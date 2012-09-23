@@ -45,19 +45,19 @@ Cmd.prototype.l = function(data, s, player, players) { // unacceptable
 }
 
 Cmd.prototype.chat = function(data, s, player) {
-		var msg = data.msg;
+	var msg = data.msg;
 		
-		data.msg = 'You chat> ' + msg;
-		data.styleClass = 'msg';
+	data.msg = 'You chat> ' + msg;
+	data.styleClass = 'msg';
 		
-		s.emit('msg', data);
+	s.emit('msg', data);
 		
-		data.msg = '';
-	    data.msg = player.name + '> ' + msg;
+	data.msg = '';
+	data.msg = player.name + '> ' + msg;
 		
-		s.in('mud').broadcast.emit('msg', data);
+	s.in('mud').broadcast.emit('msg', data);
 
-		return Character.prompt(s, player);
+	return Character.prompt(s, player);
 };
 
 Cmd.prototype.achat = function(data, s, player) {
@@ -92,22 +92,6 @@ Cmd.prototype.kill = function(r, s) {
 };
 
 Cmd.prototype.changes = function(r, s, player) {
-	r.msg = '<div class="cmd-changes"><h1>Recent Changes</h1>' +
-	'<ul><li>Moved to websockets. Yet another rewrite and move to socket.io</li>' +
-	'<li>Added Chat command, started writing channels (30%)</li>' +
-    '<li>Work continues on a smart way to emit mud state and parse commands</li>' +
-    '<li>Added player file creation with password protection (100%)</li>' +
-    '<li>Adding player creation with races, classes (40%)</li>' +
-	'<li>Added who command (70%)</li>' + 
-    '<li>Adding more modulairity, speedy HTTP development in mind</li>' +
-    '<li>Started roller module, for all RockMUD integer generation.</li>' +
-    '<li>Added Changes command.</li>' +
-    '<li>Kill command added, styling example... (2%)</li>' +
-	'<li>Please email Rocky any questions or whatever, <a href="mailto:rockybevins@gmail.com"> rockybevins@gmail.com</a></li>' +
-	'</ul></div>';	
-	r.styleClass = 'cbt';
-
-	s.emit('msg', r);
    	return Character.prompt(s, player);
 };
 
