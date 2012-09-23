@@ -17,7 +17,8 @@ developer. But here we go:
 * Work on devising a possible MVC architecture to help outside builders
 * engine should have an emphasis on adventure!
 
-Note: i dont feel like using a node MVC framework for this 
+Note: i dont feel like using a node MVC framework for this also I use DOJO so
+the client side code us using 1.8 and the AMD loader. 
 
 Some updates to get to v0.2:
 Combat Rounds, 
