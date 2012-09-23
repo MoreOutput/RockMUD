@@ -1,7 +1,7 @@
 RockMUD
 =======
 
-RockMUD v0.2
+RockMUD v0.1
 
 History:
 RockMUD was spawned out of many years of actual Diku Mudding, a love of JavaScript, and
@@ -19,4 +19,13 @@ developer. But here we go:
 
 Note: i dont feel like using a node MVC framework for this 
 
+Some updates to get to v0.2:
+Combat Rounds, 
+All 'standard' mud channels, 
+clean up function parameters, 
+save a created character (i broke this tonight when refactoring),
+save command.
+
 Quick install tip: make sure to have a version of socket.io >= .9 in the node_modules folder
+as I have decided to not include socket.io with this branch. I will do my best to make sure
+I keep up with it.
