@@ -17,4 +17,6 @@ developer. But here we go:
 * Work on devising a possible MVC architecture to help outside builders
 * engine should have an emphasis on adventure!
 
-Note: i dont feel like using a node MVC framework for this
+Note: i dont feel like using a node MVC framework for this 
+
+Quick install tip: make sure to have a version of socket.io >= .9 in the node_modules folder
