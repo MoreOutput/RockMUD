@@ -1,0 +1,202 @@
+/**
+Default AdventureMUD styles, Rocky Bevins 2012
+*/
+body {
+font: 100% "Courier New","Courier",monospace;	
+background-color: #111;
+}
+
+
+h1 {
+font: bold 150% 'Comic Sans', Arial, sans-serif;
+color: #ff0000;
+text-shadow: 1px 1px 0 white;
+}
+
+a {
+color: green;
+}
+
+p {
+width: 700px;
+margin: 0;
+padding: 0;
+}
+
+.btn, button {
+text-align: center;
+font-size: 12px;
+font-weight: bold;
+margin: 5px 10px 0 0;
+padding: 4px 8px 4px 8px;
+-webkit-border-radius: 2px;
+-moz-border-radius: 2px;
+cursor: pointer;
+border: 1px solid #3079ed;
+color: #fff;
+text-shadow: 0 1px rgba(0,0,0,0.1);
+background-color: #1685fc;
+background-image: -webkit-gradient(linear, left top, left bottom, from(#4d90fe), to(#4787ed));
+background-image: -webkit-linear-gradient(top, #4d90fe, #4787ed);
+background-image: -moz-linear-gradient(top, #4d90fe, #4787ed);
+background-image: -ms-linear-gradient(top, #4d90fe, #4787ed);
+background-image: -o-linear-gradient(top, #4d90fe, #4787ed);
+background-image: linear-gradient(top, #4d90fe, #4787ed);
+}
+
+#terminal {
+height: auto;
+background-color: #111;
+color: #fff;
+padding: 1%;
+}
+
+#terminal ul {
+width: 95%;
+left: left;
+padding: 10px;
+margin: 0;
+}
+
+#terminal ul li {
+
+}
+
+#terminal .feed {
+width: 90%;
+padding: 3px 0 3px 0;
+}
+
+#terminal .msg {
+clear: both;
+width: 95%;
+}
+
+.cmd-who {
+width: 95%;
+text-align: left;
+float: left;
+}
+
+.cmd-who li {
+width: 95%;
+padding: 2px 0 2px 0;
+display: inline-block;
+}
+
+.cmd-who .name {
+float: left;
+font-weight: bold;
+padding: 0 3px 0 0;
+}
+
+.cmd-who .level {
+float: left;
+padding: 0 3px 0 0;
+}
+
+.cmd-who .race {
+float: left;
+padding: 0 3px 0 0;
+}
+
+.cmd-who .class {
+float: left;
+}
+
+#inputwrapper {
+
+}
+
+#inputwrapper form {
+background-color: #111;
+padding: 5px;
+}
+
+#inputwrapper form input {
+width: 40%;
+border: 1px solid #111;
+padding: 5px;
+}
+
+#intro-ascii {
+height: auto;
+font-size: 70%;
+}			
+
+.intro {
+color: yellow;
+font-weight: bold;
+}
+
+.subtext {
+width: 100%;
+display: inline-block;
+clear: both;
+color: #fff;
+font-weight: lighter;
+}
+
+.room {
+padding: 5px 0 5px 0;
+}
+
+.room-title {
+color: yellow;
+font-weight: bold;
+}
+
+.room-content {
+
+}
+
+.room-exits {
+color: red;
+}
+
+#cmd-active {
+min-width: 20px;
+max-width: 200px;
+border-bottom: 1px solid #000;
+}
+
+.order {
+
+}
+
+.cmd {
+clear: both;
+display: block;
+width: 95%;
+color: yellow;
+}
+
+.msg {
+font-weight: bold;
+}
+
+.cprompt {
+font-style: italic;
+}
+
+.error {
+color: #ff0000;
+}
+
+.cmd-kill {
+clear: both;
+display: inline-block;
+}
+
+.hit {
+display: inline;
+padding: 0;
+margin: 0;
+font: bold 150% 'Comic Sans', Arial, sans-serif;
+color: #ff0000;
+text-shadow: 1px 1px 0 yellow;
+}
+
+p.enter-name {
+padding: 15px 0;
+}

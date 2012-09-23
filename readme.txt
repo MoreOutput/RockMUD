@@ -1,6 +1,3 @@
-RockMUD
-=======
-
 RockMUD v0.2
 
 History:
@@ -18,3 +15,4 @@ developer. But here we go:
 * engine should have an emphasis on adventure!
 
 Note: i dont feel like using a node MVC framework for this
+

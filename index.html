@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>RockMUD v0.2</title>
+		<meta charset="utf-8" />
+		<link href="styles.css" rel="stylesheet" media="all">
+	</head>
+	<body>
+		<div id="mudwrapper">
+			<div id="terminal" class="terminal">
+				<pre>
+               M
+   o           M
+  /| ......  /:M\------------------------------------------------,,,,,,
+(O)[]XXXXXX[]I:K+}=====<{H}>================================------------>
+  \| ^^^^^^  \:W/------------------------------------------------''''''
+   o           W
+               W
+				</pre>
+			</div>
+			<div id="inputwrapper">
+				<form id="console">
+					<input class="user-input" id="cmd" type="input" value="" placeholder="Enter Command" mud-state="login" />
+					<button id="submit" type="submit">Enter Command</button>
+				</form>
+			</div>
+		</div>		
+		
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"></script>
+	    <script src="amclient.js"></script>
+	</body>
+</html>

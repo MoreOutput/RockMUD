@@ -1,0 +1,33 @@
+{
+	"name" : "Hillcrest",
+	"id" : 1,
+	"type" : "city",
+	"levels" : "All",
+	"description" : "The first thing.",
+	"rooms" : [
+		{
+			"vnum" : 1,
+			"title" : "The first room",
+			"content" : "Welcome to the first room.",
+			"exits" : [
+					{
+						"cmd" : "north",
+						"vnum" : 0
+					},
+                                        {
+                                                "cmd" : "east",
+                                                "vnum" : 0
+                                        },
+                                        {
+                                                "cmd" : "south",
+                                                "vnum" : 0
+                                        },
+                                        {
+                                                "cmd" : "west",
+                                                "vnum" : 0
+                                        }
+			], 
+			"objects" : []
+		}
+	]
+}

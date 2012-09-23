@@ -1,0 +1,3 @@
+MUD work:
+ - Better parsing of commands, regexp characters crash mud (passing in a  ? for example)
+ - Working on reading and adjuting areas/vnums for movement   

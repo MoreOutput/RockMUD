@@ -1,0 +1,83 @@
+/*
+ * Styles for AdventureMUD a nodejs project.
+ * Author: Rocky Bevins (rockybevins@gmail.com)
+ */		
+		body {
+		font: 90% "Courier New","Courier",monospace;	
+		background-color: #111;
+		}
+
+		a {
+		color: green;
+		}
+
+		p {
+		width: 700px;
+		margin: 0;
+		padding: 0;
+		}
+		
+		#terminal {
+		height: 600px;
+		overflow: scroll;
+		background-color: #111;
+		color: #fff;
+		padding: 15px;
+		}
+
+		#terminal .feed {
+		width: 90%;
+		padding: 3px 0 3px 0;
+		}
+
+		#inputwrapper {
+
+		}
+
+		#inputwrapper form {
+		background-color: #fffeee;
+		padding: 5px;
+		}
+
+		#inputwrapper form input {
+		width: 40%;
+		border: 1px solid #111;
+		padding: 5px;
+		}
+		
+		#intro-ascii {
+		height: auto;
+		font-size: 70%;
+		}			
+		
+		.intro {
+		color: yellow;
+		font-weight: bold;
+		}
+
+		.subtext {
+		width: 100%;
+		display: inline-block;
+		clear: both;
+		color: #fff;
+		font-weight: lighter;
+		}
+
+		#cmd-active {
+		min-width: 20px;
+		max-width: 200px;
+		border-bottom: 1px solid #000;
+		}
+
+		.order {
+		
+		}
+
+		.cmd {
+                color: #fff;
+		font-weight: bold;		
+		}
+
+		p.enter-name {
+		padding: 15px 0;
+		}
