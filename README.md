@@ -14,8 +14,9 @@ developer. But here we go:
 * provide a Diku-like MUD experience from within the browser using NodeJS
 * seperate out the CSS, and optimize for themeing. Typography is a feature.
 * all core files are JavaScript or JSON.
+* players and areas are JSON files -- for now.
 * Work on devising a possible MVC architecture to help outside builders
-* engine should have an emphasis on adventure!
+* engine should be easily modified to allow it to power 'interesting' web apps.
 
 Note: i dont feel like using a node MVC framework for this also I use DOJO so
 the client side code us using 1.8 and the AMD loader. 
