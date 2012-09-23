@@ -1,3 +1,9 @@
-MUD work:
- - Better parsing of commands, regexp characters crash mud (passing in a  ? for example)
- - Working on reading and adjuting areas/vnums for movement   
+RockMUD work before .2:
+
+- Combat Rounds, 
+- All 'standard' mud channels,
+- clean up function parameters, 
+- save a created character (i broke this tonight when refactoring), 
+- save command.
+- Better parsing of commands, regexp characters crash mud (passing in a  ? for example)
+- Working on reading and adjuting areas/vnums for movement   
