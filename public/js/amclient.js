@@ -25,10 +25,6 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 					changeMudState(r.res);	
 				}
 			});			
-			
-			ws.on('logged', function (r) {
-				
-			});
 				
 			var frmH = on(dom.byId('console'), 'submit', function (e) {				
 				var node = dom.byId('cmd'),
@@ -49,7 +45,6 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 					}()),
 					res: (function () {
 						var res = dojo.attr(node, 'mud-state');
-						
 						if (res === 'selectRace') {
 							return 'raceSelection';
 						} else if (res === 'selectClass') {
@@ -57,7 +52,6 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 						} else if (res === 'createPassword') {
 							return 'setPassword';
 						} else if (res === 'enterPassword') {
-							// dojo.attr(node, 'placeholder', 'Your Password?');
 							return 'loginPassword';
 						} else {
 							return res;		

@@ -8,9 +8,11 @@ background-color: #111;
 
 
 h1 {
-font: bold 150% 'Comic Sans', Arial, sans-serif;
-color: #ff0000;
-text-shadow: 1px 1px 0 white;
+font: 150% 'Rye', Arial, sans-serif;
+color: #fff;
+text-shadow: 1px 1px 0 red;
+padding: 0;
+margin: 0;
 }
 
 a {
@@ -21,6 +23,18 @@ p {
 width: 700px;
 margin: 0;
 padding: 0;
+}
+
+ul {
+padding: 0;
+margin: 0;
+}
+
+ul li {
+display: block;
+padding: 1px 0 1px 0;
+list-style: none;
+list-style-type: none;
 }
 
 .btn, button {
@@ -133,8 +147,7 @@ font-weight: bold;
 width: 100%;
 display: inline-block;
 clear: both;
-color: #fff;
-font-weight: lighter;
+color: #ddd;
 }
 
 .room {

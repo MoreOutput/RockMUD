@@ -5,12 +5,12 @@ var Room = function() {
 
 }
 
-Room.prototype.load = function(data, s, player, players, fn) {
-	fs.readFile('./areas/' + player.area + '.json', function (err, data) {
+Room.prototype.load = function(r, s, player, players, fn) {
+	fs.readFile('./areas/' + player.area + '.json', function (err, r) {
         var i = 0,
 		exits = [],
 		playersInRoom = [],
-		area = JSON.parse(data);
+		area = JSON.parse(r);
         
 		if (err) {
 			throw err;
@@ -61,7 +61,7 @@ Room.prototype.load = function(data, s, player, players, fn) {
 }
 
 Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit must match both the room and a command)
-	fs.readFile('./areas/' + character[s.id].area + '.json', function (err, data) {
+	fs.readFile('./areas/' + character[s.id].area + '.json', function (err, r) {
 		var i = 0,
         area = {};
 
@@ -69,7 +69,7 @@ Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit mus
 			throw err;
         }
 
-        area = JSON.parse(data);
+        area = JSON.parse(r);
 
         for (i; i < area.Room.length; i += 1) {
 			if (area.Room[i].vnum === character[s.id].vnum) {
@@ -97,21 +97,21 @@ Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit mus
 	});
 }
 
-Room.prototype.look = function(data, s, player, players, fn) {
+Room.prototype.look = function(r, s, player, players, fn) {
 	if (typeof fn === 'function') {
 		fn();
 	}
 	
-	if(data.msg === data.cmd || data.msg === '') {
-		this.load(data, s, player, players);
+	if(r.msg === r.cmd || r.msg === '') {
+		this.load(r, s, player, players);
 	} else {
 		// need to see if the passed in message matches anything in the room
 	}
 }
 
-Room.prototype.north = function(data, s, player, players, fn) {
+Room.prototype.north = function(r, s, player, players, fn) {
 	if(this.checkExit(player)) {
-		Room.load(data, s, player, players, fn);
+		Room.load(r, s, player, players, fn);
 		s.emit('msg', {msg: 'You walk north.'});
 	} else {
 		s.emit('mag', {msg: 'There is no exit that way.'});

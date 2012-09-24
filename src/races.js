@@ -1,18 +1,12 @@
-var dice = require('./dice');
+var dice = require('./dice').roller;
 
 var Race = function() {
-
-}
-
-Race.prototype.getRaces = function(fn) {
-	var raceList = [
+	this.raceList = [
 		{name:'Human', wis: 1},
 		{name:'Elf', dex: 1},
         {name:'Dwarf', con: 2, int: -1}
 	];
-	return fn(raceList);
 }
-
 
 /*
  * Calculating stats
@@ -23,12 +17,11 @@ Race.prototype.getRaces = function(fn) {
 */
 
 Race.prototype.getStr = function(race) {
-	var raceList = Race.getRace(),
-	i = 0;
+	var	i = 0;
 	
-	for(i; i < raceList.length; i+=1) {
-		if(race === raceList[i].name && str in raceList[i]) {
-			return dice.roll(3,6) + 1 + raceList[i].str;
+	for(i; i < this.raceList.length; i+=1) {
+		if(race === this.raceList[i].name && str in this.raceList[i]) {
+			return dice.roll(3,6) + 1 + this.raceList[i].str;
 		}
 		else {
 			return dice.roll(3,6) + 1;
@@ -37,59 +30,55 @@ Race.prototype.getStr = function(race) {
 }
 
 Race.prototype.getWis = function(race) {
-        var raceList = Race.getRace(),
-        i = 0;
-        
-        for(i; i < raceList.length; i+=1) {
-                if(race === raceList[i].name && wis in raceList[i]) {
-                        return dice.roll(3,6) + 1 + raceList[i].wis;
-                }
-                else {
-                        return dice.roll(3,6) + 1;
-                }
-	}
+	var	i = 0;
+	
+	for(i; i < this.raceList.length; i+=1) {
+		if(race === this.raceList[i].name && str in this.raceList[i]) {
+			return dice.roll(3,6) + 1 + this.raceList[i].str;
+		}
+		else {
+			return dice.roll(3,6) + 1;
+		}
+	} 
 }
 
 Race.prototype.getInt = function(race) {
-        var raceList = Race.getRace(),
-        i = 0;
-        
-        for(i; i < raceList.length; i+=1) {
-                if(race === raceList[i].name && int in raceList[i]) {
-                        return dice.roll(3,6) + 1 + raceList[i].int;
-                }
-                else {
-                        return dice.roll(3,6) + 1;
-                }
-        }
+	var	i = 0;
+	
+	for(i; i < this.raceList.length; i+=1) {
+		if(race === this.raceList[i].name && str in this.raceList[i]) {
+			return dice.roll(3,6) + 1 + this.raceList[i].str;
+		}
+		else {
+			return dice.roll(3,6) + 1;
+		}
+	} 
 }
 
 Race.prototype.getDex = function(race) {
-        var raceList = Race.getRace(),
-        i = 0;
-        
-        for(i; i < raceList.length; i+=1) {
-                if(race === raceList[i].name && dex in raceList[i]) {
-                        return dice.roll(3,6) + 1 + raceList[i].dex;
-                }
-                else {
-                        return dice.roll(3,6) + 1;
-                }
-        }
+	var	i = 0;
+	
+	for(i; i < this.raceList.length; i+=1) {
+		if(race === this.raceList[i].name && str in this.raceList[i]) {
+			return dice.roll(3,6) + 1 + this.raceList[i].str;
+		}
+		else {
+			return dice.roll(3,6) + 1;
+		}
+	} 
 }
 
 Race.prototype.getCon = function(race) {
-        var raceList = Race.getRace(),
-        i = 0;
-        
-        for(i; i < raceList.length; i+=1) {
-                if(race === raceList[i].name && con in raceList[i]) {
-                        return dice.roll(3,6) + 1 + raceList[i].con;
-                }
-                else {
-                        return dice.roll(3,6) + 1;
-                }
-        }
+	var	i = 0;
+	
+	for(i; i < this.raceList.length; i+=1) {
+		if(race === this.raceList[i].name && str in this.raceList[i]) {
+			return dice.roll(3,6) + 1 + this.raceList[i].str;
+		}
+		else {
+			return dice.roll(3,6) + 1;
+		}
+	} 
 }
 
 module.exports.race = new Race();
