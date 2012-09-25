@@ -8,23 +8,15 @@ var Race = function() {
 	];
 }
 
-/*
- * Calculating stats
- * Stats currently follow the follow rules:
- *
- * 3d6 + 1 + raceMod -- there is an arbitrary + 1 so a person could luck out and get 19 atm
- *
-*/
-
 Race.prototype.getStr = function(race) {
 	var	i = 0;
 	
 	for(i; i < this.raceList.length; i+=1) {
 		if(race === this.raceList[i].name && str in this.raceList[i]) {
-			return dice.roll(3,6) + 1 + this.raceList[i].str;
+			return dice.roll(3,6) + this.raceList[i].str;
 		}
 		else {
-			return dice.roll(3,6) + 1;
+			return dice.roll(3,6);
 		}
 	} 
 }
@@ -34,10 +26,10 @@ Race.prototype.getWis = function(race) {
 	
 	for(i; i < this.raceList.length; i+=1) {
 		if(race === this.raceList[i].name && str in this.raceList[i]) {
-			return dice.roll(3,6) + 1 + this.raceList[i].str;
+			return dice.roll(3,6) + this.raceList[i].str;
 		}
 		else {
-			return dice.roll(3,6) + 1;
+			return dice.roll(3,6);
 		}
 	} 
 }
@@ -47,10 +39,10 @@ Race.prototype.getInt = function(race) {
 	
 	for(i; i < this.raceList.length; i+=1) {
 		if(race === this.raceList[i].name && str in this.raceList[i]) {
-			return dice.roll(3,6) + 1 + this.raceList[i].str;
+			return dice.roll(3,6) + this.raceList[i].str;
 		}
 		else {
-			return dice.roll(3,6) + 1;
+			return dice.roll(3,6);
 		}
 	} 
 }
@@ -60,10 +52,10 @@ Race.prototype.getDex = function(race) {
 	
 	for(i; i < this.raceList.length; i+=1) {
 		if(race === this.raceList[i].name && str in this.raceList[i]) {
-			return dice.roll(3,6) + 1 + this.raceList[i].str;
+			return dice.roll(3,6) + this.raceList[i].str;
 		}
 		else {
-			return dice.roll(3,6) + 1;
+			return dice.roll(3,6);
 		}
 	} 
 }
@@ -73,10 +65,10 @@ Race.prototype.getCon = function(race) {
 	
 	for(i; i < this.raceList.length; i+=1) {
 		if(race === this.raceList[i].name && str in this.raceList[i]) {
-			return dice.roll(3,6) + 1 + this.raceList[i].str;
+			return dice.roll(3,6) + this.raceList[i].str;
 		}
 		else {
-			return dice.roll(3,6) + 1;
+			return dice.roll(3,6);
 		}
 	} 
 }

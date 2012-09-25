@@ -34,12 +34,15 @@ Room.prototype.load = function(r, s, player, players, fn) {
 					var pArr = [],
 					j = 0;
 
-					for (j; j < Object.keys(players).length; j += 1) {
-						if(players[s.id].vnum === player.vnum) {
-							pArr.push(players[s.id].name + ' is standing here.');
+					for (j; j < Object.keys(players).length; j += 1) {						
+						if (players[s.id].vnum === player.vnum && players[s.id].name != player.name) {
+							pArr.push(players[s.id].name + ' is ' + player.position + ' here');
 							if (j === Object.keys(players).length - 1) {
 								return pArr.toString();
 							}
+						} else {
+							pArr.push('You are here.');
+							return pArr.toString();
 						}
 					}
 				}());

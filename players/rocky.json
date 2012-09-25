@@ -17,6 +17,7 @@
     "constitution": 8,
     "dexterity": 9,
     "intelligence": 6,
+	"position": "standing",
     "exp": 1,
     "expToLevel": 1000,
     "area": "hillcrest",

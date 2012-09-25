@@ -37,11 +37,11 @@ Character.prototype.requestNewPassword = function(r, s, player) {
 	s.emit('msg', {msg: 'Set a password (9 characters): ', res:'setPassword', styleClass: 'pw-set'});
 }
 
-Character.prototype.setPassword = function(r, s, player) {	
+Character.prototype.setPassword = function(r, s, player, players) {	
 	if(r.cmd.length > 8) {
 		player.password = r.cmd;
 		s.emit('msg', {msg : 'Your password is: ' + player.password});		
-		this.create(r, s, player);
+		this.create(r, s, player, players);
 	} else {
 		s.emit('msg', {msg: 'Yes it has to be nine characters long.'});
 		return this.requestNewPassword(s);
@@ -67,18 +67,21 @@ Character.prototype.loginPassword = function(r, s, player, players) {
 	}	
 }
 
-Character.prototype.create = function(r, s, player) { //  A New Character is saved
+Character.prototype.create = function(r, s, player, players) { //  A New Character is saved
 	var newChar = {
 		name: player.name,
 		lastname: '',
 		title: 'is a newbie, so help them out!',
 		role: 'player',
 		password: player.password,
-		sid: s.id, // current socket id
-		saved: '', // time of last save
-		level: 1,
 		race: player.race,
 		charClass: player.charClass,
+		sid: s.id, // current socket id
+		saved: new Date().toString(), // time of last save
+		level: 1,
+		exp: 1,
+		expToLevel: 1000,
+		position: 'standing',
 		alignment: '',
 		chp: 100, // current hp
 		hp: 100, // total hp
@@ -99,9 +102,6 @@ Character.prototype.create = function(r, s, player) { //  A New Character is sav
         int: (function () {
 			return Races.getInt(player.race);
         }()),
-		exp: 1,
-		expToLevel: 1000,
-		position: 'standing',
 		area: 'hillcrest',
 		vnum: 1, // current room
 		recall: 1, // vnum to recall to
@@ -147,8 +147,10 @@ Character.prototype.create = function(r, s, player) { //  A New Character is sav
 		s.leave('creation');
 		s.join('mud');
 		
+		players[s.id] = newChar;
+		
 		character.motd(s, function() {
-		//	Room.load(r, s, newChar, character.players);
+			Room.load(r, s, newChar, players);
 			character.prompt(s, newChar);
 		});	
 	});

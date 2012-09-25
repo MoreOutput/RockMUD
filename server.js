@@ -52,14 +52,12 @@ server.listen(cfg.port);
 
 ws.on('connection', function (s) {
 	// Starting message, move to browser
-	var startMUD = function() {
-		return '<h1>Welcome to RockMUD v0.1 </h1><div class="subtext">RockMUD created by ' +
+	var startMUD = '<h1>Welcome to RockMUD v0.1 </h1><div class="subtext">RockMUD created by ' +
 			'<a href="http://www.lexingtondesigner.com" target="_blank">Rocky Bevins 2012</a>.</p>' +
-			'<p>You Can find out more about RockMUD on the <a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>.</p></div>' + 
-            '<div class="enter-name order msg">Enter your name:</div>';
-	};      
-	  
-	// Playing
+			'<p>You Can find out more about RockMUD on <a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>.</p></div>' + 
+            '<div class="enter-name order msg">Enter your name:</div>';   
+	
+	// Logging in
 	s.on('login', function (r) {
 		if (r.msg != '') {
 			return Character.login(r, s, function (name, s, fnd) {
@@ -76,9 +74,9 @@ ws.on('connection', function (s) {
 					});
 				} else {
 					s.join('creation'); // Character creation is its own room (socket.io) 
-					Character['newCharacter'](r, s, {name:name});
+					Character['newCharacter'](r, s, {name:name}, players);
 					s.on('cmd', function (r) { 
-						Cmds.parse(r, s, {name:name});
+						Cmds.parse(r, s, {name:name}, players);
 					});
 				}
 			});
@@ -90,24 +88,21 @@ ws.on('connection', function (s) {
 	// Quitting
 	s.on('quit', function () {
 		s.emit('msg', {
-			msg: 'Add a little to a little and there will be a big pile.',
+			msg: 'Add a little to a little and there will be a big pile. Please visit us again!',
 			emit: 'disconnect',
 			styleClass: 'logout-msg'
 		}); 
-		
+			
 		s.leave('mud');
 		s.disconnect();
-		
-		return delete players[s.id];
 	});
 	
 	// DC
     s.on('disconnect', function () {
-		s.leave('mud');
-		//emitResponse({msg: 'You have disconnected from adventure mud.', emit: 'msg'}); 
+		return delete players[s.id];
 	});    		
 	
-	s.emit('msg', {msg : startMUD()});
+	s.emit('msg', {msg : startMUD, res: 'login'});
 });
 
 console.log(cfg.name + ' is ready to rock and roll on port ' + cfg.port);

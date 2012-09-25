@@ -96,7 +96,7 @@ Cmd.prototype.achat = function(r, s, player) {
 	}
 };
 
-Cmd.prototype.flame = function(r, s) {
+Cmd.prototype.flame = function(r, s) { 
 
 };
 
