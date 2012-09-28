@@ -66,23 +66,27 @@ ws.on('connection', function (s) {
 					Character.load({name: name}, s, function (s, player) {
 						Character.getPassword(s);	
 						player.sid = s.id;
-						players.push(player);
+						
+						s.player = player;
+						
+						players.push(s.player);
 						
 						s.on('cmd', function (r) { 
-							Cmds.parse(r, s, player, players);
+							Cmds.parse(r, s, s.player, players);
 						});
 					});
 				} else {
-					s.join('creation'); // Character creation is its own room (socket.io)				
-					
-					players.push({name:name, sid: s.id});
+					s.join('creation'); // Character creation is its own room (socket.io)	
 
-					Character.newCharacter(r, s, {name:name, sid: s.id}, players, function(player) {					
-						s.on('cmd', function (r) { 
-							console.log(player);
-							Cmds.parse(r, s, player, players);
-						});
-					});		
+					s.player = {name:name, sid: s.id};
+					
+					players.push(s.player);
+
+					Character.newCharacter(r, s, s.player, players);		
+					
+					s.on('cmd', function (r) { 
+						Cmds.parse(r, s, s.player, players);
+					});
 				}
 			});
 		} else {

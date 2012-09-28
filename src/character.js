@@ -46,7 +46,7 @@ Character.prototype.requestNewPassword = function(r, s, player) {
 }
 
 Character.prototype.setPassword = function(r, s, player, players) {	
-	if(r.cmd.length > 8) {
+	if (r.cmd.length > 8) {
 		player.password = r.cmd;
 		s.emit('msg', {msg : 'Your password is: ' + player.password});		
 		this.create(r, s, player, players);
@@ -156,9 +156,10 @@ Character.prototype.create = function(r, s, player, players) { //  A New Charact
 		s.join('mud');			
 		
 		character.motd(s, function() {
-			players.push(newChar);
-			Room.load(r, s, newChar, players);			
-			character.prompt(s, newChar);
+			s.player = newChar;
+			players.push(s.player);
+			Room.load(r, s, s.player, players);			
+			character.prompt(s, s.player);
 		});	
 	});
 }
@@ -166,8 +167,6 @@ Character.prototype.create = function(r, s, player, players) { //  A New Charact
 Character.prototype.newCharacter = function(r, s, player, players, fn) {
 	var i = 0, 
 	str = '';
-	
-	fn(player);
 	
 	for (i; i < Races.raceList.length; i += 1) {
 		str += '<li>' + Races.raceList[i].name + '</li>';
@@ -183,10 +182,10 @@ Character.prototype.raceSelection = function(r, s, player, players) {
 	var i = 0;	
 	for (i; i < Races.raceList.length; i += 1) {
 		if (r.cmd === Races.raceList[i].name.toLowerCase()) {
-			player.race = r.cmd;
-			return this.selectClass(r, s, player, players);		
+			s.player.race = r.cmd;
+			return this.selectClass(r, s, s.player, players);		
 		} else if (i === Races.raceList.length) {
-			this.newCharacter(r, s, player, players);
+			this.newCharacter(r, s, s.player, players);
 		}
 	}
 }
@@ -212,11 +211,11 @@ Character.prototype.selectClass = function(r, s, player) {
 Character.prototype.classSelection = function(r, s, player, players) {
 	var i = 0;	
 	for (i; i < Classes.classList.length; i += 1) {
-		if (r.cmd ===Classes.classList[i].name.toLowerCase()) {
-			player.charClass = r.cmd;
-			return this.requestNewPassword(r, s, player, players);		
+		if (r.cmd === Classes.classList[i].name.toLowerCase()) {
+			s.player.charClass = r.cmd;
+			return this.requestNewPassword(r, s, s.player, players);		
 		} else if (i === Classes.classList.length) {
-			this.selectClass(r, s, player, players);
+			this.selectClass(r, s, s.player, players);
 		}
 	}
 }
@@ -244,8 +243,8 @@ Character.prototype.save = function(id) {
 }
 
 Character.prototype.prompt = function(s, player) {
-	return s.emit('msg', {msg: player.name + ', hp:' + player.hp +  ' room:' 
-		+ player.vnum + '> ', styleClass: 'cprompt'});
+	return s.emit('msg', {msg: s.player.name + ', hp:' + s.player.hp +  ' room:' 
+		+ s.player.vnum + '> ', styleClass: 'cprompt'});
 }
 
 Character.prototype.level = function() {
