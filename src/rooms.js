@@ -6,11 +6,11 @@ var Room = function() {
 }
 
 Room.prototype.load = function(r, s, player, players, fn) {
-	fs.readFile('./areas/' + player.area + '.json', function (err, r) {
+	fs.readFile('./areas/' + player.area + '.json', function (err, area) {
         var i = 0,
 		exits = [],
 		playersInRoom = [],
-		area = JSON.parse(r);
+		area = JSON.parse(area);
         
 		if (err) {
 			throw err;
@@ -33,15 +33,15 @@ Room.prototype.load = function(r, s, player, players, fn) {
 				playersInRoom = (function () {
 					var pArr = [],
 					j = 0;
-
-					for (j; j < Object.keys(players).length; j += 1) {						
-						if (players[s.id].vnum === player.vnum && players[s.id].name != player.name) {
-							pArr.push(players[s.id].name + ' is ' + player.position + ' here');
-							if (j === Object.keys(players).length - 1) {
-								return pArr.toString();
-							}
+					
+					for (j; j < players.length; j += 1) {				
+						if (players[j].vnum === player.vnum && players[j].name != player.name) {
+							pArr.push(players[j].name + ' is ' + player.position + ' here ');
 						} else {
-							pArr.push('You are here.');
+							pArr.push('You are here. ');
+						}
+						
+						if (j === players.length - 1) {
 							return pArr.toString();
 						}
 					}
@@ -53,8 +53,7 @@ Room.prototype.load = function(r, s, player, players, fn) {
 					'<div class="room-exits">Visible Exits: [' + exits + ']</div>' + 
 					'Here: ' + playersInRoom, 
 					styleClass: area.type + ' room'
-				});
-				
+				});				
 
 			} else {
 				s.emit('msg', {msg: 'Room load failed.'});
@@ -100,15 +99,15 @@ Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit mus
 	});
 }
 
-Room.prototype.look = function(r, s, player, players, fn) {
-	if (typeof fn === 'function') {
-		fn();
-	}
-	
-	if(r.msg === r.cmd || r.msg === '') {
+Room.prototype.look = function(r, s, player, players, fn) {	
+	if (r.msg === r.cmd || r.msg === '') {
 		this.load(r, s, player, players);
 	} else {
 		// need to see if the passed in message matches anything in the room
+	}
+	
+	if (typeof fn === 'function') {
+		fn();
 	}
 }
 

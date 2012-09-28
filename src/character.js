@@ -14,13 +14,21 @@ Character.prototype.login = function(r, s, fn) {
 	var	name = r.msg.replace(/_.*/,'').toLowerCase(),	
 	player = { id: s.id };
 	
-	fs.stat('./players/' + name + '.json', function (err, stat) {
-		if (err === null) {
-			return fn(name, s, true);
-		} else {
-			return fn(name, s, false);
-		}
-	});
+	if (r.msg.length > 2) {
+		fs.stat('./players/' + name + '.json', function (err, stat) {
+			if (err === null) {
+				return fn(name, s, true);
+			} else {
+				return fn(name, s, false);
+			}
+		});
+	} else {
+		s.emit('msg', {
+			msg: 'Name is too short.',
+			res: 'login',
+			styleClass: 'error'
+		});
+	}
 }
 
 Character.prototype.load = function(r, s, fn) {
@@ -145,39 +153,40 @@ Character.prototype.create = function(r, s, player, players) { //  A New Charact
 		}
 		
 		s.leave('creation');
-		s.join('mud');
-		
-		players[s.id] = newChar;
+		s.join('mud');			
 		
 		character.motd(s, function() {
-			Room.load(r, s, newChar, players);
+			players.push(newChar);
+			Room.load(r, s, newChar, players);			
 			character.prompt(s, newChar);
 		});	
 	});
 }
 
-Character.prototype.newCharacter = function(r, s, player) {
+Character.prototype.newCharacter = function(r, s, player, players, fn) {
 	var i = 0, 
 	str = '';
+	
+	fn(player);
 	
 	for (i; i < Races.raceList.length; i += 1) {
 		str += '<li>' + Races.raceList[i].name + '</li>';
 
 		if	(Races.raceList.length - 1 === i) {
 			return s.emit('msg', {msg: player.name + ' is a new character! There are three more steps until ' + player.name + 
-			' is saved. The next step is to select your race: <ul>' + str + '</ul>', res: 'selectRace', styleClass: 'race-selection'});
+			' is saved. The next step is to select your race: <ul>' + str + '</ul>', res: 'selectRace', styleClass: 'race-selection'});		
 		}
 	}	
 }
 
-Character.prototype.raceSelection = function(r, s, player) {
+Character.prototype.raceSelection = function(r, s, player, players) {
 	var i = 0;	
 	for (i; i < Races.raceList.length; i += 1) {
 		if (r.cmd === Races.raceList[i].name.toLowerCase()) {
 			player.race = r.cmd;
-			return this.selectClass(r, s, player);		
+			return this.selectClass(r, s, player, players);		
 		} else if (i === Races.raceList.length) {
-			this.newCharacter(r, s, player);
+			this.newCharacter(r, s, player, players);
 		}
 	}
 }
@@ -200,14 +209,14 @@ Character.prototype.selectClass = function(r, s, player) {
 	}	
 }
 
-Character.prototype.classSelection = function(r, s, player) {
+Character.prototype.classSelection = function(r, s, player, players) {
 	var i = 0;	
 	for (i; i < Classes.classList.length; i += 1) {
 		if (r.cmd ===Classes.classList[i].name.toLowerCase()) {
 			player.charClass = r.cmd;
-			return this.requestNewPassword(r, s, player);		
+			return this.requestNewPassword(r, s, player, players);		
 		} else if (i === Classes.classList.length) {
-			this.selectClass(r, s, player);
+			this.selectClass(r, s, player, players);
 		}
 	}
 }
@@ -227,6 +236,7 @@ Character.prototype.save = function(id) {
 	try {
 		var player = fs.createWriteStream('./players/' + character[id].name + '.json', {'flags' : 'w'});
 		player.write(JSON.stringify(character[id], null, 4));
+		
 		return true;
 	} catch(err) {
 		return false;

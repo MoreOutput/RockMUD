@@ -12,7 +12,7 @@ fs = require('fs'),
 cfg = require('./src/config').server,
 Character = require('./src/character').character,
 Cmds = require('./src/commands').cmds,
-players = {},
+players = [],
 server  = http.createServer(function (req, res) {
 	if (req.url === '/' || req.url === '/index.html') {
 		fs.readFile('./index.html', function (err, data) {
@@ -54,7 +54,7 @@ ws.on('connection', function (s) {
 	// Starting message, move to browser
 	var startMUD = '<h1>Welcome to RockMUD v0.1 </h1><div class="subtext">RockMUD created by ' +
 			'<a href="http://www.lexingtondesigner.com" target="_blank">Rocky Bevins 2012</a>.</p>' +
-			'<p>You Can find out more about RockMUD on <a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>.</p></div>' + 
+			'<p>You can find out more about RockMUD on <a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>.</p></div>' + 
             '<div class="enter-name order msg">Enter your name:</div>';   
 	
 	// Logging in
@@ -65,19 +65,24 @@ ws.on('connection', function (s) {
 					s.join('mud'); // mud is one of two rooms, character creation the other (socket.io)					
 					Character.load({name: name}, s, function (s, player) {
 						Character.getPassword(s);	
-						
-						players[s.id] = player;
+						player.sid = s.id;
+						players.push(player);
 						
 						s.on('cmd', function (r) { 
 							Cmds.parse(r, s, player, players);
 						});
 					});
 				} else {
-					s.join('creation'); // Character creation is its own room (socket.io) 
-					Character['newCharacter'](r, s, {name:name}, players);
-					s.on('cmd', function (r) { 
-						Cmds.parse(r, s, {name:name}, players);
-					});
+					s.join('creation'); // Character creation is its own room (socket.io)				
+					
+					players.push({name:name, sid: s.id});
+
+					Character.newCharacter(r, s, {name:name, sid: s.id}, players, function(player) {					
+						s.on('cmd', function (r) { 
+							console.log(player);
+							Cmds.parse(r, s, player, players);
+						});
+					});		
 				}
 			});
 		} else {
@@ -88,7 +93,7 @@ ws.on('connection', function (s) {
 	// Quitting
 	s.on('quit', function () {
 		s.emit('msg', {
-			msg: 'Add a little to a little and there will be a big pile. Please visit us again!',
+			msg: 'Add a little to a little and there will be a big pile.',
 			emit: 'disconnect',
 			styleClass: 'logout-msg'
 		}); 
@@ -99,7 +104,12 @@ ws.on('connection', function (s) {
 	
 	// DC
     s.on('disconnect', function () {
-		return delete players[s.id];
+		var i = 0;
+		for (i; i < players.length; i += 1) {
+			if (players[i].sid === s.id) {
+				players.splice(i, 1);
+			}
+		}
 	});    		
 	
 	s.emit('msg', {msg : startMUD, res: 'login'});

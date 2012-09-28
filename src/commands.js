@@ -1,6 +1,3 @@
-/*
-Commands need to confirm user permissions
-*/
 var dice = require('./dice'),
 Character = require('./character').character,
 Room = require('./rooms').room;
@@ -21,7 +18,6 @@ Cmd.prototype.parse = function(r, s, player, players) {
 	} else if (r.cmd in Room) {
 		return Room[r.cmd](r, s, player, players);	
 	} else {
-		s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});	
 		return Character.prompt(s, player);
 	}
 }
@@ -57,7 +53,7 @@ Cmd.prototype.say = function(r, s) {
 
 Cmd.prototype.l = function(r, s, player, players) { // unacceptable
 	Room.look(r, s, player, players, function() {
-		console.log(123123);
+		
 	});
 }
 
@@ -77,7 +73,8 @@ Cmd.prototype.chat = function(r, s, player) {
 	return Character.prompt(s, player);
 };
 
-Cmd.prototype.achat = function(r, s, player) {
+// Example of a command requiring certain permissions
+Cmd.prototype.achat = function(r, s, player) { 
 	if (this.perms.indexOf(player.role) != -1) {
 		var msg = r.msg;
 		r.msg = 'You admin chat> ' + msg;
@@ -131,9 +128,9 @@ Cmd.prototype.who = function(r, s, player, players) {
 			obj = {},
 			i = 0;
 			
-			if (Object.keys(players).length > 0 ) {
-				for (key in players) {
-					var obj = players[key];
+			if (players.length > 0 ) {
+				for (i; players.length; i += 1) {
+					var obj = players[i];
 					str += '<li><div class="name">' + obj.name[0].toUpperCase() + 
 					obj.name.slice(1) + 
 					'</div><div class="level">a level ' + obj.level   +
