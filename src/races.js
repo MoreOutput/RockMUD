@@ -11,11 +11,10 @@ var Race = function() {
 Race.prototype.getStr = function(race) {
 	var	i = 0;
 	
-	for(i; i < this.raceList.length; i+=1) {
-		if(race === this.raceList[i].name && str in this.raceList[i]) {
+	for (i; i < this.raceList.length; i+=1) {
+		if (race === this.raceList[i].name && str in this.raceList[i]) {
 			return dice.roll(3,6) + this.raceList[i].str;
-		}
-		else {
+		} else {
 			return dice.roll(3,6);
 		}
 	} 
@@ -24,11 +23,10 @@ Race.prototype.getStr = function(race) {
 Race.prototype.getWis = function(race) {
 	var	i = 0;
 	
-	for(i; i < this.raceList.length; i+=1) {
-		if(race === this.raceList[i].name && str in this.raceList[i]) {
+	for (i; i < this.raceList.length; i+=1) {
+		if (race === this.raceList[i].name && str in this.raceList[i]) {
 			return dice.roll(3,6) + this.raceList[i].str;
-		}
-		else {
+		} else {
 			return dice.roll(3,6);
 		}
 	} 
@@ -37,11 +35,10 @@ Race.prototype.getWis = function(race) {
 Race.prototype.getInt = function(race) {
 	var	i = 0;
 	
-	for(i; i < this.raceList.length; i+=1) {
-		if(race === this.raceList[i].name && str in this.raceList[i]) {
+	for (i; i < this.raceList.length; i+=1) {
+		if (race === this.raceList[i].name && str in this.raceList[i]) {
 			return dice.roll(3,6) + this.raceList[i].str;
-		}
-		else {
+		} else {
 			return dice.roll(3,6);
 		}
 	} 
@@ -50,11 +47,10 @@ Race.prototype.getInt = function(race) {
 Race.prototype.getDex = function(race) {
 	var	i = 0;
 	
-	for(i; i < this.raceList.length; i+=1) {
-		if(race === this.raceList[i].name && str in this.raceList[i]) {
+	for (i; i < this.raceList.length; i+=1) {
+		if (race === this.raceList[i].name && str in this.raceList[i]) {
 			return dice.roll(3,6) + this.raceList[i].str;
-		}
-		else {
+		} else {
 			return dice.roll(3,6);
 		}
 	} 
@@ -63,11 +59,10 @@ Race.prototype.getDex = function(race) {
 Race.prototype.getCon = function(race) {
 	var	i = 0;
 	
-	for(i; i < this.raceList.length; i+=1) {
-		if(race === this.raceList[i].name && str in this.raceList[i]) {
+	for (i; i < this.raceList.length; i+=1) {
+		if (race === this.raceList[i].name && str in this.raceList[i]) {
 			return dice.roll(3,6) + this.raceList[i].str;
-		}
-		else {
+		} else {
 			return dice.roll(3,6);
 		}
 	} 

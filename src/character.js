@@ -11,7 +11,7 @@ var Character = function () {
 }
  
 Character.prototype.login = function(r, s, fn) {
-	var	name = r.msg.replace(/_.*/,'').toLowerCase(),	
+	var name = r.msg.replace(/_.*/,'').toLowerCase(),	
 	player = { id: s.id };
 	
 	if (r.msg.length > 2) {
@@ -64,7 +64,7 @@ Character.prototype.getPassword = function(s) {
 
 Character.prototype.loginPassword = function(r, s, player, players) {
 	var character = this;
-	if(player.password === r.msg) {
+	if (player.password === r.msg) {
 		this.motd(s, function() {
 			Room.load(r, s, player, players);
 			character.prompt(s, player);
