@@ -20,7 +20,7 @@ Current 'features' in v.1:
 * Channels 
 * Uniform way of outling commands, with permission checking
 * JSON areas
-* Various 'standard' commands: who, look, help
+* Various 'standard' commands: who, look, help, score
 
 Quick install tip: make sure to have a version of socket.io >= .9 in the node_modules folder
 as I have decided to not include socket.io with this branch. I will do my best to make sure

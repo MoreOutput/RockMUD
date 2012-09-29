@@ -5,8 +5,23 @@ var Room = function() {
 
 }
 
-Room.prototype.load = function(r, s, player, players, fn) {
-	fs.readFile('./areas/' + player.area + '.json', function (err, area) {
+// Returns area information without the room
+Room.prototype.getArea = function(r, s, players, fn) {
+	fs.readFile('./areas/' + s.player.area + '.json', function (err, area) {
+        var i = 0,
+		area = JSON.parse(area);
+			
+		if (typeof fn === 'function') {
+			fn(area);
+		} else {			
+			return area;
+		}	
+	});
+}
+
+// Returns a specifc room
+Room.prototype.getRoom = function(r, s, players, fn) {
+	fs.readFile('./areas/' + s.player.area + '.json', function (err, area) {
         var i = 0,
 		exits = [],
 		playersInRoom = [],
@@ -27,7 +42,7 @@ Room.prototype.load = function(r, s, player, players, fn) {
 		
 		for (i; i < area.rooms.length; i += 1) {
 	
-			if (area.rooms[i].vnum === player.vnum) {	
+			if (area.rooms[i].vnum === s.player.vnum) {	
 				exits = (function () {
 					var eArr = [],
 					j = 0;
@@ -44,7 +59,7 @@ Room.prototype.load = function(r, s, player, players, fn) {
 					j = 0;
 					
 					for (j; j < players.length; j += 1) {				
-						if (players[j].vnum === player.vnum && players[j].name != player.name) {
+						if (players[j].vnum === s.player.vnum && players[j].name != s.player.name) {
 							pArr.push(' ' + players[j].name + ' is ' + player.position + ' here');
 						} else {
 							pArr.push(' You are here.');
@@ -108,7 +123,7 @@ Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit mus
 	});
 }
 
-Room.prototype.north = function(r, s, player, players, fn) {
+Room.prototype.north = function(r, s, players, fn) {
 	if(this.checkExit(player)) {
 		Room.load(r, s, player, players, fn);
 		s.emit('msg', {msg: 'You walk north.'});

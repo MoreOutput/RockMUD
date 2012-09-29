@@ -59,38 +59,54 @@ ws.on('connection', function (s) {
 	
 	// Logging in
 	s.on('login', function (r) {
-		if (r.msg != '') {
+		var parseCmd = function(r, s, players) {
+			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {			
+				r.cmd = r.msg.replace(/_.*/, '').toLowerCase();
+				r.msg = r.msg.replace(/^.*?_/, '').replace(/_/g, ' ');
+				r.emit = 'msg';
+	
+				if (r.res in Character || r.cmd in Character) {
+					return Character[r.res](r, s, players);
+				} else if (r.cmd in Cmds) {
+					return Cmds[r.cmd](r, s, players);
+				} else {
+					return Character.prompt(s);
+				}
+			} else {
+				s.emit('msg', {msg: 'Invalid characters in command.'});
+			}
+		};
+		
+		if (r.msg != '' && /[`~!@#$%^&*()-+={}[]|]|[0-9]/g.test(r.msg) === false) {
 			return Character.login(r, s, function (name, s, fnd) {
 				if (fnd) {
-					s.join('mud'); // mud is one of two rooms, character creation the other (socket.io)					
+					s.join('mud'); // mud is one of two rooms, 'creation' the other (socket.io)	
+					
 					Character.load({name: name}, s, function (s, player) {
 						Character.getPassword(s);	
-						player.sid = s.id;
-						
-						s.player = player;
-						
+					
+						s.player = player;						
 						players.push(s.player);
 						
 						s.on('cmd', function (r) { 
-							Cmds.parse(r, s, s.player, players);
+							parseCmd(r, s, players);
 						});
 					});
 				} else {
-					s.join('creation'); // Character creation is its own room (socket.io)	
+					s.join('creation'); // Character creation is its own room, 'mud' the other (socket.io)	
 
-					s.player = {name:name, sid: s.id};
-					
+					s.player = {name:name, sid: s.id};					
 					players.push(s.player);
 
-					Character.newCharacter(r, s, s.player, players);		
+					Character.newCharacter(r, s, players);		
 					
 					s.on('cmd', function (r) { 
-						Cmds.parse(r, s, s.player, players);
+						parseCmd(r, s, players);
 					});
 				}
 			});
 		} else {
-			return s.emit('msg', {msg: 'Enter something.'});	
+			return s.emit('msg', {msg: 'Enter a valid response.'});	
 		}
     });
 

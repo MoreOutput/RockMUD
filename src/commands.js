@@ -6,24 +6,8 @@ var Cmd = function () {
 	this.perms = ['admin'];
 };
 
-Cmd.prototype.parse = function(r, s, player, players) {
-	r.cmd = r.msg.replace(/_.*/, '');
-	r.msg = r.msg.replace(/^.*?_/, '').replace(/_/g, ' ');
-	r.emit = 'msg';
-						
-	if (r.res in Character || r.cmd in Character) {
-		return Character[r.res](r, s, player, players);
-	} else if (r.cmd in this) {
-		return this[r.cmd](r, s, player, players);
-	} else if (r.cmd in Room) {
-		return Room[r.cmd](r, s, player, players);	
-	} else {
-		return Character.prompt(s, player);
-	}
-}
-
-Cmd.prototype.save = function(r, s) {
-	if (Character.save(s.id)) {
+Cmd.prototype.save = function(r, s, players, fn) {
+	if (Character.save(s.player)) {
 		return s.emit('msg', {msg: 'Saved!.'});
 	} else {
 		return s.emit('msg', {msg: 'Save failed.'});
@@ -51,13 +35,13 @@ Cmd.prototype.say = function(r, s) {
 
 };
 
-Cmd.prototype.look = function(r, s, player, players) {
-	Room.load(r, s, player, players, function(room) {
-		return Character.prompt(s, player);
+Cmd.prototype.look = function(r, s, players) {
+	Room.getRoom(r, s, players, function(room) {
+		return Character.prompt(s);
 	});
 }
 
-Cmd.prototype.chat = function(r, s, player) {
+Cmd.prototype.chat = function(r, s) {
 	var msg = r.msg;
 		
 	r.msg = 'You chat> ' + msg;
@@ -66,30 +50,30 @@ Cmd.prototype.chat = function(r, s, player) {
 	s.emit('msg', r);
 		
 	r.msg = '';
-	r.msg = player.name + '> ' + msg;
+	r.msg = s.player.name + '> ' + msg;
 		
 	s.in('mud').broadcast.emit('msg', r);
 
-	return Character.prompt(s, player);
+	return Character.prompt(s);
 };
 
 // Example of a command requiring certain permissions
-Cmd.prototype.achat = function(r, s, player) { 
-	if (this.perms.indexOf(player.role) != -1) {
+Cmd.prototype.achat = function(r, s) { 
+	if (this.perms.indexOf(s.player.role) != -1) {
 		var msg = r.msg;
 		r.msg = 'You admin chat> ' + msg;
-		r.styleClass = 'msg';
+		r.styleClass = 'admin-msg';
 	
 		s.emit('msg', r);
 		r.msg = '';
-	    r.msg = 'The Great Oracle> ' + msg;
+	    r.msg = 'A great voice> ' + msg;
 		
 		return s.broadcast.emit('msg', r);
 	} else {
 		r.msg = 'You do not have permission to execute this command.';
 		s.emit('msg', r);		
 		
-		return Character.prompt(s, player);
+		return Character.prompt(s);
 	}
 };
 
@@ -97,18 +81,17 @@ Cmd.prototype.flame = function(r, s) {
 
 };
 
-Cmd.prototype.kill = function(r, s, player, players) {
-	r.msg = '<div class="cmd-kill">' +
-		'You slash a wolf with <div class="hit">***UNRELENTING***</div> force.</div>';
+Cmd.prototype.kill = function(r, s, players) {
+	r.msg = 'You slash a wolf with <div class="hit">***UNRELENTING***</div> force.';
     r.styleClass = 'cbt';
 	
 	s.emit('msg', r);
 
-	return Character.prompt(s, player);
+	return Character.prompt(s);
 };
 
 Cmd.prototype.changes = function(r, s, player) {
-   	return Character.prompt(s, player);
+   	return Character.prompt(s);
 };
 
 Cmd.prototype.where = function(r, s) {
@@ -121,25 +104,22 @@ Cmd.prototype.where = function(r, s) {
 	
 	s.emit('msg', r);
 	
-	return Character.prompt(s, player);
+	return Character.prompt(s);
 };
 
-Cmd.prototype.who = function(r, s, player, players) {
+Cmd.prototype.who = function(r, s, players) {
 	s.emit('msg', {
 		msg: (function () {
 			var str = '',
 			i = 0;
 			
 			if (players.length > 0) {
-				for (i; i < players.length; i += 1) {	
-
-					
-				
+				for (i; i < players.length; i += 1) {				
 					str += '<li>' + players[i].name[0].toUpperCase() + 
 					players[i].name.slice(1) + 
 					' a level ' + players[i].level   +
 					' ' + players[i].race + 
-					' ' + players[i].charClass +  
+					' ' + players[i].charClass +  ' (' + players[i].role + ')'
 					'</li>';
 					
 					
@@ -159,14 +139,15 @@ Cmd.prototype.who = function(r, s, player, players) {
 					str +
 				'<li>***************************</li>' + 
 				'</ul>'; 
-			}
-			
-			
-				
+			}				
 		}()), styleClass: 'who-cmd'
 	});
 	
-	return Character.prompt(s, player);
+	return Character.prompt(s);
+}
+
+Cmd.prototype.score = function(r, s, players) { 
+	s.emit('msg', {msg: JSON.stringify(s.player, null, 4), styleClass: 'score' });
 }
 
 module.exports.cmds = new Cmd();
