@@ -1,7 +1,7 @@
 RockMUD
 =======
 
-RockMUD v0.1
+RockMUD 0.1.0
 
 History:
 RockMUD was spawned out of my love of MUDs and too many late night coffees. 
