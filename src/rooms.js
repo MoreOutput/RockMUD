@@ -10,6 +10,15 @@ Room.prototype.load = function(r, s, player, players, fn) {
         var i = 0,
 		exits = [],
 		playersInRoom = [],
+		displayRoom = function(room, exits, playersInRoom) {
+			return s.emit('msg', {
+				msg: '<div class="room-title">' + room.title + '</div>' + 
+				'<div class="room-content">' + room.content + '</div>' + 
+				'<div class="room-exits">Visible Exits: [' + exits + ']</div>' + 
+				'Here:' + playersInRoom, 
+				styleClass: area.type + ' room'
+			});
+		},
 		area = JSON.parse(area);
         
 		if (err) {
@@ -36,9 +45,9 @@ Room.prototype.load = function(r, s, player, players, fn) {
 					
 					for (j; j < players.length; j += 1) {				
 						if (players[j].vnum === player.vnum && players[j].name != player.name) {
-							pArr.push(players[j].name + ' is ' + player.position + ' here ');
+							pArr.push(' ' + players[j].name + ' is ' + player.position + ' here');
 						} else {
-							pArr.push('You are here. ');
+							pArr.push(' You are here.');
 						}
 						
 						if (j === players.length - 1) {
@@ -47,13 +56,13 @@ Room.prototype.load = function(r, s, player, players, fn) {
 					}
 				}());
 				
-				s.emit('msg', {
-					msg: '<div class="room-title">' + area.rooms[i].title + '</div>' + 
-					'<div class="room-content">' + area.rooms[i].content + '</div>' + 
-					'<div class="room-exits">Visible Exits: [' + exits + ']</div>' + 
-					'Here: ' + playersInRoom, 
-					styleClass: area.type + ' room'
-				});				
+					
+				if (typeof fn === 'function') {
+					displayRoom(area.rooms[i], exits, playersInRoom);
+					fn(area.rooms[i]);
+				} else {			
+					displayRoom(area.rooms[i], exits, playersInRoom);
+				}
 
 			} else {
 				s.emit('msg', {msg: 'Room load failed.'});
@@ -97,18 +106,6 @@ Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit mus
             }
 		}
 	});
-}
-
-Room.prototype.look = function(r, s, player, players, fn) {	
-	if (r.msg === r.cmd || r.msg === '') {
-		this.load(r, s, player, players);
-	} else {
-		// need to see if the passed in message matches anything in the room
-	}
-	
-	if (typeof fn === 'function') {
-		fn();
-	}
 }
 
 Room.prototype.north = function(r, s, player, players, fn) {

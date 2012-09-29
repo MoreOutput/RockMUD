@@ -2,6 +2,7 @@
 * Characters
 */
 var fs = require('fs'),
+crypto = require('crypto'),
 Races = require('./races').race,
 Classes = require('./classes').classes,
 Room = require('./rooms').room;
@@ -40,6 +41,31 @@ Character.prototype.load = function(r, s, fn) {
 		return fn(s, JSON.parse(r));
 	});
 }
+
+Character.prototype.hashPassword = function(salt, password, iterations, fn) {
+	var hash = password,
+	iterations = iterations, 
+	i = 0;
+		
+	if (password.length > 8) {
+		for (i; i < iterations; i += 1) {
+			hash = crypto.createHmac('sha256', salt).update(hash).digest('hex');
+		} 
+			
+		fn(hash);
+	
+	}
+};
+
+Character.prototype.generateSalt = function(fn) {
+	crypto.randomBytes(128, function(ex, buf) {
+		if (ex) {
+			throw ex;
+		}
+			
+		fn(buf.toString('hex'));
+	});
+};
 
 Character.prototype.requestNewPassword = function(r, s, player) {
 	s.emit('msg', {msg: 'Set a password (9 characters): ', res:'setPassword', styleClass: 'pw-set'});

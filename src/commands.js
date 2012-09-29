@@ -51,9 +51,9 @@ Cmd.prototype.say = function(r, s) {
 
 };
 
-Cmd.prototype.l = function(r, s, player, players) { // unacceptable
-	Room.look(r, s, player, players, function() {
-		
+Cmd.prototype.look = function(r, s, player, players) {
+	Room.load(r, s, player, players, function(room) {
+		return Character.prompt(s, player);
 	});
 }
 
@@ -97,12 +97,14 @@ Cmd.prototype.flame = function(r, s) {
 
 };
 
-Cmd.prototype.kill = function(r, s) {
+Cmd.prototype.kill = function(r, s, player, players) {
 	r.msg = '<div class="cmd-kill">' +
 		'You slash a wolf with <div class="hit">***UNRELENTING***</div> force.</div>';
     r.styleClass = 'cbt';
 	
-	return s.emit('msg', r);
+	s.emit('msg', r);
+
+	return Character.prompt(s, player);
 };
 
 Cmd.prototype.changes = function(r, s, player) {
@@ -117,39 +119,54 @@ Cmd.prototype.where = function(r, s) {
 	'</ul>';	
 	r.styleClass = 'playerinfo cmd-where';
 	
-	return s.emit('msg', r);
+	s.emit('msg', r);
+	
+	return Character.prompt(s, player);
 };
 
 Cmd.prototype.who = function(r, s, player, players) {
 	s.emit('msg', {
 		msg: (function () {
 			var str = '',
-			key,
-			obj = {},
 			i = 0;
 			
-			if (players.length > 0 ) {
-				for (i; players.length; i += 1) {
-					var obj = players[i];
-					str += '<li><div class="name">' + obj.name[0].toUpperCase() + 
-					obj.name.slice(1) + 
-					'</div><div class="level">a level ' + obj.level   +
-					'</div><div class="race">' + obj.race + 
-					'</div><div class="class">' + obj.charClass +  
-					'</div></li>';
+			if (players.length > 0) {
+				for (i; i < players.length; i += 1) {	
+
+					
+				
+					str += '<li>' + players[i].name[0].toUpperCase() + 
+					players[i].name.slice(1) + 
+					' a level ' + players[i].level   +
+					' ' + players[i].race + 
+					' ' + players[i].charClass +  
+					'</li>';
+					
+					
+					if (i === players.length - 1) {
+						return '<h1>Currently logged on</h1><ul>' +
+						'<li>*******Players Online******</li>' +
+						str +
+						'<li>***************************</li>' + 
+						'</ul>'; 
+					}
+					
 				}
 			} else {
 				str = '<li>No one is online.</li>';
-			}
-			
-			return '<h1>Currently logged on</h1><ul>' +
-				'<li>*******Players Online******</li>' +
-				str +
+					return '<h1>Currently logged on</h1><ul>' +
+					'<li>*******Players Online******</li>' +
+					str +
 				'<li>***************************</li>' + 
 				'</ul>'; 
+			}
+			
+			
 				
 		}()), styleClass: 'who-cmd'
 	});
+	
+	return Character.prompt(s, player);
 }
 
 module.exports.cmds = new Cmd();
