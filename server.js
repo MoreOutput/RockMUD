@@ -77,7 +77,7 @@ ws.on('connection', function (s) {
 			}
 		};
 		
-		if (r.msg != '' && /[`~!@#$%^&*()-+={}[]|]|[0-9]/g.test(r.msg) === false) {
+		if (r.msg != '' && /[`~!@#$%^&*()-+={}[]|]|[0-9]/g.test(r.msg) === false) { // not checking slashes
 			return Character.login(r, s, function (name, s, fnd) {
 				if (fnd) {
 					s.join('mud'); // mud is one of two rooms, 'creation' the other (socket.io)	

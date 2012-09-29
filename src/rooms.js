@@ -60,7 +60,7 @@ Room.prototype.getRoom = function(r, s, players, fn) {
 					
 					for (j; j < players.length; j += 1) {				
 						if (players[j].vnum === s.player.vnum && players[j].name != s.player.name) {
-							pArr.push(' ' + players[j].name + ' is ' + player.position + ' here');
+							pArr.push(' ' + players[j].name + ' is ' + s.player.position + ' here');
 						} else {
 							pArr.push(' You are here.');
 						}
