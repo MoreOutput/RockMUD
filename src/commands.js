@@ -146,6 +146,13 @@ Cmd.prototype.who = function(r, s, players) {
 	return Character.prompt(s);
 }
 
+Cmd.prototype.save = function(r, s, players) {
+	Character.save(r, s, players, function() {
+		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'})
+		return Character.prompt(s);
+	});
+}
+
 Cmd.prototype.score = function(r, s, players) { 
 	s.emit('msg', {msg: JSON.stringify(s.player, null, 4), styleClass: 'score' });
 }

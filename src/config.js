@@ -7,7 +7,7 @@ exports.server = {
 	theme: 'Fantasy',
 	website: '', 
 	info: {
-		version: '0.3',
+		version: '0.1.0',
 		author: 'Rocky Bevins',
 		programmer: 'Rocky Bevins',
 		support: 'rockybevins@gmail.com'		

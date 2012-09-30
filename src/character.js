@@ -264,15 +264,14 @@ Character.prototype.motd = function(s, fn) {
 	});
 }
 
-Character.prototype.save = function(id) {
-	try {
-		var player = fs.createWriteStream('./players/' + character[id].name + '.json', {'flags' : 'w'});
-		player.write(JSON.stringify(character[id], null, 4));
-		
-		return true;
-	} catch(err) {
-		return false;
-	}
+Character.prototype.save = function(r, s, players, fn) {
+	fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
+		if (err) {
+			return s.emit('msg', {msg: 'Error saving character.'});
+		} else {
+			return fn();
+		}
+	});
 }
 
 Character.prototype.prompt = function(s) {
