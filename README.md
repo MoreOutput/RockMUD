@@ -6,6 +6,9 @@ RockMUD 0.1.0
 History:
 RockMUD was spawned out of my love of MUDs and too many late night coffees. 
 
+Doing what I can to keep a test server running at http://lexingtondesigner.com:8000/. Client 'terminal' will be
+addressed soon.
+
 Goals:
 * Provide a Diku-like MUD experience from within the browser using NodeJS
 * Typography is a feature.
