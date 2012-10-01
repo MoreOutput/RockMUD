@@ -169,7 +169,8 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
 			diceNum: 2, 
 			diceSides: 6, 
 			attackType: 'Slice', 
-			attackElement : '' 
+			attackElement : '',
+			flags: []
 			}
 		],
 		skills: [],

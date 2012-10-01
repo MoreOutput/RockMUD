@@ -141,9 +141,7 @@ Cmd.prototype.who = function(r, s, players) {
 			} else {
 				str = '<li>No one is online.</li>';
 					return '<h1>Currently logged on</h1><ul>' +
-					'<li>*******Players Online******</li>' +
 					str +
-				'<li>***************************</li>' + 
 				'</ul>'; 
 			}				
 		}()), styleClass: 'who-cmd'
