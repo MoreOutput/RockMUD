@@ -151,7 +151,7 @@ Cmd.prototype.who = function(r, s, players) {
 }
 
 Cmd.prototype.save = function(r, s, players) {
-	Character.save(r, s, players, function() {
+	Character.save(s, players, function() {
 		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'})
 		return Character.prompt(s);
 	});
@@ -159,7 +159,7 @@ Cmd.prototype.save = function(r, s, players) {
 
 Cmd.prototype.title = function(r, s, players) {
 	s.player.title = r.msg;
-	Character.save(r, s, players, function() {
+	Character.save(s, players, function() {
 		s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
 		return Character.prompt(s);
 	});

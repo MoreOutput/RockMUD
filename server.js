@@ -113,24 +113,26 @@ io.on('connection', function (s) {
 
 	// Quitting
 	s.on('quit', function () {
-		s.emit('msg', {
-			msg: 'Add a little to a little and there will be a big pile.',
-			emit: 'disconnect',
-			styleClass: 'logout-msg'
-		}); 
+		Character.save(s, players, function() {		
+			s.emit('msg', {
+				msg: 'Add a little to a little and there will be a big pile.',
+				emit: 'disconnect',
+				styleClass: 'logout-msg'
+			}); 	
 			
-		s.leave('mud');
-		s.disconnect();
+			s.leave('mud');	
+			s.disconnect();		
+		});
+
 	});
 	
 	// DC
     s.on('disconnect', function () {
 		var i = 0;
+		
 		for (i; i < players.length; i += 1) {
 			if (players[i].name === s.player.name) {
-				players.splice(i, 1);
-				
-				Character.save(r, s);				
+				players.splice(i, 1);				
 			}
 		}
 	});    		

@@ -40,8 +40,7 @@ Room.prototype.getRoom = function(r, s, players, fn) {
 			throw err;
         }
 		
-		for (i; i < area.rooms.length; i += 1) {
-	
+		for (i; i < area.rooms.length; i += 1) {	
 			if (area.rooms[i].vnum === s.player.vnum) {	
 				exits = (function () {
 					var eArr = [],
@@ -69,8 +68,7 @@ Room.prototype.getRoom = function(r, s, players, fn) {
 							return pArr.toString();
 						}
 					}
-				}());
-				
+				}());				
 					
 				if (typeof fn === 'function') {
 					displayRoom(area.rooms[i], exits, playersInRoom);

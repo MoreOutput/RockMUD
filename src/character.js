@@ -276,7 +276,7 @@ Character.prototype.motd = function(s, fn) {
 	});
 }
 
-Character.prototype.save = function(r, s, players, fn) {
+Character.prototype.save = function(s, players, fn) {
 	s.player.saved = new Date().toString();
 	
 	fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
