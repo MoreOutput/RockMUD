@@ -47,7 +47,7 @@ Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 	iterations = iterations, 
 	i = 0;
 		
-	if (password.length > 8) {
+	if (password.length > 7) {
 		for (i; i < iterations; i += 1) {
 			hash = crypto.createHmac('sha256', salt).update(hash).digest('hex');
 		} 
@@ -67,18 +67,18 @@ Character.prototype.generateSalt = function(fn) {
 	});
 };
 
-Character.prototype.requestNewPassword = function(r, s, player) {
-	s.emit('msg', {msg: 'Set a password (9 characters): ', res:'setPassword', styleClass: 'pw-set'});
+Character.prototype.requestNewPassword = function(r, s) {
+	s.emit('msg', {msg: 'Set a password (8 characters): ', res:'setPassword', styleClass: 'pw-set'});
 }
 
 Character.prototype.setPassword = function(r, s, players) {	
-	if (r.cmd.length > 8) {
+	if (r.cmd.length > 7) {
 		s.player.password = r.cmd;
 		s.emit('msg', {msg : 'Your password is: ' + s.player.password});		
 		this.create(r, s, players);
 	} else {
-		s.emit('msg', {msg: 'Yes it has to be nine characters long.'});
-		return this.requestNewPassword(s);
+		s.emit('msg', {msg: 'Yes it has to be eight characters long.'});
+		return this.requestNewPassword(r, s);
 	}
 
 
@@ -90,24 +90,28 @@ Character.prototype.getPassword = function(s) {
 
 Character.prototype.loginPassword = function(r, s, players) {
 	var character = this;
-	if (s.player.password === r.msg) {
-		this.motd(s, function() {
-			Room.getRoom(r, s, players);
-			character.prompt(s);
-		});
-	} else {
-		s.emit('msg', {msg: 'Wrong! You are flagged after 5 incorrect responses.'});
-		this.getPassword(s);
-	}	
+	
+	character.hashPassword(s.player.salt, r.cmd, 1000, function(hash) {
+		if (s.player.password === hash) {
+			character.motd(s, function() {
+				Room.getRoom(r, s, players);
+				character.prompt(s);
+			});
+		} else {
+			s.emit('msg', {msg: 'Wrong! You are flagged after 5 incorrect responses.'});
+			character.getPassword(s);
+		}
+	});
 }
 
-Character.prototype.create = function(r, s, players) { //  A New Character is saved
-	var newChar = {
+Character.prototype.create = function(r, s, players) { //  A New Character is saved]
+	s.player = {
 		name: s.player.name,
 		lastname: '',
-		title: 'is a newbie, so help them out!',
+		title: '',
 		role: 'player',
 		password: s.player.password,
+		salt: '',
 		race: s.player.race,
 		charClass: s.player.charClass,
 		saved: new Date().toString(), // time of last save
@@ -135,6 +139,8 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
         int: (function () {
 			return Races.getInt(s.player.race);
         }()),
+		hunger: 0,
+		thirst: 0,
 		area: 'hillcrest',
 		vnum: 1, // current room
 		recall: 1, // vnum to recall to
@@ -171,30 +177,35 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
 		affects: []
 	},
 	character = this;
-
-	fs.writeFile('./players/' + newChar.name + '.json', JSON.stringify(newChar, null, 4), function (err) {
-		var i = 0;
+	
+	character.generateSalt(function(salt) {
+		s.player.salt = salt;
+		character.hashPassword(salt, s.player.password, 1000, function(hash) {
+			s.player.password = hash;
+			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
+				var i = 0;
 		
-		if (err) {
-			throw err;
-		}
+				if (err) {
+					throw err;
+				}
 		
-		for (i; i < players.length; i += 1) {
-			if (players[i].sid === s.id) {
-				players.splice(i, 1);
-			}
-		}
+				for (i; i < players.length; i += 1) {
+					if (players[i].sid === s.id) {
+						players.splice(i, 1);
+					}
+				}
 		
-		s.leave('creation');
-		s.join('mud');			
+				s.leave('creation');
+				s.join('mud');			
 		
-		character.motd(s, function() {
-			s.player = newChar;
-			players.push(s.player);
-			Room.getRoom(r, s, players);			
-			character.prompt(s);
-		});	
-	});
+				character.motd(s, function() {
+					players.push(s.player);
+					Room.getRoom(r, s, players);			
+					character.prompt(s);
+				});	
+			});	
+		});
+	});	
 }
 
 Character.prototype.newCharacter = function(r, s, players, fn) {
@@ -265,6 +276,8 @@ Character.prototype.motd = function(s, fn) {
 }
 
 Character.prototype.save = function(r, s, players, fn) {
+	s.player.saved = new Date().toString();
+	
 	fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
 		if (err) {
 			return s.emit('msg', {msg: 'Error saving character.'});

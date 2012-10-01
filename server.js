@@ -49,10 +49,10 @@ io = require('socket.io').listen(server);
 
 server.listen(cfg.port);
 
-//ws.set("heartbeat interval", 2); 
+io.set("heartbeat interval", 59); // MUD-wide ticks
+
 
 io.on('connection', function (s) {
-
 	// Starting message, could move to browser
 	var startMUD = '<h1>Welcome to RockMUD v0.1 </h1><div class="subtext">RockMUD created by ' +
 	'<a href="http://www.lexingtondesigner.com" target="_blank">Rocky Bevins 2012</a>.</p>' +
@@ -86,7 +86,7 @@ io.on('connection', function (s) {
 					
 					Character.load({name: name}, s, function (s, player) {
 						Character.getPassword(s);	
-						//console.log(io.sockets.clients('mud')[0].player);
+	
 						s.player = player;
 						players.push(s.player);
 

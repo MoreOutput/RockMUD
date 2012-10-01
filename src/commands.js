@@ -116,12 +116,20 @@ Cmd.prototype.who = function(r, s, players) {
 			if (players.length > 0) {
 				for (i; i < players.length; i += 1) {				
 					str += '<li>' + players[i].name[0].toUpperCase() + 
-					players[i].name.slice(1) + 
-					' a level ' + players[i].level   +
-					' ' + players[i].race + 
-					' ' + players[i].charClass +  ' (' + players[i].role + ')'
-					'</li>';
+					players[i].name.slice(1) + ' ' +
+					(function() {
+						if (s.player.title === '') {
+							return 'a level ' + players[i].level   +
+							' ' + players[i].race + 
+							' ' + players[i].charClass; 
+						} else {
+							return s.player.title;
+						}
 					
+					}()) +
+					' (' + players[i].role + ')'
+					
+					'</li>';					
 					
 					if (i === players.length - 1) {
 						return '<h1>Currently logged on</h1><ul>' +
@@ -149,6 +157,14 @@ Cmd.prototype.who = function(r, s, players) {
 Cmd.prototype.save = function(r, s, players) {
 	Character.save(r, s, players, function() {
 		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'})
+		return Character.prompt(s);
+	});
+}
+
+Cmd.prototype.title = function(r, s, players) {
+	s.player.title = r.msg;
+	Character.save(r, s, players, function() {
+		s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
 		return Character.prompt(s);
 	});
 }
