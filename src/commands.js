@@ -168,7 +168,12 @@ Cmd.prototype.title = function(r, s, players) {
 }
 
 Cmd.prototype.score = function(r, s, players) { 
-	s.emit('msg', {msg: JSON.stringify(s.player, null, 4), styleClass: 'score' });
+	var score = s.player;
+	
+	delete score.salt;
+	delete score.password;
+	
+	s.emit('msg', {msg: JSON.stringify(score, null, 4), styleClass: 'score' });
 }
 
 module.exports.cmds = new Cmd();
