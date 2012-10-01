@@ -133,9 +133,7 @@ Cmd.prototype.who = function(r, s, players) {
 					
 					if (i === players.length - 1) {
 						return '<h1>Currently logged on</h1><ul>' +
-						'<li>*******Players Online******</li>' +
 						str +
-						'<li>***************************</li>' + 
 						'</ul>'; 
 					}
 					

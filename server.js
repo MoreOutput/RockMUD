@@ -129,6 +129,8 @@ io.on('connection', function (s) {
 		for (i; i < players.length; i += 1) {
 			if (players[i].name === s.player.name) {
 				players.splice(i, 1);
+				
+				Character.save(r, s);				
 			}
 		}
 	});    		
