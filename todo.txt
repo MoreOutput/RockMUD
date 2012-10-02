@@ -1,9 +1,20 @@
-RockMUD work before .2 (in a few days):
+RockMUD work before 0.2.0 (in a few days):
 
 - Combat Rounds, 
 - All 'standard' mud channels,
 - clean up function parameters, 
-- save a created character (i broke this tonight when refactoring), hash passwords
+- class stats on creation
+- all character skills (skills.js)
+- one script per character class for skills (fighter.js, cleric.js)
 - save command.
-- Better parsing of commands, regexp characters crash mud (passing in a  ? for example)
-- Working on reading and adjuting areas/vnums for movement   
+- Better parsing of commands (continuing)
+- Working on reading and adjuting areas/vnums for movement / ticks (30% or so)  
+- use socket.io to manage all logged in users rather than players[]?
+
+Before 0.2.5
+- Hunger / Thirst
+- Items in the room
+- Add to inventory
+
+ 
+
