@@ -5,15 +5,15 @@ var fs = require('fs'),
 crypto = require('crypto'),
 Races = require('./races').race,
 Classes = require('./classes').classes,
-Room = require('./rooms').room;
+Room = require('./rooms').room,
+Dice = require('./dice').roller;
  
 var Character = function () {
-	this.perms = ['player'];
+	this.perms = [];
 }
  
 Character.prototype.login = function(r, s, fn) {
-	var name = r.msg.replace(/_.*/,'').toLowerCase(),	
-	player = { id: s.id };
+	var name = r.msg.replace(/_.*/,'').toLowerCase();	
 	
 	if (r.msg.length > 2) {
 		fs.stat('./players/' + name + '.json', function (err, stat) {
@@ -124,21 +124,7 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
 		hp: 100, // total hp
 		mana: 100,
 		mv: 100, // stats after this
-		str: (function () {
-			return Races.getStr(s.player.race);
-		}()),
-		wis: (function () {
-			return Races.getWis(s.player.race);
-		}()),
-		con: (function () {
-			return Races.getCon(s.player.race);
-		}()),
-		dex: (function () {
-			return Races.getDex(s.player.race);
-        }()),
-        int: (function () {
-			return Races.getInt(s.player.race);
-        }()),
+		stats: ['str', 'wis', 'int', 'dex', 'con'],
 		hunger: 0,
 		thirst: 0,
 		area: 'hillcrest',
@@ -179,34 +165,61 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
 	},
 	character = this;
 	
-	character.generateSalt(function(salt) {
-		s.player.salt = salt;
-		character.hashPassword(salt, s.player.password, 1000, function(hash) {
-			s.player.password = hash;
-			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
-				var i = 0;
+	character.rollStats(s.player, function(player) {
+		s.player = player;
+	
+		character.generateSalt(function(salt) {
+			s.player.salt = salt;
+			character.hashPassword(salt, s.player.password, 1000, function(hash) {
+				s.player.password = hash;
+				fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
+					var i = 0;
 		
-				if (err) {
-					throw err;
-				}
-		
-				for (i; i < players.length; i += 1) {
-					if (players[i].sid === s.id) {
-						players.splice(i, 1);
+					if (err) {
+						throw err;
 					}
-				}
+			
+					for (i; i < players.length; i += 1) {
+						if (players[i].sid === s.id) {
+							players.splice(i, 1);
+						}
+					}
 		
-				s.leave('creation');
-				s.join('mud');			
+					s.leave('creation');
+					s.join('mud');			
 		
-				character.motd(s, function() {
-					players.push(s.player);
-					Room.getRoom(r, s, players);			
-					character.prompt(s);
+					character.motd(s, function() {
+						players.push(s.player);
+						Room.getRoom(r, s, players);			
+						character.prompt(s);
+					});	
 				});	
-			});	
-		});
-	});	
+			});
+		});	
+	});
+}
+
+// Rolling stats for a new character
+Character.prototype.rollStats = function(player, fn) { 
+	var i = 0,
+	j = 0;
+
+	for (i; i < Races.raceList.length; i += 1) {		
+		if (Races.raceList[i].name.toLowerCase() === player.race) {	
+			for (j; j < player.stats.length; j += 1) {
+				if (player.stats[j] in Races.raceList[i]) {
+					player[player.stats[j]] = Dice.roll(3,6) + Races.raceList[i][player.stats[j]];					
+				} else {
+					player[player.stats[j]] = Dice.roll(3,6);
+				}
+				
+				if (j === player.stats.length - 1) {
+					delete player.stats;
+					return fn(player);
+				}
+			}
+		}
+	} 
 }
 
 Character.prototype.newCharacter = function(r, s, players, fn) {

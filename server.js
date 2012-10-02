@@ -18,7 +18,7 @@ server  = http.createServer(function (req, res) {
         	if (err) {
 				throw err;
 			}
-			
+
 			res.writeHead(200, {'Content-Type': 'text/html'});
         	res.write(data);
 			res.end();
@@ -53,12 +53,7 @@ io.set("heartbeat interval", 59); // MUD-wide ticks
 
 
 io.on('connection', function (s) {
-	// Starting message, could move to browser
-	var startMUD = '<h1>Welcome to RockMUD v0.1 </h1><div class="subtext">RockMUD created by ' +
-	'<a href="http://www.lexingtondesigner.com" target="_blank">Rocky Bevins 2012</a>.</p>' +
-	'<p>You can find out more about RockMUD on <a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>.</p></div>' + 
-    '<div class="enter-name order msg">Enter your name:</div>';   
-	
+
 	// Logging in and parsing commands
 	s.on('login', function (r) {
 		var parseCmd = function(r, s, players) {
@@ -66,7 +61,7 @@ io.on('connection', function (s) {
 				r.cmd = r.msg.replace(/_.*/, '').toLowerCase();
 				r.msg = r.msg.replace(/^.*?_/, '').replace(/_/g, ' ');
 				r.emit = 'msg';
-	
+
 				if (r.res in Character) {
 					return Character[r.res](r, s, players);
 				} else if (r.cmd in Cmds) {
@@ -78,15 +73,15 @@ io.on('connection', function (s) {
 				s.emit('msg', {msg: 'Invalid characters in command.'});
 			}
 		};
-		
+
 		if (r.msg != '' && /[`~!@#$%^&*()-+={}[]|]|[0-9]/g.test(r.msg) === false) { // not checking slashes
 			return Character.login(r, s, function (name, s, fnd) {
 				if (fnd) {
 					s.join('mud'); // mud is one of two rooms, 'creation' the other (socket.io)	
-					
+
 					Character.load({name: name}, s, function (s, player) {
 						Character.getPassword(s);	
-	
+
 						s.player = player;
 						players.push(s.player);
 
@@ -100,7 +95,7 @@ io.on('connection', function (s) {
 					players.push(s.player);
 
 					Character.newCharacter(r, s, players);		
-					
+
 					s.on('cmd', function (r) { 
 						parseCmd(r, s, players);
 					});
@@ -119,25 +114,25 @@ io.on('connection', function (s) {
 				emit: 'disconnect',
 				styleClass: 'logout-msg'
 			}); 	
-			
+
 			s.leave('mud');	
 			s.disconnect();		
 		});
 
 	});
-	
+
 	// DC
     s.on('disconnect', function () {
 		var i = 0;
-		
+
 		for (i; i < players.length; i += 1) {
 			if (players[i].name === s.player.name) {
 				players.splice(i, 1);				
 			}
 		}
 	});    		
-	
-	s.emit('msg', {msg : startMUD, res: 'login'});
+
+	s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 });
 
 console.log(cfg.name + ' is ready to rock and roll on port ' + cfg.port);

@@ -86,11 +86,6 @@ width: 90%;
 padding: 3px 0 3px 0;
 }
 
-#terminal .msg {
-clear: both;
-width: 95%;
-}
-
 .cmd-who {
 width: 95%;
 text-align: left;
@@ -189,7 +184,9 @@ width: 95%;
 color: yellow;
 }
 
-.msg {
+.enter-name {
+clear: both;
+display: block;
 font-weight: bold;
 }
 

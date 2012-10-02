@@ -6,32 +6,10 @@ var Cmd = function () {
 	this.perms = ['admin'];
 };
 
-Cmd.prototype.save = function(r, s, players, fn) {
-	if (Character.save(s.player)) {
-		return s.emit('msg', {msg: 'Saved!.'});
-	} else {
-		return s.emit('msg', {msg: 'Save failed.'});
-	}
-}
-
-Cmd.prototype.removePlayer = function(s) {
-	var i = 0;
-	for (i; i < cmds.players.length; i += 1) {
-		if (Character[s.id].name === cmds.players[i].name) {
-			if (i === 0) {
-				cmds.players = [];
-			} else {
-				cmds.players[i] = null;
-				cmds.players.splice(i, 1);
-			}
-		}	
-	}	
-};
-
 /*
 * Channels
 */
-Cmd.prototype.say = function(r, s) {
+Cmd.prototype.say = function(r, s, players) {
 
 };
 
@@ -88,10 +66,6 @@ Cmd.prototype.kill = function(r, s, players) {
 	s.emit('msg', r);
 
 	return Character.prompt(s);
-};
-
-Cmd.prototype.changes = function(r, s, player) {
-   	return Character.prompt(s);
 };
 
 Cmd.prototype.where = function(r, s) {
