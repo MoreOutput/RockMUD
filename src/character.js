@@ -1,5 +1,6 @@
 /*
-* Characters
+* Characters.js controls everything dealing with a character.json file, no in game commands are
+* defined here. Commands.js does share some of these method names, as they -- are --  commands. See: save().
 */
 var fs = require('fs'),
 crypto = require('crypto'),
@@ -124,7 +125,11 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
 		hp: 100, // total hp
 		mana: 100,
 		mv: 100, // stats after this
-		stats: ['str', 'wis', 'int', 'dex', 'con'],
+		str: 12,
+		wis: 12,
+		int: 12,
+		dex: 12,
+		con: 12,
 		hunger: 0,
 		thirst: 0,
 		area: 'hillcrest',
@@ -187,9 +192,9 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
 		
 					s.leave('creation');
 					s.join('mud');			
-		
-					character.motd(s, function() {
-						players.push(s.player);
+					players.push(s.player);
+					
+					character.motd(s, function() {	
 						Room.getRoom(r, s, players);			
 						character.prompt(s);
 					});	
@@ -202,24 +207,37 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
 // Rolling stats for a new character
 Character.prototype.rollStats = function(player, fn) { 
 	var i = 0,
-	j = 0;
+	j = 0,
+	racreKey, // property of the race defines in raceList
+	classKey; // property of the class defines in classList
 
-	for (i; i < Races.raceList.length; i += 1) {		
-		if (Races.raceList[i].name.toLowerCase() === player.race) {	
-			for (j; j < player.stats.length; j += 1) {
-				if (player.stats[j] in Races.raceList[i]) {
-					player[player.stats[j]] = Dice.roll(3,6) + Races.raceList[i][player.stats[j]];					
-				} else {
-					player[player.stats[j]] = Dice.roll(3,6);
+	for (i; i < Races.raceList.length; i += 1) {		// looking for race
+		if (Races.raceList[i].name.toLowerCase() === player.race) {	 // found race
+			delete Races.raceList[i].name;			
+			for (var raceKey in player) {
+				if (player[raceKey] in Races.raceList[i]) { // found, add in stat bonus						
+					player[player[raceKey]] = player[player[raceKey]] + Races.raceList[i][player[raceKey]];	
 				}
+			}
+		}		
 				
-				if (j === player.stats.length - 1) {
-					delete player.stats;
+		if (i === Races.raceList.length - 1) { // rolling stats is finished
+			for (j; j < Classes.classList.length; j += 1) { // looking through classes
+				if (Classes.classList[j].name.toLowerCase() === player.charClass) { // class match found
+					delete Classes.classList[j].name; 
+
+					for(classKey in player) {
+						if(classKey in Classes.classList[j])
+							player[classKey] = Classes.classList[j][classKey] + player[classKey];
+					}
+				}
+
+				if (j === Classes.classList.length - 1) {					
 					return fn(player);
 				}
 			}
 		}
-	} 
+	}		
 }
 
 Character.prototype.newCharacter = function(r, s, players, fn) {

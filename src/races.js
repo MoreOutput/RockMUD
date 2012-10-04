@@ -16,4 +16,6 @@ var Race = function() {
 	];
 }
 
+/* Racial based skills */
+
 module.exports.race = new Race();

@@ -8,9 +8,9 @@
 var sys = require('util'), 
 http = require('http'),
 fs = require('fs'),
-cfg = require('./src/config').server,
 Character = require('./src/character').character,
 Cmds = require('./src/commands').cmds,
+cfg = require('./config').server,
 players = [],
 server  = http.createServer(function (req, res) {
 	if (req.url === '/' || req.url === '/index.html') {
@@ -91,8 +91,7 @@ io.on('connection', function (s) {
 					});
 				} else {
 					s.join('creation'); // Character creation is its own room, 'mud' the other (socket.io)
-					s.player = {name:name, sid: s.id};					
-					players.push(s.player);
+					s.player = {name:name};					
 
 					Character.newCharacter(r, s, players);		
 
@@ -124,10 +123,11 @@ io.on('connection', function (s) {
 	// DC
     s.on('disconnect', function () {
 		var i = 0;
-
-		for (i; i < players.length; i += 1) {
-			if (players[i].name === s.player.name) {
-				players.splice(i, 1);				
+		if (s.player != undefined) {
+			for (i; i < players.length; i += 1) {
+				if (players[i].name === s.player.name) {
+					players.splice(i, 1);				
+				}
 			}
 		}
 	});    		

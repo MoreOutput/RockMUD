@@ -92,12 +92,12 @@ Cmd.prototype.who = function(r, s, players) {
 					str += '<li>' + players[i].name[0].toUpperCase() + 
 					players[i].name.slice(1) + ' ' +
 					(function() {
-						if (s.player.title === '') {
+						if (players[i].title === '') {
 							return 'a level ' + players[i].level   +
 							' ' + players[i].race + 
 							' ' + players[i].charClass; 
 						} else {
-							return s.player.title;
+							return players[i].title;
 						}
 					
 					}()) +
@@ -126,17 +126,22 @@ Cmd.prototype.who = function(r, s, players) {
 
 Cmd.prototype.save = function(r, s, players) {
 	Character.save(s, players, function() {
-		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'})
+		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'});
 		return Character.prompt(s);
 	});
 }
 
 Cmd.prototype.title = function(r, s, players) {
-	s.player.title = r.msg;
-	Character.save(s, players, function() {
-		s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
+	if (r.msg.length < 40) {
+		s.player.title = r.msg;
+		Character.save(s, players, function() {
+			s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
+			return Character.prompt(s);
+		});
+	} else {
+		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'});
 		return Character.prompt(s);
-	});
+	}
 }
 
 Cmd.prototype.score = function(r, s, players) { 
