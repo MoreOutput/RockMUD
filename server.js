@@ -54,10 +54,14 @@ io.on('connection', function (s) {
 	// Preparing ticks that affect players by socket
 	var charTick = function(s) { // Adding something to the player after a set time, regen
 		setInterval(function() {
-			if (s.player != undefined) {
+			if (s.player.name != undefined) {
 				if (s.player.chp <= s.player.hp) {			
-					Character.hpRegen(s);		
+					Character.hpRegen(s);
 				}
+				
+				Character.hunger(s);
+				Characyer.thirst(s);
+				
 			}
 		}, 60000);	
 		

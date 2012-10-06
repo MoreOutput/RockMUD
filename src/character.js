@@ -359,6 +359,26 @@ Character.prototype.save = function(s, fn) {
 	});
 }
 
+Character.prototype.hunger = function(s) {
+	if (s.player.hunger > 0) {
+		Dice.roll(1, 4, function(total) {
+			if (total > 2) { // Roll to reduce hunger pangs, CON?
+				s.player.hunger = s.player.hunger - 1;
+			}			
+						
+			if (s.player.hunger < 5) {		
+				s.emit('msg', {msg: 'You are hungry.', styleClass: 'hunger'});
+			}
+		});
+	} else {
+		s.emit('msg', {msg: 'You are starving!', styleClass: 'hunger'});
+	}
+}
+
+Character.prototype.thirst = function(s) {
+
+}
+
 Character.prototype.prompt = function(s) {
 	return s.emit('msg', {msg: s.player.name + ', hp:' + s.player.chp +  ' room:' 
 		+ s.player.vnum + '> ', styleClass: 'cprompt'});
