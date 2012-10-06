@@ -49,13 +49,34 @@ io = require('socket.io').listen(server);
 
 server.listen(cfg.port);
 
-io.set("heartbeat interval", 59); // MUD-wide ticks
-
 
 io.on('connection', function (s) {
-
-	// Logging in and parsing commands
-	s.on('login', function (r) {
+	// Preparing ticks that affect players by socket
+	var charTick = function(s) { // Adding something to the player after a set time, regen
+		setInterval(function() {
+			if (s.player != undefined) {
+				if (s.player.chp <= s.player.hp) {			
+					Character.hpRegen(s);		
+				}
+			}
+		}, 60000);	
+		
+		setInterval(function() { // Save a character every ten minutes
+			if (s.player != undefined) {	
+				if (s.player.position != 'fighting') {			
+					Character.save(s);			
+				}
+			}
+		}, 600000);	
+	};	
+	
+	/*
+		if(s.player.logged = false) {
+			login()
+		
+	*/
+	
+	s.on('login', function (r) {	
 		var parseCmd = function(r, s, players) {
 			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {			
 				r.cmd = r.msg.replace(/_.*/, '').toLowerCase();
@@ -74,30 +95,29 @@ io.on('connection', function (s) {
 			}
 		};
 
-		if (r.msg != '' && /[`~!@#$%^&*()-+={}[]|]|[0-9]/g.test(r.msg) === false) { // not checking slashes
+		if (r.msg != '') { // not checking slashes
 			return Character.login(r, s, function (name, s, fnd) {
 				if (fnd) {
 					s.join('mud'); // mud is one of two rooms, 'creation' the other (socket.io)	
-
-					Character.load({name: name}, s, function (s, player) {
-						Character.getPassword(s);	
-
-						s.player = player;
-						players.push(s.player);
-
-						s.on('cmd', function (r) { 
-							parseCmd(r, s, players);
+					Character.load({name: name}, s, function (s) {
+						Character.getPassword(s, players, function(s) {				
+							charTick(s);
+				
+							s.on('cmd', function (r) { 
+								parseCmd(r, s, players);
+							});
 						});
 					});
 				} else {
 					s.join('creation'); // Character creation is its own room, 'mud' the other (socket.io)
 					s.player = {name:name};					
 
-					Character.newCharacter(r, s, players);		
-
-					s.on('cmd', function (r) { 
-						parseCmd(r, s, players);
-					});
+					Character.newCharacter(s, players, function(s) {
+						charTick(s);
+						s.on('cmd', function (r) { 
+							parseCmd(r, s, players);
+						});
+					});	
 				}
 			});
 		} else {
@@ -107,7 +127,7 @@ io.on('connection', function (s) {
 
 	// Quitting
 	s.on('quit', function () {
-		Character.save(s, players, function() {		
+		Character.save(s, function() {		
 			s.emit('msg', {
 				msg: 'Add a little to a little and there will be a big pile.',
 				emit: 'disconnect',
@@ -127,6 +147,7 @@ io.on('connection', function (s) {
 			for (i; i < players.length; i += 1) {
 				if (players[i].name === s.player.name) {
 					players.splice(i, 1);				
+					delete s.player;
 				}
 			}
 		}

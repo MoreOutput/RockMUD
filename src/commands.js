@@ -125,7 +125,7 @@ Cmd.prototype.who = function(r, s, players) {
 }
 
 Cmd.prototype.save = function(r, s, players) {
-	Character.save(s, players, function() {
+	Character.save(s, function() {
 		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'});
 		return Character.prompt(s);
 	});
@@ -145,12 +145,21 @@ Cmd.prototype.title = function(r, s, players) {
 }
 
 Cmd.prototype.score = function(r, s, players) { 
-	var score = s.player;
+	var score = '<div class="scorecard">' + 
+	'<div class="name">' + s.player.name + ' <div class="title">' + s.player.title + '</div>' +
+	'<ul class="stats">' + 
+		'<li>(HP)' + s.player.chp + '/' + s.player.hp +'</li>' +
+		'<li>(STR)' + s.player.str + '</li>' +
+		'<li>(WIS)' + s.player.wis + '</li>' +
+		'<li>(INT)' + s.player.int + '</li>' +
+		'<li>(DEX)' + s.player.dex + '</li>' +
+		'<li>(CON)' + s.player.con + '</li>' +
+	'</ul>'	+
+	'</div>';
 	
-	delete score.salt;
-	delete score.password;
 	
-	s.emit('msg', {msg: JSON.stringify(score, null, 4), styleClass: 'score' });
+	s.emit('msg', {msg: score, styleClass: 'score' });
+	return Character.prompt(s);
 }
 
 module.exports.cmds = new Cmd();

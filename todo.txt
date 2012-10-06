@@ -16,5 +16,14 @@ Before 0.2.5
 - Items in the room
 - Add to inventory
 
+General Notes:
+Player object is appended to the socket.io socket itself, s.player, therefore any player can be obtained with
+io.sockets.socket(s.id)
+
+Ticks should work on different intervals
+
+For now the player 'saved' attribute is also adjusted upon login
+
+Should be no notion of game state client side
  
 

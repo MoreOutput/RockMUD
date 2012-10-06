@@ -16,7 +16,7 @@ var Character = function () {
 Character.prototype.login = function(r, s, fn) {
 	var name = r.msg.replace(/_.*/,'').toLowerCase();	
 	
-	if (r.msg.length > 2) {
+	if (r.msg.length > 2 ) {
 		fs.stat('./players/' + name + '.json', function (err, stat) {
 			if (err === null) {
 				return fn(name, s, true);
@@ -26,7 +26,7 @@ Character.prototype.login = function(r, s, fn) {
 		});
 	} else {
 		s.emit('msg', {
-			msg: 'Name is too short.',
+			msg: 'Invalid name choice.',
 			res: 'login',
 			styleClass: 'error'
 		});
@@ -38,8 +38,10 @@ Character.prototype.load = function(r, s, fn) {
 		if (err) {
 			throw err;
 		}
-	
-		return fn(s, JSON.parse(r));
+		
+		s.player = JSON.parse(r);
+		
+		return fn(s);
 	});
 }
 
@@ -68,44 +70,30 @@ Character.prototype.generateSalt = function(fn) {
 	});
 };
 
-Character.prototype.requestNewPassword = function(r, s) {
-	s.emit('msg', {msg: 'Set a password (8 characters): ', res:'setPassword', styleClass: 'pw-set'});
-}
-
-Character.prototype.setPassword = function(r, s, players) {	
-	if (r.cmd.length > 7) {
-		s.player.password = r.cmd;
-		s.emit('msg', {msg : 'Your password is: ' + s.player.password});		
-		this.create(r, s, players);
-	} else {
-		s.emit('msg', {msg: 'Yes it has to be eight characters long.'});
-		return this.requestNewPassword(r, s);
-	}
-
-
-}
-
-Character.prototype.getPassword = function(s) {
-	s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
-}
-
-Character.prototype.loginPassword = function(r, s, players) {
+Character.prototype.getPassword = function(s, players, fn) {
 	var character = this;
-	
-	character.hashPassword(s.player.salt, r.cmd, 1000, function(hash) {
-		if (s.player.password === hash) {
-			character.motd(s, function() {
-				Room.getRoom(r, s, players);
-				character.prompt(s);
-			});
-		} else {
-			s.emit('msg', {msg: 'Wrong! You are flagged after 5 incorrect responses.'});
-			character.getPassword(s);
-		}
+	s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
+
+	s.on('password', function (r) { 
+		character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
+			if (s.player.password === hash) {
+				players.push(s.player);
+					
+				character.motd(s, function() {		
+					Room.getRoom(r, s, players, function() {
+						fn(s);
+						character.prompt(s);
+					});					
+				});
+			} else {
+				s.emit('msg', {msg: 'Wrong! You are flagged after 5 incorrect responses.'});
+				character.getPassword(s);
+			}
+		});
 	});
 }
 
-Character.prototype.create = function(r, s, players) { //  A New Character is saved]
+Character.prototype.create = function(r, s, players, fn) { //  A New Character is saved]
 	s.player = {
 		name: s.player.name,
 		lastname: '',
@@ -115,7 +103,7 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
 		salt: '',
 		race: s.player.race,
 		charClass: s.player.charClass,
-		saved: new Date().toString(), // time of last save
+		created: new Date().toString(), // time of creation
 		level: 1,
 		exp: 1,
 		expToLevel: 1000,
@@ -183,7 +171,7 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
 					if (err) {
 						throw err;
 					}
-			
+					
 					for (i; i < players.length; i += 1) {
 						if (players[i].sid === s.id) {
 							players.splice(i, 1);
@@ -194,7 +182,8 @@ Character.prototype.create = function(r, s, players) { //  A New Character is sa
 					s.join('mud');			
 					players.push(s.player);
 					
-					character.motd(s, function() {	
+					character.motd(s, function() {
+						fn(s);
 						Room.getRoom(r, s, players);			
 						character.prompt(s);
 					});	
@@ -240,58 +229,109 @@ Character.prototype.rollStats = function(player, fn) {
 	}		
 }
 
-Character.prototype.newCharacter = function(r, s, players, fn) {
-	var i = 0, 
+Character.prototype.hpRegen = function(s, fn) {
+	var conMod = Math.ceil(s.player.con/4);
+	Dice.roll(1, 8, function(total) {
+		if (typeof fn === 'function') {
+			fn(s.player.chp + total + conMod);
+		} else {
+			s.player.chp = s.player.chp + total + conMod;
+		}
+	});
+}
+
+Character.prototype.newCharacter = function(s, players, fn) {
+	var character = this,
+	i = 0, 
 	str = '';
 	
 	for (i; i < Races.raceList.length; i += 1) {
 		str += '<li>' + Races.raceList[i].name + '</li>';
 
 		if	(Races.raceList.length - 1 === i) {
-			return s.emit('msg', {msg: s.player.name + ' is a new character! There are three more steps until ' + s.player.name + 
+			s.emit('msg', {msg: s.player.name + ' is a new character! There are three more steps until ' + s.player.name + 
 			' is saved. The next step is to select your race: <ul>' + str + '</ul>', res: 'selectRace', styleClass: 'race-selection'});		
+	
+			s.on('raceSelection', function (r) { 
+				r.msg = r.msg.toLowerCase();
+				
+				character.raceSelection(r, function(fnd) {
+					if (fnd) {
+						i = 0;
+						str = '';
+						s.player.race = r.msg;
+	
+						for (i; i < Classes.classList.length; i += 1) {
+							str += '<li>' + Classes.classList[i].name + '</li>';
+
+							if	(Classes.classList.length - 1 === i) {
+								s.emit('msg', {
+									msg: 'Great! Now time to select a class ' + s.player.name + '. Pick on of the following: <ul>' + 
+									str + '</ul>', 
+									res: 'selectClass', 
+									styleClass: 'race-selection'
+								});
+								
+								s.on('classSelection', function(r) {
+									r.msg = r.msg.toLowerCase();
+			
+									character.classSelection(r, function(fnd) {
+										if (fnd) {
+											s.player.charClass = r.msg;
+											
+											s.emit('msg', {
+												msg: s.player.name + ' is a ' + s.player.charClass + '! There is 1 more step ' + s.player.name + 
+												' is saved. Please define a password (8 characters):', 
+												res: 'createPassword', 
+												styleClass: 'race-selection'
+											});	
+								
+											s.on('setPassword', function(r) {
+												if(r.msg > 7) {
+													s.player.password = r.msg;
+													character.create(r, s, players, fn);
+												} else {
+													s.emit('msg', {msg: 'Password should be longer', styleClass: 'error' });
+												}
+											
+											});
+											
+										} else {
+											s.emit('msg', {msg: 'That class is not on the list, please try again', styleClass: 'error' });
+										}									
+									}); 
+								});
+							}
+						}										
+					} else {
+						s.emit('msg', {msg: 'That race is not on the list, please try again', styleClass: 'error' });
+					}
+				});
+			});			
 		}
 	}	
 }
 
-Character.prototype.raceSelection = function(r, s, players) {
-	var i = 0;	
+Character.prototype.raceSelection = function(r, fn) {
+	var i = 0;
+	
 	for (i; i < Races.raceList.length; i += 1) {
-		if (r.cmd === Races.raceList[i].name.toLowerCase()) {
-			s.player.race = r.cmd;
-			return this.selectClass(r, s, players);		
+		if (r.msg === Races.raceList[i].name.toLowerCase()) {
+			return fn(true);
 		} else if (i === Races.raceList.length) {
-			this.newCharacter(r, s, players);
+			return fn(false);
 		}
 	}
 }
 
-Character.prototype.selectClass = function(r, s) {
-	var i = 0, 
-	str = '';
-	
-	for (i; i < Classes.classList.length; i += 1) {
-		str += '<li>' + Classes.classList[i].name + '</li>';
 
-		if	(Classes.classList.length - 1 === i) {
-			return s.emit('msg', {
-				msg: 'Great! Now time to select a class ' + s.player.name + '. Pick on of the following: <ul>' + 
-					str + '</ul>', 
-				res: 'selectClass', 
-				styleClass: 'race-selection'
-			});
-		}
-	}	
-}
-
-Character.prototype.classSelection = function(r, s, players) {
+Character.prototype.classSelection = function(r, fn) {
 	var i = 0;	
 	for (i; i < Classes.classList.length; i += 1) {
-		if (r.cmd === Classes.classList[i].name.toLowerCase()) {
-			s.player.charClass = r.cmd;
-			return this.requestNewPassword(r, s, players);		
+		if (r.msg === Classes.classList[i].name.toLowerCase()) {
+			return fn(true)
 		} else if (i === Classes.classList.length) {
-			this.selectClass(r, s, players);
+			return fn(false)
 		}
 	}
 }
@@ -307,7 +347,7 @@ Character.prototype.motd = function(s, fn) {
 	});
 }
 
-Character.prototype.save = function(s, players, fn) {
+Character.prototype.save = function(s, fn) {
 	s.player.saved = new Date().toString();
 	
 	fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
@@ -320,7 +360,7 @@ Character.prototype.save = function(s, players, fn) {
 }
 
 Character.prototype.prompt = function(s) {
-	return s.emit('msg', {msg: s.player.name + ', hp:' + s.player.hp +  ' room:' 
+	return s.emit('msg', {msg: s.player.name + ', hp:' + s.player.chp +  ' room:' 
 		+ s.player.vnum + '> ', styleClass: 'cprompt'});
 }
 

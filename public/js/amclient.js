@@ -35,26 +35,21 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 				display({
 					msg : msg,
 					emit : (function () {
+						var res = dojo.attr(node, 'mud-state');
 						if (dojo.attr(node, 'mud-state') === 'login') {
 							return 'login';
 						} else if (msg === 'quit' || msg === 'disconnect') {
 							return 'quit';
-						} else {
-							return 'cmd';
-						}
-					}()),
-					res: (function () {
-						var res = dojo.attr(node, 'mud-state');
-						if (res === 'selectRace') {
+						} else if (res === 'selectRace') {
 							return 'raceSelection';
 						} else if (res === 'selectClass') {
 							return 'classSelection';
 						} else if (res === 'createPassword') {
 							return 'setPassword';
 						} else if (res === 'enterPassword') {
-							return 'loginPassword';
+							return 'password';
 						} else {
-							return res;		
+							return 'cmd';
 						}
 					}()),
 					styleClass: 'cmd'
