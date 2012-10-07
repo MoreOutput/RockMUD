@@ -1,9 +1,12 @@
 /**
 Default  RockMUD styles, Rocky Bevins 2012
 */
-body {
+html, body {
 font: 100% "Courier New", "Courier", monospace;	
+height: 100%;
 background-color: #111;
+padding: 0;
+margin: 0;
 }
 
 
@@ -64,7 +67,6 @@ width: 720px;
 }
 
 #terminal {
-height: auto;
 background-color: #111;
 color: #fff;
 padding: 1%;

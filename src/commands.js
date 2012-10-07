@@ -134,7 +134,7 @@ Cmd.prototype.save = function(r, s, players) {
 Cmd.prototype.title = function(r, s, players) {
 	if (r.msg.length < 40) {
 		s.player.title = r.msg;
-		Character.save(s, players, function() {
+		Character.save(s, function() {
 			s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
 			return Character.prompt(s);
 		});
@@ -148,12 +148,14 @@ Cmd.prototype.score = function(r, s, players) {
 	var score = '<div class="scorecard">' + 
 	'<div class="name">' + s.player.name + ' <div class="title">' + s.player.title + '</div>' +
 	'<ul class="stats">' + 
-		'<li>(HP)' + s.player.chp + '/' + s.player.hp +'</li>' +
-		'<li>(STR)' + s.player.str + '</li>' +
-		'<li>(WIS)' + s.player.wis + '</li>' +
-		'<li>(INT)' + s.player.int + '</li>' +
-		'<li>(DEX)' + s.player.dex + '</li>' +
-		'<li>(CON)' + s.player.con + '</li>' +
+		'<li>HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
+		'<li>STR ' + s.player.str + '</li>' +
+		'<li>WIS ' + s.player.wis + '</li>' +
+		'<li>INT ' + s.player.int + '</li>' +
+		'<li>DEX ' + s.player.dex + '</li>' +
+		'<li>CON ' + s.player.con + '</li>' +
+		'<li>Hunger: ' + s.player.hunger + '</li>' +
+		'<li>Thirst: ' + s.player.thirst + '</li>' +
 	'</ul>'	+
 	'</div>';
 	

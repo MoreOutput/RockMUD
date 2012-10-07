@@ -17,16 +17,20 @@ Character.prototype.login = function(r, s, fn) {
 	var name = r.msg.replace(/_.*/,'').toLowerCase();	
 	
 	if (r.msg.length > 2 ) {
-		fs.stat('./players/' + name + '.json', function (err, stat) {
-			if (err === null) {
-				return fn(name, s, true);
-			} else {
-				return fn(name, s, false);
-			}
-		});
+		if  (/[`~!@#$%^&*()-+={}[]]|[0-9]/g.test(r.msg) === false) {
+			fs.stat('./players/' + name + '.json', function (err, stat) {
+				if (err === null) {
+					return fn(name, s, true);
+				} else {
+					return fn(name, s, false);
+				}
+			});
+		} else {
+			return s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
+		}
 	} else {
 		s.emit('msg', {
-			msg: 'Invalid name choice.',
+			msg: 'Invalid name choice, must be more than two characters.',
 			res: 'login',
 			styleClass: 'error'
 		});
@@ -327,6 +331,7 @@ Character.prototype.raceSelection = function(r, fn) {
 
 Character.prototype.classSelection = function(r, fn) {
 	var i = 0;	
+	
 	for (i; i < Classes.classList.length; i += 1) {
 		if (r.msg === Classes.classList[i].name.toLowerCase()) {
 			return fn(true)
@@ -354,19 +359,21 @@ Character.prototype.save = function(s, fn) {
 		if (err) {
 			return s.emit('msg', {msg: 'Error saving character.'});
 		} else {
-			return fn();
+			if (typeof fn === 'function') {
+				return fn();
+			}	
 		}
 	});
 }
 
 Character.prototype.hunger = function(s) {
-	if (s.player.hunger > 0) {
+	if (s.player.hunger < 10) {
 		Dice.roll(1, 4, function(total) {
 			if (total > 2) { // Roll to reduce hunger pangs, CON?
-				s.player.hunger = s.player.hunger - 1;
+				s.player.hunger = s.player.hunger + 1;
 			}			
 						
-			if (s.player.hunger < 5) {		
+			if (s.player.hunger >= 5) {		
 				s.emit('msg', {msg: 'You are hungry.', styleClass: 'hunger'});
 			}
 		});
@@ -376,7 +383,19 @@ Character.prototype.hunger = function(s) {
 }
 
 Character.prototype.thirst = function(s) {
-
+	if (s.player.thirst < 10) {
+		Dice.roll(1, 4, function(total) {
+			if (total > 2) { // Roll to reduce hunger pangs, CON?
+				s.player.thirst = s.player.thirst + 1;
+			}			
+						
+			if (s.player.thirst >= 5) {		
+				s.emit('msg', {msg: 'You are hungry.', styleClass: 'hunger'});
+			}
+		});
+	} else {
+		s.emit('msg', {msg: 'You are starving!', styleClass: 'hunger'});
+	}
 }
 
 Character.prototype.prompt = function(s) {

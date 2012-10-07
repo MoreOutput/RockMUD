@@ -57,6 +57,8 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 					
 				node.value = '';
 				node.focus();
+				
+				window.scrollTo(0, document.body.scrollHeight);
 			});
 		});
 	});

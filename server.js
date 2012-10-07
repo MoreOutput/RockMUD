@@ -49,18 +49,17 @@ io = require('socket.io').listen(server);
 
 server.listen(cfg.port);
 
-
 io.on('connection', function (s) {
 	// Preparing ticks that affect players by socket
 	var charTick = function(s) { // Adding something to the player after a set time, regen
 		setInterval(function() {
-			if (s.player.name != undefined) {
+			if (s.player != undefined) {
 				if (s.player.chp <= s.player.hp) {			
 					Character.hpRegen(s);
 				}
 				
 				Character.hunger(s);
-				Characyer.thirst(s);
+				Character.thirst(s);
 				
 			}
 		}, 60000);	
@@ -74,12 +73,6 @@ io.on('connection', function (s) {
 		}, 600000);	
 	};	
 	
-	/*
-		if(s.player.logged = false) {
-			login()
-		
-	*/
-	
 	s.on('login', function (r) {	
 		var parseCmd = function(r, s, players) {
 			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {			
@@ -87,10 +80,15 @@ io.on('connection', function (s) {
 				r.msg = r.msg.replace(/^.*?_/, '').replace(/_/g, ' ');
 				r.emit = 'msg';
 
-				if (r.res in Character) {
-					return Character[r.res](r, s, players);
-				} else if (r.cmd in Cmds) {
-					return Cmds[r.cmd](r, s, players);
+				if (r.cmd != '') {
+					if (r.res in Character) {
+						return Character[r.res](r, s, players);
+					} else if (r.cmd in Cmds) {
+						return Cmds[r.cmd](r, s, players);
+					} else {
+						s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
+						return Character.prompt(s);
+					}
 				} else {
 					return Character.prompt(s);
 				}
@@ -115,17 +113,18 @@ io.on('connection', function (s) {
 				} else {
 					s.join('creation'); // Character creation is its own room, 'mud' the other (socket.io)
 					s.player = {name:name};					
-
+					
 					Character.newCharacter(s, players, function(s) {
 						charTick(s);
+
 						s.on('cmd', function (r) { 
 							parseCmd(r, s, players);
 						});
-					});	
+					});
 				}
 			});
 		} else {
-			return s.emit('msg', {msg: 'Enter a valid response.'});	
+			return s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 		}
     });
 
