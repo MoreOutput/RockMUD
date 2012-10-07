@@ -8,10 +8,12 @@
 var sys = require('util'), 
 http = require('http'),
 fs = require('fs'),
-Character = require('./src/character').character,
-Cmds = require('./src/commands').cmds,
+Character = require('./src/character').character, // Player cannot ever call
+Cmds = require('./src/commands').cmd, // Player can call based on role
+Skills = require('./src/skills').skill, // Player can call based on role, class, etc
 cfg = require('./config').server,
-players = [],
+players = [], // currently holds all players, will hold some basic info and socket id
+areas = [], // currently cached areas
 server  = http.createServer(function (req, res) {
 	if (req.url === '/' || req.url === '/index.html') {
 		fs.readFile('./index.html', function (err, data) {
@@ -64,7 +66,8 @@ io.on('connection', function (s) {
 			}
 		}, 60000);	
 		
-		setInterval(function() { // Save a character every ten minutes
+		// Save each character every 10 minutes
+		setInterval(function() {
 			if (s.player != undefined) {	
 				if (s.player.position != 'fighting') {			
 					Character.save(s);			
@@ -81,10 +84,10 @@ io.on('connection', function (s) {
 				r.emit = 'msg';
 
 				if (r.cmd != '') {
-					if (r.res in Character) {
-						return Character[r.res](r, s, players);
-					} else if (r.cmd in Cmds) {
+					if (r.cmd in Cmds) {
 						return Cmds[r.cmd](r, s, players);
+					} else if(r.cmd in Skills) {
+						return Skills[r.cmd](r, s, players);
 					} else {
 						s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
 						return Character.prompt(s);

@@ -369,32 +369,46 @@ Character.prototype.save = function(s, fn) {
 Character.prototype.hunger = function(s) {
 	if (s.player.hunger < 10) {
 		Dice.roll(1, 4, function(total) {
-			if (total > 2) { // Roll to reduce hunger pangs, CON?
+			if (total + s.player.con/4 < 5) { // Roll to reduce hunger pangs, CON?
 				s.player.hunger = s.player.hunger + 1;
 			}			
 						
-			if (s.player.hunger >= 5) {		
+			if (s.player.hunger >= 5) {	
+				if (total < 3) {
+					s.player.chp = s.player.chp - 1;
+				}
+			
 				s.emit('msg', {msg: 'You are hungry.', styleClass: 'hunger'});
+
+				return Character.prompt(s);
 			}
 		});
 	} else {
-		s.emit('msg', {msg: 'You are starving!', styleClass: 'hunger'});
+		s.emit('msg', {msg: 'You are dying of hunger.', styleClass: 'hunger'});
+		return Character.prompt(s);
 	}
 }
 
 Character.prototype.thirst = function(s) {
 	if (s.player.thirst < 10) {
 		Dice.roll(1, 4, function(total) {
-			if (total > 2) { // Roll to reduce hunger pangs, CON?
+			if (total + s.player.con/4 < 5) { // Roll to reduce hunger pangs, CON?
 				s.player.thirst = s.player.thirst + 1;
 			}			
 						
 			if (s.player.thirst >= 5) {		
-				s.emit('msg', {msg: 'You are hungry.', styleClass: 'hunger'});
+
+				if (total < 3) {
+					s.player.chp = s.player.chp - 1;
+				}
+			
+				s.emit('msg', {msg: 'You are Thirsty.', styleClass: 'hunger'});
+
+				return Character.prompt(s);
 			}
 		});
 	} else {
-		s.emit('msg', {msg: 'You are starving!', styleClass: 'hunger'});
+		s.emit('msg', {msg: 'You need to find somethig to drink.', styleClass: 'hunger'});
 	}
 }
 

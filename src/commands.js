@@ -144,9 +144,13 @@ Cmd.prototype.title = function(r, s, players) {
 	}
 }
 
+// View equipment
+Cmd.prototype.eq = function() {
+
+}
+
 Cmd.prototype.score = function(r, s, players) { 
-	var score = '<div class="scorecard">' + 
-	'<div class="name">' + s.player.name + ' <div class="title">' + s.player.title + '</div>' +
+	var score = '<div class="name">' + s.player.name + ' <div class="title">' + s.player.title + '</div></div>' +
 	'<ul class="stats">' + 
 		'<li>HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
 		'<li>STR ' + s.player.str + '</li>' +
@@ -156,12 +160,10 @@ Cmd.prototype.score = function(r, s, players) {
 		'<li>CON ' + s.player.con + '</li>' +
 		'<li>Hunger: ' + s.player.hunger + '</li>' +
 		'<li>Thirst: ' + s.player.thirst + '</li>' +
-	'</ul>'	+
-	'</div>';
-	
+	'</ul>';
 	
 	s.emit('msg', {msg: score, styleClass: 'score' });
 	return Character.prompt(s);
 }
 
-module.exports.cmds = new Cmd();
+module.exports.cmd = new Cmd();

@@ -6,12 +6,21 @@ var Race = function() {
 		},
 		{
 			name:'Elf',
-			dex: 1
+			int: 2,
+			con: -1
 		},
         {
 			name:'Dwarf',
 			con: 2,
-			int: -1
+			int: -1,
+			hp: 5
+		},
+		{
+			name:'Ogre',
+			str: 3,
+			int: -2,
+			dex: -1,
+			hp: 10
 		}
 	];
 }
