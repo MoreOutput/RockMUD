@@ -27,7 +27,7 @@
                     "vnum" : 0
                 }
 			], 
-			"objects" : [],
+			"objects" : [{"short": "A loaf of bread", "long": "A rather stale looking load of bread is here" , "vnum": 5, "type": "food", "hunger": -5}],
 			"flags" : []
 		}
 	]

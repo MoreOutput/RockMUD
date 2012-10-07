@@ -80,9 +80,8 @@ io.on('connection', function (s) {
 		var parseCmd = function(r, s, players) {
 			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {			
 				r.cmd = r.msg.replace(/_.*/, '').toLowerCase();
-				r.msg = r.msg.replace(/^.*?_/, '').replace(/_/g, ' ');
-				r.emit = 'msg';
-
+				r.msg = r.msg.replace(/^.*?_/, '').replace(/_/g, ' ');				
+				
 				if (r.cmd != '') {
 					if (r.cmd in Cmds) {
 						return Cmds[r.cmd](r, s, players);

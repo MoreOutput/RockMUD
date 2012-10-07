@@ -115,15 +115,16 @@ Character.prototype.create = function(r, s, players, fn) { //  A New Character i
 		alignment: '',
 		chp: 100, // current hp
 		hp: 100, // total hp
-		mana: 100,
-		mv: 100, // stats after this
 		str: 12,
 		wis: 12,
 		int: 12,
 		dex: 12,
 		con: 12,
+		ac: 10,
 		hunger: 0,
 		thirst: 0,
+		carry: 10,
+		load: 0,
 		area: 'hillcrest',
 		vnum: 1, // current room
 		recall: 1, // vnum to recall to
@@ -225,7 +226,8 @@ Character.prototype.rollStats = function(player, fn) {
 					}
 				}
 
-				if (j === Classes.classList.length - 1) {					
+				if (j === Classes.classList.length - 1) {
+					player.carry = player.str * 10;
 					return fn(player);
 				}
 			}

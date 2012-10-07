@@ -59,15 +59,6 @@ Cmd.prototype.flame = function(r, s) {
 
 };
 
-Cmd.prototype.kill = function(r, s, players) {
-	r.msg = 'You slash a wolf with <div class="hit">***UNRELENTING***</div> force.';
-    r.styleClass = 'cbt';
-	
-	s.emit('msg', r);
-
-	return Character.prompt(s);
-};
-
 Cmd.prototype.where = function(r, s) {
 	r.msg = '<ul>' + 
 	'<li>Your Name: ' + Character[s.id].name + '</li>' +
@@ -134,32 +125,64 @@ Cmd.prototype.save = function(r, s, players) {
 Cmd.prototype.title = function(r, s, players) {
 	if (r.msg.length < 40) {
 		s.player.title = r.msg;
+		
 		Character.save(s, function() {
 			s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
 			return Character.prompt(s);
 		});
 	} else {
-		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'});
+		s.emit('msg', {msg: 'Not a valid title.', styleClass: 'save'});
 		return Character.prompt(s);
 	}
 }
 
 // View equipment
-Cmd.prototype.eq = function() {
+Cmd.prototype.eq = function(r, s) {
+	var eq = '',
+	i = 0;
+	
+	s.emit('msg', {msg: eq, styleClass: 'eq' });
+	return Character.prompt(s);
+}
 
+// Current skills
+Cmd.prototype.skills = function(r, s) {
+	var skills = '',
+	i = 0;
+	
+	s.emit('msg', {msg: 'skills', styleClass: 'eq' });
+	return Character.prompt(s);
+}
+
+Cmd.prototype.get = function(r, s) {
+	if (r.msg != '') {
+		Rooms.getItem(r.msg, s.player.vnum, function(item) {
+			s.emit('msg', {
+				msg: 'You picked up ' + item.short,
+				styleClass: 'get'
+			});			
+		})
+	} else {
+		s.emit('msg', {msg: 'Get what?', styleClass: 'error'});
+		return Character.prompt(s);
+	}
 }
 
 Cmd.prototype.score = function(r, s, players) { 
 	var score = '<div class="name">' + s.player.name + ' <div class="title">' + s.player.title + '</div></div>' +
 	'<ul class="stats">' + 
 		'<li>HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
-		'<li>STR ' + s.player.str + '</li>' +
-		'<li>WIS ' + s.player.wis + '</li>' +
-		'<li>INT ' + s.player.int + '</li>' +
-		'<li>DEX ' + s.player.dex + '</li>' +
-		'<li>CON ' + s.player.con + '</li>' +
+		'<li>You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
+		'<li>STR: ' + s.player.str + '</li>' +
+		'<li>WIS: ' + s.player.wis + '</li>' +
+		'<li>INT: ' + s.player.int + '</li>' +
+		'<li>DEX: ' + s.player.dex + '</li>' +
+		'<li>CON: ' + s.player.con + '</li>' +
+		'<li>Armor: ' + s.player.ac + '</li>' +
+		'<li>XP:' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
 		'<li>Hunger: ' + s.player.hunger + '</li>' +
 		'<li>Thirst: ' + s.player.thirst + '</li>' +
+		'<li>Carrying ' + s.player.load + '/' + s.player.carry + ' LBs</li>' +
 	'</ul>';
 	
 	s.emit('msg', {msg: score, styleClass: 'score' });
