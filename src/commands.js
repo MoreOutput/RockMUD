@@ -1,5 +1,4 @@
-var dice = require('./dice'),
-Character = require('./character').character,
+var Character = require('./character').character,
 Room = require('./rooms').room;
 
 var Cmd = function () {
@@ -10,7 +9,15 @@ var Cmd = function () {
 * Channels
 */
 Cmd.prototype.say = function(r, s, players) {
-
+	var i  = 0;
+	
+	for (i; i < players.length; i += 1) {
+		if (players[i].name === r.msg && r.msg != s.player.name) {
+			
+		} else {
+			
+		}
+	}
 };
 
 Cmd.prototype.look = function(r, s, players) {
@@ -168,6 +175,15 @@ Cmd.prototype.get = function(r, s) {
 	}
 }
 
+Cmd.prototype.wear = function(r, s) {
+	if (r.msg != '') {
+
+	} else {
+		s.emit('msg', {msg: 'Wear what?', styleClass: 'error'});
+		return Character.prompt(s);
+	}
+}
+
 Cmd.prototype.score = function(r, s, players) { 
 	var score = '<div class="name">' + s.player.name + ' <div class="title">' + s.player.title + '</div></div>' +
 	'<ul class="stats">' + 
@@ -179,7 +195,8 @@ Cmd.prototype.score = function(r, s, players) {
 		'<li>DEX: ' + s.player.dex + '</li>' +
 		'<li>CON: ' + s.player.con + '</li>' +
 		'<li>Armor: ' + s.player.ac + '</li>' +
-		'<li>XP:' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
+		'<li>XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
+		'<li>Gold: ' + s.player.gold + '</li>' +
 		'<li>Hunger: ' + s.player.hunger + '</li>' +
 		'<li>Thirst: ' + s.player.thirst + '</li>' +
 		'<li>Carrying ' + s.player.load + '/' + s.player.carry + ' LBs</li>' +

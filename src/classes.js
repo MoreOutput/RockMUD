@@ -1,7 +1,6 @@
 /*
 Outline of game classes class skills are called via their respective files.
 See: fighter.js, cleric.js
-
 */
 var Classes = function() {
 	this.classList = [
@@ -11,8 +10,7 @@ var Classes = function() {
 			playable: true,
 			mv: 10,
 			dex: 2
-		},
-		{
+		}, {
 			name:'Fighter', 
 			minLevel: 0, 
 			playable: true,
@@ -21,16 +19,14 @@ var Classes = function() {
 			int: -1, 
 			wis: -1, 
 			con: 1
-		},
-		{
+		}, {
 			name:'Ranger', 
 			minLevel: 0,
 			playable: true,
 			mv: 10,
 			str: 1, 
 			dex: 1
-		},
-		{
+		}, {
 			name:'Cleric', 
 			minLevel: 0,
 			playable: true,
@@ -39,8 +35,7 @@ var Classes = function() {
 			wis: 2, 
 			con: 1,
 			str: -1
-		},
-		{
+		}, {
 			name:'Wizard', 
 			minLevel: 0,
 			playable: true,

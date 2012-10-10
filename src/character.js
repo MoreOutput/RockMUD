@@ -1,6 +1,7 @@
 /*
-* Characters.js controls everything dealing with a character.json file, no in game commands are
-* defined here. Commands.js does share some of these method names, as they -- are --  commands. See: save().
+Characters.js controls everything dealing with a character.json file, no in game commands are
+defined here. Commands.js does share some of these method names, as they -- are --  commands 
+and therefore defined in commands.js. See: save().
 */
 var fs = require('fs'),
 crypto = require('crypto'),
@@ -59,8 +60,7 @@ Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 			hash = crypto.createHmac('sha256', salt).update(hash).digest('hex');
 		} 
 			
-		fn(hash);
-	
+		fn(hash);	
 	}
 };
 
@@ -120,11 +120,14 @@ Character.prototype.create = function(r, s, players, fn) { //  A New Character i
 		int: 12,
 		dex: 12,
 		con: 12,
+		memory: 3,
 		ac: 10,
+		gold: 5,
 		hunger: 0,
 		thirst: 0,
 		carry: 10,
 		load: 0,
+		visible: true,
 		area: 'hillcrest',
 		vnum: 1, // current room
 		recall: 1, // vnum to recall to
@@ -132,8 +135,8 @@ Character.prototype.create = function(r, s, players, fn) { //  A New Character i
 		eq: {
 			head: '',
 			chest: '',
-			wield1: '',
-			wield2: '',
+			rightHand: '',
+			leftHand: '',
 			arms: '',
 			hands: '',
 			legs: '',
@@ -207,10 +210,10 @@ Character.prototype.rollStats = function(player, fn) {
 
 	for (i; i < Races.raceList.length; i += 1) {		// looking for race
 		if (Races.raceList[i].name.toLowerCase() === player.race) {	 // found race
-			delete Races.raceList[i].name;			
+		
 			for (var raceKey in player) {
-				if (player[raceKey] in Races.raceList[i]) { // found, add in stat bonus						
-					player[player[raceKey]] = player[player[raceKey]] + Races.raceList[i][player[raceKey]];	
+				if (player[raceKey] in Races.raceList[i] && raceKey != 'name') { // found, add in stat bonus						
+						player[player[raceKey]] = player[player[raceKey]] + Races.raceList[i][player[raceKey]];	
 				}
 			}
 		}		
@@ -218,11 +221,10 @@ Character.prototype.rollStats = function(player, fn) {
 		if (i === Races.raceList.length - 1) { // rolling stats is finished
 			for (j; j < Classes.classList.length; j += 1) { // looking through classes
 				if (Classes.classList[j].name.toLowerCase() === player.charClass) { // class match found
-					delete Classes.classList[j].name; 
-
 					for(classKey in player) {
-						if(classKey in Classes.classList[j])
+						if (classKey in Classes.classList[j] && classKey != 'name') {
 							player[classKey] = Classes.classList[j][classKey] + player[classKey];
+						}
 					}
 				}
 
@@ -246,7 +248,7 @@ Character.prototype.hpRegen = function(s, fn) {
 	});
 }
 
-Character.prototype.newCharacter = function(s, players, fn) {
+Character.prototype.newCharacter = function(s, players, fn) { // TODO: break this into smaller bits? Sort of like the deep nest here...
 	var character = this,
 	i = 0, 
 	str = '';
@@ -260,7 +262,7 @@ Character.prototype.newCharacter = function(s, players, fn) {
 	
 			s.on('raceSelection', function (r) { 
 				r.msg = r.msg.toLowerCase();
-				
+			
 				character.raceSelection(r, function(fnd) {
 					if (fnd) {
 						i = 0;
@@ -293,15 +295,13 @@ Character.prototype.newCharacter = function(s, players, fn) {
 											});	
 								
 											s.on('setPassword', function(r) {
-												if(r.msg > 7) {
+												if (r.msg.length > 7) {
 													s.player.password = r.msg;
 													character.create(r, s, players, fn);
 												} else {
 													s.emit('msg', {msg: 'Password should be longer', styleClass: 'error' });
-												}
-											
-											});
-											
+												}											
+											});											
 										} else {
 											s.emit('msg', {msg: 'That class is not on the list, please try again', styleClass: 'error' });
 										}									
@@ -324,12 +324,11 @@ Character.prototype.raceSelection = function(r, fn) {
 	for (i; i < Races.raceList.length; i += 1) {
 		if (r.msg === Races.raceList[i].name.toLowerCase()) {
 			return fn(true);
-		} else if (i === Races.raceList.length) {
+		} else if (i === Races.raceList.length - 1) {
 			return fn(false);
 		}
 	}
 }
-
 
 Character.prototype.classSelection = function(r, fn) {
 	var i = 0;	
@@ -337,7 +336,7 @@ Character.prototype.classSelection = function(r, fn) {
 	for (i; i < Classes.classList.length; i += 1) {
 		if (r.msg === Classes.classList[i].name.toLowerCase()) {
 			return fn(true)
-		} else if (i === Classes.classList.length) {
+		} else if (i === Classes.classList.length - 1) {
 			return fn(false)
 		}
 	}
@@ -355,17 +354,19 @@ Character.prototype.motd = function(s, fn) {
 }
 
 Character.prototype.save = function(s, fn) {
-	s.player.saved = new Date().toString();
+	if (s.player != undefined) {
+		s.player.saved = new Date().toString();
 	
-	fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
-		if (err) {
-			return s.emit('msg', {msg: 'Error saving character.'});
-		} else {
-			if (typeof fn === 'function') {
-				return fn();
-			}	
-		}
-	});
+		fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
+			if (err) {
+				return s.emit('msg', {msg: 'Error saving character.'});
+			} else {
+				if (typeof fn === 'function') {
+					return fn();
+				}	
+			}
+		});
+	};
 }
 
 Character.prototype.hunger = function(s) {
@@ -402,8 +403,7 @@ Character.prototype.thirst = function(s) {
 				s.player.thirst = s.player.thirst + 1;
 			}			
 						
-			if (s.player.thirst >= 5) {		
-
+			if (s.player.thirst >= 5) {
 				if (total < 3) {
 					s.player.chp = s.player.chp - 1;
 				}
