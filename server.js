@@ -1,9 +1,7 @@
 /*
  * RockMUD, NodeJS HTTP Mud Engine
  * Rocky Bevins, 2012 (rockybevins@gmail.com)
- *
  * We want to be able to build Diku style MUDs with only JS (areas will be JSON). 
- *
 */
 var sys = require('util'), 
 http = require('http'),
@@ -52,19 +50,19 @@ io = require('socket.io').listen(server);
 server.listen(cfg.port);
 
 io.on('connection', function (s) {
-	// Preparing ticks that affect players by socket
-	var charTick = function(s) { // Adding something to the player after a set time, regen
-		setInterval(function() {
+	var charTick = function(s) { 
+		// Adding something to the player after a set time, regen
+		setInterval(function() { 
+			console.log(s.player);
 			if (s.player != undefined) {
-				if (s.player.chp <= s.player.hp) {			
+				if (s.player.chp < s.player.hp) {			
 					Character.hpRegen(s);
 				}
 				
 				Character.hunger(s);
-				Character.thirst(s);
-				
+				Character.thirst(s);				
 			}
-		}, 60000);	
+		}, 1000);	
 		
 		// Save each character every 10 minutes
 		setInterval(function() {
@@ -103,10 +101,9 @@ io.on('connection', function (s) {
 			return Character.login(r, s, function (name, s, fnd) {
 				if (fnd) {
 					s.join('mud'); // mud is one of two rooms, 'creation' the other (socket.io)	
-					Character.load({name: name}, s, function (s) {
-						Character.getPassword(s, players, function(s) {				
-							charTick(s);
-				
+					
+					Character.load(name, s, function (s) {
+						Character.getPassword(s, players, function(s) {								
 							s.on('cmd', function (r) { 
 								parseCmd(r, s, players);
 							});
@@ -116,9 +113,7 @@ io.on('connection', function (s) {
 					s.join('creation'); // Character creation is its own room, 'mud' the other (socket.io)
 					s.player = {name:name};					
 					
-					Character.newCharacter(s, players, function(s) {
-						charTick(s);
-
+					Character.newCharacter(s, players, function(s) {			
 						s.on('cmd', function (r) { 
 							parseCmd(r, s, players);
 						});
@@ -151,8 +146,7 @@ io.on('connection', function (s) {
 		if (s.player != undefined) {
 			for (i; i < players.length; i += 1) {
 				if (players[i].name === s.player.name) {
-					players.splice(i, 1);				
-					delete s.player;
+					players.splice(i, 1);	
 				}
 			}
 		}

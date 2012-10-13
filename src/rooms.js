@@ -76,12 +76,27 @@ Room.prototype.getRoom = function(r, s, players, fn) {
 				} else {			
 					displayRoom(area.rooms[i], exits, playersInRoom);
 				}
-
 			} else {
 				s.emit('msg', {msg: 'Room load failed.'});
 			}
 		}	
 	});
+}
+
+Room.prototype.playersInRoom = function(room, fn) {
+	return fn(players);
+}
+
+Room.prototype.objectsInRoom = function(room, fn) {
+	var i = 0;
+	
+	if (room.objects.length === 0) {
+		return fn(players);
+	}
+}
+
+Room.prototype.monstersInRoom = function(room, fn) {
+	return fn(players);
 }
 
 Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit must match both the room and a command)
@@ -121,7 +136,7 @@ Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit mus
 	});
 }
 
-Room.prototype.north = function(r, s, players, fn) {
+Room.prototype.move = function(r, s, players, fn) {
 	if(this.checkExit(player)) {
 		Room.load(r, s, player, players, fn);
 		s.emit('msg', {msg: 'You walk north.'});

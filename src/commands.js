@@ -5,12 +5,9 @@ var Cmd = function () {
 	this.perms = ['admin'];
 };
 
-/*
-* Channels
-*/
 Cmd.prototype.say = function(r, s, players) {
 	var i  = 0;
-	
+
 	for (i; i < players.length; i += 1) {
 		if (players[i].name === r.msg && r.msg != s.player.name) {
 			
@@ -99,8 +96,7 @@ Cmd.prototype.who = function(r, s, players) {
 						}
 					
 					}()) +
-					' (' + players[i].role + ')'
-					
+					' (' + players[i].role + ')' +					
 					'</li>';					
 					
 					if (i === players.length - 1) {
@@ -108,7 +104,6 @@ Cmd.prototype.who = function(r, s, players) {
 						str +
 						'</ul>'; 
 					}
-					
 				}
 			} else {
 				str = '<li>No one is online.</li>';
@@ -145,7 +140,11 @@ Cmd.prototype.title = function(r, s, players) {
 
 // View equipment
 Cmd.prototype.eq = function(r, s) {
-	var eq = '',
+	var eq = '<div class="name">You are wearing the following:</div>' +
+	'<ul class="stats">' + 
+		'<li>Right Hand: </li>' +
+		'<li>Left Hand: </li>' +
+	'</ul>',
 	i = 0;
 	
 	s.emit('msg', {msg: eq, styleClass: 'eq' });
@@ -163,12 +162,12 @@ Cmd.prototype.skills = function(r, s) {
 
 Cmd.prototype.get = function(r, s) {
 	if (r.msg != '') {
-		Rooms.getItem(r.msg, s.player.vnum, function(item) {
-			s.emit('msg', {
+		Room.isItemInRoom(r.msg, s.player.vnum, function(item) {
+			return s.emit('msg', {
 				msg: 'You picked up ' + item.short,
 				styleClass: 'get'
 			});			
-		})
+		});
 	} else {
 		s.emit('msg', {msg: 'Get what?', styleClass: 'error'});
 		return Character.prompt(s);
@@ -185,10 +184,12 @@ Cmd.prototype.wear = function(r, s) {
 }
 
 Cmd.prototype.score = function(r, s, players) { 
-	var score = '<div class="name">' + s.player.name + ' <div class="title">' + s.player.title + '</div></div>' +
+	var score = '<div class="name">' + s.player.name + 
+	' <div class="title">' + s.player.title + '</div></div>' +
 	'<ul class="stats">' + 
 		'<li>HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
-		'<li>You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
+		'<li>You are a level '+ s.player.level + ' ' + s.player.race + 
+		' ' + s.player.charClass + '</li>' +
 		'<li>STR: ' + s.player.str + '</li>' +
 		'<li>WIS: ' + s.player.wis + '</li>' +
 		'<li>INT: ' + s.player.int + '</li>' +

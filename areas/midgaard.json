@@ -1,0 +1,60 @@
+{
+	"name" : "Midgaard",
+	"id" : 1,
+	"type" : "city",
+	"levels" : "All",
+	"description" : "The first city.",
+	"rooms" : [
+		{
+			"vnum" : 1,
+			"title" : "Town Square",
+			"content" : "Welcome to the first room.",
+			"exits" : [
+				{
+					"cmd" : "north",
+					"vnum" : 0
+				},
+                {
+					"cmd" : "east",
+					"vnum" : 0
+                },
+                {
+					"cmd" : "south",
+					"vnum" : 0
+                },
+                {
+					"cmd" : "west",
+                    "vnum" : 0
+                }
+			], 
+			"monsters" : [
+				{
+					"name": "A boar",
+					"short": "A large boar",
+					"long": "",
+					"vnum": 6,
+					"type": "monster",
+					"limit": 1,
+					"ac": 6
+				}, {
+					"name": "A lizard",
+					"short": "A mean lizard",
+					"long": "" ,
+					"vnum": 7,
+					"type": "monster",
+					"limit": 1,
+					"ac": 6
+				}
+			],
+			"objects" : [{
+				"name": "Loaf of bread",
+				"short": "A loaf of bread",
+				"long": "A rather stale looking load of bread is here" ,
+				"vnum": 5,
+				"type": "food",
+				"hunger": -5
+			}],
+			"flags" : []
+		}
+	]
+}

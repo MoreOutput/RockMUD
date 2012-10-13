@@ -38,8 +38,8 @@ Character.prototype.login = function(r, s, fn) {
 	}
 }
 
-Character.prototype.load = function(r, s, fn) {
-	fs.readFile('./players/'  + r.name + '.json', function (err, r) {
+Character.prototype.load = function(name, s, fn) {
+	fs.readFile('./players/'  + name + '.json', function (err, r) {
 		if (err) {
 			throw err;
 		}
@@ -55,13 +55,11 @@ Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 	iterations = iterations, 
 	i = 0;
 		
-	if (password.length > 7) {
-		for (i; i < iterations; i += 1) {
-			hash = crypto.createHmac('sha256', salt).update(hash).digest('hex');
-		} 
+	for (i; i < iterations; i += 1) {
+		hash = crypto.createHmac('sha256', salt).update(hash).digest('hex');
+	} 
 			
-		fn(hash);	
-	}
+	fn(hash);	
 };
 
 Character.prototype.generateSalt = function(fn) {
@@ -78,23 +76,33 @@ Character.prototype.getPassword = function(s, players, fn) {
 	var character = this;
 	s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
 
-	s.on('password', function (r) { 
-		character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
-			if (s.player.password === hash) {
-				players.push(s.player);
-					
-				character.motd(s, function() {		
-					Room.getRoom(r, s, players, function() {
-						fn(s);
-						character.prompt(s);
-					});					
-				});
-			} else {
-				s.emit('msg', {msg: 'Wrong! You are flagged after 5 incorrect responses.'});
-				character.getPassword(s);
-			}
-		});
+	s.on('password', function (r) {
+		if (r.msg.length <= 8) {
+			character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
+				if (s.player.password === hash) {
+					players.push(s.player);
+						
+					character.motd(s, function() {		
+						Room.getRoom(r, s, players, function() {
+							fn(s);
+							return character.prompt(s);
+						});					
+					});
+				} else {
+					s.emit('msg', {msg: 'Wrong! You are flagged after 5 incorrect responses.', res: 'enterPassword'});
+					return s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
+				}
+			});
+		} else {
+			s.emit('msg', {msg: 'Password had to be over eight characters.', res: 'enterPassword'});
+			return s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
+		}
 	});
+}
+
+Character.prototype.updateBySocket = function(id, fn) {
+	// get socket
+	fn(player);
 }
 
 Character.prototype.create = function(r, s, players, fn) { //  A New Character is saved]
@@ -128,7 +136,7 @@ Character.prototype.create = function(r, s, players, fn) { //  A New Character i
 		carry: 10,
 		load: 0,
 		visible: true,
-		area: 'hillcrest',
+		area: 'midgaard',
 		vnum: 1, // current room
 		recall: 1, // vnum to recall to
 		description: 'A brand new citizen.',
@@ -149,7 +157,7 @@ Character.prototype.create = function(r, s, players, fn) { //  A New Character i
 		}, 
 		inventory: [
 			{
-			item: 'Short Sword', 
+			name: 'Short Sword', 
 			vnum: 1, 
 			itemType: 'weapon',
 			material: 'iron', 
@@ -205,13 +213,12 @@ Character.prototype.create = function(r, s, players, fn) { //  A New Character i
 Character.prototype.rollStats = function(player, fn) { 
 	var i = 0,
 	j = 0,
-	racreKey, // property of the race defines in raceList
+	raceKey, // property of the race defines in raceList
 	classKey; // property of the class defines in classList
 
 	for (i; i < Races.raceList.length; i += 1) {		// looking for race
-		if (Races.raceList[i].name.toLowerCase() === player.race) {	 // found race
-		
-			for (var raceKey in player) {
+		if (Races.raceList[i].name.toLowerCase() === player.race) {	 // found race		
+			for (raceKey in player) {
 				if (player[raceKey] in Races.raceList[i] && raceKey != 'name') { // found, add in stat bonus						
 						player[player[raceKey]] = player[player[raceKey]] + Races.raceList[i][player[raceKey]];	
 				}
@@ -235,17 +242,6 @@ Character.prototype.rollStats = function(player, fn) {
 			}
 		}
 	}		
-}
-
-Character.prototype.hpRegen = function(s, fn) {
-	var conMod = Math.ceil(s.player.con/4);
-	Dice.roll(1, 8, function(total) {
-		if (typeof fn === 'function') {
-			fn(s.player.chp + total + conMod);
-		} else {
-			s.player.chp = s.player.chp + total + conMod;
-		}
-	});
 }
 
 Character.prototype.newCharacter = function(s, players, fn) { // TODO: break this into smaller bits? Sort of like the deep nest here...
@@ -369,17 +365,33 @@ Character.prototype.save = function(s, fn) {
 	};
 }
 
+Character.prototype.hpRegen = function(s, fn) {
+	var conMod = Math.ceil(s.player.con/4);
+	Dice.roll(1, 8, function(total) {
+		if (typeof fn === 'function') {
+			fn(s.player.chp + total + conMod);
+		} else {
+			s.player.chp = s.player.chp + total + conMod;
+			
+			if (s.player.chp > s.player.hp) {
+				return s.player.chp = s.player.hp;
+			} 
+		}
+	});
+}
+
 Character.prototype.hunger = function(s) {
-	var character = this;
+	var character = this,
+	conMod = Math.ceil(s.player.con/4);
 	
 	if (s.player.hunger < 10) {
 		Dice.roll(1, 4, function(total) {
-			if (total + s.player.con/4 < 5) { // Roll to reduce hunger pangs, CON?
+			if (total + conMod < 5) { // Roll to reduce hunger pangs, CON?
 				s.player.hunger = s.player.hunger + 1;
 			}			
 						
 			if (s.player.hunger >= 5) {	
-				if (total < 3) {
+				if (total < 4) {
 					s.player.chp = s.player.chp - 1;
 				}
 			
@@ -389,24 +401,26 @@ Character.prototype.hunger = function(s) {
 			}
 		});
 	} else {
+		s.player.chp = (s.player.chp - 10 + conMod);
 		s.emit('msg', {msg: 'You are dying of hunger.', styleClass: 'hunger'});
 		return character.prompt(s);
 	}
 }
 
 Character.prototype.thirst = function(s) {
-	var character = this;
+	var character = this,
+	conMod = Math.ceil(s.player.con/4);
+	
+	console.log(s.player.chp);
 	
 	if (s.player.thirst < 10) {
 		Dice.roll(1, 4, function(total) {
-			if (total + s.player.con/4 < 5) { // Roll to reduce hunger pangs, CON?
+			if (total + conMod < 5) { // Roll to reduce hunger pangs, CON?
 				s.player.thirst = s.player.thirst + 1;
 			}			
 						
 			if (s.player.thirst >= 5) {
-				if (total < 3) {
-					s.player.chp = s.player.chp - 1;
-				}
+				s.player.chp = s.player.chp - 1;
 			
 				s.emit('msg', {msg: 'You are Thirsty.', styleClass: 'hunger'});
 
@@ -414,7 +428,9 @@ Character.prototype.thirst = function(s) {
 			}
 		});
 	} else {
-		s.emit('msg', {msg: 'You need to find somethig to drink.', styleClass: 'hunger'});
+		s.player.chp = (s.player.chp - 10 + conMod);
+		s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'hunger'});
+
 		return character.prompt(s);
 	}
 }

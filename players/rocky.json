@@ -13,7 +13,7 @@
     "expToLevel": 1000,
     "position": "standing",
     "alignment": "",
-    "chp": 100,
+    "chp": -10,
     "hp": 110,
     "str": 14,
     "wis": 11,
@@ -21,11 +21,11 @@
     "dex": 12,
     "con": 13,
     "ac": 10,
-    "hunger": 0,
-    "thirst": 0,
+    "hunger": 10,
+    "thirst": 10,
     "carry": 140,
     "load": 0,
-    "area": "hillcrest",
+    "area": "midgaard",
     "vnum": 1,
     "recall": 1,
     "description": "A brand new citizen.",
@@ -46,7 +46,7 @@
     },
     "inventory": [
         {
-            "item": "Short Sword",
+            "name": "Short Sword",
             "vnum": 1,
             "itemType": "weapon",
             "material": "iron",
@@ -60,5 +60,5 @@
     "skills": [],
     "feats": [],
     "affects": [],
-    "saved": "Sun Oct 07 2012 03:28:52 GMT-0700 (Pacific Daylight Time)"
+    "saved": "Sat Oct 13 2012 01:25:57 GMT-0400 (Eastern Daylight Time)"
 }
