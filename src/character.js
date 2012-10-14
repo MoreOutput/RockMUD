@@ -45,6 +45,7 @@ Character.prototype.load = function(name, s, fn) {
 		}
 		
 		s.player = JSON.parse(r);
+		s.player.sid = s.id;
 		
 		return fn(s);
 	});
@@ -80,13 +81,20 @@ Character.prototype.getPassword = function(s, players, fn) {
 		if (r.msg.length <= 8) {
 			character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
 				if (s.player.password === hash) {
-					players.push(s.player);
-						
-					character.motd(s, function() {		
-						Room.getRoom(r, s, players, function() {
-							fn(s);
-							return character.prompt(s);
-						});					
+					
+					character.addPlayer(s, players, function(added) {
+						if (added) {
+							
+							character.motd(s, function() {		
+								Room.getRoom(r, s, players, function() {
+									fn(s);
+									return character.prompt(s);
+								});
+							});
+						} else {
+							s.emit('msg', {msg: 'Error logging in, please retry.'});
+							s.disconnect();
+						}
 					});
 				} else {
 					s.emit('msg', {msg: 'Wrong! You are flagged after 5 incorrect responses.', res: 'enterPassword'});
@@ -100,9 +108,51 @@ Character.prototype.getPassword = function(s, players, fn) {
 	});
 }
 
-Character.prototype.updateBySocket = function(id, fn) {
-	// get socket
-	fn(player);
+// Add a player reference object to the players array
+Character.prototype.addPlayer = function(s, players, fn) {
+	var  i = 0;	
+	if (players.length > 0) {
+		for (i; i < players.length; i += 1) {
+			if (s.player.name === players[i].name) {
+				return fn(false);
+			}
+			
+			if (i === players.length - 1) {
+				players.push({
+					name: s.player.name, 
+					sid: s.id
+				});
+			
+				fn(true);
+			}
+		}
+	} else {
+		players.push({
+			name: s.player.name, 
+			sid: s.id
+		});
+			
+		fn(true);
+	}
+}
+
+// Updates a players reference in players
+Character.prototype.updatePlayer = function(s, players, fn) {
+	var  i = 0;
+	for (i; i < players.length; i += 1) {
+		if (s.player.name === players[i].name) {
+			players[i] = {
+				name: s.player.name, 
+				sid: s.id
+			};
+			
+			if (typeof fn === 'function') {
+				fn(true);
+			} 
+		} else {
+			fn(false);
+		}
+	}
 }
 
 Character.prototype.create = function(r, s, players, fn) { //  A New Character is saved]
@@ -195,14 +245,20 @@ Character.prototype.create = function(r, s, players, fn) { //  A New Character i
 					}
 		
 					s.leave('creation');
-					s.join('mud');			
-					players.push(s.player);
+					s.join('mud');		
 					
-					character.motd(s, function() {
-						fn(s);
-						Room.getRoom(r, s, players);			
-						character.prompt(s);
-					});	
+					character.addPlayer(s, players, function(added) {
+						if (added) {
+							character.motd(s, function() {
+								fn(s);
+								Room.getRoom(r, s, players);			
+								character.prompt(s);
+							});
+						} else {
+							s.emit('msg', {msg: 'Error logging in, please retry.'});
+							s.disconnect();
+						}
+					});
 				});	
 			});
 		});	
@@ -380,7 +436,7 @@ Character.prototype.hpRegen = function(s, fn) {
 	});
 }
 
-Character.prototype.hunger = function(s) {
+Character.prototype.hunger = function(s, fn) {
 	var character = this,
 	conMod = Math.ceil(s.player.con/4);
 	
@@ -396,22 +452,21 @@ Character.prototype.hunger = function(s) {
 				}
 			
 				s.emit('msg', {msg: 'You are hungry.', styleClass: 'hunger'});
-
-				return character.prompt(s);
+		
+				fn();
 			}
 		});
 	} else {
 		s.player.chp = (s.player.chp - 10 + conMod);
 		s.emit('msg', {msg: 'You are dying of hunger.', styleClass: 'hunger'});
-		return character.prompt(s);
+		
+		fn();
 	}
 }
 
-Character.prototype.thirst = function(s) {
+Character.prototype.thirst = function(s, fn) {
 	var character = this,
 	conMod = Math.ceil(s.player.con/4);
-	
-	console.log(s.player.chp);
 	
 	if (s.player.thirst < 10) {
 		Dice.roll(1, 4, function(total) {
@@ -423,15 +478,13 @@ Character.prototype.thirst = function(s) {
 				s.player.chp = s.player.chp - 1;
 			
 				s.emit('msg', {msg: 'You are Thirsty.', styleClass: 'hunger'});
-
-				return character.prompt(s);
+				fn();
 			}
-		});
+		});	
 	} else {
 		s.player.chp = (s.player.chp - 10 + conMod);
 		s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'hunger'});
-
-		return character.prompt(s);
+		fn();
 	}
 }
 

@@ -5,6 +5,79 @@ var Cmd = function () {
 	this.perms = ['admin'];
 };
 
+Cmd.prototype.who = function(r, s, io, players) {
+	s = io.sockets.socket(players[0].sid);
+	
+	console.log(s.player.name);
+
+	players.forEach(function() {
+		var i = 0,
+		str = '';
+	
+		if (players.length > 0) {
+			for (i; i < players.length; i += 1) {
+				str += '<li>' + players[i].name[0].toUpperCase() + 
+					players[i].name.slice(1) + ' ' +
+					(function() {
+						if (players[i].title === '') {
+							return 'a level ' + players[i].level   +
+							' ' + players[i].race + 
+							' ' + players[i].charClass; 
+						} else {
+							return players[i].title;
+						}
+					
+					}()) +
+					' (' + players[i].role + ')' +					
+					'</li>';	
+					
+				if (i === players.length - 1) {
+					return s.emit('msg', {msg: str, styleClass: 'who-cmd'});
+				}
+			}
+		}
+	});
+	/*
+	s.emit('msg', {
+		msg: (function () {
+			var str = '',
+			i = 0;
+			
+			if (players.length > 0) {
+				for (i; i < players.length; i += 1) {				
+					str += '<li>' + players[i].name[0].toUpperCase() + 
+					players[i].name.slice(1) + ' ' +
+					(function() {
+						if (players[i].title === '') {
+							return 'a level ' + players[i].level   +
+							' ' + players[i].race + 
+							' ' + players[i].charClass; 
+						} else {
+							return players[i].title;
+						}
+					
+					}()) +
+					' (' + players[i].role + ')' +					
+					'</li>';					
+					
+					if (i === players.length - 1) {
+						return '<h1>Currently logged on</h1><ul>' +
+						str +
+						'</ul>'; 
+					}
+				}
+			} else {
+				str = '<li>No one is online.</li>';
+					return '<h1>Currently logged on</h1><ul>' +
+					str +
+				'</ul>'; 
+			}				
+		}()), styleClass: 'who-cmd'
+	});*/
+	
+	return Character.prompt(s);
+}
+
 Cmd.prototype.say = function(r, s, players) {
 	var i  = 0;
 
@@ -76,47 +149,6 @@ Cmd.prototype.where = function(r, s) {
 	return Character.prompt(s);
 };
 
-Cmd.prototype.who = function(r, s, players) {
-	s.emit('msg', {
-		msg: (function () {
-			var str = '',
-			i = 0;
-			
-			if (players.length > 0) {
-				for (i; i < players.length; i += 1) {				
-					str += '<li>' + players[i].name[0].toUpperCase() + 
-					players[i].name.slice(1) + ' ' +
-					(function() {
-						if (players[i].title === '') {
-							return 'a level ' + players[i].level   +
-							' ' + players[i].race + 
-							' ' + players[i].charClass; 
-						} else {
-							return players[i].title;
-						}
-					
-					}()) +
-					' (' + players[i].role + ')' +					
-					'</li>';					
-					
-					if (i === players.length - 1) {
-						return '<h1>Currently logged on</h1><ul>' +
-						str +
-						'</ul>'; 
-					}
-				}
-			} else {
-				str = '<li>No one is online.</li>';
-					return '<h1>Currently logged on</h1><ul>' +
-					str +
-				'</ul>'; 
-			}				
-		}()), styleClass: 'who-cmd'
-	});
-	
-	return Character.prompt(s);
-}
-
 Cmd.prototype.save = function(r, s, players) {
 	Character.save(s, function() {
 		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'});
@@ -129,8 +161,10 @@ Cmd.prototype.title = function(r, s, players) {
 		s.player.title = r.msg;
 		
 		Character.save(s, function() {
-			s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
-			return Character.prompt(s);
+			Character.updatePlayer(s, players, function(updated) {
+				s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
+				return Character.prompt(s);
+			});
 		});
 	} else {
 		s.emit('msg', {msg: 'Not a valid title.', styleClass: 'save'});

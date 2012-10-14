@@ -3,15 +3,16 @@
  * Rocky Bevins, 2012 (rockybevins@gmail.com)
  * We want to be able to build Diku style MUDs with only JS (areas will be JSON). 
 */
-var sys = require('util'), 
+
+var sys = require('util'),
 http = require('http'),
 fs = require('fs'),
-Character = require('./src/character').character, // Player cannot ever call
-Cmds = require('./src/commands').cmd, // Player can call based on role
-Skills = require('./src/skills').skill, // Player can call based on role, class, etc
+Character = require('./src/character').character,
+Cmds = require('./src/commands').cmd, 
+Skills = require('./src/skills').skill,
 cfg = require('./config').server,
-players = [], // currently holds all players, will hold some basic info and socket id
-areas = [], // currently cached areas
+players = [], 
+areas = [],
 server  = http.createServer(function (req, res) {
 	if (req.url === '/' || req.url === '/index.html') {
 		fs.readFile('./index.html', function (err, data) {
@@ -49,31 +50,43 @@ io = require('socket.io').listen(server);
 
 server.listen(cfg.port);
 
+// Ticks
+setInterval(function() { 
+	var i = 0,
+	s = {};
+
+	if (players.length > 0) {	
+		for (i; i < players.length; i += 1) {
+			s = io.sockets.socket(players[i].sid);
+			if (s.player.chp < s.player.hp) {			
+				Character.hpRegen(s, function(total) {
+					Character.hunger(s, function() {
+						Character.thirst(s, function() {	
+							Character.prompt(s);
+							Character.updatePlayer(s, players);
+						});
+					});
+				});
+			}								
+		}		
+	}	
+}, 60000);	
+
+setInterval(function() {
+	var i = 0,
+	s = {};
+	if (players.length > 0) {
+		for (i; i < players.length; i += 1) {
+			s = io.sockets.socket(players[i].sid);
+			
+			if (players[i].position != 'fighting') {			
+				Character.save(s);			
+			}							
+		}
+	}
+}, 600000);
+
 io.on('connection', function (s) {
-	var charTick = function(s) { 
-		// Adding something to the player after a set time, regen
-		setInterval(function() { 
-			console.log(s.player);
-			if (s.player != undefined) {
-				if (s.player.chp < s.player.hp) {			
-					Character.hpRegen(s);
-				}
-				
-				Character.hunger(s);
-				Character.thirst(s);				
-			}
-		}, 1000);	
-		
-		// Save each character every 10 minutes
-		setInterval(function() {
-			if (s.player != undefined) {	
-				if (s.player.position != 'fighting') {			
-					Character.save(s);			
-				}
-			}
-		}, 600000);	
-	};	
-	
 	s.on('login', function (r) {	
 		var parseCmd = function(r, s, players) {
 			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {			
@@ -82,7 +95,7 @@ io.on('connection', function (s) {
 				
 				if (r.cmd != '') {
 					if (r.cmd in Cmds) {
-						return Cmds[r.cmd](r, s, players);
+						return Cmds[r.cmd](r, s, io, players);
 					} else if(r.cmd in Skills) {
 						return Skills[r.cmd](r, s, players);
 					} else {
@@ -150,7 +163,7 @@ io.on('connection', function (s) {
 				}
 			}
 		}
-	});    		
+	});  
 
 	s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 });
