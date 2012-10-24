@@ -1,5 +1,5 @@
-require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'dojo/_base/event', 'dojo/ready', 'dojo/NodeList-dom'], 
-	function (dom, string, query, domAttr, on, event, ready) {
+require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'dojo/_base/event', 'dojo/window', 'dojo/ready', 'dojo/NodeList-dom'], 
+	function (dom, string, query, domAttr, on, event, win, ready) {
 		ready(function () {
 			'use strict';
 			var ws = io.connect('127.0.0.1:8000'),
@@ -28,6 +28,7 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 				
 			var frmH = on(dom.byId('console'), 'submit', function (e) {				
 				var node = dom.byId('cmd'),
+				messageNodes = [],
 				msg = string.trim(node.value.toLowerCase());
 				
 				e.preventDefault();
@@ -58,7 +59,8 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 				node.value = '';
 				node.focus();
 				
-				window.scrollTo(0, document.body.scrollHeight);
+				messageNodes = query('#terminal div');
+				win.scrollIntoView(messageNodes[messageNodes.length - 1]);	
 			});
 		});
 	});

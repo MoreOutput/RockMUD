@@ -20,7 +20,8 @@ Room.prototype.getArea = function(r, s, players, fn) {
 }
 
 // Returns a specifc room
-Room.prototype.getRoom = function(r, s, players, fn) {
+Room.prototype.getRoom = function(r, s, io, players, fn) {
+
 	fs.readFile('./areas/' + s.player.area + '.json', function (err, area) {
         var i = 0,
 		exits = [],

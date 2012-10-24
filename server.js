@@ -1,9 +1,8 @@
 /*
- * RockMUD, NodeJS HTTP Mud Engine
+ * RockMUD, NodeJS HTTP/WS Mud Engine
  * Rocky Bevins, 2012 (rockybevins@gmail.com)
  * We want to be able to build Diku style MUDs with only JS (areas will be JSON). 
 */
-
 var sys = require('util'),
 http = require('http'),
 fs = require('fs'),
@@ -63,7 +62,7 @@ setInterval(function() {
 					Character.hunger(s, function() {
 						Character.thirst(s, function() {	
 							Character.prompt(s);
-							Character.updatePlayer(s, players);
+							Character.updatePlayer(s, io, players);
 						});
 					});
 				});
@@ -75,6 +74,7 @@ setInterval(function() {
 setInterval(function() {
 	var i = 0,
 	s = {};
+	
 	if (players.length > 0) {
 		for (i; i < players.length; i += 1) {
 			s = io.sockets.socket(players[i].sid);
@@ -88,16 +88,18 @@ setInterval(function() {
 
 io.on('connection', function (s) {
 	s.on('login', function (r) {	
-		var parseCmd = function(r, s, players) {
+		var parseCmd = function(r, s, io, players) {
 			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {			
 				r.cmd = r.msg.replace(/_.*/, '').toLowerCase();
 				r.msg = r.msg.replace(/^.*?_/, '').replace(/_/g, ' ');				
 				
+				// Commands and Skills are passed socket.io to grab other players via socket id
 				if (r.cmd != '') {
+
 					if (r.cmd in Cmds) {
 						return Cmds[r.cmd](r, s, io, players);
 					} else if(r.cmd in Skills) {
-						return Skills[r.cmd](r, s, players);
+						return Skills[r.cmd](r, s, io, players);
 					} else {
 						s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
 						return Character.prompt(s);
@@ -114,11 +116,12 @@ io.on('connection', function (s) {
 			return Character.login(r, s, function (name, s, fnd) {
 				if (fnd) {
 					s.join('mud'); // mud is one of two rooms, 'creation' the other (socket.io)	
-					
+					console.log(io.sockets.clients());
 					Character.load(name, s, function (s) {
-						Character.getPassword(s, players, function(s) {								
+						
+						Character.getPassword(s, io, players, function(s) {								
 							s.on('cmd', function (r) { 
-								parseCmd(r, s, players);
+								parseCmd(r, s, io, players);
 							});
 						});
 					});
@@ -126,9 +129,9 @@ io.on('connection', function (s) {
 					s.join('creation'); // Character creation is its own room, 'mud' the other (socket.io)
 					s.player = {name:name};					
 					
-					Character.newCharacter(s, players, function(s) {			
+					Character.newCharacter(s, io, players, function(s) {			
 						s.on('cmd', function (r) { 
-							parseCmd(r, s, players);
+							parseCmd(r, s, io, players);
 						});
 					});
 				}

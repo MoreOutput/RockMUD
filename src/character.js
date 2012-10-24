@@ -73,7 +73,7 @@ Character.prototype.generateSalt = function(fn) {
 	});
 };
 
-Character.prototype.getPassword = function(s, players, fn) {
+Character.prototype.getPassword = function(s, io, players, fn) {
 	var character = this;
 	s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
 
@@ -82,11 +82,11 @@ Character.prototype.getPassword = function(s, players, fn) {
 			character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
 				if (s.player.password === hash) {
 					
-					character.addPlayer(s, players, function(added) {
+					character.addPlayer(s, io, players, function(added) {
 						if (added) {
 							
 							character.motd(s, function() {		
-								Room.getRoom(r, s, players, function() {
+								Room.getRoom(r, s, io, players, function() {
 									fn(s);
 									return character.prompt(s);
 								});
@@ -109,7 +109,7 @@ Character.prototype.getPassword = function(s, players, fn) {
 }
 
 // Add a player reference object to the players array
-Character.prototype.addPlayer = function(s, players, fn) {
+Character.prototype.addPlayer = function(s, io, players, fn) {
 	var  i = 0;	
 	if (players.length > 0) {
 		for (i; i < players.length; i += 1) {
@@ -120,7 +120,9 @@ Character.prototype.addPlayer = function(s, players, fn) {
 			if (i === players.length - 1) {
 				players.push({
 					name: s.player.name, 
-					sid: s.id
+					sid: s.id,
+					area: s.area,
+					vnum: s.vnum
 				});
 			
 				fn(true);
@@ -129,7 +131,9 @@ Character.prototype.addPlayer = function(s, players, fn) {
 	} else {
 		players.push({
 			name: s.player.name, 
-			sid: s.id
+			sid: s.id,
+			area: s.area,
+			vnum: s.vnum
 		});
 			
 		fn(true);
@@ -137,13 +141,15 @@ Character.prototype.addPlayer = function(s, players, fn) {
 }
 
 // Updates a players reference in players
-Character.prototype.updatePlayer = function(s, players, fn) {
+Character.prototype.updatePlayer = function(s, io, players, fn) {
 	var  i = 0;
 	for (i; i < players.length; i += 1) {
 		if (s.player.name === players[i].name) {
 			players[i] = {
 				name: s.player.name, 
-				sid: s.id
+				sid: s.id,
+				area: s.area,
+				vnum: s.vnum
 			};
 			
 			if (typeof fn === 'function') {
@@ -247,11 +253,11 @@ Character.prototype.create = function(r, s, players, fn) { //  A New Character i
 					s.leave('creation');
 					s.join('mud');		
 					
-					character.addPlayer(s, players, function(added) {
+					character.addPlayer(s, io, players, function(added) {
 						if (added) {
 							character.motd(s, function() {
 								fn(s);
-								Room.getRoom(r, s, players);			
+								Room.getRoom(r, s, io, players);			
 								character.prompt(s);
 							});
 						} else {
@@ -300,7 +306,7 @@ Character.prototype.rollStats = function(player, fn) {
 	}		
 }
 
-Character.prototype.newCharacter = function(s, players, fn) { // TODO: break this into smaller bits? Sort of like the deep nest here...
+Character.prototype.newCharacter = function(s, io, players, fn) { // TODO: break this into smaller bits? Sort of like the deep nest here...
 	var character = this,
 	i = 0, 
 	str = '';
