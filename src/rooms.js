@@ -21,17 +21,15 @@ Room.prototype.getArea = function(r, s, players, fn) {
 
 // Returns a specifc room
 Room.prototype.getRoom = function(r, s, io, players, fn) {
-
+	var room = this;
 	fs.readFile('./areas/' + s.player.area + '.json', function (err, area) {
         var i = 0,
-		exits = [],
-		playersInRoom = [],
-		displayRoom = function(room, exits, playersInRoom) {
+		displayRoom = function(room, optObj) {
 			return s.emit('msg', {
-				msg: '<div class="room-title">' + room.title + '</div>' + 
-				'<div class="room-content">' + room.content + '</div>' + 
-				'<div class="room-exits">Visible Exits: [' + exits + ']</div>' + 
-				'Here:' + playersInRoom, 
+				msg: '<div class="room-title">' + optObj.room.title + '</div>' + 
+				'<div class="room-content">' + optObj.room.content + '</div>' + 
+				'<div class="room-exits">Visible Exits: [' + optObj.exits.toString() + ']</div>' + 
+				'Here:' + optObj.playersInRoom.toString(), 
 				styleClass: area.type + ' room'
 			});
 		},
@@ -42,41 +40,33 @@ Room.prototype.getRoom = function(r, s, io, players, fn) {
         }
 		
 		for (i; i < area.rooms.length; i += 1) {	
-			if (area.rooms[i].vnum === s.player.vnum) {	
-				exits = (function () {
-					var eArr = [],
-					j = 0;
-					for (j; j < area.rooms[i].exits.length; j += 1) {
-						eArr.push(area.rooms[i].exits[j].cmd);
-						if (eArr.length === area.rooms[i].exits.length) {
-							return eArr.toString();
-						}
-					}
-				}());
-				
-				playersInRoom = (function () {
-					var pArr = [],
-					j = 0;
-					
-					for (j; j < players.length; j += 1) {				
-						if (players[j].vnum === s.player.vnum && players[j].name != s.player.name) {
-							pArr.push(' ' + players[j].name + ' is ' + s.player.position + ' here');
-						} else {
-							pArr.push(' You are here.');
-						}
-						
-						if (j === players.length - 1) {
-							return pArr.toString();
-						}
-					}
-				}());				
-					
-				if (typeof fn === 'function') {
-					displayRoom(area.rooms[i], exits, playersInRoom);
-					fn(area.rooms[i]);
-				} else {			
-					displayRoom(area.rooms[i], exits, playersInRoom);
-				}
+			if (area.rooms[i].vnum === s.player.vnum) {								
+				room.getExits(area.rooms[i], function(exits) {
+					room.getPlayers(s, area.rooms[i], players, function(playersInRoom) {
+						room.getItems(area.rooms[i], function(items) {
+							room.getMonsters(area.rooms[i], function(monsters) {
+								if (typeof fn === 'function') {
+									displayRoom(area.rooms[i], {
+										room: area.rooms[i],
+										exits: exits,
+										monsters: monsters,
+										items: items,
+										playersInRoom: playersInRoom
+									});									
+									return fn(area.rooms[i]);
+								} else {			
+									return displayRoom(area.rooms[i], {
+										room: area.rooms[i],
+										exits: exits,
+										monsters: monsters,
+										items: items,
+										playersInRoom: playersInRoom
+									});
+								}
+							});
+						});
+					});
+				});
 			} else {
 				s.emit('msg', {msg: 'Room load failed.'});
 			}
@@ -84,20 +74,60 @@ Room.prototype.getRoom = function(r, s, io, players, fn) {
 	});
 }
 
-Room.prototype.playersInRoom = function(room, fn) {
-	return fn(players);
-}
-
-Room.prototype.objectsInRoom = function(room, fn) {
-	var i = 0;
+Room.prototype.getExits = function(room, fn) {
+	var arr = [],
+	i = 0;
 	
-	if (room.objects.length === 0) {
-		return fn(players);
+	for (i; i < room.exits.length; i += 1) {
+		arr.push(room.exits[i].cmd);
+	
+		if (arr.length === room.exits.length) {
+			return fn(arr);
+		}
 	}
 }
 
-Room.prototype.monstersInRoom = function(room, fn) {
-	return fn(players);
+Room.prototype.getPlayers = function(s, room, players, fn) {
+	var arr = [],
+	i = 0;
+					
+	for (i; i < players.length; i += 1) {				
+		if (players[i].vnum === s.player.vnum && players[i].name != s.player.name) {
+			arr.push(' ' + players[i].name + ' is ' + s.player.position + ' here');
+		} else {
+			arr.push(' You are here.');
+		}
+						
+		if (i === players.length - 1) {
+			return fn(arr);
+		}
+	}
+}
+
+Room.prototype.getItems = function(room, fn) {
+	var arr = [],
+	i = 0;
+	
+	for (i; i < room.items.length; i += 1) {
+		arr.push(room.items[i]);
+	
+		if (arr.length === room.items.length) {
+			return fn(arr);
+		}
+	}
+}
+
+Room.prototype.getMonsters = function(room, fn) {
+	var arr = [],
+	i = 0;
+	
+	for (i; i < room.monsters.length; i += 1) {
+		arr.push(room.monsters[i]);
+	
+		if (arr.length === room.monsters.length) {
+			return fn(arr);
+		}
+	}
 }
 
 Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit must match both the room and a command)

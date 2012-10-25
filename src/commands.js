@@ -6,7 +6,6 @@ var Cmd = function () {
 };
 
 Cmd.prototype.who = function(r, s, io, players) {
-	console.log(players);
 	players.forEach(function() {
 		var i = 0,
 		str = '',
@@ -32,7 +31,7 @@ Cmd.prototype.who = function(r, s, io, players) {
 				if (i === players.length - 1) {
 					return s.emit('msg', {
 						msg:  
-						'<h2>Visible Players</h2>' +
+						'<h1>Visible Players</h1>' +
 						str, 
 						styleClass: 'who-cmd'
 					});

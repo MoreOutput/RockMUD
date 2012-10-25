@@ -115,10 +115,8 @@ io.on('connection', function (s) {
 		if (r.msg != '') { // not checking slashes
 			return Character.login(r, s, function (name, s, fnd) {
 				if (fnd) {
-					s.join('mud'); // mud is one of two rooms, 'creation' the other (socket.io)	
-					console.log(io.sockets.clients());
-					Character.load(name, s, function (s) {
-						
+					s.join('mud'); // mud is one of two rooms, 'creation' the other (socket.io)						
+					Character.load(name, s, function (s) {						
 						Character.getPassword(s, io, players, function(s) {								
 							s.on('cmd', function (r) { 
 								parseCmd(r, s, io, players);

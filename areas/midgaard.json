@@ -46,7 +46,7 @@
 					"ac": 6
 				}
 			],
-			"objects" : [{
+			"items" : [{
 				"name": "Loaf of bread",
 				"short": "A loaf of bread",
 				"long": "A rather stale looking load of bread is here" ,

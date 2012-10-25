@@ -132,8 +132,7 @@ Character.prototype.addPlayer = function(s, io, players, fn) {
 		players.push({
 			name: s.player.name, 
 			sid: s.id,
-			area: s.area,
-			vnum: s.vnum
+			area: s.area
 		});
 			
 		fn(true);
