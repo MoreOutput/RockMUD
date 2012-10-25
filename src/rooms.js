@@ -26,10 +26,13 @@ Room.prototype.getRoom = function(r, s, io, players, fn) {
         var i = 0,
 		displayRoom = function(room, optObj) {
 			return s.emit('msg', {
-				msg: '<div class="room-title">' + optObj.room.title + '</div>' + 
-				'<div class="room-content">' + optObj.room.content + '</div>' + 
-				'<div class="room-exits">Visible Exits: [' + optObj.exits.toString() + ']</div>' + 
-				'Here:' + optObj.playersInRoom.toString(), 
+				msg: '<h2 class="room-title">' + optObj.room.title + '</h2>' + 
+				'<p class="room-content">' + optObj.room.content + '</p>' + 
+				'<ul>' + 
+					'<li class="room-exits">Visible Exits: [' + optObj.exits.toString() + ']</li>' + 
+				'<li>Here:' + optObj.playersInRoom.toString() + ' ' + optObj.monsters.toString() + '</li>' +
+				'<li>Items: ' + optObj.items.toString() + '</li>' +
+				'</ul>', 
 				styleClass: area.type + ' room'
 			});
 		},
@@ -45,23 +48,16 @@ Room.prototype.getRoom = function(r, s, io, players, fn) {
 					room.getPlayers(s, area.rooms[i], players, function(playersInRoom) {
 						room.getItems(area.rooms[i], function(items) {
 							room.getMonsters(area.rooms[i], function(monsters) {
+								displayRoom(area.rooms[i], {
+									room: area.rooms[i],
+									exits: exits,
+									monsters: monsters,
+									items: items,
+									playersInRoom: playersInRoom
+								});
+								
 								if (typeof fn === 'function') {
-									displayRoom(area.rooms[i], {
-										room: area.rooms[i],
-										exits: exits,
-										monsters: monsters,
-										items: items,
-										playersInRoom: playersInRoom
-									});									
 									return fn(area.rooms[i]);
-								} else {			
-									return displayRoom(area.rooms[i], {
-										room: area.rooms[i],
-										exits: exits,
-										monsters: monsters,
-										items: items,
-										playersInRoom: playersInRoom
-									});
 								}
 							});
 						});
@@ -109,7 +105,7 @@ Room.prototype.getItems = function(room, fn) {
 	i = 0;
 	
 	for (i; i < room.items.length; i += 1) {
-		arr.push(room.items[i]);
+		arr.push(room.items[i].name);
 	
 		if (arr.length === room.items.length) {
 			return fn(arr);
@@ -122,7 +118,7 @@ Room.prototype.getMonsters = function(room, fn) {
 	i = 0;
 	
 	for (i; i < room.monsters.length; i += 1) {
-		arr.push(room.monsters[i]);
+		arr.push(room.monsters[i].name);
 	
 		if (arr.length === room.monsters.length) {
 			return fn(arr);

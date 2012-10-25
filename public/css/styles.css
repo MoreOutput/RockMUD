@@ -192,6 +192,25 @@ display: block;
 font-weight: bold;
 }
 
+.room  {
+
+}
+
+.room  h2 {
+padding: 0;
+margin: 0;
+}
+
+.room {
+padding: 0;
+margin: 0;
+}
+
+.room ul {
+padding: 0;
+margin: 0;
+}
+
 .cprompt {
 font-style: italic;
 }

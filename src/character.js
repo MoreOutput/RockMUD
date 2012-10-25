@@ -78,13 +78,11 @@ Character.prototype.getPassword = function(s, io, players, fn) {
 	s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
 
 	s.on('password', function (r) {
-		if (r.msg.length <= 8) {
+		if (r.msg.length > 7) {
 			character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
 				if (s.player.password === hash) {
-					
 					character.addPlayer(s, io, players, function(added) {
 						if (added) {
-							
 							character.motd(s, function() {		
 								Room.getRoom(r, s, io, players, function() {
 									fn(s);
@@ -93,7 +91,7 @@ Character.prototype.getPassword = function(s, io, players, fn) {
 							});
 						} else {
 							s.emit('msg', {msg: 'Error logging in, please retry.'});
-							s.disconnect();
+							return s.disconnect();
 						}
 					});
 				} else {

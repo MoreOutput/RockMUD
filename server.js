@@ -95,10 +95,9 @@ io.on('connection', function (s) {
 				
 				// Commands and Skills are passed socket.io to grab other players via socket id
 				if (r.cmd != '') {
-
 					if (r.cmd in Cmds) {
 						return Cmds[r.cmd](r, s, io, players);
-					} else if(r.cmd in Skills) {
+					} else if (r.cmd in Skills) {
 						return Skills[r.cmd](r, s, io, players);
 					} else {
 						s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
