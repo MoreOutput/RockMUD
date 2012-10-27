@@ -8,14 +8,20 @@ crypto = require('crypto'),
 Races = require('./races').race,
 Classes = require('./classes').classes,
 Room = require('./rooms').room,
-Dice = require('./dice').roller;
- 
+Dice = require('./dice').roller,
+Server = require('../server'); 
+io = null,
+players = Server.players;
+areas = Server.areas;
+
 var Character = function () {
 	this.perms = [];
 }
  
 Character.prototype.login = function(r, s, fn) {
-	var name = r.msg.replace(/_.*/,'').toLowerCase();	
+	var name = r.msg.replace(/_.*/,'').toLowerCase();
+	
+	io = Server.io;
 	
 	if (r.msg.length > 2 ) {
 		if  (/[`~!@#$%^&*()-+={}[]]|[0-9]/g.test(r.msg) === false) {
@@ -73,7 +79,7 @@ Character.prototype.generateSalt = function(fn) {
 	});
 };
 
-Character.prototype.getPassword = function(s, io, players, fn) {
+Character.prototype.getPassword = function(s, fn) {
 	var character = this;
 	s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
 
@@ -81,10 +87,18 @@ Character.prototype.getPassword = function(s, io, players, fn) {
 		if (r.msg.length > 7) {
 			character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
 				if (s.player.password === hash) {
-					character.addPlayer(s, io, players, function(added) {
+					character.addPlayer(s, function(added) {
 						if (added) {
+							Room.checkArea(s.player.area, function(fnd) {
+								if (!fnd) {
+									Room.getArea(s.player.area, function(area) {
+										areas.push(area);
+									});
+								}
+							});
+						
 							character.motd(s, function() {		
-								Room.getRoom(r, s, io, players, function() {
+								Room.getRoom(r, s, function() {
 									fn(s);
 									return character.prompt(s);
 								});
@@ -107,7 +121,7 @@ Character.prototype.getPassword = function(s, io, players, fn) {
 }
 
 // Add a player reference object to the players array
-Character.prototype.addPlayer = function(s, io, players, fn) {
+Character.prototype.addPlayer = function(s, fn) {
 	var  i = 0;	
 	if (players.length > 0) {
 		for (i; i < players.length; i += 1) {
@@ -119,8 +133,8 @@ Character.prototype.addPlayer = function(s, io, players, fn) {
 				players.push({
 					name: s.player.name, 
 					sid: s.id,
-					area: s.area,
-					vnum: s.vnum
+					area: s.player.area,
+					vnum: s.player.vnum
 				});
 			
 				fn(true);
@@ -130,15 +144,16 @@ Character.prototype.addPlayer = function(s, io, players, fn) {
 		players.push({
 			name: s.player.name, 
 			sid: s.id,
-			area: s.area
+			area: s.player.area,
+			vnum: s.player.vnum
 		});
-			
+
 		fn(true);
 	}
 }
 
 // Updates a players reference in players
-Character.prototype.updatePlayer = function(s, io, players, fn) {
+Character.prototype.updatePlayer = function(s, fn) {
 	var  i = 0;
 	for (i; i < players.length; i += 1) {
 		if (s.player.name === players[i].name) {
@@ -158,7 +173,7 @@ Character.prototype.updatePlayer = function(s, io, players, fn) {
 	}
 }
 
-Character.prototype.create = function(r, s, players, fn) { //  A New Character is saved]
+Character.prototype.create = function(r, s, fn) { //  A New Character is saved]
 	s.player = {
 		name: s.player.name,
 		lastname: '',
@@ -250,11 +265,11 @@ Character.prototype.create = function(r, s, players, fn) { //  A New Character i
 					s.leave('creation');
 					s.join('mud');		
 					
-					character.addPlayer(s, io, players, function(added) {
+					character.addPlayer(s, function(added) {
 						if (added) {
 							character.motd(s, function() {
 								fn(s);
-								Room.getRoom(r, s, io, players);			
+								Room.getRoom(r, s, players);			
 								character.prompt(s);
 							});
 						} else {
@@ -303,7 +318,7 @@ Character.prototype.rollStats = function(player, fn) {
 	}		
 }
 
-Character.prototype.newCharacter = function(s, io, players, fn) { // TODO: break this into smaller bits? Sort of like the deep nest here...
+Character.prototype.newCharacter = function(s, fn) { // TODO: break this into smaller bits? Sort of like the deep nest here...
 	var character = this,
 	i = 0, 
 	str = '';
@@ -499,5 +514,12 @@ Character.prototype.prompt = function(s) {
 Character.prototype.level = function() {
 
 }
+
+/*
+
+Character based Ticks 
+
+*/
+
 
 module.exports.character = new Character();

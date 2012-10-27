@@ -13,7 +13,7 @@
     "expToLevel": 1000,
     "position": "standing",
     "alignment": "",
-    "chp": -46,
+    "chp": -178,
     "hp": 110,
     "str": 14,
     "wis": 11,
@@ -61,6 +61,6 @@
     "skills": [],
     "feats": [],
     "affects": [],
-    "saved": "Thu Oct 25 2012 01:45:12 GMT-0700 (Pacific Daylight Time)",
-    "sid": "70qzo1lB2c4lF7o6GFyA"
+    "saved": "Fri Oct 26 2012 22:37:43 GMT-0400 (Eastern Daylight Time)",
+    "sid": "au6iFBagx658hh45C-D2"
 }

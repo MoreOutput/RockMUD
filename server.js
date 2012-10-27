@@ -3,15 +3,18 @@
  * Rocky Bevins, 2012 (rockybevins@gmail.com)
  * We want to be able to build Diku style MUDs with only JS (areas will be JSON). 
 */
-var sys = require('util'),
-http = require('http'),
+
+// Our 'globals'
+module.exports.io = require('socket.io');
+module.exports.players = [];
+module.exports.areas = [];
+
+var http = require('http'),
 fs = require('fs'),
 Character = require('./src/character').character,
 Cmds = require('./src/commands').cmd, 
 Skills = require('./src/skills').skill,
 cfg = require('./config').server,
-players = [], 
-areas = [],
 server  = http.createServer(function (req, res) {
 	if (req.url === '/' || req.url === '/index.html') {
 		fs.readFile('./index.html', function (err, data) {
@@ -45,9 +48,11 @@ server  = http.createServer(function (req, res) {
         });
 	}
 }),
-io = require('socket.io').listen(server);
+io = module.exports.io.listen(server);
 
 server.listen(cfg.port);
+
+module.exports.io = io; // io global
 
 // Ticks
 setInterval(function() { 
@@ -88,17 +93,16 @@ setInterval(function() {
 
 io.on('connection', function (s) {
 	s.on('login', function (r) {	
-		var parseCmd = function(r, s, io, players) {
+		var parseCmd = function(r, s) {
 			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {			
 				r.cmd = r.msg.replace(/_.*/, '').toLowerCase();
 				r.msg = r.msg.replace(/^.*?_/, '').replace(/_/g, ' ');				
-				
 				// Commands and Skills are passed socket.io to grab other players via socket id
 				if (r.cmd != '') {
 					if (r.cmd in Cmds) {
-						return Cmds[r.cmd](r, s, io, players);
+						return Cmds[r.cmd](r, s);
 					} else if (r.cmd in Skills) {
-						return Skills[r.cmd](r, s, io, players);
+						return Skills[r.cmd](r, s);
 					} else {
 						s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
 						return Character.prompt(s);
@@ -116,9 +120,9 @@ io.on('connection', function (s) {
 				if (fnd) {
 					s.join('mud'); // mud is one of two rooms, 'creation' the other (socket.io)						
 					Character.load(name, s, function (s) {						
-						Character.getPassword(s, io, players, function(s) {								
+						Character.getPassword(s, function(s) {	
 							s.on('cmd', function (r) { 
-								parseCmd(r, s, io, players);
+								parseCmd(r, s);
 							});
 						});
 					});
@@ -126,9 +130,9 @@ io.on('connection', function (s) {
 					s.join('creation'); // Character creation is its own room, 'mud' the other (socket.io)
 					s.player = {name:name};					
 					
-					Character.newCharacter(s, io, players, function(s) {			
+					Character.newCharacter(s, function(s) {			
 						s.on('cmd', function (r) { 
-							parseCmd(r, s, io, players);
+							parseCmd(r, s);
 						});
 					});
 				}

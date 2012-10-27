@@ -1,16 +1,20 @@
 var Character = require('./character').character,
-Room = require('./rooms').room;
-
+Room = require('./rooms').room,
+Server = require('../server'); 
+io = null,
+players = Server.players;
+areas = Server.areas;
+	
 var Cmd = function () {
 	this.perms = ['admin'];
 };
 
-Cmd.prototype.who = function(r, s, io, players) {
-	players.forEach(function() {
+Cmd.prototype.who = function(r, s) {
+	players.forEach(function(player) {
 		var i = 0,
 		str = '',
 		s = io.sockets.socket(players[0].sid);
-		
+
 		if (players.length > 0) {
 			for (i; i < players.length; i += 1) {
 				str += '<li>' + s.player.name[0].toUpperCase() + 
@@ -43,7 +47,26 @@ Cmd.prototype.who = function(r, s, io, players) {
 	return Character.prompt(s);
 }
 
-Cmd.prototype.say = function(r, s, io, players) {
+Cmd.prototype.get = function(r, s, fn) {
+	if (r.msg != '') {
+		Room.checkItem(r, s, function(fnd, item) {
+			if (fnd) {
+				return s.emit('msg', {
+					msg: 'You picked up ' + item.short,
+					styleClass: 'get'
+				});
+			} else {
+				s.emit('msg', {msg: 'That item is not here.', styleClass: 'error'});
+				return Character.prompt(s);
+			}
+		});
+	} else {
+		s.emit('msg', {msg: 'Get what?', styleClass: 'error'});
+		return Character.prompt(s);
+	}
+}
+
+Cmd.prototype.say = function(r, s) {
 	var i  = 0;
 
 	for (i; i < players.length; i += 1) {
@@ -55,8 +78,8 @@ Cmd.prototype.say = function(r, s, io, players) {
 	}
 };
 
-Cmd.prototype.look = function(r, s, io, players) {
-	Room.getRoom(r, s, io, players, function(room) {
+Cmd.prototype.look = function(r, s) {
+	Room.getRoom(r, s, function(room) {
 		return Character.prompt(s);
 	});
 }
@@ -101,7 +124,7 @@ Cmd.prototype.flame = function(r, s) {
 
 };
 
-Cmd.prototype.where = function(r, s, io, players) {
+Cmd.prototype.where = function(r, s) {
 	r.msg = '<ul>' + 
 	'<li>Your Name: ' + Character[s.id].name + '</li>' +
 	'<li>Current Area: ' + Character[s.id].area + '</li>' +
@@ -114,14 +137,14 @@ Cmd.prototype.where = function(r, s, io, players) {
 	return Character.prompt(s);
 };
 
-Cmd.prototype.save = function(r, s, io, players) {
+Cmd.prototype.save = function(r, s) {
 	Character.save(s, function() {
 		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'});
 		return Character.prompt(s);
 	});
 }
 
-Cmd.prototype.title = function(r, s, io, players) {
+Cmd.prototype.title = function(r, s) {
 	if (r.msg.length < 40) {
 		if (r.msg != 'title') {
 			s.player.title = r.msg;
@@ -129,7 +152,7 @@ Cmd.prototype.title = function(r, s, io, players) {
 			s.player.title = 'a level ' + s.player.level + ' ' + s.player.race + ' ' + s.player.charClass;
 		}
 		Character.save(s, function() {
-			Character.updatePlayer(s, io, players, function(updated) {
+			Character.updatePlayer(s, function(updated) {
 				s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
 				return Character.prompt(s);
 			});
@@ -162,20 +185,6 @@ Cmd.prototype.skills = function(r, s) {
 	return Character.prompt(s);
 }
 
-Cmd.prototype.get = function(r, s) {
-	if (r.msg != '') {
-		Room.isItemInRoom(r.msg, s.player.vnum, function(item) {
-			return s.emit('msg', {
-				msg: 'You picked up ' + item.short,
-				styleClass: 'get'
-			});			
-		});
-	} else {
-		s.emit('msg', {msg: 'Get what?', styleClass: 'error'});
-		return Character.prompt(s);
-	}
-}
-
 Cmd.prototype.wear = function(r, s) {
 	if (r.msg != '') {
 
@@ -185,7 +194,7 @@ Cmd.prototype.wear = function(r, s) {
 	}
 }
 
-Cmd.prototype.score = function(r, s, players) { 
+Cmd.prototype.score = function(r, s) { 
 	var score = '<div class="name">' + s.player.name + 
 	' <div class="title">' + s.player.title + '</div></div>' +
 	'<ul class="stats">' + 
