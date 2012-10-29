@@ -2,13 +2,10 @@
 	General skills 
 */
 var Dice = require('./dice').roller,
-Character = require('./character'),
-Combat = require('./character').combat,
-Room = require('./rooms').room,
-players = Character.players,
-areas = require('./rooms').areas;
+Character = require('./character').character,
+Combat = require('./combat').combat,
+Room = require('./rooms').room;
 
-Character = Character.character;
 
 var Skill = function() {
 	this.perms = ['admin'];

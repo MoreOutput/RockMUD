@@ -52,7 +52,7 @@ io = module.exports.io.listen(server);
 
 server.listen(cfg.port);
 
-module.exports.io = io; // io global
+module.exports.io = io; // io global, rough. Need to mull this over.
 
 // Ticks
 setInterval(function() { 

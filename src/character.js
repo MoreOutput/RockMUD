@@ -1,6 +1,6 @@
 /*
 Characters.js controls everything dealing with a character.json file, no in game commands are
-defined here. Commands.js does share some of these method names, as they -- are --  commands 
+defined here. Commands.js does share some method names with this module, as they -- are --  commands 
 and therefore defined in commands.js. See: save().
 */
 var fs = require('fs'),
@@ -9,10 +9,9 @@ Races = require('./races').race,
 Classes = require('./classes').classes,
 Room = require('./rooms').room,
 Dice = require('./dice').roller,
-Server = require('../server'); 
-io = null,
-players = Server.players;
-areas = Server.areas;
+io = null, 
+players = require('../server').players,
+areas = require('../server').areas;
 
 var Character = function () {
 	this.perms = [];
@@ -20,8 +19,6 @@ var Character = function () {
  
 Character.prototype.login = function(r, s, fn) {
 	var name = r.msg.replace(/_.*/,'').toLowerCase();
-	
-	io = Server.io;
 	
 	if (r.msg.length > 2 ) {
 		if  (/[`~!@#$%^&*()-+={}[]]|[0-9]/g.test(r.msg) === false) {
@@ -173,7 +170,8 @@ Character.prototype.updatePlayer = function(s, fn) {
 	}
 }
 
-Character.prototype.create = function(r, s, fn) { //  A New Character is saved]
+//  A New Character is saved
+Character.prototype.create = function(r, s, fn) { 
 	s.player = {
 		name: s.player.name,
 		lastname: '',
@@ -204,7 +202,7 @@ Character.prototype.create = function(r, s, fn) { //  A New Character is saved]
 		carry: 10,
 		load: 0,
 		visible: true,
-		area: 'midgaard',
+		area: 'Midgaard', // must match an area file
 		vnum: 1, // current room
 		recall: 1, // vnum to recall to
 		description: 'A brand new citizen.',
@@ -516,10 +514,7 @@ Character.prototype.level = function() {
 }
 
 /*
-
 Character based Ticks 
-
 */
-
 
 module.exports.character = new Character();

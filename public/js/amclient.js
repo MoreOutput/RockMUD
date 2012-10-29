@@ -16,6 +16,41 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 			},
 			changeMudState = function(state) {
 				domAttr.set(dom.byId('cmd'), 'mud-state', state);
+			},
+			aliases = {
+				l: 'look',
+				i: 'inventory',
+				sc: 'score',
+				n: 'north',
+				e: 'east',
+				w: 'west',
+				s: 'south',
+				u: 'up',
+				d: 'down',
+				q: 'quaff',
+				c: 'cast',
+				k: 'kill',
+				re: 'rest',
+				sl: 'sleep'
+			},
+			
+			checkAlias = function(cmd, fn) {
+				var keys = Object.keys(aliases),
+				i = 0;
+				
+				cmd = cmd.replace(/_.*/, '').toLowerCase();
+				cmd = cmd.replace(/^.*?_/, '').replace(/_/g, ' ');	
+				
+				for (i; i < keys.length; i += 1) {
+					if (keys[i] === cmd) {
+						return fn(aliases[keys[i]]);
+					}	
+					
+					if (i === keys.length - 1) {
+						return fn(cmd);
+					}
+				}
+				
 			};
 				
 			ws.on('msg', function(r) {
@@ -34,7 +69,9 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 				e.preventDefault();
 				
 				display({
-					msg : msg,
+					msg : checkAlias(msg, function(cmd) {
+						return cmd;
+					}),
 					emit : (function () {
 						var res = dojo.attr(node, 'mud-state');
 						if (dojo.attr(node, 'mud-state') === 'login') {

@@ -2,14 +2,16 @@ var Character = require('./character').character,
 Room = require('./rooms').room,
 Server = require('../server'); 
 io = null,
-players = Server.players;
-areas = Server.areas;
-	
+players = require('../server').players;
+areas = require('../server').areas;
+
 var Cmd = function () {
 	this.perms = ['admin'];
 };
 
 Cmd.prototype.who = function(r, s) {
+	io = require('../server').io;
+	
 	players.forEach(function(player) {
 		var i = 0,
 		str = '',
@@ -192,6 +194,12 @@ Cmd.prototype.wear = function(r, s) {
 		s.emit('msg', {msg: 'Wear what?', styleClass: 'error'});
 		return Character.prompt(s);
 	}
+}
+
+Cmd.prototype.inventory = function(s) {
+	var iStr = '';
+	s.emit('msg', {msg: '', styleClass: 'inventory' });
+	return Character.prompt(s);
 }
 
 Cmd.prototype.score = function(r, s) { 

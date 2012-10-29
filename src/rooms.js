@@ -1,8 +1,7 @@
 var fs = require('fs'),
-Server = require('../server'),
 io = null,
-players = Server.players,
-areas = Server.areas;
+players = require('../server').players,
+areas = require('../server').areas;
 
 var Room = function() {
  
@@ -24,44 +23,29 @@ Room.prototype.getArea = function(areaName, fn) {
 
 // Returns a specifc room
 Room.prototype.getRoom = function(r, s, fn) {
-	var room = this;
-
-	fs.readFile('./areas/' + s.player.area + '.json', function (err, area) {
-        var i = 0,
-		displayRoom = function(room, optObj) {
-			return s.emit('msg', {
-				msg: '<h2 class="room-title">' + optObj.room.title + '</h2>' + 
-				'<p class="room-content">' + optObj.room.content + '</p>' + 
-				'<ul>' + 
-					'<li class="room-exits">Visible Exits: [' + optObj.exits.toString() + ']</li>' + 
-				'<li>Here:' + optObj.playersInRoom.toString() + ' ' + optObj.monsters.toString() + '</li>' +
-				'<li>Items: ' + optObj.items.toString() + '</li>' +
-				'</ul>', 
-				styleClass: area.type + ' room'
-			});
-		},
-		area = JSON.parse(area);
-        
-		if (err) {
-			throw err;
-        }
-	
-		for (i; i < area.rooms.length; i += 1) {	
-			if (area.rooms[i].vnum === s.player.vnum) {								
-				room.getExits(area.rooms[i], function(exits) {
-					room.getPlayers(s, area.rooms[i], function(playersInRoom) {
-						room.getItems(area.rooms[i], {specific: 'short'}, function(items) {
-							room.getMonsters(area.rooms[i], function(monsters) {
-								displayRoom(area.rooms[i], {
-									room: area.rooms[i],
-									exits: exits,
-									monsters: monsters,
-									items: items,
-									playersInRoom: playersInRoom
+	var room = this,
+	displayRoom = function(rooms, fn) {
+		var i = 0;
+		
+		for (i; i < rooms.length; i += 1) {	
+			if (rooms[i].vnum === s.player.vnum) {								
+				room.getExits(rooms[i], function(exits) {
+					room.getPlayers(s, rooms[i], function(playersInRoom) {
+						room.getItems(rooms[i], {specific: 'short'}, function(items) {
+							room.getMonsters(rooms[i], function(monsters) {
+								s.emit('msg', {
+									msg: '<h2 class="room-title">' + rooms[i].title + '</h2>' + 
+									'<p class="room-content">' + rooms[i].content + '</p>' + 
+									'<ul>' + 
+										'<li class="room-exits">Visible Exits: [' + exits.toString() + ']</li>' + 
+										'<li>Here:' + playersInRoom.toString().replace(/,/g, ', ') + ' ' + monsters.toString() + '</li>' +
+										'<li>Items: ' + items.toString() + '</li>' +
+									'</ul>', 
+									styleClass: 'room'
 								});
 
 								if (typeof fn === 'function') {
-									return fn(area.rooms[i]);
+									return fn();
 								}
 							});
 						});
@@ -71,6 +55,32 @@ Room.prototype.getRoom = function(r, s, fn) {
 				s.emit('msg', {msg: 'Room load failed.'});
 			}
 		}	
+
+	};
+	
+	room.checkArea(s.player.area, function(fnd, area) {
+		if (fnd) { //  area was in areas[]
+			displayRoom(area.rooms);
+			
+			if (typeof fn === 'function') {
+				return fn();
+			}
+		} else { // loading area and placing it into memory
+			fs.readFile('./areas/' + s.player.area + '.json', function (err, area) {
+				var i = 0,
+				area = JSON.parse(area);
+       
+				if (err) {
+					throw err;
+				}
+
+				displayRoom(area.rooms);
+				
+				if (typeof fn === 'function') {
+					return fn();
+				}
+			});
+		}
 	});
 }
 
@@ -103,8 +113,6 @@ Room.prototype.getPlayers = function(s, room, fn) {
 		}
 	}
 }
-
-
 
 Room.prototype.getItems = function(room, optObj, fn) {
 	var arr = [],

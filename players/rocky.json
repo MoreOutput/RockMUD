@@ -1,7 +1,7 @@
 {
     "name": "rocky",
     "lastname": "",
-    "title": "a level 1 ogre",
+    "title": "a level 1 ogre fighter",
     "role": "admin",
     "password": "f8408a2e84e39faf32bd9e71fc136ed38154fabfaaac8d0c6510946138ead949",
     "salt": "499a5c50d365d9ec6e0c7f70a5b670b597fc504c8663fc55a5fc2bd232e6b88580c693a78297948ef963b69a72932554c2f025a22ad5122ef049c39cd16c0081f0acdef9cfb6aee321a50bd1026b93a4e4211fb473bab451efcbdb9492c40b09d3b4eb32fb8722b932daa7b4adfb5e83dacf247249fac57b0e01c7d0c0d1e6e8",
@@ -13,7 +13,7 @@
     "expToLevel": 1000,
     "position": "standing",
     "alignment": "",
-    "chp": -178,
+    "chp": -2254,
     "hp": 110,
     "str": 14,
     "wis": 11,
@@ -26,7 +26,7 @@
     "thirst": 10,
     "carry": 140,
     "load": 0,
-    "area": "midgaard",
+    "area": "Midgaard",
     "vnum": 1,
     "recall": 1,
     "description": "A brand new citizen.",
@@ -45,7 +45,7 @@
         "ring2": "",
         "floating": ""
     },
-    "inventory": [
+    "items": [
         {
             "name": "Short Sword",
             "vnum": 1,
@@ -61,6 +61,6 @@
     "skills": [],
     "feats": [],
     "affects": [],
-    "saved": "Fri Oct 26 2012 22:37:43 GMT-0400 (Eastern Daylight Time)",
-    "sid": "au6iFBagx658hh45C-D2"
+    "saved": "Sat Oct 27 2012 17:57:39 GMT-0400 (Eastern Daylight Time)",
+    "sid": "j9QSoSDlA8KTLMKOBAww"
 }
