@@ -1,8 +1,7 @@
 var Character = require('./character').character,
 Room = require('./rooms').room,
-Server = require('../server'); 
-io = null,
-players = require('../server').players;
+io = require('../server').io,
+players = require('../server').players,
 areas = require('../server').areas;
 
 var Cmd = function () {
@@ -10,8 +9,6 @@ var Cmd = function () {
 };
 
 Cmd.prototype.who = function(r, s) {
-	io = require('../server').io;
-	
 	players.forEach(function(player) {
 		var i = 0,
 		str = '',
@@ -53,9 +50,20 @@ Cmd.prototype.get = function(r, s, fn) {
 	if (r.msg != '') {
 		Room.checkItem(r, s, function(fnd, item) {
 			if (fnd) {
-				return s.emit('msg', {
-					msg: 'You picked up ' + item.short,
-					styleClass: 'get'
+				Character.addToInventory(s, item, function(added) {
+					if (added) {
+						Room.removeItemFromRoom({area: s.player.area, vnum: s.player.vnum, item: item}, function() {
+							s.emit('msg', {
+								msg: 'You picked up ' + item.short,
+								styleClass: 'get'
+							});
+							
+							return Character.prompt(s);
+						});
+					} else {
+						s.emit('msg', {msg: 'Could not pick up a ' + item.short, styleClass: 'error'});					
+						return Character.prompt(s);
+					}
 				});
 			} else {
 				s.emit('msg', {msg: 'That item is not here.', styleClass: 'error'});
@@ -81,7 +89,7 @@ Cmd.prototype.say = function(r, s) {
 };
 
 Cmd.prototype.look = function(r, s) {
-	Room.getRoom(r, s, function(room) {
+	Room.getRoom(s, function(room) {
 		return Character.prompt(s);
 	});
 }
@@ -196,9 +204,12 @@ Cmd.prototype.wear = function(r, s) {
 	}
 }
 
-Cmd.prototype.inventory = function(s) {
+Cmd.prototype.inventory = function(r, s) {
 	var iStr = '';
-	s.emit('msg', {msg: '', styleClass: 'inventory' });
+	
+	console.log(s.player.items);
+	
+	s.emit('msg', {msg: s.player.items.toString(), styleClass: 'inventory' });
 	return Character.prompt(s);
 }
 

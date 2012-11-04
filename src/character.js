@@ -9,7 +9,6 @@ Races = require('./races').race,
 Classes = require('./classes').classes,
 Room = require('./rooms').room,
 Dice = require('./dice').roller,
-io = null, 
 players = require('../server').players,
 areas = require('../server').areas;
 
@@ -95,7 +94,7 @@ Character.prototype.getPassword = function(s, fn) {
 							});
 						
 							character.motd(s, function() {		
-								Room.getRoom(r, s, function() {
+								Room.getRoom(s, function() {
 									fn(s);
 									return character.prompt(s);
 								});
@@ -146,27 +145,6 @@ Character.prototype.addPlayer = function(s, fn) {
 		});
 
 		fn(true);
-	}
-}
-
-// Updates a players reference in players
-Character.prototype.updatePlayer = function(s, fn) {
-	var  i = 0;
-	for (i; i < players.length; i += 1) {
-		if (s.player.name === players[i].name) {
-			players[i] = {
-				name: s.player.name, 
-				sid: s.id,
-				area: s.area,
-				vnum: s.vnum
-			};
-			
-			if (typeof fn === 'function') {
-				fn(true);
-			} 
-		} else {
-			fn(false);
-		}
 	}
 }
 
@@ -267,7 +245,7 @@ Character.prototype.create = function(r, s, fn) {
 						if (added) {
 							character.motd(s, function() {
 								fn(s);
-								Room.getRoom(r, s, players);			
+								Room.getRoom(s);			
 								character.prompt(s);
 							});
 						} else {
@@ -439,17 +417,21 @@ Character.prototype.save = function(s, fn) {
 
 Character.prototype.hpRegen = function(s, fn) {
 	var conMod = Math.ceil(s.player.con/4);
-	Dice.roll(1, 8, function(total) {
-		if (typeof fn === 'function') {
-			fn(s.player.chp + total + conMod);
-		} else {
-			s.player.chp = s.player.chp + total + conMod;
-			
-			if (s.player.chp > s.player.hp) {
-				return s.player.chp = s.player.hp;
-			} 
-		}
-	});
+	if (s.player.chp < s.player.hp) {
+		Dice.roll(1, 8, function(total) {
+			if (typeof fn === 'function') {
+				fn(s.player.chp + total + conMod);
+			} else {
+				s.player.chp = s.player.chp + total + conMod;
+				
+				if (s.player.chp > s.player.hp) {
+					return s.player.chp = s.player.hp;
+				} 
+			}
+		});
+	} else {
+		fn(s.player.chp);
+	}
 }
 
 Character.prototype.hunger = function(s, fn) {
@@ -500,7 +482,42 @@ Character.prototype.thirst = function(s, fn) {
 	} else {
 		s.player.chp = (s.player.chp - 10 + conMod);
 		s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'hunger'});
+		
 		fn();
+	}
+}
+
+// boolean if item is in a players inventory
+Character.prototype.checkItem = function(s, name, fn) {
+
+}
+
+// push an item into a players inventory, checks items to ensure a player can use it
+Character.prototype.addToInventory = function(s, item, fn) {
+	s.player.items.push(item);
+	
+	fn(true);
+}
+
+// Updates a players reference in players[] with some data attached to the socket
+Character.prototype.updatePlayer = function(s, fn) {
+	var  i = 0;
+
+	for (i; i < players.length; i += 1) {
+		if (s.player.name === players[i].name) {
+			players[i] = {
+				name: s.player.name, 
+				sid: s.id,
+				area: s.area,
+				vnum: s.vnum
+			};
+			
+			if (typeof fn === 'function') {
+				fn(true);
+			} 
+		} else {
+			fn(false);
+		}
 	}
 }
 
@@ -516,5 +533,4 @@ Character.prototype.level = function() {
 /*
 Character based Ticks 
 */
-
 module.exports.character = new Character();

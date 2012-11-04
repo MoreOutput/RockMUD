@@ -13,7 +13,7 @@
     "expToLevel": 1000,
     "position": "standing",
     "alignment": "",
-    "chp": -2254,
+    "chp": -595,
     "hp": 110,
     "str": 14,
     "wis": 11,
@@ -56,11 +56,50 @@
             "attackType": "Slice",
             "attackElement": "",
             "flags": []
+        },
+        {
+            "name": "Loaf of bread",
+            "short": "A loaf of bread",
+            "long": "A rather stale looking loaf of bread is here",
+            "vnum": 5,
+            "level": 1,
+            "itemType": "food",
+            "flags": [
+                {
+                    "hunger": -5
+                }
+            ]
+        },
+        {
+            "name": "Loaf of bread",
+            "short": "A loaf of bread",
+            "long": "A rather stale looking loaf of bread is here",
+            "vnum": 5,
+            "level": 1,
+            "itemType": "food",
+            "flags": [
+                {
+                    "hunger": -5
+                }
+            ]
+        },
+        {
+            "name": "Loaf of bread",
+            "short": "A loaf of bread",
+            "long": "A rather stale looking loaf of bread is here",
+            "vnum": 5,
+            "level": 1,
+            "itemType": "food",
+            "flags": [
+                {
+                    "hunger": -5
+                }
+            ]
         }
     ],
     "skills": [],
     "feats": [],
     "affects": [],
-    "saved": "Sat Oct 27 2012 17:57:39 GMT-0400 (Eastern Daylight Time)",
-    "sid": "j9QSoSDlA8KTLMKOBAww"
+    "saved": "Sun Nov 04 2012 02:17:53 GMT-0500 (Eastern Standard Time)",
+    "sid": "jRf5l5W-fWIdLSk_SDKR"
 }

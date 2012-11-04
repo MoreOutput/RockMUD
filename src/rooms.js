@@ -21,18 +21,21 @@ Room.prototype.getArea = function(areaName, fn) {
 	});
 }
 
-// Returns a specifc room
-Room.prototype.getRoom = function(r, s, fn) {
+// Returns a specifc room for display, to retun the room Obj use getRoomObject
+Room.prototype.getRoom = function(s, fn) {
 	var room = this,
 	displayRoom = function(rooms, fn) {
 		var i = 0;
-		
+
 		for (i; i < rooms.length; i += 1) {	
 			if (rooms[i].vnum === s.player.vnum) {								
 				room.getExits(rooms[i], function(exits) {
 					room.getPlayers(s, rooms[i], function(playersInRoom) {
-						room.getItems(rooms[i], {specific: 'short'}, function(items) {
+						console.log(1);
+						room.getItems(rooms[i], {specific: 'short'}, function(items) {	
+	console.log(2);						
 							room.getMonsters(rooms[i], function(monsters) {
+								console.log(3);
 								s.emit('msg', {
 									msg: '<h2 class="room-title">' + rooms[i].title + '</h2>' + 
 									'<p class="room-content">' + rooms[i].content + '</p>' + 
@@ -61,7 +64,7 @@ Room.prototype.getRoom = function(r, s, fn) {
 	room.checkArea(s.player.area, function(fnd, area) {
 		if (fnd) { //  area was in areas[]
 			displayRoom(area.rooms);
-			
+
 			if (typeof fn === 'function') {
 				return fn();
 			}
@@ -80,6 +83,24 @@ Room.prototype.getRoom = function(r, s, fn) {
 					return fn();
 				}
 			});
+		}
+	});
+}
+
+// Return a room in memory as an object, pass in the area name and the room vnum {area: 'Midgaard', vnum: 1}
+Room.prototype.getRoomObject = function(areaQuery, fn) {
+	var i = 0;	
+	
+	this.checkArea(areaQuery.area, function(fnd, area) {
+		if (fnd) { //  area was in areas[]
+			for (i; i < area.rooms.length; i += 1) {	
+				if (area.rooms[i].vnum === areaQuery.vnum) {								
+					return fn(area.rooms[i]);
+				} 
+			}
+		} else { 
+			// Area should always be in areas[] if items are being moved to inventory
+			console.log('Area was not loaded, could not get room object');
 		}
 	});
 }
@@ -117,26 +138,30 @@ Room.prototype.getPlayers = function(s, room, fn) {
 Room.prototype.getItems = function(room, optObj, fn) {
 	var arr = [],
 	i = 0;
-	
+
 	if (optObj.specific != undefined) {
-		for (i; i < room.items.length; i += 1) {
-			arr.push(room.items[i][optObj.specific]);
+		if (room.items.length > 0) {
+			for (i; i < room.items.length; i += 1) {
+				arr.push(room.items[i][optObj.specific]);
 		
-			if (arr.length === room.items.length) {
-				return fn(arr);
-			}
-		}
-	} else {
-		for (i; i < room.items.length; i += 1) {
-			arr.push(room.items[i]);
-		
-			if (arr.length === room.items.length) {
-				if (arguments.length === 2) {
-					return optObj(arr);
-				} else {
+				if (arr.length === room.items.length) {
 					return fn(arr);
 				}
 			}
+		} else {
+			return fn(arr);
+		}
+	} else {
+		if (room.items.length > 0) {
+			for (i; i < room.items.length; i += 1) {
+				arr.push(room.items[i]);
+			
+				if (arr.length === room.items.length) {
+					return fn(arr);
+				}
+			}
+		} else {
+			return fn(arr);
 		}
 	}
 }
@@ -205,12 +230,11 @@ Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit mus
 	});
 }
 
-// does a string matches an item in the room
+// does a string match an item in the room
 Room.prototype.checkItem = function(r, s, fn) {
 	var room = this;
-	
-	room.getRoom(r, s, function(roomObj) {
-		room.getItems(roomObj, function(items) {
+	room.getRoomObject({area: s.player.area, vnum: s.player.vnum}, function(roomObj) {
+		room.getItems(roomObj, {}, function(items) {
 			var msgPatt = new RegExp('^' + r.msg);
 			items.forEach(function(item) {
 				if (msgPatt.test(item.name.toLowerCase())) {
@@ -223,8 +247,23 @@ Room.prototype.checkItem = function(r, s, fn) {
 	});
 };
 
+Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
+	var i = 0;
+	this.getRoomObject(roomQuery, function(roomObj) {
+		for (i; i < roomObj.items.length; i += 1) {
+			if (roomObj.items[i].vnum === roomQuery.item.vnum) {
+				console.log(roomObj.items);
+				roomObj.items.splice(i, 1);
+				console.log(roomObj.items);
+			}
+		}				
+	});
+	
+	fn();
+}
+
 Room.prototype.move = function(r, s, fn) {
-	if(this.checkExit(player)) {
+	if (this.checkExit(player)) {
 		Room.load(r, s, player, players, fn);
 		s.emit('msg', {msg: 'You walk north.'});
 	} else {

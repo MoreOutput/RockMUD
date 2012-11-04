@@ -9,6 +9,7 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 				return parseCmd(r);
 			},
 			parseCmd = function(r) {
+				console.log(r);
 				if (r.msg != undefined) {
 					r.msg = r.msg.replace(/ /g, '_');
 					ws.emit(r.emit, r);
@@ -36,11 +37,13 @@ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'd
 			
 			checkAlias = function(cmd, fn) {
 				var keys = Object.keys(aliases),
-				i = 0;
+				i = 0,
 				
-				cmd = cmd.replace(/_.*/, '').toLowerCase();
-				cmd = cmd.replace(/^.*?_/, '').replace(/_/g, ' ');	
-				
+				// duplicating input
+				// / /g.test('d d')
+				cmd = cmd.replace(/_.*/, '').toLowerCase(),
+				msg = cmd.replace(/^.*?_/, '').replace(/_/g, ' ');			
+
 				for (i; i < keys.length; i += 1) {
 					if (keys[i] === cmd) {
 						return fn(aliases[keys[i]]);

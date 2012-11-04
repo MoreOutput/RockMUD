@@ -30,29 +30,42 @@
 			"monsters" : [
 				{
 					"name": "A boar",
+					"area": "Midgaard",
+					"level": 1,
 					"short": "A large boar",
 					"long": "",
 					"vnum": 6,
 					"type": "monster",
-					"limit": 1,
+					"race": "animal",
+					"class": "",
+					"limit": 2,
 					"ac": 6
 				}, {
-					"name": "A lizard",
-					"short": "A mean lizard",
-					"long": "" ,
-					"vnum": 7,
+					"name": "A boar",
+					"area": "Midgaard",
+					"level": 1,
+					"short": "A large boar",
+					"long": "",
+					"vnum": 6,
 					"type": "monster",
-					"limit": 1,
+					"race": "animal",
+					"class": "",
+					"limit": 2,
 					"ac": 6
 				}
 			],
 			"items" : [{
 				"name": "Loaf of bread",
 				"short": "A loaf of bread",
-				"long": "A rather stale looking load of bread is here" ,
+				"long": "A rather stale looking loaf of bread is here" ,
 				"vnum": 5,
-				"type": "food",
-				"hunger": -5
+				"level": 1,
+				"itemType": "food",
+				"flags": [
+					{
+						"hunger": -5
+					}
+				]
 			}],
 			"flags" : []
 		}

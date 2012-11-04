@@ -5,15 +5,10 @@
 */
 
 // Our 'globals'
-module.exports.io = require('socket.io');
-module.exports.players = [];
-module.exports.areas = [];
+
 
 var http = require('http'),
 fs = require('fs'),
-Character = require('./src/character').character,
-Cmds = require('./src/commands').cmd, 
-Skills = require('./src/skills').skill,
 cfg = require('./config').server,
 server  = http.createServer(function (req, res) {
 	if (req.url === '/' || req.url === '/index.html') {
@@ -48,48 +43,55 @@ server  = http.createServer(function (req, res) {
         });
 	}
 }),
-io = module.exports.io.listen(server);
+io = require('socket.io').listen(server);
+
+module.exports.io = io;
+module.exports.players = [];
+module.exports.areas = [];
+
+var Character = require('./src/character').character,
+Cmds = require('./src/commands').cmd, 
+Skills = require('./src/skills').skill;
 
 server.listen(cfg.port);
-
-module.exports.io = io; // io global, rough. Need to mull this over.
 
 // Ticks
 setInterval(function() { 
 	var i = 0,
 	s = {};
 
-	if (players.length > 0) {	
-		for (i; i < players.length; i += 1) {
-			s = io.sockets.socket(players[i].sid);
-			if (s.player.chp < s.player.hp) {			
-				Character.hpRegen(s, function(total) {
-					Character.hunger(s, function() {
-						Character.thirst(s, function() {	
-							Character.prompt(s);
-							Character.updatePlayer(s, io, players);
+	if (module.exports.players.length > 0) {	
+		for (i; i < module.exports.players.length; i += 1) {
+			s = io.sockets.socket(module.exports.players[i].sid);
+			if (s.player.chp <= s.player.hp) {			
+				Character.hunger(s, function() {
+					Character.thirst(s, function() {							
+						Character.hpRegen(s, function(total) {
+							Character.updatePlayer(s, function() {
+								Character.prompt(s);
+							});
 						});
 					});
 				});
 			}								
 		}		
 	}	
-}, 60000);	
+}, 6000 * 10);	
 
 setInterval(function() {
 	var i = 0,
 	s = {};
 	
-	if (players.length > 0) {
-		for (i; i < players.length; i += 1) {
-			s = io.sockets.socket(players[i].sid);
+	if (module.exports.players.length > 0) {
+		for (i; i < module.exports.players.length; i += 1) {
+			s = io.sockets.socket(module.exports.players[i].sid);
 			
-			if (players[i].position != 'fighting') {			
+			if (s.position != 'fighting') {			
 				Character.save(s);			
 			}							
 		}
 	}
-}, 600000);
+}, 60000 * 10);
 
 io.on('connection', function (s) {
 	s.on('login', function (r) {	
@@ -161,9 +163,9 @@ io.on('connection', function (s) {
     s.on('disconnect', function () {
 		var i = 0;
 		if (s.player != undefined) {
-			for (i; i < players.length; i += 1) {
-				if (players[i].name === s.player.name) {
-					players.splice(i, 1);	
+			for (i; i < module.exports.players.length; i += 1) {
+				if (module.exports.players[i].name === s.player.name) {
+					module.exports.players.splice(i, 1);	
 				}
 			}
 		}
