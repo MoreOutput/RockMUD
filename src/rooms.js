@@ -31,11 +31,8 @@ Room.prototype.getRoom = function(s, fn) {
 			if (rooms[i].vnum === s.player.vnum) {								
 				room.getExits(rooms[i], function(exits) {
 					room.getPlayers(s, rooms[i], function(playersInRoom) {
-						console.log(1);
-						room.getItems(rooms[i], {specific: 'short'}, function(items) {	
-	console.log(2);						
+						room.getItems(rooms[i], {specific: 'short'}, function(items) {					
 							room.getMonsters(rooms[i], function(monsters) {
-								console.log(3);
 								s.emit('msg', {
 									msg: '<h2 class="room-title">' + rooms[i].title + '</h2>' + 
 									'<p class="room-content">' + rooms[i].content + '</p>' + 
@@ -252,9 +249,7 @@ Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		for (i; i < roomObj.items.length; i += 1) {
 			if (roomObj.items[i].vnum === roomQuery.item.vnum) {
-				console.log(roomObj.items);
 				roomObj.items.splice(i, 1);
-				console.log(roomObj.items);
 			}
 		}				
 	});

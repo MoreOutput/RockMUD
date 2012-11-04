@@ -207,8 +207,6 @@ Cmd.prototype.wear = function(r, s) {
 Cmd.prototype.inventory = function(r, s) {
 	var iStr = '';
 	
-	console.log(s.player.items);
-	
 	s.emit('msg', {msg: s.player.items.toString(), styleClass: 'inventory' });
 	return Character.prompt(s);
 }
