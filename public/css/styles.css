@@ -5,8 +5,8 @@ html, body {
 font: 100% "Courier New", "Courier", monospace;	
 height: 100%;
 background-color: #111;
-padding: 0;
-margin: 0;
+padding: 0 0 100px 0;
+margin: 0 0 0 0;
 }
 
 
@@ -63,7 +63,7 @@ background-image: linear-gradient(top, #4d90fe, #4787ed);
 
 #mudwrapper {
 margin: 0 auto;
-width: 720px;
+width: 90%;
 }
 
 #terminal {

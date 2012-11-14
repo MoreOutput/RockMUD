@@ -6,66 +6,75 @@
 	"description" : "The first city.",
 	"rooms" : [
 		{
-			"vnum" : 1,
+			"id" : 1,
 			"title" : "Town Square",
 			"content" : "Welcome to the first room.",
 			"exits" : [
 				{
 					"cmd" : "north",
 					"vnum" : 0
-				},
-                {
+				}, {
 					"cmd" : "east",
 					"vnum" : 0
-                },
-                {
+                }, {
 					"cmd" : "south",
 					"vnum" : 0
-                },
-                {
+                }, {
 					"cmd" : "west",
                     "vnum" : 0
                 }
 			], 
 			"monsters" : [
 				{
-					"name": "A boar",
+					"name": "Boar",
 					"area": "Midgaard",
 					"level": 1,
 					"short": "A large boar",
 					"long": "",
-					"vnum": 6,
+					"id": 6,
 					"type": "monster",
 					"race": "animal",
-					"class": "",
 					"limit": 2,
 					"ac": 6
 				}, {
-					"name": "A boar",
+					"name": "Boar",
 					"area": "Midgaard",
 					"level": 1,
 					"short": "A large boar",
 					"long": "",
-					"vnum": 6,
+					"id": 6,
 					"type": "monster",
 					"race": "animal",
-					"class": "",
 					"limit": 2,
 					"ac": 6
 				}
 			],
 			"items" : [{
-				"name": "Loaf of bread",
+				"name": "bread",
 				"short": "A loaf of bread",
-				"long": "A rather stale looking loaf of bread is here" ,
-				"vnum": 5,
+				"long": "A rather stale looking loaf of bread." ,
+				"area": "Midgaard",
+				"id": 5,
 				"level": 1,
 				"itemType": "food",
 				"flags": [
-					{
-						"hunger": -5
-					}
+					{"hunger": -5},
+					{"carry": 1} 
 				]
+			}, {
+				"name": "Short Sword", 
+				"short": "A Short Sword",
+				"long": "A sharp looking short sword with a hilt wrapped in leather." ,
+				"area": "Midgaard",
+				"id": 1, 
+				"level": 1,
+				"itemType": "weapon",
+				"material": "iron", 
+				"diceNum": 2, 
+				"diceSides": 4, 
+				"attackType": "Slice", 
+				"attackElement": "",
+				"flags": []
 			}],
 			"flags" : []
 		}

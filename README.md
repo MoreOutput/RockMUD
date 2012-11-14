@@ -15,17 +15,20 @@ Goals:
 * Everything is JavaScript / JSON.
 * Engine should be easily modified to allow it to power RPG web apps.
 
-Note: Not using a node MVC framework. Client-side I use DOJO 1.8.
+Notes on dependencies: 
+* Not using a Node MVC framework. 
+* Client side I use DOJO 1.8
+* socket.io >= .9
+* Node > .8.3
 
-Current 'features' in v.1.5:
-* Simple
-* Character creation (Races, Classes, Stats) and saving as json files.
+Currently in v.1.5:
+* Simple architecture with no whitelisting of commands
+* Character creation (Races, Classes, Stats, Passwords) and saving as json files.
 * Channels 
-* Uniform way of outling commands, with permission checking
+* Uniform way of scripting commands -- with user permission checking
 * JSON areas with room parsing of items, monsters, exits
 * Asynchronous, no Globals
-* Various 'standard' commands: who, look, help, score, save, title, quit
+* Alaises. Defined client side.
+* Various 'standard' commands: who, look, help, score, save, title, quit, get, drop
+* AMD Loader for client side scripts
 
-Quick install tip: make sure to have a version of socket.io >= .9 in the node_modules folder
-as I have decided to not include socket.io with this branch. I will do my best to make sure
-I keep up with it. Node > .8.3

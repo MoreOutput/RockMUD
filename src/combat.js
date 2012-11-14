@@ -1,5 +1,5 @@
 var Combat = function() {
-	
+
 }
 
 Combat.prototype.firstRound = function(s, player2, fn) {
@@ -42,17 +42,13 @@ Combat.prototype.nextRound = function(s, player2, fn) {
 				
 				Combat.msgToPlayer('', function() {
 					s.emit('msg', {msg: attack, styleClass: 'error'});	
-					
 					Combat.msgToOpponent('', function() {
-						s.emit('msg', {msg: attack, styleClass: 'error'});						
-							
+						s.emit('msg', {msg: attack, styleClass: 'error'});
 						Combat.msgToRoom('', function() {
 							s.emit('msg', {msg: attack, styleClass: 'error'});
-							
 						});
 					});
 				});
-				
 				
 				return fn(player2);
 			});					

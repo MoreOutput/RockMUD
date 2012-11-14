@@ -130,7 +130,7 @@ Character.prototype.addPlayer = function(s, fn) {
 					name: s.player.name, 
 					sid: s.id,
 					area: s.player.area,
-					vnum: s.player.vnum
+					roomid: s.player.roomid
 				});
 			
 				fn(true);
@@ -141,7 +141,7 @@ Character.prototype.addPlayer = function(s, fn) {
 			name: s.player.name, 
 			sid: s.id,
 			area: s.player.area,
-			vnum: s.player.vnum
+			roomid: s.player.roomid
 		});
 
 		fn(true);
@@ -181,7 +181,7 @@ Character.prototype.create = function(r, s, fn) {
 		load: 0,
 		visible: true,
 		area: 'Midgaard', // must match an area file
-		vnum: 1, // current room
+		roomid: 1, // current room
 		recall: 1, // vnum to recall to
 		description: 'A brand new citizen.',
 		eq: {
@@ -199,10 +199,10 @@ Character.prototype.create = function(r, s, fn) {
 			ring2: '',
 			floating: ''
 		}, 
-		inventory: [
+		items: [
 			{
 			name: 'Short Sword', 
-			vnum: 1, 
+			roomid: 1, 
 			itemType: 'weapon',
 			material: 'iron', 
 			diceNum: 2, 
@@ -343,7 +343,7 @@ Character.prototype.newCharacter = function(s, fn) { // TODO: break this into sm
 											s.on('setPassword', function(r) {
 												if (r.msg.length > 7) {
 													s.player.password = r.msg;
-													character.create(r, s, players, fn);
+													character.create(r, s, fn);
 												} else {
 													s.emit('msg', {msg: 'Password should be longer', styleClass: 'error' });
 												}											
@@ -440,7 +440,7 @@ Character.prototype.hunger = function(s, fn) {
 	
 	if (s.player.hunger < 10) {
 		Dice.roll(1, 4, function(total) {
-			if (total + conMod < 5) { // Roll to reduce hunger pangs, CON?
+			if (total + conMod < 5) { 
 				s.player.hunger = s.player.hunger + 1;
 			}			
 						
@@ -468,7 +468,7 @@ Character.prototype.thirst = function(s, fn) {
 	
 	if (s.player.thirst < 10) {
 		Dice.roll(1, 4, function(total) {
-			if (total + conMod < 5) { // Roll to reduce hunger pangs, CON?
+			if (total + conMod < 5) { 
 				s.player.thirst = s.player.thirst + 1;
 			}			
 						
@@ -487,9 +487,22 @@ Character.prototype.thirst = function(s, fn) {
 	}
 }
 
-// boolean if item is in a players inventory
-Character.prototype.checkItem = function(s, name, fn) {
-
+// boolean if item with the same vnum is in a players inventory
+Character.prototype.checkInventory = function(r, s, fn) {
+	var i = 0,
+	msgPatt = new RegExp('^' + r.msg);
+	
+	if (s.player.items.length > 0) {
+		for (i; i < s.player.items.length; i += 1){
+			if (msgPatt.test(s.player.items[i].name.toLowerCase())) {
+				fn(true, s.player.items[i]);
+			} else if (i === s.player.items.length - 1) {
+				fn(false);
+			}
+		}
+	} else {
+		fn(false);
+	}
 }
 
 // push an item into a players inventory, checks items to ensure a player can use it
@@ -497,6 +510,24 @@ Character.prototype.addToInventory = function(s, item, fn) {
 	s.player.items.push(item);
 	
 	fn(true);
+}
+
+// remove from inventory -- I AM HERE
+Character.prototype.removeFromInventory = function(s, itemObj, fn) {
+	var i = 0;
+	if (s.player.items.length > 0) {
+		s.player.items = s.player.items.filter(function(item, i) {
+			if (item.id === itemObj.id) {
+				return false;
+			} else {
+				return true;
+			}				
+		});
+		
+		fn(true);		
+	} else {
+		fn(false);
+	}
 }
 
 // Updates a players reference in players[] with some data attached to the socket
@@ -507,9 +538,9 @@ Character.prototype.updatePlayer = function(s, fn) {
 		if (s.player.name === players[i].name) {
 			players[i] = {
 				name: s.player.name, 
-				sid: s.id,
-				area: s.area,
-				vnum: s.vnum
+				sid: s.player.id,
+				area: s.player.area,
+				roomid: s.player.roomid
 			};
 			
 			if (typeof fn === 'function') {
@@ -523,14 +554,11 @@ Character.prototype.updatePlayer = function(s, fn) {
 
 Character.prototype.prompt = function(s) {
 	return s.emit('msg', {msg: s.player.name + ', hp:' + s.player.chp +  ' room:' 
-		+ s.player.vnum + '> ', styleClass: 'cprompt'});
+		+ s.player.roomid + '> ', styleClass: 'cprompt'});
 }
 
-Character.prototype.level = function() {
+Character.prototype.level = function(s, fn) {
 
 }
 
-/*
-Character based Ticks 
-*/
 module.exports.character = new Character();

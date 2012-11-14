@@ -1,16 +1,12 @@
 /*
  * RockMUD, NodeJS HTTP/WS Mud Engine
- * Rocky Bevins, 2012 (rockybevins@gmail.com)
+ * Rocky Bevins, 2012 (moreoutput@gmail.com)
  * We want to be able to build Diku style MUDs with only JS (areas will be JSON). 
 */
-
-// Our 'globals'
-
-
 var http = require('http'),
 fs = require('fs'),
 cfg = require('./config').server,
-server  = http.createServer(function (req, res) {
+server = http.createServer(function (req, res) {
 	if (req.url === '/' || req.url === '/index.html') {
 		fs.readFile('./index.html', function (err, data) {
         	if (err) {
@@ -45,17 +41,20 @@ server  = http.createServer(function (req, res) {
 }),
 io = require('socket.io').listen(server);
 
-module.exports.io = io;
+// considering referencing these within their respective modules, ex: Character.players rather than players[]
+module.exports.io = io; 
 module.exports.players = [];
 module.exports.areas = [];
 
 var Character = require('./src/character').character,
-Cmds = require('./src/commands').cmd, 
+Cmds = require('./src/commands').cmd,
 Skills = require('./src/skills').skill;
+
+io.set('log level', 1);
 
 server.listen(cfg.port);
 
-// Ticks
+// Healing, Hunger and Thirst Tick
 setInterval(function() { 
 	var i = 0,
 	s = {};
@@ -78,6 +77,7 @@ setInterval(function() {
 	}	
 }, 6000 * 10);	
 
+// Saving characters Tick
 setInterval(function() {
 	var i = 0,
 	s = {};
@@ -91,7 +91,8 @@ setInterval(function() {
 			}							
 		}
 	}
-}, 60000 * 10);
+}, 60000 * 12);
+
 
 io.on('connection', function (s) {
 	s.on('login', function (r) {	
@@ -99,7 +100,7 @@ io.on('connection', function (s) {
 			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {			
 				r.cmd = r.msg.replace(/_.*/, '').toLowerCase();
 				r.msg = r.msg.replace(/^.*?_/, '').replace(/_/g, ' ');				
-				// Commands and Skills are passed socket.io to grab other players via socket id
+
 				if (r.cmd != '') {
 					if (r.cmd in Cmds) {
 						return Cmds[r.cmd](r, s);
@@ -151,25 +152,26 @@ io.on('connection', function (s) {
 				msg: 'Add a little to a little and there will be a big pile.',
 				emit: 'disconnect',
 				styleClass: 'logout-msg'
-			}); 	
+			});
 
-			s.leave('mud');	
-			s.disconnect();		
+			s.leave('mud');
+			s.disconnect();
 		});
-
 	});
 
 	// DC
     s.on('disconnect', function () {
 		var i = 0;
 		if (s.player != undefined) {
-			for (i; i < module.exports.players.length; i += 1) {
-				if (module.exports.players[i].name === s.player.name) {
-					module.exports.players.splice(i, 1);	
-				}
-			}
+			module.exports.players = module.exports.players.filter(function(item, i) {
+				if (s.player.name === item.name) {
+					return false;
+				} else {
+					return true;
+				}				
+			});
 		}
-	});  
+	});
 
 	s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 });

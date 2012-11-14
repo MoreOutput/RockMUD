@@ -13,7 +13,7 @@
     "expToLevel": 1000,
     "position": "standing",
     "alignment": "",
-    "chp": -595,
+    "chp": 110,
     "hp": 110,
     "str": 14,
     "wis": 11,
@@ -22,12 +22,12 @@
     "con": 13,
     "ac": 10,
     "gold": 1000,
-    "hunger": 10,
-    "thirst": 10,
+    "hunger": 1,
+    "thirst": 1,
     "carry": 140,
     "load": 0,
     "area": "Midgaard",
-    "vnum": 1,
+    "roomid": 1,
     "recall": 1,
     "description": "A brand new citizen.",
     "eq": {
@@ -45,61 +45,10 @@
         "ring2": "",
         "floating": ""
     },
-    "items": [
-        {
-            "name": "Short Sword",
-            "vnum": 1,
-            "itemType": "weapon",
-            "material": "iron",
-            "diceNum": 2,
-            "diceSides": 6,
-            "attackType": "Slice",
-            "attackElement": "",
-            "flags": []
-        },
-        {
-            "name": "Loaf of bread",
-            "short": "A loaf of bread",
-            "long": "A rather stale looking loaf of bread is here",
-            "vnum": 5,
-            "level": 1,
-            "itemType": "food",
-            "flags": [
-                {
-                    "hunger": -5
-                }
-            ]
-        },
-        {
-            "name": "Loaf of bread",
-            "short": "A loaf of bread",
-            "long": "A rather stale looking loaf of bread is here",
-            "vnum": 5,
-            "level": 1,
-            "itemType": "food",
-            "flags": [
-                {
-                    "hunger": -5
-                }
-            ]
-        },
-        {
-            "name": "Loaf of bread",
-            "short": "A loaf of bread",
-            "long": "A rather stale looking loaf of bread is here",
-            "vnum": 5,
-            "level": 1,
-            "itemType": "food",
-            "flags": [
-                {
-                    "hunger": -5
-                }
-            ]
-        }
-    ],
+    "items": [],
     "skills": [],
-    "feats": [],
+    "traits": [],
     "affects": [],
-    "saved": "Sun Nov 04 2012 02:17:53 GMT-0500 (Eastern Standard Time)",
-    "sid": "jRf5l5W-fWIdLSk_SDKR"
+    "saved": "Wed Nov 14 2012 00:59:07 GMT-0500 (Eastern Standard Time)",
+    "sid": "JP8rDpAf3wxkhBrKfxv_"
 }
