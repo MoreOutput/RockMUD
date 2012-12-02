@@ -34,7 +34,7 @@ Room.prototype.getRoom = function(s, fn) {
 				room.getExits(rooms[i], function(exits) {
 					room.getPlayers(s, rooms[i], function(playersInRoom) {
 						room.getItems(rooms[i], {specific: 'short'}, function(items) {	
-							room.getMonsters(rooms[i], function(monsters) {							
+							room.getMonsters(rooms[i], {specific: 'short'}, function(monsters) {							
 								if (exits.length > 0) {
 									roomStr += '<li class="room-exits">Visible Exits: ' + exits.toString() + '</li>';
 								} else {
@@ -194,14 +194,32 @@ Room.prototype.getItems = function(room, optObj, fn) {
 	}
 }
 
-Room.prototype.getMonsters = function(room, fn) {
+Room.prototype.getMonsters = function(room, optObj, fn) {
 	var arr = [],
 	i = 0;
-	
-	for (i; i < room.monsters.length; i += 1) {
-		arr.push(room.monsters[i].short);
-	
-		if (arr.length === room.monsters.length) {
+
+	if (optObj.specific != undefined) {
+		if (room.monsters.length > 0) {
+			for (i; i < room.monsters.length; i += 1) {
+				arr.push(room.monsters[i][optObj.specific]);
+		
+				if (arr.length === room.monsters.length) {
+					return fn(arr);
+				}
+			}
+		} else {
+			return fn(arr);
+		}
+	} else {
+		if (room.monsters.length > 0) {
+			for (i; i < room.monsters.length; i += 1) {
+				arr.push(room.monsters[i]);
+			
+				if (arr.length === room.monsters.length) {
+					return fn(arr);
+				}
+			}
+		} else {
 			return fn(arr);
 		}
 	}
@@ -221,46 +239,31 @@ Room.prototype.checkArea = function(areaName, fn) {
 	}
 };
 
-Room.prototype.checkExit = function(s) { //  boolean if exit is viable (exit must match both the room and a command)
+// does a string match an exit in the room
+Room.prototype.checkExit = function(s) { 
 
+}
+
+// does a string match any monsters in the room
+Room.prototype.checkMonster = function(r, s, fn) { 
+	var room = this,
+	i = 0;
 	
-
-
-
-	fs.readFile('./areas/' + character[s.id].area + '.json', function (err, r) {
-		var i = 0,
-        area = {};
-
-        if (err) {
-			throw err;
-        }
-
-        area = JSON.parse(r);
-
-        for (i; i < area.Room.length; i += 1) {
-			if (area.Room[i].id === character[s.id].roomid) {
-				var exits = (function() {
-					var eArr = [],
-					j = 0;
-					for (j; j < area.Room[i].exits.length; j += 1) {
-						eArr.push(area.Room[i].exits[j].cmd);
-						if (eArr.length === area.Room[i].exits.length) {
-							return eArr.toString();
-						}
-					}
-				}());
-
-                return s.emit('msg', {
-					msg: '<div class="room-title">' + area.Room[i].title + '</div>' +
-                    '<div class="room-content">' + area.Room[i].content + '</div>' +
-                    '<div class="room-exits">Visible Exits: [' + exits + ']</div>',
-					styleClass: area.type + ' room'
-				});
-            } else {
-				return s.emit('msg', {msg: 'Room load failed.'});
-            }
+	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
+		if (roomObj.monsters.length > 0) {
+			var msgPatt = new RegExp('^' + r.msg);
+			
+			for (i; i < roomObj.monsters.length; i += 1) {
+				if (msgPatt.test(roomObj.monsters[i].name.toLowerCase())) {
+					fn(true, roomObj.monsters[i]);
+				} else if (i === roomObj.monsters.length - 1){
+					fn(false);
+				}
+			}
+		} else {
+			fn(false);
 		}
-	});
+	});	
 }
 
 // does a string match an item in the room

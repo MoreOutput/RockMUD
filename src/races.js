@@ -22,6 +22,6 @@ var Race = function() {
 	];
 }
 
-/* Racial based skills */
+/* Racial skills */
 
 module.exports.race = new Race();

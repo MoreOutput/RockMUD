@@ -13,7 +13,7 @@
     "expToLevel": 1000,
     "position": "standing",
     "alignment": "",
-    "chp": 110,
+    "chp": 99,
     "hp": 110,
     "str": 14,
     "wis": 11,
@@ -22,8 +22,8 @@
     "con": 13,
     "ac": 10,
     "gold": 1000,
-    "hunger": 1,
-    "thirst": 1,
+    "hunger": 9,
+    "thirst": 4,
     "carry": 140,
     "load": 0,
     "area": "Midgaard",
@@ -45,10 +45,43 @@
         "ring2": "",
         "floating": ""
     },
-    "items": [],
+    "items": [
+        {
+            "name": "Short Sword",
+            "short": "A Short Sword",
+            "long": "A sharp looking short sword with a hilt wrapped in leather.",
+            "area": "Midgaard",
+            "id": 1,
+            "level": 1,
+            "itemType": "weapon",
+            "material": "iron",
+            "diceNum": 2,
+            "diceSides": 4,
+            "attackType": "Slice",
+            "attackElement": "",
+            "flags": []
+        },
+        {
+            "name": "bread",
+            "short": "A loaf of bread",
+            "long": "A rather stale looking loaf of bread.",
+            "area": "Midgaard",
+            "id": 5,
+            "level": 1,
+            "itemType": "food",
+            "flags": [
+                {
+                    "hunger": -5
+                },
+                {
+                    "carry": 1
+                }
+            ]
+        }
+    ],
     "skills": [],
     "traits": [],
     "affects": [],
-    "saved": "Wed Nov 14 2012 00:59:07 GMT-0500 (Eastern Standard Time)",
-    "sid": "JP8rDpAf3wxkhBrKfxv_"
+    "saved": "Thu Nov 15 2012 14:50:38 GMT-0500 (Eastern Standard Time)",
+    "sid": "DdqzpqCuCrZA2HXGn0Io"
 }

@@ -83,7 +83,7 @@ Character.prototype.getPassword = function(s, fn) {
 		if (r.msg.length > 7) {
 			character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
 				if (s.player.password === hash) {
-					character.addPlayer(s, function(added) {
+					character.addPlayer(s, function(added, msg) {
 						if (added) {
 							Room.checkArea(s.player.area, function(fnd) {
 								if (!fnd) {
@@ -100,7 +100,12 @@ Character.prototype.getPassword = function(s, fn) {
 								});
 							});
 						} else {
-							s.emit('msg', {msg: 'Error logging in, please retry.'});
+							if (msg === undefined) {
+								s.emit('msg', {msg: 'Error logging in, please retry.'});
+							} else {
+								s.emit('msg', {msg: msg})
+							}
+							
 							return s.disconnect();
 						}
 					});
@@ -122,7 +127,7 @@ Character.prototype.addPlayer = function(s, fn) {
 	if (players.length > 0) {
 		for (i; i < players.length; i += 1) {
 			if (s.player.name === players[i].name) {
-				return fn(false);
+				return fn(false, 'Already Logged in');
 			}
 			
 			if (i === players.length - 1) {
@@ -475,13 +480,13 @@ Character.prototype.thirst = function(s, fn) {
 			if (s.player.thirst >= 5) {
 				s.player.chp = s.player.chp - 1;
 			
-				s.emit('msg', {msg: 'You are Thirsty.', styleClass: 'hunger'});
+				s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'hunger'});
 				fn();
 			}
 		});	
 	} else {
 		s.player.chp = (s.player.chp - 10 + conMod);
-		s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'hunger'});
+		s.emit('msg', {msg: 'You are dying of thirst.', styleClass: 'hunger'});
 		
 		fn();
 	}

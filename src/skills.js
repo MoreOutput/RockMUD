@@ -10,8 +10,31 @@ var Skill = function() {
 	this.perms = ['admin'];
 }
 
-Skill.prototype.kill = function(r, s, fn) {
-	
+// For attacking in-game monsters
+Skill.prototype.kill = function(r, s) {
+	Room.checkMonster(r, s, function(fnd, monster) {
+		if (fnd) {
+			Combat.begin(s, monster, function(contFight, monster) { // the first round qualifiers
+				if (contFight) {
+					while (s.player.position === 'fighting' && monster.position === 'fighting') {
+						Combat.round(s, monster, function() {
+							
+							if (monster.chp <= 0 || s.player.chp <= 0) {
+								monster.position = 'dead';
+								Character.prompt(s);
+							}						
+						});						
+					}					
+				}
+			});
+		} else {
+			s.emit('msg', {msg: 'There is nothing by that name here.', styleClass: 'error'});
+		}
+	});
+}
+
+Skill.prototype.bash = function(r, s) { 
+
 }
 
 /*
@@ -53,9 +76,5 @@ Skill.prototype.kill = function(r, s, fn) {
 	}	
 }
 */
-
-Skill.prototype.bash = function(r, s, fn) {
-
-}
 
 module.exports.skill = new Skill();

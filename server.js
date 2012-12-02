@@ -93,7 +93,6 @@ setInterval(function() {
 	}
 }, 60000 * 12);
 
-
 io.on('connection', function (s) {
 	s.on('login', function (r) {	
 		var parseCmd = function(r, s) {
@@ -115,6 +114,7 @@ io.on('connection', function (s) {
 				}
 			} else {
 				s.emit('msg', {msg: 'Invalid characters in command.'});
+				return Character.prompt(s);
 			}
 		};
 
@@ -163,13 +163,11 @@ io.on('connection', function (s) {
     s.on('disconnect', function () {
 		var i = 0;
 		if (s.player != undefined) {
-			module.exports.players = module.exports.players.filter(function(item, i) {
-				if (s.player.name === item.name) {
-					return false;
-				} else {
-					return true;
-				}				
-			});
+			for (i; i < module.exports.players.length; i += 1) {
+				if (module.exports.players[i].name === s.player.name) {
+					module.exports.players.splice(i, 1);	
+				}
+			}
 		}
 	});
 

@@ -35,6 +35,9 @@
 					"type": "monster",
 					"race": "animal",
 					"limit": 2,
+					"hp": 10,
+					"chp": 10,
+					"position": "standing",
 					"ac": 6
 				}, {
 					"name": "Boar",
@@ -46,6 +49,9 @@
 					"type": "monster",
 					"race": "animal",
 					"limit": 2,
+					"hp": 10,
+					"chp": 10,
+					"position": "standing",
 					"ac": 6
 				}
 			],
