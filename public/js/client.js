@@ -1,4 +1,8 @@
-require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'dojo/_base/event', 'dojo/window', 'dojo/ready', 'dojo/NodeList-dom'], 
+/*
+ Client Side JS for RockMUD
+ Rocky Bevins, moreoutput@gmail.com 2012
+*/
+ require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'dojo/_base/event', 'dojo/window', 'dojo/ready', 'dojo/NodeList-dom'], 
 	function (dom, string, query, domAttr, on, event, win, ready) {
 		ready(function () {
 			'use strict';

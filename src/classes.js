@@ -1,6 +1,6 @@
 /*
 Outline of game classes class skills are just skills in skill.js.
-There should be no strong ties between skills and classes, we want a skill to be accessible the only
+There should be no strong ties between skills and classes, we want a skill to be accessible -- the only
 requirement within the codebase is if it is in player.skills[]
 */
 var Classes = function() {

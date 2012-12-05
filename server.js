@@ -27,8 +27,8 @@ server = http.createServer(function (req, res) {
            	res.write(data);
            	res.end();
         });
-    } else if (req.url === '/amclient.js') {
-		fs.readFile('./public/js/amclient.js', function (err, data) {
+    } else if (req.url === '/client.js') {
+		fs.readFile('./public/js/client.js', function (err, data) {
 			if (err) {
 				throw err;
             }
