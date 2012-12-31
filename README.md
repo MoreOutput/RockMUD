@@ -30,5 +30,5 @@ Currently in v.1.5:
 * Asynchronous, no Globals
 * Command aliases defined client side.
 * Various 'standard' commands: who, look, help, score, save, title, quit, get, drop
-* AMD loading for client side scripts
+* AMD loader for client side scripts
 

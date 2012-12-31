@@ -1,14 +1,14 @@
 /*
  * RockMUD, NodeJS HTTP/WS Mud Engine
- * Rocky Bevins, 2012 (moreoutput@gmail.com)
- * We want to be able to build Diku style MUDs with only JS (areas will be JSON). 
+ * Rocky Bevins, 2013 (moreoutput@gmail.com)
+ * We want to be able to build Browser, Diku-style, MUDs with only JS/JSON. 
 */
 var http = require('http'),
 fs = require('fs'),
-cfg = require('./config').server,
+cfg = require('./config').server.game,
 server = http.createServer(function (req, res) {
 	if (req.url === '/' || req.url === '/index.html') {
-		fs.readFile('./index.html', function (err, data) {
+		fs.readFile(cfg.home, function (err, data) {
         	if (err) {
 				throw err;
 			}
@@ -62,6 +62,7 @@ setInterval(function() {
 	if (module.exports.players.length > 0) {	
 		for (i; i < module.exports.players.length; i += 1) {
 			s = io.sockets.socket(module.exports.players[i].sid);
+			
 			if (s.player.chp <= s.player.hp) {			
 				Character.hunger(s, function() {
 					Character.thirst(s, function() {							
@@ -75,7 +76,7 @@ setInterval(function() {
 			}								
 		}		
 	}	
-}, 6000 * 10);	
+}, 60000);	
 
 // Saving characters Tick
 setInterval(function() {
@@ -91,7 +92,7 @@ setInterval(function() {
 			}							
 		}
 	}
-}, 60000 * 12);
+}, 60000 * 15);
 
 io.on('connection', function (s) {
 	s.on('login', function (r) {	

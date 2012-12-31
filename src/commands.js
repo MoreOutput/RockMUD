@@ -1,3 +1,8 @@
+/*
+* All non-combat commands that one would consider 'general' to a wide section
+* of users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
+*/
+
 var Character = require('./character').character,
 Room = require('./rooms').room,
 io = require('../server').io,
@@ -38,31 +43,36 @@ Cmd.prototype.who = function(r, s) {
 	players.forEach(function(player) {
 		var i = 0,
 		str = '',
-		s = io.sockets.socket(players[0].sid);
+		player = io.sockets.socket(players[i].sid).player; // A visible player in players[]
 
 		if (players.length > 0) {
-			for (i; i < players.length; i += 1) {
-				str += '<li>' + s.player.name[0].toUpperCase() + 
-					s.player.name.slice(1) + ' ';
+			for (i; i < players.length; i += 1) {		
+				str += '<li>' + player.name[0].toUpperCase() + 
+					player.name.slice(1) + ' ';
 
-				if (s.player.title === '') {
-					str += 'a level ' + players[i].level   +
-						' ' + s.player.race + 
-						' ' + s.player.charClass; 
+				if (player.title === '') {
+					str += 'a level ' + player.level   +
+						' ' + player.race + 
+						' ' + player.charClass; 
 				} else {
-					str += s.player.title;
+					str += player.title;
 				}					
 
-				str += ' (' + s.player.role + ')' +					
-					'</li>';	
-					
-				if (i === players.length - 1) {
-					s.emit('msg', {
-						msg: '<h1>Visible Players</h1>' + str, 
-						styleClass: 'who-cmd'
-					});
-				}
+				str += ' (' + player.role + ')' +					
+					'</li>';
+
+				player = io.sockets.socket(players[i].sid).player;
 			}
+			
+			s.emit('msg', {
+				msg: '<h1>Visible Players</h1>' + str, 
+				styleClass: 'who-cmd'
+			});
+		} else {
+			s.emit('msg', {
+				msg: '<h1>Visible Players</h1>' + str, 
+				styleClass: 'who-cmd'
+			});
 		}
 	});
 	
@@ -134,8 +144,6 @@ Cmd.prototype.say = function(r, s) {
 
 	for (i; i < players.length; i += 1) {
 		if (players[i].name === r.msg && r.msg != s.player.name) {
-			
-		} else {
 			
 		}
 	}
@@ -229,23 +237,22 @@ Cmd.prototype.title = function(r, s) {
 
 // View equipment
 Cmd.prototype.equipment = function(r, s) {
-	var keys = Object.keys(s.players.eq),
+	var keys = Object.keys(s.player.eq),
 	eq = '',
 	i = 0;	
 	
 	for (i; i < keys.length; i += 1) {
 		eqStr += '<li>' + keys[i] + '</li>';
-		
-		if (i === keys.length - 1) {
-			s.emit('msg', {
-				msg: '<div class="name">You are wearing the following:</div>' +
-				'<ul class="stats">' +
-				eqStr + '</ul>', 
-				styleClass: 'eq' 
-			});
-			return Character.prompt(s);
-		}
 	}
+	
+	s.emit('msg', {
+		msg: '<div class="name">You are wearing the following:</div>' +
+			'<ul class="stats">' +
+		eqStr + '</ul>', 
+		styleClass: 'eq' 
+	});
+	
+	return Character.prompt(s);
 }
 
 // Current skills
@@ -256,11 +263,10 @@ Cmd.prototype.skills = function(r, s) {
 	if (s.player.skills.length > 0) {
 		for (i; i < s.player.skills.length; i += 1) {
 			skills += s.player.skills[i].name;
-			if (i === s.player.skills.length - 1) {
-				s.emit('msg', {msg: 'skills', styleClass: 'eq' });
-				return Character.prompt(s);
-			}
 		}
+		
+		s.emit('msg', {msg: 'skills', styleClass: 'eq' });
+		return Character.prompt(s);
 	} else {
 		s.emit('msg', {msg: 'skills', styleClass: 'eq' });
 		return Character.prompt(s);
@@ -304,12 +310,10 @@ Cmd.prototype.inventory = function(r, s) {
 	if (s.player.items.length > 0) {
 		for (i; i < s.player.items.length; i += 1) {			
 			iStr += '<li>' + s.player.items[i].short + '</li>';
-			
-			if (i === s.player.items.length - 1) {
-				s.emit('msg', {msg: '<ul>' + iStr + '</ul>', styleClass: 'inventory' });
-				return Character.prompt(s);
-			}
 		}
+		
+		s.emit('msg', {msg: '<ul>' + iStr + '</ul>', styleClass: 'inventory' });
+		return Character.prompt(s);
 	} else {
 		s.emit('msg', {msg: 'No items in your inventory, can carry ' + s.player.carry + ' pounds of gear.', styleClass: 'inventory' });
 		return Character.prompt(s);

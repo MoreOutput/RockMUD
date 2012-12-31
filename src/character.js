@@ -5,10 +5,10 @@ and therefore defined in commands.js. See: save().
 */
 var fs = require('fs'),
 crypto = require('crypto'),
-Races = require('./races').race,
-Classes = require('./classes').classes,
 Room = require('./rooms').room,
 Dice = require('./dice').roller,
+races = require('../config').server.races,
+classes = require('../config').server.classes,
 players = require('../server').players,
 areas = require('../server').areas;
 
@@ -271,26 +271,26 @@ Character.prototype.rollStats = function(player, fn) {
 	raceKey, // property of the race defines in raceList
 	classKey; // property of the class defines in classList
 
-	for (i; i < Races.raceList.length; i += 1) {		// looking for race
-		if (Races.raceList[i].name.toLowerCase() === player.race) {	 // found race		
+	for (i; i < races.length; i += 1) {		// looking for race
+		if (races[i].name.toLowerCase() === player.race) {	 // found race		
 			for (raceKey in player) {
-				if (player[raceKey] in Races.raceList[i] && raceKey != 'name') { // found, add in stat bonus						
-						player[player[raceKey]] = player[player[raceKey]] + Races.raceList[i][player[raceKey]];	
+				if (player[raceKey] in races[i] && raceKey != 'name') { // found, add in stat bonus						
+						player[player[raceKey]] = player[player[raceKey]] + races[i][player[raceKey]];	
 				}
 			}
 		}		
 				
-		if (i === Races.raceList.length - 1) { // rolling stats is finished
-			for (j; j < Classes.classList.length; j += 1) { // looking through classes
-				if (Classes.classList[j].name.toLowerCase() === player.charClass) { // class match found
+		if (i === races.length - 1) { // rolling stats is finished
+			for (j; j < classes.length; j += 1) { // looking through classes
+				if (classes[j].name.toLowerCase() === player.charClass) { // class match found
 					for(classKey in player) {
-						if (classKey in Classes.classList[j] && classKey != 'name') {
-							player[classKey] = Classes.classList[j][classKey] + player[classKey];
+						if (classKey in classes[j] && classKey != 'name') {
+							player[classKey] = classes[j][classKey] + player[classKey];
 						}
 					}
 				}
 
-				if (j === Classes.classList.length - 1) {
+				if (j === classes.length - 1) {
 					player.carry = player.str * 10;
 					return fn(player);
 				}
@@ -299,15 +299,15 @@ Character.prototype.rollStats = function(player, fn) {
 	}		
 }
 
-Character.prototype.newCharacter = function(s, fn) { // TODO: break this into smaller bits? Sort of like the deep nest here...
+Character.prototype.newCharacter = function(s, fn) { // TODO: break this into smaller bits? Sort of like the deep nest here...unneeded if statements
 	var character = this,
 	i = 0, 
 	str = '';
 	
-	for (i; i < Races.raceList.length; i += 1) {
-		str += '<li>' + Races.raceList[i].name + '</li>';
+	for (i; i < races.length; i += 1) {
+		str += '<li>' + races[i].name + '</li>';
 
-		if	(Races.raceList.length - 1 === i) {
+		if	(races.length - 1 === i) {
 			s.emit('msg', {msg: s.player.name + ' is a new character! There are three more steps until ' + s.player.name + 
 			' is saved. The next step is to select your race: <ul>' + str + '</ul>', res: 'selectRace', styleClass: 'race-selection'});		
 	
@@ -320,10 +320,10 @@ Character.prototype.newCharacter = function(s, fn) { // TODO: break this into sm
 						str = '';
 						s.player.race = r.msg;
 	
-						for (i; i < Classes.classList.length; i += 1) {
-							str += '<li>' + Classes.classList[i].name + '</li>';
+						for (i; i < classes.length; i += 1) {
+							str += '<li>' + classes.name + '</li>';
 
-							if	(Classes.classList.length - 1 === i) {
+							if	(classes.length - 1 === i) {
 								s.emit('msg', {
 									msg: 'Great! Now time to select a class ' + s.player.name + '. Pick on of the following: <ul>' + 
 									str + '</ul>', 
@@ -372,25 +372,25 @@ Character.prototype.newCharacter = function(s, fn) { // TODO: break this into sm
 Character.prototype.raceSelection = function(r, fn) {
 	var i = 0;
 	
-	for (i; i < Races.raceList.length; i += 1) {
-		if (r.msg === Races.raceList[i].name.toLowerCase()) {
+	for (i; i < races.length; i += 1) {
+		if (r.msg === races[i].name.toLowerCase()) {
 			return fn(true);
-		} else if (i === Races.raceList.length - 1) {
-			return fn(false);
 		}
 	}
+	
+	return fn(false);
 }
 
 Character.prototype.classSelection = function(r, fn) {
 	var i = 0;	
 	
-	for (i; i < Classes.classList.length; i += 1) {
-		if (r.msg === Classes.classList[i].name.toLowerCase()) {
+	for (i; i < classes.length; i += 1) {
+		if (r.msg === classes[i].name.toLowerCase()) {
 			return fn(true)
-		} else if (i === Classes.classList.length - 1) {
-			return fn(false)
 		}
 	}
+	
+	return fn(false)
 }
 
 Character.prototype.motd = function(s, fn) {	
@@ -441,7 +441,7 @@ Character.prototype.hpRegen = function(s, fn) {
 
 Character.prototype.hunger = function(s, fn) {
 	var character = this,
-	conMod = Math.ceil(s.player.con/4);
+	conMod = Math.ceil(s.player.con/3);
 	
 	if (s.player.hunger < 10) {
 		Dice.roll(1, 4, function(total) {
@@ -469,24 +469,24 @@ Character.prototype.hunger = function(s, fn) {
 
 Character.prototype.thirst = function(s, fn) {
 	var character = this,
-	conMod = Math.ceil(s.player.con/4);
+	dexMod = Math.ceil(s.player.dex/3);
 	
 	if (s.player.thirst < 10) {
 		Dice.roll(1, 4, function(total) {
-			if (total + conMod < 5) { 
+			if (total + dexMod < 5) { 
 				s.player.thirst = s.player.thirst + 1;
 			}			
 						
 			if (s.player.thirst >= 5) {
 				s.player.chp = s.player.chp - 1;
 			
-				s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'hunger'});
+				s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'thirst'});
 				fn();
 			}
 		});	
 	} else {
-		s.player.chp = (s.player.chp - 10 + conMod);
-		s.emit('msg', {msg: 'You are dying of thirst.', styleClass: 'hunger'});
+		s.player.chp = (s.player.chp - 5 + conMod);
+		s.emit('msg', {msg: 'You are dying of thirst.', styleClass: 'thirst'});
 		
 		fn();
 	}
@@ -543,7 +543,7 @@ Character.prototype.updatePlayer = function(s, fn) {
 		if (s.player.name === players[i].name) {
 			players[i] = {
 				name: s.player.name, 
-				sid: s.player.id,
+				sid: s.id,
 				area: s.player.area,
 				roomid: s.player.roomid
 			};
@@ -551,8 +551,6 @@ Character.prototype.updatePlayer = function(s, fn) {
 			if (typeof fn === 'function') {
 				fn(true);
 			} 
-		} else {
-			fn(false);
 		}
 	}
 }

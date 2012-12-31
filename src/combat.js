@@ -11,7 +11,7 @@ You swing and miss a Red Dragon with barbaric intensity
 */
 Combat.prototype.begin = function(s, monster, fn) {
 	var i = 0;
-	
+
 	s.player.position = 'fighting';
 	monster.position = 'fighting';
 	
@@ -55,16 +55,6 @@ Combat.prototype.round = function(s, monster, fn) {
 					msg: 'hit',
 					styleClass: 'hit'
 				});	
-				
-				/*
-				
-				Combat.msgToPlayer('', function() {
-					s.emit('msg', {msg: attack, styleClass: 'error'});	
-						Combat.msgToRoom('', function() {
-							s.emit('msg', {msg: attack, styleClass: 'error'});
-						});
-				});
-				*/
 				return fn();
 			});					
 		} else {

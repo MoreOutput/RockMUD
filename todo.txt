@@ -1,15 +1,13 @@
-RockMUD work before 0.2.0 (in a few days):
+Open work:
 
+- thirst update breaks reference to current player in players[]
 - Combat Rounds, 
 - All 'standard' mud channels,
 - clean up function parameters, 
-- class stats on creation
 - all character skills (skills.js)
-- one script per character class for skills (fighter.js, cleric.js)
-- save command.
 - Better parsing of commands (continuing)
-- Working on reading and adjuting areas/vnums for movement / ticks (30% or so)  
-- use socket.io to manage all logged in users rather than players[]?
+- Working on reading and adjuting areas/vnums for movement / ticks (70% or so)  
+- use socket.io to manage all logged in users rather than players[]? 
 
 Before 0.2.5
 - Hunger / Thirst

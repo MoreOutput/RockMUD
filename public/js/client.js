@@ -40,14 +40,16 @@
 				wh: 'where'
 			},			
 			checkAlias = function(cmd, fn) {
+				console.log(cmd);
 				var keys = Object.keys(aliases),
 				i = 0,
 				cmd = cmd.replace(/_.*/, '').toLowerCase(),
 				msg = cmd.replace(/^.*?_/, '').replace(/_/g, ' ');			
 			
 				for (i; i < keys.length; i += 1) {
+					console.log(aliases[keys[i]] + ' ' + msg);
 					if (keys[i] === cmd) {
-						return fn(aliases[keys[i]]);
+						return fn(aliases[keys[i]] + ' ' + msg);
 					}	
 					
 					if (i === keys.length - 1) {

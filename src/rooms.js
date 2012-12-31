@@ -1,3 +1,7 @@
+/*
+* All Room based interactions are defined here, sometimes they are called from another module
+* see a movement command like 'east' for example.
+*/
 var fs = require('fs'),
 players = require('../server').players,
 areas = require('../server').areas;
@@ -156,11 +160,8 @@ Room.prototype.getPlayers = function(s, room, fn) {
 		if (players[i].id === s.player.roomid && players[i].name != s.player.name) {
 			arr.push(' ' + players[i].name + ' is ' + s.player.position + ' here');
 		} 
-		
-		if (i === players.length - 1) {
-			return fn(arr);
-		}
 	}
+	return fn(arr);
 }
 
 Room.prototype.getItems = function(room, optObj, fn) {
@@ -171,11 +172,8 @@ Room.prototype.getItems = function(room, optObj, fn) {
 		if (room.items.length > 0) {
 			for (i; i < room.items.length; i += 1) {
 				arr.push(room.items[i][optObj.specific]);
-		
-				if (arr.length === room.items.length) {
-					return fn(arr);
-				}
 			}
+			return fn(arr);
 		} else {
 			return fn(arr);
 		}
@@ -183,11 +181,8 @@ Room.prototype.getItems = function(room, optObj, fn) {
 		if (room.items.length > 0) {
 			for (i; i < room.items.length; i += 1) {
 				arr.push(room.items[i]);
-			
-				if (arr.length === room.items.length) {
-					return fn(arr);
-				}
 			}
+			return fn(arr);
 		} else {
 			return fn(arr);
 		}
@@ -202,11 +197,9 @@ Room.prototype.getMonsters = function(room, optObj, fn) {
 		if (room.monsters.length > 0) {
 			for (i; i < room.monsters.length; i += 1) {
 				arr.push(room.monsters[i][optObj.specific]);
-		
-				if (arr.length === room.monsters.length) {
-					return fn(arr);
-				}
 			}
+			
+			return fn(arr);
 		} else {
 			return fn(arr);
 		}
@@ -214,11 +207,8 @@ Room.prototype.getMonsters = function(room, optObj, fn) {
 		if (room.monsters.length > 0) {
 			for (i; i < room.monsters.length; i += 1) {
 				arr.push(room.monsters[i]);
-			
-				if (arr.length === room.monsters.length) {
-					return fn(arr);
-				}
-			}
+			}			
+			return fn(arr);
 		} else {
 			return fn(arr);
 		}
@@ -255,11 +245,11 @@ Room.prototype.checkMonster = function(r, s, fn) {
 			
 			for (i; i < roomObj.monsters.length; i += 1) {
 				if (msgPatt.test(roomObj.monsters[i].name.toLowerCase())) {
-					fn(true, roomObj.monsters[i]);
-				} else if (i === roomObj.monsters.length - 1){
-					fn(false);
+					return fn(true, roomObj.monsters[i]);
 				}
 			}
+			
+			return fn(false);
 		} else {
 			fn(false);
 		}
@@ -278,10 +268,9 @@ Room.prototype.checkItem = function(r, s, fn) {
 				for (i; i < items.length; i += 1) {
 					if (msgPatt.test(items[i].name.toLowerCase())) {
 						fn(true, items[i]);
-					} else if (i === items.length - 1){
-						fn(false);
 					}
 				}
+				return fn(false);
 			});
 		} else {
 			fn(false);

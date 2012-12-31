@@ -1,3 +1,6 @@
+/*
+* Simulates the rolling of dice, should never directly add any modifiers.
+*/
 var Roller = function() {
 
 }
@@ -7,14 +10,13 @@ Roller.prototype.roll = function(dNum, dSides, fn) {
 	i = 0;
 		
 	for (i; i < dNum; i += 1) {
-		total = total + Math.floor(Math.random() * dSides);				
-		if(i === dNum - 1) {	
-			if (typeof fn === 'function') {
-				return fn(total);
-			} else {
-				return total;
-			}
-		}		
+		total = total + Math.floor(Math.random() * dSides);					
+	}
+	
+	if (typeof fn === 'function') {
+		return fn(total);
+	} else {
+		return total;
 	}
 }
 

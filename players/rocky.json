@@ -1,7 +1,7 @@
 {
     "name": "rocky",
     "lastname": "",
-    "title": "a level 1 ogre fighter",
+    "title": "programmer guy",
     "role": "admin",
     "password": "f8408a2e84e39faf32bd9e71fc136ed38154fabfaaac8d0c6510946138ead949",
     "salt": "499a5c50d365d9ec6e0c7f70a5b670b597fc504c8663fc55a5fc2bd232e6b88580c693a78297948ef963b69a72932554c2f025a22ad5122ef049c39cd16c0081f0acdef9cfb6aee321a50bd1026b93a4e4211fb473bab451efcbdb9492c40b09d3b4eb32fb8722b932daa7b4adfb5e83dacf247249fac57b0e01c7d0c0d1e6e8",
@@ -11,9 +11,9 @@
     "level": 1,
     "exp": 1,
     "expToLevel": 1000,
-    "position": "standing",
+    "position": "fighting",
     "alignment": "",
-    "chp": 99,
+    "chp": 110,
     "hp": 110,
     "str": 14,
     "wis": 11,
@@ -22,8 +22,8 @@
     "con": 13,
     "ac": 10,
     "gold": 1000,
-    "hunger": 9,
-    "thirst": 4,
+    "hunger": 1,
+    "thirst": 1,
     "carry": 140,
     "load": 0,
     "area": "Midgaard",
@@ -62,26 +62,24 @@
             "flags": []
         },
         {
-            "name": "bread",
-            "short": "A loaf of bread",
-            "long": "A rather stale looking loaf of bread.",
+            "name": "Short Sword",
+            "short": "A Short Sword",
+            "long": "A sharp looking short sword with a hilt wrapped in leather.",
             "area": "Midgaard",
-            "id": 5,
+            "id": 1,
             "level": 1,
-            "itemType": "food",
-            "flags": [
-                {
-                    "hunger": -5
-                },
-                {
-                    "carry": 1
-                }
-            ]
+            "itemType": "weapon",
+            "material": "iron",
+            "diceNum": 2,
+            "diceSides": 4,
+            "attackType": "Slice",
+            "attackElement": "",
+            "flags": []
         }
     ],
     "skills": [],
     "traits": [],
     "affects": [],
-    "saved": "Thu Nov 15 2012 14:50:38 GMT-0500 (Eastern Standard Time)",
-    "sid": "DdqzpqCuCrZA2HXGn0Io"
+    "saved": "Sat Dec 29 2012 21:46:53 GMT-0500 (Eastern Standard Time)",
+    "sid": "BKGMoeD360hQMEqDs_eY"
 }
