@@ -172,6 +172,7 @@ io.on('connection', function (s) {
 		}
 	});
 
+
 	s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 });
 

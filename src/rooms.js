@@ -256,6 +256,23 @@ Room.prototype.checkMonster = function(r, s, fn) {
 	});	
 }
 
+
+// Remove a monster from a room
+Room.prototype.removeMonster = function(roomQuery, fn) {
+	var i = 0;
+	this.getRoomObject(roomQuery, function(roomObj) {
+		roomObj.monsters = roomObj.monsters.filter(function(item, i) {
+			if (item.id === monster.id) {
+				return false;
+			} else {
+				return true;
+			}			
+		});	
+	});
+	
+	fn();
+}
+
 // does a string match an item in the room
 Room.prototype.checkItem = function(r, s, fn) {
 	var room = this,

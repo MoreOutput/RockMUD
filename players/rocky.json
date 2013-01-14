@@ -22,8 +22,8 @@
     "con": 13,
     "ac": 10,
     "gold": 1000,
-    "hunger": 1,
-    "thirst": 1,
+    "hunger": 5,
+    "thirst": 5,
     "carry": 140,
     "load": 0,
     "area": "Midgaard",
@@ -45,41 +45,12 @@
         "ring2": "",
         "floating": ""
     },
-    "items": [
-        {
-            "name": "Short Sword",
-            "short": "A Short Sword",
-            "long": "A sharp looking short sword with a hilt wrapped in leather.",
-            "area": "Midgaard",
-            "id": 1,
-            "level": 1,
-            "itemType": "weapon",
-            "material": "iron",
-            "diceNum": 2,
-            "diceSides": 4,
-            "attackType": "Slice",
-            "attackElement": "",
-            "flags": []
-        },
-        {
-            "name": "Short Sword",
-            "short": "A Short Sword",
-            "long": "A sharp looking short sword with a hilt wrapped in leather.",
-            "area": "Midgaard",
-            "id": 1,
-            "level": 1,
-            "itemType": "weapon",
-            "material": "iron",
-            "diceNum": 2,
-            "diceSides": 4,
-            "attackType": "Slice",
-            "attackElement": "",
-            "flags": []
-        }
+    "items": [],
+    "skills": [
+        "bash"
     ],
-    "skills": [],
     "traits": [],
     "affects": [],
-    "saved": "Sat Dec 29 2012 21:46:53 GMT-0500 (Eastern Standard Time)",
-    "sid": "BKGMoeD360hQMEqDs_eY"
+    "saved": "Sun Jan 13 2013 22:56:09 GMT-0500 (Eastern Standard Time)",
+    "sid": "qm4i5--lDKouMj3qMwIM"
 }

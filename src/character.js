@@ -219,7 +219,8 @@ Character.prototype.create = function(r, s, fn) {
 		],
 		skills: [],
 		feats: [],
-		affects: []
+		affects: [],
+		channels: ['say', 'yell', 'chat', 'achat']
 	},
 	character = this;
 	
@@ -321,7 +322,7 @@ Character.prototype.newCharacter = function(s, fn) { // TODO: break this into sm
 						s.player.race = r.msg;
 	
 						for (i; i < classes.length; i += 1) {
-							str += '<li>' + classes.name + '</li>';
+							str += '<li>' + classes[i].name + '</li>';
 
 							if	(classes.length - 1 === i) {
 								s.emit('msg', {

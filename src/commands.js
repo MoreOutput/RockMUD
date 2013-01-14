@@ -10,13 +10,12 @@ players = require('../server').players,
 areas = require('../server').areas;
 
 var Cmd = function () {
-	this.perms = ['admin'];
+
 };
 
 /*
 	Exit Commands, may adjust for completely dynamic exits -- but seems trival atm
 */
-
 Cmd.prototype.north = function(r, s) {
 	Room.checkExit(r.cmd, function(fnd) {
 		if (fnd) {
@@ -139,6 +138,68 @@ Cmd.prototype.drop = function(r, s) {
 	}
 }
 
+
+// For attacking in-game monsters
+Cmd.prototype.kill = function(r, s) {
+	Room.checkMonster(r, s, function(fnd, monster) {
+		if (fnd) {
+			Combat.begin(s, monster, function(contFight, monster) { // the first round qualifiers
+				var combatInterval;
+				
+				if (contFight) {
+					// Combat Loop
+					combatInterval = setInterval(function() {
+						if (s.player.position === 'fighting' && monster.position === 'fighting') {	
+							s.emit('msg', {msg: '*** STARTING A NEW ROUND ***', styleClass: 'alert'});
+							
+							Combat.round(s, monster, function() {
+								if (monster.chp <= 0) {
+									monster.position = 'dead';
+									clearInterval(combatInterval);
+									//Room.removeMonster();
+									//Character.calXP(s, monster, function(earnedXP) {});
+									s.emit('msg', {msg: 'You won the fight!', styleClass: 'victory'});
+								} else if (s.player.chp <= 0) {
+									clearInterval(combatInterval);
+									//Character.death(s);
+									s.emit('msg', {msg: 'You died!', styleClass: 'combat-death'});
+								}	
+
+								Character.prompt(s);
+							});	
+						}	
+					}, 2000);
+				}
+			});
+		} else {
+			s.emit('msg', {msg: 'There is nothing by that name here.', styleClass: 'error'});
+		}
+	});
+}
+
+Cmd.prototype.look = function(r, s) {
+	Room.getRoom(s, function(room) {
+		return Character.prompt(s);
+	});
+}
+
+
+Cmd.prototype.where = function(r, s) {
+	r.msg = '<ul>' + 
+	'<li>Your Name: ' + Character[s.id].name + '</li>' +
+	'<li>Current Area: ' + Character[s.id].area + '</li>' +
+	'<li>Room Number: ' + Character[s.id].id + '</li>'  +
+	'</ul>';	
+	r.styleClass = 'playerinfo cmd-where';
+	
+	s.emit('msg', r);
+	
+	return Character.prompt(s);
+};
+
+
+/** Communication Channels **/
+
 Cmd.prototype.say = function(r, s) {
 	var i  = 0;
 
@@ -148,12 +209,6 @@ Cmd.prototype.say = function(r, s) {
 		}
 	}
 };
-
-Cmd.prototype.look = function(r, s) {
-	Room.getRoom(s, function(room) {
-		return Character.prompt(s);
-	});
-}
 
 Cmd.prototype.chat = function(r, s) {
 	var msg = r.msg;
@@ -171,43 +226,11 @@ Cmd.prototype.chat = function(r, s) {
 	return Character.prompt(s);
 };
 
-// Example of a command requiring certain permissions
-Cmd.prototype.achat = function(r, s) { 
-	if (this.perms.indexOf(s.player.role) != -1) {
-		var msg = r.msg;
-		r.msg = 'You admin chat> ' + msg;
-		r.styleClass = 'admin-msg';
-	
-		s.emit('msg', r);
-		r.msg = '';
-	    r.msg = 'A great voice> ' + msg;
-		
-		s.broadcast.emit('msg', r);
-		return Character.prompt(s);
-	} else {
-		r.msg = 'You do not have permission to execute this command.';
-		s.emit('msg', r);		
-		
-		return Character.prompt(s);
-	}
-};
-
 Cmd.prototype.flame = function(r, s) { 
 
 };
 
-Cmd.prototype.where = function(r, s) {
-	r.msg = '<ul>' + 
-	'<li>Your Name: ' + Character[s.id].name + '</li>' +
-	'<li>Current Area: ' + Character[s.id].area + '</li>' +
-	'<li>Room Number: ' + Character[s.id].id + '</li>'  +
-	'</ul>';	
-	r.styleClass = 'playerinfo cmd-where';
-	
-	s.emit('msg', r);
-	
-	return Character.prompt(s);
-};
+/** Related to Saving and character adjustment/interaction **/
 
 Cmd.prototype.save = function(r, s) {
 	Character.save(s, function() {
@@ -238,7 +261,7 @@ Cmd.prototype.title = function(r, s) {
 // View equipment
 Cmd.prototype.equipment = function(r, s) {
 	var keys = Object.keys(s.player.eq),
-	eq = '',
+	eqStr = '',
 	i = 0;	
 	
 	for (i; i < keys.length; i += 1) {
@@ -343,5 +366,36 @@ Cmd.prototype.score = function(r, s) {
 	s.emit('msg', {msg: score, styleClass: 'score' });
 	return Character.prompt(s);
 }
+
+/* Admin commands below here. You can confirm a value connected to the currently socket player -- role or level */
+
+
+// Example of a command requiring a particular value for the role property 
+Cmd.prototype.achat = function(r, s) { 
+	if (s.player.role === 'admin') {
+		var msg = r.msg;
+		r.msg = 'You admin chat> ' + msg;
+		r.styleClass = 'admin-msg';
+	
+		s.emit('msg', r);
+		r.msg = '';
+	    r.msg = 'A great voice> ' + msg;
+		
+		s.broadcast.emit('msg', r);
+		return Character.prompt(s);
+	} else {
+		r.msg = 'You do not have permission to execute this command.';
+		s.emit('msg', r);		
+		
+		return Character.prompt(s);
+	}
+};
+
+// Command uses level checking. So if you cap players at X you can use levels above that for admin
+// View a string representation of the JSON behind a world object.
+Cmd.prototype.objreport = function(r, s) {
+
+}
+
 
 module.exports.cmd = new Cmd();

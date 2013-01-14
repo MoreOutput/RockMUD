@@ -6,7 +6,7 @@
 	function (dom, string, query, domAttr, on, event, win, ready) {
 		ready(function () {
 			'use strict';
-			var ws = io.connect('127.0.0.1:8000'),
+			var ws = io.connect(''),
 			terminal = dom.byId('terminal'),
 			display = function(r) {
 				terminal.innerHTML += '<p><div class="' + r.styleClass + '">' + r.msg + '</div></p>';
@@ -40,22 +40,18 @@
 				wh: 'where'
 			},			
 			checkAlias = function(cmd, fn) {
-				console.log(cmd);
 				var keys = Object.keys(aliases),
 				i = 0,
 				cmd = cmd.replace(/_.*/, '').toLowerCase(),
 				msg = cmd.replace(/^.*?_/, '').replace(/_/g, ' ');			
 			
 				for (i; i < keys.length; i += 1) {
-					console.log(aliases[keys[i]] + ' ' + msg);
 					if (keys[i] === cmd) {
 						return fn(aliases[keys[i]] + ' ' + msg);
 					}	
-					
-					if (i === keys.length - 1) {
-						return fn(cmd);
-					}
-				}				
+				}		
+
+				return fn(cmd);				
 			};
 				
 			ws.on('msg', function(r) {

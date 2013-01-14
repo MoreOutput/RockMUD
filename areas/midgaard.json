@@ -35,8 +35,8 @@
 					"type": "monster",
 					"race": "animal",
 					"limit": 2,
-					"hp": 10,
-					"chp": 10,
+					"hp": 100,
+					"chp": 100,
 					"position": "standing",
 					"ac": 6
 				}, {
@@ -49,8 +49,8 @@
 					"type": "monster",
 					"race": "animal",
 					"limit": 2,
-					"hp": 10,
-					"chp": 10,
+					"hp": 100,
+					"chp": 100,
 					"position": "standing",
 					"ac": 6
 				}
