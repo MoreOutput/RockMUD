@@ -129,18 +129,16 @@ Character.prototype.addPlayer = function(s, fn) {
 			if (s.player.name === players[i].name) {
 				return fn(false, 'Already Logged in');
 			}
-			
-			if (i === players.length - 1) {
-				players.push({
-					name: s.player.name, 
-					sid: s.id,
-					area: s.player.area,
-					roomid: s.player.roomid
-				});
-			
-				fn(true);
-			}
 		}
+		
+		players.push({
+			name: s.player.name, 
+			sid: s.id,
+			area: s.player.area,
+			roomid: s.player.roomid
+		});
+			
+		return fn(true);
 	} else {
 		players.push({
 			name: s.player.name, 
@@ -149,7 +147,7 @@ Character.prototype.addPlayer = function(s, fn) {
 			roomid: s.player.roomid
 		});
 
-		fn(true);
+		return fn(true);
 	}
 }
 
@@ -185,9 +183,9 @@ Character.prototype.create = function(r, s, fn) {
 		carry: 10,
 		load: 0,
 		visible: true,
-		area: 'Midgaard', // must match an area file
+		area: 'midgaard', // must match an area file
 		roomid: 1, // current room
-		recall: 1, // vnum to recall to
+		recall: 1, // id to recall to
 		description: 'A brand new citizen.',
 		eq: {
 			head: '',

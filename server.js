@@ -48,7 +48,6 @@ module.exports.areas = [];
 
 var Character = require('./src/character').character,
 Cmds = require('./src/commands').cmd,
-Room = require('./src/commands').room,
 Skills = require('./src/skills').skill;
 
 io.set('log level', 1);
@@ -165,14 +164,13 @@ io.on('connection', function (s) {
     s.on('disconnect', function () {
 		var i = 0;
 		if (s.player != undefined) {
-			for (i; i < module.exports.players.length; i += 1) {
+			for (i; i < module.exports.players.length; i += 1) {	
 				if (module.exports.players[i].name === s.player.name) {
 					module.exports.players.splice(i, 1);	
 				}
 			}
 		}
 	});
-
 
 	s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 });

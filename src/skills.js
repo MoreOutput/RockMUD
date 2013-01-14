@@ -1,6 +1,5 @@
 var Dice = require('./dice').roller,
 Character = require('./character').character,
-Combat = require('./combat').combat,
 Room = require('./rooms').room,
 io = require('../server').io,
 players = require('../server').players,

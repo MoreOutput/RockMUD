@@ -25,6 +25,20 @@ Room.prototype.getArea = function(areaName, fn) {
 	});
 }
 
+Room.prototype.checkArea = function(areaName, fn) {
+	if (areas.length > 0) {
+		areas.forEach(function(area) {
+			if (areaName === area.name.toLowerCase()) {
+				fn(true, area);
+			} else {
+				fn(false);
+			}
+		});
+	} else {
+		fn(false);
+	}
+};
+
 // Returns a specifc room for display, to retun the room Obj use getRoomObject
 Room.prototype.getRoom = function(s, fn) {
 	var room = this,
@@ -213,20 +227,6 @@ Room.prototype.getMonsters = function(room, optObj, fn) {
 		}
 	}
 }
-
-Room.prototype.checkArea = function(areaName, fn) {
-	if (areas.length > 0) {
-		areas.forEach(function(area) {
-			if (areaName === area.name) {
-				fn(true, area);
-			} else {
-				fn(false);
-			}
-		});
-	} else {
-		fn(false);
-	}
-};
 
 // does a string match an exit in the room
 Room.prototype.checkExit = function(s) { 

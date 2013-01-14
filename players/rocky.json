@@ -13,7 +13,7 @@
     "expToLevel": 1000,
     "position": "fighting",
     "alignment": "",
-    "chp": 110,
+    "chp": 71,
     "hp": 110,
     "str": 14,
     "wis": 11,
@@ -51,6 +51,6 @@
     ],
     "traits": [],
     "affects": [],
-    "saved": "Mon Jan 14 2013 00:48:13 GMT-0500 (Eastern Standard Time)",
-    "sid": "VJDNrIflodL6kwv9mbAH"
+    "saved": "Mon Jan 14 2013 02:12:38 GMT-0500 (Eastern Standard Time)",
+    "sid": "Uql-RAscdRNducd35rMN"
 }

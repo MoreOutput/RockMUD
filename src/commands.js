@@ -5,6 +5,7 @@
 
 var Character = require('./character').character,
 Room = require('./rooms').room,
+Combat = require('./combat').combat,
 io = require('../server').io,
 players = require('../server').players,
 areas = require('../server').areas;
