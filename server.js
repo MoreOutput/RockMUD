@@ -48,6 +48,7 @@ module.exports.areas = [];
 
 var Character = require('./src/character').character,
 Cmds = require('./src/commands').cmd,
+Room = require('./src/commands').room,
 Skills = require('./src/skills').skill;
 
 io.set('log level', 1);

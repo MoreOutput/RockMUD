@@ -17,8 +17,7 @@ Room.prototype.getArea = function(areaName, fn) {
 			return fn(area);
 		} else {
 			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
-				var i = 0,
-				area = JSON.parse(area);
+				var area = JSON.parse(area);
 				
 				return fn(area);	
 			});

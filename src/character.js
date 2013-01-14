@@ -395,7 +395,7 @@ Character.prototype.classSelection = function(r, fn) {
 }
 
 Character.prototype.motd = function(s, fn) {	
-	fs.readFile('motd.json', function (err, data) {
+	fs.readFile('./motd.json', function (err, data) {
 		if (err) {
 			throw err;
 		}

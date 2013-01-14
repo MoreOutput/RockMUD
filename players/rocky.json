@@ -26,7 +26,7 @@
     "thirst": 5,
     "carry": 140,
     "load": 0,
-    "area": "Midgaard",
+    "area": "midgaard",
     "roomid": 1,
     "recall": 1,
     "description": "A brand new citizen.",
@@ -51,6 +51,6 @@
     ],
     "traits": [],
     "affects": [],
-    "saved": "Sun Jan 13 2013 22:56:09 GMT-0500 (Eastern Standard Time)",
-    "sid": "qm4i5--lDKouMj3qMwIM"
+    "saved": "Mon Jan 14 2013 00:48:13 GMT-0500 (Eastern Standard Time)",
+    "sid": "VJDNrIflodL6kwv9mbAH"
 }
