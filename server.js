@@ -48,58 +48,22 @@ module.exports.areas = [];
 
 var Character = require('./src/character').character,
 Cmds = require('./src/commands').cmd,
-Skills = require('./src/skills').skill;
+Skills = require('./src/skills').skill,
+Ticks = require('./src/ticks');
 
 io.set('log level', 1);
 
 server.listen(cfg.port);
 
-// Healing, Hunger and Thirst Tick
-setInterval(function() { 
-	var i = 0,
-	s = {};
-
-	if (module.exports.players.length > 0) {	
-		for (i; i < module.exports.players.length; i += 1) {
-			s = io.sockets.socket(module.exports.players[i].sid);
-			
-			if (s.player.chp <= s.player.hp) {			
-				Character.hunger(s, function() {
-					Character.thirst(s, function() {							
-						Character.hpRegen(s, function(total) {
-							Character.updatePlayer(s, function() {
-								Character.prompt(s);
-							});
-						});
-					});
-				});
-			}								
-		}		
-	}	
-}, 60000);	
-
-// Saving characters Tick
-setInterval(function() {
-	var i = 0,
-	s = {};
-	
-	if (module.exports.players.length > 0) {
-		for (i; i < module.exports.players.length; i += 1) {
-			s = io.sockets.socket(module.exports.players[i].sid);
-			
-			if (s.position != 'fighting') {			
-				Character.save(s);			
-			}							
-		}
-	}
-}, 60000 * 15);
-
 io.on('connection', function (s) {
 	s.on('login', function (r) {	
 		var parseCmd = function(r, s) {
-			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {			
-				r.cmd = r.msg.replace(/_.*/, '').toLowerCase();
-				r.msg = r.msg.replace(/^.*?_/, '').replace(/_/g, ' ');				
+			var cmdArr = [];
+
+			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {
+				cmdArr = r.msg.split('_');	
+				r.cmd = cmdArr[0].toLowerCase();
+				r.msg = cmdArr.slice(1).toString().replace(',', ' ');				
 
 				if (r.cmd != '') {
 					if (r.cmd in Cmds) {
@@ -122,7 +86,7 @@ io.on('connection', function (s) {
 		if (r.msg != '') { // not checking slashes
 			return Character.login(r, s, function (name, s, fnd) {
 				if (fnd) {
-					s.join('mud'); // mud is one of two rooms, 'creation' the other (socket.io)						
+					s.join('mud'); // mud is one of two socket.io rooms, 'creation' the other				
 					Character.load(name, s, function (s) {						
 						Character.getPassword(s, function(s) {	
 							s.on('cmd', function (r) { 
@@ -131,7 +95,7 @@ io.on('connection', function (s) {
 						});
 					});
 				} else {
-					s.join('creation'); // Character creation is its own room, 'mud' the other (socket.io)
+					s.join('creation'); // Character creation is its own socket.io room, 'mud' the other
 					s.player = {name:name};					
 					
 					Character.newCharacter(s, function(s) {			

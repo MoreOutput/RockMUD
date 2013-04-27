@@ -13,7 +13,7 @@ players = require('../server').players,
 areas = require('../server').areas;
 
 var Character = function () {
-	this.perms = [];
+
 }
  
 Character.prototype.login = function(r, s, fn) {
@@ -124,6 +124,7 @@ Character.prototype.getPassword = function(s, fn) {
 // Add a player reference object to the players array
 Character.prototype.addPlayer = function(s, fn) {
 	var  i = 0;	
+
 	if (players.length > 0) {
 		for (i; i < players.length; i += 1) {
 			if (s.player.name === players[i].name) {
@@ -216,6 +217,7 @@ Character.prototype.create = function(r, s, fn) {
 			}
 		],
 		skills: [],
+		spells: [],
 		feats: [],
 		affects: [],
 		channels: ['say', 'yell', 'chat', 'achat']
@@ -242,7 +244,7 @@ Character.prototype.create = function(r, s, fn) {
 						}
 					}
 		
-					s.leave('creation');
+					s.leave('creation'); // No longer creating the character so leave the channel and join the game
 					s.join('mud');		
 					
 					character.addPlayer(s, function(added) {
@@ -282,10 +284,14 @@ Character.prototype.rollStats = function(player, fn) {
 		if (i === races.length - 1) { // rolling stats is finished
 			for (j; j < classes.length; j += 1) { // looking through classes
 				if (classes[j].name.toLowerCase() === player.charClass) { // class match found
-					for(classKey in player) {
+					for (classKey in player) {
 						if (classKey in classes[j] && classKey != 'name') {
-							player[classKey] = classes[j][classKey] + player[classKey];
-						}
+							if (classKey != 'skills' && classKey != 'spells'  && classKey != 'feats'  && classKey != 'affects') {
+								player[classKey] = classes[j][classKey] + player[classKey];
+							} else {
+								player[classKey].push(classes[j][classKey]);
+							}
+						} 
 					}
 				}
 
@@ -298,7 +304,7 @@ Character.prototype.rollStats = function(player, fn) {
 	}		
 }
 
-Character.prototype.newCharacter = function(s, fn) { // TODO: break this into smaller bits? Sort of like the deep nest here...unneeded if statements
+Character.prototype.newCharacter = function(s, fn) {
 	var character = this,
 	i = 0, 
 	str = '';
@@ -421,7 +427,14 @@ Character.prototype.save = function(s, fn) {
 
 Character.prototype.hpRegen = function(s, fn) {
 	var conMod = Math.ceil(s.player.con/4);
+
 	if (s.player.chp < s.player.hp) {
+
+		if (s.player.position === 'fighting' || s.player.position === 'sleeping') {
+			conMod = conMod + 2;
+		}
+
+
 		Dice.roll(1, 8, function(total) {
 			if (typeof fn === 'function') {
 				fn(s.player.chp + total + conMod);
@@ -480,11 +493,12 @@ Character.prototype.thirst = function(s, fn) {
 				s.player.chp = s.player.chp - 1;
 			
 				s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'thirst'});
+
 				fn();
 			}
 		});	
 	} else {
-		s.player.chp = (s.player.chp - 5 + conMod);
+		s.player.chp = (s.player.chp - 5 + dexMod);
 		s.emit('msg', {msg: 'You are dying of thirst.', styleClass: 'thirst'});
 		
 		fn();

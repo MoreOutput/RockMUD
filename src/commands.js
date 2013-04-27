@@ -2,7 +2,6 @@
 * All non-combat commands that one would consider 'general' to a wide section
 * of users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
 */
-
 var Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
@@ -18,13 +17,23 @@ var Cmd = function () {
 	Exit Commands, may adjust for completely dynamic exits -- but seems trival atm
 */
 Cmd.prototype.north = function(r, s) {
-	Room.checkExit(r.cmd, function(fnd) {
-		if (fnd) {
-			Room.move('north', s);
-		} else {
-			
-		}
-	}); 
+	if (s.player.position != 'fighting' && s.player.position != 'resting' && s.player.position != 'sleeping') {
+		Room.checkExit(r.cmd, function(fnd) {
+			if (fnd) {
+				Room.move('north', s);
+			} else {
+				s.emit('msg', {
+					msg: 'There is no exit in that direction.', 
+					styleClass: 'error'
+				});
+			}
+		}); 
+	} else {
+		s.emit('msg', {
+			msg: 'You cant move right now!', 
+			styleClass: 'error'
+		});
+	}
 }
 
 Cmd.prototype.east = function(r, s) {
@@ -40,41 +49,37 @@ Cmd.prototype.west = function(r, s) {
 }
 
 Cmd.prototype.who = function(r, s) {
-	players.forEach(function(player) {
-		var i = 0,
-		str = '',
-		player = io.sockets.socket(players[i].sid).player; // A visible player in players[]
+	var str = '', 
+	player,
+	i = 0;
+	
+	if (players.length > 0) {
+		for (i; i < players.length; i += 1) {
+			player = io.sockets.socket(players[i].sid).player; // A visible player in players[]
 
-		if (players.length > 0) {
-			for (i; i < players.length; i += 1) {		
-				str += '<li>' + player.name[0].toUpperCase() + 
-					player.name.slice(1) + ' ';
+			str += '<li>' + player.name[0].toUpperCase() + player.name.slice(1) + ' ';
 
-				if (player.title === '') {
-					str += 'a level ' + player.level   +
-						' ' + player.race + 
-						' ' + player.charClass; 
-				} else {
-					str += player.title;
-				}					
+			if (player.title === '') {
+				str += 'a level ' + player.level   +
+					' ' + player.race + 
+					' ' + player.charClass; 
+			} else {
+				str += player.title;
+			}					
 
-				str += ' (' + player.role + ')' +					
-					'</li>';
-
-				player = io.sockets.socket(players[i].sid).player;
-			}
-			
-			s.emit('msg', {
-				msg: '<h1>Visible Players</h1>' + str, 
-				styleClass: 'who-cmd'
-			});
-		} else {
-			s.emit('msg', {
-				msg: '<h1>Visible Players</h1>' + str, 
-				styleClass: 'who-cmd'
-			});
+			str += ' (' + player.role + ')</li>';
 		}
-	});
+					
+		s.emit('msg', {
+			msg: '<h1>Visible Players</h1>' + str, 
+			styleClass: 'who-cmd'
+		});
+	} else {
+		s.emit('msg', {
+			msg: '<h1>No Visible Players</h1>', 
+			styleClass: 'who-cmd'
+		});
+	}
 	
 	return Character.prompt(s);
 }
@@ -143,6 +148,7 @@ Cmd.prototype.drop = function(r, s) {
 // For attacking in-game monsters
 Cmd.prototype.kill = function(r, s) {
 	Room.checkMonster(r, s, function(fnd, monster) {
+			console.log('123');
 		if (fnd) {
 			Combat.begin(s, monster, function(contFight, monster) { // the first round qualifiers
 				var combatInterval;
@@ -179,11 +185,20 @@ Cmd.prototype.kill = function(r, s) {
 }
 
 Cmd.prototype.look = function(r, s) {
-	Room.getRoom(s, function(room) {
-		return Character.prompt(s);
-	});
+	console.log(r.msg);
+	if (r.msg === '') { 
+		Room.getRoom(s, function(room) {
+			return Character.prompt(s);
+		});
+	} else {
+		// Gave us a noun, so lets see if something matches it in the room. 
+		Room.checkMonster(r, s, function(fnd, monster) {
+			Room.checkItem(r, s, function(fnd, item) {
+				return Character.prompt(s);
+			});
+		});
+	}
 }
-
 
 Cmd.prototype.where = function(r, s) {
 	r.msg = '<ul>' + 
@@ -200,7 +215,6 @@ Cmd.prototype.where = function(r, s) {
 
 
 /** Communication Channels **/
-
 Cmd.prototype.say = function(r, s) {
 	var i  = 0;
 
@@ -365,10 +379,11 @@ Cmd.prototype.score = function(r, s) {
 	'</ul>';
 	
 	s.emit('msg', {msg: score, styleClass: 'score' });
+	
 	return Character.prompt(s);
 }
 
-/* Admin commands below here. You can confirm a value connected to the currently socket player -- role or level */
+/* Admin commands below here. You can confirm a value connected to the current socket  -- either player role/level */
 
 
 // Example of a command requiring a particular value for the role property 
@@ -395,7 +410,22 @@ Cmd.prototype.achat = function(r, s) {
 // Command uses level checking. So if you cap players at X you can use levels above that for admin
 // View a string representation of the JSON behind a world object.
 Cmd.prototype.objreport = function(r, s) {
+	if (s.player.level >= 200) {
+	
+	}
+}
 
+/*
+* A soft reboot. Reloads all areas and characters without restarting the server.
+*/
+Cmd.prototype.reboot = function(r, s) {
+	if (s.player.role === 'admin') {
+
+	} else {
+		s.emit('msg', {msg: 'Not a valid command', styleClass: 'error' });	
+		
+		return Character.prompt(s);
+	}
 }
 
 

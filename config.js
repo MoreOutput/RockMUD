@@ -1,7 +1,7 @@
 exports.server = {
 	game: {
 		ip: '127.0.0.1',
-		port: 80,
+		port: 8000,
 		name: 'RockMUD',
 		home: './index.html',
 		version: '0.1.5',

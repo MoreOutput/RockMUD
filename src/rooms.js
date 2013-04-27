@@ -18,13 +18,13 @@ Room.prototype.getArea = function(areaName, fn) {
 		} else {
 			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
 				var area = JSON.parse(area);
-				
 				return fn(area);	
 			});
 		}
 	});
 }
 
+// return boolean after checking if the area is in areas[]
 Room.prototype.checkArea = function(areaName, fn) {
 	if (areas.length > 0) {
 		areas.forEach(function(area) {
@@ -97,10 +97,6 @@ Room.prototype.getRoom = function(s, fn) {
 			fs.readFile('./areas/' + s.player.area + '.json', function (err, area) {
 				var i = 0,
 				area = JSON.parse(area);
-       
-				if (err) {
-					throw err;
-				}
 
 				displayRoom(area.rooms);
 				
@@ -112,6 +108,7 @@ Room.prototype.getRoom = function(s, fn) {
 	});
 }
 
+// Refreshes the area reference in areas[]
 Room.prototype.updateArea = function(areaName, fn) {
 	var  i = 0;
 
@@ -120,11 +117,7 @@ Room.prototype.updateArea = function(areaName, fn) {
 			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
 				var i = 0,
 				area = JSON.parse(area);
-       
-				if (err) {
-					throw err;
-				}
-
+				
 				areas[i] = area;
 				
 				if (typeof fn === 'function') {
@@ -132,7 +125,7 @@ Room.prototype.updateArea = function(areaName, fn) {
 				}
 			});
 		} else {
-			fn(false);
+			return fn(false);
 		}
 	}
 }
@@ -158,11 +151,9 @@ Room.prototype.getExits = function(room, fn) {
 	
 	for (i; i < room.exits.length; i += 1) {
 		arr.push(room.exits[i].cmd);
-	
-		if (arr.length === room.exits.length) {
-			return fn(arr);
-		}
 	}
+	
+	return fn(arr);
 }
 
 Room.prototype.getPlayers = function(s, room, fn) {
@@ -237,7 +228,7 @@ Room.prototype.checkExit = function(s) {
 Room.prototype.checkMonster = function(r, s, fn) { 
 	var room = this,
 	i = 0;
-	
+
 	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
 		if (roomObj.monsters.length > 0) {
 			var msgPatt = new RegExp('^' + r.msg);
@@ -319,7 +310,7 @@ Room.prototype.addItem = function(roomQuery, fn) {
 	fn();
 }
 
-// Callback is only fired if the direction is valid
+// Moves a player to a new room connected to the one they're standing in. Switches their room ID and could load a new area.
 Room.prototype.move = function(direction, fn) {
 	//Room.getRoom(s, fn);
 }

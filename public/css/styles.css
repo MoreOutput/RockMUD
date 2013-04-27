@@ -1,6 +1,17 @@
 /**
 Default  RockMUD styles, Rocky Bevins 2012
 */
+@media screen and (max-width: 1060px) {
+    #primary { width:67%; }
+    #secondary { width:30%; margin-left:3%;}  
+}
+
+
+@media screen and (max-width: 768px) {
+    #primary { width:100%; }
+    #secondary { width:100%; margin:0; border:none; }
+}
+
 html, body {
 font: 100% "Courier New", "Courier", monospace;	
 height: 100%;
@@ -11,7 +22,7 @@ margin: 0 0 0 0;
 
 
 h1 {
-font: 150% 'Rye', Arial, sans-serif;
+font: 150% Arial, sans-serif;
 color: #fff;
 text-shadow: 1px 1px 0 red;
 padding: 0;
