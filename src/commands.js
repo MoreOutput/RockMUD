@@ -148,7 +148,6 @@ Cmd.prototype.drop = function(r, s) {
 // For attacking in-game monsters
 Cmd.prototype.kill = function(r, s) {
 	Room.checkMonster(r, s, function(fnd, monster) {
-			console.log('123');
 		if (fnd) {
 			Combat.begin(s, monster, function(contFight, monster) { // the first round qualifiers
 				var combatInterval;
@@ -185,7 +184,6 @@ Cmd.prototype.kill = function(r, s) {
 }
 
 Cmd.prototype.look = function(r, s) {
-	console.log(r.msg);
 	if (r.msg === '') { 
 		Room.getRoom(s, function(room) {
 			return Character.prompt(s);
@@ -227,15 +225,16 @@ Cmd.prototype.say = function(r, s) {
 
 Cmd.prototype.chat = function(r, s) {
 	var msg = r.msg;
+
+	s.emit('msg', {
+		msg: 'You chat> ' + msg,
+		element: 'blockquote',
+		styleClass: 'msg'
+	});
 		
-	r.msg = 'You chat> ' + msg;
-	r.styleClass = 'msg';
-		
-	s.emit('msg', r);
-		
-	r.msg = '';
 	r.msg = s.player.name + '> ' + msg;
-		
+	r.styleClass = 'chatmsg';
+
 	s.in('mud').broadcast.emit('msg', r);
 
 	return Character.prompt(s);

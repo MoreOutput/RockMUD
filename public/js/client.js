@@ -8,19 +8,7 @@
 			'use strict';
 			var ws = io.connect(''),
 			terminal = dom.byId('terminal'),
-			display = function(r) {
-				terminal.innerHTML += '<p><div class="' + r.styleClass + '">' + r.msg + '</div></p>';
-				return parseCmd(r);
-			},
-			parseCmd = function(r) {
-				if (r.msg != undefined) {
-					r.msg = r.msg.replace(/ /g, '_');
-					ws.emit(r.emit, r);
-				}
-			},
-			changeMudState = function(state) {
-				domAttr.set(dom.byId('cmd'), 'mud-state', state);
-			},
+			/* Command aliases are loaded by the client */
 			aliases = {
 				l: 'look',
 				i: 'inventory',
@@ -38,7 +26,27 @@
 				re: 'rest',
 				sl: 'sleep',
 				wh: 'where'
-			},			
+			},	
+
+			display = function(r) {
+				if (r.element === 'undefined') {
+					terminal.innerHTML += '<p><div class="' + r.styleClass + '">' + r.msg + '</div></p>';
+				} else {
+					terminal.innerHTML += '<' + r.element + '><div class="' + r.styleClass + '">' + r.msg + '</div></' + r.element + '>';
+				}
+
+				return parseCmd(r);
+			},
+			parseCmd = function(r) {
+				if (r.msg != undefined) {
+					r.msg = r.msg.replace(/ /g, '_');
+					ws.emit(r.emit, r);
+				}
+			},
+			changeMudState = function(state) {
+				domAttr.set(dom.byId('cmd'), 'mud-state', state);
+			},		
+			
 			checkAlias = function(cmd, fn) {
 				var keys = Object.keys(aliases),
 				i = 0,
@@ -74,8 +82,9 @@
 						return cmd;
 					}),
 					emit : (function () {
-						var res = dojo.attr(node, 'mud-state');
-						if (dojo.attr(node, 'mud-state') === 'login') {
+						var res = domAttr.get(node, 'mud-state');
+
+						if (res === 'login') {
 							return 'login';
 						} else if (msg === 'quit' || msg === 'disconnect') {
 							return 'quit';

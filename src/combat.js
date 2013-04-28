@@ -105,7 +105,7 @@ Combat.prototype.targetRound = function(s, monster, fn) {
 			});					
 		} else {
 			s.emit('msg', {
-					msg: monster.short + ' misses '+ ' you!',
+				msg: monster.short + ' misses '+ ' you!',
 				styleClass: 'hit'
 			});
 		}

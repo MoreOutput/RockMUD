@@ -239,7 +239,8 @@ display: inline-block;
 display: inline;
 padding: 0;
 margin: 0;
-font: bold 150% 'Comic Sans', Arial, sans-serif;
+font-size: 150%;
+font-weight: bold;
 color: #ff0000;
 text-shadow: 1px 1px 0 yellow;
 }
@@ -247,3 +248,15 @@ text-shadow: 1px 1px 0 yellow;
 p.enter-name {
 padding: 15px 0;
 }
+
+blockquote {
+
+}
+
+blockquote:before {
+	
+}
+
+blockquote:after {
+
+};
