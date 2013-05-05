@@ -9,7 +9,6 @@ var Skill = function() {
 
 }
 
-
 /*
 * Fighter Skills
 */

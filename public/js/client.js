@@ -9,37 +9,37 @@
 			var ws = io.connect(''),
 			terminal = dom.byId('terminal'),
 			/* Command aliases are loaded by the client */
-			aliases = {
-				l: 'look',
-				i: 'inventory',
-				sc: 'score',
+			aliases = {	
 				n: 'north',
 				e: 'east',
 				w: 'west',
 				s: 'south',
 				u: 'up',
 				d: 'down',
+				l: 'look',
+				i: 'inventory',
+				sc: 'score',
 				eq: 'equipment',
 				q: 'quaff',
 				c: 'cast',
 				k: 'kill',
 				re: 'rest',
 				sl: 'sleep',
-				wh: 'where'
-			},	
-
+				wh: 'where',
+				ooc: 'chat'
+			},
 			display = function(r) {
-				if (r.element === 'undefined') {
-					terminal.innerHTML += '<p><div class="' + r.styleClass + '">' + r.msg + '</div></p>';
+				if (r.element === undefined) {
+					terminal.innerHTML += '<p class="' + r.styleClass + '">' + r.msg + '</p>';
 				} else {
-					terminal.innerHTML += '<' + r.element + '><div class="' + r.styleClass + '">' + r.msg + '</div></' + r.element + '>';
+					terminal.innerHTML += '<' + r.element + ' class="' + r.styleClass + '">' + r.msg + '</' + r.element + '>';
 				}
 
 				return parseCmd(r);
 			},
 			parseCmd = function(r) {
 				if (r.msg != undefined) {
-					r.msg = r.msg.replace(/ /g, '_');
+					r.msg = string.trim(r.msg.replace(/ /g, ' '));
 					ws.emit(r.emit, r);
 				}
 			},
@@ -47,19 +47,22 @@
 				domAttr.set(dom.byId('cmd'), 'mud-state', state);
 			},		
 			
-			checkAlias = function(cmd, fn) {
+			checkAlias = function(cmdStr, fn) {
 				var keys = Object.keys(aliases),
 				i = 0,
-				cmd = cmd.replace(/_.*/, '').toLowerCase(),
-				msg = cmd.replace(/^.*?_/, '').replace(/_/g, ' ');			
-			
+				cmd,
+				msg,
+				cmdArr = cmdStr.split(' ');
+
+				cmd = cmdArr[0].toLowerCase();
+				msg = cmdArr.slice(1).toString().replace(',', ' ');
+	
 				for (i; i < keys.length; i += 1) {
 					if (keys[i] === cmd) {
 						return fn(aliases[keys[i]] + ' ' + msg);
 					}	
-				}		
-
-				return fn(cmd);				
+				}
+				return fn(cmd + ' ' + msg);				
 			};
 				
 			ws.on('msg', function(r) {
@@ -74,7 +77,7 @@
 				var node = dom.byId('cmd'),
 				messageNodes = [],
 				msg = string.trim(node.value.toLowerCase());
-				
+			
 				e.preventDefault();
 				
 				display({
@@ -106,8 +109,7 @@
 				node.value = '';
 				node.focus();
 				
-				messageNodes = query('#terminal div');
-				win.scrollIntoView(messageNodes[messageNodes.length - 1]);	
+				terminal.scrollTop = terminal.scrollHeight;	
 			});
 		});
 	});

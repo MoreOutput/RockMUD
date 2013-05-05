@@ -233,6 +233,7 @@ Cmd.prototype.chat = function(r, s) {
 	});
 		
 	r.msg = s.player.name + '> ' + msg;
+	r.element = 'blockquote';
 	r.styleClass = 'chatmsg';
 
 	s.in('mud').broadcast.emit('msg', r);
@@ -240,8 +241,30 @@ Cmd.prototype.chat = function(r, s) {
 	return Character.prompt(s);
 };
 
-Cmd.prototype.flame = function(r, s) { 
+Cmd.prototype.achat = function(r, s) { 
+	var msg;
+	if (s.player.role === 'admin') {
+		msg = r.msg;
 
+		s.emit('msg', {
+			msg: 'You roar> ' + msg,
+			element: 'blockquote',
+			styleClass: 'msg'
+		});
+			
+		r.msg = s.player.name + '> ' + msg;
+		r.element = 'blockquote';
+		r.styleClass = 'adminmsg';
+
+		s.in('mud').broadcast.emit('msg', r);
+
+		return Character.prompt(s);
+	} else {
+		r.msg = 'You do not have permission to execute this command.';
+		s.emit('msg', r);		
+		
+		return Character.prompt(s);
+	}
 };
 
 /** Related to Saving and character adjustment/interaction **/
@@ -358,12 +381,14 @@ Cmd.prototype.inventory = function(r, s) {
 }
 
 Cmd.prototype.score = function(r, s) { 
-	var score = '<div class="name">' + s.player.name + 
+	var i = 0,
+	score = '<div class="name">' + s.player.name + 
 	' <div class="title">' + s.player.title + '</div></div>' +
 	'<ul class="stats">' + 
 		'<li>HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
-		'<li>You are a level '+ s.player.level + ' ' + s.player.race + 
-		' ' + s.player.charClass + '</li>' +
+		'<li>Mana: ' + s.player.cmana + '/' + s.player.mana +'</li>' +
+		'<li>Stamina: ' + s.player.cmv + '/' + s.player.mv +'</li>' +
+		'<li>You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
 		'<li>STR: ' + s.player.str + '</li>' +
 		'<li>WIS: ' + s.player.wis + '</li>' +
 		'<li>INT: ' + s.player.int + '</li>' +
@@ -376,46 +401,38 @@ Cmd.prototype.score = function(r, s) {
 		'<li>Thirst: ' + s.player.thirst + '</li>' +
 		'<li>Carrying ' + s.player.load + '/' + s.player.carry + ' LBs</li>' +
 	'</ul>';
+
+	if (s.player.affects.length > 0) {
+		score += '<ul class="affects">';
+
+		for (i; i < s.player.affects; i += 1) {
+			score += '<li>' + affects[i].name + '</li>';
+		}
+
+		score += '</ul>';
+	} else {
+		score += '<p>No Affects</p>';
+	}
 	
-	s.emit('msg', {msg: score, styleClass: 'score' });
+	s.emit('msg', {msg: score, element: 'section', styleClass: 'score' });
 	
 	return Character.prompt(s);
 }
 
-/* Admin commands below here. You can confirm a value connected to the current socket  -- either player role/level */
-
-
-// Example of a command requiring a particular value for the role property 
-Cmd.prototype.achat = function(r, s) { 
-	if (s.player.role === 'admin') {
-		var msg = r.msg;
-		r.msg = 'You admin chat> ' + msg;
-		r.styleClass = 'admin-msg';
-	
-		s.emit('msg', r);
-		r.msg = '';
-	    r.msg = 'A great voice> ' + msg;
-		
-		s.broadcast.emit('msg', r);
-		return Character.prompt(s);
-	} else {
-		r.msg = 'You do not have permission to execute this command.';
-		s.emit('msg', r);		
-		
-		return Character.prompt(s);
-	}
-};
+/*
+* Special Admin commands below here. You can confirm a value connected to the current socket  -- player role/level 
+*/
 
 // Command uses level checking. So if you cap players at X you can use levels above that for admin
 // View a string representation of the JSON behind a world object.
-Cmd.prototype.objreport = function(r, s) {
+Cmd.prototype.spit = function(r, s) {
 	if (s.player.level >= 200) {
 	
 	}
 }
 
 /*
-* A soft reboot. Reloads all areas and characters without restarting the server.
+* A soft reboot. Reloads all areas and characters without restarting the server. Checks users role.
 */
 Cmd.prototype.reboot = function(r, s) {
 	if (s.player.role === 'admin') {
@@ -426,6 +443,5 @@ Cmd.prototype.reboot = function(r, s) {
 		return Character.prompt(s);
 	}
 }
-
 
 module.exports.cmd = new Cmd();

@@ -2,29 +2,42 @@
 Default  RockMUD styles, Rocky Bevins 2012
 */
 @media screen and (max-width: 1060px) {
-    #primary { width:67%; }
-    #secondary { width:30%; margin-left:3%;}  
+	#primary { 
+	width: 67%;
+	}
+
+	#secondary {
+	width:30%; 
+	margin-left:3%;
+	}  
 }
 
 
 @media screen and (max-width: 768px) {
-    #primary { width:100%; }
-    #secondary { width:100%; margin:0; border:none; }
+	#primary { 
+	width:100%; 
+	}
+	
+	#secondary { 
+	width:100%; 
+	margin:0; 
+	border:none; 
+	}
 }
 
 html, body {
-font: 100% "Courier New", "Courier", monospace;	
+font: 100% 'Montserrat', Arial, sans-serif;	
 height: 100%;
-background-color: #111;
+background-color: #eee;
 padding: 0 0 100px 0;
 margin: 0 0 0 0;
+text-align: center;
 }
 
 
 h1 {
-font: 150% Arial, sans-serif;
+font-size: 150%;
 color: #fff;
-text-shadow: 1px 1px 0 red;
 padding: 0;
 margin: 0;
 }
@@ -74,13 +87,21 @@ background-image: linear-gradient(top, #4d90fe, #4787ed);
 
 #mudwrapper {
 margin: 0 auto;
-width: 90%;
+width: 70%;
+text-align: left;
+background-color: #fff;
+border: 1px solid #ccc;
+padding: 10px;
+box-shadow: 1px 1px 1px 1px #999;
 }
 
 #terminal {
-background-color: #111;
+height: 650px;
+overflow: scroll;
+background-color: #0c010f;
 color: #fff;
-padding: 1%;
+margin: 0 0 10px 0;
+padding: 30px;
 }
 
 #terminal ul {
@@ -136,14 +157,13 @@ float: left;
 }
 
 #inputwrapper form {
-background-color: #111;
+background-color: #fff;
 padding: 5px;
 }
 
 #inputwrapper form input {
-width: 40%;
-border: 1px solid #111;
-padding: 5px;
+width: 100%;
+border: none;
 }
 
 #intro-ascii {
@@ -203,16 +223,12 @@ display: block;
 font-weight: bold;
 }
 
-.room  {
-
+.room {
+margin: 0;
+color: #ddd;;
 }
 
 .room  h2 {
-padding: 0;
-margin: 0;
-}
-
-.room {
 padding: 0;
 margin: 0;
 }
@@ -223,7 +239,7 @@ margin: 0;
 }
 
 .cprompt {
-font-style: italic;
+color:#fff;
 }
 
 .error {

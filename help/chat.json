@@ -1,0 +1,8 @@
+{
+	"name" : "Chat",
+	"related" : ["Channels", "Say", "Yell", "Flame", "Tell"],
+	"type" : "Command",
+	"levels" : "All",
+	"restrict": 0,
+	"description" : "Send a message to everyone on the mud. See HELP CHANNELS for a comprehensive overview of communication commands."
+}

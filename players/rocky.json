@@ -13,8 +13,12 @@
     "expToLevel": 1000,
     "position": "fighting",
     "alignment": "",
-    "chp": 63,
+    "chp": 50,
     "hp": 110,
+    "cmana": 100,
+    "mana": 100,
+    "cmv": 80,
+    "mv": 100,
     "str": 14,
     "wis": 11,
     "int": 11,
@@ -22,8 +26,8 @@
     "con": 13,
     "ac": 10,
     "gold": 1000,
-    "hunger": 1,
-    "thirst": 1,
+    "hunger": 10,
+    "thirst": 4,
     "carry": 140,
     "load": 0,
     "area": "midgaard",
@@ -51,6 +55,6 @@
     ],
     "traits": [],
     "affects": [],
-    "saved": "Sat Apr 27 2013 04:54:07 GMT-0400 (Eastern Daylight Time)",
-    "sid": "6X9GOBGrOtsD8eJGspRG"
+    "saved": "Sat May 04 2013 22:28:24 GMT-0400 (Eastern Daylight Time)",
+    "sid": "6xBgurJmIL5EC3EKbs2m"
 }

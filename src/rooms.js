@@ -63,7 +63,7 @@ Room.prototype.getRoom = function(s, fn) {
 								}
 								
 								if (items.length > 0) {
-									roomStr += '<li>Items: ' + items.toString() + '</li>';
+									roomStr += '<li>Items: ' + items.toString().replace(/,/g, ', ') + '</li>';
 								}							
 							
 								s.emit('msg', {

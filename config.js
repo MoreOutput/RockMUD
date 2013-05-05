@@ -1,11 +1,11 @@
 exports.server = {
 	game: {
 		ip: '127.0.0.1',
-		port: 8000,
+		port: 80,
 		name: 'RockMUD',
 		home: './index.html',
-		version: '0.1.5',
-		website: ''
+		version: '0.1.6',
+		website: 'https://github.com/MoreOutput/RockMUD'
 	},
 	admins: [{
 		name: 'Rocky',
@@ -37,6 +37,7 @@ exports.server = {
 		playable: true,
 		mv: 10,
 		dex: 2,
+		gold: 10,
 		skills: ["backstab"]
 	}, {
 		name:'Fighter', 

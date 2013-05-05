@@ -1,7 +1,7 @@
 var Dice = require('./dice').roller;
 
 var Combat = function() {
-	this.adjectives = ['barbaric', 'great', 'mighty', 'AWESOME'];
+	this.adjectives = ['barbaric', 'BARBARIC', 'great', 'GREAT', 'mighty', 'MIGHTY', '**AWESOME**'];
 	this.abstractNouns = ['hatred', 'intensity', 'weakness'];
 }
 

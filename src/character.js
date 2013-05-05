@@ -55,7 +55,6 @@ Character.prototype.load = function(name, s, fn) {
 
 Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 	var hash = password,
-	iterations = iterations, 
 	i = 0;
 		
 	for (i; i < iterations; i += 1) {
@@ -171,6 +170,10 @@ Character.prototype.create = function(r, s, fn) {
 		alignment: '',
 		chp: 100, // current hp
 		hp: 100, // total hp
+		cmana: 100,
+		mana: 100,
+		cmv: 80,
+		mv: 100,
 		str: 12,
 		wis: 12,
 		int: 12,
@@ -294,12 +297,10 @@ Character.prototype.rollStats = function(player, fn) {
 						} 
 					}
 				}
-
-				if (j === classes.length - 1) {
-					player.carry = player.str * 10;
-					return fn(player);
-				}
 			}
+			
+			player.carry = player.str * 10;
+			return fn(player);
 		}
 	}		
 }
@@ -457,7 +458,7 @@ Character.prototype.hunger = function(s, fn) {
 	
 	if (s.player.hunger < 10) {
 		Dice.roll(1, 4, function(total) {
-			if (total + conMod < 5) { 
+			if ((total + conMod) < s.player.con/2) { 
 				s.player.hunger = s.player.hunger + 1;
 			}			
 						
@@ -569,8 +570,10 @@ Character.prototype.updatePlayer = function(s, fn) {
 }
 
 Character.prototype.prompt = function(s) {
-	return s.emit('msg', {msg: s.player.name + ', hp:' + s.player.chp +  ' room:' 
-		+ s.player.roomid + '> ', styleClass: 'cprompt'});
+	return s.emit('msg', {msg: s.player.chp + '/'  + s.player.hp + 'hps ' +
+		s.player.cmana + '/'  + s.player.mana + 'mana ' +  
+		s.player.cmv + '/'  + s.player.mv +'mv room:' +
+		s.player.roomid + '> ', styleClass: 'cprompt'});
 }
 
 Character.prototype.level = function(s, fn) {

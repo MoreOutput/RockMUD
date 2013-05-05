@@ -58,11 +58,10 @@ server.listen(cfg.port);
 io.on('connection', function (s) {
 	s.on('login', function (r) {	
 		var parseCmd = function(r, s) {
-			var cmdArr = r.msg.split('_');	
-
+			var cmdArr = r.msg.split(' ');	
 			r.cmd = cmdArr[0].toLowerCase();
 			r.msg = cmdArr.slice(1).toString().replace(',', ' ');
-			
+		
 			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {
 				if (r.cmd != '') {
 					if (r.cmd in Cmds) {

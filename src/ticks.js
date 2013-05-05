@@ -30,7 +30,7 @@ areas = require('../server').areas;
 				});					
 			}		
 		}	
-	}, 60000);	
+	}, 60000 * 2);	
 
 	// Saving characters Tick
 	setInterval(function() {
