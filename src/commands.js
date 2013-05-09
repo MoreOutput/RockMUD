@@ -419,12 +419,18 @@ Cmd.prototype.score = function(r, s) {
 	return Character.prompt(s);
 }
 
+Cmd.prototype.help = function(r, s) {
+	
+}
+
 /*
-* Special Admin commands below here. You can confirm a value connected to the current socket  -- player role/level 
+* Special Admin commands below here. You can confirm permission with a value connected to the current player  
 */
 
-// Command uses level checking. So if you cap players at X you can use levels above that for admin
-// View a string representation of the JSON behind a world object.
+/*
+* This command uses level checking. So if you cap players at X you can use levels above that for admin
+* View a string representation of the JSON behind a world object.
+*/
 Cmd.prototype.spit = function(r, s) {
 	if (s.player.level >= 200) {
 	

@@ -4,7 +4,8 @@ This module houses all the timed events on the server. For example:
 	* Every Tweleve minutes the character is saved if they're not in a fight
 	* Every fifteen minutes all the areas in memory are checked any with no players is removed from areas[]
 */
-var Character = require('./character').character,
+var fs = require('fs'),
+Character = require('./character').character,
 Room = require('./rooms').room,
 io = require('../server').io,
 players = require('../server').players,
@@ -48,20 +49,35 @@ areas = require('../server').areas;
 		}
 	}, 60000 * 12);
 
-	// Every three minutes we send a random alert to all logged in players
+	// Random alert to all logged in players
 	setInterval(function() {
-		var s;
-
+		var s,
+		shuffle = function (arr) {
+			var i = arr.length - 1,
+			j = Math.floor(Math.random() * i),
+			temp;
+			
+			for (i; i > 0; i -= 1) {
+				temp = arr[i];
+				arr[i] = arr[j];
+				arr[j] = temp;
+				
+				j = Math.floor (Math.random() * i);
+			}
+			
+			return arr;
+		};
+		
 		if (players.length > 0) {
 			s = io.sockets.socket(players[0].sid);
 			fs.readFile('./motd.json', function (err, data) {
-				alerts = JSON.parse(data).alerts;
+				alerts = shuffle(JSON.parse(data).alerts);
 
-				s.in('mud').broadcast.emit('msg', {
-					msg: alerts[0],
-					styleClass: 'annoucement'
+				io.sockets.in('mud').emit('msg', {
+					msg: '<span class="alert">ALERT: </span><span class="alertmsg"> ' + alerts[0] + '</span>',
+					styleClass: 'alert'
 				});
 			});
 		}
-	}, 60000 * 3);
+	}, 60000 * 2.5);
 }());

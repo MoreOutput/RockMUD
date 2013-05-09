@@ -1,7 +1,7 @@
 {
-	"motd": "Entering RockMUD, remember to read the following help files if you are a mudding newbie: HELP CHANNELS, HELP NEWBIE, and HELP MOVEMENT",
+	"motd": "Entering RockMUD, try to use the following help commands if you're a mudding newbie: HELP CHANNELS, HELP NEWBIE, and HELP MOVEMENT",
 	"alerts": [
-		"No commands are require proper casing.",
+		"Commands are not case sensitive.",
 		"Use the HELP command to find out more about RockMUDs Commands, Skills, and History",
 		"To attack something use the KILL command. See HELP KILL",
 		"You will die of starvation or thirst so keep up on your supplies. See HELP HUNGER",
@@ -12,7 +12,7 @@
 		"Master communication by reading over HELP CHANNELS",
 		"Use the WHO command to see logged, visible, players.",
 		"Use the CHAT command to speak to everyone logged into the game. See HELP CHANNELS",
-		"Once you're dead you're dead, so play wisely! See HELP DEATH",
+		"Once you're dead, you're dead. Play wisely! See HELP DEATH",
 		"You may benefit from reading: HELP CHANNELS, HELP DEATH, HELP SKILLS, HELP NEWBIE, and HELP MOVEMENT"
 	]
 }

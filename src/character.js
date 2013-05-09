@@ -403,7 +403,7 @@ Character.prototype.motd = function(s, fn) {
 			throw err;
 		}
 	
-		s.emit('msg', {msg : JSON.parse(data).motd, res: 'logged'});
+		s.emit('msg', {msg : JSON.parse(data).motd, res: 'logged', styleClass: 'motd'});
 		return fn();
 	});
 }

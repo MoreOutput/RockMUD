@@ -1,32 +1,11 @@
 /**
 Default  RockMUD styles, Rocky Bevins 2012
 */
-@media screen and (max-width: 1060px) {
-	#primary { 
-	width: 67%;
-	}
-
-	#secondary {
-	width:30%; 
-	margin-left:3%;
-	}  
-}
 
 
-@media screen and (max-width: 768px) {
-	#primary { 
-	width:100%; 
-	}
-	
-	#secondary { 
-	width:100%; 
-	margin:0; 
-	border:none; 
-	}
-}
 
 html, body {
-font: 100% 'Montserrat', Arial, sans-serif;	
+font: 90% 'Montserrat', Arial, sans-serif;	
 height: 100%;
 background-color: #eee;
 padding: 0 0 100px 0;
@@ -85,45 +64,42 @@ background-image: -o-linear-gradient(top, #4d90fe, #4787ed);
 background-image: linear-gradient(top, #4d90fe, #4787ed);
 }
 
+/* Adjustments for resizing */
+
+@media screen and (max-width: 800px) {
+	#mudwrapper { 
+	width:100%; 
+	}
+	
+	#terminal { 
+	width:100%; 
+	margin:0; 
+	}
+}
+
 #mudwrapper {
+width: 100%;
 margin: 0 auto;
-width: 70%;
 text-align: left;
-background-color: #fff;
-border: 1px solid #ccc;
-padding: 10px;
-box-shadow: 1px 1px 1px 1px #999;
+background-color: #0c010f;
 }
 
 #terminal {
-height: 650px;
+height: 70%;
 overflow: scroll;
 background-color: #0c010f;
 color: #fff;
 margin: 0 0 10px 0;
-padding: 30px;
-}
-
-#terminal ul {
-width: 95%;
-left: left;
-padding: 10px;
-margin: 0;
-}
-
-#terminal ul li {
-
+padding: 20px;
 }
 
 #terminal .feed {
-width: 90%;
 padding: 3px 0 3px 0;
 }
 
 .cmd-who {
-width: 95%;
-text-align: left;
 float: left;
+text-align: left;
 }
 
 .cmd-who li {
@@ -152,8 +128,18 @@ padding: 0 3px 0 0;
 float: left;
 }
 
-#inputwrapper {
+.motd {
+color: red;
+}
 
+.alert {
+color: red;
+font-weight: bold;
+}
+
+.alertmsg {
+color: #fff;
+font-style: italic;
 }
 
 #inputwrapper form {
@@ -162,19 +148,8 @@ padding: 5px;
 }
 
 #inputwrapper form input {
-width: 100%;
 border: none;
-}
-
-#intro-ascii {
-height: auto;
-font-size: 70%;
-}			
-
-.intro {
-color: yellow;
-font-weight: bold;
-}
+}		
 
 .subtext {
 width: 100%;
@@ -239,7 +214,7 @@ margin: 0;
 }
 
 .cprompt {
-color:#fff;
+color: #eee;
 }
 
 .error {
@@ -261,10 +236,6 @@ color: #ff0000;
 text-shadow: 1px 1px 0 yellow;
 }
 
-p.enter-name {
-padding: 15px 0;
-}
-
 blockquote {
 
 }
@@ -276,3 +247,4 @@ blockquote:before {
 blockquote:after {
 
 };
+
