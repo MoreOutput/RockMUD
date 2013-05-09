@@ -8,7 +8,7 @@ fs = require('fs'),
 cfg = require('./config').server.game,
 server = http.createServer(function (req, res) {
 	if (req.url === '/' || req.url === '/index.html') {
-		fs.readFile(cfg.home, function (err, data) {
+		fs.readFile('./public/index.html', function (err, data) {
         	if (err) {
 				throw err;
 			}

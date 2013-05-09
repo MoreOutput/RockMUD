@@ -1,9 +1,8 @@
 exports.server = {
 	game: {
 		ip: '127.0.0.1',
-		port: 80,
+		port: 8000,
 		name: 'RockMUD',
-		home: './index.html',
 		version: '0.1.6',
 		website: 'https://github.com/MoreOutput/RockMUD'
 	},
@@ -38,7 +37,8 @@ exports.server = {
 		mv: 10,
 		dex: 2,
 		gold: 10,
-		skills: ["backstab"]
+		skills: [{ name: 'backstab', train: 65 }],
+		skillList: [{ name: 'Backstab', mod: 2, level: 1, maxTrain: 95, wait: 3 }]
 	}, {
 		name:'Fighter', 
 		minLevel: 0, 
@@ -48,7 +48,8 @@ exports.server = {
 		int: -1, 
 		wis: -1, 
 		con: 1,
-		skills: ["bash"]
+		skills: [{ name: 'bash', train: 65 }],
+		skillList: [{ name: 'Bash', mod: 1, level: 1, maxTrain: 95, wait: 1 }]
 	}, {
 		name:'Ranger', 
 		minLevel: 0,
@@ -56,7 +57,8 @@ exports.server = {
 		mv: 10,
 		str: 1, 
 		dex: 1,
-		skills: ["lunge"]
+		skills: [{ name: 'lunge', train: 65 }],
+		skillList: [{ name: 'Lunge', mod: 1, level: 1, maxTrain: 95, wait: 2 }]
 	}, {
 		name:'Cleric', 
 		minLevel: 0,
@@ -66,7 +68,8 @@ exports.server = {
 		wis: 2, 
 		con: 1,
 		str: -1,
-		spells: ["cure"]
+		skills: [{ name: 'cure light', train: 65 }],
+		skillList: [{ name: 'Cure Light', mod: 2, level: 1, maxTrain: 95, wait : 1 }]
 	}, {
 		name:'Wizard', 
 		minLevel: 0,
@@ -75,6 +78,7 @@ exports.server = {
 		int: 2, 
 		con: -1, 
 		str: -1,
-		spells:	["dart"]
+		skills: [{ name: 'dart', train: 65 }],
+		skillList: [{ name: 'Dart', mod: 2, level: 1, maxTrain: 95, wait: 1 }]
 	}]
 };

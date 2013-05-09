@@ -13,7 +13,7 @@
     "expToLevel": 1000,
     "position": "fighting",
     "alignment": "",
-    "chp": 50,
+    "chp": -24,
     "hp": 110,
     "cmana": 100,
     "mana": 100,
@@ -25,9 +25,10 @@
     "dex": 12,
     "con": 13,
     "ac": 10,
+    "wait": 0,
     "gold": 1000,
     "hunger": 10,
-    "thirst": 4,
+    "thirst": 5,
     "carry": 140,
     "load": 0,
     "area": "midgaard",
@@ -51,10 +52,22 @@
     },
     "items": [],
     "skills": [
-        "bash"
+        {
+            "name": "bash",
+            "train": 65
+        }
     ],
-    "traits": [],
+    "skillList": [
+        {
+            "name": "Bash",
+            "mod": 1,
+            "level": 1,
+            "maxTrain": 95,
+            "wait": 1
+        }
+    ],
+    "feats": [],
     "affects": [],
-    "saved": "Sat May 04 2013 22:28:24 GMT-0400 (Eastern Daylight Time)",
-    "sid": "6xBgurJmIL5EC3EKbs2m"
+    "saved": "Wed May 08 2013 21:39:55 GMT-0400 (Eastern Daylight Time)",
+    "sid": "oUddoNIu2awv1Toe462J"
 }

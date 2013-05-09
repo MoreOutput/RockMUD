@@ -11,7 +11,7 @@ players = require('../server').players,
 areas = require('../server').areas;
 
 (function() {
-	// Regen, Hunger and Thirst Tick
+	// Regen, Hunger and Thirst Tick 
 	setInterval(function() { 
 		var i = 0,
 		s; 
@@ -48,5 +48,20 @@ areas = require('../server').areas;
 		}
 	}, 60000 * 12);
 
-	// Every fifteen minutes remove all areas with no users inside of them
+	// Every three minutes we send a random alert to all logged in players
+	setInterval(function() {
+		var s;
+
+		if (players.length > 0) {
+			s = io.sockets.socket(players[0].sid);
+			fs.readFile('./motd.json', function (err, data) {
+				alerts = JSON.parse(data).alerts;
+
+				s.in('mud').broadcast.emit('msg', {
+					msg: alerts[0],
+					styleClass: 'annoucement'
+				});
+			});
+		}
+	}, 60000 * 3);
 }());

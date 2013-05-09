@@ -179,7 +179,7 @@ Character.prototype.create = function(r, s, fn) {
 		int: 12,
 		dex: 12,
 		con: 12,
-		memory: 3,
+		wait: 0,
 		ac: 10,
 		gold: 5,
 		hunger: 0,
@@ -205,24 +205,22 @@ Character.prototype.create = function(r, s, fn) {
 			ring1: '',
 			ring2: '',
 			floating: ''
-		}, 
+		},
 		items: [
 			{
-			name: 'Short Sword', 
-			roomid: 1, 
-			itemType: 'weapon',
-			material: 'iron', 
-			diceNum: 2, 
-			diceSides: 6, 
-			attackType: 'Slice', 
-			attackElement : '',
-			flags: []
+				"name": "Pot Pie", 
+				"short": "A Chicken Pot Pie",
+				"long": "An over-stuffed simple pot pie",
+				"id": 4, 
+				"area": "all",
+				"level": 1,
+				"itemType": "food",
+				"flags": [
+					{"hunger": -7},
+					{"carry": 1} 
+				]
 			}
 		],
-		skills: [],
-		spells: [],
-		feats: [],
-		affects: [],
 		channels: ['say', 'yell', 'chat', 'achat']
 	},
 	character = this;
@@ -289,10 +287,10 @@ Character.prototype.rollStats = function(player, fn) {
 				if (classes[j].name.toLowerCase() === player.charClass) { // class match found
 					for (classKey in player) {
 						if (classKey in classes[j] && classKey != 'name') {
-							if (classKey != 'skills' && classKey != 'spells'  && classKey != 'feats'  && classKey != 'affects') {
+							if (classKey !== undefined) {
 								player[classKey] = classes[j][classKey] + player[classKey];
 							} else {
-								player[classKey].push(classes[j][classKey]);
+								player[classKey] = classes[j][classKey];
 							}
 						} 
 					}

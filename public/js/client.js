@@ -1,6 +1,6 @@
 /*
  Client Side JS for RockMUD
- Rocky Bevins, moreoutput@gmail.com 2012
+ Rocky Bevins, moreoutput@gmail.com 2013
 */
  require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'dojo/_base/event', 'dojo/window', 'dojo/ready', 'dojo/NodeList-dom'], 
 	function (dom, string, query, domAttr, on, event, win, ready) {
@@ -8,7 +8,7 @@
 			'use strict';
 			var ws = io.connect(''),
 			terminal = dom.byId('terminal'),
-			/* Command aliases are loaded by the client */
+			/* Command aliases */
 			aliases = {	
 				n: 'north',
 				e: 'east',
@@ -25,6 +25,7 @@
 				k: 'kill',
 				re: 'rest',
 				sl: 'sleep',
+				h: 'help',
 				wh: 'where',
 				ooc: 'chat'
 			},

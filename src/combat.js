@@ -44,7 +44,10 @@ Combat.prototype.begin = function(s, monster, fn) {
 }
 
 /*
-* If begin() was successful then we can move to running this function until the attacker or target hits 0 chps.
+* If begin() was successful then we can move to running this function until:
+* 1) attacker or target hits 0 chps.
+* 2) a skill or command ends the battle -- flee for example
+* 3) the target or attacker changes postions to sleeping, or 'prone'
 * Each player gets one round of attacks against their target
 */
 Combat.prototype.round = function(s, monster, fn) {
@@ -60,7 +63,10 @@ Combat.prototype.round = function(s, monster, fn) {
 	});
 }
 
-// Attacker is always at the top of the round
+/*
+* The round for the entity issuing the kill command, the Attacker 
+* Attacker is always at the top of the round
+*/
 Combat.prototype.attackerRound = function(s, monster, fn) {
 	Dice.roll(1, 20, function(total) { // Roll against AC
 		total = total + 1 + s.player.dex/4;
@@ -86,7 +92,10 @@ Combat.prototype.attackerRound = function(s, monster, fn) {
 	});
 }
 
-// Target is at the bottom of the attack block
+/*
+* The round for the entity being attacked, the Target
+* Target is always at the bottom of the round
+*/
 Combat.prototype.targetRound = function(s, monster, fn) {
 	Dice.roll(1, 20, function(total) { // Roll against AC
 		total = total + 5;
@@ -112,6 +121,7 @@ Combat.prototype.targetRound = function(s, monster, fn) {
 	});
 }
 
+/* End combat and reward XP and any gold on the monster */
 Combat.prototype.end = function(s, monster, fn) {
 
 }

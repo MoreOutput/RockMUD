@@ -12,16 +12,16 @@
 			"exits" : [
 				{
 					"cmd" : "north",
-					"vnum" : 0
+					"vnum" : 2
 				}, {
 					"cmd" : "east",
-					"vnum" : 0
+					"vnum" : 3
                 }, {
 					"cmd" : "south",
-					"vnum" : 0
+					"vnum" : 4
                 }, {
 					"cmd" : "west",
-                    "vnum" : 0
+                    "vnum" : 5
                 }
 			], 
 			"monsters" : [
@@ -82,6 +82,62 @@
 				"attackElement": "",
 				"flags": []
 			}],
+			"flags" : []
+		},
+		{
+			"id" : 2,
+			"title" : "North of Town Square",
+			"content" : "Richly adorned houses line the pebbled street that stretches to the north and south.",
+			"exits" : [
+				{
+					"cmd" : "south",
+					"vnum" : 1
+                }
+			], 
+			"monsters" : [],
+			"items" : [],
+			"flags" : []
+		},
+		{
+			"id" : 3,
+			"title" : "East of Town Square",
+			"content" : "Beautiful shops line the pebbled street that leads to the east and west.",
+			"exits" : [
+				{
+					"cmd" : "west",
+					"vnum" : 1
+                }
+			], 
+			"monsters" : [],
+			"items" : [],
+			"flags" : []
+		},
+		{
+			"id" : 4,
+			"title" : "South of Town Square",
+			"content" : "The pebbled street leads north and south from here.",
+			"exits" : [
+				{
+					"cmd" : "north",
+					"vnum" : 1
+                }
+			], 
+			"monsters" : [],
+			"items" : [],
+			"flags" : []
+		},
+		{
+			"id" : 5,
+			"title" : "West of Town Square",
+			"content" : "Beautiful shops line the pebbled street that stretches to the east and west.",
+			"exits" : [
+				{
+					"cmd" : "east",
+					"vnum" : 1
+                }
+			], 
+			"monsters" : [],
+			"items" : [],
 			"flags" : []
 		}
 	]
