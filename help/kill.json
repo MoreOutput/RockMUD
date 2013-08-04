@@ -1,0 +1,9 @@
+{
+	"name" : "Kill",
+	"related" : ["Combat", "Death", "Delete", "Quit"],
+	"type" : "Command",
+	"levels" : "All",
+	"restrict": 0,
+	"description" : "Targets a monster and attacks. The attacker gets the first hits of the combat initiation. First combatant to reach zero HP expires.",
+	"Alias" : "k"
+}

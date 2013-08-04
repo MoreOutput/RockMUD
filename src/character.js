@@ -221,7 +221,7 @@ Character.prototype.create = function(r, s, fn) {
 				]
 			}
 		],
-		channels: ['say', 'yell', 'chat', 'achat']
+		channels: ['say', 'yell', 'chat', 'tell']
 	},
 	character = this;
 	

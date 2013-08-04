@@ -164,6 +164,8 @@ Cmd.prototype.kill = function(r, s) {
 									clearInterval(combatInterval);
 									//Room.removeMonster();
 									//Character.calXP(s, monster, function(earnedXP) {});
+									s.player.position = 'standing';
+									
 									s.emit('msg', {msg: 'You won the fight!', styleClass: 'victory'});
 								} else if (s.player.chp <= 0) {
 									clearInterval(combatInterval);
@@ -382,24 +384,24 @@ Cmd.prototype.inventory = function(r, s) {
 
 Cmd.prototype.score = function(r, s) { 
 	var i = 0,
-	score = '<div class="name">' + s.player.name + 
-	' <div class="title">' + s.player.title + '</div></div>' +
-	'<ul class="stats">' + 
-		'<li>HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
-		'<li>Mana: ' + s.player.cmana + '/' + s.player.mana +'</li>' +
-		'<li>Stamina: ' + s.player.cmv + '/' + s.player.mv +'</li>' +
-		'<li>You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
-		'<li>STR: ' + s.player.str + '</li>' +
-		'<li>WIS: ' + s.player.wis + '</li>' +
-		'<li>INT: ' + s.player.int + '</li>' +
-		'<li>DEX: ' + s.player.dex + '</li>' +
-		'<li>CON: ' + s.player.con + '</li>' +
-		'<li>Armor: ' + s.player.ac + '</li>' +
-		'<li>XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
-		'<li>Gold: ' + s.player.gold + '</li>' +
-		'<li>Hunger: ' + s.player.hunger + '</li>' +
-		'<li>Thirst: ' + s.player.thirst + '</li>' +
-		'<li>Carrying ' + s.player.load + '/' + s.player.carry + ' LBs</li>' +
+	score = '<div class="score-name">' + s.player.name + 
+	' <div class="score-title">' + s.player.title + '</div></div>' +
+	'<ul class="score-stats">' + 
+		'<li class="stat-hp">HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
+		'<li class="stat-mana">Mana: ' + s.player.cmana + '/' + s.player.mana +'</li>' +
+		'<li class="stat-mv">Stamina: ' + s.player.cmv + '/' + s.player.mv +'</li>' +
+		'<li class="stat-level">You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
+		'<li class="stat-str">STR: ' + s.player.str + '</li>' +
+		'<li class="stat-wis">WIS: ' + s.player.wis + '</li>' +
+		'<li class="stat-int">INT: ' + s.player.int + '</li>' +
+		'<li class="stat-dex">DEX: ' + s.player.dex + '</li>' +
+		'<li class="stat-con">CON: ' + s.player.con + '</li>' +
+		'<li class="stat-armor">Armor: ' + s.player.ac + '</li>' +
+		'<li class="stat-xp">XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
+		'<li class="stat-gold">Gold: ' + s.player.gold + '</li>' +
+		'<li class="stat-hunger">Hunger: ' + s.player.hunger + '</li>' +
+		'<liclass="stat-thirst">Thirst: ' + s.player.thirst + '</li>' +
+		'<li class="stat-carry">Carrying ' + s.player.load + '/' + s.player.carry + ' pounds.</li>' +
 	'</ul>';
 
 	if (s.player.affects.length > 0) {
@@ -429,7 +431,8 @@ Cmd.prototype.help = function(r, s) {
 
 /*
 * This command uses level checking. So if you cap players at X you can use levels above that for admin
-* View a string representation of the JSON behind a world object.
+* View a string representation of the JSON behind a world object. Pass in an ID (matches first), or noun pattern
+* typing 'spit' alone will give the json object for the entire current room.
 */
 Cmd.prototype.spit = function(r, s) {
 	if (s.player.level >= 200) {

@@ -1,9 +1,9 @@
-var Dice = require('./dice').roller;
+var Dice = require('./dice').roller,
 
-var Combat = function() {
+Combat = function() {
 	this.adjectives = ['barbaric', 'BARBARIC', 'great', 'GREAT', 'mighty', 'MIGHTY', '**AWESOME**'];
 	this.abstractNouns = ['hatred', 'intensity', 'weakness'];
-}
+};
 
 /*
 General idea behind a hit:

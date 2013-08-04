@@ -1,0 +1,48 @@
+{
+	"name" : "The Plains",
+	"id" : 2,
+	"type" : "grasslands",
+	"levels" : "1-10",
+	"description" : "The second area.",
+	"rooms" : [
+		{
+			"id" : 1,
+			"title" : "On the outskirts of town",
+			"content" : "Beautiful grasslands stretch in all directions.",
+			"exits" : [
+				{
+					"cmd" : "north",
+					"vnum" : 2
+				}, {
+					"cmd" : "east",
+					"vnum" : 3
+                }, {
+					"cmd" : "south",
+					"vnum" : 4
+                }, {
+					"cmd" : "west",
+                    "vnum" : 5
+                }
+			], 
+			"monsters" : [
+				{
+					"name": "Boar",
+					"area": "Midgaard",
+					"level": 1,
+					"short": "A large boar",
+					"long": "",
+					"id": 6,
+					"type": "monster",
+					"race": "animal",
+					"limit": 2,
+					"hp": 100,
+					"chp": 100,
+					"position": "standing",
+					"ac": 6
+				}
+			],
+			"items" : [],
+			"flags" : []
+		}
+	]
+}

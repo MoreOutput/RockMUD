@@ -1,0 +1,9 @@
+{
+	"name" : "Yell",
+	"related" : ["Channels", "Say", "Yell", "Flame", "Tell"],
+	"type" : "Command",
+	"levels" : "All",
+	"restrict": 0,
+	"description" : "Send a message to everyone in your current area. See HELP CHANNELS for a comprehensive overview of communication commands.",
+	"Alias" : ""
+}
