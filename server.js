@@ -62,7 +62,7 @@ io.on('connection', function (s) {
 			r.cmd = cmdArr[0].toLowerCase();
 			r.msg = cmdArr.slice(1).toString().replace(',', ' ');
 		
-			if (/[`~!@#$%^&*()-+={}[]|]/g.test(r.msg) === false) {
+			if (/[`~!@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
 				if (r.cmd != '') {
 					if (r.cmd in Cmds) {
 						return Cmds[r.cmd](r, s);

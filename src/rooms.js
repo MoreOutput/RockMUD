@@ -80,8 +80,6 @@ Room.prototype.getRoom = function(s, fn) {
 						});
 					});
 				});
-			} else {
-				s.emit('msg', {msg: 'Room load failed.'});
 			}
 		}	
 	};

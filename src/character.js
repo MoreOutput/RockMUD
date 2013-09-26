@@ -1,6 +1,6 @@
 /*
 Characters.js controls everything dealing with a character.json file, no in game commands are
-defined here. Commands.js does share some method names with this module, as they -- are --  commands 
+defined here. Commands.js does share some function names with this module, as they -- are --  commands 
 and therefore defined in commands.js. See: save().
 */
 var fs = require('fs'),
@@ -15,12 +15,12 @@ areas = require('../server').areas;
 var Character = function () {
 
 }
- 
+
 Character.prototype.login = function(r, s, fn) {
 	var name = r.msg.replace(/_.*/,'').toLowerCase();
 	
-	if (r.msg.length > 2 ) {
-		if  (/[`~!@#$%^&*()-+={}[]]|[0-9]/g.test(r.msg) === false) {
+	if (r.msg.length > 3 ) {
+		if  (/^[a-z]+$/g.test(r.msg) === true) {
 			fs.stat('./players/' + name + '.json', function (err, stat) {
 				if (err === null) {
 					return fn(name, s, true);
@@ -29,11 +29,11 @@ Character.prototype.login = function(r, s, fn) {
 				}
 			});
 		} else {
-			return s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
+			return s.emit('msg', {msg : '<b>Invalid Entry</b>. Enter your name:', res: 'login', styleClass: 'enter-name'});
 		}
 	} else {
 		s.emit('msg', {
-			msg: 'Invalid name choice, must be more than two characters.',
+			msg: 'Invalid name choice, must be more than three characters.',
 			res: 'login',
 			styleClass: 'error'
 		});

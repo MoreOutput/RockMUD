@@ -10,7 +10,7 @@ Roller.prototype.roll = function(dNum, dSides, fn) {
 	i = 0;
 		
 	for (i; i < dNum; i += 1) {
-		total = total + Math.floor(Math.random() * dSides);					
+		total = total + Math.floor((Math.random() * dSides) + 1);					
 	}
 	
 	if (typeof fn === 'function') {

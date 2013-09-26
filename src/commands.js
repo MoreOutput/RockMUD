@@ -1,6 +1,6 @@
 /*
-* All non-combat commands that one would consider 'general' to a wide section
-* of users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
+* All non-combat commands that one would consider 'general' to a all
+* users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
 */
 var Character = require('./character').character,
 Room = require('./rooms').room,
@@ -400,7 +400,8 @@ Cmd.prototype.score = function(r, s) {
 		'<li class="stat-xp">XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
 		'<li class="stat-gold">Gold: ' + s.player.gold + '</li>' +
 		'<li class="stat-hunger">Hunger: ' + s.player.hunger + '</li>' +
-		'<liclass="stat-thirst">Thirst: ' + s.player.thirst + '</li>' +
+		'<li class="stat-thirst">Thirst: ' + s.player.thirst + '</li>' +
+		'<li class="stat-position">Position: ' + s.player.position + '</li>' +
 		'<li class="stat-carry">Carrying ' + s.player.load + '/' + s.player.carry + ' pounds.</li>' +
 	'</ul>';
 
@@ -430,9 +431,8 @@ Cmd.prototype.help = function(r, s) {
 */
 
 /*
-* This command uses level checking. So if you cap players at X you can use levels above that for admin
 * View a string representation of the JSON behind a world object. Pass in an ID (matches first), or noun pattern
-* typing 'spit' alone will give the json object for the entire current room.
+* typing 'spit' alone will give the json object for the entire current room. 
 */
 Cmd.prototype.spit = function(r, s) {
 	if (s.player.level >= 200) {
@@ -442,6 +442,7 @@ Cmd.prototype.spit = function(r, s) {
 
 /*
 * A soft reboot. Reloads all areas and characters without restarting the server. Checks users role.
+* Should forces typical tick regens.
 */
 Cmd.prototype.reboot = function(r, s) {
 	if (s.player.role === 'admin') {
