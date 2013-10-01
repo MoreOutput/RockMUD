@@ -13,7 +13,7 @@
     "expToLevel": 1000,
     "position": "standing",
     "alignment": "",
-    "chp": 103,
+    "chp": -276,
     "hp": 110,
     "cmana": 100,
     "mana": 100,
@@ -27,7 +27,7 @@
     "ac": 10,
     "wait": 0,
     "gold": 1000,
-    "hunger": 6,
+    "hunger": 10,
     "thirst": 4,
     "carry": 140,
     "load": 0,
@@ -50,7 +50,25 @@
         "ring2": "",
         "floating": ""
     },
-    "items": [],
+    "items": [
+        {
+            "name": "bread",
+            "short": "A loaf of bread",
+            "long": "A rather stale looking loaf of bread.",
+            "area": "Midgaard",
+            "id": 5,
+            "level": 1,
+            "itemType": "food",
+            "flags": [
+                {
+                    "hunger": -5
+                },
+                {
+                    "carry": 1
+                }
+            ]
+        }
+    ],
     "skills": [
         {
             "name": "bash",
@@ -68,6 +86,6 @@
     ],
     "feats": [],
     "affects": [],
-    "saved": "Sun Aug 04 2013 16:17:56 GMT-0400 (Eastern Daylight Time)",
-    "sid": "hEQs_RX7vHlbtE6n5Zat"
+    "saved": "Mon Sep 30 2013 22:39:26 GMT-0400 (Eastern Daylight Time)",
+    "sid": "rvR9IkIcspuezy3Wq39X"
 }

@@ -29,13 +29,13 @@ Room.prototype.checkArea = function(areaName, fn) {
 	if (areas.length > 0) {
 		areas.forEach(function(area) {
 			if (areaName === area.name.toLowerCase()) {
-				fn(true, area);
+				return fn(true, area);
 			} else {
-				fn(false);
+				return fn(false);
 			}
 		});
 	} else {
-		fn(false);
+		return fn(false);
 	}
 };
 
@@ -53,17 +53,20 @@ Room.prototype.getRoom = function(s, fn) {
 						room.getItems(rooms[i], {specific: 'short'}, function(items) {	
 							room.getMonsters(rooms[i], {specific: 'short'}, function(monsters) {							
 								if (exits.length > 0) {
-									roomStr += '<li class="room-exits">Visible Exits: ' + exits.toString() + '</li>';
+								 	roomStr += '<li class="room-exits">Visible Exits: ' + 
+								 	exits.toString() + '</li>';
 								} else {
 									roomStr += '<li class="room-exits">Visible Exits: None!</li>';
 								}
 								
 								if (playersInRoom.length > 0 || monsters.length > 0) {
-									roomStr += '<li>Here:' + playersInRoom.toString().replace(/,/g, ', ') + ' ' + monsters.toString().replace(/,/g, ', ') + '</li>';
+									roomStr += '<li>Here:' + playersInRoom.toString().replace(/,/g, ', ') + 
+									' ' + monsters.toString().replace(/,/g, ', ') + '</li>';
 								}
 								
 								if (items.length > 0) {
-									roomStr += '<li>Items: ' + items.toString().replace(/,/g, ', ') + '</li>';
+									roomStr += '<li>Items: ' + items.toString().replace(/,/g, ', ') + 
+									'</li>';
 								}							
 							
 								s.emit('msg', {
@@ -150,7 +153,6 @@ Room.prototype.getExits = function(room, fn) {
 	for (i; i < room.exits.length; i += 1) {
 		arr.push(room.exits[i].cmd);
 	}
-	
 	return fn(arr);
 }
 
@@ -218,8 +220,22 @@ Room.prototype.getMonsters = function(room, optObj, fn) {
 }
 
 // does a string match an exit in the room
-Room.prototype.checkExit = function(s) { 
-
+Room.prototype.checkExit = function(r, s, fn) { 
+	var room = this,
+	i = 0;
+	
+	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
+		if (roomObj.exits.length > 0) {
+			for (i; i < roomObj.exits.length; i += 1) {
+				if (r.cmd === roomObj.exits[i].cmd) {
+					return fn(true, roomObj.exits[i].vnum);
+				}
+			}
+			return fn(false);
+		} else {
+			return fn(false);
+		}
+	});		
 }
 
 // does a string match any monsters in the room
@@ -239,7 +255,7 @@ Room.prototype.checkMonster = function(r, s, fn) {
 			
 			return fn(false);
 		} else {
-			fn(false);
+			return fn(false);
 		}
 	});	
 }
@@ -251,14 +267,12 @@ Room.prototype.removeMonster = function(roomQuery, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.monsters = roomObj.monsters.filter(function(item, i) {
 			if (item.id === monster.id) {
-				return false;
+				return fn(false);
 			} else {
-				return true;
+				return fn(true);
 			}			
 		});	
 	});
-	
-	fn();
 }
 
 // does a string match an item in the room
@@ -272,13 +286,13 @@ Room.prototype.checkItem = function(r, s, fn) {
 				var msgPatt = new RegExp('^' + r.msg);
 				for (i; i < items.length; i += 1) {
 					if (msgPatt.test(items[i].name.toLowerCase())) {
-						fn(true, items[i]);
+						return fn(true, items[i]);
 					}
 				}
 				return fn(false);
 			});
 		} else {
-			fn(false);
+			return fn(false);
 		}
 	});		
 };
@@ -288,14 +302,12 @@ Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.items = roomObj.items.filter(function(item, i) {
 			if (item.id === roomQuery.item.id) {
-				return false;
+				return fn(false);
 			} else {
-				return true;
+				return fn(true);
 			}			
 		});	
 	});
-	
-	fn();
 }
 
 Room.prototype.addItem = function(roomQuery, fn) {
@@ -304,13 +316,7 @@ Room.prototype.addItem = function(roomQuery, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.items.push(roomQuery.item);		
 	});
-	
-	fn();
-}
-
-// Moves a player to a new room connected to the one they're standing in. Switches their room ID and could load a new area.
-Room.prototype.move = function(direction, fn) {
-	//Room.getRoom(s, fn);
+	return fn();
 }
 
 module.exports.room = new Room();

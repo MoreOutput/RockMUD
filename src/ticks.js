@@ -1,6 +1,6 @@
 /*
 This module houses all the timed events on the server. For example:
-	* Hunger/Thirst/Regen ticks every minute
+	* Hunger/Thirst/Regen ticks every two minutes
 	* Every Tweleve minutes the character is saved if they're not in a fight
 	* Every fifteen minutes all the areas in memory are checked any with no players is removed from areas[]
 */
@@ -52,6 +52,7 @@ areas = require('../server').areas;
 	// Random alert to all logged in players
 	setInterval(function() {
 		var s,
+		alerts,
 		shuffle = function (arr) {
 			var i = arr.length - 1,
 			j = Math.floor(Math.random() * i),
@@ -70,14 +71,23 @@ areas = require('../server').areas;
 		
 		if (players.length > 0) {
 			s = io.sockets.socket(players[0].sid);
-			fs.readFile('./motd.json', function (err, data) {
+			if (!alerts) {
+				fs.readFile('./motd.json', function (err, data) {
+					alerts = shuffle(JSON.parse(data).alerts);
+
+					io.sockets.in('mud').emit('msg', {
+						msg: '<span class="alert">ALERT: </span><span class="alertmsg"> ' + alerts[0] + '</span>',
+						styleClass: 'alert'
+					});
+				});
+			} else {
 				alerts = shuffle(JSON.parse(data).alerts);
 
 				io.sockets.in('mud').emit('msg', {
 					msg: '<span class="alert">ALERT: </span><span class="alertmsg"> ' + alerts[0] + '</span>',
 					styleClass: 'alert'
 				});
-			});
+			}
 		}
-	}, 60000 * 3.5);
+	}, 60000 * 2);
 }());

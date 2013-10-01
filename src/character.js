@@ -94,7 +94,7 @@ Character.prototype.getPassword = function(s, fn) {
 						
 							character.motd(s, function() {		
 								Room.getRoom(s, function() {
-									fn(s);
+				  					fn(s);
 									return character.prompt(s);
 								});
 							});
@@ -545,6 +545,11 @@ Character.prototype.removeFromInventory = function(s, itemObj, fn) {
 	} else {
 		fn(false);
 	}
+}
+
+Character.prototype.move = function(s, id, fn) {
+    s.player.roomid = id;
+    return fn(s);
 }
 
 // Updates a players reference in players[] with some data attached to the socket

@@ -18,9 +18,19 @@ var Cmd = function () {
 */
 Cmd.prototype.north = function(r, s) {
 	if (s.player.position != 'fighting' && s.player.position != 'resting' && s.player.position != 'sleeping') {
-		Room.checkExit(r.cmd, function(fnd) {
+		Room.checkExit(r, s, function(fnd, roomID) {
 			if (fnd) {
-				Room.move('north', s);
+				// Make the adjustment in the socket character reference
+				Character.move(s, roomID, function(s) {
+					Room.getRoomObject({
+						area: s.player.area,
+						vnum: roomID
+					}, function(roomObj) {
+						Room.getRoom(s, function() {
+							return Character.prompt(s);
+						});
+					});
+				}); 
 			} else {
 				s.emit('msg', {
 					msg: 'There is no exit in that direction.', 
@@ -30,7 +40,7 @@ Cmd.prototype.north = function(r, s) {
 		}); 
 	} else {
 		s.emit('msg', {
-			msg: 'You cant move right now!', 
+			msg: 'You are in no position to move right now!', 
 			styleClass: 'error'
 		});
 	}
@@ -206,6 +216,7 @@ Cmd.prototype.where = function(r, s) {
 	'<li>Current Area: ' + Character[s.id].area + '</li>' +
 	'<li>Room Number: ' + Character[s.id].id + '</li>'  +
 	'</ul>';	
+
 	r.styleClass = 'playerinfo cmd-where';
 	
 	s.emit('msg', r);
@@ -423,7 +434,12 @@ Cmd.prototype.score = function(r, s) {
 }
 
 Cmd.prototype.help = function(r, s) {
-	
+	// if we don't list a specific help file we return help.json
+	if (r.cmd === '') {
+
+	} else {
+
+	}
 }
 
 /*
@@ -445,6 +461,17 @@ Cmd.prototype.spit = function(r, s) {
 * Should forces typical tick regens.
 */
 Cmd.prototype.reboot = function(r, s) {
+	if (s.player.role === 'admin') {
+
+	} else {
+		s.emit('msg', {msg: 'Not a valid command', styleClass: 'error' });	
+		
+		return Character.prompt(s);
+	}
+}
+
+// Fully heal everyone on the MUD
+Cmd.prototype.restore = function(r, s) {
 	if (s.player.role === 'admin') {
 
 	} else {
