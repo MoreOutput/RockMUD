@@ -29,25 +29,39 @@
 				wh: 'where',
 				ooc: 'chat'
 			},
+			// movement = ['north', 'east', 'south', 'west'],
 			display = function(r) {
 				if (r.element === undefined) {
-					terminal.innerHTML += '<p class="' + r.styleClass + '">' + r.msg + '</p>';
+					terminal.innerHTML += '<div class="' + r.styleClass + '">' + r.msg + '</div>';
 				} else {
 					terminal.innerHTML += '<' + r.element + ' class="' + r.styleClass + '">' + r.msg + '</' + r.element + '>';
 				}
 
 				return parseCmd(r);
 			},
+			
 			parseCmd = function(r) {
-				if (r.msg != undefined) {
+				if (r.msg !== undefined) {
 					r.msg = string.trim(r.msg.replace(/ /g, ' '));
 					ws.emit(r.emit, r);
 				}
 			},
+
 			changeMudState = function(state) {
 				domAttr.set(dom.byId('cmd'), 'mud-state', state);
 			},		
-			
+			/*
+			For Dynamic Movement
+
+			checkMovement = function(cmdStr, fn) {
+				if (movement.toString().indexOf(cmdStr) !== -1) {
+					return fn(true, 'mov-' + cmdStr);
+				} else {
+					return fn(false, cmdStr);
+				}
+			},
+			*/
+
 			checkAlias = function(cmdStr, fn) {
 				var keys = Object.keys(aliases),
 				i = 0,
@@ -63,18 +77,11 @@
 						return fn(aliases[keys[i]] + ' ' + msg);
 					}	
 				}
+
 				return fn(cmd + ' ' + msg);				
-			};
-				
-			ws.on('msg', function(r) {
-				display(r);
-				
-				if (r.res) {
-					changeMudState(r.res);	
-				}
-			});			
-				
-			var frmH = on(dom.byId('console'), 'submit', function (e) {				
+			},
+
+			frmH = on(dom.byId('console'), 'submit', function (e) {				
 				var node = dom.byId('cmd'),
 				messageNodes = [],
 				msg = string.trim(node.value.toLowerCase());
@@ -83,7 +90,9 @@
 				
 				display({
 					msg : checkAlias(msg, function(cmd) {
-						return cmd;
+						// return checkMovement(cmd, function(wasMov, cmd) {
+							return cmd;
+						//});
 					}),
 					emit : (function () {
 						var res = domAttr.get(node, 'mud-state');
@@ -112,5 +121,21 @@
 				
 				terminal.scrollTop = terminal.scrollHeight;	
 			});
+
+			query('body').on('click', function(evt) {
+				query('#cmd')[0].focus();
+			});
+
+			query('#cmd')[0].focus();
+
+			ws.on('msg', function(r) {
+				display(r);
+
+				win.scrollIntoView(query('#cmd')[0]);
+				
+				if (r.res) {
+					changeMudState(r.res);	
+				}
+			});	
 		});
 	});

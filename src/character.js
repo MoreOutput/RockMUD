@@ -58,7 +58,7 @@ Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 	i = 0;
 		
 	for (i; i < iterations; i += 1) {
-		hash = crypto.createHmac('sha256', salt).update(hash).digest('hex');
+		hash = crypto.createHmac('sha512', salt).update(hash).digest('hex');
 	} 
 			
 	fn(hash);	
@@ -216,11 +216,15 @@ Character.prototype.create = function(r, s, fn) {
 				"level": 1,
 				"itemType": "food",
 				"flags": [
-					{"hunger": -7},
+					{"	hunger": -7},
 					{"carry": 1} 
 				]
 			}
 		],
+		affects: [],
+		racials: [],
+		skills: [],
+		skillList: [],
 		channels: ['say', 'yell', 'chat', 'tell']
 	},
 	character = this;
@@ -276,7 +280,7 @@ Character.prototype.rollStats = function(player, fn) {
 	for (i; i < races.length; i += 1) {		// looking for race
 		if (races[i].name.toLowerCase() === player.race) {	 // found race		
 			for (raceKey in player) {
-				if (player[raceKey] in races[i] && raceKey != 'name') { // found, add in stat bonus						
+				if (player[raceKey] in races[i] && raceKey !== 'name') { // found, add in stat bonus						
 						player[player[raceKey]] = player[player[raceKey]] + races[i][player[raceKey]];	
 				}
 			}
@@ -286,11 +290,11 @@ Character.prototype.rollStats = function(player, fn) {
 			for (j; j < classes.length; j += 1) { // looking through classes
 				if (classes[j].name.toLowerCase() === player.charClass) { // class match found
 					for (classKey in player) {
-						if (classKey in classes[j] && classKey != 'name') {
-							if (classKey !== undefined) {
+						if (classKey in classes[j] && classKey !== 'name') {
+							if (!classes[j][classKey].length) {
 								player[classKey] = classes[j][classKey] + player[classKey];
 							} else {
-								player[classKey] = classes[j][classKey];
+								player[classKey].push(classes[j][classKey]);
 							}
 						} 
 					}

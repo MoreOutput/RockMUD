@@ -37,8 +37,8 @@ exports.server = {
 		mv: 10,
 		dex: 2,
 		gold: 10,
-		skills: [{ name: 'backstab', train: 65 }],
-		skillList: [{ name: 'Backstab', mod: 2, level: 1, maxTrain: 95, wait: 3 }]
+		skills: [{ name: 'backstab', train: 65, type: 'starter' }],
+		skillList: [{ name: 'Backstab', mod: 2, level: 1, maxTrain: 95, wait: 3, type: 'starter' }]
 	}, {
 		name:'Fighter', 
 		minLevel: 0, 
@@ -48,8 +48,8 @@ exports.server = {
 		int: -1, 
 		wis: -1, 
 		con: 1,
-		skills: [{ name: 'bash', train: 65 }],
-		skillList: [{ name: 'Bash', mod: 1, level: 1, maxTrain: 95, wait: 1 }]
+		skills: [{ name: 'bash', train: 65, type: 'melee' }],
+		skillList: [{ name: 'Bash', mod: 1, level: 1, maxTrain: 95, wait: 1, type: 'melee'}]
 	}, {
 		name:'Ranger', 
 		minLevel: 0,
@@ -57,8 +57,8 @@ exports.server = {
 		mv: 10,
 		str: 1, 
 		dex: 1,
-		skills: [{ name: 'lunge', train: 65 }],
-		skillList: [{ name: 'Lunge', mod: 1, level: 1, maxTrain: 95, wait: 2 }]
+		skills: [{ name: 'lunge', train: 65, type: 'starter' }],
+		skillList: [{ name: 'Lunge', mod: 1, level: 1, maxTrain: 95, wait: 2, type: 'starter' }]
 	}, {
 		name:'Cleric', 
 		minLevel: 0,
@@ -68,8 +68,8 @@ exports.server = {
 		wis: 2, 
 		con: 1,
 		str: -1,
-		skills: [{ name: 'cure light', train: 65 }],
-		skillList: [{ name: 'Cure Light', mod: 2, level: 1, maxTrain: 95, wait : 1 }]
+		skills: [{ name: 'cure light', train: 65, type: 'spell' }],
+		skillList: [{ name: 'Cure Light', mod: 2, level: 1, maxTrain: 95, wait : 1, type: 'spell' }]
 	}, {
 		name:'Wizard', 
 		minLevel: 0,
@@ -78,7 +78,7 @@ exports.server = {
 		int: 2, 
 		con: -1, 
 		str: -1,
-		skills: [{ name: 'dart', train: 65 }],
-		skillList: [{ name: 'Dart', mod: 2, level: 1, maxTrain: 95, wait: 1 }]
+		skills: [{ name: 'dart', train: 65, type: 'spell' }],
+		skillList: [{ name: 'Dart', mod: 2, level: 1, maxTrain: 95, wait: 1, type: 'spell' }]
 	}]
 };

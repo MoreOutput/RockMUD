@@ -1,36 +1,37 @@
 {
     "name": "rocky",
     "lastname": "",
-    "title": "programmer guy",
-    "role": "admin",
-    "password": "f8408a2e84e39faf32bd9e71fc136ed38154fabfaaac8d0c6510946138ead949",
-    "salt": "499a5c50d365d9ec6e0c7f70a5b670b597fc504c8663fc55a5fc2bd232e6b88580c693a78297948ef963b69a72932554c2f025a22ad5122ef049c39cd16c0081f0acdef9cfb6aee321a50bd1026b93a4e4211fb473bab451efcbdb9492c40b09d3b4eb32fb8722b932daa7b4adfb5e83dacf247249fac57b0e01c7d0c0d1e6e8",
-    "race": "ogre",
-    "charClass": "fighter",
-    "created": "Sun Oct 07 2012 03:12:18 GMT-0700 (Pacific Daylight Time)",
+    "title": "",
+    "role": "player",
+    "password": "dfdad4a85f4bd91ee9a04b9ebf2fa0c65efd191c9dc15ac63c18fe596808779bc0c1880f1aac137c15f30ea77172876773f7700feec8d8accdbeb112ca812b85",
+    "salt": "f2bc644d0413eec2c6a673d787c5726c073ca9304bbffba189c7d66ee797dbc22e32407de9fad90303d22f7494d802aa10c9fb89ae35aee95327f7bdc0b4d4997559ca1a0da5e46a80befebc25679857ccdde608a35369b4d0fc1c304591ac0e98005fbe3c67bb8b65975b1b412d32e35f082c4f69e78934062ed475cd9121f3",
+    "race": "human",
+    "charClass": "thief",
+    "created": "Sat Nov 30 2013 20:47:17 GMT-0500 (Eastern Standard Time)",
     "level": 1,
     "exp": 1,
     "expToLevel": 1000,
     "position": "standing",
     "alignment": "",
-    "chp": -276,
-    "hp": 110,
+    "chp": 1000,
+    "hp": 1000,
     "cmana": 100,
     "mana": 100,
     "cmv": 80,
-    "mv": 100,
-    "str": 14,
-    "wis": 11,
-    "int": 11,
-    "dex": 12,
-    "con": 13,
-    "ac": 10,
+    "mv": 110,
+    "str": 12,
+    "wis": 12,
+    "int": 12,
+    "dex": 14,
+    "con": 12,
     "wait": 0,
-    "gold": 1000,
+    "ac": 10,
+    "gold": 15,
     "hunger": 10,
-    "thirst": 4,
-    "carry": 140,
+    "thirst": 0,
+    "carry": 120,
     "load": 0,
+    "visible": true,
     "area": "midgaard",
     "roomid": 1,
     "recall": 1,
@@ -38,8 +39,8 @@
     "eq": {
         "head": "",
         "chest": "",
-        "wield1": "",
-        "wield2": "",
+        "rightHand": "",
+        "leftHand": "",
         "arms": "",
         "hands": "",
         "legs": "",
@@ -51,6 +52,23 @@
         "floating": ""
     },
     "items": [
+        {
+            "name": "Pot Pie",
+            "short": "A Chicken Pot Pie",
+            "long": "An over-stuffed simple pot pie",
+            "id": 4,
+            "area": "all",
+            "level": 1,
+            "itemType": "food",
+            "flags": [
+                {
+                    "\thunger": -7
+                },
+                {
+                    "carry": 1
+                }
+            ]
+        },
         {
             "name": "bread",
             "short": "A loaf of bread",
@@ -69,23 +87,35 @@
             ]
         }
     ],
+    "affects": [],
+    "racials": [],
     "skills": [
-        {
-            "name": "bash",
-            "train": 65
-        }
+        [
+            {
+                "name": "backstab",
+                "train": 65,
+                "type": "starter"
+            }
+        ]
     ],
     "skillList": [
-        {
-            "name": "Bash",
-            "mod": 1,
-            "level": 1,
-            "maxTrain": 95,
-            "wait": 1
-        }
+        [
+            {
+                "name": "Backstab",
+                "mod": 2,
+                "level": 1,
+                "maxTrain": 95,
+                "wait": 3,
+                "type": "starter"
+            }
+        ]
     ],
-    "feats": [],
-    "affects": [],
-    "saved": "Mon Sep 30 2013 22:39:26 GMT-0400 (Eastern Daylight Time)",
-    "sid": "rvR9IkIcspuezy3Wq39X"
+    "channels": [
+        "say",
+        "yell",
+        "chat",
+        "tell"
+    ],
+    "sid": "S6fQHRualeQRHYVaf77H",
+    "saved": "Sat Nov 30 2013 23:52:32 GMT-0500 (Eastern Standard Time)"
 }

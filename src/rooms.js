@@ -134,11 +134,10 @@ Room.prototype.updateArea = function(areaName, fn) {
 // Return a room in memory as an object, pass in the area name and the room vnum {area: 'Midgaard', vnum: 1}
 Room.prototype.getRoomObject = function(areaQuery, fn) {
 	var i = 0;	
-	
 	this.checkArea(areaQuery.area, function(fnd, area) {
 		if (fnd) { //  area was in areas[]
-			for (i; i < area.rooms.length; i += 1) {	
-				if (area.rooms[i].id === areaQuery.id) {								
+			for (i; i < area.rooms.length; i += 1) {
+				if (area.rooms[i].id === areaQuery.id) {		
 					return fn(area.rooms[i]);
 				} 
 			}

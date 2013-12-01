@@ -24,7 +24,7 @@ Cmd.prototype.north = function(r, s) {
 				Character.move(s, roomID, function(s) {
 					Room.getRoomObject({
 						area: s.player.area,
-						vnum: roomID
+						id: roomID
 					}, function(roomObj) {
 						Room.getRoom(s, function() {
 							return Character.prompt(s);
@@ -47,15 +47,93 @@ Cmd.prototype.north = function(r, s) {
 }
 
 Cmd.prototype.east = function(r, s) {
-
+	if (s.player.position != 'fighting' && s.player.position != 'resting' && s.player.position != 'sleeping') {
+		Room.checkExit(r, s, function(fnd, roomID) {
+			if (fnd) {
+				// Make the adjustment in the socket character reference
+				Character.move(s, roomID, function(s) {
+					Room.getRoomObject({
+						area: s.player.area,
+						id: roomID
+					}, function(roomObj) {
+						Room.getRoom(s, function() {
+							return Character.prompt(s);
+						});
+					});
+				}); 
+			} else {
+				s.emit('msg', {
+					msg: 'There is no exit in that direction.', 
+					styleClass: 'error'
+				});
+			}
+		}); 
+	} else {
+		s.emit('msg', {
+			msg: 'You are in no position to move right now!', 
+			styleClass: 'error'
+		});
+	}
 }
 
 Cmd.prototype.south = function(r, s) {
-
+	if (s.player.position != 'fighting' && s.player.position != 'resting' && s.player.position != 'sleeping') {
+		Room.checkExit(r, s, function(fnd, roomID) {
+			if (fnd) {
+				// Make the adjustment in the socket character reference
+				Character.move(s, roomID, function(s) {
+					Room.getRoomObject({
+						area: s.player.area,
+						id: roomID
+					}, function(roomObj) {
+						Room.getRoom(s, function() {
+							return Character.prompt(s);
+						});
+					});
+				}); 
+			} else {
+				s.emit('msg', {
+					msg: 'There is no exit in that direction.', 
+					styleClass: 'error'
+				});
+			}
+		}); 
+	} else {
+		s.emit('msg', {
+			msg: 'You are in no position to move right now!', 
+			styleClass: 'error'
+		});
+	}
 }
 
 Cmd.prototype.west = function(r, s) {
-
+	if (s.player.position != 'fighting' && s.player.position != 'resting' && s.player.position != 'sleeping') {
+		Room.checkExit(r, s, function(fnd, roomID) {
+			if (fnd) {
+				// Make the adjustment in the socket character reference
+				Character.move(s, roomID, function(s) {
+					Room.getRoomObject({
+						area: s.player.area,
+						id: roomID
+					}, function(roomObj) {
+						Room.getRoom(s, function() {
+							return Character.prompt(s);
+						});
+					});
+				}); 
+			} else {
+				s.emit('msg', {
+					msg: 'There is no exit in that direction.', 
+					styleClass: 'error'
+				});
+			}
+		}); 
+	} else {
+		s.emit('msg', {
+			msg: 'You are in no position to move right now!', 
+			styleClass: 'error'
+		});
+	}
 }
 
 Cmd.prototype.who = function(r, s) {
@@ -464,7 +542,7 @@ Cmd.prototype.reboot = function(r, s) {
 	if (s.player.role === 'admin') {
 
 	} else {
-		s.emit('msg', {msg: 'Not a valid command', styleClass: 'error' });	
+		s.emit('msg', {msg: 'You wish!', styleClass: 'error' });	
 		
 		return Character.prompt(s);
 	}

@@ -1,19 +1,17 @@
 /**
-Default  RockMUD styles, Rocky Bevins 2012
+Default  RockMUD styles
 */
-
 html, body {
-font: 90% 'Montserrat', Arial, sans-serif;	
+font: .95em 'Montserrat', Arial, sans-serif;	
 height: 100%;
-background-color: #eee;
-padding: 0 0 100px 0;
+background-color: #222;
+padding: 0 0 0 0;
 margin: 0 0 0 0;
 text-align: center;
 }
 
-
 h1 {
-font-size: 150%;
+font-size: 1.25em;
 color: #fff;
 padding: 0;
 margin: 0;
@@ -43,7 +41,7 @@ list-style-type: none;
 
 .btn, button {
 text-align: center;
-font-size: 12px;
+font-size: 1em;
 font-weight: bold;
 margin: 5px 10px 0 0;
 padding: 4px 8px 4px 8px;
@@ -63,7 +61,6 @@ background-image: linear-gradient(top, #4d90fe, #4787ed);
 }
 
 /* Adjustments for resizing */
-
 @media screen and (max-width: 800px) {
 	#mudwrapper { 
 	width:100%; 
@@ -76,23 +73,26 @@ background-image: linear-gradient(top, #4d90fe, #4787ed);
 }
 
 #mudwrapper {
-width: 100%;
+width: 80%;
 margin: 0 auto;
 text-align: left;
 background-color: #0c010f;
+padding: 10px;
 }
 
 #terminal {
-height: 70%;
-overflow: scroll;
+width: 100%;
 background-color: #0c010f;
 color: #fff;
 margin: 0 0 10px 0;
-padding: 20px;
 }
 
 #terminal .feed {
 padding: 3px 0 3px 0;
+}
+
+#screen-start {
+	
 }
 
 .cmd-who {
@@ -141,12 +141,14 @@ font-style: italic;
 }
 
 #inputwrapper form {
-background-color: #fff;
+background-color: #555;
 padding: 5px;
 }
 
 #inputwrapper form input {
 border: none;
+background-color: #555;
+color: #fff;
 }		
 
 .subtext {
@@ -228,7 +230,7 @@ display: inline-block;
 display: inline;
 padding: 0;
 margin: 0;
-font-size: 150%;
+font-size: 1.25em;
 font-weight: bold;
 color: #ff0000;
 text-shadow: 1px 1px 0 yellow;
@@ -245,4 +247,3 @@ blockquote:before {
 blockquote:after {
 
 };
-
