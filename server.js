@@ -62,8 +62,8 @@ io.on('connection', function (s) {
 			r.cmd = cmdArr[0].toLowerCase();
 			r.msg = cmdArr.slice(1).join(' ');
 		
-			if (/[`~!@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
-				if (r.cmd != '') {
+			if (/[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
+				if (r.cmd !== '') {
 					if (r.cmd in Cmds) {
 						return Cmds[r.cmd](r, s);
 					} else if (r.cmd in Skills) {
@@ -81,7 +81,7 @@ io.on('connection', function (s) {
 			}
 		};
 
-		if (r.msg != '') { // not checking slashes
+		if (r.msg !== '') { // not checking slashes
 			return Character.login(r, s, function (name, s, fnd) {
 				if (fnd) {
 					s.join('mud'); // mud is one of two socket.io rooms, 'creation' the other				
@@ -96,7 +96,7 @@ io.on('connection', function (s) {
 					s.join('creation'); // Character creation is its own socket.io room, 'mud' the other
 					s.player = {name:name};					
 					
-					Character.newCharacter(s, function(s) {			
+					Character.newCharacter(r, s, function(s) {			
 						s.on('cmd', function (r) { 
 							parseCmd(r, s);
 						});
@@ -125,7 +125,7 @@ io.on('connection', function (s) {
 	// DC
     s.on('disconnect', function () {
 		var i = 0;
-		if (s.player != undefined) {
+		if (s.player !== undefined) {
 			for (i; i < module.exports.players.length; i += 1) {	
 				if (module.exports.players[i].name === s.player.name) {
 					module.exports.players.splice(i, 1);	

@@ -20,7 +20,7 @@ Character.prototype.login = function(r, s, fn) {
 	var name = r.msg.replace(/_.*/,'').toLowerCase();
 	
 	if (r.msg.length > 3 ) {
-		if  (/^[a-z]+$/g.test(r.msg) === true) {
+		if  (/^[a-z]+$/g.test(r.msg) === true && /[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
 			fs.stat('./players/' + name + '.json', function (err, stat) {
 				if (err === null) {
 					return fn(name, s, true);
@@ -47,6 +47,7 @@ Character.prototype.load = function(name, s, fn) {
 		}
 		
 		s.player = JSON.parse(r);
+		s.player.name = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
 		s.player.sid = s.id;
 		
 		return fn(s);
@@ -307,22 +308,25 @@ Character.prototype.rollStats = function(player, fn) {
 	}		
 }
 
-Character.prototype.newCharacter = function(s, fn) {
+Character.prototype.newCharacter = function(r, s, fn) {
 	var character = this,
-	i = 0, 
+	i = 0,
 	str = '';
-	
+
 	for (i; i < races.length; i += 1) {
-		str += '<li>' + races[i].name + '</li>';
+		str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
 
 		if	(races.length - 1 === i) {
 			s.emit('msg', {msg: s.player.name + ' is a new character! There are three more steps until ' + s.player.name + 
-			' is saved. The next step is to select your race: <ul>' + str + '</ul>', res: 'selectRace', styleClass: 'race-selection'});		
-	
+			' is saved. The next step is to select your race: <ul>' + str + '</ul><p class="tip">You can learn more about each race by typing help race name</p>', res: 'selectRace', styleClass: 'race-selection'});		
+
 			s.on('raceSelection', function (r) { 
-				r.msg = r.msg.toLowerCase();
-			
-				character.raceSelection(r, function(fnd) {
+				var cmdArr = r.msg.split(' ');
+
+				r.cmd = cmdArr[0].toLowerCase();
+				r.msg = cmdArr.slice(1).join(' ');
+	
+				character.raceSelection(r, s, function(r, s, fnd) {
 					if (fnd) {
 						i = 0;
 						str = '';
@@ -333,7 +337,7 @@ Character.prototype.newCharacter = function(s, fn) {
 
 							if	(classes.length - 1 === i) {
 								s.emit('msg', {
-									msg: 'Great! Now time to select a class ' + s.player.name + '. Pick on of the following: <ul>' + 
+									msg: 'Great! Now time to select a class for ' + s.player.name + '. Pick on of the following: <ul>' + 
 									str + '</ul>', 
 									res: 'selectClass', 
 									styleClass: 'race-selection'
@@ -368,7 +372,7 @@ Character.prototype.newCharacter = function(s, fn) {
 								});
 							}
 						}										
-					} else {
+					} else if (!fnd && r.cmd !== 'help') {
 						s.emit('msg', {msg: 'That race is not on the list, please try again', styleClass: 'error' });
 					}
 				});
@@ -377,16 +381,35 @@ Character.prototype.newCharacter = function(s, fn) {
 	}	
 }
 
-Character.prototype.raceSelection = function(r, fn) {
+Character.prototype.raceSelection = function(r, s, fn) {
 	var i = 0;
-	
-	for (i; i < races.length; i += 1) {
-		if (r.msg === races[i].name.toLowerCase()) {
-			return fn(true);
+
+	if (r.cmd !== 'help') {	
+		for (i; i < races.length; i += 1) {
+			if (r.cmd === races[i].name.toLowerCase()) {
+				return fn(r, s, true);
+			}
 		}
+
+		return fn(r, s, false);
+	} else {
+		fs.readFile('./help/' + r.msg + '.json', function (err, data) {
+			if (!err) {
+				data = JSON.parse(data);
+
+				helpTxt = '<h2>Race Profile: ' + data.name + '</h2> ' + data.description + 
+				'<h3>Benefits:</h3><p class="small">Related: '+ data.related.toString() + '</p>';
+
+				s.emit('msg', {msg: helpTxt, styleClass: 'cmd-help' });
+
+				return fn(r, s, false);
+			} else {
+				s.emit('msg', {msg: 'No help file found for this race.', styleClass: 'error' });	
+
+				return fn(r, s, false);
+			}
+		});	
 	}
-	
-	return fn(false);
 }
 
 Character.prototype.classSelection = function(r, fn) {
@@ -567,11 +590,6 @@ Character.prototype.wear = function(r, s, item, fn) {
 	} else {
 		console.log('not a weapon')
 	}
-}
-
-Character.prototype.move = function(s, id, fn) {
-    s.player.roomid = id;
-    return fn(s);
 }
 
 Character.prototype.calXP = function(s, monster, fn) {

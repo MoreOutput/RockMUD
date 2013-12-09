@@ -1,8 +1,8 @@
 {
-    "name": "rocky",
+    "name": "Rocky",
     "lastname": "",
-    "title": "",
-    "role": "player",
+    "title": "the programmer",
+    "role": "admin",
     "password": "dfdad4a85f4bd91ee9a04b9ebf2fa0c65efd191c9dc15ac63c18fe596808779bc0c1880f1aac137c15f30ea77172876773f7700feec8d8accdbeb112ca812b85",
     "salt": "f2bc644d0413eec2c6a673d787c5726c073ca9304bbffba189c7d66ee797dbc22e32407de9fad90303d22f7494d802aa10c9fb89ae35aee95327f7bdc0b4d4997559ca1a0da5e46a80befebc25679857ccdde608a35369b4d0fc1c304591ac0e98005fbe3c67bb8b65975b1b412d32e35f082c4f69e78934062ed475cd9121f3",
     "race": "human",
@@ -133,6 +133,6 @@
         "chat",
         "tell"
     ],
-    "sid": "C9ivJR-opPVRmAxKqGqP",
-    "saved": "Sun Dec 08 2013 19:01:29 GMT-0500 (Eastern Standard Time)"
+    "sid": "ANZ5F2kh1CUjos4LYpXp",
+    "saved": "Sun Dec 08 2013 22:24:44 GMT-0500 (Eastern Standard Time)"
 }

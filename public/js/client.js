@@ -79,7 +79,7 @@
 					}	
 				}
 
-				return fn(cmd + ' ' + msg);				b 
+				return fn(cmd + ' ' + msg);	
 			},
 
 			frmH = on(dom.byId('console'), 'submit', function (e) {				
@@ -92,7 +92,6 @@
 				display({
 					msg : checkAlias(msg, function(cmd) {
 						 return checkMovement(cmd, function(wasMov, cmd) {
-						 	console.log(cmd);
 							return cmd;
 						});
 					}),
@@ -121,7 +120,7 @@
 				node.value = '';
 				node.focus();
 				
-				terminal.scrollTop = terminal.scrollHeight;	
+				win.scrollIntoView(node);
 			});
 
 			query('body').on('click', function(evt) {

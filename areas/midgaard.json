@@ -4,6 +4,7 @@
 	"type" : "city",
 	"levels" : "All",
 	"description" : "The first city.",
+	"reloads": 0,
 	"rooms" : [
 		{
 			"id" : 1,
@@ -78,7 +79,7 @@
 				"material": "iron", 
 				"diceNum": 2, 
 				"diceSides": 4, 
-				"attackType": "Slice", 
+				"attackType": "slice", 
 				"attackElement": "",
 				"flags": []
 			}],
@@ -95,7 +96,18 @@
                 }
 			], 
 			"monsters" : [],
-			"items" : [],
+			"items" : [{
+				"name": "Tattered Buckler", 
+				"short": "A Tattered Buckler",
+				"long": "A round buckler that looks like its seen heavy use." ,
+				"area": "Midgaard",
+				"id": 2, 
+				"level": 1,
+				"itemType": "shield",
+				"material": "wood", 
+				"ac": 2, 
+				"flags": []
+			}],
 			"flags" : []
 		},
 		{

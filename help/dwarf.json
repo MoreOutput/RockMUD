@@ -1,0 +1,9 @@
+{
+	"name" : "Dwarf",
+	"related" : ["Races"],
+	"type" : "Command",
+	"levels" : "All",
+	"restrict": 0,
+	"description" : "Dwarf description.",
+	"Alias" : "Dwf"
+}

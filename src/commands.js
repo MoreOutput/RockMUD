@@ -14,31 +14,28 @@ var Cmd = function () {
 
 };
 
-/*
-	Exit Commands, may adjust for completely dynamic exits -- but seems trival atm
-*/
 Cmd.prototype.move = function(r, s) {
 	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping') {
 		r.cmd = r.msg;
 
 		Room.checkExit(r, s, function(fnd, roomID) {
 			if (fnd) {
-				// Make the adjustment in the socket character reference
-				Character.move(s, roomID, function(s) {
-					Room.getRoomObject({
-						area: s.player.area,
-						id: roomID
-					}, function(roomObj) {
-						Room.getRoom(s, function() {
-							return Character.prompt(s);
-						});
+				s.player.roomid = roomID; // Make the adjustment in the socket character reference
+
+				Room.getRoomObject({
+					area: s.player.area,
+					id: roomID
+				}, function(roomObj) {
+					Room.getRoom(s, function() {
+						return Character.prompt(s);
 					});
-				}); 
+				});
 			} else {
 				s.emit('msg', {
 					msg: 'There is no exit in that direction.', 
 					styleClass: 'error'
 				});
+				return Character.prompt(s);
 			}
 		}); 
 	} else {
@@ -46,6 +43,7 @@ Cmd.prototype.move = function(r, s) {
 			msg: 'You are in no position to move right now!', 
 			styleClass: 'error'
 		});
+		return Character.prompt(s);
 	}
 }
 
@@ -240,33 +238,39 @@ Cmd.prototype.chat = function(r, s) {
 		element: 'blockquote',
 		styleClass: 'msg'
 	});
-		
-	r.msg = s.player.name + '> ' + msg;
-	r.element = 'blockquote';
-	r.styleClass = 'chatmsg';
 
-	s.in('mud').broadcast.emit('msg', r);
-	return Character.prompt(s);
+	s.in('mud').broadcast.emit('msg', {
+		msg: s.player.name + '> ' + msg,
+		element: 'blockquote',
+		styleClass: 'chatmsg'
+	});
+
+	/* 
+	If you want to return prompt after each chat you can use the below,
+	be sure to define i
+
+	for (i; i < players.length; i += 1) {
+		Character.prompt(s);
+		s = io.sockets.socket(players[i].sid);
+	}	
+	*/
 };
 
 Cmd.prototype.achat = function(r, s) { 
-	var msg;
+	var msg = r.msg;
 
 	if (s.player.role === 'admin') {
-		msg = r.msg;
-
 		s.emit('msg', {
-			msg: 'You roar> ' + msg,
+			msg: 'You achat> ' + msg,
 			element: 'blockquote',
-			styleClass: 'msg'
+			styleClass: 'adminmsg'
 		});
-			
-		r.msg = s.player.name + '> ' + msg;
-		r.element = 'blockquote';
-		r.styleClass = 'adminmsg';
 
-		s.in('mud').broadcast.emit('msg', r);
-		return Character.prompt(s);
+		s.in('mud').broadcast.emit('msg', {
+			msg: s.player.name + ' the Admin> ' + msg,
+			element: 'blockquote',
+			styleClass: 'adminmsg'
+		});
 	} else {
 		r.msg = 'You do not have permission to execute this command.';
 		s.emit('msg', r);		
@@ -428,7 +432,7 @@ Cmd.prototype.help = function(r, s) {
 			if (!err) {
 				data = JSON.parse(data);
 
-				helpTxt = '<h2> ' + data.name + '</h2> ' + data.description + 
+				helpTxt = '<h2>Help: ' + data.name + '</h2> ' + data.description + 
 				'<p class="small">Related: '+ data.related.toString() + '</p>';
 
 				s.emit('msg', {msg: helpTxt, styleClass: 'cmd-help' });
@@ -455,7 +459,7 @@ Cmd.prototype.help = function(r, s) {
 * View a string representation of the JSON behind a world object. Pass in an ID (matches first), or noun pattern
 * typing 'spit' alone will give the json object for the entire current room. 
 */
-Cmd.prototype.spit = function(r, s) {
+Cmd.prototype.json = function(r, s) {
 	if (s.player.role === 'admin') {
 	
 	}
