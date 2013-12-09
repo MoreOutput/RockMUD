@@ -1,7 +1,7 @@
 var Dice = require('./dice').roller,
 
 Combat = function() {
-	this.adjectives = ['barbaric', 'BARBARIC', 'great', 'GREAT', 'mighty', 'MIGHTY', '**AWESOME**'];
+	this.adjectives = ['barbaric', 'BARBARIC', 'great', 'GREAT', 'mighty', 'MIGHTY', 'AWESOME'];
 	this.abstractNouns = ['hatred', 'intensity', 'weakness'];
 };
 
@@ -26,19 +26,14 @@ Combat.prototype.begin = function(s, monster, fn) {
 				monster.chp = monster.chp - total;
 				
 				s.emit('msg', {
-					msg: 'You begin your attack on ' + monster.short + ' Your HP: ' + s.player.hp + ' MOB HP: ' + monster.chp, 
-					styleClass: ''
-				});
-				
-				s.emit('msg', {
 					msg: 'You hit ' + monster.short + ' (' + total + ')', 
-					styleClass: 'hit'
+					styleClass: 'player-hit'
 				});
 
 				return fn(true, monster);
 			});					
 		} else {
-			return s.emit('msg', {msg: 'miss', styleClass: 'hit'});
+			return s.emit('msg', {msg: 'You swing and miss.', styleClass: 'player-miss'});
 		}
 	});
 }
@@ -77,8 +72,8 @@ Combat.prototype.attackerRound = function(s, monster, fn) {
 				monster.chp = monster.chp - total;
 
 				s.emit('msg', {
-					msg: 'You hit ' + monster.short.toLowerCase()  + ' hard. Damage: ' + total + ' Opponent HP: ' + monster.chp,
-					styleClass: 'hit'
+					msg: 'You hit ' + monster.short.toLowerCase()  + ' hard. (' + total + ') Opponent HP: ' + monster.chp,
+					styleClass: 'player-hit'
 				});	
 				
 				return fn(s, monster);
@@ -86,7 +81,7 @@ Combat.prototype.attackerRound = function(s, monster, fn) {
 		} else {
 			s.emit('msg', {
 				msg: 'You miss a ' + monster.short.toLowerCase()  + '.',
-				styleClass: 'hit'
+				styleClass: 'player-hit'
 			});
 		}
 	});
@@ -107,7 +102,7 @@ Combat.prototype.targetRound = function(s, monster, fn) {
 
 				s.emit('msg', {
 					msg: monster.short + ' hits you hard! Damage: ' + total + ' Your HP: ' + s.player.chp,
-					styleClass: 'hit'
+					styleClass: 'foe-hit'
 				});	
 				
 				return fn(s, monster);
@@ -115,7 +110,7 @@ Combat.prototype.targetRound = function(s, monster, fn) {
 		} else {
 			s.emit('msg', {
 				msg: monster.short + ' misses '+ ' you!',
-				styleClass: 'hit'
+				styleClass: 'foe-miss'
 			});
 		}
 	});
@@ -127,18 +122,6 @@ Combat.prototype.end = function(s, monster, fn) {
 }
 
 Combat.prototype.damageMessage = function(attack, fn) {
-
-}
-
-Combat.prototype.msgToPlayer = function(attack, fn) {
-
-}
-
-Combat.prototype.msgTomonsteronent = function(attack, fn) {
-
-}
-
-Combat.prototype.msgToRoom = function(attack, fn) {
 
 }
 

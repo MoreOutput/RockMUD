@@ -2,7 +2,8 @@
 * All non-combat commands that one would consider 'general' to a all
 * users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
 */
-var Character = require('./character').character,
+var fs = require('fs'),
+Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
 io = require('../server').io,
@@ -16,98 +17,10 @@ var Cmd = function () {
 /*
 	Exit Commands, may adjust for completely dynamic exits -- but seems trival atm
 */
-Cmd.prototype.north = function(r, s) {
-	if (s.player.position != 'fighting' && s.player.position != 'resting' && s.player.position != 'sleeping') {
-		Room.checkExit(r, s, function(fnd, roomID) {
-			if (fnd) {
-				// Make the adjustment in the socket character reference
-				Character.move(s, roomID, function(s) {
-					Room.getRoomObject({
-						area: s.player.area,
-						id: roomID
-					}, function(roomObj) {
-						Room.getRoom(s, function() {
-							return Character.prompt(s);
-						});
-					});
-				}); 
-			} else {
-				s.emit('msg', {
-					msg: 'There is no exit in that direction.', 
-					styleClass: 'error'
-				});
-			}
-		}); 
-	} else {
-		s.emit('msg', {
-			msg: 'You are in no position to move right now!', 
-			styleClass: 'error'
-		});
-	}
-}
+Cmd.prototype.move = function(r, s) {
+	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping') {
+		r.cmd = r.msg;
 
-Cmd.prototype.east = function(r, s) {
-	if (s.player.position != 'fighting' && s.player.position != 'resting' && s.player.position != 'sleeping') {
-		Room.checkExit(r, s, function(fnd, roomID) {
-			if (fnd) {
-				// Make the adjustment in the socket character reference
-				Character.move(s, roomID, function(s) {
-					Room.getRoomObject({
-						area: s.player.area,
-						id: roomID
-					}, function(roomObj) {
-						Room.getRoom(s, function() {
-							return Character.prompt(s);
-						});
-					});
-				}); 
-			} else {
-				s.emit('msg', {
-					msg: 'There is no exit in that direction.', 
-					styleClass: 'error'
-				});
-			}
-		}); 
-	} else {
-		s.emit('msg', {
-			msg: 'You are in no position to move right now!', 
-			styleClass: 'error'
-		});
-	}
-}
-
-Cmd.prototype.south = function(r, s) {
-	if (s.player.position != 'fighting' && s.player.position != 'resting' && s.player.position != 'sleeping') {
-		Room.checkExit(r, s, function(fnd, roomID) {
-			if (fnd) {
-				// Make the adjustment in the socket character reference
-				Character.move(s, roomID, function(s) {
-					Room.getRoomObject({
-						area: s.player.area,
-						id: roomID
-					}, function(roomObj) {
-						Room.getRoom(s, function() {
-							return Character.prompt(s);
-						});
-					});
-				}); 
-			} else {
-				s.emit('msg', {
-					msg: 'There is no exit in that direction.', 
-					styleClass: 'error'
-				});
-			}
-		}); 
-	} else {
-		s.emit('msg', {
-			msg: 'You are in no position to move right now!', 
-			styleClass: 'error'
-		});
-	}
-}
-
-Cmd.prototype.west = function(r, s) {
-	if (s.player.position != 'fighting' && s.player.position != 'resting' && s.player.position != 'sleeping') {
 		Room.checkExit(r, s, function(fnd, roomID) {
 			if (fnd) {
 				// Make the adjustment in the socket character reference
@@ -173,7 +86,7 @@ Cmd.prototype.who = function(r, s) {
 }
 
 Cmd.prototype.get = function(r, s, fn) {
-	if (r.msg != '') {
+	if (r.msg !== '') {
 		Room.checkItem(r, s, function(fnd, item) {
 			if (fnd) {
 				Character.addToInventory(s, item, function(added) {
@@ -203,7 +116,7 @@ Cmd.prototype.get = function(r, s, fn) {
 }
 
 Cmd.prototype.drop = function(r, s) {
-	if (r.msg != '') {
+	if (r.msg !== '') {
 		Character.checkInventory(r, s, function(fnd, item) {
 			if (fnd) {
 				Character.removeFromInventory(s, item, function(removed) {
@@ -244,31 +157,32 @@ Cmd.prototype.kill = function(r, s) {
 					// Combat Loop
 					combatInterval = setInterval(function() {
 						if (s.player.position === 'fighting' && monster.position === 'fighting') {	
-							s.emit('msg', {msg: '*** STARTING A NEW ROUND ***', styleClass: 'alert'});
 							
 							Combat.round(s, monster, function() {
 								if (monster.chp <= 0) {
 									monster.position = 'dead';
+
 									clearInterval(combatInterval);
-									//Room.removeMonster();
-									//Character.calXP(s, monster, function(earnedXP) {});
-									s.player.position = 'standing';
-									
-									s.emit('msg', {msg: 'You won the fight!', styleClass: 'victory'});
+
+									Character.calXP(s, monster, function(earnedXP) {
+										s.player.position = 'standing';
+										s.emit('msg', {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
+									});
 								} else if (s.player.chp <= 0) {
 									clearInterval(combatInterval);
-									//Character.death(s);
 									s.emit('msg', {msg: 'You died!', styleClass: 'combat-death'});
+									//Character.death(s);
 								}	
 
 								Character.prompt(s);
 							});	
 						}	
-					}, 2000);
+					}, 1800);
 				}
 			});
 		} else {
 			s.emit('msg', {msg: 'There is nothing by that name here.', styleClass: 'error'});
+			return Character.prompt(s);
 		}
 	});
 }
@@ -295,20 +209,24 @@ Cmd.prototype.where = function(r, s) {
 	'<li>Room Number: ' + Character[s.id].id + '</li>'  +
 	'</ul>';	
 
-	r.styleClass = 'playerinfo cmd-where';
+	r.styleClass = 'playerinfo where';
 	
 	s.emit('msg', r);
-	
 	return Character.prompt(s);
 };
 
 
 /** Communication Channels **/
 Cmd.prototype.say = function(r, s) {
-	var i  = 0;
+	var i  = 0,
+	msg = r.msg;
+
+	Room.msgToRoom(msg, roomID, function() {
+
+	});
 
 	for (i; i < players.length; i += 1) {
-		if (players[i].name === r.msg && r.msg != s.player.name) {
+		if (players[i].name === r.msg && r.msg !== s.player.name) {
 			
 		}
 	}
@@ -328,12 +246,12 @@ Cmd.prototype.chat = function(r, s) {
 	r.styleClass = 'chatmsg';
 
 	s.in('mud').broadcast.emit('msg', r);
-
 	return Character.prompt(s);
 };
 
 Cmd.prototype.achat = function(r, s) { 
 	var msg;
+
 	if (s.player.role === 'admin') {
 		msg = r.msg;
 
@@ -348,12 +266,10 @@ Cmd.prototype.achat = function(r, s) {
 		r.styleClass = 'adminmsg';
 
 		s.in('mud').broadcast.emit('msg', r);
-
 		return Character.prompt(s);
 	} else {
 		r.msg = 'You do not have permission to execute this command.';
 		s.emit('msg', r);		
-		
 		return Character.prompt(s);
 	}
 };
@@ -374,6 +290,7 @@ Cmd.prototype.title = function(r, s) {
 		} else {
 			s.player.title = 'a level ' + s.player.level + ' ' + s.player.race + ' ' + s.player.charClass;
 		}
+
 		Character.save(s, function() {
 			Character.updatePlayer(s, function(updated) {
 				s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
@@ -425,23 +342,12 @@ Cmd.prototype.skills = function(r, s) {
 }
 
 Cmd.prototype.wear = function(r, s) {
-	if (r.msg != '') {
+	if (r.msg !== '') {
 		Character.checkInventory(r, s, function(fnd, item) {
 			if (fnd) {
-				Character.removeFromInventory(s, item, function(removed) {
-					if (removed) {
-						Character.wearItem(item, function() {
-							s.emit('msg', {
-								msg: 'You picked up ' + item.short,
-								styleClass: 'get'
-							});
-							
-							return Character.prompt(s);
-						});
-					} else {
-						s.emit('msg', {msg: 'Could not pick up a ' + item.short, styleClass: 'error'});					
-						return Character.prompt(s);
-					}
+				Character.wear(r, s, item, function(wearSuccess, msg) {
+					s.emit('msg', {msg: msg, styleClass: 'wear'});
+					return Character.prompt(s);
 				});
 			} else {
 				s.emit('msg', {msg: 'That item is not here.', styleClass: 'error'});
@@ -475,27 +381,29 @@ Cmd.prototype.score = function(r, s) {
 	var i = 0,
 	score = '<div class="score-name">' + s.player.name + 
 	' <div class="score-title">' + s.player.title + '</div></div>' +
-	'<ul class="score-stats">' + 
+	'<ul class="score-info">' + 
 		'<li class="stat-hp">HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
 		'<li class="stat-mana">Mana: ' + s.player.cmana + '/' + s.player.mana +'</li>' +
 		'<li class="stat-mv">Stamina: ' + s.player.cmv + '/' + s.player.mv +'</li>' +
 		'<li class="stat-level">You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
+		'<li class="stat-xp">XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
+		'<li class="stat-position">Position: ' + s.player.position + '</li>' +
+		'<li class="stat-carry">Carrying ' + s.player.load + '/' + s.player.carry + ' pounds.</li>' +
+	'</ul>' +
+	'<ul class="score-stats">' + 
 		'<li class="stat-str">STR: ' + s.player.str + '</li>' +
 		'<li class="stat-wis">WIS: ' + s.player.wis + '</li>' +
 		'<li class="stat-int">INT: ' + s.player.int + '</li>' +
 		'<li class="stat-dex">DEX: ' + s.player.dex + '</li>' +
 		'<li class="stat-con">CON: ' + s.player.con + '</li>' +
 		'<li class="stat-armor">Armor: ' + s.player.ac + '</li>' +
-		'<li class="stat-xp">XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
 		'<li class="stat-gold">Gold: ' + s.player.gold + '</li>' +
 		'<li class="stat-hunger">Hunger: ' + s.player.hunger + '</li>' +
 		'<li class="stat-thirst">Thirst: ' + s.player.thirst + '</li>' +
-		'<li class="stat-position">Position: ' + s.player.position + '</li>' +
-		'<li class="stat-carry">Carrying ' + s.player.load + '/' + s.player.carry + ' pounds.</li>' +
 	'</ul>';
 
 	if (s.player.affects.length > 0) {
-		score += '<ul class="affects">';
+		score += '<ul class="score-affects">';
 
 		for (i; i < s.player.affects; i += 1) {
 			score += '<li>' + affects[i].name + '</li>';
@@ -503,7 +411,7 @@ Cmd.prototype.score = function(r, s) {
 
 		score += '</ul>';
 	} else {
-		score += '<p>No Affects</p>';
+		score += '<ul class="score-affects"><li>No Affects</li></ul>';
 	}
 	
 	s.emit('msg', {msg: score, element: 'section', styleClass: 'score' });
@@ -513,10 +421,29 @@ Cmd.prototype.score = function(r, s) {
 
 Cmd.prototype.help = function(r, s) {
 	// if we don't list a specific help file we return help.json
-	if (r.cmd === '') {
+	var helpTxt = '';
 
+	if (r.msg !== '') {
+		fs.readFile('./help/' + r.msg + '.json', function (err, data) {
+			if (!err) {
+				data = JSON.parse(data);
+
+				helpTxt = '<h2> ' + data.name + '</h2> ' + data.description + 
+				'<p class="small">Related: '+ data.related.toString() + '</p>';
+
+				s.emit('msg', {msg: helpTxt, styleClass: 'cmd-help' });
+
+				return Character.prompt(s);
+			} else {
+				s.emit('msg', {msg: 'No help file found.', styleClass: 'error' });	
+
+				return Character.prompt(s);
+			}
+		});	
 	} else {
+		s.emit('msg', {msg: 'Help you with what exactly?', styleClass: 'error' });
 
+		return Character.prompt(s);
 	}
 }
 
@@ -529,21 +456,20 @@ Cmd.prototype.help = function(r, s) {
 * typing 'spit' alone will give the json object for the entire current room. 
 */
 Cmd.prototype.spit = function(r, s) {
-	if (s.player.level >= 200) {
+	if (s.player.role === 'admin') {
 	
 	}
 }
 
 /*
-* A soft reboot. Reloads all areas and characters without restarting the server. Checks users role.
-* Should forces typical tick regens.
+* A soft game reboot. 
+* Stops all combat and reloads all active areas and players without restarting the server. Checks users role.
 */
 Cmd.prototype.reboot = function(r, s) {
 	if (s.player.role === 'admin') {
 
 	} else {
 		s.emit('msg', {msg: 'You wish!', styleClass: 'error' });	
-		
 		return Character.prompt(s);
 	}
 }
@@ -553,8 +479,7 @@ Cmd.prototype.restore = function(r, s) {
 	if (s.player.role === 'admin') {
 
 	} else {
-		s.emit('msg', {msg: 'Not a valid command', styleClass: 'error' });	
-		
+		s.emit('msg', {msg: 'You wish you possessed such power!', styleClass: 'error' });	
 		return Character.prompt(s);
 	}
 }

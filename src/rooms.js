@@ -17,8 +17,7 @@ Room.prototype.getArea = function(areaName, fn) {
 			return fn(area);
 		} else {
 			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
-				var area = JSON.parse(area);
-				return fn(area);	
+				return fn(JSON.parse(area));	
 			});
 		}
 	});
@@ -96,8 +95,7 @@ Room.prototype.getRoom = function(s, fn) {
 			}
 		} else { // loading area and placing it into memory
 			fs.readFile('./areas/' + s.player.area + '.json', function (err, area) {
-				var i = 0,
-				area = JSON.parse(area);
+				var area = JSON.parse(area);
 
 				displayRoom(area.rooms);
 				
@@ -116,8 +114,7 @@ Room.prototype.updateArea = function(areaName, fn) {
 	for (i; i < areas.length; i += 1) {
 		if (areaName === areas[i].name) {
 			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
-				var i = 0,
-				area = JSON.parse(area);
+				var area = JSON.parse(area);
 				
 				areas[i] = area;
 				
@@ -133,8 +130,9 @@ Room.prototype.updateArea = function(areaName, fn) {
 
 // Return a room in memory as an object, pass in the area name and the room vnum {area: 'Midgaard', vnum: 1}
 Room.prototype.getRoomObject = function(areaQuery, fn) {
-	var i = 0;	
 	this.checkArea(areaQuery.area, function(fnd, area) {
+		var i = 0;
+
 		if (fnd) { //  area was in areas[]
 			for (i; i < area.rooms.length; i += 1) {
 				if (area.rooms[i].id === areaQuery.id) {		
@@ -220,10 +218,11 @@ Room.prototype.getMonsters = function(room, optObj, fn) {
 
 // does a string match an exit in the room
 Room.prototype.checkExit = function(r, s, fn) { 
-	var room = this,
-	i = 0;
+	var room = this;
 	
 	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
+		var i = 0;
+
 		if (roomObj.exits.length > 0) {
 			for (i; i < roomObj.exits.length; i += 1) {
 				if (r.cmd === roomObj.exits[i].cmd) {
@@ -239,13 +238,13 @@ Room.prototype.checkExit = function(r, s, fn) {
 
 // does a string match any monsters in the room
 Room.prototype.checkMonster = function(r, s, fn) { 
-	var room = this,
-	i = 0;
+	var room = this;
 
 	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
+		var msgPatt = new RegExp('^' + r.msg),
+		i = 0;
+		
 		if (roomObj.monsters.length > 0) {
-			var msgPatt = new RegExp('^' + r.msg);
-			
 			for (i; i < roomObj.monsters.length; i += 1) {
 				if (msgPatt.test(roomObj.monsters[i].name.toLowerCase())) {
 					return fn(true, roomObj.monsters[i]);
@@ -262,12 +261,9 @@ Room.prototype.checkMonster = function(r, s, fn) {
 
 // Remove a monster from a room
 Room.prototype.removeMonster = function(roomQuery, fn) {
-	var i = 0;
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.monsters = roomObj.monsters.filter(function(item, i) {
-			if (item.id === monster.id) {
-				return fn(false);
-			} else {
+			if (item.id !== monster.id) {
 				return fn(true);
 			}			
 		});	
@@ -276,13 +272,14 @@ Room.prototype.removeMonster = function(roomQuery, fn) {
 
 // does a string match an item in the room
 Room.prototype.checkItem = function(r, s, fn) {
-	var room = this,
-	i = 0;
+	var room = this;
 	
 	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
 		if (roomObj.items.length > 0) {
 			room.getItems(roomObj, {}, function(items) {
-				var msgPatt = new RegExp('^' + r.msg);
+				var msgPatt = new RegExp('^' + r.msg),
+				i = 0;
+
 				for (i; i < items.length; i += 1) {
 					if (msgPatt.test(items[i].name.toLowerCase())) {
 						return fn(true, items[i]);
@@ -297,12 +294,9 @@ Room.prototype.checkItem = function(r, s, fn) {
 };
 
 Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
-	var i = 0;
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.items = roomObj.items.filter(function(item, i) {
-			if (item.id === roomQuery.item.id) {
-				return fn(false);
-			} else {
+			if (item.id !== roomQuery.item.id) {
 				return fn(true);
 			}			
 		});	
@@ -310,12 +304,21 @@ Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
 }
 
 Room.prototype.addItem = function(roomQuery, fn) {
-	var i = 0;	
-	
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.items.push(roomQuery.item);		
 	});
+	
 	return fn();
+}
+
+// Emit a message to all the rooms players
+Room.prototype.msgToRoom = function() {
+
+}
+
+// Emit a message to all the players in an area
+Room.prototype.msgToArea = function() {
+
 }
 
 module.exports.room = new Room();

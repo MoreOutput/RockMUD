@@ -61,7 +61,7 @@ Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 		hash = crypto.createHmac('sha512', salt).update(hash).digest('hex');
 	} 
 			
-	fn(hash);	
+	return fn(hash);	
 };
 
 Character.prototype.generateSalt = function(fn) {
@@ -216,7 +216,7 @@ Character.prototype.create = function(r, s, fn) {
 				"level": 1,
 				"itemType": "food",
 				"flags": [
-					{"	hunger": -7},
+					{"hunger": -7},
 					{"carry": 1} 
 				]
 			}
@@ -347,7 +347,7 @@ Character.prototype.newCharacter = function(s, fn) {
 											s.player.charClass = r.msg;
 											
 											s.emit('msg', {
-												msg: s.player.name + ' is a ' + s.player.charClass + '! There is 1 more step ' + s.player.name + 
+												msg: s.player.name + ' is a ' + s.player.charClass + '! There is 1 more step before ' + s.player.name + 
 												' is saved. Please define a password (8 characters):', 
 												res: 'createPassword', 
 												styleClass: 'race-selection'
@@ -485,7 +485,7 @@ Character.prototype.hunger = function(s, fn) {
 Character.prototype.thirst = function(s, fn) {
 	var character = this,
 	dexMod = Math.ceil(s.player.dex/3);
-	
+
 	if (s.player.thirst < 10) {
 		Dice.roll(1, 4, function(total) {
 			if (total + dexMod < 5) { 
@@ -494,11 +494,11 @@ Character.prototype.thirst = function(s, fn) {
 						
 			if (s.player.thirst >= 5) {
 				s.player.chp = s.player.chp - 1;
-			
-				s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'thirst'});
-
-				fn();
 			}
+
+			s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'thirst'});
+
+			fn();
 		});	
 	} else {
 		s.player.chp = (s.player.chp - 5 + dexMod);
@@ -551,9 +551,50 @@ Character.prototype.removeFromInventory = function(s, itemObj, fn) {
 	}
 }
 
+Character.prototype.wear = function(r, s, item, fn) {
+	if (item.itemType === 'weapon') {
+		if (s.player.eq.rightHand !== '' && s.player.eq.leftHand !== '') {
+			return fn(false, 'Your hands are full.')
+		} else {
+			if (s.player.eq.rightHand === '') {
+				s.player.eq.rightHand = item;
+				return fn(true, 'You weild a ' + item.short + ' in your right hand');
+			} else {
+				s.player.eq.leftHand = item;
+				return fn(true, 'You begin weilding a ' + item.short + ' in your left hand');
+			}
+		}
+	} else {
+		console.log('not a weapon')
+	}
+}
+
 Character.prototype.move = function(s, id, fn) {
     s.player.roomid = id;
     return fn(s);
+}
+
+Character.prototype.calXP = function(s, monster, fn) {
+	if ((monster.level) >= (s.player.level - 5)) {
+		if (monster.level >= s.player.level) {
+			Dice.roll(1, 4, function(total) {
+				var exp,
+				total = total + 1;
+
+				exp = ((monster.level - s.player.level) * total) + 1 * (total * 45);
+
+				s.player.exp = exp + s.player.exp;
+
+				fn( exp );
+			});
+		} else {
+			Dice.roll(1, 4, function(total) {
+				fn(total * 10);
+			});
+		}
+	} else {
+		fn(0);
+	}
 }
 
 // Updates a players reference in players[] with some data attached to the socket

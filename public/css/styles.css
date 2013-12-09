@@ -2,7 +2,7 @@
 Default  RockMUD styles
 */
 html, body {
-font: .95em 'Montserrat', Arial, sans-serif;	
+font: .95em 'Droid Serif', serif;
 height: 100%;
 background-color: #222;
 padding: 0 0 0 0;
@@ -12,6 +12,13 @@ text-align: center;
 
 h1 {
 font-size: 1.25em;
+color: #fff;
+padding: 0;
+margin: 0;
+}
+
+h2 {
+font-size: 1.1em;
 color: #fff;
 padding: 0;
 margin: 0;
@@ -77,7 +84,7 @@ width: 80%;
 margin: 0 auto;
 text-align: left;
 background-color: #0c010f;
-padding: 10px;
+padding: 40px;
 }
 
 #terminal {
@@ -146,6 +153,7 @@ padding: 5px;
 }
 
 #inputwrapper form input {
+width: 100%;
 border: none;
 background-color: #555;
 color: #fff;
@@ -214,7 +222,7 @@ margin: 0;
 }
 
 .cprompt {
-color: #eee;
+color: #fff;
 }
 
 .error {
@@ -226,24 +234,107 @@ clear: both;
 display: inline-block;
 }
 
-.hit {
-display: inline;
+.player-hit {
+display: block;
 padding: 0;
 margin: 0;
-font-size: 1.25em;
-font-weight: bold;
+font-size: 1.1em;
 color: #ff0000;
-text-shadow: 1px 1px 0 yellow;
 }
 
-blockquote {
-
+.player-miss {
+display: block;
+padding: 0;
+margin: 0;
+font-size: 1.1em;
+color: #00ffff;
 }
 
-blockquote:before {
-	
+.foe-hit {
+display: block;
+padding: 0;
+margin: 0;
+font-size: 1.1em;
+color: #ffff00;
 }
 
-blockquote:after {
+.foe-miss {
+display: block;
+padding: 0;
+margin: 0;
+font-size: 1.1em;
+color: #fff;
+}
 
-};
+/**
+	Player Scores
+**/
+.score {
+width: 50%;
+border: 3px solid #eee;
+display: block;
+}
+
+.score .score-name {
+width: 100%;
+display: inline-block;
+font-size: 1.5em;
+background-color: #fff;
+color: #000;
+padding: 3px 0 3px 0;
+text-align: center;
+}
+
+.score .score-title {
+color: #333;
+}
+
+.score .score-info {
+float: left;
+width: 40%;
+padding: 20px 0 20px 20px;
+}
+
+.score .score-stats {
+float: left;
+width: 40%;
+padding: 20px 0 20px 0;
+}
+
+.score .score-affects {
+clear: both;
+text-align: center;
+width: 100%;
+padding: 20px 0;
+}
+
+.score .score-affects li{
+display: inline;
+}
+
+.score .stat-hp {
+font-size: 2em;
+color: #ff0000;
+}
+
+.score .stat-mana {
+font-size: 2em;
+color: #00ffff;
+}
+
+.score .stat-mv {
+font-size: 2em;
+color: #ffff00;
+}
+
+.score .stat-gold {
+color: #ffff00;
+}
+
+.small {
+	font-size: 80%;
+}
+
+.bold {
+	font-weight: bold;
+}

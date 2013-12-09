@@ -60,7 +60,7 @@ io.on('connection', function (s) {
 		var parseCmd = function(r, s) {
 			var cmdArr = r.msg.split(' ');	
 			r.cmd = cmdArr[0].toLowerCase();
-			r.msg = cmdArr.slice(1).toString().replace(',', ' ');
+			r.msg = cmdArr.slice(1).join(' ');
 		
 			if (/[`~!@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
 				if (r.cmd != '') {

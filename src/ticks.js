@@ -21,7 +21,7 @@ areas = require('../server').areas;
 			for (i; i < players.length; i += 1) {
 				s = io.sockets.socket(players[i].sid);		
 				Character.hunger(s, function() {
-					Character.thirst(s, function() {							
+					Character.thirst(s, function() {
 						Character.hpRegen(s, function(total) {
 							Character.updatePlayer(s, function() {
 								Character.prompt(s);
@@ -42,7 +42,7 @@ areas = require('../server').areas;
 			for (i; i < players.length; i += 1) {
 				s = io.sockets.socket(players[i].sid);
 				
-				if (s.position != 'fighting') {			
+				if (s.position !== 'fighting') {			
 					Character.save(s);			
 				}							
 			}
@@ -52,7 +52,6 @@ areas = require('../server').areas;
 	// Random alert to all logged in players
 	setInterval(function() {
 		var s,
-		alerts,
 		shuffle = function (arr) {
 			var i = arr.length - 1,
 			j = Math.floor(Math.random() * i),
@@ -68,26 +67,22 @@ areas = require('../server').areas;
 			
 			return arr;
 		};
-		
-		if (players.length > 0) {
-			s = io.sockets.socket(players[0].sid);
-			if (!alerts) {
-				fs.readFile('./motd.json', function (err, data) {
-					alerts = shuffle(JSON.parse(data).alerts);
 
-					io.sockets.in('mud').emit('msg', {
-						msg: '<span class="alert">ALERT: </span><span class="alertmsg"> ' + alerts[0] + '</span>',
-						styleClass: 'alert'
-					});
-				});
-			} else {
-				alerts = shuffle(JSON.parse(data).alerts);
+		if (players.length > 0) {	
+			fs.readFile('./motd.json', function (err, data) {
+				var i = 0,
+				alert = shuffle(JSON.parse(data).alerts)[0];
 
-				io.sockets.in('mud').emit('msg', {
-					msg: '<span class="alert">ALERT: </span><span class="alertmsg"> ' + alerts[0] + '</span>',
+				io.sockets.socket().in('mud').broadcast.emit('msg', {
+					msg: '<span class="alert">ALERT: </span><span class="alertmsg"> ' + alert + '</span>',
 					styleClass: 'alert'
 				});
-			}
-		}
-	}, 60000 * 2);
+
+				for (i; i < players.length; i += 1) {
+					s = io.sockets.socket(players[i].sid);
+					Character.prompt(s);				
+				}	
+			});	
+		}	
+	}, 60000 * 3);
 }());

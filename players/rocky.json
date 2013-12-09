@@ -27,7 +27,7 @@
     "wait": 0,
     "ac": 10,
     "gold": 15,
-    "hunger": 10,
+    "hunger": 0,
     "thirst": 0,
     "carry": 120,
     "load": 0,
@@ -85,6 +85,23 @@
                     "carry": 1
                 }
             ]
+        },
+        {
+            "name": "bread",
+            "short": "A loaf of bread",
+            "long": "A rather stale looking loaf of bread.",
+            "area": "Midgaard",
+            "id": 5,
+            "level": 1,
+            "itemType": "food",
+            "flags": [
+                {
+                    "hunger": -5
+                },
+                {
+                    "carry": 1
+                }
+            ]
         }
     ],
     "affects": [],
@@ -116,6 +133,6 @@
         "chat",
         "tell"
     ],
-    "sid": "S6fQHRualeQRHYVaf77H",
-    "saved": "Sat Nov 30 2013 23:52:32 GMT-0500 (Eastern Standard Time)"
+    "sid": "C9ivJR-opPVRmAxKqGqP",
+    "saved": "Sun Dec 08 2013 19:01:29 GMT-0500 (Eastern Standard Time)"
 }

@@ -27,9 +27,11 @@
 				sl: 'sleep',
 				h: 'help',
 				wh: 'where',
-				ooc: 'chat'
+				aff: 'affect',
+				ooc: 'chat',
+				slist: 'skills'
 			},
-			// movement = ['north', 'east', 'south', 'west'],
+			movement = ['north', 'east', 'south', 'west'],
 			display = function(r) {
 				if (r.element === undefined) {
 					terminal.innerHTML += '<div class="' + r.styleClass + '">' + r.msg + '</div>';
@@ -50,19 +52,14 @@
 			changeMudState = function(state) {
 				domAttr.set(dom.byId('cmd'), 'mud-state', state);
 			},		
-			/*
-			For Dynamic Movement
-
 			checkMovement = function(cmdStr, fn) {
 				if (movement.toString().indexOf(cmdStr) !== -1) {
-					return fn(true, 'mov-' + cmdStr);
+					return fn(true, 'move ' + cmdStr);
 				} else {
 					return fn(false, cmdStr);
 				}
 			},
-			*/
-
-			checkAlias = function(cmdStr, fn) {
+			checkAlias = function(cmdStr, fn) { 
 				var keys = Object.keys(aliases),
 				i = 0,
 				cmd,
@@ -70,15 +67,19 @@
 				cmdArr = cmdStr.split(' ');
 
 				cmd = cmdArr[0].toLowerCase();
-				msg = cmdArr.slice(1).toString().replace(',', ' ');
+				msg = cmdArr.slice(1).toString().replace(/,/g, ' ');
 	
 				for (i; i < keys.length; i += 1) {
 					if (keys[i] === cmd) {
-						return fn(aliases[keys[i]] + ' ' + msg);
+						if (msg === '') {
+							return fn(aliases[keys[i]]);
+						} else {
+							return fn(aliases[keys[i]] + ' ' + msg);
+						}
 					}	
 				}
 
-				return fn(cmd + ' ' + msg);				
+				return fn(cmd + ' ' + msg);				b 
 			},
 
 			frmH = on(dom.byId('console'), 'submit', function (e) {				
@@ -90,9 +91,10 @@
 				
 				display({
 					msg : checkAlias(msg, function(cmd) {
-						// return checkMovement(cmd, function(wasMov, cmd) {
+						 return checkMovement(cmd, function(wasMov, cmd) {
+						 	console.log(cmd);
 							return cmd;
-						//});
+						});
 					}),
 					emit : (function () {
 						var res = domAttr.get(node, 'mud-state');
@@ -123,7 +125,10 @@
 			});
 
 			query('body').on('click', function(evt) {
-				query('#cmd')[0].focus();
+				var node = query('#cmd')[0];
+				
+				node.focus();
+				win.scrollIntoView(node);
 			});
 
 			query('#cmd')[0].focus();

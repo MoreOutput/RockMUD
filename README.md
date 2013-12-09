@@ -19,7 +19,7 @@ Notes on dependencies:
 * Not using any JS templating engines.
 * Client side I use DOJO 1.9
 * socket.io >= .9
-* Node > .8.3
+* Node > .10.X
 
 Currently in 0.1.7:
 * Simple architecture with no whitelisting of commands
@@ -33,6 +33,5 @@ Currently in 0.1.7:
 * Basic Combat (kill <mob name>)
 * Inventory
 * Ticks (for periodic healing, refreshing, messages and hunger/thirst)
-* Movement (North, East, South, West, Up, and Down) with the ability to easily add new directions
+* Movement directions are not static
 * AMD loading for client side scripts
-
