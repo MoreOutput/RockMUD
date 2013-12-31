@@ -1,3 +1,5 @@
+"use strict";
+
 var Dice = require('./dice').roller,
 
 Combat = function() {
@@ -47,7 +49,7 @@ Combat.prototype.begin = function(s, monster, fn) {
 */
 Combat.prototype.round = function(s, monster, fn) {
 	var combat = this;
-	combat.attackerRound(s, monster, function(s, monster) {
+	combat.attackerRound(s, monster, function(s, monster) {		
 		if (monster.chp > 0) {
 			combat.targetRound(s, monster, function(s, monster) {
 				return fn();
@@ -63,12 +65,12 @@ Combat.prototype.round = function(s, monster, fn) {
 * Attacker is always at the top of the round
 */
 Combat.prototype.attackerRound = function(s, monster, fn) {
-	Dice.roll(1, 20, function(total) { // Roll against AC
-		total = total + 1 + s.player.dex/4;
+	Dice.roll(1, 10, function(total) { // Roll against AC
+		total = total + 1 + s.player.dex/4 - s.player.wait;
 		if (total > monster.ac) {
-			total = total + 1 + s.player.str/3;
-			
 			Dice.roll(1, 20, function(total) {
+				total = (total + 1 + s.player.str/1.5) - monster.ac / 2;
+				
 				monster.chp = monster.chp - total;
 
 				s.emit('msg', {
@@ -94,11 +96,10 @@ Combat.prototype.attackerRound = function(s, monster, fn) {
 Combat.prototype.targetRound = function(s, monster, fn) {
 	Dice.roll(1, 20, function(total) { // Roll against AC
 		total = total + 5;
-		if (total > s.player.ac) {
-			total = total + 1;
-			
+		if (total > s.player.ac) {			
 			Dice.roll(1, 20, function(total) {
-				s.player.chp = s.player.chp - total;
+				total = (total + monster.level + monster.minAtk + 1) - (s.player.ac / 2);
+				s.player.chp = s.player.chp - total ;
 
 				s.emit('msg', {
 					msg: monster.short + ' hits you hard! Damage: ' + total + ' Your HP: ' + s.player.chp,

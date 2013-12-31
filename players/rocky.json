@@ -1,55 +1,124 @@
 {
     "name": "Rocky",
     "lastname": "",
-    "title": "the programmer",
+    "title": "",
     "role": "admin",
-    "password": "dfdad4a85f4bd91ee9a04b9ebf2fa0c65efd191c9dc15ac63c18fe596808779bc0c1880f1aac137c15f30ea77172876773f7700feec8d8accdbeb112ca812b85",
-    "salt": "f2bc644d0413eec2c6a673d787c5726c073ca9304bbffba189c7d66ee797dbc22e32407de9fad90303d22f7494d802aa10c9fb89ae35aee95327f7bdc0b4d4997559ca1a0da5e46a80befebc25679857ccdde608a35369b4d0fc1c304591ac0e98005fbe3c67bb8b65975b1b412d32e35f082c4f69e78934062ed475cd9121f3",
-    "race": "human",
-    "charClass": "thief",
-    "created": "Sat Nov 30 2013 20:47:17 GMT-0500 (Eastern Standard Time)",
-    "level": 1,
+    "password": "feeb9072f24a04620f343924890105aae6366ddca2479ba7419eb65fc712d751d0c211dd6fa5b99d017af50c46393b9ec9dd3a1ef47da2a62381a68c30497157",
+    "salt": "6f422fc8eceb576f02633ac9bf90b819f8417a0c099909b2b72c6b0b6cad2f22310a8320066d99c46bfdf8e285d4ab7b9dcc4c498ce37403fc3f09be2e421bec4ea8d33aa846c1639370e98e8689deed7a8de2c4b181b351ee0c6eafcea7f78fe0b7011a53df894232f9693c0293b8bd61c00a134ed2eb4c5f03f8ba25fa4171",
+    "race": "",
+    "sex": "",
+    "charClass": "fighter",
+    "created": "Wed Dec 11 2013 02:07:13 GMT-0500 (Eastern Standard Time)",
+    "level": 100,
     "exp": 1,
     "expToLevel": 1000,
     "position": "standing",
-    "alignment": "",
-    "chp": 1000,
-    "hp": 1000,
+    "alignment": 0,
+    "chp": 10660,
+    "hp": 11000,
     "cmana": 100,
     "mana": 100,
-    "cmv": 80,
-    "mv": 110,
-    "str": 12,
+    "cmv": 8,
+    "mv": 100,
+    "str": 15,
     "wis": 12,
-    "int": 12,
-    "dex": 14,
-    "con": 12,
+    "int": 11,
+    "dex": 12,
+    "con": 14,
     "wait": 0,
     "ac": 10,
-    "gold": 15,
-    "hunger": 0,
+    "gold": 5,
+    "hunger": 10,
     "thirst": 0,
-    "carry": 120,
-    "load": 0,
+    "load": 3,
     "visible": true,
     "area": "midgaard",
     "roomid": 1,
     "recall": 1,
     "description": "A brand new citizen.",
     "eq": {
-        "head": "",
-        "chest": "",
-        "rightHand": "",
-        "leftHand": "",
-        "arms": "",
-        "hands": "",
-        "legs": "",
-        "feet": "",
-        "necklace1": "",
-        "necklace2": "",
-        "ring1": "",
-        "ring2": "",
-        "floating": ""
+        "head": [
+            {
+                "name": "Head",
+                "item": null
+            },
+            {
+                "name": "Necklace 1",
+                "item": null
+            },
+            {
+                "name": "Necklace 2",
+                "item": null
+            }
+        ],
+        "body": [
+            {
+                "name": "Body",
+                "item": null
+            },
+            {
+                "name": "Chest",
+                "item": null
+            },
+            {
+                "name": "About Body",
+                "item": null
+            }
+        ],
+        "arms": [
+            {
+                "name": "Right Arm",
+                "item": null
+            },
+            {
+                "name": "Left Arm",
+                "item": null
+            }
+        ],
+        "hands": [
+            {
+                "name": "Right Hand",
+                "item": null,
+                "dual": false
+            },
+            {
+                "name": "Left Hand",
+                "item": null,
+                "dual": false
+            },
+            {
+                "name": "Ring 1",
+                "item": null
+            },
+            {
+                "name": "Ring 2",
+                "item": null
+            }
+        ],
+        "legs": [
+            {
+                "name": "Right Leg",
+                "item": null
+            },
+            {
+                "name": "Left Leg",
+                "item": null
+            },
+            {
+                "name": "Left Foot",
+                "item": null
+            },
+            {
+                "name": "Right Foot",
+                "item": null
+            }
+        ],
+        "misc": [
+            {
+                "name": "Floating",
+                "item": null
+            }
+        ]
     },
     "items": [
         {
@@ -60,9 +129,10 @@
             "area": "all",
             "level": 1,
             "itemType": "food",
+            "weight": 2,
             "flags": [
                 {
-                    "\thunger": -7
+                    "hunger": -7
                 },
                 {
                     "carry": 1
@@ -70,38 +140,16 @@
             ]
         },
         {
-            "name": "bread",
-            "short": "A loaf of bread",
-            "long": "A rather stale looking loaf of bread.",
-            "area": "Midgaard",
+            "name": "Burlap Sack",
+            "short": "A Burlap Sack",
+            "long": "An over-used burlap sack with many tears",
             "id": 5,
+            "area": "all",
             "level": 1,
-            "itemType": "food",
-            "flags": [
-                {
-                    "hunger": -5
-                },
-                {
-                    "carry": 1
-                }
-            ]
-        },
-        {
-            "name": "bread",
-            "short": "A loaf of bread",
-            "long": "A rather stale looking loaf of bread.",
-            "area": "Midgaard",
-            "id": 5,
-            "level": 1,
-            "itemType": "food",
-            "flags": [
-                {
-                    "hunger": -5
-                },
-                {
-                    "carry": 1
-                }
-            ]
+            "itemType": "container",
+            "weight": 1,
+            "maxWeight": 40,
+            "contains": []
         }
     ],
     "affects": [],
@@ -109,30 +157,28 @@
     "skills": [
         [
             {
-                "name": "backstab",
+                "name": "bash",
                 "train": 65,
-                "type": "starter"
+                "type": "melee"
             }
         ]
     ],
     "skillList": [
         [
             {
-                "name": "Backstab",
-                "mod": 2,
+                "name": "Bash",
+                "mod": 1,
                 "level": 1,
                 "maxTrain": 95,
-                "wait": 3,
-                "type": "starter"
+                "wait": 1,
+                "type": "melee"
             }
         ]
     ],
-    "channels": [
-        "say",
-        "yell",
-        "chat",
-        "tell"
+    "prevent": [
+        "flame"
     ],
-    "sid": "ANZ5F2kh1CUjos4LYpXp",
-    "saved": "Sun Dec 08 2013 22:24:44 GMT-0500 (Eastern Standard Time)"
+    "carry": 150,
+    "sid": "-hzZC-xo89IpcaHmYd7v",
+    "saved": "Thu Dec 12 2013 19:24:44 GMT-0500 (Eastern Standard Time)"
 }

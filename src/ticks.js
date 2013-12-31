@@ -4,6 +4,8 @@ This module houses all the timed events on the server. For example:
 	* Every Tweleve minutes the character is saved if they're not in a fight
 	* Every fifteen minutes all the areas in memory are checked any with no players is removed from areas[]
 */
+"use strict";
+
 var fs = require('fs'),
 Character = require('./character').character,
 Room = require('./rooms').room,
@@ -31,7 +33,7 @@ areas = require('../server').areas;
 				});					
 			}		
 		}	
-	}, 60000 * 2);	
+	}, 60000 * 3);	
 
 	// Saving characters Tick
 	setInterval(function() {
@@ -84,5 +86,5 @@ areas = require('../server').areas;
 				}	
 			});	
 		}	
-	}, 60000 * 3);
+	}, 60000 * 5);
 }());

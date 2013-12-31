@@ -2,6 +2,8 @@
 * All non-combat commands that one would consider 'general' to a all
 * users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
 */
+"use strict";
+
 var fs = require('fs'),
 Character = require('./character').character,
 Room = require('./rooms').room,
@@ -18,16 +20,31 @@ Cmd.prototype.move = function(r, s) {
 	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping') {
 		r.cmd = r.msg;
 
-		Room.checkExit(r, s, function(fnd, roomID) {
+		Room.checkExit(r, s, function(fnd, roomid) {
 			if (fnd) {
-				s.player.roomid = roomID; // Make the adjustment in the socket character reference
+				Room.msgToRoom({
+					msg: s.player.name + ' the ' + s.player.race + ' walks ' + r.cmd + '.', 
+					playerName: s.player.name, 
+					roomid: s.player.roomid
+				}, true);
+
+				s.player.cmv = Math.round((s.player.cmv - (12 - s.player.dex/4)));	
+				s.player.roomid = roomid; // Make the adjustment in the socket character reference.
+
+				Character.updatePlayer(s);
 
 				Room.getRoomObject({
 					area: s.player.area,
-					id: roomID
+					id: roomid
 				}, function(roomObj) {
 					Room.getRoom(s, function() {
-						return Character.prompt(s);
+						Room.msgToRoom({
+							msg: s.player.name + ' the ' + s.player.race + ' enters the room.', 
+							playerName: s.player.name, 
+							roomid: roomid
+						}, true, function() {
+							return Character.prompt(s);
+						});
 					});
 				});
 			} else {
@@ -35,6 +52,7 @@ Cmd.prototype.move = function(r, s) {
 					msg: 'There is no exit in that direction.', 
 					styleClass: 'error'
 				});
+
 				return Character.prompt(s);
 			}
 		}); 
@@ -216,19 +234,28 @@ Cmd.prototype.where = function(r, s) {
 
 /** Communication Channels **/
 Cmd.prototype.say = function(r, s) {
-	var i  = 0,
-	msg = r.msg;
-
-	Room.msgToRoom(msg, roomID, function() {
-
-	});
-
-	for (i; i < players.length; i += 1) {
-		if (players[i].name === r.msg && r.msg !== s.player.name) {
-			
-		}
-	}
+	var i  = 0;
+	
+	s.emit('msg', {msg: 'You say> ' + r.msg, styleClass: 'cmd-say'});
+	
+	Room.msgToRoom({
+		msg: s.player.name + ' says> ' + r.msg +  '.', 
+		playerName: s.player.name, 
+		roomid: s.player.roomid
+	}, true);
 };
+
+Cmd.prototype.yell = function(r, s) {
+	var i  = 0;
+	
+	s.emit('msg', {msg: 'You yell> ' + r.msg, styleClass: 'cmd-say'});
+	
+	Room.msgToArea({
+		msg: s.player.name + ' yells> ' + r.msg +  '.', 
+		playerName: s.player.name
+	}, true);
+};
+
 
 Cmd.prototype.chat = function(r, s) {
 	var msg = r.msg;
@@ -246,7 +273,7 @@ Cmd.prototype.chat = function(r, s) {
 	});
 
 	/* 
-	If you want to return prompt after each chat you can use the below,
+	If you want to return prompt after each message you can use the below,
 	be sure to define i
 
 	for (i; i < players.length; i += 1) {
@@ -255,6 +282,30 @@ Cmd.prototype.chat = function(r, s) {
 	}	
 	*/
 };
+
+/*
+Cmd.prototype.tell = function(r, s) {
+	var i  = 0;
+	
+	s.emit('msg', {msg: 'You tell ' + r.playerName + '> ' + r.msg, styleClass: 'cmd-say'});
+	
+	Character.msgToPlayer({
+		msg: s.player.name + ' tells you> ' + r.msg +  '.', 
+		playerName: s.player.name
+	}, true);
+};
+
+Cmd.prototype.reply = function(r, s) {
+	var i  = 0;
+	
+	s.emit('msg', {msg: 'You reply to ' + s.player.reply + '> ' + r.msg, styleClass: 'cmd-say'});
+	
+	Character.msgToPlayer({
+		msg: s.player.name + ' tells you> ' + r.msg +  '.', 
+		playerName: s.player.name
+	}, true);
+};
+*/
 
 Cmd.prototype.achat = function(r, s) { 
 	var msg = r.msg;
@@ -309,19 +360,32 @@ Cmd.prototype.title = function(r, s) {
 
 // View equipment
 Cmd.prototype.equipment = function(r, s) {
-	var keys = Object.keys(s.player.eq),
+	var bodyAreas = Object.keys(s.player.eq),
 	eqStr = '',
-	i = 0;	
+	i = 0,
+	j = 0;	
 	
-	for (i; i < keys.length; i += 1) {
-		eqStr += '<li>' + keys[i] + '</li>';
+	for (i; i < bodyAreas.length; i += 1) {	
+		j = 0;
+		
+		for (j; j < s.player.eq[bodyAreas[i]].length; j += 1) {
+			eqStr += '<li class="' + bodyAreas[i] + 
+				' slot-' + s.player.eq[bodyAreas[i]][j].name.replace(/ /g, '') + 
+				'">' + s.player.eq[bodyAreas[i]][j].name + ': ';
+			
+			if (s.player.eq[bodyAreas[i]][j].item === null || s.player.eq[bodyAreas[i]][j].item === '') {
+				eqStr += ' Nothing</li>';
+			} else {
+				eqStr += '<strong>'  + s.player.eq[bodyAreas[i]][j].item.short + '</strong></li>';
+			}
+		}
 	}
 	
 	s.emit('msg', {
-		msg: '<div class="name">You are wearing the following:</div>' +
-			'<ul class="stats">' +
+		msg: '<h3>You are wearing:</h3>' +
+			'<ul class="equipment-list">' +
 		eqStr + '</ul>', 
-		styleClass: 'eq' 
+		styleClass: 'cmd-eq' 
 	});
 	
 	return Character.prompt(s);
@@ -350,7 +414,7 @@ Cmd.prototype.wear = function(r, s) {
 		Character.checkInventory(r, s, function(fnd, item) {
 			if (fnd) {
 				Character.wear(r, s, item, function(wearSuccess, msg) {
-					s.emit('msg', {msg: msg, styleClass: 'wear'});
+					s.emit('msg', {msg: msg, styleClass: 'cmd-wear'});
 					return Character.prompt(s);
 				});
 			} else {
@@ -388,11 +452,11 @@ Cmd.prototype.score = function(r, s) {
 	'<ul class="score-info">' + 
 		'<li class="stat-hp">HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
 		'<li class="stat-mana">Mana: ' + s.player.cmana + '/' + s.player.mana +'</li>' +
-		'<li class="stat-mv">Stamina: ' + s.player.cmv + '/' + s.player.mv +'</li>' +
+		'<li class="stat-mv">Moves: ' + s.player.cmv + '/' + s.player.mv +'</li>' +
 		'<li class="stat-level">You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
 		'<li class="stat-xp">XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
 		'<li class="stat-position">Position: ' + s.player.position + '</li>' +
-		'<li class="stat-carry">Carrying ' + s.player.load + '/' + s.player.carry + ' pounds.</li>' +
+		'<li class="stat-carry">Carrying ' + s.player.load + '/' + Character.getLoad(s) + ' pounds.</li>' +
 	'</ul>' +
 	'<ul class="score-stats">' + 
 		'<li class="stat-str">STR: ' + s.player.str + '</li>' +
@@ -451,17 +515,32 @@ Cmd.prototype.help = function(r, s) {
 	}
 }
 
+Cmd.prototype.xyzzy = function(s) {
+	Room.msgToRoom({
+		msg: s.player.name + 	' tries to xyzzy but nothing happens.', 
+		roomid: s.player.roomid,
+		styleClass: 'error'
+	}, true, function() {
+		s.emit('msg', {msg: 'Nothing happens!', styleClass: 'error' });
+
+		return Character.prompt(s);
+	});
+}
+
 /*
 * Special Admin commands below here. You can confirm permission with a value connected to the current player  
 */
 
 /*
-* View a string representation of the JSON behind a world object. Pass in an ID (matches first), or noun pattern
-* typing 'spit' alone will give the json object for the entire current room. 
+* View a string representation of the JSON behind a world object.
+* Syntax: json objectType (item, room, monster or player)
+* typing 'json' alone will give the json object for the entire current room. 
 */
 Cmd.prototype.json = function(r, s) {
 	if (s.player.role === 'admin') {
-	
+		
+	} else {
+		s.emit('msg', {msg: 'Nothing happens!', styleClass: 'error' });
 	}
 }
 
@@ -483,7 +562,7 @@ Cmd.prototype.restore = function(r, s) {
 	if (s.player.role === 'admin') {
 
 	} else {
-		s.emit('msg', {msg: 'You wish you possessed such power!', styleClass: 'error' });	
+		s.emit('msg', {msg: 'You do not possess that kind of power.', styleClass: 'error' });	
 		return Character.prompt(s);
 	}
 }

@@ -3,6 +3,8 @@
  * Rocky Bevins, 2013 (moreoutput@gmail.com)
  * We want to be able to build Browser, Diku-style, MUDs with only JS/JSON. 
 */
+"use strict";
+
 var http = require('http'),
 fs = require('fs'),
 cfg = require('./config').server.game,

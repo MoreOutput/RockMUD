@@ -1,7 +1,7 @@
 RockMUD
 =======
 
-RockMUD (0.1.7) is a WebSockets MUD server using node.js.
+RockMUD (0.1.7) is a WebSockets MUD server with node.js.
 
 Doing what I can to keep a test server running on nodejitsu: http://moreoutput.rockmud.jit.su/. Client 'terminal' will be
 addressed soon. You can reach me directly: moreoutput@gmail.com.
@@ -21,17 +21,16 @@ Notes on dependencies:
 * socket.io >= .9
 * Node > .10.X
 
-Currently in 0.1.7:
+Some things Currently in 0.1.7:
 * Simple architecture with no whitelisting of commands
 * Character creation (Races, Classes, Stats, Passwords) and saving as json files.
 * Channels
-* In game helpfile system
 * Uniform way of scripting commands -- with permission checking
-* JSON areas with room parsing of items, monsters, exits (events coming)
+* JSON areas
 * Command aliases defined client side. 
-* Various 'standard' commands: chat, who, look, help, score, save, title, quit, get, drop
+* Various 'standard' commands (ex: chat, who, look, help, score, save, title, quit, get, drop, say, kill)
 * Basic Combat (kill <mob name>)
 * Inventory
-* Ticks (for periodic healing, refreshing, messages and hunger/thirst)
+* Ticks (ex: regen, messages, autosave, and hunger/thirst)
 * Movement directions are not static
 * AMD loading for client side scripts

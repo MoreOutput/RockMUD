@@ -1,8 +1,7 @@
-/*
-* All Room based interactions are defined here, sometimes they are called from another module
-* see a movement command like 'east' for example.
-*/
+"use strict";
+
 var fs = require('fs'),
+io = require('../server').io,
 players = require('../server').players,
 areas = require('../server').areas;
 
@@ -53,14 +52,14 @@ Room.prototype.getRoom = function(s, fn) {
 							room.getMonsters(rooms[i], {specific: 'short'}, function(monsters) {							
 								if (exits.length > 0) {
 								 	roomStr += '<li class="room-exits">Visible Exits: ' + 
-								 	exits.toString() + '</li>';
+								 	exits.toString().replace(/,/g, ', ') + '</li>';
 								} else {
 									roomStr += '<li class="room-exits">Visible Exits: None!</li>';
 								}
 								
 								if (playersInRoom.length > 0 || monsters.length > 0) {
-									roomStr += '<li>Here:' + playersInRoom.toString().replace(/,/g, ', ') + 
-									' ' + monsters.toString().replace(/,/g, ', ') + '</li>';
+									roomStr += '<li>Here:' + playersInRoom.toString().replace(/,/g, '. ') + 
+									' ' + monsters.toString().replace(/,/g, '. ') + '</li>';
 								}
 								
 								if (items.length > 0) {
@@ -153,15 +152,19 @@ Room.prototype.getExits = function(room, fn) {
 	return fn(arr);
 }
 
+// This needs to look like getItems() for returning a player obj based on room
 Room.prototype.getPlayers = function(s, room, fn) {
 	var arr = [],
+	player,
 	i = 0;
 
-	for (i; i < players.length; i += 1) {				
-		if (players[i].id === s.player.roomid && players[i].name != s.player.name) {
-			arr.push(' ' + players[i].name + ' is ' + s.player.position + ' here');
-		} 
+	for (i; i < players.length; i += 1) {
+		player = io.sockets.socket(players[i].sid).player;
+		if (player.roomid === s.player.roomid && player.name !== s.player.name) {
+			arr.push(' ' + player.name + ' the ' + player.race + ' is ' + player.position + ' here');
+		}
 	}
+
 	return fn(arr);
 }
 
@@ -194,7 +197,7 @@ Room.prototype.getMonsters = function(room, optObj, fn) {
 	var arr = [],
 	i = 0;
 
-	if (optObj.specific != undefined) {
+	if (optObj.specific !== undefined) {
 		if (room.monsters.length > 0) {
 			for (i; i < room.monsters.length; i += 1) {
 				arr.push(room.monsters[i][optObj.specific]);
@@ -303,22 +306,70 @@ Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
 	});
 }
 
-Room.prototype.addItem = function(roomQuery, fn) {
-	this.getRoomObject(roomQuery, function(roomObj) {
-		roomObj.items.push(roomQuery.item);		
+Room.prototype.addItem = function(itemOpt, fn) {
+	this.getRoomObject(itemOpt, function(roomObj) {
+		roomObj.items.push(itemOpt.item);		
 	});
 	
 	return fn();
 }
 
 // Emit a message to all the rooms players
-Room.prototype.msgToRoom = function() {
+Room.prototype.msgToRoom = function(msgOpt, exclude, fn) {
+	var i = 0,
+	s;
 
+	for (i; i < players.length; i += 1) {				
+		s = io.sockets.socket(players[i].sid);
+		if (exclude === undefined || exclude === true) {
+			if (s.player.name !== msgOpt.playerName && s.player.roomid === msgOpt.roomid) {
+				s.emit('msg', {
+					msg: msgOpt.msg, 
+					styleClass: msgOpt.styleClass
+				});
+			} 
+		} else {
+			if (s.player.roomid === msgOpt.roomid) {
+				s.emit('msg', {
+					msg: msgOpt.msg, 
+					styleClass: msgOpt.styleClass
+				});
+			} 
+		}
+	}
+
+	if (typeof fn === 'function') {
+		return fn();
+	}
 }
 
 // Emit a message to all the players in an area
-Room.prototype.msgToArea = function() {
+Room.prototype.msgToArea = function(msgOpt, exclude, fn) {
+	var i = 0,
+	s;
 
+	for (i; i < players.length; i += 1) {				
+		s = io.sockets.socket(players[i].sid);
+		if (exclude === undefined || exclude === true) {
+			if (s.player.name !== msgOpt.playerName && s.player.area === msgOpt.area) {
+				s.emit('msg', {
+					msg: msgOpt.msg, 
+					styleClass: msgOpt.styleClass
+				});
+			} 
+		} else {
+			if (s.player.area === msgOpt.area) {
+				s.emit('msg', {
+					msg: msgOpt.msg, 
+					styleClass: msgOpt.styleClass
+				});
+			} 
+		}
+	}
+
+	if (typeof fn === 'function') {
+		return fn();
+	}
 }
 
 module.exports.room = new Room();

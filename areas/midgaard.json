@@ -36,9 +36,12 @@
 					"type": "monster",
 					"race": "animal",
 					"limit": 2,
-					"hp": 100,
-					"chp": 100,
+					"hp": 105,
+					"chp": 105,
+					"weight": 105,
 					"position": "standing",
+					"minAtk": 2,
+					"maxAtk": 5,
 					"ac": 6
 				}, {
 					"name": "Boar",
@@ -52,7 +55,10 @@
 					"limit": 2,
 					"hp": 100,
 					"chp": 100,
+					"weight": 85,
 					"position": "standing",
+					"minAtk": 2,
+					"maxAtk": 3,
 					"ac": 6
 				}
 			],
@@ -64,9 +70,9 @@
 				"id": 5,
 				"level": 1,
 				"itemType": "food",
+				"weight": 0.5,
 				"flags": [
-					{"hunger": -5},
-					{"carry": 1} 
+					{"hunger": -5}
 				]
 			}, {
 				"name": "Short Sword", 
@@ -81,6 +87,8 @@
 				"diceSides": 4, 
 				"attackType": "slice", 
 				"attackElement": "",
+				"weight": 4,
+				"slot": "hands",
 				"flags": []
 			}],
 			"flags" : []
@@ -106,6 +114,8 @@
 				"itemType": "shield",
 				"material": "wood", 
 				"ac": 2, 
+				"weight": 6,
+				"slot": "hands",
 				"flags": []
 			}],
 			"flags" : []

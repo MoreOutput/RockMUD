@@ -13,22 +13,26 @@ exports.server = {
 	}],
 	races: [{
 		name:'Human', 
-		wis: 1
+		wis: 1,
+		unarmed: 'punch'
 	}, {
 		name:'Elf',
 		int: 2,
-		con: -1
+		con: -1,
+		unarmed: 'punch'
 	}, {
 		name:'Dwarf',
 		con: 2,
 		int: -1,
-		hp: 5
+		hp: 5,
+		unarmed: 'punch'
 	}, {
 		name:'Ogre',
 		str: 3,
 		int: -2,
 		dex: -1,
-		hp: 10
+		hp: 10,
+		unarmed: 'smash'
 	}],
 	classes: [{
 		name:'Thief',

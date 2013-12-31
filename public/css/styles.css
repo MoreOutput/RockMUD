@@ -36,7 +36,7 @@ color: green;
 }
 
 p {
-width: 700px;
+width: 90%;
 margin: 0;
 padding: 0;
 }
@@ -87,15 +87,15 @@ background-image: linear-gradient(top, #4d90fe, #4787ed);
 }
 
 #mudwrapper {
-width: 80%;
+width: 90%;
 margin: 0 auto;
 text-align: left;
 background-color: #0c010f;
-padding: 40px;
+padding: 1%;
 }
 
 #terminal {
-width: 100%;
+width: 90%;
 background-color: #0c010f;
 color: #fff;
 margin: 0 0 10px 0;
@@ -207,6 +207,10 @@ width: 95%;
 color: yellow;
 }
 
+.cmd-wear {
+font-weight: bold;
+}
+
 .enter-name {
 clear: both;
 display: block;
@@ -278,6 +282,7 @@ color: #fff;
 **/
 .score {
 width: 50%;
+min-width: 400px;
 border: 3px solid #eee;
 display: block;
 }
@@ -320,17 +325,17 @@ display: inline;
 }
 
 .score .stat-hp {
-font-size: 2em;
+font-size: 1.75em;
 color: #ff0000;
 }
 
 .score .stat-mana {
-font-size: 2em;
+font-size: 1.75em;
 color: #00ffff;
 }
 
 .score .stat-mv {
-font-size: 2em;
+font-size: 1.75em;
 color: #ffff00;
 }
 

@@ -1,6 +1,8 @@
 /*
 * Simulates the rolling of dice, should never directly add any modifiers.
 */
+"use strict";
+
 var Roller = function() {
 
 }

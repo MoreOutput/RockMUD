@@ -3,6 +3,8 @@ Characters.js controls everything dealing with a character.json file, no in game
 defined here. Commands.js does share some function names with this module, as they -- are --  commands 
 and therefore defined in commands.js. See: save().
 */
+"use strict";
+
 var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms').room,
@@ -47,7 +49,13 @@ Character.prototype.load = function(name, s, fn) {
 		}
 		
 		s.player = JSON.parse(r);
+
 		s.player.name = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
+
+		if (s.player.lastname !== '') {
+			s.player.lastname = s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
+		}
+
 		s.player.sid = s.id;
 		
 		return fn(s);
@@ -102,11 +110,11 @@ Character.prototype.getPassword = function(s, fn) {
 						} else {
 							if (msg === undefined) {
 								s.emit('msg', {msg: 'Error logging in, please retry.'});
+								return s.disconnect();
 							} else {
-								s.emit('msg', {msg: msg})
+								s.emit('msg', {msg: msg});
+								s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 							}
-							
-							return s.disconnect();
 						}
 					});
 				} else {
@@ -138,7 +146,7 @@ Character.prototype.addPlayer = function(s, fn) {
 			area: s.player.area,
 			roomid: s.player.roomid
 		});
-			
+
 		return fn(true);
 	} else {
 		players.push({
@@ -162,50 +170,98 @@ Character.prototype.create = function(r, s, fn) {
 		password: s.player.password,
 		salt: '',
 		race: s.player.race,
+		sex: '',
 		charClass: s.player.charClass,
 		created: new Date().toString(), // time of creation
 		level: 1,
 		exp: 1,
 		expToLevel: 1000,
 		position: 'standing',
-		alignment: '',
+		alignment: 0,
 		chp: 100, // current hp
 		hp: 100, // total hp
 		cmana: 100,
 		mana: 100,
 		cmv: 80,
 		mv: 100,
-		str: 12,
-		wis: 12,
+		str: 13,
+		wis: 13,
 		int: 12,
 		dex: 12,
-		con: 12,
+		con: 13,
 		wait: 0,
 		ac: 10,
 		gold: 5,
 		hunger: 0,
 		thirst: 0,
-		carry: 10,
-		load: 0,
+		load: 3,
 		visible: true,
+		unarmed: 'punch',
 		area: 'midgaard', // must match an area file
 		roomid: 1, // current room
 		recall: 1, // id to recall to
 		description: 'A brand new citizen.',
+		reply: '',
 		eq: {
-			head: '',
-			chest: '',
-			rightHand: '',
-			leftHand: '',
-			arms: '',
-			hands: '',
-			legs: '',
-			feet: '',
-			necklace1: '',
-			necklace2: '',
-			ring1: '',
-			ring2: '',
-			floating: ''
+			head: [{
+				name: 'Head',
+				item: null
+			}, {
+				name: 'Necklace 1',
+				item: null
+			}, {
+				name: 'Necklace 2',
+				item: null
+			}],
+			body: [{
+				name: 'Body',
+				item: null
+			}, {
+				name: 'Chest',
+				item: null
+			}, {
+				name: 'About Body',
+				item: null
+			}],
+			arms: [{
+				name: 'Right Arm',
+				item: null
+			}, {
+				name: 'Left Arm',
+				item: null
+			}],
+			hands: [{
+				name: 'Right Hand',
+				item: null,
+				dual: false
+			}, {
+				name: 'Left Hand',
+				item: null,
+				dual: false
+			}, {
+				name: 'Ring 1',
+				item: null
+			}, {
+				name: 'Ring 2',
+				item: null
+			}],
+			legs: [{
+				name: 'Right Leg',
+				item: null
+			}, {
+				name: 'Left Leg',
+				item: null
+			}, {
+				name: 'Left Foot',
+				item: null
+			}, {
+				name: 'Right Foot',
+				item: null
+			}],
+			misc: [{
+				name: 'Floating',
+				item: null
+			}]
 		},
 		items: [
 			{
@@ -216,17 +272,30 @@ Character.prototype.create = function(r, s, fn) {
 				"area": "all",
 				"level": 1,
 				"itemType": "food",
+				"weight": 2,
 				"flags": [
 					{"hunger": -7},
 					{"carry": 1} 
 				]
+			},
+			{
+				"name": "Burlap Sack", 
+				"short": "A Burlap Sack",
+				"long": "An over-used burlap sack with many tears",
+				"id": 5, 
+				"area": "all",
+				"level": 1,
+				"itemType": "container",
+				"weight": 1,
+				"maxWeight": 40,
+				"contains": []
 			}
 		],
 		affects: [],
 		racials: [],
 		skills: [],
 		skillList: [],
-		channels: ['say', 'yell', 'chat', 'tell']
+		prevent: ['flame']
 	},
 	character = this;
 	
@@ -352,7 +421,7 @@ Character.prototype.newCharacter = function(r, s, fn) {
 											
 											s.emit('msg', {
 												msg: s.player.name + ' is a ' + s.player.charClass + '! There is 1 more step before ' + s.player.name + 
-												' is saved. Please define a password (8 characters):', 
+												' is saved. Please define a password (8 or more characters):', 
 												res: 'createPassword', 
 												styleClass: 'race-selection'
 											});	
@@ -436,16 +505,20 @@ Character.prototype.motd = function(s, fn) {
 }
 
 Character.prototype.save = function(s, fn) {
-	if (s.player != undefined) {
+	var character = this;
+
+	if (s.player !== undefined) {
 		s.player.saved = new Date().toString();
 	
 		fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
 			if (err) {
 				return s.emit('msg', {msg: 'Error saving character.'});
 			} else {
-				if (typeof fn === 'function') {
-					return fn();
-				}	
+				character.updatePlayer(s, function() {
+					if (typeof fn === 'function') {
+						return fn();
+					}
+				})
 			}
 		});
 	};
@@ -456,10 +529,9 @@ Character.prototype.hpRegen = function(s, fn) {
 
 	if (s.player.chp < s.player.hp) {
 
-		if (s.player.position === 'fighting' || s.player.position === 'sleeping') {
+		if (s.player.position === 'sleeping') {
 			conMod = conMod + 2;
 		}
-
 
 		Dice.roll(1, 8, function(total) {
 			if (typeof fn === 'function') {
@@ -556,41 +628,78 @@ Character.prototype.addToInventory = function(s, item, fn) {
 	fn(true);
 }
 
-// remove from inventory -- I AM HERE
 Character.prototype.removeFromInventory = function(s, itemObj, fn) {
 	var i = 0;
+
 	if (s.player.items.length > 0) {
 		s.player.items = s.player.items.filter(function(item, i) {
-			if (item.id === itemObj.id) {
-				return false;
-			} else {
+			if (item.id !== itemObj.id) {
 				return true;
-			}				
+			}		
 		});
-		
-		fn(true);		
+	
+		if (typeof fn === 'function') {
+			return fn(true);
+		}	
 	} else {
-		fn(false);
+		if (typeof fn === 'function') {
+			return fn(false);
+		}
 	}
 }
 
 Character.prototype.wear = function(r, s, item, fn) {
-	if (item.itemType === 'weapon') {
-		if (s.player.eq.rightHand !== '' && s.player.eq.leftHand !== '') {
-			return fn(false, 'Your hands are full.')
-		} else {
-			if (s.player.eq.rightHand === '') {
-				s.player.eq.rightHand = item;
-				return fn(true, 'You weild a ' + item.short + ' in your right hand');
-			} else {
-				s.player.eq.leftHand = item;
-				return fn(true, 'You begin weilding a ' + item.short + ' in your left hand');
+	var bodyAreas = Object.keys(s.player.eq),
+	i = 0,
+	j = 0;	
+	
+	for (i; i < bodyAreas.length; i += 1) {	
+		j = 0;
+		
+		for (j; j < s.player.eq[bodyAreas[i]].length; j += 1) {
+			if (item.slot === bodyAreas[i]) {
+				if (item.itemType === 'weapon') {
+					// Wielding weapons
+					if (item.weight < (20 + s.player.str)) { // Dual check
+
+					}
+
+					if (s.player.eq[bodyAreas[i]][j].dual === false && s.player.eq[bodyAreas[i]][j].item === null) {
+						this.removeFromInventory(s, item);
+						//var place = j;
+						s.player.eq[bodyAreas[i]][j].item = item;
+						//j = s.player.eq[bodyAreas[i]].length + 1;
+
+						return fn(true, 'You wield a ' + item.short + ' in your ' + s.player.eq[bodyAreas[i]][j].name);
+					}
+				} else {
+					// Wearing Armor
+					if (s.player.eq[bodyAreas[i]][j].item === null) {
+						this.removeFromInventory(s, item);
+						s.player.eq[bodyAreas[i]][j].item = item;
+
+						s.player.ac = s.player.ac + item.ac;
+						
+						return fn(true, 'You wear a ' + item.short + ' on your ' + s.player.eq[bodyAreas[i]][j].name);
+					} else {
+						this.removeFromInventory(s, item);
+						this.addToInventory(s, s.player.eq[bodyAreas[i]][j].item);
+
+						s.player.ac = s.player.ac - s.player.eq[bodyAreas[i]][j].item.ac;
+
+						s.player.eq[bodyAreas[i]][j].item = item;
+
+						s.player.ac = s.player.ac + s.player.eq[bodyAreas[i]][j].item.ac
+
+						return fn(true, 'You wear ' + s.player.eq[bodyAreas[i]][j].item.short + ' on your ' + 
+							s.player.eq[bodyAreas[i]][j].name + ' and remove ' + 
+							s.player.eq[bodyAreas[i]][j].item.short);
+					}
+				}
 			}
 		}
-	} else {
-		console.log('not a weapon')
 	}
-}
+} 
 
 Character.prototype.calXP = function(s, monster, fn) {
 	if ((monster.level) >= (s.player.level - 5)) {
@@ -603,17 +712,27 @@ Character.prototype.calXP = function(s, monster, fn) {
 
 				s.player.exp = exp + s.player.exp;
 
-				fn( exp );
+				return fn( exp );
 			});
 		} else {
 			Dice.roll(1, 4, function(total) {
-				fn(total * 10);
+				return fn(total * 10);
 			});
 		}
 	} else {
-		fn(0);
+		return fn(0);
 	}
 }
+
+Character.prototype.getLoad = function(s, fn) {
+	var load = Math.round((s.player.str + s.player.con / 4) * 10);
+			
+	if (typeof fn === 'function') {
+		fn(load);
+	} else {
+		return load;
+	}
+};
 
 // Updates a players reference in players[] with some data attached to the socket
 Character.prototype.updatePlayer = function(s, fn) {
@@ -639,7 +758,7 @@ Character.prototype.prompt = function(s) {
 	return s.emit('msg', {msg: s.player.chp + '/'  + s.player.hp + 'hps ' +
 		s.player.cmana + '/'  + s.player.mana + 'mana ' +  
 		s.player.cmv + '/'  + s.player.mv +'mv room:' +
-		s.player.roomid + '> ', styleClass: 'cprompt'});
+		s.player.roomid + ' wait: ' + s.player.wait + '> ', styleClass: 'cprompt'});
 }
 
 Character.prototype.level = function(s, fn) {
