@@ -2,7 +2,7 @@
 Default  RockMUD styles
 */
 html, body {
-font: .95em 'Droid Serif', serif;
+font: 1em 'Courier New', sans-serif;
 height: 100%;
 background-color: #222;
 padding: 0 0 0 0;
@@ -11,8 +11,8 @@ text-align: center;
 }
 
 h1 {
-font-size: 1.25em;
-color: #fff;
+font-size: 1.2em;
+color: #eee;
 padding: 0;
 margin: 0;
 }
@@ -75,13 +75,13 @@ background-image: linear-gradient(top, #4d90fe, #4787ed);
 }
 
 /* Adjustments for resizing */
-@media screen and (max-width: 800px) {
+@media screen and (max-width: 720px) {
 	#mudwrapper { 
-	width:100%; 
+	width: 90%; 
 	}
 	
 	#terminal { 
-	width:100%; 
+	width: 90%; 
 	margin:0; 
 	}
 }
@@ -233,6 +233,7 @@ margin: 0;
 }
 
 .cprompt {
+font-weight: bold;
 color: #fff;
 }
 

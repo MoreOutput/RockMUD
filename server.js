@@ -47,6 +47,20 @@ io = require('socket.io').listen(server);
 module.exports.io = io; 
 module.exports.players = [];
 module.exports.areas = [];
+module.exports.time = fs.readFile('./data/time.json');
+
+if (!module.exports.time) {
+	module.exports.time = {	
+		year: '100',
+		month: 'March',
+		day: 8,
+		hour: 12,
+		minute: 13,
+		name: 'The year of MUD'
+	};
+
+	fs.writeFile('./data/time.json', JSON.stringify(module.exports.time, null, 4));
+}
 
 var Character = require('./src/character').character,
 Cmds = require('./src/commands').cmd,

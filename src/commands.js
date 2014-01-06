@@ -10,6 +10,7 @@ Room = require('./rooms').room,
 Combat = require('./combat').combat,
 io = require('../server').io,
 players = require('../server').players,
+time = require('../server').time,
 areas = require('../server').areas;
 
 var Cmd = function () {
@@ -180,9 +181,14 @@ Cmd.prototype.kill = function(r, s) {
 
 									clearInterval(combatInterval);
 
-									Character.calXP(s, monster, function(earnedXP) {
+									Combat.calXP(s, monster, function(earnedXP) {
 										s.player.position = 'standing';
-										s.emit('msg', {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
+
+										if (earnedXP > 0) {
+											s.emit('msg', {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
+										} else {
+											s.emit('msg', {msg: 'You won, but learned nothing.', styleClass: 'victory'});
+										}
 									});
 								} else if (s.player.chp <= 0) {
 									clearInterval(combatInterval);
@@ -328,6 +334,11 @@ Cmd.prototype.achat = function(r, s) {
 		return Character.prompt(s);
 	}
 };
+
+// Viewing the time
+Cmd.prototype.time = function(r, s) {
+
+}
 
 /** Related to Saving and character adjustment/interaction **/
 

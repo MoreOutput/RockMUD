@@ -12,7 +12,7 @@ Skill = function() {
 };
 
 /*
-* Fighter Skills
+* Melee Skills
 */
 Skill.prototype.bash = function(r, s) { 
 	if (s.player.position === 'fighting' && s.player.class = 'fighter') {

@@ -1,11 +1,11 @@
 {
     "name": "Rocky",
     "lastname": "",
-    "title": "",
+    "title": "the programmer.",
     "role": "admin",
     "password": "feeb9072f24a04620f343924890105aae6366ddca2479ba7419eb65fc712d751d0c211dd6fa5b99d017af50c46393b9ec9dd3a1ef47da2a62381a68c30497157",
     "salt": "6f422fc8eceb576f02633ac9bf90b819f8417a0c099909b2b72c6b0b6cad2f22310a8320066d99c46bfdf8e285d4ab7b9dcc4c498ce37403fc3f09be2e421bec4ea8d33aa846c1639370e98e8689deed7a8de2c4b181b351ee0c6eafcea7f78fe0b7011a53df894232f9693c0293b8bd61c00a134ed2eb4c5f03f8ba25fa4171",
-    "race": "",
+    "race": "ogre",
     "sex": "",
     "charClass": "fighter",
     "created": "Wed Dec 11 2013 02:07:13 GMT-0500 (Eastern Standard Time)",
@@ -14,13 +14,13 @@
     "expToLevel": 1000,
     "position": "standing",
     "alignment": 0,
-    "chp": 10660,
+    "chp": 10431,
     "hp": 11000,
     "cmana": 100,
     "mana": 100,
     "cmv": 8,
     "mv": 100,
-    "str": 15,
+    "str": 25,
     "wis": 12,
     "int": 11,
     "dex": 12,
@@ -179,6 +179,6 @@
         "flame"
     ],
     "carry": 150,
-    "sid": "-hzZC-xo89IpcaHmYd7v",
-    "saved": "Thu Dec 12 2013 19:24:44 GMT-0500 (Eastern Standard Time)"
+    "sid": "-vV6O2PW2moSei6A8sUw",
+    "saved": "Sun Jan 05 2014 19:27:56 GMT-0500 (Eastern Standard Time)"
 }

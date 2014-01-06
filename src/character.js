@@ -162,6 +162,8 @@ Character.prototype.addPlayer = function(s, fn) {
 
 //  A New Character is saved
 Character.prototype.create = function(r, s, fn) { 
+	var character = this;
+
 	s.player = {
 		name: s.player.name,
 		lastname: '',
@@ -202,6 +204,7 @@ Character.prototype.create = function(r, s, fn) {
 		recall: 1, // id to recall to
 		description: 'A brand new citizen.',
 		reply: '',
+		following: '',
 		eq: {
 			head: [{
 				name: 'Head',
@@ -295,9 +298,10 @@ Character.prototype.create = function(r, s, fn) {
 		racials: [],
 		skills: [],
 		skillList: [],
-		prevent: ['flame']
-	},
-	character = this;
+		prevent: ['flame'],
+		autoloot: true,
+		autosac: false
+	};
 	
 	character.rollStats(s.player, function(player) {
 		s.player = player;
@@ -399,8 +403,8 @@ Character.prototype.newCharacter = function(r, s, fn) {
 					if (fnd) {
 						i = 0;
 						str = '';
-						s.player.race = r.msg;
-	
+						s.player.race = r.cmd;
+
 						for (i; i < classes.length; i += 1) {
 							str += '<li>' + classes[i].name + '</li>';
 
@@ -561,7 +565,7 @@ Character.prototype.hunger = function(s, fn) {
 						
 			if (s.player.hunger >= 5) {	
 				if (total < 4) {
-					s.player.chp = s.player.chp - 1;
+					s.player.chp = s.player.chp - (s.player.chp / 5 + conMod);
 				}
 			
 				s.emit('msg', {msg: 'You are hungry.', styleClass: 'hunger'});
@@ -584,7 +588,7 @@ Character.prototype.thirst = function(s, fn) {
 	if (s.player.thirst < 10) {
 		Dice.roll(1, 4, function(total) {
 			if (total + dexMod < 5) { 
-				s.player.thirst = s.player.thirst + 1;
+				s.player.chp = s.player.chp - (s.player.chp / 4 + dexMod);
 			}			
 						
 			if (s.player.thirst >= 5) {
@@ -700,29 +704,6 @@ Character.prototype.wear = function(r, s, item, fn) {
 		}
 	}
 } 
-
-Character.prototype.calXP = function(s, monster, fn) {
-	if ((monster.level) >= (s.player.level - 5)) {
-		if (monster.level >= s.player.level) {
-			Dice.roll(1, 4, function(total) {
-				var exp,
-				total = total + 1;
-
-				exp = ((monster.level - s.player.level) * total) + 1 * (total * 45);
-
-				s.player.exp = exp + s.player.exp;
-
-				return fn( exp );
-			});
-		} else {
-			Dice.roll(1, 4, function(total) {
-				return fn(total * 10);
-			});
-		}
-	} else {
-		return fn(0);
-	}
-}
 
 Character.prototype.getLoad = function(s, fn) {
 	var load = Math.round((s.player.str + s.player.con / 4) * 10);

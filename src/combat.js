@@ -69,12 +69,12 @@ Combat.prototype.attackerRound = function(s, monster, fn) {
 		total = total + 1 + s.player.dex/4 - s.player.wait;
 		if (total > monster.ac) {
 			Dice.roll(1, 20, function(total) {
-				total = (total + 1 + s.player.str/1.5) - monster.ac / 2;
+				total = (total + 1 + s.player.str) - (monster.ac / 2) + (s.player.level - monster.level);
 				
 				monster.chp = monster.chp - total;
 
 				s.emit('msg', {
-					msg: 'You hit ' + monster.short.toLowerCase()  + ' hard. (' + total + ') Opponent HP: ' + monster.chp,
+					msg: 'You hit ' + monster.short.toLowerCase()  + ' hard. (' + total + ')',
 					styleClass: 'player-hit'
 				});	
 				
@@ -98,11 +98,11 @@ Combat.prototype.targetRound = function(s, monster, fn) {
 		total = total + 5;
 		if (total > s.player.ac) {			
 			Dice.roll(1, 20, function(total) {
-				total = (total + monster.level + monster.minAtk + 1) - (s.player.ac / 2);
-				s.player.chp = s.player.chp - total ;
+				total = (total + monster.level + monster.minAtk + 1) - (s.player.ac / 2) + (s.monster - s.player.level);
+				s.player.chp = s.player.chp - total;
 
 				s.emit('msg', {
-					msg: monster.short + ' hits you hard! Damage: ' + total + ' Your HP: ' + s.player.chp,
+					msg: monster.short + ' hits you hard! (' + total + ')',
 					styleClass: 'foe-hit'
 				});	
 				
@@ -117,9 +117,27 @@ Combat.prototype.targetRound = function(s, monster, fn) {
 	});
 }
 
-/* End combat and reward XP and any gold on the monster */
-Combat.prototype.end = function(s, monster, fn) {
+Combat.prototype.calXP = function(s, monster, fn) {
+	if ((monster.level) >= (s.player.level - 5)) {
+		if (monster.level >= s.player.level) {
+			Dice.roll(1, 4, function(total) {
+				var exp,
+				total = total + 1;
 
+				exp = ((monster.level - s.player.level) * total) + 1 * (total * 45);
+
+				s.player.exp = exp + s.player.exp;
+
+				return fn( exp );
+			});
+		} else {
+			Dice.roll(1, 4, function(total) {
+				return fn(total * 10);
+			});
+		}
+	} else {
+		return fn(0);
+	}
 }
 
 Combat.prototype.damageMessage = function(attack, fn) {

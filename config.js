@@ -12,7 +12,8 @@ exports.server = {
 		contact: 'moreoutput@gmail.com'		
 	}],
 	races: [{
-		name:'Human', 
+		name:'Human',
+		con: 1, 
 		wis: 1,
 		unarmed: 'punch'
 	}, {
@@ -84,5 +85,25 @@ exports.server = {
 		str: -1,
 		skills: [{ name: 'dart', train: 65, type: 'spell' }],
 		skillList: [{ name: 'Dart', mod: 2, level: 1, maxTrain: 95, wait: 1, type: 'spell' }]
-	}]
+	}],
+	gameTime: {
+		dayHours: 24,
+		months: [
+			{
+				name: 'January',
+				days: '31',
+				lightHours: 12
+			},
+			{
+				name: 'February',
+				days: '28',
+				lightHours: 10
+			},
+			{
+				name: 'March',
+				days: '31',
+				lightHours: 12
+			}
+		]
+	}
 };

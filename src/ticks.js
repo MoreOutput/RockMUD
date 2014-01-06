@@ -11,7 +11,9 @@ Character = require('./character').character,
 Room = require('./rooms').room,
 io = require('../server').io,
 players = require('../server').players,
-areas = require('../server').areas;
+areas = require('../server').areas,
+time = require('../server').time,
+timeConfig = require('../config').server.gameTime;
 
 (function() {
 	// Regen, Hunger and Thirst Tick 
@@ -65,7 +67,7 @@ areas = require('../server').areas;
 				arr[j] = temp;
 				
 				j = Math.floor (Math.random() * i);
-			}
+			} 
 			
 			return arr;
 		};
@@ -87,4 +89,9 @@ areas = require('../server').areas;
 			});	
 		}	
 	}, 60000 * 5);
+
+
+	// Time -- Increase minute, hours, days and years.
+	// time data is saved to data/time.json every 24 hours
+
 }());

@@ -296,6 +296,23 @@ Room.prototype.checkItem = function(r, s, fn) {
 	});		
 };
 
+Room.prototype.addCorpse = function(monster, fn) {
+	roomObj.items.push({
+		name: monster.name + ' corpse',
+		short: 'Corpse of a ' + monster.name,
+		area: monster.area,
+		id: monster.id + '-corpse',
+		level: 1,
+		itemType: 'corpse',
+		weight: monster.weight - 10,
+		flags: [
+			{decay: 5}
+		]
+	});	
+	
+	return fn();
+}
+
 Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.items = roomObj.items.filter(function(item, i) {
