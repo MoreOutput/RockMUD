@@ -1,0 +1,9 @@
+{
+	"name" : "Newbie",
+	"related" : ["Channels", "Movement"],
+	"type" : "Help",
+	"levels" : "All",
+	"restrict": 0,
+	"description" : "Send a message to everyone on the mud. See HELP CHANNELS for a comprehensive overview of communication commands.",
+	"Alias" : "ooc"
+}

@@ -1,0 +1,9 @@
+{
+	"name" : "Channels",
+	"related" : ["Chat", "Say", "Yell", "Flame", "Tell"],
+	"type" : "Help",
+	"levels" : "All",
+	"restrict": 0,
+	"description" : "Channels refer to the different ways you can communicate with the world and other players.",
+	"Alias" : ""
+}

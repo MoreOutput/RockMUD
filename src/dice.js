@@ -7,6 +7,7 @@ var Roller = function() {
 
 }
 
+// General dice rolling
 Roller.prototype.roll = function(dNum, dSides, fn) {
 	var total = 0,	
 	i = 0;

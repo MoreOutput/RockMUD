@@ -13,29 +13,34 @@ Your Short Sword (proper noun) slices (verb attached to item) a Red Dragon (prop
 You swing and miss a Red Dragon with barbaric intensity (14)
 */
 Combat.prototype.begin = function(s, monster, fn) {
-	var i = 0;
+	var combat = this;
 
 	s.player.position = 'fighting';
-	monster.position = 'fighting';
+	monster.position = 'fighting'; 
 	
 	Dice.roll(1, 20, function(total) { // Roll against AC
+		var i = 0;
 		total = total + 1 + s.player.dex/4;
-		
-		if (total > monster.ac) {
-			total = total + 1 + s.player.str/3;
-			
-			Dice.roll(1, 20, function(total) {
-				monster.chp = monster.chp - total;
-				
-				s.emit('msg', {
-					msg: 'You hit ' + monster.short + ' (' + total + ')', 
-					styleClass: 'player-hit'
-				});
 
-				return fn(true, monster);
-			});					
+		if (total > monster.ac) {
+			if (s.player.eq.hands.length !== 0) {
+				for (i; i < s.player.eq.hands.length; i += 1) {
+					if (s.player.eq.hands[i].item !== null && s.player.eq.hands[i].item.itemType === 'weapon') {
+						combat.meleeDamage(s, monster, s.player.eq.hands[i].item, function(total, weapon) {
+							s.emit('msg', {
+								msg: 'You ' + weapon.attackType + ' ' + monster.short + ' with your ' + weapon.name + ' (' + total + ')', 
+								styleClass: 'player-hit'
+							});
+						});
+					}
+				}
+
+				return fn(true, monster);	
+			} else {
+				// Unarmed
+			}		
 		} else {
-			return s.emit('msg', {msg: 'You swing and miss.', styleClass: 'player-miss'});
+			return s.emit('msg', {msg: 'You swing and miss ' +  monster.short, styleClass: 'player-miss'});
 		}
 	});
 }
@@ -140,8 +145,23 @@ Combat.prototype.calXP = function(s, monster, fn) {
 	}
 }
 
-Combat.prototype.damageMessage = function(attack, fn) {
+// Calculate the total damage done with a melee hit
+Combat.prototype.meleeDamage = function(s, monster, weapon, fn) {
+	Dice.roll(1, 20, function(total) {
+		total = (total + 1 + s.player.str/2);
 
+		total = total - (monster.ac/3);
+
+		if (typeof weapon !== 'function') {
+			total += Dice.roll(weapon.diceNum, weapon.diceSides);
+
+			return fn(Math.round(total), weapon);
+		} else {
+			return fn(Math.round(total), weapon);
+		}
+
+	
+	});
 }
 
 module.exports.combat = new Combat();

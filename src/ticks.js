@@ -90,8 +90,7 @@ timeConfig = require('../config').server.gameTime;
 		}	
 	}, 60000 * 5);
 
-
 	// Time -- Increase minute, hours, days and years.
-	// time data is saved to data/time.json every 24 hours
+	// time data is saved to data/time.json every 12 hours
 
 }());

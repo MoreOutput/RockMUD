@@ -30,7 +30,7 @@
 					"name": "Boar",
 					"area": "Midgaard",
 					"level": 1,
-					"short": "A large boar",
+					"short": "a large boar",
 					"long": "",
 					"id": 6,
 					"type": "monster",
@@ -47,7 +47,7 @@
 					"name": "Boar",
 					"area": "Midgaard",
 					"level": 1,
-					"short": "A large boar",
+					"short": "a large boar",
 					"long": "",
 					"id": 6,
 					"type": "monster",
@@ -64,7 +64,7 @@
 			],
 			"items" : [{
 				"name": "bread",
-				"short": "A loaf of bread",
+				"short": "a loaf of bread",
 				"long": "A rather stale looking loaf of bread." ,
 				"area": "Midgaard",
 				"id": 5,
@@ -76,7 +76,7 @@
 				]
 			}, {
 				"name": "Short Sword", 
-				"short": "A Short Sword",
+				"short": "a Short Sword",
 				"long": "A sharp looking short sword with a hilt wrapped in leather." ,
 				"area": "Midgaard",
 				"id": 1, 
@@ -106,7 +106,7 @@
 			"monsters" : [],
 			"items" : [{
 				"name": "Tattered Buckler", 
-				"short": "A Tattered Buckler",
+				"short": "a Tattered Buckler",
 				"long": "A round buckler that looks like its seen heavy use." ,
 				"area": "Midgaard",
 				"id": 2, 
@@ -159,7 +159,20 @@
                 }
 			], 
 			"monsters" : [],
-			"items" : [],
+			"items" : [{
+				"name": "Leather Helmet", 
+				"short": "a Leather Helmet",
+				"long": "" ,
+				"area": "Midgaard",
+				"id": 3, 
+				"level": 1,
+				"itemType": "helmet",
+				"material": "wood", 
+				"ac": 1, 
+				"weight": 1,
+				"slot": "head",
+				"flags": []
+			}],
 			"flags" : []
 		}
 	]

@@ -14,11 +14,11 @@
     "expToLevel": 1000,
     "position": "standing",
     "alignment": 0,
-    "chp": 10431,
+    "chp": 7906,
     "hp": 11000,
     "cmana": 100,
     "mana": 100,
-    "cmv": 8,
+    "cmv": -28,
     "mv": 100,
     "str": 25,
     "wis": 12,
@@ -78,7 +78,23 @@
         "hands": [
             {
                 "name": "Right Hand",
-                "item": null,
+                "item": {
+                    "name": "Short Sword",
+                    "short": "A Short Sword",
+                    "long": "A sharp looking short sword with a hilt wrapped in leather.",
+                    "area": "Midgaard",
+                    "id": 1,
+                    "level": 1,
+                    "itemType": "weapon",
+                    "material": "iron",
+                    "diceNum": 2,
+                    "diceSides": 4,
+                    "attackType": "slice",
+                    "attackElement": "",
+                    "weight": 4,
+                    "slot": "hands",
+                    "flags": []
+                },
                 "dual": false
             },
             {
@@ -138,18 +154,6 @@
                     "carry": 1
                 }
             ]
-        },
-        {
-            "name": "Burlap Sack",
-            "short": "A Burlap Sack",
-            "long": "An over-used burlap sack with many tears",
-            "id": 5,
-            "area": "all",
-            "level": 1,
-            "itemType": "container",
-            "weight": 1,
-            "maxWeight": 40,
-            "contains": []
         }
     ],
     "affects": [],
@@ -179,6 +183,6 @@
         "flame"
     ],
     "carry": 150,
-    "sid": "-vV6O2PW2moSei6A8sUw",
-    "saved": "Sun Jan 05 2014 19:27:56 GMT-0500 (Eastern Standard Time)"
+    "sid": "UOWR98HXSSeal8o80UeC",
+    "saved": "Sun Feb 16 2014 23:56:49 GMT-0500 (Eastern Standard Time)"
 }
