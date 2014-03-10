@@ -26,9 +26,9 @@ Combat.prototype.begin = function(s, monster, fn) {
 			if (s.player.eq.hands.length !== 0) {
 				for (i; i < s.player.eq.hands.length; i += 1) {
 					if (s.player.eq.hands[i].item !== null && s.player.eq.hands[i].item.itemType === 'weapon') {
-						combat.meleeDamage(s, monster, s.player.eq.hands[i].item, function(total, weapon) {
+						combat.meleeDamage(s.player, monster, s.player.eq.hands[i].item, function(total, weapon) {
 							s.emit('msg', {
-								msg: 'You ' + weapon.attackType + ' ' + monster.short + ' with your ' + weapon.name + ' (' + total + ')', 
+								msg: 'You ' + weapon.attackType + ' ' + monster.short + '(' + total + ')', 
 								styleClass: 'player-hit'
 							});
 						});
@@ -70,26 +70,33 @@ Combat.prototype.round = function(s, monster, fn) {
 * Attacker is always at the top of the round
 */
 Combat.prototype.attackerRound = function(s, monster, fn) {
-	Dice.roll(1, 10, function(total) { // Roll against AC
-		total = total + 1 + s.player.dex/4 - s.player.wait;
-		if (total > monster.ac) {
-			Dice.roll(1, 20, function(total) {
-				total = (total + 1 + s.player.str) - (monster.ac / 2) + (s.player.level - monster.level);
-				
-				monster.chp = monster.chp - total;
+	var combat = this;
+	Dice.roll(1, 20, function(total) { // Roll against AC
+		var i = 0;
+		total = total + 1 + s.player.dex/4;
 
-				s.emit('msg', {
-					msg: 'You hit ' + monster.short.toLowerCase()  + ' hard. (' + total + ')',
-					styleClass: 'player-hit'
-				});	
-				
-				return fn(s, monster);
-			});					
+		if (total > monster.ac) {
+			if (s.player.eq.hands.length !== 0) {
+				for (i; i < s.player.eq.hands.length; i += 1) {
+					if (s.player.eq.hands[i].item !== null && s.player.eq.hands[i].item.itemType === 'weapon') {
+						combat.meleeDamage(s.player, monster, s.player.eq.hands[i].item, function(total, weapon) {
+							monster.chp = (monster.chp - total);
+							s.emit('msg', {
+								msg: 'You ' + weapon.attackType + ' ' + monster.short + '(' + total + ')', 
+								styleClass: 'player-hit'
+							});
+						});
+					}
+				}
+
+				return fn(s, monster);	
+			} else {
+				// Unarmed
+			}		
 		} else {
-			s.emit('msg', {
-				msg: 'You miss a ' + monster.short.toLowerCase()  + '.',
-				styleClass: 'player-hit'
-			});
+			s.emit('msg', {msg: 'You swing and miss ' +  monster.short, styleClass: 'player-miss'});
+
+			return fn(s, monster);	
 		}
 	});
 }
@@ -99,20 +106,32 @@ Combat.prototype.attackerRound = function(s, monster, fn) {
 * Target is always at the bottom of the round
 */
 Combat.prototype.targetRound = function(s, monster, fn) {
+	var combat = this;
 	Dice.roll(1, 20, function(total) { // Roll against AC
 		total = total + 5;
-		if (total > s.player.ac) {			
-			Dice.roll(1, 20, function(total) {
-				total = (total + monster.level + monster.minAtk + 1) - (s.player.ac / 2) + (s.monster - s.player.level);
-				s.player.chp = s.player.chp - total;
-
+		if (total > s.player.ac) {		
+			combat.meleeDamage(monster, s.player, {diceNum: monster.diceNum, diceSides: monster.diceSides}, function(total, weapon) {
+				s.player.chp = (s.player.chp - total);
 				s.emit('msg', {
-					msg: monster.short + ' hits you hard! (' + total + ')',
+					msg: monster.short + ' ' + monster.attackType + 's you hard! (' + total + ')',
 					styleClass: 'foe-hit'
 				});	
 				
 				return fn(s, monster);
-			});					
+			});
+			/*	
+			Dice.roll(1, 20, function(total) {
+				total = (total + monster.level + Dice.roll(monster.diceNum, monster.diceSides)) - (s.player.ac / 2) + (s.monster - s.player.level);
+				s.player.chp = s.player.chp - total;
+ 
+				s.emit('msg', {
+					msg: monster.short + ' ' + monster.attackType + ' you hard! (' + total + ')',
+					styleClass: 'foe-hit'
+				});	
+				
+				return fn(s, monster);
+			});		
+			*/			
 		} else {
 			s.emit('msg', {
 				msg: monster.short + ' misses '+ ' you!',
@@ -146,11 +165,10 @@ Combat.prototype.calXP = function(s, monster, fn) {
 }
 
 // Calculate the total damage done with a melee hit
-Combat.prototype.meleeDamage = function(s, monster, weapon, fn) {
+Combat.prototype.meleeDamage = function(attacker, opponent, weapon, fn) {
 	Dice.roll(1, 20, function(total) {
-		total = (total + 1 + s.player.str/2);
-
-		total = total - (monster.ac/3);
+		total = (total + 1 + attacker.str/2);
+		total = total - (opponent.ac/3);
 
 		if (typeof weapon !== 'function') {
 			total += Dice.roll(weapon.diceNum, weapon.diceSides);
@@ -158,9 +176,7 @@ Combat.prototype.meleeDamage = function(s, monster, weapon, fn) {
 			return fn(Math.round(total), weapon);
 		} else {
 			return fn(Math.round(total), weapon);
-		}
-
-	
+		}	
 	});
 }
 

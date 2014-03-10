@@ -263,7 +263,7 @@ Room.prototype.checkMonster = function(r, s, fn) {
 
 
 // Remove a monster from a room
-Room.prototype.removeMonster = function(roomQuery, fn) {
+Room.prototype.removeMonster = function(roomQuery, monster, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.monsters = roomObj.monsters.filter(function(item, i) {
 			if (item.id !== monster.id) {
@@ -296,19 +296,21 @@ Room.prototype.checkItem = function(r, s, fn) {
 	});		
 };
 
-Room.prototype.addCorpse = function(monster, fn) {
-	roomObj.items.push({
-		name: monster.name + ' corpse',
-		short: 'Corpse of a ' + monster.name,
-		area: monster.area,
-		id: monster.id + '-corpse',
-		level: 1,
-		itemType: 'corpse',
-		weight: monster.weight - 10,
-		flags: [
-			{decay: 5}
-		]
-	});	
+Room.prototype.addCorpse = function(s, monster, fn) {
+	this.getRoomObject({
+		area: s.player.area,
+		id: s.player.roomid
+	}, function(roomObj) {
+		monster.short = 'rotting corpse of a ' + monster.name;
+		monster.flags.push({decay: 5});
+		monster.itemType = 'corpse';
+		monster.id = monster.id + '-corpse';
+		monster.weight = monster.weight - 2;
+		monster.chp = 0;
+		monster.hp = 0;
+
+		roomObj.items.push(monster);
+	});
 	
 	return fn();
 }

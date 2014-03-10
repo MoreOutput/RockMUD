@@ -198,7 +198,7 @@ Character.prototype.create = function(r, s, fn) {
 		thirst: 0,
 		load: 3,
 		visible: true,
-		unarmed: 'punch',
+		attackType: 'punch',
 		area: 'midgaard', // must match an area file
 		roomid: 1, // current room
 		recall: 1, // id to recall to

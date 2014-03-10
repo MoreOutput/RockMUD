@@ -11,8 +11,11 @@ RockMUD was spawned out of my love of MUDs and too many late night coffees.
 
 Goals:
 * A Diku-like MUD experience from within the browser using HTML5 and NodeJS.
-* Typography is a feature.
+* Leverage HTML for MUD text.
 * Everything is JavaScript / JSON.
+* Fast Development
+* Easy client GUI creation.
+* Real-time browser OLC and world management. 
 
 Notes on dependencies: 
 * Not using a Node MVC framework.

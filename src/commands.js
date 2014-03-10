@@ -18,7 +18,7 @@ var Cmd = function () {
 };
 
 Cmd.prototype.move = function(r, s) {
-	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping') {
+	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping' && s.player.cmv > 5) {
 		r.cmd = r.msg;
 
 		Room.checkExit(r, s, function(fnd, roomid) {
@@ -59,9 +59,10 @@ Cmd.prototype.move = function(r, s) {
 		}); 
 	} else {
 		s.emit('msg', {
-			msg: 'You are in no position to move right now!', 
+			msg: 'You cant move right now!', 
 			styleClass: 'error'
 		});
+
 		return Character.prompt(s);
 	}
 }
@@ -109,6 +110,7 @@ Cmd.prototype.get = function(r, s, fn) {
 				Character.addToInventory(s, item, function(added) {
 					if (added) {
 						Room.removeItemFromRoom({area: s.player.area, id: s.player.roomid, item: item}, function() {
+							console.log(item);
 							s.emit('msg', {
 								msg: 'You picked up ' + item.short,
 								styleClass: 'get'
@@ -180,16 +182,26 @@ Cmd.prototype.kill = function(r, s) {
 									monster.position = 'dead';
 
 									clearInterval(combatInterval);
+								
+									Room.removeMonster({
+										area: s.player.area,
+										id: s.player.roomid
+									}, monster, function(removed) {
+										if (removed) {
+											Room.addCorpse(s, monster, function(corpse) {
+												Combat.calXP(s, monster, function(earnedXP) {
+													s.player.position = 'standing';
 
-									Combat.calXP(s, monster, function(earnedXP) {
-										s.player.position = 'standing';
-
-										if (earnedXP > 0) {
-											s.emit('msg', {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
-										} else {
-											s.emit('msg', {msg: 'You won, but learned nothing.', styleClass: 'victory'});
+													if (earnedXP > 0) {
+														s.emit('msg', {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
+													} else {
+														s.emit('msg', {msg: 'You won, but learned nothing.', styleClass: 'victory'});
+													}
+												});
+											});
 										}
 									});
+
 								} else if (s.player.chp <= 0) {
 									clearInterval(combatInterval);
 									s.emit('msg', {msg: 'You died!', styleClass: 'combat-death'});
@@ -357,11 +369,9 @@ Cmd.prototype.title = function(r, s) {
 			s.player.title = 'a level ' + s.player.level + ' ' + s.player.race + ' ' + s.player.charClass;
 		}
 
-		Character.save(s, function() {
-			Character.updatePlayer(s, function(updated) {
-				s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
-				return Character.prompt(s);
-			});
+		Character.updatePlayer(s, function(updated) {
+			s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
+			return Character.prompt(s);
 		});
 	} else {
 		s.emit('msg', {msg: 'Not a valid title.', styleClass: 'save'});
@@ -438,6 +448,27 @@ Cmd.prototype.wear = function(r, s) {
 		return Character.prompt(s);
 	}
 }
+
+/*
+Cmd.prototype.remove = function(r, s) {
+	if (r.msg !== '') {
+		Character.checkInventory(r, s, function(fnd, item) {
+			if (fnd) {
+				Character.remove(r, s, item, function(removeSuccess, msg) {
+					s.emit('msg', {msg: msg, styleClass: 'cmd-wear'});
+					return Character.prompt(s);
+				});
+			} else {
+				s.emit('msg', {msg: 'You are not wearing that.', styleClass: 'error'});
+				return Character.prompt(s);
+			}
+		});
+	} else {
+		s.emit('msg', {msg: 'Remove what?', styleClass: 'error'});
+		return Character.prompt(s);
+	}
+}
+*/
 
 Cmd.prototype.inventory = function(r, s) {
 	var iStr = '',

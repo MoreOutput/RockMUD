@@ -15,25 +15,25 @@ exports.server = {
 		name:'Human',
 		con: 1, 
 		wis: 1,
-		unarmed: 'punch'
+		attackType: 'punch'
 	}, {
 		name:'Elf',
 		int: 2,
 		con: -1,
-		unarmed: 'punch'
+		attackType: 'punch'
 	}, {
 		name:'Dwarf',
 		con: 2,
 		int: -1,
 		hp: 5,
-		unarmed: 'punch'
+		attackType: 'punch'
 	}, {
 		name:'Ogre',
 		str: 3,
 		int: -2,
 		dex: -1,
 		hp: 10,
-		unarmed: 'smash'
+		attackType: 'smash'
 	}],
 	classes: [{
 		name:'Thief',
