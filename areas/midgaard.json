@@ -115,6 +115,7 @@
 				"attackElement": "",
 				"weight": 4,
 				"slot": "hands",
+				"equipped": false,
 				"flags": []
 			}],
 			"flags" : [],
@@ -143,6 +144,7 @@
 				"ac": 2, 
 				"weight": 6,
 				"slot": "hands",
+				"equipped": false,
 				"flags": []
 			}],
 			"flags" : []
@@ -198,6 +200,7 @@
 				"ac": 1, 
 				"weight": 1,
 				"slot": "head",
+				"equipped": false,
 				"flags": []
 			}],
 			"flags" : []

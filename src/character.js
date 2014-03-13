@@ -659,49 +659,51 @@ Character.prototype.removeFromInventory = function(s, itemObj, fn) {
 }
 
 Character.prototype.wear = function(r, s, item, fn) {
-	var i = 0;	
+	var i = 0,
+	replacedItem;	
 
 	for (i; i < s.player.eq.length; i += 1) {	
-		if (item.slot === s.player.eq[i].slot) {
+		if (item.slot === s.player.eq[i].slot && item.equipped === false) {
 			if (item.itemType === 'weapon') {
+				 item.equipped = true;
+				 
 				// Wielding weapons
 				if (item.weight < (20 + s.player.str)) { // Dual check
 
 				}
 
 				if (s.player.eq[i].dual === false && s.player.eq[i].item === null) {
-					this.removeFromInventory(s, item);
-					//var place = j;
 					s.player.eq[i].item = item;
-					//j = s.player.eq[bodyAreas[i]].length + 1;
 
-					return fn(true, 'You wield a ' + item.short + ' in your ' + s.player.eq[i].name);
+					fn(true, 'You wield a ' + item.short + ' in your ' + s.player.eq[i].name);
+					break;
 				}
 			} else {
 				// Wearing Armor
 				if (s.player.eq[i].item === null) {
-					this.removeFromInventory(s, item);
+					item.equipped = true;
 					s.player.eq[i].item = item;
 
 					s.player.ac = s.player.ac + item.ac;
 					
 					return fn(true, 'You wear a ' + item.short + ' on your ' + s.player.eq[i].name);
 				} else {
-					this.removeFromInventory(s, item);
-					this.addToInventory(s, s.player.eq[i].item);
+					item.equipped = true;
+					s.player.eq[i].item.equipped = false;
 
-					s.player.ac = s.player.ac - s.player.eq[i].item.ac;
-
+					replacedItem = s.player.eq[i].item;
 					s.player.eq[i].item = item;
 
-					s.player.ac = s.player.ac + s.player.eq[i].item.ac
+					s.player.ac = s.player.ac - replacedItem.ac;
 
-					return fn(true, 'You wear ' + s.player.eq[i].item.short + ' on your ' + 
+					s.player.ac = s.player.ac + item.ac
+
+					return fn(true, 'You wear ' + item.short + ' on your ' + 
 						s.player.eq[i].name + ' and remove ' + 
-						s.player.eq[i].item.short);
+						replacedItem.short);
 				}
 			}
-		}
+		} 
 	}
 } 
 

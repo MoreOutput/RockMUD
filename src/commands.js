@@ -426,7 +426,7 @@ Cmd.prototype.wear = function(r, s) {
 	if (r.msg !== '') {
 		Character.checkInventory(r, s, function(fnd, item) {
 			if (fnd) {
-				Character.wear(r, s, item, function(wearSuccess, msg) {
+				 Character.wear(r, s, item, function(wearSuccess, msg) {
 					s.emit('msg', {msg: msg, styleClass: 'cmd-wear'});
 					return Character.prompt(s);
 				});
@@ -467,8 +467,13 @@ Cmd.prototype.inventory = function(r, s) {
 	i = 0;
 	
 	if (s.player.items.length > 0) {
-		for (i; i < s.player.items.length; i += 1) {			
-			iStr += '<li>' + s.player.items[i].short + '</li>';
+		for (i; i < s.player.items.length; i += 1) {
+			if (!s.player.items[i].equipped) {
+				iStr += '<li>' + s.player.items[i].short + '</li>';
+			} else {
+				iStr += '<li>' + s.player.items[i].short + ' (Equipped) </li>';
+			}		
+			
 		}
 		
 		s.emit('msg', {msg: '<ul>' + iStr + '</ul>', styleClass: 'inventory' });
