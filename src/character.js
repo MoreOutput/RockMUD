@@ -205,67 +205,73 @@ Character.prototype.create = function(r, s, fn) {
 		description: 'A brand new citizen.',
 		reply: '',
 		following: '',
-		eq: {
-			head: [{
-				name: 'Head',
-				item: null
-			}, {
-				name: 'Necklace 1',
-				item: null
-			}, {
-				name: 'Necklace 2',
-				item: null
-			}],
-			body: [{
-				name: 'Body',
-				item: null
-			}, {
-				name: 'Chest',
-				item: null
-			}, {
-				name: 'About Body',
-				item: null
-			}],
-			arms: [{
-				name: 'Right Arm',
-				item: null
-			}, {
-				name: 'Left Arm',
-				item: null
-			}],
-			hands: [{
-				name: 'Right Hand',
-				item: null,
-				dual: false
-			}, {
-				name: 'Left Hand',
-				item: null,
-				dual: false
-			}, {
-				name: 'Ring 1',
-				item: null
-			}, {
-				name: 'Ring 2',
-				item: null
-			}],
-			legs: [{
-				name: 'Right Leg',
-				item: null
-			}, {
-				name: 'Left Leg',
-				item: null
-			}, {
-				name: 'Left Foot',
-				item: null
-			}, {
-				name: 'Right Foot',
-				item: null
-			}],
-			misc: [{
-				name: 'Floating',
-				item: null
-			}]
-		},
+		eq: [{
+			name: 'Head',
+			item: null,
+			slot: 'head'
+		}, {
+			name: 'Necklace 1',
+			item: null,
+			slot: 'head'
+		}, {
+			name: 'Necklace 2',
+			item: null,
+			slot: 'head'
+		}, {
+			name: 'Body',
+			item: null,
+			slot: 'body'
+		}, {
+			name: 'Chest',
+			item: null,
+			slot: 'body'
+		}, {
+			name: 'About Body',
+			item: null,
+			slot: 'body'
+		}, {
+			name: 'Right Arm',
+			item: null,
+			slot: 'arms'
+		}, {
+			name: 'Left Arm',
+			item: null,
+			slot: 'arms'
+		}, {
+			name: 'Right Hand',
+			item: null,
+			dual: false,
+			slot: 'hands'
+		}, {
+			name: 'Left Hand',
+			item: null,
+			dual: false,
+			slot: 'hands'
+		}, {
+			name: 'Ring 1',
+			item: null,
+			slot: 'fingers'
+		}, {
+			name: 'Ring 2',
+			item: null,
+			slot: 'fingers'
+		}, {
+			name: 'Right Leg',
+			item: null,
+			slot: 'legs'
+		}, {
+			name: 'Left Leg',
+			item: null,
+			slot: 'legs'
+		}, {
+			name: 'Feet',
+			item: null,
+			slot: 'feet'
+		}, {
+			name: 'Floating',
+			item: null,
+			slot: 'floating'
+		}],
 		items: [
 			{
 				"name": "Pot Pie", 
@@ -653,52 +659,46 @@ Character.prototype.removeFromInventory = function(s, itemObj, fn) {
 }
 
 Character.prototype.wear = function(r, s, item, fn) {
-	var bodyAreas = Object.keys(s.player.eq),
-	i = 0,
-	j = 0;	
-	
-	for (i; i < bodyAreas.length; i += 1) {	
-		j = 0;
-		
-		for (j; j < s.player.eq[bodyAreas[i]].length; j += 1) {
-			if (item.slot === bodyAreas[i]) {
-				if (item.itemType === 'weapon') {
-					// Wielding weapons
-					if (item.weight < (20 + s.player.str)) { // Dual check
+	var i = 0;	
 
-					}
+	for (i; i < s.player.eq.length; i += 1) {	
+		if (item.slot === s.player.eq[i].slot) {
+			if (item.itemType === 'weapon') {
+				// Wielding weapons
+				if (item.weight < (20 + s.player.str)) { // Dual check
 
-					if (s.player.eq[bodyAreas[i]][j].dual === false && s.player.eq[bodyAreas[i]][j].item === null) {
-						this.removeFromInventory(s, item);
-						//var place = j;
-						s.player.eq[bodyAreas[i]][j].item = item;
-						//j = s.player.eq[bodyAreas[i]].length + 1;
+				}
 
-						return fn(true, 'You wield a ' + item.short + ' in your ' + s.player.eq[bodyAreas[i]][j].name);
-					}
+				if (s.player.eq[i].dual === false && s.player.eq[i].item === null) {
+					this.removeFromInventory(s, item);
+					//var place = j;
+					s.player.eq[i].item = item;
+					//j = s.player.eq[bodyAreas[i]].length + 1;
+
+					return fn(true, 'You wield a ' + item.short + ' in your ' + s.player.eq[i].name);
+				}
+			} else {
+				// Wearing Armor
+				if (s.player.eq[i].item === null) {
+					this.removeFromInventory(s, item);
+					s.player.eq[i].item = item;
+
+					s.player.ac = s.player.ac + item.ac;
+					
+					return fn(true, 'You wear a ' + item.short + ' on your ' + s.player.eq[i].name);
 				} else {
-					// Wearing Armor
-					if (s.player.eq[bodyAreas[i]][j].item === null) {
-						this.removeFromInventory(s, item);
-						s.player.eq[bodyAreas[i]][j].item = item;
+					this.removeFromInventory(s, item);
+					this.addToInventory(s, s.player.eq[i].item);
 
-						s.player.ac = s.player.ac + item.ac;
-						
-						return fn(true, 'You wear a ' + item.short + ' on your ' + s.player.eq[bodyAreas[i]][j].name);
-					} else {
-						this.removeFromInventory(s, item);
-						this.addToInventory(s, s.player.eq[bodyAreas[i]][j].item);
+					s.player.ac = s.player.ac - s.player.eq[i].item.ac;
 
-						s.player.ac = s.player.ac - s.player.eq[bodyAreas[i]][j].item.ac;
+					s.player.eq[i].item = item;
 
-						s.player.eq[bodyAreas[i]][j].item = item;
+					s.player.ac = s.player.ac + s.player.eq[i].item.ac
 
-						s.player.ac = s.player.ac + s.player.eq[bodyAreas[i]][j].item.ac
-
-						return fn(true, 'You wear ' + s.player.eq[bodyAreas[i]][j].item.short + ' on your ' + 
-							s.player.eq[bodyAreas[i]][j].name + ' and remove ' + 
-							s.player.eq[bodyAreas[i]][j].item.short);
-					}
+					return fn(true, 'You wear ' + s.player.eq[i].item.short + ' on your ' + 
+						s.player.eq[i].name + ' and remove ' + 
+						s.player.eq[i].item.short);
 				}
 			}
 		}

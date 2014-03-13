@@ -1,9 +1,9 @@
 /*
  Client Side JS for RockMUD
- Rocky Bevins, moreoutput@gmail.com 2013
+ Rocky Bevins, moreoutput@gmail.com 2014
 */
- require(['dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'dojo/_base/event', 'dojo/window', 'dojo/ready', 'dojo/NodeList-dom'], 
-	function (dom, string, query, domAttr, on, event, win, ready) {
+ require(['../socket.io/socket.io.js', 'dojo/dom', 'dojo/string', 'dojo/query', 'dojo/dom-attr', 'dojo/on', 'dojo/_base/event', 'dojo/window', 'dojo/ready', 'dojo/NodeList-dom'], 
+	function (io, dom, string, query, domAttr, on, event, win, ready) {
 		ready(function () {
 			'use strict';
 			var ws = io.connect(''),
@@ -17,6 +17,7 @@
 				u: 'up',
 				d: 'down',
 				l: 'look',
+				ls: 'look',
 				i: 'inventory',
 				sc: 'score',
 				eq: 'equipment',

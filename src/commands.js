@@ -110,7 +110,6 @@ Cmd.prototype.get = function(r, s, fn) {
 				Character.addToInventory(s, item, function(added) {
 					if (added) {
 						Room.removeItemFromRoom({area: s.player.area, id: s.player.roomid, item: item}, function() {
-							console.log(item);
 							s.emit('msg', {
 								msg: 'You picked up ' + item.short,
 								styleClass: 'get'
@@ -381,24 +380,17 @@ Cmd.prototype.title = function(r, s) {
 
 // View equipment
 Cmd.prototype.equipment = function(r, s) {
-	var bodyAreas = Object.keys(s.player.eq),
-	eqStr = '',
-	i = 0,
-	j = 0;	
+	var eqStr = '',
+	i = 0;	
 	
-	for (i; i < bodyAreas.length; i += 1) {	
-		j = 0;
+	for (i; i < s.player.eq.length; i += 1) {	
+		eqStr += '<li class="slot-' + s.player.eq[i].slot.replace(/ /g, '') + 
+			'">' + s.player.eq[i].name + ': ';
 		
-		for (j; j < s.player.eq[bodyAreas[i]].length; j += 1) {
-			eqStr += '<li class="' + bodyAreas[i] + 
-				' slot-' + s.player.eq[bodyAreas[i]][j].name.replace(/ /g, '') + 
-				'">' + s.player.eq[bodyAreas[i]][j].name + ': ';
-			
-			if (s.player.eq[bodyAreas[i]][j].item === null || s.player.eq[bodyAreas[i]][j].item === '') {
-				eqStr += ' Nothing</li>';
-			} else {
-				eqStr += '<strong>'  + s.player.eq[bodyAreas[i]][j].item.short + '</strong></li>';
-			}
+		if (s.player.eq[i].item === null || s.player.eq[i].item === '') {
+			eqStr += ' Nothing</li>';
+		} else {
+			eqStr += '<strong>'  + s.player.eq[i].item.short + '</strong></li>';
 		}
 	}
 	

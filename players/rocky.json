@@ -1,142 +1,144 @@
 {
-    "name": "Rocky",
+    "name": "Ronn",
     "lastname": "",
-    "title": "the programmer.",
+    "title": "",
     "role": "admin",
-    "password": "feeb9072f24a04620f343924890105aae6366ddca2479ba7419eb65fc712d751d0c211dd6fa5b99d017af50c46393b9ec9dd3a1ef47da2a62381a68c30497157",
-    "salt": "6f422fc8eceb576f02633ac9bf90b819f8417a0c099909b2b72c6b0b6cad2f22310a8320066d99c46bfdf8e285d4ab7b9dcc4c498ce37403fc3f09be2e421bec4ea8d33aa846c1639370e98e8689deed7a8de2c4b181b351ee0c6eafcea7f78fe0b7011a53df894232f9693c0293b8bd61c00a134ed2eb4c5f03f8ba25fa4171",
-    "race": "ogre",
+    "password": "9e1775bcbfb095f0eb2b799a4fc638f78bc30e60557e12839c4ba444839d47465e36789bdd36d12bb0704b06e8de93c7df62b77d839bfd084d3e7e1b894ecb75",
+    "salt": "4b85acc233e30e07fb1c3393617a8247fe7afaae30d8c97d513a00e438afc3a5a85fab7842de4021220bc955983514fe4bef519dfcc64273918614674ebf28077c130a07d645ec17a38279ebfa53bac3cb803838351d360f955f3913c17d7c7d8bce24765ad882576ed89b61721ecfe92ce1f89cb89e2ab78c401e7e31a8244b",
+    "race": "human",
     "sex": "",
-    "charClass": "fighter",
-    "created": "Wed Dec 11 2013 02:07:13 GMT-0500 (Eastern Standard Time)",
+    "charClass": "thief",
+    "created": "Thu Mar 13 2014 02:04:27 GMT-0400 (Eastern Daylight Time)",
     "level": 100,
     "exp": 1,
     "expToLevel": 1000,
     "position": "standing",
     "alignment": 0,
-    "chp": 7676,
-    "hp": 11000,
+    "chp": 100,
+    "hp": 100,
     "cmana": 100,
     "mana": 100,
-    "cmv": 928,
-    "mv": 1000,
-    "str": 25,
-    "wis": 12,
-    "int": 11,
-    "dex": 12,
-    "con": 14,
+    "cmv": 80,
+    "mv": 110,
+    "str": 13,
+    "wis": 13,
+    "int": 12,
+    "dex": 14,
+    "con": 13,
     "wait": 0,
     "ac": 10,
-    "gold": 5,
-    "hunger": 10,
+    "gold": 15,
+    "hunger": 0,
     "thirst": 0,
     "load": 3,
-    "attackType": "punch",
     "visible": true,
+    "attackType": "punch",
     "area": "midgaard",
     "roomid": 1,
     "recall": 1,
     "description": "A brand new citizen.",
-    "eq": {
-        "head": [
-            {
-                "name": "Head",
-                "item": null
+    "reply": "",
+    "following": "",
+    "eq": [
+        {
+            "name": "Head",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Necklace 1",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Necklace 2",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Body",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "Chest",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "About Body",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "Right Arm",
+            "item": null,
+            "slot": "arms"
+        },
+        {
+            "name": "Left Arm",
+            "item": null,
+            "slot": "arms"
+        },
+        {
+            "name": "Right Hand",
+            "item": {
+                "name": "Short Sword",
+                "short": "a Short Sword",
+                "long": "A sharp looking short sword with a hilt wrapped in leather.",
+                "area": "Midgaard",
+                "id": 1,
+                "level": 1,
+                "itemType": "weapon",
+                "material": "iron",
+                "diceNum": 2,
+                "diceSides": 4,
+                "attackType": "slice",
+                "attackElement": "",
+                "weight": 4,
+                "slot": "hands",
+                "flags": []
             },
-            {
-                "name": "Necklace 1",
-                "item": null
-            },
-            {
-                "name": "Necklace 2",
-                "item": null
-            }
-        ],
-        "body": [
-            {
-                "name": "Body",
-                "item": null
-            },
-            {
-                "name": "Chest",
-                "item": null
-            },
-            {
-                "name": "About Body",
-                "item": null
-            }
-        ],
-        "arms": [
-            {
-                "name": "Right Arm",
-                "item": null
-            },
-            {
-                "name": "Left Arm",
-                "item": null
-            }
-        ],
-        "hands": [
-            {
-                "name": "Right Hand",
-                "item": {
-                    "name": "Short Sword",
-                    "short": "A Short Sword",
-                    "long": "A sharp looking short sword with a hilt wrapped in leather.",
-                    "area": "Midgaard",
-                    "id": 1,
-                    "level": 1,
-                    "itemType": "weapon",
-                    "material": "iron",
-                    "diceNum": 2,
-                    "diceSides": 4,
-                    "attackType": "slice",
-                    "attackElement": "",
-                    "weight": 4,
-                    "slot": "hands",
-                    "flags": []
-                },
-                "dual": false
-            },
-            {
-                "name": "Left Hand",
-                "item": null,
-                "dual": false
-            },
-            {
-                "name": "Ring 1",
-                "item": null
-            },
-            {
-                "name": "Ring 2",
-                "item": null
-            }
-        ],
-        "legs": [
-            {
-                "name": "Right Leg",
-                "item": null
-            },
-            {
-                "name": "Left Leg",
-                "item": null
-            },
-            {
-                "name": "Left Foot",
-                "item": null
-            },
-            {
-                "name": "Right Foot",
-                "item": null
-            }
-        ],
-        "misc": [
-            {
-                "name": "Floating",
-                "item": null
-            }
-        ]
-    },
+            "dual": false,
+            "slot": "hands"
+        },
+        {
+            "name": "Left Hand",
+            "item": null,
+            "dual": false,
+            "slot": "hands"
+        },
+        {
+            "name": "Ring 1",
+            "item": null,
+            "slot": "fingers"
+        },
+        {
+            "name": "Ring 2",
+            "item": null,
+            "slot": "fingers"
+        },
+        {
+            "name": "Right Leg",
+            "item": null,
+            "slot": "legs"
+        },
+        {
+            "name": "Left Leg",
+            "item": null,
+            "slot": "legs"
+        },
+        {
+            "name": "Feet",
+            "item": null,
+            "slot": "feet"
+        },
+        {
+            "name": "Floating",
+            "item": null,
+            "slot": "floating"
+        }
+    ],
     "items": [
         {
             "name": "Pot Pie",
@@ -155,6 +157,18 @@
                     "carry": 1
                 }
             ]
+        },
+        {
+            "name": "Burlap Sack",
+            "short": "A Burlap Sack",
+            "long": "An over-used burlap sack with many tears",
+            "id": 5,
+            "area": "all",
+            "level": 1,
+            "itemType": "container",
+            "weight": 1,
+            "maxWeight": 40,
+            "contains": []
         }
     ],
     "affects": [],
@@ -162,21 +176,21 @@
     "skills": [
         [
             {
-                "name": "bash",
+                "name": "backstab",
                 "train": 65,
-                "type": "melee"
+                "type": "starter"
             }
         ]
     ],
     "skillList": [
         [
             {
-                "name": "Bash",
-                "mod": 1,
+                "name": "Backstab",
+                "mod": 2,
                 "level": 1,
                 "maxTrain": 95,
-                "wait": 1,
-                "type": "melee"
+                "wait": 3,
+                "type": "starter"
             }
         ]
     ],
@@ -185,7 +199,7 @@
     ],
     "autoloot": true,
     "autosac": false,
-    "carry": 150,
-    "sid": "EiSbMKqKatCr32yzlmRA",
-    "saved": "Sun Feb 23 2014 02:13:02 GMT-0500 (Eastern Standard Time)"
+    "carry": 130,
+    "saved": "Thu Mar 13 2014 02:05:13 GMT-0400 (Eastern Daylight Time)",
+    "sid": "0fJwZzOHapOTCjY_Cwrp"
 }
