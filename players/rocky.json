@@ -1,5 +1,5 @@
 {
-    "name": "Ronn",
+    "name": "Rocky",
     "lastname": "",
     "title": "",
     "role": "admin",
@@ -14,12 +14,12 @@
     "expToLevel": 1000,
     "position": "standing",
     "alignment": 0,
-    "chp": 100,
-    "hp": 100,
-    "cmana": 100,
-    "mana": 100,
-    "cmv": 80,
-    "mv": 110,
+    "chp": 10000,
+    "hp": 10000,
+    "cmana": 10000,
+    "mana": 10000,
+    "cmv": 10000,
+    "mv": 10000,
     "str": 13,
     "wis": 13,
     "int": 12,
@@ -34,7 +34,7 @@
     "visible": true,
     "attackType": "punch",
     "area": "midgaard",
-    "roomid": 1,
+    "roomid": 4,
     "recall": 1,
     "description": "A brand new citizen.",
     "reply": "",
@@ -200,6 +200,6 @@
     "autoloot": true,
     "autosac": false,
     "carry": 130,
-    "saved": "Thu Mar 13 2014 02:05:13 GMT-0400 (Eastern Daylight Time)",
-    "sid": "0fJwZzOHapOTCjY_Cwrp"
+    "saved": "Tue May 06 2014 00:31:28 GMT-0400 (Eastern Daylight Time)",
+    "sid": "w9d_teu9Kb9q2DD4twO-"
 }

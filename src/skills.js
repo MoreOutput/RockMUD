@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var Dice = require('./dice').roller,
 Character = require('./character').character,

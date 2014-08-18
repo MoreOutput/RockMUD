@@ -15,25 +15,25 @@ exports.server = {
 		name:'Human',
 		con: 1, 
 		wis: 1,
-		attackType: 'punch'
+		attackType: { type: 'punch', mod: 1 }
 	}, {
 		name:'Elf',
 		int: 2,
 		con: -1,
-		attackType: 'punch'
+		attackType: { type: 'punch', mod: 1 }
 	}, {
 		name:'Dwarf',
 		con: 2,
 		int: -1,
 		hp: 5,
-		attackType: 'punch'
+		attackType: { type: 'punch', mod: 1 }
 	}, {
 		name:'Ogre',
 		str: 3,
 		int: -2,
 		dex: -1,
 		hp: 10,
-		attackType: 'smash'
+		attackType: { type: 'smash', mod: 1 }
 	}],
 	classes: [{
 		name:'Thief',
@@ -41,7 +41,7 @@ exports.server = {
 		playable: true,
 		mv: 10,
 		dex: 2,
-		gold: 10,
+		gold: 40,
 		skills: [{ name: 'backstab', train: 65, type: 'starter' }],
 		skillList: [{ name: 'Backstab', mod: 2, level: 1, maxTrain: 95, wait: 3, type: 'starter' }]
 	}, {
@@ -73,6 +73,7 @@ exports.server = {
 		wis: 2, 
 		con: 1,
 		str: -1,
+		gold: 15,
 		skills: [{ name: 'cure light', train: 65, type: 'spell' }],
 		skillList: [{ name: 'Cure Light', mod: 2, level: 1, maxTrain: 95, wait : 1, type: 'spell' }]
 	}, {
@@ -85,25 +86,5 @@ exports.server = {
 		str: -1,
 		skills: [{ name: 'dart', train: 65, type: 'spell' }],
 		skillList: [{ name: 'Dart', mod: 2, level: 1, maxTrain: 95, wait: 1, type: 'spell' }]
-	}],
-	gameTime: {
-		dayHours: 24,
-		months: [
-			{
-				name: 'January',
-				days: '31',
-				lightHours: 12
-			},
-			{
-				name: 'February',
-				days: '28',
-				lightHours: 10
-			},
-			{
-				name: 'March',
-				days: '31',
-				lightHours: 12
-			}
-		]
-	}
+	}]
 };

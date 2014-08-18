@@ -21,7 +21,7 @@ Notes on dependencies:
 * Not using a Node MVC framework.
 * Not using any JS templating engines.
 * Client side I use DOJO 1.9
-* socket.io >= .9
+* socket.io >= 1.0
 * Node > .10.X
 
 Some things Currently in 0.1.7:

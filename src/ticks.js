@@ -4,7 +4,7 @@ This module houses all the timed events on the server. For example:
 	* Every Tweleve minutes the character is saved if they're not in a fight
 	* Every fifteen minutes all the areas in memory are checked any with no players is removed from areas[]
 */
-"use strict";
+'use strict';
 
 var fs = require('fs'),
 Character = require('./character').character,
@@ -23,7 +23,7 @@ timeConfig = require('../config').server.gameTime;
 
 		if (players.length > 0) {	
 			for (i; i < players.length; i += 1) {
-				s = io.sockets.socket(players[i].sid);		
+				s = io.sockets.connected[players[i].sid];		
 				Character.hunger(s, function() {
 					Character.thirst(s, function() {
 						Character.hpRegen(s, function(total) {
@@ -44,7 +44,7 @@ timeConfig = require('../config').server.gameTime;
 		
 		if (players.length > 0) {
 			for (i; i < players.length; i += 1) {
-				s = io.sockets.socket(players[i].sid);
+				s = io.sockets.connected[players[i].sid];
 				
 				if (s.position !== 'fighting') {			
 					Character.save(s);			
@@ -83,7 +83,7 @@ timeConfig = require('../config').server.gameTime;
 				});
 
 				for (i; i < players.length; i += 1) {
-					s = io.sockets.socket(players[i].sid);
+					s = io.sockets.connected[players[i].sid];
 					Character.prompt(s);				
 				}	
 			});	

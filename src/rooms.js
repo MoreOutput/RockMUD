@@ -1,11 +1,11 @@
-"use strict";
+'use strict';
 
 var fs = require('fs'),
 io = require('../server').io,
 players = require('../server').players,
-areas = require('../server').areas;
+areas = require('../server').areas,
 
-var Room = function() {
+Room = function() {
  
 }
 
@@ -159,7 +159,8 @@ Room.prototype.getPlayers = function(s, room, fn) {
 	i = 0;
 
 	for (i; i < players.length; i += 1) {
-		player = io.sockets.socket(players[i].sid).player;
+		player = io.sockets.connected[players[i].sid].player;
+		// io.sockets.socket(players[i].sid).player;
 		if (player.roomid === s.player.roomid && player.name !== s.player.name) {
 			arr.push(' ' + player.name + ' the ' + player.race + ' is ' + player.position + ' here');
 		}
@@ -266,9 +267,7 @@ Room.prototype.checkMonster = function(r, s, fn) {
 Room.prototype.removeMonster = function(roomQuery, monster, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.monsters = roomObj.monsters.filter(function(item, i) {
-			if (item.id !== monster.id) {
-				return fn(true);
-			}			
+			return (item.id !== monster.id);
 		});	
 	});
 }
@@ -304,7 +303,7 @@ Room.prototype.addCorpse = function(s, monster, fn) {
 		monster.short = 'rotting corpse of a ' + monster.name;
 		monster.flags.push({decay: 5});
 		monster.itemType = 'corpse';
-		monster.id = monster.id + '-corpse';
+		monster.corpse = true;
 		monster.weight = monster.weight - 2;
 		monster.chp = 0;
 		monster.hp = 0;
@@ -339,7 +338,7 @@ Room.prototype.msgToRoom = function(msgOpt, exclude, fn) {
 	s;
 
 	for (i; i < players.length; i += 1) {				
-		s = io.sockets.socket(players[i].sid);
+		s = io.sockets.connected[players[i].sid];
 		if (exclude === undefined || exclude === true) {
 			if (s.player.name !== msgOpt.playerName && s.player.roomid === msgOpt.roomid) {
 				s.emit('msg', {

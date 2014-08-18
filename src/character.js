@@ -1,9 +1,9 @@
 /*
-Characters.js controls everything dealing with a character.json file, no in game commands are
-defined here. Commands.js does share some function names with this module, as they -- are --  commands 
-and therefore defined in commands.js. See: save().
+* Characters.js controls everything dealing with a 'Character'; which includes in game creatures.
+* No in game commands are defiend here; Commands.js does share some function names with this module, 
+* see: save().
 */
-"use strict";
+'use strict';
 
 var fs = require('fs'),
 crypto = require('crypto'),
@@ -12,9 +12,9 @@ Dice = require('./dice').roller,
 races = require('../config').server.races,
 classes = require('../config').server.classes,
 players = require('../server').players,
-areas = require('../server').areas;
+areas = require('../server').areas,
 
-var Character = function () {
+Character = function () {
 
 }
 
@@ -123,7 +123,7 @@ Character.prototype.getPassword = function(s, fn) {
 				}
 			});
 		} else {
-			s.emit('msg', {msg: 'Password had to be over eight characters.', res: 'enterPassword'});
+			s.emit('msg', {msg: 'Password has to be over eight characters.', res: 'enterPassword'});
 			return s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
 		}
 	});
@@ -164,6 +164,7 @@ Character.prototype.addPlayer = function(s, fn) {
 Character.prototype.create = function(r, s, fn) { 
 	var character = this;
 
+	// Player model
 	s.player = {
 		name: s.player.name,
 		lastname: '',
@@ -174,7 +175,7 @@ Character.prototype.create = function(r, s, fn) {
 		race: s.player.race,
 		sex: '',
 		charClass: s.player.charClass,
-		created: new Date().toString(), // time of creation
+		created: new Date().toString(), 
 		level: 1,
 		exp: 1,
 		expToLevel: 1000,
@@ -188,8 +189,8 @@ Character.prototype.create = function(r, s, fn) {
 		mv: 100,
 		str: 13,
 		wis: 13,
-		int: 12,
-		dex: 12,
+		int: 13,
+		dex: 13,
 		con: 13,
 		wait: 0,
 		ac: 10,
@@ -518,7 +519,7 @@ Character.prototype.save = function(s, fn) {
 	var character = this;
 
 	if (s.player !== undefined) {
-		s.player.saved = new Date().toString();
+		s.player.modified = new Date().toString();
 	
 		fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
 			if (err) {
@@ -637,6 +638,39 @@ Character.prototype.addToInventory = function(s, item, fn) {
 	
 	fn(true);
 }
+
+/*
+* Returns all items that meet the query criteria, could be optimized if your
+* slots are consistent.
+*/
+Character.prototype.getWeapons = function(creature, fn) {
+	var i = 0,
+	weapons = [];
+
+	for (i; i < creature.eq.length; i += 1) {	
+		if (creature.eq[i].slot === 'hands' && creature.eq[i].item !== null && creature.eq[i].item.itemType === 'weapon') {
+			weapons.push(creature.eq[i].item);
+		}
+	}
+
+	if (weapons.length === 0) {
+		weapons.push({
+			attackType: creature.attackType,
+			itemType: 'fist',
+			material: 'flesh',
+			weight: 0,
+			slot: 'hands',
+			diceNum: 2,
+			diceSides: 2
+		});
+	}
+	
+	if (typeof fn === 'function') {
+		return fn(weapons);
+	} else {
+		return weapons;
+	}
+};
 
 Character.prototype.removeFromInventory = function(s, itemObj, fn) {
 	var i = 0;

@@ -1,9 +1,8 @@
 /*
- * RockMUD, NodeJS HTTP/WS Mud Engine
- * Rocky Bevins, 2013 (moreoutput@gmail.com)
- * We want to be able to build Browser, Diku-style, MUDs with only JS/JSON. 
+ * RockMUD a NodeJS WebSockets Mud Engine
+ * Rocky Bevins, 2014 (moreoutput@gmail.com)
 */
-"use strict";
+'use strict';
 
 var http = require('http'),
 fs = require('fs'),
@@ -41,7 +40,7 @@ server = http.createServer(function (req, res) {
         });
 	}
 }),
-io = require('socket.io').listen(server);
+io = require('socket.io')(server);
 
 // considering referencing these within their respective modules, ex: Character.players rather than players[]
 module.exports.io = io; 
@@ -49,25 +48,10 @@ module.exports.players = [];
 module.exports.areas = [];
 module.exports.time = fs.readFile('./data/time.json');
 
-if (!module.exports.time) {
-	module.exports.time = {	
-		year: '100',
-		month: 'March',
-		day: 8,
-		hour: 12,
-		minute: 13,
-		name: 'The year of MUD'
-	};
-
-	fs.writeFile('./data/time.json', JSON.stringify(module.exports.time, null, 4));
-}
-
 var Character = require('./src/character').character,
 Cmds = require('./src/commands').cmd,
 Skills = require('./src/skills').skill,
 Ticks = require('./src/ticks');
-
-io.set('log level', 1);
 
 server.listen(cfg.port);
 

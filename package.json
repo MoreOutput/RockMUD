@@ -5,9 +5,9 @@
     "start": "server.js"
   },
   "dependencies": {
-    "socket.io": ">= 0.9.8"
+    "socket.io": ">= 1.0.0"
   },
-  "version": "0.1.5-52",
+  "version": "0.1.5-53",
   "engines": {
     "node": "0.10.x"
   }

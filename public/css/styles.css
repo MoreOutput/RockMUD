@@ -4,7 +4,7 @@ Default  RockMUD styles
 html, body {
 font: 1em 'Courier New', sans-serif;
 height: 100%;
-background-color: #222;
+background-color: #111;
 padding: 0 0 0 0;
 margin: 0 0 0 0;
 text-align: center;
@@ -90,13 +90,13 @@ background-image: linear-gradient(top, #4d90fe, #4787ed);
 width: 90%;
 margin: 0 auto;
 text-align: left;
-background-color: #0c010f;
+background-color: #111;
 padding: 1%;
 }
 
 #terminal {
 width: 90%;
-background-color: #0c010f;
+background-color: #111;
 color: #fff;
 margin: 0 0 10px 0;
 }

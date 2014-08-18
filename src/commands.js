@@ -2,7 +2,7 @@
 * All non-combat commands that one would consider 'general' to a all
 * users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
 */
-"use strict";
+'use strict';
 
 var fs = require('fs'),
 Character = require('./character').character,
@@ -11,9 +11,9 @@ Combat = require('./combat').combat,
 io = require('../server').io,
 players = require('../server').players,
 time = require('../server').time,
-areas = require('../server').areas;
+areas = require('../server').areas,
 
-var Cmd = function () {
+Cmd = function () {
 
 };
 
@@ -74,7 +74,7 @@ Cmd.prototype.who = function(r, s) {
 	
 	if (players.length > 0) {
 		for (i; i < players.length; i += 1) {
-			player = io.sockets.socket(players[i].sid).player; // A visible player in players[]
+			player = io.sockets.connected[players[i].sid].player; // A visible player in players[]
 
 			str += '<li>' + player.name[0].toUpperCase() + player.name.slice(1) + ' ';
 
@@ -166,29 +166,29 @@ Cmd.prototype.drop = function(r, s) {
 
 // For attacking in-game monsters
 Cmd.prototype.kill = function(r, s) {
-	Room.checkMonster(r, s, function(fnd, monster) {
+	Room.checkMonster(r, s, function(fnd, target) {
 		if (fnd) {
-			Combat.begin(s, monster, function(contFight, monster) { // the first round qualifiers
+			Combat.begin(s, target, function(contFight, target) { // the first round qualifiers
 				var combatInterval;
 				
 				if (contFight) {
 					// Combat Loop
 					combatInterval = setInterval(function() {
-						if (s.player.position === 'fighting' && monster.position === 'fighting') {	
+						if (s.player.position === 'fighting' && target.position === 'fighting') {	
 							
-							Combat.round(s, monster, function() {
-								if (monster.chp <= 0) {
-									monster.position = 'dead';
+							Combat.fight(s, target, function(contFight) {
+								if (!contFight) {
+									target.position = 'dead';
 
 									clearInterval(combatInterval);
 								
 									Room.removeMonster({
 										area: s.player.area,
 										id: s.player.roomid
-									}, monster, function(removed) {
-										if (removed) {
-											Room.addCorpse(s, monster, function(corpse) {
-												Combat.calXP(s, monster, function(earnedXP) {
+									}, target, function(removed) {
+										if (removed) { 
+											Room.addCorpse(s, target, function(corpse) {
+												Combat.calXP(s, target, function(earnedXP) {
 													s.player.position = 'standing';
 
 													if (earnedXP > 0) {
@@ -355,7 +355,7 @@ Cmd.prototype.time = function(r, s) {
 
 Cmd.prototype.save = function(r, s) {
 	Character.save(s, function() {
-		s.emit('msg', {msg: s.player.name + ' was saved!', styleClass: 'save'});
+		s.emit('msg', {msg: s.player.name + ' was saved! Whew!', styleClass: 'save'});
 		return Character.prompt(s);
 	});
 }
@@ -566,9 +566,9 @@ Cmd.prototype.xyzzy = function(s) {
 	});
 }
 
-/*
-* Special Admin commands below here. You can confirm permission with a value connected to the current player  
-*/
+/**********************************************************************************************************
+* ADMIN COMMANDS  
+************************************************************************************************************/
 
 /*
 * View a string representation of the JSON behind a world object.
@@ -579,19 +579,19 @@ Cmd.prototype.json = function(r, s) {
 	if (s.player.role === 'admin') {
 		
 	} else {
-		s.emit('msg', {msg: 'Nothing happens!', styleClass: 'error' });
+		s.emit('msg', {msg: 'Jason who?', styleClass: 'error' });
 	}
 }
 
 /*
-* A soft game reboot. 
-* Stops all combat and reloads all active areas and players without restarting the server. Checks users role.
+* An in game reboot. 
+* Stops all combat, reloads all active areas, saves players, and clears all corpses / items with a decay flag
 */
 Cmd.prototype.reboot = function(r, s) {
 	if (s.player.role === 'admin') {
 
 	} else {
-		s.emit('msg', {msg: 'You wish!', styleClass: 'error' });	
+		s.emit('msg', {msg: 'No.', styleClass: 'error' });	
 		return Character.prompt(s);
 	}
 }
@@ -605,5 +605,16 @@ Cmd.prototype.restore = function(r, s) {
 		return Character.prompt(s);
 	}
 }
+ 
+// Stops all game combat, does not heal
+Cmd.prototype.calm = function(r, s) {
+	if (s.player.role === 'admin') {
+
+	} else {
+		s.emit('msg', {msg: 'You do not possess that kind of power.', styleClass: 'error' });	
+		return Character.prompt(s);
+	}
+}
+
 
 module.exports.cmd = new Cmd();
