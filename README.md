@@ -14,8 +14,9 @@ Goals:
 * Leverage HTML for MUD text.
 * Everything is JavaScript / JSON.
 * Fast Development
-* Easy client GUI creation.
-* Real-time browser OLC and world management. 
+* Easy client GUI creation and triggering client side events.
+* Real-time browser OLC and world management.
+* Games should have little issue sharing items, areas and players.
 
 Notes on dependencies: 
 * Not using a Node MVC framework.

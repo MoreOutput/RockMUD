@@ -9,7 +9,12 @@ Room = function() {
  
 }
 
-// Returns an entire area
+// Before an area is loaded into areas[] we roll some dyanmic values for its objects
+Room.prototype.rollArea = function() {
+
+};
+
+// Returns an entire area, uses rollArea to roll dynamic values
 Room.prototype.getArea = function(areaName, fn) {
 	this.checkArea(areaName, function(fnd, area) {
 		if (fnd) {
@@ -22,7 +27,7 @@ Room.prototype.getArea = function(areaName, fn) {
 	});
 }
 
-// return boolean after checking if the area is in areas[]
+// Return boolean after checking if the area is in areas[]
 Room.prototype.checkArea = function(areaName, fn) {
 	if (areas.length > 0) {
 		areas.forEach(function(area) {
@@ -269,6 +274,7 @@ Room.prototype.removeMonster = function(roomQuery, monster, fn) {
 		roomObj.monsters = roomObj.monsters.filter(function(item, i) {
 			return (item.id !== monster.id);
 		});	
+		return fn(true);
 	});
 }
 

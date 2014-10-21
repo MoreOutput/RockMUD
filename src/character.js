@@ -136,7 +136,7 @@ Character.prototype.addPlayer = function(s, fn) {
 	if (players.length > 0) {
 		for (i; i < players.length; i += 1) {
 			if (s.player.name === players[i].name) {
-				return fn(false, 'Already Logged in');
+				return fn(false, 'Already Logged in. Disconnecting...Refresh the page and relog.');
 			}
 		}
 		

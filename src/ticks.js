@@ -77,7 +77,7 @@ timeConfig = require('../config').server.gameTime;
 				var i = 0,
 				alert = shuffle(JSON.parse(data).alerts)[0];
 
-				io.sockets.socket().in('mud').broadcast.emit('msg', {
+				io.sockets.to('mud').emit('msg', {
 					msg: '<span class="alert">ALERT: </span><span class="alertmsg"> ' + alert + '</span>',
 					styleClass: 'alert'
 				});
@@ -88,7 +88,7 @@ timeConfig = require('../config').server.gameTime;
 				}	
 			});	
 		}	
-	}, 60000 * 5);
+	}, 60000 * 2);
 
 	// Time -- Increase minute, hours, days and years.
 	// time data is saved to data/time.json every 12 hours
