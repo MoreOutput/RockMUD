@@ -1,6 +1,6 @@
 /*
 * Characters.js controls everything dealing with a 'Character'; which includes in game creatures.
-* No in game commands are defiend here; Commands.js does share some function names with this module, 
+* No in game commands are defined here; Commands.js does share some function names with this module,
 * see: save().
 */
 'use strict';
@@ -477,7 +477,7 @@ Character.prototype.raceSelection = function(r, s, fn) {
 			if (!err) {
 				data = JSON.parse(data);
 
-				helpTxt = '<h2>Race Profile: ' + data.name + '</h2> ' + data.description + 
+				var helpTxt = '<h2>Race Profile: ' + data.name + '</h2> ' + data.description +
 				'<h3>Benefits:</h3><p class="small">Related: '+ data.related.toString() + '</p>';
 
 				s.emit('msg', {msg: helpTxt, styleClass: 'cmd-help' });
