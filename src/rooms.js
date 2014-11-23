@@ -322,11 +322,16 @@ Room.prototype.addCorpse = function(s, monster, fn) {
 
 Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
+		var removed=false;
 		roomObj.items = roomObj.items.filter(function(item, i) {
 			if (item.id !== roomQuery.item.id) {
-				return fn(true);
-			}			
-		});	
+				return true;
+			} else {
+				removed=true; // At least one item was successfully removed
+			}
+		});
+		if(removed)
+			fn();  // Invoke success callback
 	});
 }
 
