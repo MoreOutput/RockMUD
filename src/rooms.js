@@ -42,7 +42,7 @@ Room.prototype.checkArea = function(areaName, fn) {
 	}
 };
 
-// Returns a specifc room for display, to retun the room Obj use getRoomObject
+// Returns a specific room for display, to retun the room Obj use getRoomObject
 Room.prototype.getRoom = function(s, fn) {
 	var room = this,
 	displayRoom = function(rooms, fn) {
@@ -50,7 +50,7 @@ Room.prototype.getRoom = function(s, fn) {
 		roomStr = '';
 
 		for (i; i < rooms.length; i += 1) {	
-			if (rooms[i].id === s.player.roomid) {								
+			if (rooms[i].id === s.player.roomid) {
 				room.getExits(rooms[i], function(exits) {
 					room.getPlayers(s, rooms[i], function(playersInRoom) {
 						room.getItems(rooms[i], {specific: 'short'}, function(items) {	
@@ -102,7 +102,7 @@ Room.prototype.getRoom = function(s, fn) {
 				var area = JSON.parse(area);
 
 				displayRoom(area.rooms);
-				
+
 				if (typeof fn === 'function') {
 					return fn();
 				}
@@ -322,11 +322,14 @@ Room.prototype.addCorpse = function(s, monster, fn) {
 
 Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
+		var fnd=false;
 		roomObj.items = roomObj.items.filter(function(item, i) {
 			if (item.id !== roomQuery.item.id) {
-				return fn(true);
+				fnd=true;
+				return true;
 			}			
-		});	
+		});
+		fn(fnd);
 	});
 }
 
