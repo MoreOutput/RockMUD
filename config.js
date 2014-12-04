@@ -33,7 +33,7 @@ exports.server = {
 		int: -2,
 		dex: -1,
 		hp: 10,
-		attackType: { type: 'smash', mod: 1 }
+		attackType: { type: 'smash', mod: 2 }
 	}],
 	classes: [{
 		name:'Thief',

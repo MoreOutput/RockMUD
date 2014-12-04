@@ -76,14 +76,14 @@ background-image: linear-gradient(top, #4d90fe, #4787ed);
 
 /* Adjustments for resizing */
 @media screen and (max-width: 720px) {
-	#mudwrapper { 
-	width: 90%; 
-	}
-	
-	#terminal { 
-	width: 90%; 
-	margin:0; 
-	}
+#mudwrapper { 
+width: 90%; 
+}
+
+#terminal { 
+width: 90%; 
+margin:0; 
+}
 }
 
 #mudwrapper {
@@ -106,7 +106,7 @@ padding: 3px 0 3px 0;
 }
 
 #screen-start {
-	
+
 }
 
 .cmd-who {
@@ -235,6 +235,7 @@ margin: 0;
 .cprompt {
 font-weight: bold;
 color: #fff;
+margin: 0 0 5px 0;
 }
 
 .error {
@@ -279,7 +280,7 @@ color: #fff;
 }
 
 /**
-	Player Scores
+Player Scores
 **/
 .score {
 width: 50%;
@@ -345,9 +346,9 @@ color: #ffff00;
 }
 
 .small {
-	font-size: 80%;
+font-size: 80%;
 }
 
 .bold {
-	font-weight: bold;
+font-weight: bold;
 }

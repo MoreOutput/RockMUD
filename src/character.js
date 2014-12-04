@@ -417,7 +417,7 @@ Character.prototype.newCharacter = function(r, s, fn) {
 
 							if	(classes.length - 1 === i) {
 								s.emit('msg', {
-									msg: 'Great! Now time to select a class for ' + s.player.name + '. Pick on of the following: <ul>' + 
+									msg: 'Great! Now time to select a class for ' + s.player.name + '. Pick one of the following: <ul>' + 
 									str + '</ul>', 
 									res: 'selectClass', 
 									styleClass: 'race-selection'
@@ -431,7 +431,7 @@ Character.prototype.newCharacter = function(r, s, fn) {
 											s.player.charClass = r.msg;
 											
 											s.emit('msg', {
-												msg: s.player.name + ' is a ' + s.player.charClass + '! There is 1 more step before ' + s.player.name + 
+												msg: s.player.name + ' is a ' + s.player.charClass + '! One more step before ' + s.player.name + 
 												' is saved. Please define a password (8 or more characters):', 
 												res: 'createPassword', 
 												styleClass: 'race-selection'
@@ -535,25 +535,26 @@ Character.prototype.save = function(s, fn) {
 	};
 }
 
+Character.prototype.getModifier = function(s, stat, fn) {
+	var mod = Math.round(s.player[stat]/3);
+	
+	if (!fn) {
+		return mod;
+	} else {
+		return fn(mod);
+	}
+};
+
 Character.prototype.hpRegen = function(s, fn) {
-	var conMod = Math.ceil(s.player.con/4);
+	var conMod = this.getModifier(s, 'con');
 
 	if (s.player.chp < s.player.hp) {
-
 		if (s.player.position === 'sleeping') {
 			conMod = conMod + 2;
 		}
 
-		Dice.roll(1, 8, function(total) {
-			if (typeof fn === 'function') {
-				fn(s.player.chp + total + conMod);
-			} else {
-				s.player.chp = s.player.chp + total + conMod;
-				
-				if (s.player.chp > s.player.hp) {
-					return s.player.chp = s.player.hp;
-				} 
-			}
+		Dice.roll(1 * (s.player.level + conMod), 8, function(total) {
+			fn(s.player.chp + total);
 		});
 	} else {
 		fn(s.player.chp);

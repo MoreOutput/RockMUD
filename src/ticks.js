@@ -1,9 +1,3 @@
-/*
-This module houses all the timed events on the server. For example:
-	* Hunger/Thirst/Regen ticks every two minutes
-	* Every Tweleve minutes the character is saved if they're not in a fight
-	* Every fifteen minutes all the areas in memory are checked any with no players is removed from areas[]
-*/
 'use strict';
 
 var fs = require('fs'),
@@ -46,7 +40,9 @@ timeConfig = require('../config').server.gameTime;
 			for (i; i < players.length; i += 1) {
 				s = io.sockets.connected[players[i].sid];
 				
-				if (s.position !== 'fighting') {			
+				if (s.position === 'sleeping' || 
+					s.position === 'resting' || 
+					s.position === 'standing') {			
 					Character.save(s);			
 				}							
 			}
@@ -88,9 +84,8 @@ timeConfig = require('../config').server.gameTime;
 				}	
 			});	
 		}	
-	}, 60000 * 2);
+	}, 50000);
 
 	// Time -- Increase minute, hours, days and years.
 	// time data is saved to data/time.json every 12 hours
-
 }());
