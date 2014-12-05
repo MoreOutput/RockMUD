@@ -136,8 +136,8 @@ Room.prototype.updateArea = function(areaName, fn) {
 Room.prototype.getRoomObject = function(areaQuery, fn) {
 	this.checkArea(areaQuery.area, function(fnd, area) {
 		var i = 0;
-
-		if (fnd) { //  area was in areas[]
+		
+		if (fnd) { 
 			for (i; i < area.rooms.length; i += 1) {
 				if (area.rooms[i].id === areaQuery.id) {		
 					return fn(area.rooms[i]);
@@ -281,7 +281,6 @@ Room.prototype.removeMonster = function(roomQuery, monster, fn) {
 // does a string match an item in the room
 Room.prototype.checkItem = function(r, s, fn) {
 	var room = this;
-	
 	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
 		if (roomObj.items.length > 0) {
 			room.getItems(roomObj, {}, function(items) {
@@ -324,9 +323,11 @@ Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.items = roomObj.items.filter(function(item, i) {
 			if (item.id !== roomQuery.item.id) {
-				return fn(true);
+				return true;
 			}			
-		});	
+		});
+		
+		return fn(true);
 	});
 }
 

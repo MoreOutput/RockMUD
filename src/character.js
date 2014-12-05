@@ -324,22 +324,25 @@ Character.prototype.create = function(r, s, fn) {
 						throw err;
 					}
 					
-					for (i; i < players.length; i += 1) {
-						if (players[i].sid === s.id) {
-							players.splice(i, 1);
-						}
-					}
-		
-					s.leave('creation'); // No longer creating the character so leave the channel and join the game
-					s.join('mud');		
-					
 					character.addPlayer(s, function(added) {
 						if (added) {
-							character.motd(s, function() {
-								fn(s);
-								Room.getRoom(s);			
-								character.prompt(s);
+							s.leave('creation'); // No longer creating the character so leave the channel and join the game
+							s.join('mud');		
+
+							Room.checkArea(s.player.area, function(fnd) {
+								if (!fnd) {
+									Room.getArea(s.player.area, function(area) {
+										areas.push(area);
+									});
+								}
+								
+								character.motd(s, function() {
+									fn(s);
+									Room.getRoom(s);			
+									character.prompt(s);
+								});
 							});
+						
 						} else {
 							s.emit('msg', {msg: 'Error logging in, please retry.'});
 							s.disconnect();
