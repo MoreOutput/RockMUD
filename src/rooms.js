@@ -7,7 +7,7 @@ areas = require('../server').areas,
 
 Room = function() {
  
-}
+};
 
 // Before an area is loaded into areas[] we roll some dyanmic values for its objects
 Room.prototype.rollArea = function() {
@@ -25,7 +25,7 @@ Room.prototype.getArea = function(areaName, fn) {
 			});
 		}
 	});
-}
+};
 
 // Return boolean after checking if the area is in areas[]
 Room.prototype.checkArea = function(areaName, fn) {
@@ -99,7 +99,7 @@ Room.prototype.getRoom = function(s, fn) {
 			}
 		} else { // loading area and placing it into memory
 			fs.readFile('./areas/' + s.player.area + '.json', function (err, area) {
-				var area = JSON.parse(area);
+				area = JSON.parse(area);
 
 				displayRoom(area.rooms);
 				
@@ -109,7 +109,7 @@ Room.prototype.getRoom = function(s, fn) {
 			});
 		}
 	});
-}
+};
 
 // Refreshes the area reference in areas[]
 Room.prototype.updateArea = function(areaName, fn) {
@@ -130,7 +130,7 @@ Room.prototype.updateArea = function(areaName, fn) {
 			return fn(false);
 		}
 	}
-}
+};
 
 // Return a room in memory as an object, pass in the area name and the room vnum {area: 'Midgaard', vnum: 1}
 Room.prototype.getRoomObject = function(areaQuery, fn) {
@@ -145,7 +145,7 @@ Room.prototype.getRoomObject = function(areaQuery, fn) {
 			}
 		}
 	});
-}
+};
 
 Room.prototype.getExits = function(room, fn) {
 	var arr = [],
@@ -155,7 +155,7 @@ Room.prototype.getExits = function(room, fn) {
 		arr.push(room.exits[i].cmd);
 	}
 	return fn(arr);
-}
+};
 
 // This needs to look like getItems() for returning a player obj based on room
 Room.prototype.getPlayers = function(s, room, fn) {
@@ -172,7 +172,7 @@ Room.prototype.getPlayers = function(s, room, fn) {
 	}
 
 	return fn(arr);
-}
+};
 
 Room.prototype.getItems = function(room, optObj, fn) {
 	var arr = [],
@@ -197,7 +197,7 @@ Room.prototype.getItems = function(room, optObj, fn) {
 			return fn(arr);
 		}
 	}
-}
+};
 
 Room.prototype.getMonsters = function(room, optObj, fn) {
 	var arr = [],
@@ -223,7 +223,7 @@ Room.prototype.getMonsters = function(room, optObj, fn) {
 			return fn(arr);
 		}
 	}
-}
+};
 
 // does a string match an exit in the room
 Room.prototype.checkExit = function(r, s, fn) { 
@@ -243,7 +243,7 @@ Room.prototype.checkExit = function(r, s, fn) {
 			return fn(false);
 		}
 	});		
-}
+};
 
 // does a string match any monsters in the room
 Room.prototype.checkMonster = function(r, s, fn) { 
@@ -265,7 +265,7 @@ Room.prototype.checkMonster = function(r, s, fn) {
 			return fn(false);
 		}
 	});	
-}
+};
 
 
 // Remove a monster from a room
@@ -276,28 +276,29 @@ Room.prototype.removeMonster = function(roomQuery, monster, fn) {
 		});	
 		return fn(true);
 	});
-}
+};
 
-// does a string match an item in the room
+// callback with boolean if item with the supplied string matches room item, and first matched item as
+// second argument if applicable
 Room.prototype.checkItem = function(r, s, fn) {
-	var room = this;
-	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
-		if (roomObj.items.length > 0) {
-			room.getItems(roomObj, {}, function(items) {
-				var msgPatt = new RegExp('^' + r.msg),
-				i = 0;
+	var msgPatt = new RegExp('^' + r.msg),
+		fnd,
+		room = this;
 
-				for (i; i < items.length; i += 1) {
-					if (msgPatt.test(items[i].name.toLowerCase())) {
-						return fn(true, items[i]);
-					}
-				}
-				return fn(false);
-			});
+	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
+		fnd = Array.prototype.filter.call(roomObj.items, function (item) {
+			return msgPatt.test(item.name.toLowerCase());
+		});
+
+		// Can be extended later to support commands such as 'drop 2.sword' to drop the second match
+		// For now, return the first
+
+		if (fnd.length > 0) {
+			fn(true, fnd[0]);
 		} else {
-			return fn(false);
+			fn(false);
 		}
-	});		
+	});
 };
 
 Room.prototype.addCorpse = function(s, monster, fn) {
@@ -317,7 +318,7 @@ Room.prototype.addCorpse = function(s, monster, fn) {
 	});
 	
 	return fn();
-}
+};
 
 Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
@@ -329,7 +330,7 @@ Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
 		
 		return fn(true);
 	});
-}
+};
 
 Room.prototype.addItem = function(itemOpt, fn) {
 	this.getRoomObject(itemOpt, function(roomObj) {
@@ -337,7 +338,7 @@ Room.prototype.addItem = function(itemOpt, fn) {
 	});
 	
 	return fn();
-}
+};
 
 // Emit a message to all the rooms players
 Room.prototype.msgToRoom = function(msgOpt, exclude, fn) {
@@ -366,7 +367,7 @@ Room.prototype.msgToRoom = function(msgOpt, exclude, fn) {
 	if (typeof fn === 'function') {
 		return fn();
 	}
-}
+};
 
 // Emit a message to all the players in an area
 Room.prototype.msgToArea = function(msgOpt, exclude, fn) {
@@ -395,6 +396,6 @@ Room.prototype.msgToArea = function(msgOpt, exclude, fn) {
 	if (typeof fn === 'function') {
 		return fn();
 	}
-}
+};
 
 module.exports.room = new Room();

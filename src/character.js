@@ -16,7 +16,7 @@ areas = require('../server').areas,
 
 Character = function () {
 
-}
+};
 
 Character.prototype.login = function(r, s, fn) {
 	var name = r.msg.replace(/_.*/,'').toLowerCase();
@@ -40,7 +40,7 @@ Character.prototype.login = function(r, s, fn) {
 			styleClass: 'error'
 		});
 	}
-}
+};
 
 Character.prototype.load = function(name, s, fn) {
 	fs.readFile('./players/'  + name + '.json', function (err, r) {
@@ -60,7 +60,7 @@ Character.prototype.load = function(name, s, fn) {
 		
 		return fn(s);
 	});
-}
+};
 
 Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 	var hash = password,
@@ -127,7 +127,7 @@ Character.prototype.getPassword = function(s, fn) {
 			return s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
 		}
 	});
-}
+};
 
 // Add a player reference object to the players array
 Character.prototype.addPlayer = function(s, fn) {
@@ -158,7 +158,7 @@ Character.prototype.addPlayer = function(s, fn) {
 
 		return fn(true);
 	}
-}
+};
 
 //  A New Character is saved
 Character.prototype.create = function(r, s, fn) { 
@@ -352,7 +352,7 @@ Character.prototype.create = function(r, s, fn) {
 			});
 		});	
 	});
-}
+};
 
 // Rolling stats for a new character
 Character.prototype.rollStats = function(player, fn) { 
@@ -389,7 +389,7 @@ Character.prototype.rollStats = function(player, fn) {
 			return fn(player);
 		}
 	}		
-}
+};
 
 Character.prototype.newCharacter = function(r, s, fn) {
 	var character = this,
@@ -462,10 +462,11 @@ Character.prototype.newCharacter = function(r, s, fn) {
 			});			
 		}
 	}	
-}
+};
 
 Character.prototype.raceSelection = function(r, s, fn) {
-	var i = 0;
+	var i = 0,
+	helpTxt;
 
 	if (r.cmd !== 'help') {	
 		for (i; i < races.length; i += 1) {
@@ -493,7 +494,7 @@ Character.prototype.raceSelection = function(r, s, fn) {
 			}
 		});	
 	}
-}
+};
 
 Character.prototype.classSelection = function(r, fn) {
 	var i = 0;	
@@ -505,7 +506,7 @@ Character.prototype.classSelection = function(r, fn) {
 	}
 	
 	return fn(false)
-}
+};
 
 Character.prototype.motd = function(s, fn) {	
 	fs.readFile('./motd.json', function (err, data) {
@@ -516,7 +517,7 @@ Character.prototype.motd = function(s, fn) {
 		s.emit('msg', {msg : JSON.parse(data).motd, res: 'logged', styleClass: 'motd'});
 		return fn();
 	});
-}
+};
 
 Character.prototype.save = function(s, fn) {
 	var character = this;
@@ -535,8 +536,8 @@ Character.prototype.save = function(s, fn) {
 				})
 			}
 		});
-	};
-}
+	}
+};
 
 Character.prototype.getModifier = function(s, stat, fn) {
 	var mod = Math.round(s.player[stat]/3);
@@ -590,7 +591,7 @@ Character.prototype.hunger = function(s, fn) {
 		
 		fn();
 	}
-}
+};
 
 Character.prototype.thirst = function(s, fn) {
 	var character = this,
@@ -618,30 +619,33 @@ Character.prototype.thirst = function(s, fn) {
 	}
 }
 
-// boolean if item with the same vnum is in a players inventory
+// callback with boolean if item with the supplied string matches inventory item, and first matched item as
+// second argument if applicable
 Character.prototype.checkInventory = function(r, s, fn) {
-	var i = 0,
-	msgPatt = new RegExp('^' + r.msg);
-	
-	if (s.player.items.length > 0) {
-		for (i; i < s.player.items.length; i += 1){
-			if (msgPatt.test(s.player.items[i].name.toLowerCase())) {
-				fn(true, s.player.items[i]);
-			} else if (i === s.player.items.length - 1) {
-				fn(false);
-			}
-		}
+	var msgPatt = new RegExp('^' + r.msg),
+	fnd;
+
+	fnd = Array.prototype.filter.call(s.player.items,function(item) {
+		return msgPatt.test(item.name.toLowerCase());
+	});
+
+	// Can be extended later to support commands such as 'drop 2.sword' to drop the second match
+	// For now, return the first
+
+	if(fnd.length > 0) {
+		fn(true,fnd[0]);
 	} else {
 		fn(false);
 	}
-}
+};
+
 
 // push an item into a players inventory, checks items to ensure a player can use it
 Character.prototype.addToInventory = function(s, item, fn) {
 	s.player.items.push(item);
 	
 	fn(true);
-}
+};
 
 /*
 * Returns all items that meet the query criteria, could be optimized if your
@@ -694,7 +698,7 @@ Character.prototype.removeFromInventory = function(s, itemObj, fn) {
 			return fn(false);
 		}
 	}
-}
+};
 
 Character.prototype.wear = function(r, s, item, fn) {
 	var i = 0,
@@ -773,17 +777,17 @@ Character.prototype.updatePlayer = function(s, fn) {
 			} 
 		}
 	}
-}
+};
 
 Character.prototype.prompt = function(s) {
 	return s.emit('msg', {msg: s.player.chp + '/'  + s.player.hp + 'hps ' +
 		s.player.cmana + '/'  + s.player.mana + 'mana ' +  
 		s.player.cmv + '/'  + s.player.mv +'mv room:' +
 		s.player.roomid + ' wait: ' + s.player.wait + '> ', styleClass: 'cprompt'});
-}
+};
 
 Character.prototype.level = function(s, fn) {
 
-}
+};
 
 module.exports.character = new Character();
