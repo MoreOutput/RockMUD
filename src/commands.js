@@ -18,7 +18,7 @@ Cmd = function () {
 };
 
 Cmd.prototype.move = function(r, s) {
-	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping' && s.player.cmv > 5) {
+	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping' && s.player.cmv > 5 && s.player.wait === 0) {
 		r.cmd = r.msg;
 
 		Room.checkExit(r, s, function(fnd, roomid) {
@@ -30,7 +30,7 @@ Cmd.prototype.move = function(r, s) {
 				}, true);
 
 				s.player.cmv = Math.round((s.player.cmv - (12 - s.player.dex/4)));	
-				s.player.roomid = roomid; // Make the adjustment in the socket character reference.
+				s.player.roomid = roomid;
 
 				Character.updatePlayer(s);
 
@@ -38,7 +38,13 @@ Cmd.prototype.move = function(r, s) {
 					area: s.player.area,
 					id: roomid
 				}, function(roomObj) {
-					Room.getRoom(s, function() {
+					if (roomObj.terrianMod) {
+						s.player.wait = roomObj.terrianMod;
+					} else {
+						s.player.wait = 1;
+					}
+
+					Room.getRoom(s, function(room) {
 						Room.msgToRoom({
 							msg: s.player.name + ' the ' + s.player.race + ' enters the room.', 
 							playerName: s.player.name, 
@@ -57,6 +63,13 @@ Cmd.prototype.move = function(r, s) {
 				return Character.prompt(s);
 			}
 		}); 
+	} else if (s.player.wait !== 0) {
+		s.emit('msg', {
+			msg: 'You cant move that fast!', 
+			styleClass: 'error'
+		});
+
+		return Character.prompt(s);
 	} else {
 		s.emit('msg', {
 			msg: 'You cant move right now!', 

@@ -189,6 +189,8 @@
 			"id" : 3,
 			"title" : "East of Town Square",
 			"content" : "Beautiful shops line the pebbled street that leads to the east and west.",
+			"terrian" : "stone-road",
+			"terrianMod": 2,
 			"exits" : [
 				{
 					"cmd" : "west",
