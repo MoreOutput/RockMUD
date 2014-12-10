@@ -5,6 +5,7 @@
 'use strict';
 
 var fs = require('fs'),
+util = require('util'),
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
@@ -78,7 +79,7 @@ Cmd.prototype.move = function(r, s) {
 
 		return Character.prompt(s);
 	}
-}
+};
 
 Cmd.prototype.who = function(r, s) {
 	var str = '', 
@@ -114,7 +115,7 @@ Cmd.prototype.who = function(r, s) {
 	}
 	
 	return Character.prompt(s);
-}
+};
 
 Cmd.prototype.get = function(r, s, fn) {
 	if (r.msg !== '') {
@@ -144,7 +145,7 @@ Cmd.prototype.get = function(r, s, fn) {
 		s.emit('msg', {msg: 'Get what?', styleClass: 'error'});
 		return Character.prompt(s);
 	}
-}
+};
 
 Cmd.prototype.drop = function(r, s) {
 	if (r.msg !== '') {
@@ -174,7 +175,7 @@ Cmd.prototype.drop = function(r, s) {
 		s.emit('msg', {msg: 'Drop what?', styleClass: 'error'});
 		return Character.prompt(s);
 	}
-}
+};
 
 
 // For attacking in-game monsters
@@ -231,7 +232,7 @@ Cmd.prototype.kill = function(r, s) {
 			return Character.prompt(s);
 		}
 	});
-}
+};
 
 Cmd.prototype.look = function(r, s) {
 	if (r.msg === '') { 
@@ -246,7 +247,7 @@ Cmd.prototype.look = function(r, s) {
 			});
 		});
 	}
-}
+};
 
 Cmd.prototype.where = function(r, s) {
 	r.msg = '<ul>' + 
@@ -362,7 +363,7 @@ Cmd.prototype.achat = function(r, s) {
 // Viewing the time
 Cmd.prototype.time = function(r, s) {
 
-}
+};
 
 /** Related to Saving and character adjustment/interaction **/
 
@@ -371,7 +372,7 @@ Cmd.prototype.save = function(r, s) {
 		s.emit('msg', {msg: s.player.name + ' was saved! Whew!', styleClass: 'save'});
 		return Character.prompt(s);
 	});
-}
+};
 
 Cmd.prototype.title = function(r, s) {
 	if (r.msg.length < 40) {
@@ -382,14 +383,14 @@ Cmd.prototype.title = function(r, s) {
 		}
 
 		Character.updatePlayer(s, function(updated) {
-			s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'})
+			s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'});
 			return Character.prompt(s);
 		});
 	} else {
 		s.emit('msg', {msg: 'Not a valid title.', styleClass: 'save'});
 		return Character.prompt(s);
 	}
-}
+};
 
 // View equipment
 Cmd.prototype.equipment = function(r, s) {
@@ -415,7 +416,7 @@ Cmd.prototype.equipment = function(r, s) {
 	});
 	
 	return Character.prompt(s);
-}
+};
 
 // Current skills
 Cmd.prototype.skills = function(r, s) {
@@ -433,7 +434,7 @@ Cmd.prototype.skills = function(r, s) {
 		s.emit('msg', {msg: 'skills', styleClass: 'eq' });
 		return Character.prompt(s);
 	}
-}
+};
 
 Cmd.prototype.wear = function(r, s) {
 	if (r.msg !== '') {
@@ -452,7 +453,7 @@ Cmd.prototype.wear = function(r, s) {
 		s.emit('msg', {msg: 'Wear what?', styleClass: 'error'});
 		return Character.prompt(s);
 	}
-}
+};
 
 /*
 Cmd.prototype.remove = function(r, s) {
@@ -495,7 +496,7 @@ Cmd.prototype.inventory = function(r, s) {
 		s.emit('msg', {msg: 'No items in your inventory, can carry ' + s.player.carry + ' pounds of gear.', styleClass: 'inventory' });
 		return Character.prompt(s);
 	}
-}
+};
 
 Cmd.prototype.score = function(r, s) { 
 	var i = 0,
@@ -537,7 +538,7 @@ Cmd.prototype.score = function(r, s) {
 	s.emit('msg', {msg: score, element: 'section', styleClass: 'score' });
 	
 	return Character.prompt(s);
-}
+};
 
 Cmd.prototype.help = function(r, s) {
 	// if we don't list a specific help file we return help.json
@@ -565,7 +566,7 @@ Cmd.prototype.help = function(r, s) {
 
 		return Character.prompt(s);
 	}
-}
+};
 
 Cmd.prototype.xyzzy = function(s) {
 	Room.msgToRoom({
@@ -577,7 +578,7 @@ Cmd.prototype.xyzzy = function(s) {
 
 		return Character.prompt(s);
 	});
-}
+};
 
 /**********************************************************************************************************
 * ADMIN COMMANDS  
@@ -589,12 +590,31 @@ Cmd.prototype.xyzzy = function(s) {
 * typing 'json' alone will give the json object for the entire current room. 
 */
 Cmd.prototype.json = function(r, s) {
-	if (s.player.role === 'admin') {
-		
+	if (s.player.role === 'admin' && r.msg) {
+		Character.checkInventory(r,s,function(fnd,item) {
+			if (fnd) {
+				s.emit('msg', {msg: util.inspect(item, {depth: null})});
+			} else {
+				Room.checkItem(r, s, function (fnd, item) {
+					if (fnd) {
+						s.emit('msg', {msg: util.inspect(item, {depth: null})});
+					} else {
+						Room.checkMonster(r, s, function (fnd, monster) {
+								if (fnd) {
+									s.emit('msg', {msg: util.inspect(monster, {depth: null})});
+								} else {
+									s.emit('msg', {msg: 'Target not found.', styleClass: 'error' });
+								}
+							}
+						);
+					}
+				});
+			}
+		});
 	} else {
 		s.emit('msg', {msg: 'Jason who?', styleClass: 'error' });
 	}
-}
+};
 
 /*
 * An in game reboot. 
@@ -607,7 +627,7 @@ Cmd.prototype.reboot = function(r, s) {
 		s.emit('msg', {msg: 'No.', styleClass: 'error' });	
 		return Character.prompt(s);
 	}
-}
+};
 
 // Fully heal everyone on the MUD
 Cmd.prototype.restore = function(r, s) {
@@ -617,7 +637,7 @@ Cmd.prototype.restore = function(r, s) {
 		s.emit('msg', {msg: 'You do not possess that kind of power.', styleClass: 'error' });	
 		return Character.prompt(s);
 	}
-}
+};
  
 // Stops all game combat, does not heal
 Cmd.prototype.calm = function(r, s) {
@@ -627,7 +647,6 @@ Cmd.prototype.calm = function(r, s) {
 		s.emit('msg', {msg: 'You do not possess that kind of power.', styleClass: 'error' });	
 		return Character.prompt(s);
 	}
-}
-
+};
 
 module.exports.cmd = new Cmd();

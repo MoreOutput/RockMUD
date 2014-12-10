@@ -36,7 +36,7 @@ Combat.prototype.begin = function(s, target, fn) {
 			return s.emit('msg', {msg: 'You swing and miss ' +  target.short, styleClass: 'player-miss'});
 		}
 	});
-}
+};
 
 /*
 * The AC roll for the attacker
@@ -55,7 +55,7 @@ Combat.prototype.attackerRound = function(s, target, fn) {
 			return fn(s, target);	
 		}
 	});
-}
+};
 
 /*
 * The AC roll for the target
@@ -74,7 +74,7 @@ Combat.prototype.targetRound = function(s, target, fn) {
 			});
 		}
 	});
-}
+};
 
 Combat.prototype.calXP = function(s, target, fn) {
 	if ((target.level) >= (s.player.level - 5)) {
@@ -93,7 +93,7 @@ Combat.prototype.calXP = function(s, target, fn) {
 	} else {
 		return fn(0);
 	}
-}
+};
 
 // Calculate the total damage done with a melee hit
 Combat.prototype.meleeDamage = function(attacker, opponent, weapon, fn) {
@@ -110,7 +110,7 @@ Combat.prototype.meleeDamage = function(attacker, opponent, weapon, fn) {
 			return weapon(total, weapon);
 		}	
 	});
-}
+};
 
 Combat.prototype.round = function(s, target, mod, fn) {
 	var combat = this;
@@ -144,7 +144,7 @@ Combat.prototype.round = function(s, target, mod, fn) {
 			}
 		});
 	}
-}
+};
 
 /*
 * If begin() was successful then we can move to running this function until:
@@ -164,6 +164,6 @@ Combat.prototype.fight = function(s, target, fn) {
 			return fn(false);
 		}
 	});
-}
+};
 
 module.exports.combat = new Combat();
