@@ -18,11 +18,11 @@ Skill.prototype.bash = function(r, s) {
 	var addWait = 10,
 	minLevel = 1; 
 
-	if (s.player.position === 'fighting' && s.player.class = 'fighter') {
+	if (s.player.position === 'fighting' && s.player.class === 'fighter') {
 		s.emit('msg', {msg: 'BASH!', styleClass: 'skill bash'});
 	} else {
 		// Not advanced enough to use the skill
 	}
-}
+};
 
 module.exports.skill = new Skill();

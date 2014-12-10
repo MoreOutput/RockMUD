@@ -30,6 +30,6 @@ Roller.prototype.roll = function(dNum, dSides, mod, fn) {
 	} else {
 		return Math.round(total);
 	}
-}
+};
 
 module.exports.roller = new Roller();
