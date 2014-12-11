@@ -457,6 +457,8 @@ Cmd.prototype.wear = function(r, s) {
 	}
 };
 
+Cmd.prototype.equip = Cmd.prototype.wear;
+
 /*
 Cmd.prototype.remove = function(r, s) {
 	if (r.msg !== '') {
