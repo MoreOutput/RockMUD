@@ -639,7 +639,7 @@ Character.prototype.checkInventory = function(r, s, fn) {
 		findItem = r.msg;
 	}
 
-	msgPatt = new RegExp('^' + findItem);
+	msgPatt = new RegExp(findItem);
 
 	items = s.player.items.filter(function(item, i) {
 		if (msgPatt.test(item.name.toLowerCase())) {

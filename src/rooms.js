@@ -311,7 +311,7 @@ Room.prototype.checkItem = function(r, s, fn) {
 		findItem = r.msg;
 	}
 
-	msgPatt = new RegExp('^' + findItem);
+	msgPatt = new RegExp(findItem);
 
 	this.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
 		items = roomObj.items.filter(function (item, i) {
