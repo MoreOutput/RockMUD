@@ -622,18 +622,33 @@ Character.prototype.thirst = function(s, fn) {
 // callback with boolean if item with the supplied string matches inventory item, and first matched item as
 // second argument if applicable
 Character.prototype.checkInventory = function(r, s, fn) {
-	var msgPatt = new RegExp('^' + r.msg),	
-	item = s.player.items.filter(function(item, i) {
+	var msgPatt,
+	items,
+	parts,
+	findIndex,
+	findItem;
+
+	// Split to account for target modifier (IE: 2.longsword)
+	parts = r.msg.split('.');
+	if(parts.length === 2) {
+		findIndex = parseInt(parts[0])-1;
+		findItem = parts[1];
+	}
+	else {
+		findIndex = 0;
+		findItem = r.msg;
+	}
+
+	msgPatt = new RegExp('^' + findItem);
+
+	items = s.player.items.filter(function(item, i) {
 		if (msgPatt.test(item.name.toLowerCase())) {
 			return true;
 		}			
 	});
 
-	// Can be extended later to support commands such as 'drop 2.sword' to drop the second match
-	// For now, return the first
-
-	if (item.length > 0) {
-		fn(true, item[0]);
+	if (items.length > 0 && findIndex in items) {
+		fn(true, items[findIndex]);
 	} else {
 		fn(false);
 	}

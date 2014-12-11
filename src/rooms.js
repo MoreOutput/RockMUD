@@ -246,27 +246,40 @@ Room.prototype.checkExit = function(r, s, fn) {
 };
 
 // does a string match any monsters in the room
-Room.prototype.checkMonster = function(r, s, fn) { 
-	var room = this;
+Room.prototype.checkMonster = function(r, s, fn) {
+	var msgPatt,
+	monsters,
+	parts,
+	findIndex,
+	findMonster;
 
-	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
-		var msgPatt = new RegExp('^' + r.msg),
-		i = 0;
-		
-		if (roomObj.monsters.length > 0) {
-			for (i; i < roomObj.monsters.length; i += 1) {
-				if (msgPatt.test(roomObj.monsters[i].name.toLowerCase())) {
-					return fn(true, roomObj.monsters[i]);
-				}
+	// Split to account for target modifier (IE: 2.boar)
+	parts = r.msg.split('.');
+	if(parts.length === 2) {
+		findIndex = parseInt(parts[0])-1;
+		findMonster = parts[1];
+	}
+	else {
+		findIndex = 0;
+		findMonster = r.msg;
+	}
+
+	msgPatt = new RegExp('^' + findMonster);
+
+	this.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
+		monsters = roomObj.monsters.filter(function (item, i) {
+			if (msgPatt.test(item.name.toLowerCase())) {
+				return true;
 			}
-			
-			return fn(false);
+		});
+
+		if (monsters.length > 0 && findIndex in monsters) {
+			fn(true, monsters[findIndex]);
 		} else {
-			return fn(false);
+			fn(false);
 		}
 	});	
 };
-
 
 // Remove a monster from a room
 Room.prototype.removeMonster = function(roomQuery, monster, fn) {
@@ -281,18 +294,34 @@ Room.prototype.removeMonster = function(roomQuery, monster, fn) {
 // callback with boolean if item with the supplied string matches room item, and first matched item as
 // second argument if applicable
 Room.prototype.checkItem = function(r, s, fn) {
-	var msgPatt = new RegExp('^' + r.msg),
-	item;
+	var msgPatt,
+	items,
+	parts,
+	findIndex,
+	findItem;
+
+	// Split to account for target modifier (IE: 2.longsword)
+	parts = r.msg.split('.');
+	if(parts.length === 2) {
+		findIndex = parseInt(parts[0])-1;
+		findItem = parts[1];
+	}
+	else {
+		findIndex = 0;
+		findItem = r.msg;
+	}
+
+	msgPatt = new RegExp('^' + findItem);
 
 	this.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
-		item = roomObj.items.filter(function (item) {
+		items = roomObj.items.filter(function (item, i) {
 			if (msgPatt.test(item.name.toLowerCase())) {
 				return true;
-			}	
+			}
 		});
 
-		if (item.length > 0) {
-			fn(true, item[0]);
+		if (items.length > 0 && findIndex in items) {
+			fn(true, items[findIndex]);
 		} else {
 			fn(false);
 		}
