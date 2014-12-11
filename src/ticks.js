@@ -2,7 +2,6 @@
 
 var fs = require('fs'),
 Character = require('./character').character,
-Room = require('./rooms').room,
 io = require('../server').io,
 players = require('../server').players,
 areas = require('../server').areas,

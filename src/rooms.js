@@ -282,19 +282,17 @@ Room.prototype.removeMonster = function(roomQuery, monster, fn) {
 // second argument if applicable
 Room.prototype.checkItem = function(r, s, fn) {
 	var msgPatt = new RegExp('^' + r.msg),
-		fnd,
-		room = this;
+	item;
 
-	room.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
-		fnd = Array.prototype.filter.call(roomObj.items, function (item) {
-			return msgPatt.test(item.name.toLowerCase());
+	this.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
+		item = roomObj.items.filter(function (item) {
+			if (msgPatt.test(item.name.toLowerCase())) {
+				return true;
+			}	
 		});
 
-		// Can be extended later to support commands such as 'drop 2.sword' to drop the second match
-		// For now, return the first
-
-		if (fnd.length > 0) {
-			fn(true, fnd[0]);
+		if (item.length > 0) {
+			fn(true, item[0]);
 		} else {
 			fn(false);
 		}

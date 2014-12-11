@@ -574,7 +574,7 @@ Cmd.prototype.xyzzy = function(s) {
 		roomid: s.player.roomid,
 		styleClass: 'error'
 	}, true, function() {
-		s.emit('msg', {msg: 'Nothing happens!', styleClass: 'error' });
+		s.emit('msg', {msg: 'Nothing happens, why would it?', styleClass: 'error' });
 
 		return Character.prompt(s);
 	});

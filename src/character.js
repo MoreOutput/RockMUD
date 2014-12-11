@@ -617,23 +617,23 @@ Character.prototype.thirst = function(s, fn) {
 		
 		fn();
 	}
-}
+};
 
 // callback with boolean if item with the supplied string matches inventory item, and first matched item as
 // second argument if applicable
 Character.prototype.checkInventory = function(r, s, fn) {
-	var msgPatt = new RegExp('^' + r.msg),
-	fnd;
-
-	fnd = Array.prototype.filter.call(s.player.items,function(item) {
-		return msgPatt.test(item.name.toLowerCase());
+	var msgPatt = new RegExp('^' + r.msg),	
+	item = s.player.items.filter(function(item, i) {
+		if (msgPatt.test(item.name.toLowerCase())) {
+			return true;
+		}			
 	});
 
 	// Can be extended later to support commands such as 'drop 2.sword' to drop the second match
 	// For now, return the first
 
-	if(fnd.length > 0) {
-		fn(true,fnd[0]);
+	if (item.length > 0) {
+		fn(true, item[0]);
 	} else {
 		fn(false);
 	}
@@ -747,7 +747,7 @@ Character.prototype.wear = function(r, s, item, fn) {
 			}
 		} 
 	}
-} 
+};
 
 Character.prototype.getLoad = function(s, fn) {
 	var load = Math.round((s.player.str + s.player.con / 4) * 10);
