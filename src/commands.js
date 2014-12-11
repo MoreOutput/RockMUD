@@ -147,6 +147,8 @@ Cmd.prototype.get = function(r, s, fn) {
 	}
 };
 
+Cmd.prototype.take = Cmd.prototype.get;
+
 Cmd.prototype.drop = function(r, s) {
 	if (r.msg !== '') {
 		Character.checkInventory(r, s, function(fnd, item) {
