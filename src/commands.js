@@ -184,6 +184,7 @@ Cmd.prototype.kill = function(r, s) {
 		if (fnd) {
 			Combat.begin(s, target, function(contFight, target) { // the first round qualifiers
 				var combatInterval;
+				Character.prompt(s);
 				
 				if (contFight) {
 					// Combat Loop
@@ -204,11 +205,12 @@ Cmd.prototype.kill = function(r, s) {
 											Room.addCorpse(s, target, function(corpse) {
 												Combat.calXP(s, target, function(earnedXP) {
 													s.player.position = 'standing';
+													s.player.wait = 0;
 
 													if (earnedXP > 0) {
 														s.emit('msg', {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
 													} else {
-														s.emit('msg', {msg: 'You won, but learned nothing.', styleClass: 'victory'});
+														s.emit('msg', {msg: 'You won but learned nothing.', styleClass: 'victory'});
 													}
 												});
 											});

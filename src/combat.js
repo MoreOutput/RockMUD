@@ -17,7 +17,7 @@ You swing and miss a Red Dragon with barbaric intensity (14)
 
 /*
 * Starting combat, begin() much return true and the target node for a fight to continue
-* otherwise both parties are left in the state prior.
+* otherwise both parties are left in the state prior. Beginning combat does not add Wait.
 */
 Combat.prototype.begin = function(s, target, fn) {
 	var combat = this;
@@ -116,7 +116,12 @@ Combat.prototype.round = function(s, target, mod, fn) {
 	var combat = this;
 	// Is a player attacking something
 	if (s.player) {
-		console.log('Character Target Round');
+		if (s.player.wait > 0) {
+			s.player.wait -= 1;
+		} else {
+			s.player.wait = 0;
+		}
+		
 		Character.getWeapons(s.player, function(weapons) {
 			var i = 0;
 			for (i; i < weapons.length; i += 1) {
@@ -133,7 +138,6 @@ Combat.prototype.round = function(s, target, mod, fn) {
 			}
 		});
 	} else {
-		console.log('MOB Round');
 		Character.getWeapons(s, function(weapons) {
 			var i = 0;
 			for (i; i < weapons.length; i += 1) {
