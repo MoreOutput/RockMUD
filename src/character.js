@@ -101,10 +101,20 @@ Character.prototype.getPassword = function(s, fn) {
 								}
 							});
 						
-							character.motd(s, function() {		
-								Room.getRoom(s, function() {
-				  					fn(s);
-									return character.prompt(s);
+							character.motd(s, function() {
+								Room.getRoomObject({
+									area: s.player.area,
+									id: s.player.roomid
+								}, function(roomObj) {
+									Room.getDisplayHTML(roomObj, function(displayHTML) {
+										s.emit('msg', {
+											msg: displayHTML, 
+											styleClass: 'room'
+										});
+
+										fn(s);
+										return character.prompt(s);
+									});
 								});
 							});
 						} else {
@@ -338,8 +348,10 @@ Character.prototype.create = function(r, s, fn) {
 								
 								character.motd(s, function() {
 									fn(s);
-									Room.getRoom(s);			
-									character.prompt(s);
+									Room.getRoomDisplay(s, function() {
+										character.prompt(s);
+									});			
+									
 								});
 							});
 						

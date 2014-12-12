@@ -42,14 +42,12 @@
 
 				return parseCmd(r);
 			},
-			
 			parseCmd = function(r) {
 				if (r.msg !== undefined) {
 					r.msg = string.trim(r.msg.replace(/ /g, ' '));
 					ws.emit(r.emit, r);
 				}
 			},
-
 			changeMudState = function(state) {
 				domAttr.set(dom.byId('cmd'), 'mud-state', state);
 			},		

@@ -22,48 +22,53 @@ Cmd.prototype.move = function(r, s) {
 	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping' && s.player.cmv > 5 && s.player.wait === 0) {
 		r.cmd = r.msg;
 
-		Room.checkExit(r, s, function(fnd, roomid) {
-			if (fnd) {
-				Room.msgToRoom({
-					msg: s.player.name + ' the ' + s.player.race + ' walks ' + r.cmd + '.', 
-					playerName: s.player.name, 
-					roomid: s.player.roomid
-				}, true);
+		Room.getRoomObject({
+			area: s.player.area,
+			id: s.player.roomid
+		}, function(roomObj) {
+			Room.checkExit(roomObj, r, function(fnd) {
+				if (fnd) {
+					Room.msgToRoom({
+						msg: s.player.name + ' the ' + s.player.race + ' walks ' + r.cmd + '.', 
+						playerName: s.player.name, 
+						roomid: s.player.roomid
+					}, true);
 
-				s.player.cmv = Math.round((s.player.cmv - (12 - s.player.dex/4)));	
-				s.player.roomid = roomid;
+					s.player.cmv = Math.round((s.player.cmv - (12 - s.player.dex/4)));	
+					s.player.roomid = roomObj.id;
 
-				Character.updatePlayer(s);
-
-				Room.getRoomObject({
-					area: s.player.area,
-					id: roomid
-				}, function(roomObj) {
 					if (roomObj.terrianMod) {
 						s.player.wait = roomObj.terrianMod;
 					} else {
 						s.player.wait = 1;
 					}
 
-					Room.getRoom(s, function(room) {
+					Character.updatePlayer(s);
+
+					Room.getDisplayHTML(roomObj, function(displayHTML) {
+						s.emit('msg', {
+							msg: displayHTML, 
+							styleClass: 'room'
+						});
+
 						Room.msgToRoom({
 							msg: s.player.name + ' the ' + s.player.race + ' enters the room.', 
 							playerName: s.player.name, 
-							roomid: roomid
+							roomid: roomObj.id
 						}, true, function() {
 							return Character.prompt(s);
 						});
 					});
-				});
-			} else {
-				s.emit('msg', {
-					msg: 'There is no exit in that direction.', 
-					styleClass: 'error'
-				});
+				} else {
+					s.emit('msg', {
+						msg: 'There is no exit in that direction.', 
+						styleClass: 'error'
+					});
 
-				return Character.prompt(s);
-			}
-		}); 
+					return Character.prompt(s);
+				}
+			});
+		});
 	} else if (s.player.wait !== 0) {
 		s.emit('msg', {
 			msg: 'You cant move that fast!', 
@@ -185,7 +190,7 @@ Cmd.prototype.kill = function(r, s) {
 			Combat.begin(s, target, function(contFight, target) { // the first round qualifiers
 				var combatInterval;
 				Character.prompt(s);
-				
+
 				if (contFight) {
 					// Combat Loop
 					combatInterval = setInterval(function() {
@@ -238,8 +243,18 @@ Cmd.prototype.kill = function(r, s) {
 
 Cmd.prototype.look = function(r, s) {
 	if (r.msg === '') { 
-		Room.getRoom(s, function(room) {
-			return Character.prompt(s);
+		Room.getRoomObject({
+			area: s.player.area,
+			id: s.player.roomid
+		}, function(roomObj) {
+			Room.getDisplayHTML(roomObj, function(displayHTML) {
+				s.emit('msg', {
+					msg: displayHTML, 
+					styleClass: 'room'
+				});
+
+				return Character.prompt(s);
+			});
 		});
 	} else {
 		// Gave us a noun, so lets see if something matches it in the room. 

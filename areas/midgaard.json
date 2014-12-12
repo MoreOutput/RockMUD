@@ -9,6 +9,7 @@
 		{
 			"id" : 1,
 			"title" : "Town Square",
+			"area": "Midgaard",
 			"content" : "Welcome to the first room.",
 			"exits" : [
 				{
@@ -160,6 +161,7 @@
 		{
 			"id" : 2,
 			"title" : "North of Town Square",
+			"area": "Midgaard",
 			"content" : "Richly adorned houses line the pebbled street that stretches to the north and south.",
 			"exits" : [
 				{
@@ -188,6 +190,7 @@
 		{
 			"id" : 3,
 			"title" : "East of Town Square",
+			"area": "Midgaard",
 			"content" : "Beautiful shops line the pebbled street that leads to the east and west.",
 			"terrian" : "stone-road",
 			"terrianMod": 2,
@@ -204,6 +207,7 @@
 		{
 			"id" : 4,
 			"title" : "South of Town Square",
+			"area": "Midgaard",
 			"content" : "The pebbled street leads north and south from here.",
 			"exits" : [
 				{
@@ -218,6 +222,7 @@
 		{
 			"id" : 5,
 			"title" : "West of Town Square",
+			"area": "Midgaard",
 			"content" : "Beautiful shops line the pebbled street that stretches to the east and west.",
 			"exits" : [
 				{
