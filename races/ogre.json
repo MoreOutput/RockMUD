@@ -1,0 +1,11 @@
+{
+    "name": "Ogre",
+    "str": 3,
+    "int": -2,
+    "dex": -1,
+    "hp": 10,
+    "attackType": {
+        "type": "smash",
+        "mod": 2
+    }
+}

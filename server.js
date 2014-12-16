@@ -1,6 +1,5 @@
 /*
- * RockMUD a NodeJS WebSockets Mud Engine
- * Rocky Bevins, 2014 (moreoutput@gmail.com)
+ * Rocky Bevins (moreoutput@gmail.com)
 */
 'use strict';
 

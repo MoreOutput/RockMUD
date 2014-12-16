@@ -1,0 +1,9 @@
+{
+    "name": "Elf",
+    "int": 2,
+    "con": -1,
+    "attackType": {
+        "type": "punch",
+        "mod": 1
+    }
+}

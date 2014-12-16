@@ -1,0 +1,9 @@
+{
+    "name": "Human",
+    "con": 1,
+    "wis": 1,
+    "attackType": {
+        "type": "punch",
+        "mod": 1
+    }
+}

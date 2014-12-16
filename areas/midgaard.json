@@ -57,7 +57,8 @@
 					"ac": 6,
 					"items": [],
 					"eq": [],
-					"flags": []
+					"flags": [],
+					"behaviors": ["animal"]
 				}, {
 					"name": "Boar",
 					"area": "Midgaard",

@@ -1,0 +1,10 @@
+{
+    "name": "Dwarf",
+    "con": 2,
+    "int": -1,
+    "hp": 5,
+    "attackType": {
+        "type": "punch",
+        "mod": 1
+    }
+}

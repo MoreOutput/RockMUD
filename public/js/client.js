@@ -80,7 +80,6 @@
 
 				return fn(cmd + ' ' + msg);	
 			},
-
 			frmH = on(dom.byId('console'), 'submit', function (e) {				
 				var node = dom.byId('cmd'),
 				messageNodes = [],
