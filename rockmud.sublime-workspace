@@ -439,7 +439,7 @@
 			"file": "server.js",
 			"settings":
 			{
-				"buffer_size": 3793,
+				"buffer_size": 3696,
 				"line_ending": "Windows"
 			}
 		},
@@ -447,7 +447,7 @@
 			"file": "config.js",
 			"settings":
 			{
-				"buffer_size": 1552,
+				"buffer_size": 250,
 				"line_ending": "Windows"
 			}
 		},
@@ -455,7 +455,7 @@
 			"file": "areas/midgaard.json",
 			"settings":
 			{
-				"buffer_size": 2831,
+				"buffer_size": 5229,
 				"line_ending": "Windows"
 			}
 		},
@@ -463,7 +463,7 @@
 			"file": "players/rocky.json",
 			"settings":
 			{
-				"buffer_size": 2231,
+				"buffer_size": 5678,
 				"line_ending": "Unix"
 			}
 		},
@@ -471,7 +471,7 @@
 			"file": "src/combat.js",
 			"settings":
 			{
-				"buffer_size": 3658,
+				"buffer_size": 4515,
 				"line_ending": "Windows"
 			}
 		},
@@ -479,7 +479,7 @@
 			"file": "src/character.js",
 			"settings":
 			{
-				"buffer_size": 14192,
+				"buffer_size": 19451,
 				"line_ending": "Windows"
 			}
 		},
@@ -487,7 +487,14 @@
 			"file": "src/rooms.js",
 			"settings":
 			{
-				"buffer_size": 7606,
+				"buffer_size": 8793,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"settings":
+			{
+				"buffer_size": 0,
 				"line_ending": "Windows"
 			}
 		},
@@ -495,7 +502,7 @@
 			"file": "src/commands.js",
 			"settings":
 			{
-				"buffer_size": 12531,
+				"buffer_size": 17655,
 				"line_ending": "Windows"
 			}
 		},
@@ -503,7 +510,7 @@
 			"file": "README.md",
 			"settings":
 			{
-				"buffer_size": 1371,
+				"buffer_size": 1436,
 				"line_ending": "Windows"
 			}
 		},
@@ -511,7 +518,7 @@
 			"file": "src/ticks.js",
 			"settings":
 			{
-				"buffer_size": 2279,
+				"buffer_size": 2516,
 				"line_ending": "Windows"
 			}
 		},
@@ -519,7 +526,7 @@
 			"file": "src/dice.js",
 			"settings":
 			{
-				"buffer_size": 412,
+				"buffer_size": 801,
 				"line_ending": "Windows"
 			}
 		},
@@ -535,7 +542,7 @@
 			"file": "public/js/client.js",
 			"settings":
 			{
-				"buffer_size": 2799,
+				"buffer_size": 3461,
 				"line_ending": "Windows"
 			}
 		},
@@ -543,7 +550,7 @@
 			"file": "public/css/styles.css",
 			"settings":
 			{
-				"buffer_size": 2969,
+				"buffer_size": 4172,
 				"line_ending": "Windows"
 			}
 		},
@@ -551,7 +558,7 @@
 			"file": "public/index.html",
 			"settings":
 			{
-				"buffer_size": 1289,
+				"buffer_size": 1077,
 				"line_ending": "Windows"
 			}
 		},
@@ -559,7 +566,7 @@
 			"file": "help/kill.json",
 			"settings":
 			{
-				"buffer_size": 296,
+				"buffer_size": 278,
 				"line_ending": "Windows"
 			}
 		}
@@ -906,15 +913,15 @@
 					"file": "server.js",
 					"settings":
 					{
-						"buffer_size": 3793,
+						"buffer_size": 3696,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1071,
-								1071
+								0,
+								0
 							]
 						],
 						"settings":
@@ -934,15 +941,15 @@
 					"file": "config.js",
 					"settings":
 					{
-						"buffer_size": 1552,
+						"buffer_size": 250,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								248,
-								248
+								0,
+								0
 							]
 						],
 						"settings":
@@ -951,7 +958,7 @@
 							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
-						"translation.y": 210.0,
+						"translation.y": 195.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -961,15 +968,15 @@
 					"file": "areas/midgaard.json",
 					"settings":
 					{
-						"buffer_size": 2831,
+						"buffer_size": 5229,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1031,
-								1031
+								0,
+								0
 							]
 						],
 						"settings":
@@ -988,15 +995,15 @@
 					"file": "players/rocky.json",
 					"settings":
 					{
-						"buffer_size": 2231,
+						"buffer_size": 5678,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1597,
-								1597
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1014,7 +1021,7 @@
 			]
 		},
 		{
-			"selected": 2,
+			"selected": 3,
 			"sheets":
 			[
 				{
@@ -1022,15 +1029,15 @@
 					"file": "src/combat.js",
 					"settings":
 					{
-						"buffer_size": 3658,
+						"buffer_size": 4515,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								841,
-								841
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1049,21 +1056,21 @@
 					"file": "src/character.js",
 					"settings":
 					{
-						"buffer_size": 14192,
+						"buffer_size": 19451,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1667,
-								1667
+								0,
+								0
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"translate_tabs_to_spaces": true
+							"translate_tabs_to_spaces": false
 						},
 						"translation.x": 0.0,
 						"translation.y": 2630.0,
@@ -1076,15 +1083,15 @@
 					"file": "src/rooms.js",
 					"settings":
 					{
-						"buffer_size": 7606,
+						"buffer_size": 8793,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5250,
-								5250
+								4308,
+								4308
 							]
 						],
 						"settings":
@@ -1097,6 +1104,31 @@
 						"zoom_level": 1.0
 					},
 					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
 				}
 			]
 		},
@@ -1105,19 +1137,19 @@
 			"sheets":
 			[
 				{
-					"buffer": 7,
+					"buffer": 8,
 					"file": "src/commands.js",
 					"settings":
 					{
-						"buffer_size": 12531,
+						"buffer_size": 17655,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								724,
-								785
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1132,19 +1164,19 @@
 					"type": "text"
 				},
 				{
-					"buffer": 8,
+					"buffer": 9,
 					"file": "README.md",
 					"settings":
 					{
-						"buffer_size": 1371,
+						"buffer_size": 1436,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								288,
-								288
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1158,19 +1190,19 @@
 					"type": "text"
 				},
 				{
-					"buffer": 9,
+					"buffer": 10,
 					"file": "src/ticks.js",
 					"settings":
 					{
-						"buffer_size": 2279,
+						"buffer_size": 2516,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								117,
-								117
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1191,19 +1223,19 @@
 			"sheets":
 			[
 				{
-					"buffer": 10,
+					"buffer": 11,
 					"file": "src/dice.js",
 					"settings":
 					{
-						"buffer_size": 412,
+						"buffer_size": 801,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								90,
-								90
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1218,7 +1250,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 11,
+					"buffer": 12,
 					"file": "motd.json",
 					"settings":
 					{
@@ -1245,11 +1277,11 @@
 					"type": "text"
 				},
 				{
-					"buffer": 12,
+					"buffer": 13,
 					"file": "public/js/client.js",
 					"settings":
 					{
-						"buffer_size": 2799,
+						"buffer_size": 3461,
 						"regions":
 						{
 						},
@@ -1272,11 +1304,11 @@
 					"type": "text"
 				},
 				{
-					"buffer": 13,
+					"buffer": 14,
 					"file": "public/css/styles.css",
 					"settings":
 					{
-						"buffer_size": 2969,
+						"buffer_size": 4172,
 						"regions":
 						{
 						},
@@ -1298,19 +1330,19 @@
 					"type": "text"
 				},
 				{
-					"buffer": 14,
+					"buffer": 15,
 					"file": "public/index.html",
 					"settings":
 					{
-						"buffer_size": 1289,
+						"buffer_size": 1077,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								89,
-								89
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1325,19 +1357,19 @@
 					"type": "text"
 				},
 				{
-					"buffer": 15,
+					"buffer": 16,
 					"file": "help/kill.json",
 					"settings":
 					{
-						"buffer_size": 296,
+						"buffer_size": 278,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								19,
-								19
+								0,
+								0
 							]
 						],
 						"settings":
@@ -1393,7 +1425,7 @@
 		"cols":
 		[
 			0.0,
-			0.2248757939,
+			0.2886257939,
 			0.503793668985,
 			0.866868581888,
 			1.0

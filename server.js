@@ -50,6 +50,7 @@ module.exports.time = fs.readFile('./data/time.json');
 var Character = require('./src/character').character,
 Cmds = require('./src/commands').cmd,
 Skills = require('./src/skills').skill,
+World = require('./src/world').world,
 Ticks = require('./src/ticks');
 
 server.listen(cfg.port);

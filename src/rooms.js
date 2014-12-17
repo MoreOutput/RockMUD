@@ -5,7 +5,7 @@ io = require('../server').io,
 players = require('../server').players,
 areas = require('../server').areas,
 
-Area = function() {
+Room = function() {
  
 };
 
@@ -92,7 +92,7 @@ Room.prototype.getDisplayHTML = function(roomObj, fn) {
 	
 	if (roomObj.playersInRoom.length > 0 || roomObj.monsters.length > 0) {
 		roomStr += '<li>Here:' + roomObj.playersInRoom.toString().replace(/,/g, '. ') + 
-		' ' + monsters.toStri ng().replace(/,/g, '. ') + '</li>';
+		' ' + monsters.toString().replace(/,/g, '. ') + '</li>';
 	}
 	
 	if (roomObj.items.length > 0) {
@@ -377,17 +377,42 @@ Room.prototype.msgToArea = function(msgOpt, exclude, fn) {
 	Example query object:
 	{
 		data: 'items', // Room property
-		value: '' // Required value
+		value: '' // Required value, r.msg
 	}
 	
 
 	The methids line getItemFromRoom above should call this function
 */
 Room.prototype.search = function(roomObj, query, fn) {
-	var results = [];
+	var msgPatt,
+	results,
+	parts,
+	findIndex,
+	toFind;
 
-	if (roomObj[query.data]) {
+	// Split to account for target modifier (IE: 2.boar)
+	parts = query.value.split('.');
 
+	if (parts.length === 2) {
+		findIndex = parseInt(parts[0])-1;
+		toFind = parts[1];
+	} else {
+		findIndex = 0;
+		toFind = query.value;
+	}
+
+	msgPatt = new RegExp('^' + toFind);
+
+	results = roomObj[query.value].filter(function (item, i) {
+		if (msgPatt.test(item.name.toLowerCase())) {
+			return true;
+		}
+	});
+
+	if (results.length > 0 && findIndex in results) {
+		fn(true, results[findIndex]);
+	} else {
+		fn(false, results);
 	}
 };
 

@@ -4,8 +4,13 @@ var Dice = require('./dice').roller,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = function() {
-	this.adjectives = ['barbaric', 'great', 'mighty', 'awesome'];
-	this.abstractNouns = ['hatred', 'intensity', 'weakness'];
+	this.adjectives = [{
+		value: 'barbaric', 
+		minLevel: 1, 
+		minDamage: 10,
+		maxDamage: 20,
+		className: 'dmg-adjective dmg-barbaric'
+	}];
 };
 
 /*
