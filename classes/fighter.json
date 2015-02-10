@@ -11,7 +11,8 @@
         {
             "name": "bash",
             "train": 65,
-            "type": "melee"
+            "type": "melee",
+            "wait": 1
         }
     ],
     "skillList": [
@@ -20,7 +21,6 @@
             "mod": 1,
             "level": 1,
             "maxTrain": 95,
-            "wait": 1,
             "type": "melee"
         }
     ]

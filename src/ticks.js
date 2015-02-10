@@ -2,21 +2,17 @@
 
 var fs = require('fs'),
 Character = require('./character').character,
-io = require('../server').io,
-players = require('../server').players,
-areas = require('../server').areas,
-time = require('../server').time,
-timeConfig = require('../config').server.gameTime;
+World = require('./world').world;
 
 (function() {
 	// Automated wait-state removal
 	setInterval(function() { 
 		var i = 0,
 		s;
-
-		if (players.length > 0) {	
-			for (i; i < players.length; i += 1) {
-				s = io.sockets.connected[players[i].sid];
+		
+		if (World.players.length > 0) {	
+			for (i; i < World.players.length; i += 1) {
+				s = World.io.sockets.connected[World.players[i].sid];
 
 				if (s.player.position === 'sleeping' || 
 					s.player.position === 'resting' || 
@@ -32,6 +28,10 @@ timeConfig = require('../config').server.gameTime;
 		}	
 	}, 800);	
 
+	// Fire behaviors every 60000ms (1 min)
+
+
+/*
 	// Regen, Hunger and Thirst Tick 
 	setInterval(function() { 
 		var i = 0,
@@ -107,7 +107,7 @@ timeConfig = require('../config').server.gameTime;
 			});	
 		}	
 	}, 50000);
-
+*/
 
 	// Time -- Increase minute, hours, days and years.
 	// time data is saved to data/time.json every 12 hours

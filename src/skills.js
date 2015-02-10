@@ -15,10 +15,13 @@ Skill = function() {
 * Melee Skills
 */
 Skill.prototype.bash = function(r, s) {
-	var addWait = 10,
+	var addWait = 2,
+	msgToPlayer = '',
+	msgToRoom = '',
+	msgToTarget = '',
 	minLevel = 1; 
 
-	if (s.player.position === 'fighting' && s.player.class === 'fighter') {
+	if (s.player.position === 'fighting') {
 		s.emit('msg', {msg: 'BASH!', styleClass: 'skill bash'});
 	} else {
 		// Not advanced enough to use the skill

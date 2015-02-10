@@ -1,39 +1,19 @@
 'use strict';
-
 var fs = require('fs'),
-io = require('../server').io,
-players = require('../server').players,
-areas = require('../server').areas,
+World = require('./world').world,
+io = World.io,
+players = World.players,
+time = World.time,
+areas = World.areas,
 
 Room = function() {
  
 };
 
-// Returns an entire area, uses rollArea to roll dynamic values
-Room.prototype.loadArea = function(areaName, fn) {
-	var room = this;
-	room.checkArea(areaName, function(fnd, area) {
-		if (fnd) {
-			return fn(area);
-		} else {
-			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
-				area = JSON.parse(area);
-				
-				area.monsters.forEach(function(mob, i) {
-					area.monsters[i] = room.rollMob(mob);
-				});
-
-				area.monsters.forEach(function(item, i) {
-					area.items[i] = room.rollMob(item);
-				});
-			});
-		}
-	});
-};
-
 // Rolls values for Mobs (including their equipment)
 Room.prototype.rollMob = function(mob, fn) {
 	var diceMod, // Added to all generated totals 
+	refId = Math.random().toString().replace('0.', ''),
 	hp,
 	mv, 
 	mana,
@@ -46,35 +26,31 @@ Room.prototype.rollMob = function(mob, fn) {
 	raceObj,
 	ac;
 
-	if (!item.modRace && item.modRace !== false) {
-		race = world.getRace(mob.race);
-	} else {
-		race = {name: item.race};
-	}
+	mob.refId = refId;
 
-	if (race.name) {
+	World.getRace(mob.race, function(raceObj, err) {
+		if (err) {
+			
+		}
 		
-	}
+		World.merge(mob, raceObj, function(mob, err) {
+			if (err) {
+
+			}
+
+			if (mob.templates && mob.templates.length > 0) {
+
+			}		
+		});
+	});
+
+
+	return fn(mob);
 };
 
 // Setup Items in an area
-Room.prototype.setupItems = function(area, fn) {
+Room.prototype.rollItem = function(item, fn) {
 
-};
-
-// Return boolean after checking if the area is in areas[]
-Room.prototype.checkArea = function(areaName, fn) {
-	if (areas.length > 0) {
-		areas.forEach(function(area) {
-			if (areaName === area.name.toLowerCase()) {
-				return fn(true, area);
-			} else {
-				return fn(false);
-			}
-		});
-	} else {
-		return fn(false);
-	}
 };
 
 // Returns a string (html) representation of a room for
@@ -131,33 +107,6 @@ Room.prototype.updateArea = function(areaName, fn) {
 		}
 	}
 };
-
-/* Return a room in memory as an object, pass in the area name and the 
-room id {area: 'Midgaard', id: 1}. 
-
-Appends the playersInRoom property indicating the other players
-in the same room.
-*/
-Room.prototype.getRoomObject = function(areaQuery, fn) {
-	this.checkArea(areaQuery.area, function(fnd, area) {
-		var i = 0,
-		roomObj;
-		
-		if (fnd) { 
-			for (i; i < area.rooms.length; i += 1) {
-				if (area.rooms[i].id === areaQuery.id) {
-					roomObj = area.rooms[i];
-					room.getPlayersByRoomID(roomObj.id, function(playersInRoom) {
-						roomObj.playersInRoom = playersInRoom;
-						return fn(roomObj);
-					})		
-					
-				} 
-			}
-		}
-	});
-};
-
 
 // This needs to look like getItems() for returning a player obj based on room
 Room.prototype.getPlayersByRoomID = function(roomID, fn) {
@@ -239,41 +188,20 @@ Room.prototype.removeMonster = function(roomQuery, monster, fn) {
 	});
 };
 
-// callback with boolean if item with the supplied string matches room item, and first matched item as
-// second argument if applicable
-Room.prototype.checkItem = function(r, s, fn) {
-	var msgPatt,
-	items,
-	parts,
-	findIndex,
-	findItem;
-
-	// Split to account for target modifier (IE: 2.longsword)
-	parts = r.msg.split('.');
-
-	if (parts.length === 2) {
-		findIndex = parseInt(parts[0])-1;
-		findItem = parts[1];
-	} else {
-		findIndex = 0;
-		findItem = r.msg;
+/*
+	{
+		data: 'items', // Room property
+		value: '' // Required value, r.msg
 	}
+*/
+Room.prototype.checkItem = function(r, s, fn) {
+	console.log(this.search({
+		data: 'items',
+		value: r.msg }));
 
-	msgPatt = new RegExp('^' + findItem);
-
-	this.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
-		items = roomObj.items.filter(function (item, i) {
-			if (msgPatt.test(item.name.toLowerCase())) {
-				return true;
-			}
-		});
-
-		if (items.length > 0 && findIndex in items) {
-			fn(true, items[findIndex]);
-		} else {
-			fn(false);
-		}
-	});
+	return this.search({
+		data: 'items',
+		value: r.msg}, fn);
 };
 
 Room.prototype.addCorpse = function(s, monster, fn) {
@@ -386,12 +314,10 @@ Room.prototype.msgToArea = function(msgOpt, exclude, fn) {
 Room.prototype.search = function(roomObj, query, fn) {
 	var msgPatt,
 	results,
-	parts,
+	// Split to account for target modifier (IE: 2.boar)
+	parts = query.value.split('.'),
 	findIndex,
 	toFind;
-
-	// Split to account for target modifier (IE: 2.boar)
-	parts = query.value.split('.');
 
 	if (parts.length === 2) {
 		findIndex = parseInt(parts[0])-1;
@@ -409,11 +335,7 @@ Room.prototype.search = function(roomObj, query, fn) {
 		}
 	});
 
-	if (results.length > 0 && findIndex in results) {
-		fn(true, results[findIndex]);
-	} else {
-		fn(false, results);
-	}
+	return results;
 };
 
 Room.prototype.remove = function(roomObj, itemID, roomArray, fn) {

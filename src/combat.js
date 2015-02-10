@@ -4,13 +4,11 @@ var Dice = require('./dice').roller,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = function() {
-	this.adjectives = [{
-		value: 'barbaric', 
-		minLevel: 1, 
-		minDamage: 10,
-		maxDamage: 20,
-		className: 'dmg-adjective dmg-barbaric'
-	}];
+	/*
+	fs.readFile('./templates/messages/combat.json', function (err, r) {
+		world.combatMessages = JSON.parse(r);
+	});
+	*/	
 };
 
 /*
@@ -174,5 +172,9 @@ Combat.prototype.fight = function(s, target, fn) {
 		}
 	});
 };
+
+Combat.prototype.createMessage = function(s, target, fn) {
+	var messagePatt;
+}
 
 module.exports.combat = new Combat();

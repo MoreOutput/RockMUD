@@ -6,13 +6,14 @@
 
 var fs = require('fs'),
 util = require('util'),
+World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
-io = require('../server').io,
-players = require('../server').players,
-time = require('../server').time,
-areas = require('../server').areas,
+io = World.io,
+players = World.players,
+time = World.time,
+areas = World.areas,
 
 Cmd = function () {
 
@@ -22,10 +23,7 @@ Cmd.prototype.move = function(r, s) {
 	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping' && s.player.cmv > 5 && s.player.wait === 0) {
 		r.cmd = r.msg;
 
-		Room.getRoomObject({
-			area: s.player.area,
-			id: s.player.roomid
-		}, function(roomObj) {
+		World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
 			Room.checkExit(roomObj, r, function(fnd) {
 				if (fnd) {
 					Room.msgToRoom({
@@ -591,7 +589,7 @@ Cmd.prototype.xyzzy = function(s) {
 		roomid: s.player.roomid,
 		styleClass: 'error'
 	}, true, function() {
-		s.emit('msg', {msg: 'Nothing happens, why would it?', styleClass: 'error' });
+		s.emit('msg', {msg: 'Nothing happens. Why would it?', styleClass: 'error' });
 
 		return Character.prompt(s);
 	});
@@ -657,7 +655,7 @@ Cmd.prototype.restore = function(r, s) {
 };
  
 // Stops all game combat, does not heal
-Cmd.prototype.calm = function(r, s) {
+Cmd.prototype.peace = function(r, s) {
 	if (s.player.role === 'admin') {
 
 	} else {

@@ -1,0 +1,18 @@
+{
+	"motd": "Entering RockMUD, try to use the following help commands if you're a mudding newbie: HELP CHANNELS, HELP NEWBIE, and HELP MOVEMENT",
+	"alerts": [
+		"Commands are not case sensitive.",
+		"Use the HELP command to find out more about RockMUDs Commands, Skills, and History",
+		"To attack something use the KILL command. See HELP KILL",
+		"You will die of starvation or thirst so keep up on your supplies. See HELP HUNGER",
+		"The more Strength you have the more damage your combat hits will do",
+		"Any skill can be learned by any class -- proficiency is another matter.",
+		"Use the (N)orth, (E)ast, (S)outh, (W)est, (U)p, and (D)own commands to move. See HELP MOVEMENT",
+		"Sleeping will aid in resource generation. See HELP SLEEP",
+		"Master communication by reading over HELP CHANNELS",
+		"Use the WHO command to see logged, visible, players.",
+		"Use the CHAT command to speak to everyone logged into the game. See HELP CHANNELS",
+		"Once you're dead, you're dead. Play wisely! See HELP DEATH",
+		"You may benefit from reading: HELP CHANNELS, HELP DEATH, HELP SKILLS, HELP NEWBIE, and HELP MOVEMENT"
+	]
+}

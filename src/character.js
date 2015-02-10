@@ -1,5 +1,5 @@
 /*
-* Characters.js controls everything dealing with a 'Character'; which includes in game creatures.
+* Characters.js controls everything dealing with a 'Character' which includes in game creatures.
 * No in game commands are defiend here; Commands.js does share some function names with this module, 
 * see: save().
 */
@@ -10,8 +10,8 @@ crypto = require('crypto'),
 Room = require('./rooms').room,
 Dice = require('./dice').roller,
 World = require('./world').world,
-players = require('../server').players,
-areas = require('../server').areas,
+players = World.players,
+areas = World.areas,
 
 Character = function () {
 
@@ -92,27 +92,24 @@ Character.prototype.getPassword = function(s, fn) {
 				if (s.player.password === hash) {
 					character.addPlayer(s, function(added, msg) {
 						if (added) {
-							Room.checkArea(s.player.area, function(fnd) {
-								if (!fnd) {
-									Room.getArea(s.player.area, function(area) {
-										areas.push(area);
-									});
-								}
-							});
-						
-							character.motd(s, function() {
-								Room.getRoomObject({
-									area: s.player.area,
-									id: s.player.roomid
-								}, function(roomObj) {
-									Room.getDisplayHTML(roomObj, function(displayHTML) {
-										s.emit('msg', {
-											msg: displayHTML, 
-											styleClass: 'room'
-										});
 
-										fn(s);
-										return character.prompt(s);
+							World.loadArea(s.player.area, function(area) {
+								World.motd(s, function() {
+									console.log(s.player.area);
+									console.log(s.player.roomid);
+									World.getRoomObject({
+										area: s.player.area,
+										id: s.player.roomid
+									}, function(roomObj) {
+										Room.getDisplayHTML(roomObj, function(displayHTML) {
+											s.emit('msg', {
+												msg: displayHTML, 
+												styleClass: 'room'
+											});
+
+											fn(s);
+											return character.prompt(s);
+										});
 									});
 								});
 							});
@@ -214,6 +211,7 @@ Character.prototype.create = function(r, s, fn) {
 		recall: 1, // id to recall to
 		description: 'A brand new citizen.',
 		reply: '',
+		verified: false,
 		following: '',
 		eq: [{
 			name: 'Head',
@@ -338,14 +336,14 @@ Character.prototype.create = function(r, s, fn) {
 							s.leave('creation'); // No longer creating the character so leave the channel and join the game
 							s.join('mud');		
 
-							Room.checkArea(s.player.area, function(fnd) {
+							World.checkArea(s.player.area, function(fnd) {
 								if (!fnd) {
-									Room.getArea(s.player.area, function(area) {
+									World.loadArea(s.player.area, function(area) {
 										areas.push(area);
 									});
 								}
 								
-								character.motd(s, function() {
+								World.motd(s, function() {
 									fn(s);
 									Room.getRoomDisplay(s, function() {
 										character.prompt(s);
@@ -431,7 +429,7 @@ Character.prototype.newCharacter = function(r, s, fn) {
 
 							if	(classes.length - 1 === i) {
 								s.emit('msg', {
-									msg: 'Great! Now time to select a class for ' + s.player.name + '. Pick one of the following: <ul>' + 
+									msg: 'Great, two more steps to go! Now time to select a class for ' + s.player.name + '. Pick one of the following: <ul>' + 
 									str + '</ul>', 
 									res: 'selectClass', 
 									styleClass: 'race-selection'
@@ -517,17 +515,6 @@ Character.prototype.classSelection = function(r, fn) {
 	}
 	
 	return fn(false)
-};
-
-Character.prototype.motd = function(s, fn) {	
-	fs.readFile('./motd.json', function (err, data) {
-		if (err) {
-			throw err;
-		}
-	
-		s.emit('msg', {msg : JSON.parse(data).motd, res: 'logged', styleClass: 'motd'});
-		return fn();
-	});
 };
 
 Character.prototype.save = function(s, fn) {
@@ -815,5 +802,6 @@ Character.prototype.prompt = function(s) {
 Character.prototype.level = function(s, fn) {
 
 };
+
 
 module.exports.character = new Character();

@@ -27,8 +27,8 @@ server = http.createServer(function (req, res) {
            	res.write(data);
            	res.end();
         });
-    } else if (req.url === '/client.js') {
-		fs.readFile('./public/js/client.js', function (err, data) {
+    } else if (req.url === '/rockmud-client.js') {
+		fs.readFile('./public/js/rockmud-client.js', function (err, data) {
 			if (err) {
 				throw err;
             }
@@ -39,102 +39,94 @@ server = http.createServer(function (req, res) {
         });
 	}
 }),
+World = require('./src/world').world,
 io = require('socket.io')(server);
 
-// considering referencing these within their respective modules, ex: Character.players rather than players[]
-module.exports.io = io; 
-module.exports.players = [];
-module.exports.areas = [];
-module.exports.time = fs.readFile('./data/time.json');
+World.setup(io, cfg, function(Character, Cmds, Skills) {
+	server.listen(cfg.port);
 
-var Character = require('./src/character').character,
-Cmds = require('./src/commands').cmd,
-Skills = require('./src/skills').skill,
-World = require('./src/world').world,
-Ticks = require('./src/ticks');
+	console.log(cfg.name + ' is ready to rock and roll on port ' + cfg.port);
 
-server.listen(cfg.port);
-
-io.on('connection', function (s) {
-	s.on('login', function (r) {	
-		var parseCmd = function(r, s) {
-			var cmdArr = r.msg.split(' ');	
-			r.cmd = cmdArr[0].toLowerCase();
-			r.msg = cmdArr.slice(1).join(' ');
-		
-			if (/[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
-				if (r.cmd !== '') {
-					if (r.cmd in Cmds) {
-						return Cmds[r.cmd](r, s);
-					} else if (r.cmd in Skills) {
-						return Skills[r.cmd](r, s);
+	io.on('connection', function (s) {
+		s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
+	
+		s.on('login', function (r) {	
+			var parseCmd = function(r, s) {
+				var cmdArr = r.msg.split(' ');	
+				r.cmd = cmdArr[0].toLowerCase();
+				r.msg = cmdArr.slice(1).join(' ').toLowerCase();
+			
+				if (/[`~@#$%^&*()-+={}[]|<>]+$/g.test(r.msg) === false) {
+					if (r.cmd !== '') {
+						if (r.cmd in Cmds) {
+							return Cmds[r.cmd](r, s);
+						} else if (r.cmd in Skills) {
+							return Skills[r.cmd](r, s);
+						/*} else if (r.cmd in Skills && r.msg === 'cast') {
+							return Spells[r.cmd](r, s); */
+						} else {
+							s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
+							return Character.prompt(s);
+						}
 					} else {
-						s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
 						return Character.prompt(s);
 					}
 				} else {
+					s.emit('msg', {msg: 'Invalid characters in command.'});
 					return Character.prompt(s);
 				}
-			} else {
-				s.emit('msg', {msg: 'Invalid characters in command.'});
-				return Character.prompt(s);
-			}
-		};
+			};
 
-		if (r.msg !== '') { // not checking slashes
-			return Character.login(r, s, function (name, s, fnd) {
-				if (fnd) {
-					s.join('mud'); // mud is one of two socket.io rooms, 'creation' the other				
-					Character.load(name, s, function (s) {						
-						Character.getPassword(s, function(s) {	
+			if (r.msg !== '') { // not checking slashes
+				return Character.login(r, s, function (name, s, fnd) {
+					if (fnd) {
+						s.join('mud'); // mud is one of two socket.io rooms, 'creation' the other			
+						Character.load(name, s, function (s) {						
+							Character.getPassword(s, function(s) {	
+								s.on('cmd', function (r) { 
+									parseCmd(r, s);
+								});
+							});
+						});
+					} else {
+						s.join('creation'); // Character creation is its own socket.io room, 'mud' the other
+						s.player = {name:name};					
+						
+						Character.newCharacter(r, s, function(s) {			
 							s.on('cmd', function (r) { 
 								parseCmd(r, s);
 							});
 						});
-					});
-				} else {
-					s.join('creation'); // Character creation is its own socket.io room, 'mud' the other
-					s.player = {name:name};					
-					
-					Character.newCharacter(r, s, function(s) {			
-						s.on('cmd', function (r) { 
-							parseCmd(r, s);
-						});
-					});
-				}
-			});
-		} else {
-			return s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
-		}
-    });
+					}
+				});
+			} else {
+				return s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
+			}
+	    });
 
-	// Quitting
-	s.on('quit', function () {
-		Character.save(s, function() {		
-			s.emit('msg', {
-				msg: 'Add a little to a little and there will be a big pile.',
-				emit: 'disconnect',
-				styleClass: 'logout-msg'
-			});
+		s.on('quit', function () {
+			Character.save(s, function() {		
+				s.emit('msg', {
+					msg: 'Add a little to a little and there will be a big pile.',
+					emit: 'disconnect',
+					styleClass: 'logout-msg'
+				});
 
-			s.leave('mud');
-			s.disconnect();
+				s.leave('mud');
+				s.disconnect();
+			});
 		});
-	});
 
-	// DC
-    s.on('disconnect', function () {
-		var i = 0;
-		if (s.player !== undefined) {
-			for (i; i < module.exports.players.length; i += 1) {	
-				if (module.exports.players[i].name === s.player.name) {
-					module.exports.players.splice(i, 1);	
+	    s.on('disconnect', function () {
+			var i = 0;
+			if (s.player !== undefined) {
+				for (i; i < world.players.length; i += 1) {	
+					if (world.players[i].name === s.player.name) {
+						world.players.splice(i, 1);	
+					}
 				}
 			}
-		}
+		});
 	});
-
-	s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 });
 
-console.log(cfg.name + ' is ready to rock and roll on port ' + cfg.port);
