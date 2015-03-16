@@ -241,10 +241,7 @@ Cmd.prototype.kill = function(r, s) {
 
 Cmd.prototype.look = function(r, s) {
 	if (r.msg === '') { 
-		Room.getRoomObject({
-			area: s.player.area,
-			id: s.player.roomid
-		}, function(roomObj) {
+		World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
 			Room.getDisplayHTML(roomObj, function(displayHTML) {
 				s.emit('msg', {
 					msg: displayHTML, 
@@ -516,18 +513,18 @@ Cmd.prototype.inventory = function(r, s) {
 Cmd.prototype.score = function(r, s) { 
 	var i = 0,
 	score = '<div class="score-name">' + s.player.name + 
-	' <div class="score-title">' + s.player.title + '</div></div>' +
+	'<span class="score-title">' + s.player.title + '</span></div>' +
 	'<ul class="score-info">' + 
-		'<li class="stat-hp">HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
+		'<li class="stat-hp first">HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
 		'<li class="stat-mana">Mana: ' + s.player.cmana + '/' + s.player.mana +'</li>' +
 		'<li class="stat-mv">Moves: ' + s.player.cmv + '/' + s.player.mv +'</li>' +
 		'<li class="stat-level">You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
 		'<li class="stat-xp">XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
 		'<li class="stat-position">Position: ' + s.player.position + '</li>' +
-		'<li class="stat-carry">Carrying ' + s.player.load + '/' + Character.getLoad(s) + ' pounds.</li>' +
+		'<li class="stat-carry last">Carrying ' + s.player.load + '/' + Character.getLoad(s) + ' pounds.</li>' +
 	'</ul>' +
 	'<ul class="score-stats">' + 
-		'<li class="stat-str">STR: ' + s.player.str + '</li>' +
+		'<li class="stat-str first">STR: ' + s.player.str + '</li>' +
 		'<li class="stat-wis">WIS: ' + s.player.wis + '</li>' +
 		'<li class="stat-int">INT: ' + s.player.int + '</li>' +
 		'<li class="stat-dex">DEX: ' + s.player.dex + '</li>' +
@@ -535,7 +532,7 @@ Cmd.prototype.score = function(r, s) {
 		'<li class="stat-armor">Armor: ' + s.player.ac + '</li>' +
 		'<li class="stat-gold">Gold: ' + s.player.gold + '</li>' +
 		'<li class="stat-hunger">Hunger: ' + s.player.hunger + '</li>' +
-		'<li class="stat-thirst">Thirst: ' + s.player.thirst + '</li>' +
+		'<li class="stat-thirst last">Thirst: ' + s.player.thirst + '</li>' +
 	'</ul>';
 
 	if (s.player.affects.length > 0) {

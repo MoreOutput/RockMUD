@@ -28,7 +28,7 @@ World = require('./world').world;
 		}	
 	}, 800);	
 
-	// Fire behaviors every 60000ms (1 min)
+	// Behaviors also have an indepentent tick here, called mobTick
 
 
 /*

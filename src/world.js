@@ -105,7 +105,7 @@ World.prototype.getTemplate = function(tempType, tempName, fn) {
 
 World.prototype.loadArea = function(areaName, fn) {
 	var world = this;
-
+	console.log('Call to load Area');
 	world.checkArea(areaName, function(fnd, area) {
 		if (fnd) {
 			return fn(area);
@@ -113,7 +113,7 @@ World.prototype.loadArea = function(areaName, fn) {
 			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
 				area = JSON.parse(area);
 				
-				areas.push(area);
+				world.areas.push(area);
 				
 				return fn(area);
 				
@@ -140,16 +140,29 @@ World.prototype.getArea = function(areaName, fn) {
 };
 
 World.prototype.getRoomObject = function(areaName, roomId, fn) {
-	var i = 0;
+	var world = this,
+	getRoomFromArea = function(area) {
+		var i = 0;
+		for (i; i < area.rooms.length; i += 1) {
+			if (area.rooms[i].id === roomId) {
+				room.getPlayersByRoomID(roomId, function(playersInRoom) {
+					area.rooms[i].playersInRoom = playersInRoom;
+					return area.rooms[i];
+				});
+			} 
+		}
+	};
 
-	for (i; i < area.rooms.length; i += 1) {
-		if (area.rooms[i].id === roomId) {
-			room.getPlayersByRoomID(area.rooms[i].id, function(playersInRoom) {
-				area.rooms[i].playersInRoom = playersInRoom;
-				return fn(area.rooms[i]);
+	world.checkArea(areaName, function(fnd, area) {
+		if (fnd) {
+			return fn(getRoomFromArea(area));
+		} else {
+			console.log('Why am I here');
+			world.loadArea(areaName, function(area) {
+				return fn(getRoomFromArea(area));
 			});
-		} 
-	}
+		}
+	});
 };
 
 World.prototype.checkArea = function(areaName, fn) {
@@ -175,11 +188,16 @@ World.prototype.motd = function(s, fn) {
 };
 
 /*
-	obj2 is merged into obj1, any matching properties with numbers are added together,
-	any matched array properties are merged, any slot with the value null in obj2
-	will be removed from obj1, and any slot in obj2 with the value of -1 will be set to 0.
+	obj2 is merged into obj1.
+	
+	combine:
+		true (default): By default any matching properties with numbers are added together,
+		any matched array properties are merged, any slot with the value null in obj2
+		will be removed from obj1, and any slot in obj2 with the value of -1 will be set to 0.
+		
+		false: All matching properties result in obj2 values (overrides obj1)
 */
-World.prototype.mergeObjects = function(obj1, obj2, fn) {
+World.prototype.mergeObjects = function(obj1, obj2, combine, fn) {
 
 }
 

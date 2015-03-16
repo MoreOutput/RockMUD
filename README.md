@@ -1,7 +1,7 @@
 RockMUD
 ================
 
-RockMUD (0.1.8) is a WebSockets MUD server with node.js.
+RockMUD (0.1.9) is a WebSockets MUD server with node.js.
 
 Doing what I can to keep a test server running on nodejitsu: http://moreoutput.rockmud.jit.su/. Client 'terminal' will be
 addressed soon. You can reach me directly: moreoutput@gmail.com.
@@ -25,20 +25,23 @@ Notes on dependencies:
 * socket.io >= 1.0
 * Node > .12.X 
 
-Some things Currently in 0.1.7:
+Some things Currently in 0.1.9:
 * Simple architecture with no whitelisting of commands
 * Character creation (Races, Classes, Stats, Passwords) and saving as json files.
 * Channels
 * Uniform way of scripting commands -- with permission checking
 * JSON areas
 * Command aliases defined client side. 
-* Various 'standard' commands (ex: chat, who, look, help, score, save, title, quit, get, drop, say, kill)
-* Basic Combat (kill <mob name>)
+* Various standard commands (ex: chat, who, look, help, score, save, title, quit, get, drop, say, kill)
+* Basic Combat (kill <mob name>) (Combat round timer not tied into tick timers)
 * Inventory
-* Ticks (ex: regen, messages, autosave, and hunger/thirst)
-* Movement directions are not static
+* Ticks (ex: regen, server messages, autosave, time, heartbeat, and hunger/thirst are all on their own timer)
+* Movement directions are not static -- anything in a rooms exit array is a valid move. 
+* Message Templates
+* Skill Example (see: bash)
+* AI
 
-#10000 feet up:#
+#From 10000 feet up:#
 All design/data elements of RockMUD must be either valid JSON or .js files. Please look at the current code and make an effort to match the style if you plan to submit a pull request.
 
 ##Core Modules, found in /src :##
@@ -100,7 +103,7 @@ Templates for in game messages. Modules load these templates when constructed.
 Item templates extend objects into certain items based on their itemType property
 
 **/behaviors**
-AI scripts (.js). RockMUD will come with three AI behaviors: Mayor.js, Aggie.js, Wander.js, Beggar.js
+AI scripts. RockMUD will come with four AI behaviors: Mayor.js, Aggie.js, Wanderer.js, Beggar.js
 
 **/tools**
 Eventual location of building and admin tools. /forge.html is a planned tool for real-time area creation. 
@@ -108,9 +111,6 @@ Eventual location of building and admin tools. /forge.html is a planned tool for
 ##Files##
 **/config.js**
 Server Configuration
-
-**/motd.json**
-Starting Screen
 
 **/time.json**
 Time data

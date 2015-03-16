@@ -24,10 +24,15 @@ window.onload = function() {
 		aff: 'affect',
 		ooc: 'chat',
 		slist: 'skills',
-		$: 'score'
+		desc: 'description',
+		re: 'rest'
 	},
 	movement = ['north', 'east', 'south', 'west'],
 	display = function(r) {
+		if (!r.styleClass) {
+			r.styleClass = '';
+		}
+
 		if (r.element === undefined) {
 			terminal.innerHTML += '<div class="' + r.styleClass + '">' + r.msg + '</div>';
 		} else {

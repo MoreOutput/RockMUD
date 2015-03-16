@@ -1,29 +1,40 @@
 <!doctype html>
-<html>
+<html lang="en">
 	<head>
 		<title>RockMUD v0.1.7</title>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" /> 
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<meta name="HandheldFriendly" content="true" />
-		<link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
+
+		<!-- Bootstrap from CDN -->
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+
 		<link href="styles.css" rel="stylesheet" media="all" />
 	</head>
 	<body>
-		<div id="mudwrapper">
-			<div id="terminal" class="terminal">
-				<div id="screen-start">
-					<h1>Welcome to RockMUD v0.1.7</h1>
+		<div id="mudwrapper" class="container">
+			<div id="terminal" class="row">
+				<div id="screen-start" class="col-1">
+					<h1>Welcome to RockMUD v0.1.8</h1>
 					<div class="subtext">
 						<p>You can find out more about RockMUD on 
-							<a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>
+							<a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>.
 						</p>
 					</div>
 				</div>
 			</div>
-			<div id="inputwrapper">
-				<form id="console">
-					<input class="user-input" id="cmd" type="input" value="" placeholder="Enter Command" mud-state="login" />
-				</form>
+			<div class="row">
+				<hr />
+			</div>
+			<div class="row">
+				<div id="inputwrapper" class="col-1">
+					<form id="console">
+						<div class="form-group">
+							<input class="user-input form-control" id="cmd" type="input" value="" placeholder="Enter Command" mud-state="login" />
+						</div>
+					</form>
+				</div>
 			</div>
 		</div>		
 		<script src="../socket.io/socket.io.js"></script>

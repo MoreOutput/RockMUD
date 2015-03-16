@@ -92,11 +92,10 @@ Character.prototype.getPassword = function(s, fn) {
 				if (s.player.password === hash) {
 					character.addPlayer(s, function(added, msg) {
 						if (added) {
-
+							console.log('here');
 							World.loadArea(s.player.area, function(area) {
+								console.log(123);
 								World.motd(s, function() {
-									console.log(s.player.area);
-									console.log(s.player.roomid);
 									World.getRoomObject({
 										area: s.player.area,
 										id: s.player.roomid
@@ -108,6 +107,7 @@ Character.prototype.getPassword = function(s, fn) {
 											});
 
 											fn(s);
+											
 											return character.prompt(s);
 										});
 									});

@@ -32,18 +32,24 @@ Room.prototype.rollMob = function(mob, fn) {
 		if (err) {
 			
 		}
+
+		console.log('MOB:');
+		console.log(mob);
+		console.log('Race Obj:');
+		console.log(raceObj);
 		
 		World.merge(mob, raceObj, function(mob, err) {
 			if (err) {
 
 			}
 
+			console.log('Item Merged');
+
 			if (mob.templates && mob.templates.length > 0) {
 
 			}		
 		});
 	});
-
 
 	return fn(mob);
 };
