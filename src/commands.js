@@ -122,21 +122,37 @@ Cmd.prototype.who = function(r, s) {
 	return Character.prompt(s);
 };
 
-Cmd.prototype.get = function(r, s, fn) {
-	if (r.msg !== '') {
-		Room.checkItem(r, s, function(fnd, item) {
-			if (fnd) {
-				Character.addToInventory(s, item, function(added) {
-					if (added) {
-						Room.removeItemFromRoom({area: s.player.area, id: s.player.roomid, item: item}, function() {
-							s.emit('msg', {
+Cmd.prototype.get = function(r, s, fn) 
+{
+	if (r.msg !== '') 
+	{
+		Room.checkItem(r, s, function(fnd, item) 
+		{
+			if (fnd) 
+			{
+				Character.addToInventory(s, item, function(added) 
+				{
+					if (added) 
+					{
+						Room.removeItemFromRoom({area: s.player.area, id: s.player.roomid, item: item}, function() 
+						{
+							s.emit('msg', 
+							{
 								msg: 'You picked up ' + item.short,
 								styleClass: 'get'
 							});
 							
 							return Character.prompt(s);
 						});
-					} else {
+						
+						Room.msgToRoom({
+							msg: s.player.name + ' just picked up ' + item.short, 
+							playerName: s.player.name, 
+							roomid: s.player.roomid
+						}, true, function(){});
+					} 
+					else 
+					{
 						s.emit('msg', {msg: 'Could not pick up a ' + item.short, styleClass: 'error'});					
 						return Character.prompt(s);
 					}
@@ -523,10 +539,11 @@ Cmd.prototype.score = function(r, s) {
 		'<li class="stat-hp">HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
 		'<li class="stat-mana">Mana: ' + s.player.cmana + '/' + s.player.mana +'</li>' +
 		'<li class="stat-mv">Moves: ' + s.player.cmv + '/' + s.player.mv +'</li>' +
-		'<li class="stat-level">You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
 		'<li class="stat-xp">XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
 		'<li class="stat-position">Position: ' + s.player.position + '</li>' +
 		'<li class="stat-carry">Carrying ' + s.player.load + '/' + Character.getLoad(s) + ' pounds.</li>' +
+		'<li>----------------------</li>' +
+		'<li class="stat-level">You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
 	'</ul>' +
 	'<ul class="score-stats">' + 
 		'<li class="stat-str">STR: ' + s.player.str + '</li>' +
