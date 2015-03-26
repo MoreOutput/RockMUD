@@ -92,14 +92,9 @@ Character.prototype.getPassword = function(s, fn) {
 				if (s.player.password === hash) {
 					character.addPlayer(s, function(added, msg) {
 						if (added) {
-							console.log('here');
 							World.loadArea(s.player.area, function(area) {
-								console.log(123);
 								World.motd(s, function() {
-									World.getRoomObject({
-										area: s.player.area,
-										id: s.player.roomid
-									}, function(roomObj) {
+									World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
 										Room.getDisplayHTML(roomObj, function(displayHTML) {
 											s.emit('msg', {
 												msg: displayHTML, 
@@ -206,7 +201,7 @@ Character.prototype.create = function(r, s, fn) {
 		load: 3,
 		visible: true,
 		attackType: 'punch',
-		area: 'midgaard', // must match an area file
+		area: 'Midgaard', // must match an area file
 		roomid: 1, // current room
 		recall: 1, // id to recall to
 		description: 'A brand new citizen.',

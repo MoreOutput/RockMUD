@@ -7,7 +7,7 @@ time = World.time,
 areas = World.areas,
 
 Room = function() {
- 
+ console.log(World.io);
 };
 
 // Rolls values for Mobs (including their equipment)

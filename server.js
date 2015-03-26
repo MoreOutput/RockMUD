@@ -43,6 +43,8 @@ World = require('./src/world').world,
 io = require('socket.io')(server);
 
 World.setup(io, cfg, function(Character, Cmds, Skills) {
+	var Ticks = require('./src/ticks');
+
 	server.listen(cfg.port);
 
 	console.log(cfg.name + ' is ready to rock and roll on port ' + cfg.port);
@@ -120,9 +122,9 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 	    s.on('disconnect', function () {
 			var i = 0;
 			if (s.player !== undefined) {
-				for (i; i < world.players.length; i += 1) {	
-					if (world.players[i].name === s.player.name) {
-						world.players.splice(i, 1);	
+				for (i; i < World.players.length; i += 1) {	
+					if (World.players[i].name === s.player.name) {
+						World.players.splice(i, 1);	
 					}
 				}
 			}

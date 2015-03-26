@@ -4,6 +4,10 @@
 'use strict';
 
 var fs = require('fs'),
+Room,
+Character,
+Cmds,
+Skills,
 World = function() {
 	var world = this;
 	world.io = null;
@@ -25,12 +29,12 @@ World = function() {
 };
 
 World.prototype.setup = function(socketIO, cfg, fn) {
-	var Character = require('./character').character,
-	Cmds = require('./commands').cmd,
-	Skills = require('./skills').skill,
-	Ticks = require('./ticks');
-	
 	this.io = socketIO;
+
+	Character = require('./character').character;
+	Cmds = require('./commands').cmd;
+	Skills = require('./skills').skil;
+	Room = require('./rooms').room;
 
 	return fn(Character, Cmds, Skills);
 };
@@ -105,17 +109,19 @@ World.prototype.getTemplate = function(tempType, tempName, fn) {
 
 World.prototype.loadArea = function(areaName, fn) {
 	var world = this;
-	console.log('Call to load Area');
+
 	world.checkArea(areaName, function(fnd, area) {
 		if (fnd) {
-			return fn(area);
+			return fn(area, true);
 		} else {
 			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
 				area = JSON.parse(area);
-				
+
+                console.log(area);
+
 				world.areas.push(area);
 				
-				return fn(area);
+				return fn(area, false);
 				
 				area.rooms.forEach(function(roomObj, i) {
 					roomObj.monsters.forEach(function(mob, i) {
@@ -129,44 +135,30 @@ World.prototype.loadArea = function(areaName, fn) {
 	});
 };
 
-World.prototype.getArea = function(areaName, fn) {
-	this.areas.forEach(function(area, i) {
-		if (area.name === areaName) {
-			return fn(area);
-		}
-	});
-
-	this.loadArea(areaName, fn);
-};
-
 World.prototype.getRoomObject = function(areaName, roomId, fn) {
 	var world = this,
 	getRoomFromArea = function(area) {
 		var i = 0;
 		for (i; i < area.rooms.length; i += 1) {
 			if (area.rooms[i].id === roomId) {
-				room.getPlayersByRoomID(roomId, function(playersInRoom) {
+				Room.getPlayersByRoomID(roomId, function(playersInRoom) {
 					area.rooms[i].playersInRoom = playersInRoom;
-					return area.rooms[i];
+                    return fn(area.rooms[i]);
 				});
 			} 
 		}
 	};
 
 	world.checkArea(areaName, function(fnd, area) {
-		if (fnd) {
+        if (fnd) {
 			return fn(getRoomFromArea(area));
-		} else {
-			console.log('Why am I here');
-			world.loadArea(areaName, function(area) {
-				return fn(getRoomFromArea(area));
-			});
-		}
-	});
+	    }
+    });
 };
 
 World.prototype.checkArea = function(areaName, fn) {
-	this.areas.forEach(function(area, i) {
+    console.log('Looking for' + areaName);
+    this.areas.forEach(function(area, i) {
 		if (area.name === areaName) {
 			return fn(true, area);
 		}

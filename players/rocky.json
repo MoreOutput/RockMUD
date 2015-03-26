@@ -33,7 +33,7 @@
     "load": 3,
     "visible": true,
     "attackType": "punch",
-    "area": "midgaard",
+    "area": "Midgaard",
     "roomid": 1,
     "recall": 1,
     "description": "A brand new citizen.",
