@@ -136,6 +136,11 @@ Cmd.prototype.get = function(r, s, fn) {
 							
 							return Character.prompt(s);
 						});
+						Room.msgToRoom({
+							msg: s.player.name + ' has picked up ' + item.short,
+							playerName: s.player.name,
+							roomid: s.player.roomid
+						}, true, function() {});
 					} else {
 						s.emit('msg', {msg: 'Could not pick up a ' + item.short, styleClass: 'error'});					
 						return Character.prompt(s);
