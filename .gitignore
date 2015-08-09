@@ -7,10 +7,13 @@ lib-cov
 *.pid
 *.gz
 *~
+*.swp
+*.sublime-project
 
 pids
 logs
 results
 
+players/*
 node_modules
 npm-debug.log

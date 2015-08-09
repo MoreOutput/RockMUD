@@ -7,5 +7,6 @@
     "attackType": {
         "type": "punch",
         "mod": 1
-    }
+    },
+    "racial" : ["darkvision"]
 }

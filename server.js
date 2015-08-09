@@ -45,10 +45,6 @@ io = require('socket.io')(server);
 World.setup(io, cfg, function(Character, Cmds, Skills) {
 	var Ticks = require('./src/ticks');
 
-	server.listen(cfg.port);
-
-	console.log(cfg.name + ' is ready to rock and roll on port ' + cfg.port);
-
 	io.on('connection', function (s) {
 		s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 	
@@ -64,7 +60,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							return Cmds[r.cmd](r, s);
 						} else if (r.cmd in Skills) {
 							return Skills[r.cmd](r, s);
-						/*} else if (r.cmd in Skills && r.msg === 'cast') {
+						/*} else if (r.msg === 'cast' && r.cmd in Skills) {
 							return Spells[r.cmd](r, s); */
 						} else {
 							s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
@@ -129,6 +125,10 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				}
 			}
 		});
+
+		server.listen(cfg.port);
+
+		console.log(cfg.name + ' is ready to rock and roll on port ' + cfg.port);
 	});
 });
 

@@ -1,3 +1,4 @@
+
 /*
 * Characters.js controls everything dealing with a 'Character' which includes in game creatures.
 * No in game commands are defiend here; Commands.js does share some function names with this module, 
@@ -10,9 +11,6 @@ crypto = require('crypto'),
 Room = require('./rooms').room,
 Dice = require('./dice').roller,
 World = require('./world').world,
-players = World.players,
-areas = World.areas,
-
 Character = function () {
 
 };
@@ -94,8 +92,8 @@ Character.prototype.getPassword = function(s, fn) {
 						if (added) {
 							World.loadArea(s.player.area, function(area) {
 								World.motd(s, function() {
-									World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
-										Room.getDisplayHTML(roomObj, function(displayHTML) {
+									World.getRoomObject(area, s.player.roomid,function(roomObj) {
+                                        Room.getDisplayHTML(roomObj, function(displayHTML) {
 											s.emit('msg', {
 												msg: displayHTML, 
 												styleClass: 'room'
@@ -134,14 +132,14 @@ Character.prototype.getPassword = function(s, fn) {
 Character.prototype.addPlayer = function(s, fn) {
 	var  i = 0;	
 
-	if (players.length > 0) {
-		for (i; i < players.length; i += 1) {
+	if (World.players.length > 0) {
+		for (i; i < World.players.length; i += 1) {
 			if (s.player.name === players[i].name) {
 				return fn(false, 'Already Logged in. Disconnecting...Refresh the page and relog.');
 			}
 		}
 		
-		players.push({
+		World.players.push({
 			name: s.player.name, 
 			sid: s.id,
 			area: s.player.area,
@@ -150,7 +148,7 @@ Character.prototype.addPlayer = function(s, fn) {
 
 		return fn(true);
 	} else {
-		players.push({
+		World.players.push({
 			name: s.player.name, 
 			sid: s.id,
 			area: s.player.area,
@@ -279,7 +277,7 @@ Character.prototype.create = function(r, s, fn) {
 			{
 				"name": "Pot Pie", 
 				"short": "A Chicken Pot Pie",
-				"long": "An over-stuffed simple pot pie",
+				"long": "A pot pie",
 				"id": 4, 
 				"area": "all",
 				"level": 1,
@@ -304,7 +302,7 @@ Character.prototype.create = function(r, s, fn) {
 			}
 		],
 		affects: [],
-		racials: [],
+		racial: [],
 		skills: [],
 		skillList: [],
 		prevent: ['flame'],
@@ -334,7 +332,7 @@ Character.prototype.create = function(r, s, fn) {
 							World.checkArea(s.player.area, function(fnd) {
 								if (!fnd) {
 									World.loadArea(s.player.area, function(area) {
-										areas.push(area);
+										World.areas.push(area);
 									});
 								}
 								
@@ -398,6 +396,8 @@ Character.prototype.rollStats = function(player, fn) {
 Character.prototype.newCharacter = function(r, s, fn) {
 	var character = this,
 	i = 0,
+	races = World.races,
+	classes = World.classes,
 	str = '';
 
 	for (i; i < races.length; i += 1) {
@@ -771,7 +771,7 @@ Character.prototype.getLoad = function(s, fn) {
 Character.prototype.updatePlayer = function(s, fn) {
 	var  i = 0;
 
-	for (i; i < players.length; i += 1) {
+	for (i; i < World.players.length; i += 1) {
 		if (s.player.name === players[i].name) {
 			players[i] = {
 				name: s.player.name, 

@@ -10,5 +10,8 @@ exports.server = {
 		name: 'Rocky',
 		position: 'Code Guy',
 		contact: 'moreoutput@gmail.com'		
-	}]
+	}],
+    onStart: function() {
+        // Event firing on server start.
+    }
 };

@@ -3,45 +3,34 @@ RockMUD
 
 RockMUD (0.1.9) is a WebSockets MUD server with node.js.
 
-Doing what I can to keep a test server running on nodejitsu: http://moreoutput.rockmud.jit.su/. Client 'terminal' will be
-addressed soon. You can reach me directly: moreoutput@gmail.com.
-
-History:
-RockMUD was spawned out of my love of MUDs and too many late night coffees. 
-
 Goals:
 * A Diku-like MUD experience from within the browser using HTML5 and NodeJS.
-* Leverage HTML for MUD text.
-* Everything is JavaScript / JSON.
 * Fast Development
 * Easy client GUI creation and triggering client side events.
 * Real-time browser OLC and world management.
-* Games should have little issue sharing items, areas and players.
+* Accessible data
 
 Notes on dependencies: 
-* Not using a Node MVC framework.
-* Not using any JS templating engines.
-* No client side framework
-* socket.io >= 1.0
-* Node > .12.X 
+* Socket.io 1.0 or greater is required.
+* Development aims to keep up with latested node release.
 
 Some things Currently in 0.1.9:
-* Simple architecture with no whitelisting of commands
-* Character creation (Races, Classes, Stats, Passwords) and saving as json files.
+* Simple architecture with no command whitelisting
+* Character creation (Races, Classes, Stats, Passwords) and saving as json files (/players).
 * Channels
 * Uniform way of scripting commands -- with permission checking
-* JSON areas
-* Command aliases defined client side. 
+* JSON world definition
+* Command aliases defined client side.
 * Various standard commands (ex: chat, who, look, help, score, save, title, quit, get, drop, say, kill)
-* Basic Combat (kill <mob name>) (Combat round timer not tied into tick timers)
+* Basic Combat (kill <mob name>)
 * Inventory
 * Ticks (ex: regen, server messages, autosave, time, heartbeat, and hunger/thirst are all on their own timer)
-* Movement directions are not static -- anything in a rooms exit array is a valid move. 
+* Dynamic movement directions/options.
 * Message Templates
 * Skill Example (see: bash)
-* AI
+* AI (starting)
 
-#From 10000 feet up:#
+#10000 feet:#
 All design/data elements of RockMUD must be either valid JSON or .js files. Please look at the current code and make an effort to match the style if you plan to submit a pull request.
 
 ##Core Modules, found in /src :##
@@ -49,7 +38,7 @@ All design/data elements of RockMUD must be either valid JSON or .js files. Plea
 Starts server and outlines public resource paths.
 
 **world.js**
-Functions that have game-wide reach. 
+Functions that have game-wide reach. In memory data -- World.races, World.players and etc.
 
 **room.js**
 Used to interact with loaded areas found in World.areas[]
@@ -68,8 +57,8 @@ There is no single heartbeat timer. This controls the games timed events -- othe
 is in Combat.js
 
 **commands.js, skills.js and spells.js**
-All game commands are in found in these three files. Commands are not whitelisted. Creating the function "test" in Commands.js
-will add "test" to the game. 
+All game commands are in found in these three files. Creating the function "test" in Commands.js adds the command 'test' to the game.
+will add "test" to the game.
 
 ##Directory Breakdown##
 **/classes**
@@ -90,11 +79,8 @@ Player files as flat json data.
 **/areas**
 JSON files representing areas.
 
-**/areas/persist**
-For the eventual toggle to keep data persistent long-term
-
 **/templates**
-JSON templates used to enhance in-game items
+JSON templates used to enhance in-game items.
 
 **/templates/messages**
 Templates for in game messages. Modules load these templates when constructed.
@@ -114,3 +100,10 @@ Server Configuration
 
 **/time.json**
 Time data
+
+###Installation###
+* Install Node, NPM, and Git
+* Clone the repo
+* cd RockMUD (enter cloned repo)
+* npm install (socket.io)
+* npm start or node server.js to start the server (defaults to port 8000)

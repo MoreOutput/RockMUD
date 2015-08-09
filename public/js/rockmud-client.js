@@ -24,6 +24,7 @@ window.onload = function() {
 		aff: 'affect',
 		ooc: 'chat',
 		slist: 'skills',
+		skill: 'skills',
 		desc: 'description',
 		re: 'rest'
 	},
@@ -80,7 +81,7 @@ window.onload = function() {
 		return fn(cmd + ' ' + msg);	
 	};
 
-	document.getElementById('console').onsubmit = function (e) {	
+	document.getElementById('console').onsubmit = function (e) {
 		var node = document.getElementById('cmd'),
 		messageNodes = [],
 		msg = node.value.toLowerCase().trim();
@@ -125,7 +126,7 @@ window.onload = function() {
 		display(r);
 
 		if (r.res) {
-			changeMudState(r.res);	
+			changeMudState(r.res);
 		}
 	});
 };

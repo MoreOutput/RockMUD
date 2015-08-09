@@ -7,7 +7,7 @@ time = World.time,
 areas = World.areas,
 
 Room = function() {
- console.log(World.io);
+
 };
 
 // Rolls values for Mobs (including their equipment)
@@ -54,27 +54,29 @@ Room.prototype.rollMob = function(mob, fn) {
 	return fn(mob);
 };
 
-// Setup Items in an area
 Room.prototype.rollItem = function(item, fn) {
 
 };
 
-// Returns a string (html) representation of a room for
 Room.prototype.getDisplayHTML = function(roomObj, fn) {
 	var room = this,
 	i = 0,
-	roomStr = '';
-
-	if (roomObj.exits.length > 0) {
+    roomStr = '';
+  
+    if (roomObj.exits.length > 0) {
 	 	roomStr += '<li class="room-exits">Visible Exits: ' + 
 	 	roomObj.exits.toString().replace(/,/g, ', ') + '</li>';
 	} else {
 		roomStr += '<li class="room-exits">Visible Exits: None!</li>';
 	}
+
+    for (i; i < roomObj.playersInRoom.length; i += 1) {
+
+    }
 	
 	if (roomObj.playersInRoom.length > 0 || roomObj.monsters.length > 0) {
 		roomStr += '<li>Here:' + roomObj.playersInRoom.toString().replace(/,/g, '. ') + 
-		' ' + monsters.toString().replace(/,/g, '. ') + '</li>';
+		' ' + roomObj.monsters.toString().replace(/,/g, '. ') + '</li>';
 	}
 	
 	if (roomObj.items.length > 0) {
@@ -124,7 +126,7 @@ Room.prototype.getPlayersByRoomID = function(roomID, fn) {
 		player = io.sockets.connected[players[i].sid].player;
 
 		if (player.roomid === roomID) {
-			arr.push(' ' + player.name + ' the ' + player.race + ' is ' + player.position + ' here');
+			arr.push(player);
 		}
 	}
 
@@ -158,11 +160,11 @@ Room.prototype.checkMonster = function(r, s, fn) {
 
 	// Split to account for target modifier (IE: 2.boar)
 	parts = r.msg.split('.');
-	if(parts.length === 2) {
+	
+	if (parts.length === 2) {
 		findIndex = parseInt(parts[0])-1;
 		findMonster = parts[1];
-	}
-	else {
+	} else {
 		findIndex = 0;
 		findMonster = r.msg;
 	}
@@ -181,7 +183,7 @@ Room.prototype.checkMonster = function(r, s, fn) {
 		} else {
 			fn(false);
 		}
-	});	
+	});
 };
 
 // Remove a monster from a room
@@ -189,7 +191,8 @@ Room.prototype.removeMonster = function(roomQuery, monster, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.monsters = roomObj.monsters.filter(function(item, i) {
 			return (item.id !== monster.id);
-		});	
+		});
+
 		return fn(true);
 	});
 };

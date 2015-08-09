@@ -4,7 +4,7 @@
     "int": -2,
     "dex": -1,
     "hp": 10,
-    "playable": true,    
+    "playable": true,
     "attackType": {
         "type": "smash",
         "mod": 2

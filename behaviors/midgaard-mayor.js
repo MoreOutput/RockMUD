@@ -1,7 +1,6 @@
-
+'use strict';
 Dice = require('../src/dice').roller,
-World = require('../src/world').world,
-MayorBehavior = require('mayor').mayor;
+World = require('../src/world').world;
 
 var Mayor = function(mobObj) {
 	mobObj.foundKey = false;
@@ -22,5 +21,5 @@ Mayor.prototype.walk = function() {
 
 // Main loop for the Mayor behavior. Fired when outlined in ticks.js
 Mayor.prototype.live = function() {
-	if (this.)
-};	
+	
+};

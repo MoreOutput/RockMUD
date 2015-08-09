@@ -34,7 +34,8 @@
 					"area": "Midgaard",
 					"weight": 120,
 					"diceNum": 2, 
-					"diceSides": 8, 
+					"diceSides": 8,
+					"dice": "2d8"
 					"attackType": "bite",
 					"templates": [],
 					"ac": 6,

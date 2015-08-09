@@ -1,31 +1,81 @@
 /*
 * Working with game-wide data. Areas, Races, Classes and in-game Time
+* This can be considered the entry point of the application.
 */
 'use strict';
-
 var fs = require('fs'),
 Room,
 Character,
 Cmds,
 Skills,
 World = function() {
-	var world = this;
+	var world = this,
+	loadTime = function (fn) {
+		fs.readFile('./time.json', function (err, r) {
+			return  fn(err, JSON.parse(r));
+		});	
+	},
+	loadRaces = function (fn) {
+		var races = [];
+
+		fs.readdir('./races', function(err, fileNames) {
+			fileNames.forEach(function(fileName, i) {
+				fs.readFile('./races/' + fileName, function (err, race) {
+					races.push(JSON.parse(race));
+
+					if (i === fileNames.length - 1) {
+						return fn(err, races);
+					}
+				});
+			});
+		});
+	},
+	loadClasses = function (fn) {
+		var classes = [];
+
+		fs.readdir('./classes', function(err, fileNames) {
+			fileNames.forEach(function(fileName, i) {
+				fs.readFile('./classes/' + fileName, function (err, classObj) {
+					classes.push(JSON.parse(classObj));
+
+					if (i === fileNames.length - 1) {
+						return fn(err, classes);
+					}
+				});
+			});
+		});
+	},
+	loadTemplates = function (templateType, fn) {
+		return fn();
+	},
+	loadDefaultArea = function (fn) {
+		return fn();
+	};
+
 	world.io = null;
-	world.races = [];
-	world.classes = [];
+	world.races = []; // Race JSON definition is in memory
+	world.classes = []; // Class JSON definition is in memory
 	world.areas = []; // Loaded areas
 	world.players = []; // Loaded players
-	world.time = fs.readFile('./time.json');
+	world.time = null;
+	world.itemTemplates = [];
+	world.mobTemplates = [];
+	world.messageTemplates = [];
 
-	fs.readFile('./time.json', function (err, r) {
-		world.time = JSON.parse(r);
-	});	
-
-	fs.readFile('./templates/messages/combat.json', function (err, r) {
-		world.itemTemplates = JSON.parse(r);
+	loadTime(function(err, time){
+		loadRaces(function(err, races) {
+			loadClasses(function(err, classes) {
+				loadTemplates('messsages', function(err, msgTemplates) {
+					world.time = time;
+					world.races = races;
+					world.classes = classes;
+					//world.messageTemplates = msgTemplates;
+					console.log(world);
+					return world;
+				});
+			});
+		});
 	});
-
-	return world;
 };
 
 World.prototype.setup = function(socketIO, cfg, fn) {
@@ -33,36 +83,25 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 	Character = require('./character').character;
 	Cmds = require('./commands').cmd;
-	Skills = require('./skills').skil;
+	Skills = require('./skills').skill;
 	Room = require('./rooms').room;
 
 	return fn(Character, Cmds, Skills);
 };
 
 World.prototype.getPlayableRaces = function(fn) {
-	var world = this;
+	var world,
+	playableRaces = [];
 
-	if (world.races.length !== 0) {
-		return fn(world.races);
-	} else {
-		fs.readdir('./races', function(err, fileNames) {
-			fileNames.forEach(function(fileName, i) {
-				fs.readFile('./races/' + fileName, function (err, race) {
-					race =  JSON.parse(race);
+	world.races.forEach(function(race, i) {
+		if (race.playable === true) {
+			playableRaces.push (race);
+		}
 
-					if (race.playable) {
-						world.races.push({
-							name: race.name
-						});
-					}
-
-					if (i === fileNames.length - 1) {
-						return fn(world.races);
-					}
-				});
-			});
-		});
-	}
+		if (world.races.length - 1 === i) {
+			return fn(playableRaces);
+		}
+	});
 };
 
 World.prototype.getPlayableClasses = function(fn) {
@@ -105,7 +144,7 @@ World.prototype.getClass = function(className, fn) {
 
 World.prototype.getTemplate = function(tempType, tempName, fn) {
 
-};	
+};
 
 World.prototype.loadArea = function(areaName, fn) {
 	var world = this;
@@ -116,8 +155,6 @@ World.prototype.loadArea = function(areaName, fn) {
 		} else {
 			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
 				area = JSON.parse(area);
-
-                console.log(area);
 
 				world.areas.push(area);
 				
@@ -130,34 +167,22 @@ World.prototype.loadArea = function(areaName, fn) {
 						});
 					});
 				});
-			});
+            });
 		}
 	});
 };
 
-World.prototype.getRoomObject = function(areaName, roomId, fn) {
-	var world = this,
-	getRoomFromArea = function(area) {
-		var i = 0;
-		for (i; i < area.rooms.length; i += 1) {
-			if (area.rooms[i].id === roomId) {
-				Room.getPlayersByRoomID(roomId, function(playersInRoom) {
-					area.rooms[i].playersInRoom = playersInRoom;
-                    return fn(area.rooms[i]);
-				});
-			} 
-		}
-	};
+World.prototype.getRoomObject = function(area, roomId, fn) {
+    var i = 0;
 
-	world.checkArea(areaName, function(fnd, area) {
-        if (fnd) {
-			return fn(getRoomFromArea(area));
-	    }
-    });
+	for (i; i < area.rooms.length; i += 1) {
+		if (area.rooms[i].id === roomId) {
+            return fn(area.rooms[i]);
+		} 
+	}
 };
 
 World.prototype.checkArea = function(areaName, fn) {
-    console.log('Looking for' + areaName);
     this.areas.forEach(function(area, i) {
 		if (area.name === areaName) {
 			return fn(true, area);
