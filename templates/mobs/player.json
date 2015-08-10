@@ -1,0 +1,154 @@
+{
+        name: s.player.name,
+        lastname: '',
+        title: '',
+        role: 'player',
+        password: s.player.password,
+        salt: '',
+        race: s.player.race,
+        sex: '',
+        charClass: s.player.charClass,
+        created: new Date().toString(), 
+        level: 1,
+        exp: 1,
+        expToLevel: 1000,
+        position: 'standing',
+        alignment: 0,
+        chp: 100, // current hp
+        hp: 100, // total hp
+        cmana: 100,
+        mana: 100,
+        cmv: 80,
+        mv: 100,
+        str: 13,
+        wis: 13,
+        int: 13,
+        dex: 13,
+        con: 13,
+        wait: 0,
+        ac: 10,
+        gold: 5,
+        hunger: 0,
+        thirst: 0,
+        load: 3,
+        visible: true,
+        attackType: 'punch',
+        area: 'Midgaard', // must match an area file
+        roomid: 1, // current room
+        recall: 1, // id to recall to
+        description: 'A brand new citizen.',
+        reply: '',
+        verified: false,
+        following: '',
+        eq: [{
+            name: 'Head',
+            item: null,
+            slot: 'head'
+        }, {
+            name: 'Necklace 1',
+            item: null,
+            slot: 'head'
+        }, {
+            name: 'Necklace 2',
+            item: null,
+            slot: 'head'
+        }, {
+            name: 'Body',
+            item: null,
+            slot: 'body'
+        }, {
+            name: 'Chest',
+            item: null,
+            slot: 'body'
+        }, {
+            name: 'About Body',
+            item: null,
+            slot: 'body'
+        }, {
+            name: 'Right Arm',
+            item: null,
+            slot: 'arms'
+        }, {
+            name: 'Left Arm',
+            item: null,
+            slot: 'arms'
+        }, {
+            name: 'Right Hand',
+            item: null,
+            dual: false,
+            slot: 'hands'
+        }, {
+            name: 'Left Hand',
+            item: null,
+            dual: false,
+            slot: 'hands'
+        }, {
+            name: 'Ring 1',
+            item: null,
+            slot: 'fingers'
+        }, {
+            name: 'Ring 2',
+            item: null,
+            slot: 'fingers'
+        }, {
+            name: 'Right Leg',
+            item: null,
+            slot: 'legs'
+        }, {
+            name: 'Left Leg',
+            item: null,
+            slot: 'legs'
+        }, {
+            name: 'Feet',
+            item: null,
+            slot: 'feet'
+        }, {
+            name: 'Floating',
+            item: null,
+            slot: 'floating'
+        }],
+        items: [
+            {
+                "name": "Pot Pie", 
+                "short": "A Chicken Pot Pie",
+                "long": "A pot pie",
+                "id": 4, 
+                "area": "all",
+                "level": 1,
+                "itemType": "food",
+                "weight": 2,
+                "flags": [
+                    {"hunger": -7},
+                    {"carry": 1} 
+                ]
+            },
+            {
+                "name": "Burlap Sack", 
+                "short": "A Burlap Sack",
+                "long": "An over-used burlap sack with many tears",
+                "id": 5, 
+                "area": "all",
+                "level": 1,
+                "itemType": "container",
+                "weight": 1,
+                "maxWeight": 40,
+                "contains": []
+            }
+        ],
+        affects: [],
+        racial: [],
+        skills: [],
+        skillList: [],
+        prevent: [], // character specific command ban
+        autoloot: true,
+        autosac: false,
+        behaviors: [],
+        settings: {
+            autosac: false,
+            autoloot: true,
+            autodrink: {on: true, item: ''},
+            channels: {
+                blocked: ['flame']
+            }
+        }
+    }

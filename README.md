@@ -82,14 +82,17 @@ JSON files representing areas.
 **/templates**
 JSON templates used to enhance in-game items.
 
-**/templates/messages**
-Templates for in game messages. Modules load these templates when constructed.
+* **/templates/messages** 
+Templates for in game messages.
 
-**/templates/items**
-Item templates extend objects into certain items based on their itemType property
+* **/templates/items** 
+Item templates extend objects into certain items based on their template[] property
+
+* **/templates/mob** 
+MOB/NPC templates extend objects into certain items based on their template[] property
 
 **/behaviors**
-AI scripts. RockMUD will come with four AI behaviors: Mayor.js, Aggie.js, Wanderer.js, Beggar.js
+AI scripts. RockMUD will come with four AI behaviors: Mayor.js, Aggie.js, Wanderer.js, Beggar.js.
 
 **/tools**
 Eventual location of building and admin tools. /forge.html is a planned tool for real-time area creation. 

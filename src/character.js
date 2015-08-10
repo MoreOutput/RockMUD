@@ -305,10 +305,21 @@ Character.prototype.create = function(r, s, fn) {
 		racial: [],
 		skills: [],
 		skillList: [],
-		prevent: ['flame'],
+		prevent: [], // character specific command ban
 		autoloot: true,
-		autosac: false
+		autosac: false,
+		behaviors: [],
+		settings: {
+			autosac: false,
+			autoloot: true,
+			autodrink: {on: true, item: ''},
+			channels: {
+				blocked: ['flame']
+			}
+		}
 	};
+
+	// World.getMobTemplate('player', function(err, playerTemplate) {});
 	
 	character.rollStats(s.player, function(player) {
 		s.player = player;
