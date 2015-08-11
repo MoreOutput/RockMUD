@@ -1,0 +1,7 @@
+{
+    "name": "Kobold",
+    "dex": 1,
+    "playable": false,
+    "attackType": "claw",
+    "racial" : ["darkvision"]
+}

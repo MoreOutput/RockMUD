@@ -39,6 +39,7 @@
 					"attackType": "bite",
 					"templates": [],
 					"ac": 6,
+					"itemType": "mob",
 					"behaviors": [{
 						"module" : "Wander",
 						"parameters": {

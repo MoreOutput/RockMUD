@@ -58,7 +58,6 @@ is in Combat.js
 
 **commands.js, skills.js and spells.js**
 All game commands are in found in these three files. Creating the function "test" in Commands.js adds the command 'test' to the game.
-will add "test" to the game.
 
 ##Directory Breakdown##
 **/classes**
@@ -85,20 +84,23 @@ JSON templates used to enhance in-game items.
 * **/templates/messages** 
 Templates for in game messages.
 
-* **/templates/items** 
-Item templates extend objects into certain items based on their template[] property
+* **/templates/objects** 
+Item templates extend objects into certain items based on their template[] and itemType properties.
+    ** entity.json is the default Character/MOB outline attached to all 'living' objects upon creation.
+    ** Outlined fields in the object definition overwrite entity.json definitions.
 
-* **/templates/mob** 
-MOB/NPC templates extend objects into certain items based on their template[] property
+**/ai**
+Mob specific AI scripts. RockMUD core aims to have 1: midgaardMayor.js
 
-**/behaviors**
-AI scripts. RockMUD will come with four AI behaviors: Mayor.js, Aggie.js, Wanderer.js, Beggar.js.
+**/ai/behaviors**
+AI scripts. RockMUD will come with four AI behaviors: mayor.js, aggie.js, wanderer.js, beggar.js, guard.js. Behaviors define
+the API for AI scripts along with a default 'action set'. 
 
 **/tools**
-Eventual location of building and admin tools. /forge.html is a planned tool for real-time area creation. 
+Eventual location of building and admin tools.
 
 ##Files##
-**/config.js**
+**/config.json**
 Server Configuration
 
 **/time.json**

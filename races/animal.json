@@ -1,0 +1,5 @@
+{
+    "name": "Animal",
+    "playable": false,
+    "attackType": "claw"
+}

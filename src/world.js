@@ -4,10 +4,6 @@
 */
 'use strict';
 var fs = require('fs'),
-Room,
-Character,
-Cmds,
-Skills,
 World = function() {
 	var world = this,
 	loadTime = function (fn) {
@@ -45,6 +41,11 @@ World = function() {
 			});
 		});
 	},
+	/*
+	Two Types of Templates Message and Object:
+		Message - String conversion via World.i18n()
+		Object - Auto combined with any object with the same 'itemType', addional templates defined in an objects template property
+	*/
 	loadTemplates = function (templateType, fn) {
 		return fn();
 	},
@@ -81,10 +82,11 @@ World = function() {
 World.prototype.setup = function(socketIO, cfg, fn) {
 	this.io = socketIO;
 
-	Character = require('./character').character;
-	Cmds = require('./commands').cmd;
-	Skills = require('./skills').skill;
-	Room = require('./rooms').room;
+	var Character = require('./character').character,
+	Cmds = require('./commands').cmd,
+	Skills = require('./skills').skill,
+	Room = require('./rooms').room,
+	Ticks = require('./src/ticks');
 
 	return fn(Character, Cmds, Skills);
 };

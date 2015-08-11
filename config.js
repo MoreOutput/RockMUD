@@ -4,14 +4,8 @@ exports.server = {
 		port: 8000,
 		name: 'RockMUD',
 		version: '0.1.8',
-		website: 'https://github.com/MoreOutput/RockMUD'
+		website: 'https://github.com/MoreOutput/RockMUD',
+		description: ''
 	},
-	admins: [{
-		name: 'Rocky',
-		position: 'Code Guy',
-		contact: 'moreoutput@gmail.com'		
-	}],
-    onStart: function() {
-        // Event firing on server start.
-    }
+	admins: []
 };

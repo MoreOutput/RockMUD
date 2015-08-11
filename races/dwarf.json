@@ -3,6 +3,7 @@
     "con": 2,
     "int": -1,
     "hp": 5,
+    "ac": 1,
     "playable": true,
     "attackType": {
         "type": "punch",
