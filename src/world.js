@@ -6,40 +6,30 @@
 var fs = require('fs'),
 World = function() {
 	var world = this,
+	loadFileSet = function(path, fn) {
+		var tmpArr = [];
+		fs.readdir(path, function(err, fileNames) {
+			fileNames.forEach(function(fileName, i) {
+				fs.readFile(path + fileName, function (err, messageTmp) {
+					tmpArr.push(JSON.parse(messageTmp));
+
+					if (i === fileNames.length - 1) {
+						return fn(err, tmpArr);
+					}
+				});
+			});
+		});
+	},
 	loadTime = function (fn) {
 		fs.readFile('./time.json', function (err, r) {
 			return  fn(err, JSON.parse(r));
 		});	
 	},
 	loadRaces = function (fn) {
-		var races = [];
-
-		fs.readdir('./races', function(err, fileNames) {
-			fileNames.forEach(function(fileName, i) {
-				fs.readFile('./races/' + fileName, function (err, race) {
-					races.push(JSON.parse(race));
-
-					if (i === fileNames.length - 1) {
-						return fn(err, races);
-					}
-				});
-			});
-		});
+		loadFileSet('./races/', fn);
 	},
 	loadClasses = function (fn) {
-		var classes = [];
-
-		fs.readdir('./classes', function(err, fileNames) {
-			fileNames.forEach(function(fileName, i) {
-				fs.readFile('./classes/' + fileName, function (err, classObj) {
-					classes.push(JSON.parse(classObj));
-
-					if (i === fileNames.length - 1) {
-						return fn(err, classes);
-					}
-				});
-			});
-		});
+		loadFileSet('./classes/', fn);
 	},
 	/*
 	Two Types of Templates Message and Object:
@@ -47,7 +37,13 @@ World = function() {
 		Object - Auto combined with any object with the same 'itemType', addional templates defined in an objects template property
 	*/
 	loadTemplates = function (templateType, fn) {
-		return fn();
+		var tmpArr = [];
+
+		if (tempType === 'messages') {
+			loadFileSet('./templates/messages', fn);
+		} else {
+			loadFileSet('./templates/objects', fn);
+		}
 	},
 	loadDefaultArea = function (fn) {
 		return fn();
