@@ -63,12 +63,13 @@ window.onload = function() {
 		i = 0,
 		cmd,
 		msg,
+		keyLength = keys.length,
 		cmdArr = cmdStr.split(' ');
 
 		cmd = cmdArr[0].toLowerCase();
 		msg = cmdArr.slice(1).toString().replace(/,/g, ' ');
 
-		for (i; i < keys.length; i += 1) {
+		for (i; i < keyLength; i += 1) {
 			if (keys[i] === cmd) {
 				if (msg === '') {
 					return fn(aliases[keys[i]]);

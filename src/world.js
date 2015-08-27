@@ -36,7 +36,7 @@ World = function() {
 		Message - String conversion via World.i18n()
 		Object - Auto combined with any object with the same 'itemType', addional templates defined in an objects template property
 	*/
-	loadTemplates = function (templateType, fn) {
+	loadTemplates = function (tempType, fn) {
 		var tmpArr = [];
 
 		if (tempType === 'messages') {
@@ -54,15 +54,15 @@ World = function() {
 	world.classes = []; // Class JSON definition is in memory
 	world.areas = []; // Loaded areas
 	world.players = []; // Loaded players
-	world.time = null;
-	world.itemTemplates = [];
-	world.mobTemplates = [];
-	world.messageTemplates = [];
+	world.time = null; // Current Time data
+	world.itemTemplates = []; // Templates that merge with various items types
+	world.mobTemplates = []; // Templates that merge with various mob types
+	world.messageTemplates = []; // Templates that merge with various message types
 
-	loadTime(function(err, time){
+	loadTime(function(err, time) {
 		loadRaces(function(err, races) {
 			loadClasses(function(err, classes) {
-				loadTemplates('messsages', function(err, msgTemplates) {
+				loadTemplates('messages', function(err, msgTemplates) {
 					world.time = time;
 					world.races = races;
 					world.classes = classes;
@@ -82,7 +82,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	Cmds = require('./commands').cmd,
 	Skills = require('./skills').skill,
 	Room = require('./rooms').room,
-	Ticks = require('./src/ticks');
+	Ticks = require('./ticks');
 
 	return fn(Character, Cmds, Skills);
 };
@@ -203,16 +203,27 @@ World.prototype.motd = function(s, fn) {
 };
 
 /*
-	obj2 is merged into obj1.
+	RockMUD custom extend(target, obj2, callback);
 	
-	combine:
-		true (default): By default any matching properties with numbers are added together,
-		any matched array properties are merged, any slot with the value null in obj2
-		will be removed from obj1, and any slot in obj2 with the value of -1 will be set to 0.
-		
-		false: All matching properties result in obj2 values (overrides obj1)
+	Target gains all properties from obj2 but keeps any strings match with its current set, all numbers/dice rolls are added together.
+	This function is used heavily in item initalzation; as to merge in templates.
+
+	So:
+	
+	X = {itemType: 'weapon', dice: '2d4+1'};
+	Y= {itemType: 'template', dice: '1', slot: 'hands'};
+
+	World.extend(X, Y, function(rolledItem) {
+		rolledItem, an instance of item X, now looks like:
+		{
+			itemType: 'weapon',
+			dice: '2d4+2',
+			slot: 'hands'
+		}
+	});
+
 */
-World.prototype.mergeObjects = function(obj1, obj2, combine, fn) {
+World.prototype.extend= function(target, template, fn) {
 
 }
 
