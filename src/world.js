@@ -40,9 +40,9 @@ World = function() {
 		var tmpArr = [];
 
 		if (tempType === 'messages') {
-			loadFileSet('./templates/messages', fn);
+			loadFileSet('./templates/messages/', fn);
 		} else {
-			loadFileSet('./templates/objects', fn);
+			loadFileSet('./templates/objects/', fn);
 		}
 	},
 	loadDefaultArea = function (fn) {
@@ -67,7 +67,6 @@ World = function() {
 					world.races = races;
 					world.classes = classes;
 					//world.messageTemplates = msgTemplates;
-					console.log(world);
 					return world;
 				});
 			});
@@ -76,7 +75,7 @@ World = function() {
 };
 
 World.prototype.setup = function(socketIO, cfg, fn) {
-	this.io = socketIO;
+
 
 	var Character = require('./character').character,
 	Cmds = require('./commands').cmd,
@@ -84,11 +83,15 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	Room = require('./rooms').room,
 	Ticks = require('./ticks');
 
+	this.io = socketIO;
+
+
+
 	return fn(Character, Cmds, Skills);
 };
 
 World.prototype.getPlayableRaces = function(fn) {
-	var world,
+	var world = this,
 	playableRaces = [];
 
 	world.races.forEach(function(race, i) {
