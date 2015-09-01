@@ -5,7 +5,6 @@
 * see: save().
 */
 'use strict';
-
 var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms').room,

@@ -1,8 +1,7 @@
-"use strict";
-
+'use strict';
 var Roller = function() {
 
-}
+};
 
 // General dice rolling
 Roller.prototype.roll = function(dNum, dSides, mod, fn) {
@@ -32,6 +31,6 @@ Roller.prototype.roll = function(dNum, dSides, mod, fn) {
 // Strings using limited dice notation (ex: 1d20, 2d7) can be used to get bounded totals, TODO expand to 1d20+1
 Roller.prototype.parseDice = function(d, mod, fn) {
 	return this.roll(d.replace(/d.*/, ''), d.replace(/.*d/, ''), mod, fn)
-}
+};
 
 module.exports.roller = new Roller();

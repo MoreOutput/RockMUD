@@ -12,9 +12,7 @@ copies of the Software, and to permit persons to whom the Software is furnished
 0. The above copyright notice and this permission notice shall be included in all copies 
 or substantial portions of the Software.
 
-1. Orginal authors name (Rocky Bevins) must appear at the top of server.js.
-
-2. Orginal authors name (Rocky Bevins) must be listed in a public credit or information help file.
+1. Orginal authors name (Rocky Bevins) must be listed in a public credit or help file.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
 INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 

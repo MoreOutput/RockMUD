@@ -1,5 +1,4 @@
 'use strict';
-
 var fs = require('fs'),
 Character = require('./character').character,
 World = require('./world').world;

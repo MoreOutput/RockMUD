@@ -9,6 +9,7 @@ Goals:
 * Easy client GUI creation and triggering client side events.
 * Real-time browser OLC and world management.
 * Accessible data
+* GUI world building tools
 
 Notes on dependencies: 
 * Socket.io 1.0 or greater is required.
@@ -28,15 +29,16 @@ Some things Currently in 0.1.9:
 * Dynamic movement directions/options.
 * Message Templates
 * Skill Example (see: bash)
+* Spell Example: (see: cast spark)
 * AI (starting)
 
 #10000 feet:#
-All design/data elements of RockMUD must be either valid JSON or .js files. Please look at the current code and make an effort to match the style if you plan to submit a pull request.
+All design/data elements of RockMUD must be either valid JSON or .js files. Please look at the current code and make an effort to match the style if you plan to submit a pull request. 
 
-##Core Modules, found in /src :##
 **server.js**
 Starts server and outlines public resource paths.
 
+##Core Modules, found in /src :##
 **world.js**
 Functions that have game-wide reach. In memory data -- World.races, World.players and etc.
 
@@ -67,7 +69,7 @@ Game classes.
 Game races.
 
 **/help**
-In-game help files
+In-game help files.
 
 **/src**
 Location of the core modules.
@@ -93,8 +95,8 @@ Item templates extend objects into certain items based on their template[] and i
 Mob specific AI scripts. RockMUD core aims to have 1: midgaardMayor.js
 
 **/ai/behaviors**
-AI scripts. RockMUD will come with four AI behaviors: mayor.js, aggie.js, wanderer.js, beggar.js, guard.js. Behaviors define
-the API for AI scripts along with a default 'action set'. 
+AI scripts defining generic AI actions. RockMUD will come with five AI behaviors: mayor.js, aggie.js, wanderer.js, beggar.js, guard.js. Behaviors define
+an API for AI scripts along with a default 'action set'. 
 
 **/tools**
 Eventual location of building and admin tools.
@@ -104,7 +106,7 @@ Eventual location of building and admin tools.
 Server Configuration
 
 **/time.json**
-Time data
+Time and Weather data
 
 ###Installation###
 * Install Node, NPM, and Git

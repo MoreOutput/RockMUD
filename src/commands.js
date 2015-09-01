@@ -3,7 +3,6 @@
 * users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
 */
 'use strict';
-
 var fs = require('fs'),
 util = require('util'),
 World = require('./world').world,

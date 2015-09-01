@@ -221,10 +221,17 @@ World.prototype.motd = function(s, fn) {
 			slot: 'hands'
 		}
 	});
-
 */
-World.prototype.extend= function(target, template, fn) {
+World.prototype.extend = function(target, template, fn) {
+	for (prop in obj2) {
+		if (target[prop]) {
+			target[prop] += obj2[prop];
+		} else {
+			target[prop] = obj2[prop];
+		}
+	}
 
-}
+	return fn(target);
+};
 
 module.exports.world = new World();
