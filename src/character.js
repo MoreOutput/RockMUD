@@ -406,90 +406,94 @@ Character.prototype.rollStats = function(player, fn) {
 Character.prototype.newCharacter = function(r, s, fn) {
 	var character = this,
 	i = 0,
-	races = World.races,
-	classes = World.classes,
 	str = '';
 
-	for (i; i < races.length; i += 1) {
-		str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
+	World.getPlayableRaces(function(races) {
+		World.getPlayableClasses(function(classes) {
+			for (i; i < races.length; i += 1) {
+				str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
 
-		if	(races.length - 1 === i) {
-			s.emit('msg', {msg: s.player.name + ' is a new character! There are three more steps until ' + s.player.name + 
-			' is saved. The next step is to select your race: <ul>' + str + '</ul><p class="tip">You can learn more about each race by typing help race name</p>', res: 'selectRace', styleClass: 'race-selection'});		
+				if	(races.length - 1 === i) {
+					s.emit('msg', {msg: s.player.name + ' is a new character! There are three more steps until ' + s.player.name + 
+					' is saved. The next step is to select your race: <ul>' + str + '</ul><p class="tip">You can learn more about each race by typing help race name</p>', res: 'selectRace', styleClass: 'race-selection'});		
 
-			s.on('raceSelection', function (r) { 
-				var cmdArr = r.msg.split(' ');
+					s.on('raceSelection', function (r) { 
+						var cmdArr = r.msg.split(' ');
 
-				r.cmd = cmdArr[0].toLowerCase();
-				r.msg = cmdArr.slice(1).join(' ');
-	
-				character.raceSelection(r, s, function(r, s, fnd) {
-					if (fnd) {
-						i = 0;
-						str = '';
-						s.player.race = r.cmd;
-
-						for (i; i < classes.length; i += 1) {
-							str += '<li>' + classes[i].name + '</li>';
-
-							if	(classes.length - 1 === i) {
-								s.emit('msg', {
-									msg: 'Great, two more steps to go! Now time to select a class for ' + s.player.name + '. Pick one of the following: <ul>' + 
-									str + '</ul>', 
-									res: 'selectClass', 
-									styleClass: 'race-selection'
-								});
-								
-								s.on('classSelection', function(r) {
-									r.msg = r.msg.toLowerCase();
+						r.cmd = cmdArr[0].toLowerCase();
+						r.msg = cmdArr.slice(1).join(' ');
 			
-									character.classSelection(r, function(fnd) {
-										if (fnd) {
-											s.player.charClass = r.msg;
-											
-											s.emit('msg', {
-												msg: s.player.name + ' is a ' + s.player.charClass + '! One more step before ' + s.player.name + 
-												' is saved. Please define a password (8 or more characters):', 
-												res: 'createPassword', 
-												styleClass: 'race-selection'
-											});	
-								
-											s.on('setPassword', function(r) {
-												if (r.msg.length > 7) {
-													s.player.password = r.msg;
-													character.create(r, s, fn);
+						character.raceSelection(r, s, function(r, s, fnd) {
+							if (fnd) {
+								i = 0;
+								str = '';
+								s.player.race = r.cmd;
+
+								for (i; i < classes.length; i += 1) {
+									str += '<li>' + classes[i].name + '</li>';
+
+									if	(classes.length - 1 === i) {
+										s.emit('msg', {
+											msg: 'Great, two more steps to go! Now time to select a class for ' + s.player.name + '. Pick one of the following: <ul>' + 
+											str + '</ul>', 
+											res: 'selectClass', 
+											styleClass: 'race-selection'
+										});
+										
+										s.on('classSelection', function(r) {
+											r.msg = r.msg.toLowerCase();
+					
+											character.classSelection(r, function(fnd) {
+												if (fnd) {
+													s.player.charClass = r.msg;
+													
+													s.emit('msg', {
+														msg: s.player.name + ' is a ' + s.player.charClass + '! One more step before ' + s.player.name + 
+														' is saved. Please define a password (8 or more characters):', 
+														res: 'createPassword', 
+														styleClass: 'race-selection'
+													});	
+										
+													s.on('setPassword', function(r) {
+														if (r.msg.length > 7) {
+															s.player.password = r.msg;
+															character.create(r, s, fn);
+														} else {
+															s.emit('msg', {msg: 'Password should be longer', styleClass: 'error' });
+														}											
+													});											
 												} else {
-													s.emit('msg', {msg: 'Password should be longer', styleClass: 'error' });
-												}											
-											});											
-										} else {
-											s.emit('msg', {msg: 'That class is not on the list, please try again', styleClass: 'error' });
-										}									
-									}); 
-								});
+													s.emit('msg', {msg: 'That class is not on the list, please try again', styleClass: 'error' });
+												}									
+											}); 
+										});
+									}
+								}										
+							} else if (!fnd && r.cmd !== 'help') {
+								s.emit('msg', {msg: 'That race is not on the list, please try again', styleClass: 'error' });
 							}
-						}										
-					} else if (!fnd && r.cmd !== 'help') {
-						s.emit('msg', {msg: 'That race is not on the list, please try again', styleClass: 'error' });
-					}
-				});
-			});			
-		}
-	}	
+						});
+					});			
+				}
+			}	
+		});
+	});
 };
 
 Character.prototype.raceSelection = function(r, s, fn) {
 	var i = 0,
 	helpTxt;
 
-	if (r.cmd !== 'help') {	
-		for (i; i < races.length; i += 1) {
-			if (r.cmd === races[i].name.toLowerCase()) {
-				return fn(r, s, true);
+	if (r.cmd !== 'help') {
+		World.getPlayableRaces(function(races) {
+			for (i; i < races.length; i += 1) {
+				if (r.cmd === races[i].name.toLowerCase()) {
+					return fn(r, s, true);
+				}
 			}
-		}
 
-		return fn(r, s, false);
+			return fn(r, s, false);
+		});
 	} else {
 		fs.readFile('./help/' + r.msg + '.json', function (err, data) {
 			if (!err) {
@@ -511,15 +515,17 @@ Character.prototype.raceSelection = function(r, s, fn) {
 };
 
 Character.prototype.classSelection = function(r, fn) {
-	var i = 0;	
-	
-	for (i; i < classes.length; i += 1) {
-		if (r.msg === classes[i].name.toLowerCase()) {
-			return fn(true)
+	var i = 0;
+
+	World.getPlayableClasses(function(classes) {
+		for (i; i < classes.length; i += 1) {
+			if (r.msg === classes[i].name.toLowerCase()) {
+				return fn(true)
+			}
 		}
-	}
-	
-	return fn(false)
+
+		return fn(false);
+	});
 };
 
 Character.prototype.save = function(s, fn) {
