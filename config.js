@@ -74,8 +74,8 @@ exports.server = {
 		con: 1,
 		str: -1,
 		gold: 15,
-		skills: [{ name: 'cure light', train: 65, type: 'spell' }],
-		skillList: [{ name: 'Cure Light', mod: 2, level: 1, maxTrain: 95, wait : 1, type: 'spell' }]
+		skills: [{ name: 'cure-light', train: 65, type: 'spell' }],
+		skillList: [{ name: 'Cure-Light', mod: 2, level: 1, maxTrain: 95, wait : 1, type: 'spell' }]
 	}, {
 		name:'Wizard', 
 		minLevel: 0,

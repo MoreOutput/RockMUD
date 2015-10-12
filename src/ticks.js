@@ -39,7 +39,7 @@ timeConfig = require('../config').server.gameTime;
 
 		if (players.length > 0) {	
 			for (i; i < players.length; i += 1) {
-				s = io.sockets.connected[players[i].sid];		
+				s = io.sockets.connected[players[i].sid];
 				Character.hunger(s, function() {
 					Character.thirst(s, function() {
 						Character.hpRegen(s, function(total) {
@@ -48,7 +48,7 @@ timeConfig = require('../config').server.gameTime;
 							});
 						});
 					});
-				});					
+				});
 			}		
 		}	
 	}, 60000 * 3);	
@@ -108,6 +108,19 @@ timeConfig = require('../config').server.gameTime;
 		}	
 	}, 50000);
 
+	setInterval(function() {
+		var i = 0,
+		s; 
+
+		if (players.length > 0) {	
+			for (i; i < players.length; i += 1) {
+				s = io.sockets.connected[players[i].sid];
+				Character.mvmpRegen(s, function() {
+					Character.prompt(s);
+				});
+			}
+		}
+	}, 30000);
 
 	// Time -- Increase minute, hours, days and years.
 	// time data is saved to data/time.json every 12 hours

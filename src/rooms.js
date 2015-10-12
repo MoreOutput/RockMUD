@@ -395,14 +395,14 @@ Room.prototype.msgToArea = function(msgOpt, exclude, fn) {
 	s;
 
 	for (i; i < players.length; i += 1) {				
-		s = io.sockets.socket(players[i].sid);
+		s = io.sockets.connected[players[i].sid];
 		if (exclude === undefined || exclude === true) {
 			if (s.player.name !== msgOpt.playerName && s.player.area === msgOpt.area) {
 				s.emit('msg', {
 					msg: msgOpt.msg, 
 					styleClass: msgOpt.styleClass
 				});
-			} 
+			}
 		} else {
 			if (s.player.area === msgOpt.area) {
 				s.emit('msg', {

@@ -69,6 +69,10 @@ io.on('connection', function (s) {
 					} else if (r.cmd in Skills) {
 						return Skills[r.cmd](r, s);
 					} else {
+
+						/* Inexplicable errors here are probably the result of the last command
+						   mutating r.msg. You should emit a new {msg: msg, ...} instead. */
+
 						s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
 						return Character.prompt(s);
 					}

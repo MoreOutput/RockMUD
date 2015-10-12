@@ -26,7 +26,7 @@ Cmd.prototype.move = function(r, s) {
 			area: s.player.area,
 			id: s.player.roomid
 		}, function(roomObj) {
-			Room.checkExit(roomObj, r, function(fnd) {
+			Room.checkExit(roomObj, r, function(fnd, newRoomid) {
 				if (fnd) {
 					Room.msgToRoom({
 						msg: s.player.name + ' the ' + s.player.race + ' walks ' + r.cmd + '.', 
@@ -35,28 +35,33 @@ Cmd.prototype.move = function(r, s) {
 					}, true);
 
 					s.player.cmv = Math.round((s.player.cmv - (12 - s.player.dex/4)));	
-					s.player.roomid = roomObj.id;
+					s.player.roomid = newRoomid;
 
-					if (roomObj.terrianMod) {
-						s.player.wait = roomObj.terrianMod;
-					} else {
-						s.player.wait = 1;
-					}
+					Room.getRoomObject({
+						area: s.player.area,
+						id: s.player.roomid
+					}, function(newRoomObj) {
+						if (newRoomObj.terrianMod) {		//I think? maybe roomObj.terrainMod...
+							s.player.wait = newRoomObj.terrianMod;
+						} else {
+							s.player.wait = 1;
+						}
 
-					Character.updatePlayer(s);
+						Character.updatePlayer(s);
 
-					Room.getDisplayHTML(roomObj, function(displayHTML) {
-						s.emit('msg', {
-							msg: displayHTML, 
-							styleClass: 'room'
-						});
+						Room.getDisplayHTML(newRoomObj, function(displayHTML) {
+							s.emit('msg', {
+								msg: displayHTML, 
+								styleClass: 'room'
+							});
 
-						Room.msgToRoom({
-							msg: s.player.name + ' the ' + s.player.race + ' enters the room.', 
-							playerName: s.player.name, 
-							roomid: roomObj.id
-						}, true, function() {
-							return Character.prompt(s);
+							Room.msgToRoom({
+								msg: s.player.name + ' the ' + s.player.race + ' enters the room.', 
+								playerName: s.player.name, 
+								roomid: newRoomid
+							}, true, function() {
+								return Character.prompt(s);
+							});
 						});
 					});
 				} else {
@@ -267,15 +272,17 @@ Cmd.prototype.look = function(r, s) {
 };
 
 Cmd.prototype.where = function(r, s) {
-	r.msg = '<ul>' + 
-	'<li>Your Name: ' + Character[s.id].name + '</li>' +
-	'<li>Current Area: ' + Character[s.id].area + '</li>' +
-	'<li>Room Number: ' + Character[s.id].id + '</li>'  +
-	'</ul>';	
+	var msg = '<ul>' + 
+	'<li>Your Name: ' + s.player.name + '</li>' +
+	'<li>Current Area: ' + s.player.area + '</li>' +
+	'<li>Room Number: ' + s.player.roomid + '</li>'  +
+	'</ul>';
 
-	r.styleClass = 'playerinfo where';
-	
-	s.emit('msg', r);
+	s.emit('msg', {
+		msg: msg,
+		styleClass: 'playerinfo where'
+	});
+
 	return Character.prompt(s);
 };
 
@@ -300,7 +307,8 @@ Cmd.prototype.yell = function(r, s) {
 	
 	Room.msgToArea({
 		msg: s.player.name + ' yells> ' + r.msg +  '.', 
-		playerName: s.player.name
+		playerName: s.player.name,
+		area: s.player.area
 	}, true);
 };
 
@@ -371,15 +379,20 @@ Cmd.prototype.achat = function(r, s) {
 			styleClass: 'adminmsg'
 		});
 	} else {
-		r.msg = 'You do not have permission to execute this command.';
-		s.emit('msg', r);		
+		var msg = 'You do not have permission to execute this command.';
+		s.emit('msg', {
+			msg: msg,
+			styleClass: 'error'
+		});		
 		return Character.prompt(s);
 	}
 };
 
 // Viewing the time
 Cmd.prototype.time = function(r, s) {
+	/* Is this supposed to be server time, or in-game time? */
 
+	s.emit('msg', {msg: 'It\'s about 2015ish', styleClass: 'playerinfo'});
 };
 
 /** Related to Saving and character adjustment/interaction **/
@@ -439,16 +452,16 @@ Cmd.prototype.equipment = function(r, s) {
 Cmd.prototype.skills = function(r, s) {
 	var skills = '',
 	i = 0;
-	
+
 	if (s.player.skills.length > 0) {
 		for (i; i < s.player.skills.length; i += 1) {
-			skills += s.player.skills[i].name;
+			skills += s.player.skills[i].name + "<br>";
 		}
-		
-		s.emit('msg', {msg: 'skills', styleClass: 'eq' });
+
+		s.emit('msg', {msg: skills, styleClass: 'eq' });
 		return Character.prompt(s);
 	} else {
-		s.emit('msg', {msg: 'skills', styleClass: 'eq' });
+		s.emit('msg', {msg: skills, styleClass: 'eq' });
 		return Character.prompt(s);
 	}
 };

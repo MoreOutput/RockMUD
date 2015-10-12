@@ -385,8 +385,10 @@ Character.prototype.rollStats = function(player, fn) {
 	for (i; i < races.length; i += 1) {		// looking for race
 		if (races[i].name.toLowerCase() === player.race) {	 // found race		
 			for (raceKey in player) {
-				if (player[raceKey] in races[i] && raceKey !== 'name') { // found, add in stat bonus						
-						player[player[raceKey]] = player[player[raceKey]] + races[i][player[raceKey]];	
+				if (player[raceKey] in races[i] && raceKey !== 'name') { // found, add in stat bonus
+						// dangerous because [] + [] = '', {} + {} = NaN. Will clobber 'skills' and 'attackType'.
+						// should be replaced by a merge function that adds numbers, concats arrays and recurses on objects
+						player[player[raceKey]] = player[player[raceKey]] + races[i][player[raceKey]];
 				}
 			}
 		}		
@@ -399,7 +401,7 @@ Character.prototype.rollStats = function(player, fn) {
 							if (!classes[j][classKey].length) {
 								player[classKey] = classes[j][classKey] + player[classKey];
 							} else {
-								player[classKey].push(classes[j][classKey]);
+								player[classKey]= player[classKey].concat(player[classKey], classes[j][classKey]);
 							}
 						} 
 					}
@@ -579,11 +581,50 @@ Character.prototype.hpRegen = function(s, fn) {
 		}
 
 		Dice.roll(1 * (s.player.level + conMod), 8, function(total) {
+			if(s.player.chp + total > s.player.hp){
+				s.player.chp = s.player.hp;
+			}else{
+				s.player.chp += total;
+			}
+
 			fn(s.player.chp + total);
 		});
 	} else {
 		fn(s.player.chp);
 	}
+}
+
+Character.prototype.mvmpRegen = function(s, fn) {
+	var conMod = this.getModifier(s, 'con'),
+	    intMod = this.getModifier(s, 'int'),
+	    wisMod = this.getModifier(s, 'wis'),
+	    manaMod = 0;
+
+	if(intMod > wisMod){
+		manaMod = intMod;
+	}else{
+		manaMod = wisMod;
+	}
+
+	if (s.player.position === 'sleeping') {
+		conMod = conMod + 2;
+	}
+
+	Dice.roll(2 * (s.player.level + conMod), 8, function(total) {
+		if(s.player.cmv + total > s.player.mv){
+			s.player.cmv = s.player.mv;
+		}else{
+			s.player.cmv += total;
+		}
+		Dice.roll(1 * (s.player.level + manaMod), 8, function(total) {
+			if(s.player.cmana + total > s.player.mana){
+				s.player.cmana = s.player.mana;
+			}else{
+				s.player.cmana += total;
+			}
+			fn();
+		});
+	});
 }
 
 Character.prototype.hunger = function(s, fn) {
