@@ -347,12 +347,21 @@ Character.prototype.create = function(r, s, fn) {
 								}
 								
 								character.motd(s, function() {
-									fn(s);
-									Room.getRoomDisplay(s, function() {
-										character.prompt(s);
-									});			
-									
-								});
+								    Room.getRoomObject({
+									    area: s.player.area,
+									    id: s.player.roomid
+								    }, function(roomObj) {
+									    Room.getDisplayHTML(roomObj, function(displayHTML) {
+										    s.emit('msg', {
+											    msg: displayHTML, 
+											    styleClass: 'room'
+										    });
+
+										    fn(s);
+										    return character.prompt(s);
+									    });
+								    });
+							    });
 							});
 						
 						} else {
