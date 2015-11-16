@@ -79,7 +79,7 @@ window.onload = function() {
 			}	
 		}
 
-		return fn(cmd + ' ' + msg);	
+		return fn(cmd + ' ' + msg);
 	};
 
 	document.getElementById('console').onsubmit = function (e) {

@@ -1,0 +1,12 @@
+{
+    "name" : "A new area",
+    "id" : 0,
+    "type" : "forest",
+    "levels" : "All",
+    "description" : "",
+    "reloads": 0,
+    "created": "",
+    "saved": "",
+    "author": "",
+    "rooms" : []
+}

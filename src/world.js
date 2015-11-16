@@ -23,7 +23,7 @@ World = function() {
 	loadTime = function (fn) {
 		fs.readFile('./time.json', function (err, r) {
 			return  fn(err, JSON.parse(r));
-		});	
+		});
 	},
 	loadRaces = function (fn) {
 		loadFileSet('./races/', fn);
@@ -59,6 +59,7 @@ World = function() {
 	world.mobTemplates = []; // Templates that merge with various mob types
 	world.messageTemplates = []; // Templates that merge with various message types
 
+	// embrace callback hell
 	loadTime(function(err, time) {
 		loadRaces(function(err, races) {
 			loadClasses(function(err, classes) {
@@ -75,8 +76,6 @@ World = function() {
 };
 
 World.prototype.setup = function(socketIO, cfg, fn) {
-
-
 	var Character = require('./character').character,
 	Cmds = require('./commands').cmd,
 	Skills = require('./skills').skill,
@@ -206,15 +205,20 @@ World.prototype.motd = function(s, fn) {
 };
 
 /*
-	RockMUD custom extend(target, obj2, callback);
+	RockMUD extend(target, obj2, callback);
 	
-	Target gains all properties from obj2 but keeps any strings match with its current set, all numbers/dice rolls are added together.
+	Target gains all properties from obj2 that arent in the current object, all numbers/dice rolls are added together.
 	This function is used heavily in item initalzation; as to merge in templates.
 
 	So:
 	
 	X = {itemType: 'weapon', dice: '2d4+1'};
-	Y= {itemType: 'template', dice: '1', slot: 'hands'};
+	// reverse copies Y into X
+	Y = {
+		template: {itemType: 'template', dice: '+1', slot: 'hands'}, // World.getTemplate() also works
+		reverse: false,
+		addValues: true // add numners, false just uses templates.
+	};
 
 	World.extend(X, Y, function(rolledItem) {
 		rolledItem, an instance of item X, now looks like:
@@ -225,7 +229,7 @@ World.prototype.motd = function(s, fn) {
 		}
 	});
 */
-World.prototype.extend = function(target, template, fn) {
+World.prototype.extend = function(target, options, fn) {
 	for (prop in obj2) {
 		if (target[prop]) {
 			target[prop] += obj2[prop];

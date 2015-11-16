@@ -18,6 +18,11 @@ Cmd = function () {
 
 };
 
+// Parses incoming user input
+Cmd.prototype.parse = function() {
+
+};
+
 Cmd.prototype.move = function(r, s) {
 	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping' && s.player.cmv > 5 && s.player.wait === 0) {
 		r.cmd = r.msg;

@@ -162,7 +162,20 @@ Character.prototype.addPlayer = function(s, fn) {
 Character.prototype.create = function(r, s, fn) { 
 	var character = this;
 
-	// Player model
+	// All living creatures use the entity template
+	// password, salt, role, verified
+	/*
+	 "settings": {
+            "autosac": false,
+            "autoloot": true,
+            "autodrink": {"enabled": true, "itemId": ""},
+            "wimpy": {"enabled": false, "hp": 0},
+            "channels": {
+                "blocked": ["flame"]
+            }
+        }
+     */
+     
 	s.player = {
 		name: s.player.name,
 		lastname: '',
@@ -373,34 +386,35 @@ Character.prototype.rollStats = function(player, fn) {
 	raceKey, // property of the race defines in raceList
 	classKey; // property of the class defines in classList
 
-	for (i; i < races.length; i += 1) {		// looking for race
-		if (races[i].name.toLowerCase() === player.race) {	 // found race		
+
+	// TODO: abstract these abilities
+
+	for (i; i < World.races.length; i += 1) {// looking for race
+		if (World.races[i].name.toLowerCase() === player.race) { // found race		
 			for (raceKey in player) {
-				if (player[raceKey] in races[i] && raceKey !== 'name') { // found, add in stat bonus						
-						player[player[raceKey]] = player[player[raceKey]] + races[i][player[raceKey]];	
+				if (player[raceKey] in World.races[i] && raceKey !== 'name') { // found, add in stat bonus						
+						player[player[raceKey]] = player[player[raceKey]] + World.races[i][player[raceKey]];	
 				}
 			}
-		}		
-				
-		if (i === races.length - 1) { // rolling stats is finished
-			for (j; j < classes.length; j += 1) { // looking through classes
-				if (classes[j].name.toLowerCase() === player.charClass) { // class match found
-					for (classKey in player) {
-						if (classKey in classes[j] && classKey !== 'name') {
-							if (!classes[j][classKey].length) {
-								player[classKey] = classes[j][classKey] + player[classKey];
-							} else {
-								player[classKey].push(classes[j][classKey]);
-							}
-						} 
-					}
-				}
-			}
-			
-			player.carry = player.str * 10;
-			return fn(player);
 		}
-	}		
+	}
+
+	for (j; j < World.classes.length; j += 1) { // looking through classes
+		if (World.classes[j].name.toLowerCase() === player.charClass) { // class match found
+			for (classKey in player) {
+				if (classKey in World.classes[j] && classKey !== 'name') {
+					if (!World.classes[j][classKey].length) {
+						player[classKey] = World.classes[j][classKey] + player[classKey];
+					} else {
+						player[classKey].push(World.classes[j][classKey]);
+					}
+				} 
+			}
+		}
+	}
+			
+	player.carry = player.str * 10;
+	return fn(player);
 };
 
 Character.prototype.newCharacter = function(r, s, fn) {
