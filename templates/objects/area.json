@@ -8,5 +8,9 @@
     "created": "",
     "saved": "",
     "author": "",
+    "alwaysProcess": false,
+    "age": 0,
+    "state": "good",
+    "weather": {},
     "rooms" : []
 }

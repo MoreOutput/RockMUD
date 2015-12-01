@@ -89,22 +89,18 @@ Character.prototype.getPassword = function(s, fn) {
 				if (s.player.password === hash) {
 					character.addPlayer(s, function(added, msg) {
 						if (added) {
-							World.loadArea(s.player.area, function(area) {
 								World.motd(s, function() {
-									World.getRoomObject(area, s.player.roomid,function(roomObj) {
-                                        Room.getDisplayHTML(roomObj, function(displayHTML) {
-											s.emit('msg', {
-												msg: displayHTML, 
-												styleClass: 'room'
-											});
-
-											fn(s);
-											
-											return character.prompt(s);
+									Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
+										s.emit('msg', {
+											msg: displayHTML, 
+											styleClass: 'room'
 										});
+
+										fn(s);
+										
+										return character.prompt(s);
 									});
 								});
-							});
 						} else {
 							if (msg === undefined) {
 								s.emit('msg', {msg: 'Error logging in, please retry.'});
@@ -162,177 +158,22 @@ Character.prototype.addPlayer = function(s, fn) {
 Character.prototype.create = function(r, s, fn) { 
 	var character = this;
 
-	// All living creatures use the entity template
-	// password, salt, role, verified
-	/*
-	 "settings": {
-            "autosac": false,
-            "autoloot": true,
-            "autodrink": {"enabled": true, "itemId": ""},
-            "wimpy": {"enabled": false, "hp": 0},
-            "channels": {
-                "blocked": ["flame"]
-            }
-        }
-     */
-     
-	s.player = {
-		name: s.player.name,
-		lastname: '',
-		title: '',
-		role: 'player',
-		password: s.player.password,
-		salt: '',
-		race: s.player.race,
-		sex: '',
-		charClass: s.player.charClass,
-		created: new Date().toString(), 
-		level: 1,
-		exp: 1,
-		expToLevel: 1000,
-		position: 'standing',
-		alignment: 0,
-		chp: 100, // current hp
-		hp: 100, // total hp
-		cmana: 100,
-		mana: 100,
-		cmv: 80,
-		mv: 100,
-		str: 13,
-		wis: 13,
-		int: 13,
-		dex: 13,
-		con: 13,
-		wait: 0,
-		ac: 10,
-		gold: 5,
-		hunger: 0,
-		thirst: 0,
-		load: 3,
-		visible: true,
-		attackType: 'punch',
-		area: 'Midgaard', // must match an area file
-		roomid: 1, // current room
-		recall: 1, // id to recall to
-		description: 'A brand new citizen.',
-		reply: '',
-		verified: false,
-		following: '',
-		eq: [{
-			name: 'Head',
-			item: null,
-			slot: 'head'
-		}, {
-			name: 'Necklace 1',
-			item: null,
-			slot: 'head'
-		}, {
-			name: 'Necklace 2',
-			item: null,
-			slot: 'head'
-		}, {
-			name: 'Body',
-			item: null,
-			slot: 'body'
-		}, {
-			name: 'Chest',
-			item: null,
-			slot: 'body'
-		}, {
-			name: 'About Body',
-			item: null,
-			slot: 'body'
-		}, {
-			name: 'Right Arm',
-			item: null,
-			slot: 'arms'
-		}, {
-			name: 'Left Arm',
-			item: null,
-			slot: 'arms'
-		}, {
-			name: 'Right Hand',
-			item: null,
-			dual: false,
-			slot: 'hands'
-		}, {
-			name: 'Left Hand',
-			item: null,
-			dual: false,
-			slot: 'hands'
-		}, {
-			name: 'Ring 1',
-			item: null,
-			slot: 'fingers'
-		}, {
-			name: 'Ring 2',
-			item: null,
-			slot: 'fingers'
-		}, {
-			name: 'Right Leg',
-			item: null,
-			slot: 'legs'
-		}, {
-			name: 'Left Leg',
-			item: null,
-			slot: 'legs'
-		}, {
-			name: 'Feet',
-			item: null,
-			slot: 'feet'
-		}, {
-			name: 'Floating',
-			item: null,
-			slot: 'floating'
-		}],
-		items: [
-			{
-				"name": "Pot Pie", 
-				"short": "A Chicken Pot Pie",
-				"long": "A pot pie",
-				"id": 4, 
-				"area": "all",
-				"level": 1,
-				"itemType": "food",
-				"weight": 2,
-				"flags": [
-					{"hunger": -7},
-					{"carry": 1} 
-				]
-			},
-			{
-				"name": "Burlap Sack", 
-				"short": "A Burlap Sack",
-				"long": "An over-used burlap sack with many tears",
-				"id": 5, 
-				"area": "all",
-				"level": 1,
-				"itemType": "container",
-				"weight": 1,
-				"maxWeight": 40,
-				"contains": []
-			}
-		],
-		affects: [],
-		racial: [],
-		skills: [],
-		skillList: [],
-		prevent: [], // character specific command ban
-		autoloot: true,
+	s.player = World.mobTemplate;
+	s.player.isPlayer = true;
+	s.player.salt = '';
+	s.player.password = '';
+	s.player.created = new Date();
+	s.player.saved = null;
+	s.player.settings = {
 		autosac: false,
-		behaviors: [],
-		settings: {
-			autosac: false,
-			autoloot: true,
-			autodrink: {on: true, item: ''},
-			channels: {
-				blocked: ['flame']
-			}
+		autoloot: true,
+		autodrink: {enabled: true, itemId: ''},
+		wimpy: {enabled: false, hp: 0},
+		channels: {
+			blocked: [flame]
 		}
 	};
 
-	// World.getMobTemplate('player', function(err, playerTemplate) {});
-	
 	character.rollStats(s.player, function(player) {
 		s.player = player;
 	
@@ -340,31 +181,31 @@ Character.prototype.create = function(r, s, fn) {
 			s.player.salt = salt;
 			character.hashPassword(salt, s.player.password, 1000, function(hash) {
 				s.player.password = hash;
+
 				fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
 					var i = 0;
 		
 					if (err) {
 						throw err;
 					}
-					
+
+					s.player.saved = new Date();
+
 					character.addPlayer(s, function(added) {
 						if (added) {
 							s.leave('creation'); // No longer creating the character so leave the channel and join the game
-							s.join('mud');		
+							s.join('mud');
 
-							World.checkArea(s.player.area, function(fnd) {
-								if (!fnd) {
-									World.loadArea(s.player.area, function(area) {
-										World.areas.push(area);
-									});
-								}
-								
-								World.motd(s, function() {
+							World.motd(s, function() {
+								World.getRoomDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
 									fn(s);
-									Room.getRoomDisplay(s, function() {
-										character.prompt(s);
-									});			
 									
+									s.emit('msg', {
+										msg: displayHTML, 
+										styleClass: 'room'
+									});
+
+									character.prompt(s);
 								});
 							});
 						
@@ -373,9 +214,9 @@ Character.prototype.create = function(r, s, fn) {
 							s.disconnect();
 						}
 					});
-				});	
+				});
 			});
-		});	
+		});
 	});
 };
 
@@ -456,7 +297,7 @@ Character.prototype.newCharacter = function(r, s, fn) {
 										
 										s.on('classSelection', function(r) {
 											r.msg = r.msg.toLowerCase();
-					
+
 											character.classSelection(r, function(fnd) {
 												if (fnd) {
 													s.player.charClass = r.msg;
@@ -466,7 +307,7 @@ Character.prototype.newCharacter = function(r, s, fn) {
 														' is saved. Please define a password (8 or more characters):', 
 														res: 'createPassword', 
 														styleClass: 'race-selection'
-													});	
+													});
 										
 													s.on('setPassword', function(r) {
 														if (r.msg.length > 7) {
@@ -474,22 +315,22 @@ Character.prototype.newCharacter = function(r, s, fn) {
 															character.create(r, s, fn);
 														} else {
 															s.emit('msg', {msg: 'Password should be longer', styleClass: 'error' });
-														}											
-													});											
+														}
+													});
 												} else {
 													s.emit('msg', {msg: 'That class is not on the list, please try again', styleClass: 'error' });
-												}									
+												}
 											}); 
 										});
 									}
-								}										
+								}
 							} else if (!fnd && r.cmd !== 'help') {
 								s.emit('msg', {msg: 'That race is not on the list, please try again', styleClass: 'error' });
 							}
 						});
-					});			
+					});
 				}
-			}	
+			}
 		});
 	});
 };
@@ -524,7 +365,7 @@ Character.prototype.raceSelection = function(r, s, fn) {
 
 				return fn(r, s, false);
 			}
-		});	
+		});
 	}
 };
 
@@ -653,11 +494,11 @@ Character.prototype.checkInventory = function(r, s, fn) {
 
 	// Split to account for target modifier (IE: 2.longsword)
 	parts = r.msg.split('.');
-	if(parts.length === 2) {
-		findIndex = parseInt(parts[0])-1;
+
+	if (parts.length === 2) {
+		findIndex = parseInt(parts[0]) - 1;
 		findItem = parts[1];
-	}
-	else {
+	} else {
 		findIndex = 0;
 		findItem = r.msg;
 	}
@@ -667,7 +508,7 @@ Character.prototype.checkInventory = function(r, s, fn) {
 	items = s.player.items.filter(function(item, i) {
 		if (msgPatt.test(item.name.toLowerCase())) {
 			return true;
-		}			
+		}
 	});
 
 	if (items.length > 0 && findIndex in items) {
@@ -828,5 +669,10 @@ Character.prototype.level = function(s, fn) {
 
 };
 
+/*
+* Checks, used to add variety to different game endeavours.
+*/
+
 
 module.exports.character = new Character();
+ 

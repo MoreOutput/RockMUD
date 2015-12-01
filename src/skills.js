@@ -11,6 +11,23 @@ Skill = function() {
 };
 
 /*
+* Passive Skills and Racials
+*/
+Skill.prototype.darkvision = function(r, s) {
+	return {
+		minLevel: 1,
+		type: 'passive',
+		maxTrain: 100,
+		onMove: function(room) {
+
+		},
+		onBlind: function() {
+
+		}
+	}
+};
+
+/*
 * Melee Skills
 */
 Skill.prototype.bash = function(r, s) {

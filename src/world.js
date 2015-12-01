@@ -41,34 +41,56 @@ World = function() {
 
 		if (tempType === 'messages') {
 			loadFileSet('./templates/messages/', fn);
+		} else if (tempType === 'area') {
+			fs.readFile('./templates/objects/area.json', function (err, r) {
+				return  fn(err, JSON.parse(r));
+			});
+		} else if (tempType === 'mob') {
+			fs.readFile('./templates/objects/entity.json', function (err, r) {
+				return  fn(err, JSON.parse(r));
+			});
 		} else {
-			loadFileSet('./templates/objects/', fn);
+			fs.readFile('./templates/objects/item.json', function (err, r) {
+				return  fn(err, JSON.parse(r));
+			});
 		}
 	},
 	loadDefaultArea = function (fn) {
 		return fn();
 	};
 
-	world.io = null;
+	world.io = null; // Websocket object, Socket.io
 	world.races = []; // Race JSON definition is in memory
 	world.classes = []; // Class JSON definition is in memory
 	world.areas = []; // Loaded areas
 	world.players = []; // Loaded players
 	world.time = null; // Current Time data
-	world.itemTemplates = []; // Templates that merge with various items types
-	world.mobTemplates = []; // Templates that merge with various mob types
+	world.itemTemplate = {};
+	world.areaTemplate = {};
+	world.mobTemplate = {};
 	world.messageTemplates = []; // Templates that merge with various message types
+	world.heartBeats = 0;
 
 	// embrace callback hell
 	loadTime(function(err, time) {
 		loadRaces(function(err, races) {
 			loadClasses(function(err, classes) {
 				loadTemplates('messages', function(err, msgTemplates) {
-					world.time = time;
-					world.races = races;
-					world.classes = classes;
-					//world.messageTemplates = msgTemplates;
-					return world;
+					loadTemplates('area', function(err, areaTemplate) {
+						loadTemplates('mob', function(err, mobTemplate) {
+							loadTemplates('item', function(err, itemTemplate) {
+								world.time = time;
+								world.races = races;
+								world.classes = classes;
+								world.messageTemplates = msgTemplates;
+								world.areaTemplate = areaTemplate;
+								world.itemTemplate = itemTemplate;
+								world.mobTemplate = mobTemplate;
+
+								return world;
+							});
+						});
+					});
 				});
 			});
 		});
@@ -83,8 +105,6 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	Ticks = require('./ticks');
 
 	this.io = socketIO;
-
-
 
 	return fn(Character, Cmds, Skills);
 };
@@ -142,8 +162,30 @@ World.prototype.getClass = function(className, fn) {
 	});
 };
 
-World.prototype.getTemplate = function(tempType, tempName, fn) {
+World.prototype.getObjectTemplate = function(tempName, fn) {
+	var world = this;
+};
 
+World.prototype.getMessageTemplate = function(tempName, fn) {
+	var world = this;
+};
+
+// This needs to look like getItems() for returning a player obj based on room
+World.prototype.getPlayersByRoomID = function(roomID, fn) {
+	var world = this,
+	arr = [],
+	player,
+	i = 0;
+
+	for (i; i < world.players.length; i += 1) {
+		player = world.io.sockets.connected[players[i].sid].player;
+
+		if (player.roomid === roomID) {
+			arr.push(player);
+		}
+	}
+
+	return fn(arr);
 };
 
 World.prototype.loadArea = function(areaName, fn) {
@@ -239,6 +281,37 @@ World.prototype.extend = function(target, options, fn) {
 	}
 
 	return fn(target);
+};
+
+// Shuffle an array
+World.prototype.shuffle = function (arr) {
+	var i = arr.length - 1,
+	j = Math.floor(Math.random() * i),
+	temp;
+
+	for (i; i > 0; i -= 1) {
+		temp = arr[i];
+		arr[i] = arr[j];
+		arr[j] = temp;
+
+		j = Math.floor(Math.random() * i);
+	}
+
+	return arr;
+}
+
+// return an array of numbers of length @number and between 0 - @arr.length
+World.prototype.generateRandomNumber = function(number, arr) {
+	var i = 0,
+	randomNum = 0;
+
+	for (i; i < number; i += 1) {
+		randomNum = ;
+
+		resultArr.push(randomNum);
+	}
+
+	return resultArr;
 };
 
 module.exports.world = new World();

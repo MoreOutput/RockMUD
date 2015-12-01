@@ -5,17 +5,19 @@ World = require('./world').world;
 
 (function() {
 	// Automated wait-state removal
-	setInterval(function() { 
+	setInterval(function() {
 		var i = 0,
 		s;
 		
-		if (World.players.length > 0) {	
+		world.heartBeats += 1;
+
+		if (World.players.length > 0) {
 			for (i; i < World.players.length; i += 1) {
 				s = World.io.sockets.connected[World.players[i].sid];
 
 				if (s.player.position === 'sleeping' || 
 					s.player.position === 'resting' || 
-					s.player.position === 'standing') {	
+					s.player.position === 'standing') {
 					
 					if (s.player.wait > 0) {
 						s.player.wait -= 1;
@@ -23,12 +25,44 @@ World = require('./world').world;
 						s.player.wait = 0;
 					}
 				}
-			}		
-		}	
-	}, 800);	
+			}
+		}
+	}, 800);
 
-	// Behaviors also have an indepentent tick here, called mobTick
+	// AI Ticks for monsters
+	setInterval(function() {
+		var i = 0,
+		areasToProcess = [],
+		numToProcess = 3, // Areas to process per tick (randomly selected)
+		s;
+		
+		if (World.players.length > 0) {
+			World.areas = World.pickAny(numToProcess, areas);
+			
+			for (i; i < World.areas.length; i += 1) {
+				// if an areas alwasyProcess property is set to true
+				if (i <= areasToProcess) {
+					World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
+						monsters.forEach(function(monster, i) {
+							if (monster.chp >= 1 && monster.onAlive) {
+								monster.onAlive();
+							}
+						});
+					});
+				} else {
+					return false;
+				}
+			}
+		}
+	}, 1000);
 
+	// AI Ticks for areas
+	setInterval(function() {
+		var i = 0,
+		areasToProcess = 5, // Areas to process per tick (randomly selected)
+		s;
+
+	}, 1000);
 
 /*
 	// Regen, Hunger and Thirst Tick 

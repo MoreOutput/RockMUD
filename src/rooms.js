@@ -28,7 +28,7 @@ Room.prototype.rollMob = function(mob, fn) {
 
 	mob.refId = refId;
 
-	World.getRace(mob.race, function(raceObj, err) {
+	World.getMob(mob.race, function(raceObj, err) {
 		if (err) {
 			
 		}
@@ -38,16 +38,10 @@ Room.prototype.rollMob = function(mob, fn) {
 		console.log('Race Obj:');
 		console.log(raceObj);
 		
-		World.merge(mob, raceObj, function(mob, err) {
+		World.extend(mob, raceObj, function(mob, err) {
 			if (err) {
 
 			}
-
-			console.log('Item Merged');
-
-			if (mob.templates && mob.templates.length > 0) {
-
-			}		
 		});
 	});
 
@@ -61,18 +55,20 @@ Room.prototype.rollItem = function(item, fn) {
 Room.prototype.getDisplayHTML = function(roomObj, fn) {
 	var room = this,
 	i = 0,
-    roomStr = '';
-  
-    if (roomObj.exits.length > 0) {
-	 	roomStr += '<li class="room-exits">Visible Exits: ' + 
-	 	roomObj.exits.toString().replace(/,/g, ', ') + '</li>';
+	roomStr = '';
+
+	if (roomObj.exits.length > 0) {
+		roomStr += '<li class="room-exits">Visible Exits: ' + 
+		roomObj.exits.toString().replace(/,/g, ', ') + '</li>';
 	} else {
 		roomStr += '<li class="room-exits">Visible Exits: None!</li>';
 	}
 
-    for (i; i < roomObj.playersInRoom.length; i += 1) {
+	console.log(roomObj);
 
-    }
+	for (i; i < roomObj.playersInRoom.length; i += 1) {
+
+	}
 	
 	if (roomObj.playersInRoom.length > 0 || roomObj.monsters.length > 0) {
 		roomStr += '<li>Here:' + roomObj.playersInRoom.toString().replace(/,/g, '. ') + 
@@ -116,30 +112,13 @@ Room.prototype.updateArea = function(areaName, fn) {
 	}
 };
 
-// This needs to look like getItems() for returning a player obj based on room
-Room.prototype.getPlayersByRoomID = function(roomID, fn) {
-	var arr = [],
-	player,
-	i = 0;
-
-	for (i; i < players.length; i += 1) {
-		player = io.sockets.connected[players[i].sid].player;
-
-		if (player.roomid === roomID) {
-			arr.push(player);
-		}
-	}
-
-	return fn(arr);
-};
-
 // does a string match an exit in the room
-Room.prototype.checkExit = function(roomObj, r, fn) { 
+Room.prototype.checkExit = function(roomObj, direction, fn) { 
 	var i = 0;
 
 	if (roomObj.exits.length > 0) {
 		for (i; i < roomObj.exits.length; i += 1) {
-			if (r.cmd === roomObj.exits[i].cmd) {
+			if (direction === roomObj.exits[i].cmd) {
 				return fn(true, roomObj.exits[i].vnum);
 			}
 		}
@@ -147,7 +126,27 @@ Room.prototype.checkExit = function(roomObj, r, fn) {
 	} else {
 		return fn(false);
 	}
-	
+};
+
+// return all the rooms connected to this one
+Room.prototype.getAdjacent = function(roomObj, depth, r, fn) {
+	var i = 0;
+
+};
+
+Room.prototype.getDisplay = function(areaName, roomId, fn) {
+	var room = this;
+
+	World.loadArea(areaName, function(area) {
+		World.getRoomObject(area, roomId, function(roomObj) {
+			room.getPlayersByRoomId(roomId, function(players) {
+				room.playersInRoom = players;
+				room.getDisplayHTML(roomObj, function(displayHTML) {
+					fn(displayHTML, roomObj);
+				});
+			});
+		});
+	});
 };
 
 // does a string match any monsters in the room

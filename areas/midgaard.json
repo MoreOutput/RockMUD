@@ -8,6 +8,7 @@
 	"created": "",
 	"saved": "",
 	"author": "",
+	"alwaysProcess": true,
 	"rooms" : [
 		{
 			"id" : 1,
@@ -31,6 +32,25 @@
 			], 
 			"monsters" : [
 				{
+					"name": "Mayor",
+					"race": "human",
+					"id": 9,
+					"area": "Midgaard",
+					"weight": 245,
+					"diceNum": 2, 
+					"diceSides": 8,
+					"dice": "2d8",
+					"attackType": "punch",
+					"templates": [],
+					"ac": 20,
+					"itemType": "mob",
+					"behaviors": [{
+						"module" : "midgaard-mayor",
+						"parameters": {
+							"interval": 1000 
+						}
+					}]
+				}, {
 					"name": "Boar",
 					"race": "",
 					"id": 6,
@@ -44,7 +64,7 @@
 					"ac": 6,
 					"itemType": "mob",
 					"behaviors": [{
-						"module" : "Wander",
+						"module" : "wander",
 						"parameters": {
 							"setInterval": 1000 
 						}

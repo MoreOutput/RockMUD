@@ -18,17 +18,39 @@ Cmd = function () {
 
 };
 
-// Parses incoming user input
-Cmd.prototype.parse = function() {
-
-};
+Cmd.prototype.fire = function(commandName, r, s, fn) {
+	this[commandName](r, s);
+	return fn();
+}
 
 Cmd.prototype.move = function(r, s) {
 	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping' && s.player.cmv > 5 && s.player.wait === 0) {
 		r.cmd = r.msg;
 
 		World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
-			Room.checkExit(roomObj, r, function(fnd) {
+			Room.checkExit(roomObj, r.cmd, function(fnd) {
+				/*
+				// the checkMovement* functions roll modifiers for the movement amount; any could halt progression
+				// Preparing an object that reflects the characters move skills and other modifiers
+				Room.checkMovementSkills(roomObj, s.player, function(moveSkillModifiers) {
+					// Holding some items can modify movement
+					Room.checkMovementItems(roomObj, s.player, function(moveSkillModifiers) {
+						// Checking the terrian, certain terrian carries a higher movement cost to traverse
+						// along with the possibility of an increased wait.
+						Room.checkMovementTerrian(roomObj, s.player, function(moveSkillModifiers) {
+							// Perform a dex check, used to add randomness to some of the above
+							Character.dexCheck(s.player, function() {
+								
+							});
+						});
+					});
+				});
+
+				Rooms.getAdjacent(roomid, depth, function(rooms) {
+					
+				});
+
+				*/
 				if (fnd) {
 					Room.msgToRoom({
 						msg: s.player.name + ' the ' + s.player.race + ' walks ' + r.cmd + '.', 
@@ -248,7 +270,7 @@ Cmd.prototype.look = function(r, s) {
 		World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
 			Room.getDisplayHTML(roomObj, function(displayHTML) {
 				s.emit('msg', {
-					msg: displayHTML, 
+					msg: displayHTML,
 					styleClass: 'room'
 				});
 
@@ -371,7 +393,7 @@ Cmd.prototype.achat = function(r, s) {
 		});
 	} else {
 		r.msg = 'You do not have permission to execute this command.';
-		s.emit('msg', r);		
+		s.emit('msg', r);
 		return Character.prompt(s);
 	}
 };

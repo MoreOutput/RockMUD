@@ -10,7 +10,6 @@ Goals:
 * Real-time browser OLC and world management.
 * Accessible content
 * GUI world building tools
-* Aiming for hot code reloads.
 
 Notes on dependencies: 
 * Socket.io 1.0 or greater is required.
@@ -24,7 +23,7 @@ Some things Currently in 0.1.9:
 * Uniform way of scripting commands -- with permission checking
 * JSON world definition
 * Command aliases defined client side.
-* Various 'standard' commands (see: chat, who, look, help, score, save, title, quit, get, drop, say, kill, inventory)
+* Various 'standard' commands (see: HELP COMMANDS)
 * Basic Combat (see: kill <mob name>)
 * Inventory
 * Ticks (ex: regen, server messages, autosave, time, heartbeat, and hunger/thirst are all on their own timer)
@@ -91,7 +90,7 @@ Item templates extend objects into certain items based on their template[] and i
     * entity.json is the default object attached to all 'living' objects upon initial load.
 
     * item.json is the default object attached to all 'living' objects upon initial load.
-    
+
     * Outlined fields in the object definition overwrite entity.json definitions.
 
 **/ai**  
