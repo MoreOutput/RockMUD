@@ -23,90 +23,89 @@ Cmd.prototype.fire = function(commandName, r, s, fn) {
 	return fn();
 }
 
-Cmd.prototype.move = function(r, s) {
-	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping' && s.player.cmv > 5 && s.player.wait === 0) {
-		r.cmd = r.msg;
+// Puts any target object into a defined room after verifying criteria
+Cmd.prototype.move = function(target, direction, fn) {
+	var world = this,
+	s;
 
-		World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
-			Room.checkExit(roomObj, r.cmd, function(fnd) {
-				/*
-				// the checkMovement* functions roll modifiers for the movement amount; any could halt progression
-				// Preparing an object that reflects the characters move skills and other modifiers
-				Room.checkMovementSkills(roomObj, s.player, function(moveSkillModifiers) {
-					// Holding some items can modify movement
-					Room.checkMovementItems(roomObj, s.player, function(moveSkillModifiers) {
-						// Checking the terrian, certain terrian carries a higher movement cost to traverse
-						// along with the possibility of an increased wait.
-						Room.checkMovementTerrian(roomObj, s.player, function(moveSkillModifiers) {
-							// Perform a dex check, used to add randomness to some of the above
-							Character.dexCheck(s.player, function() {
-								
+	if (target.player) {
+		target = target.player;
+		s = target;
+	}
+
+	if (target.position !== 'fighting' && target.position 
+		!== 'resting' && target.position !== 'sleeping' 
+		&& target.cmv > 5 && target.wait === 0) {
+
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			Room.checkExit(roomObj, direction, function(isValidExit, exitObj) {
+				if (exitObj) {
+					if (!exitObj.area) {
+						exitObj.area = roomObj.area;
+					}
+
+					World.getRoomObject(exitObj.area, exitObj.id, function(targetRoom) {
+						Room.checkExitCriteria(target, targetRoom, function(clearToMove) {
+							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {
+								if (clearToMove) {
+									// check against dex, con, current hp and carry weight for a mod to movement cost
+									Character.movementCheck(entity, targetRoom, function(moveMod) {
+										entity.cmv = Math.round((entity.cmv - ( (12) - entity.dex/4)));
+										target.roomid = roomObj.id;
+
+										if (targetRoom.terrianMod) {
+											s.player.wait = terrianMod;
+										} else {
+											s.player.wait = 1;
+										}
+
+										// NOTE WE MADE NEED TO SEND PROMPTS
+
+										if (target.isPlayer) {
+											Character.updatePlayer(target);
+
+											Room.getDisplayHTML(targetRoom, function(displayHTML) {
+												World.msgPlayer(target, {
+													msg: displayHTML,
+													styleClass: 'room'
+												});
+											});
+										}
+
+										World.msgRoom(targetRoom, {
+											msg: target.name + ' a ' + target.race + ' enters the room.',
+											playerName: target.name
+										});
+
+										World.msgRoom(roomObj, {
+											msg: target.name + ' leaves the room'
+										});
+									});
+								} else {
+									entity.cmv = Math.round((entity.cmv - (7 - entity.dex/4)));
+								}
 							});
 						});
 					});
-				});
-
-				Rooms.getAdjacent(roomid, depth, function(rooms) {
-					
-				});
-
-				*/
-				if (fnd) {
-					Room.msgToRoom({
-						msg: s.player.name + ' the ' + s.player.race + ' walks ' + r.cmd + '.', 
-						playerName: s.player.name, 
-						roomid: s.player.roomid
-					}, true);
-
-					s.player.cmv = Math.round((s.player.cmv - (12 - s.player.dex/4)));	
-					s.player.roomid = roomObj.id;
-
-					if (roomObj.terrianMod) {
-						s.player.wait = roomObj.terrianMod;
-					} else {
-						s.player.wait = 1;
-					}
-
-					Character.updatePlayer(s);
-
-					Room.getDisplayHTML(roomObj, function(displayHTML) {
-						s.emit('msg', {
-							msg: displayHTML, 
-							styleClass: 'room'
-						});
-
-						Room.msgToRoom({
-							msg: s.player.name + ' the ' + s.player.race + ' enters the room.', 
-							playerName: s.player.name, 
-							roomid: roomObj.id
-						}, true, function() {
-							return Character.prompt(s);
-						});
-					});
 				} else {
-					s.emit('msg', {
-						msg: 'There is no exit in that direction.', 
-						styleClass: 'error'
-					});
+					entity.cmv = Math.round((entity.cmv - (7 - entity.dex/4)));
 
-					return Character.prompt(s);
+					if (target.isPlayer) {
+						World.msgPlayer(target, {
+							msg: 'There is no exit in that direction.', 
+							styleClass: 'error'
+						});
+					}
 				}
 			});
 		});
-	} else if (s.player.wait !== 0) {
-		s.emit('msg', {
-			msg: 'You cant move that fast!', 
-			styleClass: 'error'
-		});
-
-		return Character.prompt(s);
 	} else {
-		s.emit('msg', {
-			msg: 'You cant move right now!', 
-			styleClass: 'error'
-		});
-
-		return Character.prompt(s);
+		if (target.isPlayer) {
+			World.msgPlayer(target, {
+				msg: 'There is no exit in that direction.', 
+				styleClass: 'error'
+			});
+		}
 	}
 };
 

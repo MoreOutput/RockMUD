@@ -69,7 +69,6 @@ World = function() {
 	world.areaTemplate = {};
 	world.mobTemplate = {};
 	world.messageTemplates = []; // Templates that merge with various message types
-	world.heartBeats = 0;
 
 	// embrace callback hell
 	loadTime(function(err, time) {
@@ -246,6 +245,69 @@ World.prototype.motd = function(s, fn) {
 	});
 };
 
+World.prototype.msgPlayer = function(target, msgObj, fn) {
+	var world = this,
+	s;
+
+	// enables us to pass in a socket directly
+	if (!target.player && target.sid) {
+		 s = world.io.sockets.socket(target.sid);
+	} else {
+		s = target;
+	}
+
+	s.emit('msg', msgObj);
+
+	if (typeof fn === 'function') {
+		return fn(s);
+	}
+}
+
+// Emit a message to all the rooms players
+World.prototype.msgRoom = function(roomObj, msgObj, fn) {
+	var world = this,
+	i = 0,
+	s;
+
+	for (i; i < world.players.length; i += 1) {
+		s = world.io.sockets.connected[world.players[i].sid];
+
+		if (s.player.name !== msgOpt.playerName && s.player.roomid === roomObj.roomid) {
+			world.msgPlayer(s, {
+				msg: msgOpt.msg,
+				styleClass: 'room-msg'
+			});
+		}
+	}
+
+	if (typeof fn === 'function') {
+		return fn();
+	}
+};
+
+// Emit a message to all the players in an area
+World.prototype.msgArea = function(areaName, msgObj, fn) {
+	var world = this,
+	i = 0,
+	s;
+
+	for (i; i < world.players.length; i += 1) {
+		s = world.io.sockets.connected[world.players[i].sid];
+
+		if (s.player.name !== msgOpt.playerName && s.player.area === areaName) {
+			world.msgPlayer(s, {
+				msg: msgOpt.msg,
+				styleClass: 'area-msg'
+			});
+		}
+	}
+
+	if (typeof fn === 'function') {
+		return fn();
+	}
+};
+
+
 /*
 	RockMUD extend(target, obj2, callback);
 	
@@ -301,12 +363,13 @@ World.prototype.shuffle = function (arr) {
 }
 
 // return an array of numbers of length @number and between 0 - @arr.length
-World.prototype.generateRandomNumber = function(number, arr) {
+World.prototype.generateRandomNumbers = function(number, arr) {
 	var i = 0,
+	resultArr = [],
 	randomNum = 0;
 
 	for (i; i < number; i += 1) {
-		randomNum = ;
+		randomNum = Math.random() * (arr.length - 0);
 
 		resultArr.push(randomNum);
 	}

@@ -119,7 +119,7 @@ Room.prototype.checkExit = function(roomObj, direction, fn) {
 	if (roomObj.exits.length > 0) {
 		for (i; i < roomObj.exits.length; i += 1) {
 			if (direction === roomObj.exits[i].cmd) {
-				return fn(true, roomObj.exits[i].vnum);
+				return fn(true, roomObj.exits[i].id);
 			}
 		}
 		return fn(false);

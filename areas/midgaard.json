@@ -18,16 +18,16 @@
 			"exits" : [
 				{
 					"cmd" : "north",
-					"vnum" : 2
+					"id" : 2
 				}, {
 					"cmd" : "east",
-					"vnum" : 3
+					"id" : 3
                 }, {
 					"cmd" : "south",
-					"vnum" : 4
+					"id" : 4
                 }, {
 					"cmd" : "west",
-                    "vnum" : 5
+                    "id" : 5
                 }
 			], 
 			"monsters" : [
@@ -112,7 +112,7 @@
 			"exits" : [
 				{
 					"cmd" : "south",
-					"vnum" : 1
+					"id" : 1
                 }
 			], 
 			"monsters" : [],
@@ -143,7 +143,7 @@
 			"exits" : [
 				{
 					"cmd" : "west",
-					"vnum" : 1
+					"id" : 1
                 }
 			], 
 			"monsters" : [],
@@ -158,7 +158,7 @@
 			"exits" : [
 				{
 					"cmd" : "north",
-					"vnum" : 1
+					"id" : 1
                 }
 			], 
 			"monsters" : [],
@@ -173,7 +173,7 @@
 			"exits" : [
 				{
 					"cmd" : "east",
-					"vnum" : 1
+					"id" : 1
                 }
 			], 
 			"monsters" : [],

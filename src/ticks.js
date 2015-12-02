@@ -9,8 +9,6 @@ World = require('./world').world;
 		var i = 0,
 		s;
 		
-		world.heartBeats += 1;
-
 		if (World.players.length > 0) {
 			for (i; i < World.players.length; i += 1) {
 				s = World.io.sockets.connected[World.players[i].sid];
