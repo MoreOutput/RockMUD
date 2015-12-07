@@ -32,13 +32,16 @@
 			], 
 			"monsters" : [
 				{
-					"name": "Mayor",
+					"name": "Rufus",
+					"short": "Rufus, the mayor of Midgaard",
+					"description": "",
 					"race": "human",
 					"id": 9,
 					"area": "Midgaard",
 					"weight": 245,
 					"diceNum": 2, 
 					"diceSides": 8,
+					"position": "standing",
 					"dice": "2d8",
 					"attackType": "punch",
 					"templates": [],
@@ -52,6 +55,7 @@
 					}]
 				}, {
 					"name": "Boar",
+					"short": "A large brown boar",
 					"race": "",
 					"id": 6,
 					"area": "Midgaard",
@@ -59,6 +63,7 @@
 					"diceNum": 2, 
 					"diceSides": 8,
 					"dice": "2d8",
+					"position": "standing",
 					"attackType": "bite",
 					"templates": [],
 					"ac": 6,
@@ -72,8 +77,8 @@
 				}
 			],
 			"items" : [{
-				"name": "bread",
-				"short": "a loaf of bread",
+				"name": "Bread",
+				"short": "A loaf of bread",
 				"long": "A rather stale looking loaf of bread." ,
 				"area": "Midgaard",
 				"id": 7,
@@ -85,7 +90,7 @@
 				]
 			}, {
 				"name": "Short Sword", 
-				"short": "a Short Sword",
+				"short": "A Short Sword",
 				"long": "A sharp looking short sword with a hilt wrapped in leather." ,
 				"area": "Midgaard",
 				"id": 8,
@@ -118,7 +123,7 @@
 			"monsters" : [],
 			"items" : [{
 				"name": "Tattered Buckler", 
-				"short": "a Tattered Buckler",
+				"short": "A Tattered Buckler",
 				"long": "A round buckler that looks like its seen heavy use." ,
 				"area": "Midgaard",
 				"id": 2, 
@@ -179,7 +184,7 @@
 			"monsters" : [],
 			"items" : [{
 				"name": "Leather Helmet", 
-				"short": "a Leather Helmet",
+				"short": "A Leather Helmet",
 				"long": "" ,
 				"area": "Midgaard",
 				"id": 3, 

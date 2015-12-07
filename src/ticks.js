@@ -1,5 +1,6 @@
 'use strict';
 var fs = require('fs'),
+Dice = require('./dice').roller,
 Character = require('./character').character,
 World = require('./world').world;
 
@@ -30,28 +31,28 @@ World = require('./world').world;
 	// AI Ticks for monsters
 	setInterval(function() {
 		var i = 0,
-		areasToProcess = [],
 		numToProcess = 3, // Areas to process per tick (randomly selected)
 		s;
-		
+		/*
 		if (World.players.length > 0) {
-			World.areas = World.pickAny(numToProcess, areas);
-			
-			for (i; i < World.areas.length; i += 1) {
-				// if an areas alwasyProcess property is set to true
-				if (i <= areasToProcess) {
-					World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
-						monsters.forEach(function(monster, i) {
-							if (monster.chp >= 1 && monster.onAlive) {
-								monster.onAlive();
-							}
+			Dice.randomPick(numToProcess, World.areas.length, function(areasToProcess) {
+				for (i; i < World.areas.length; i += 1) {
+					// if an areas alwasyProcess property is set to true
+					if (i === areasToProcess) {
+						World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
+							monsters.forEach(function(monster, i) {
+								if (monster.chp >= 1 && monster.onAlive) {
+									monster.onAlive();
+								}
+							});
 						});
-					});
-				} else {
-					return false;
+					} else {
+						return false;
+					}
 				}
-			}
+			});
 		}
+		*/
 	}, 1000);
 
 	// AI Ticks for areas

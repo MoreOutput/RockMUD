@@ -9,23 +9,21 @@ World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
-io = World.io,
+Dice = require('./dice').roller,
 players = World.players,
 time = World.time,
 areas = World.areas,
 
-Cmd = function () {
+Cmd = function () {};
 
-};
-
-Cmd.prototype.fire = function(commandName, r, s, fn) {
-	this[commandName](r, s);
-	return fn();
+Cmd.prototype.fire = function(commandName, target, command, fn) {
+	return this[commandName](target, command, fn);
 }
 
 // Puts any target object into a defined room after verifying criteria
-Cmd.prototype.move = function(target, direction, fn) {
+Cmd.prototype.move = function(target, command, fn) {
 	var world = this,
+	direction = command.msg,
 	s;
 
 	if (target.player) {
@@ -49,14 +47,14 @@ Cmd.prototype.move = function(target, direction, fn) {
 							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {
 								if (clearToMove) {
 									// check against dex, con, current hp and carry weight for a mod to movement cost
-									Character.movementCheck(entity, targetRoom, function(moveMod) {
-										entity.cmv = Math.round((entity.cmv - ( (12) - entity.dex/4)));
+									Dice.movementCheck(target, targetRoom, function(moveMod) {
+										target.cmv = Math.round((target.cmv - ( (12) - target.dex/4)));
 										target.roomid = roomObj.id;
 
 										if (targetRoom.terrianMod) {
-											s.player.wait = terrianMod;
+											target.wait += targetRoom.terrianMod;
 										} else {
-											s.player.wait = 1;
+											target.wait += 1;
 										}
 
 										// NOTE WE MADE NEED TO SEND PROMPTS
@@ -82,13 +80,13 @@ Cmd.prototype.move = function(target, direction, fn) {
 										});
 									});
 								} else {
-									entity.cmv = Math.round((entity.cmv - (7 - entity.dex/4)));
+									target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
 								}
 							});
 						});
 					});
 				} else {
-					entity.cmv = Math.round((entity.cmv - (7 - entity.dex/4)));
+					target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
 
 					if (target.isPlayer) {
 						World.msgPlayer(target, {
@@ -264,16 +262,13 @@ Cmd.prototype.kill = function(r, s) {
 	});
 };
 
-Cmd.prototype.look = function(r, s) {
-	if (r.msg === '') { 
-		World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
-			Room.getDisplayHTML(roomObj, function(displayHTML) {
-				s.emit('msg', {
-					msg: displayHTML,
-					styleClass: 'room'
-				});
-
-				return Character.prompt(s);
+Cmd.prototype.look = function(target, command) {
+	if (command.msg === '') { 
+		// if no arguments are given we display the current room
+		Room.getDisplay(target.area, target.roomid, function(displayHTML, roomObj) {
+			return World.msgPlayer(target, {
+				msg: displayHTML,
+				styleClass: 'room'
 			});
 		});
 	} else {

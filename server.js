@@ -1,4 +1,4 @@
-'use strict';
+ 'use strict';
 var http = require('http'),
 fs = require('fs'),
 cfg = require('./config').server.game,
@@ -49,27 +49,40 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 
 		s.on('login', function (r) {	
 			var parseCmd = function(r, s) {
-				var cmdArr = r.msg.split(' ');
-				r.cmd = cmdArr[0].toLowerCase();
-				r.msg = cmdArr.slice(1).join(' ').toLowerCase();
+				var cmdArr = r.msg.split(' '),
+				cmdObj ={};
 
 				if (/[`~@#$%^&*()-+={}[]|<>]+$/g.test(r.msg) === false) {
-					if (r.cmd !== '') {
-						if (r.cmd in Cmds) {
-							return Cmds[r.cmd](r, s);
-						} else if (r.cmd in Skills) {
-							return Skills[r.cmd](r, s);
-						/*} else if (r.msg === 'cast' && r.cmd in Skills) {
-							return Spells[r.cmd](r, s); */
+					cmdObj = {
+						cmd:  cmdArr[0].toLowerCase(),
+						msg: cmdArr.slice(1).join(' ').toLowerCase(),
+						number: 1, // Command target
+						socketId: s.player.sid
+					};
+					
+					if (!isNaN(parseInt(cmdObj.msg[0]))) {
+						cmdObj.number = parseInt(cmdObj.msg[0]);
+						cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
+					}
+
+					if (cmdObj.cmd) {
+						if (cmdObj.cmd in Cmds) {
+							return Cmds[cmdObj.cmd](s.player, cmdObj);
+						} else if (cmdObj.cmd in Skills) {
+							return Skills[r.cmd](s.player, cmdObj);
+						/*
+						} else if (r.msg === 'cast' && r.cmd in Skills) {
+							return Spells[r.cmd](r, s); 
+						*/
 						} else {
-							s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
+							s.emit('msg', {msg: cmdObj.cmd + 'is not a valid command.', styleClass: 'error'});
 							return Character.prompt(s);
 						}
 					} else {
 						return Character.prompt(s);
 					}
 				} else {
-					s.emit('msg', {msg: 'Invalid characters in command.'});
+					s.emit('msg', {msg: 'Invalid characters in command!', styleClass: 'error'});
 					return Character.prompt(s);
 				}
 			};
@@ -87,7 +100,6 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						});
 					} else {
 						s.join('creation'); // creation is one of two rooms, 'mud' being the other
-						s.player = {name:name};
 						
 						Character.newCharacter(r, s, function(s) {
 							s.on('cmd', function (r) { 

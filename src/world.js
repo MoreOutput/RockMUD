@@ -170,14 +170,14 @@ World.prototype.getMessageTemplate = function(tempName, fn) {
 };
 
 // This needs to look like getItems() for returning a player obj based on room
-World.prototype.getPlayersByRoomID = function(roomID, fn) {
+World.prototype.getPlayersByRoomId = function(roomID, fn) {
 	var world = this,
 	arr = [],
 	player,
 	i = 0;
 
 	for (i; i < world.players.length; i += 1) {
-		player = world.io.sockets.connected[players[i].sid].player;
+		player = world.io.sockets.connected[world.players[i].sid].player;
 
 		if (player.roomid === roomID) {
 			arr.push(player);
@@ -208,27 +208,32 @@ World.prototype.loadArea = function(areaName, fn) {
 						});
 					});
 				});
-            });
+			});
 		}
 	});
 };
 
 World.prototype.getRoomObject = function(area, roomId, fn) {
-    var i = 0;
+	var world = this,
+	i = 0;
 
-	for (i; i < area.rooms.length; i += 1) {
-		if (area.rooms[i].id === roomId) {
-            return fn(area.rooms[i]);
-		} 
-	}
+	world.loadArea(area, function(area) {
+		for (i; i < area.rooms.length; i += 1) {
+			if (roomId === area.rooms[i].id) {
+				return fn(area.rooms[i]);
+			}
+		}
+	});
 };
 
 World.prototype.checkArea = function(areaName, fn) {
-    this.areas.forEach(function(area, i) {
-		if (area.name === areaName) {
-			return fn(true, area);
+	var i = 0;
+
+	for (i; this.areas.length; i += 1) {
+		if (this.areas[i].name === areaName) {
+			return fn(true, this.areas[i]);
 		}
-	});
+	}
 
 	return fn(false);
 };
@@ -251,7 +256,7 @@ World.prototype.msgPlayer = function(target, msgObj, fn) {
 
 	// enables us to pass in a socket directly
 	if (!target.player && target.sid) {
-		 s = world.io.sockets.socket(target.sid);
+		 s = world.io.sockets.connected[target.sid];
 	} else {
 		s = target;
 	}
@@ -270,10 +275,10 @@ World.prototype.msgRoom = function(roomObj, msgObj, fn) {
 	s;
 
 	for (i; i < world.players.length; i += 1) {
-		s = world.io.sockets.connected[world.players[i].sid];
-
 		if (s.player.name !== msgOpt.playerName && s.player.roomid === roomObj.roomid) {
-			world.msgPlayer(s, {
+			s = world.io.sockets.connected[target.sid];
+
+			world.msgPlayer(s.player, {
 				msg: msgOpt.msg,
 				styleClass: 'room-msg'
 			});
@@ -292,7 +297,7 @@ World.prototype.msgArea = function(areaName, msgObj, fn) {
 	s;
 
 	for (i; i < world.players.length; i += 1) {
-		s = world.io.sockets.connected[world.players[i].sid];
+		s = world.io.sockets.connected[target.sid];
 
 		if (s.player.name !== msgOpt.playerName && s.player.area === areaName) {
 			world.msgPlayer(s, {
@@ -361,20 +366,5 @@ World.prototype.shuffle = function (arr) {
 
 	return arr;
 }
-
-// return an array of numbers of length @number and between 0 - @arr.length
-World.prototype.generateRandomNumbers = function(number, arr) {
-	var i = 0,
-	resultArr = [],
-	randomNum = 0;
-
-	for (i; i < number; i += 1) {
-		randomNum = Math.random() * (arr.length - 0);
-
-		resultArr.push(randomNum);
-	}
-
-	return resultArr;
-};
 
 module.exports.world = new World();

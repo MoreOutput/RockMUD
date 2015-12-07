@@ -90,9 +90,10 @@ Character.prototype.getPassword = function(s, fn) {
 					character.addPlayer(s, function(added, msg) {
 						if (added) {
 								World.motd(s, function() {
+									
 									Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
 										s.emit('msg', {
-											msg: displayHTML, 
+											msg: displayHTML,
 											styleClass: 'room'
 										});
 
@@ -158,7 +159,6 @@ Character.prototype.addPlayer = function(s, fn) {
 Character.prototype.create = function(r, s, fn) { 
 	var character = this;
 
-	s.player = World.mobTemplate;
 	s.player.isPlayer = true;
 	s.player.salt = '';
 	s.player.password = '';
@@ -265,6 +265,8 @@ Character.prototype.newCharacter = function(r, s, fn) {
 
 	World.getPlayableRaces(function(races) {
 		World.getPlayableClasses(function(classes) {
+			s.player = World.mobTemplate;
+
 			for (i; i < races.length; i += 1) {
 				str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
 
@@ -659,10 +661,12 @@ Character.prototype.updatePlayer = function(s, fn) {
 };
 
 Character.prototype.prompt = function(s) {
-	return s.emit('msg', {msg: s.player.chp + '/'  + s.player.hp + 'hps ' +
-		s.player.cmana + '/'  + s.player.mana + 'mana ' +  
-		s.player.cmv + '/'  + s.player.mv +'mv room:' +
-		s.player.roomid + ' wait: ' + s.player.wait + '> ', styleClass: 'cprompt'});
+	return s.emit('msg', {
+		msg: s.player.chp + '/'  + s.player.hp + 'hp - ' +
+			s.player.cmana + '/'  + s.player.mana + 'm - ' +  
+			s.player.cmv + '/'  + s.player.mv +'mv - ' + s.player.wait + 'w',
+		styleClass: 'cprompt'
+	});
 };
 
 Character.prototype.level = function(s, fn) {

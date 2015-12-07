@@ -33,4 +33,29 @@ Roller.prototype.parseDice = function(d, mod, fn) {
 	return this.roll(d.replace(/d.*/, ''), d.replace(/.*d/, ''), mod, fn)
 };
 
+// return an array of numbers of length @number and between 0 - @arr.length
+Roller.prototype.randomPick = function(number, upperBound, fn) {
+	var i = 0,
+	resultArr = [],
+	randomNum = 0;
+
+	for (i; i < number; i += 1) {
+		randomNum = this.roll(1, upperBound);
+
+		resultArr.push(randomNum);
+	}
+
+	if (typeof fn === 'function') {
+		return fn(resultArr);
+	} else {
+		return resultArr;
+	}
+}
+
+Roller.prototype.movementCheck = function(target, roomObj, fn) {
+	if (typeof fn == 'function') {
+		return fn();
+	}
+}
+
 module.exports.roller = new Roller();
