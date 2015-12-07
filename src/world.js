@@ -213,11 +213,11 @@ World.prototype.loadArea = function(areaName, fn) {
 	});
 };
 
-World.prototype.getRoomObject = function(area, roomId, fn) {
+World.prototype.getRoomObject = function(areaName, roomId, fn) {
 	var world = this,
 	i = 0;
 
-	world.loadArea(area, function(area) {
+	world.loadArea(areaName, function(area) {
 		for (i; i < area.rooms.length; i += 1) {
 			if (roomId === area.rooms[i].id) {
 				return fn(area.rooms[i]);
@@ -275,11 +275,13 @@ World.prototype.msgRoom = function(roomObj, msgObj, fn) {
 	s;
 
 	for (i; i < world.players.length; i += 1) {
-		if (s.player.name !== msgOpt.playerName && s.player.roomid === roomObj.roomid) {
-			s = world.io.sockets.connected[target.sid];
+		s = world.io.sockets.connected[world.players[i].sid];
 
-			world.msgPlayer(s.player, {
-				msg: msgOpt.msg,
+		if (s.player && s.player.name !== msgObj.playerName 
+			&& s.player.roomid === roomObj.roomid) {
+
+			world.msgPlayer(s, {
+				msg: msgObj.msg,
 				styleClass: 'room-msg'
 			});
 		}
@@ -312,6 +314,18 @@ World.prototype.msgArea = function(areaName, msgObj, fn) {
 	}
 };
 
+// Emit a message to all the players in an area
+World.prototype.msgWorld = function(target, msgObj, fn) {
+	var world = this,
+	i = 0,
+	s = world.io.sockets.connected[target.sid];
+
+	s.in('mud').broadcast.emit('msg', msgObj);
+
+	if (typeof fn === 'function') {
+		return fn();
+	}
+};
 
 /*
 	RockMUD extend(target, obj2, callback);

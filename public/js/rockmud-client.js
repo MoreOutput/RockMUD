@@ -67,7 +67,7 @@ window.onload = function() {
 		cmdArr = cmdStr.split(' ');
 
 		cmd = cmdArr[0].toLowerCase();
-		msg = cmdArr.slice(1).toString().replace(/,/g, ' ');
+		msg = cmdArr.slice(1).join(' ');
 
 		for (i; i < keyLength; i += 1) {
 			if (keys[i] === cmd) {

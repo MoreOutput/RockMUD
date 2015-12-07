@@ -41,32 +41,29 @@ Cmd.prototype.move = function(target, command, fn) {
 					if (!exitObj.area) {
 						exitObj.area = roomObj.area;
 					}
-
-					World.getRoomObject(exitObj.area, exitObj.id, function(targetRoom) {
+					
+					Room.getDisplay(exitObj.area, exitObj.id, function(displayHTML, targetRoom) {
 						Room.checkExitCriteria(target, targetRoom, function(clearToMove) {
 							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {
 								if (clearToMove) {
 									// check against dex, con, current hp and carry weight for a mod to movement cost
 									Dice.movementCheck(target, targetRoom, function(moveMod) {
 										target.cmv = Math.round((target.cmv - ( (12) - target.dex/4)));
-										target.roomid = roomObj.id;
+
+										target.roomid = targetRoom.id;
 
 										if (targetRoom.terrianMod) {
 											target.wait += targetRoom.terrianMod;
-										} else {
-											target.wait += 1;
 										}
 
-										// NOTE WE MADE NEED TO SEND PROMPTS
+										// NOTE WE MAY NEED TO SEND PROMPTS
 
 										if (target.isPlayer) {
 											Character.updatePlayer(target);
 
-											Room.getDisplayHTML(targetRoom, function(displayHTML) {
-												World.msgPlayer(target, {
-													msg: displayHTML,
-													styleClass: 'room'
-												});
+											World.msgPlayer(target, {
+												msg: displayHTML,
+												styleClass: 'room'
 											});
 										}
 
@@ -100,28 +97,28 @@ Cmd.prototype.move = function(target, command, fn) {
 	} else {
 		if (target.isPlayer) {
 			World.msgPlayer(target, {
-				msg: 'There is no exit in that direction.', 
+				msg: 'You cannot do that now.', 
 				styleClass: 'error'
 			});
 		}
 	}
 };
 
-Cmd.prototype.who = function(r, s) {
+Cmd.prototype.who = function(target, command) {
 	var str = '', 
 	player,
 	i = 0;
 	
-	if (players.length > 0) {
-		for (i; i < players.length; i += 1) {
-			player = io.sockets.connected[players[i].sid].player; // A visible player in players[]
+	if (World.players.length > 0) {
+		for (i; i < World.players.length; i += 1) {
+			player = World.io.sockets.connected[World.players[i].sid].player; // A visible player in players[]
 
 			str += '<li>' + player.name[0].toUpperCase() + player.name.slice(1) + ' ';
 
 			if (player.title === '') {
-				str += 'a level ' + player.level   +
+				str += 'a level ' + player.level +
 					' ' + player.race + 
-					' ' + player.charClass; 
+					' ' + player.charClass;
 			} else {
 				str += player.title;
 			}					
@@ -129,18 +126,18 @@ Cmd.prototype.who = function(r, s) {
 			str += ' (' + player.role + ')</li>';
 		}
 					
-		s.emit('msg', {
-			msg: '<h1>Visible Players</h1>' + str, 
+		World.msgPlayer(target, {
+			msg: '<h2>Visible Players</h2><ul class="who-list">' + str + '</ul>', 
 			styleClass: 'who-cmd'
 		});
 	} else {
-		s.emit('msg', {
-			msg: '<h1>No Visible Players</h1>', 
+		World.msgPlayer(target, {
+			msg: '<h2>No Visible Players</h2>', 
 			styleClass: 'who-cmd'
 		});
 	}
 	
-	return Character.prompt(s);
+	return Character.prompt(target);
 };
 
 Cmd.prototype.get = function(r, s, fn) {
@@ -296,54 +293,45 @@ Cmd.prototype.where = function(r, s) {
 
 
 /** Communication Channels **/
-Cmd.prototype.say = function(r, s) {
-	var i  = 0;
+Cmd.prototype.say = function(target, command) {
+	World.msgToPlayer(target, {
+		msg: 'You say> ' + command.msg, 
+		styleClass: 'cmd-say'
+	});
 	
-	s.emit('msg', {msg: 'You say> ' + r.msg, styleClass: 'cmd-say'});
-	
-	Room.msgToRoom({
-		msg: s.player.name + ' says> ' + r.msg +  '.', 
-		playerName: s.player.name, 
-		roomid: s.player.roomid
-	}, true);
+	World.getRoomObject(target.area, target.roomId, function(roomObj) {
+		World.msgRoom(roomObj, {
+			msg: target.name + ' says> ' + command.msg +  '.', 
+			playerName: target.name
+		});
+	});
 };
 
-Cmd.prototype.yell = function(r, s) {
-	var i  = 0;
+Cmd.prototype.yell = function(target, command) {
+	World.msgToPlayer(target, {
+		msg: 'You yell> ' + command.msg, 
+		styleClass: 'cmd-yell'
+	});
 	
-	s.emit('msg', {msg: 'You yell> ' + r.msg, styleClass: 'cmd-say'});
-	
-	Room.msgToArea({
-		msg: s.player.name + ' yells> ' + r.msg +  '.', 
+	World.msgArea(target.area, {
+		msg: target.name + ' yells> ' + command.msg +  '.', 
 		playerName: s.player.name
-	}, true);
+	});
 };
 
 
-Cmd.prototype.chat = function(r, s) {
-	var msg = r.msg;
-
-	s.emit('msg', {
-		msg: 'You chat> ' + msg,
+Cmd.prototype.chat = function(target, command) {
+	World.msgPlayer(target, {
+		msg: 'You chat> ' + command.msg,
 		element: 'blockquote',
-		styleClass: 'msg'
+		styleClass: 'msg cmd-chat'
 	});
 
-	s.in('mud').broadcast.emit('msg', {
-		msg: s.player.name + '> ' + msg,
+	World.msgWorld(target, {
+		msg: target.name + '> ' + command.msg,
 		element: 'blockquote',
 		styleClass: 'chatmsg'
 	});
-
-	/* 
-	If you want to return prompt after each message you can use the below,
-	be sure to define i
-
-	for (i; i < players.length; i += 1) {
-		Character.prompt(s);
-		s = io.sockets.socket(players[i].sid);
-	}	
-	*/
 };
 
 /*
