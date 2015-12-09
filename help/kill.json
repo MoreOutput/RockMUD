@@ -4,6 +4,6 @@
 	"type" : "Command",
 	"levels" : "All",
 	"restrict": 0,
-	"description" : "Targets a monster and attacks. The attacker is at the top of the round. First combatant to reach zero HP expires.",
+	"description" : "Triggers an attack. The attacker is at the top of the combat round. First combatant to reach zero HP expires.",
 	"Alias" : "k"
 }

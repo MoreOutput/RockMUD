@@ -1,0 +1,10 @@
+{
+    "name": "Human",
+    "con": 1,
+    "wis": 1,
+    "playable": true,
+    "attackType": {
+        "type": "punch",
+        "mod": 1
+    }
+}

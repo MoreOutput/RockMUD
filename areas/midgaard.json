@@ -5,6 +5,10 @@
 	"levels" : "All",
 	"description" : "The first city.",
 	"reloads": 0,
+	"created": "",
+	"saved": "",
+	"author": "",
+	"alwaysProcess": true,
 	"rooms" : [
 		{
 			"id" : 1,
@@ -14,86 +18,67 @@
 			"exits" : [
 				{
 					"cmd" : "north",
-					"vnum" : 2
+					"id" : 2
 				}, {
 					"cmd" : "east",
-					"vnum" : 3
+					"id" : 3
                 }, {
 					"cmd" : "south",
-					"vnum" : 4
+					"id" : 4
                 }, {
 					"cmd" : "west",
-                    "vnum" : 5
+                    "id" : 5
                 }
 			], 
 			"monsters" : [
 				{
-					"name": "Boar",
+					"name": "Rufus",
+					"short": "Rufus, the mayor of Midgaard",
+					"description": "",
+					"race": "human",
+					"id": 9,
 					"area": "Midgaard",
-					"level": 1,
-					"short": "a large boar",
-					"long": "",
-					"id": 6,
-					"type": "monster",
-					"race": "animal",
-					"limit": 1,
-					"hp": 120,
-					"chp": 120,
-				    "cmana": 0,
-				    "mana": 0,
-				    "cmv": 100,
-				    "mv": 100,
-				    "str": 5,
-				    "wis": 5,
-				    "int": 5,
-				    "dex": 5,
-				    "con": 6,
-				    "wait": 0,
-					"weight": 85,
-					"position": "standing",
+					"weight": 245,
 					"diceNum": 2, 
-					"diceSides": 8, 
-					"attackType": "bite",
-					"ac": 6,
-					"items": [],
-					"eq": [],
-					"flags": []
+					"diceSides": 8,
+					"position": "standing",
+					"dice": "2d8",
+					"attackType": "punch",
+					"templates": [],
+					"ac": 20,
+					"itemType": "mob",
+					"behaviors": [{
+						"module" : "midgaard-mayor",
+						"parameters": {
+							"interval": 1000 
+						}
+					}]
 				}, {
 					"name": "Boar",
+					"short": "A large brown boar",
+					"race": "",
+					"id": 6,
 					"area": "Midgaard",
-					"level": 1,
-					"short": "a large brown boar",
-					"long": "",
-					"id": 7,
-					"type": "monster",
-					"race": "animal",
-					"limit": 1,
-					"hp": 150,
-					"chp": 150,
-				    "cmana": 0,
-				    "mana": 0,
-				    "cmv": 200,
-				    "mv": 200,
-				    "str": 8,
-				    "wis": 5,
-				    "int": 5,
-				    "dex": 5,
-				    "con": 6,
-				    "wait": 0,
-					"weight": 85,
+					"weight": 120,
+					"diceNum": 2, 
+					"diceSides": 8,
+					"dice": "2d8",
 					"position": "standing",
-					"diceNum": 4, 
-					"diceSides": 6, 
 					"attackType": "bite",
-					"ac": 8,
-					"items": [],
-					"eq": [],
-					"flags": []
+					"templates": [],
+					"ac": 6,
+					"itemType": "mob",
+					"behaviors": [{
+						"module" : "wander",
+						"parameters": {
+							"setInterval": 1000 
+						}
+					}]
 				}
 			],
 			"items" : [{
-				"name": "bread",
-				"short": "a loaf of bread",
+				"name": "Bread",
+				"short": "A loaf of bread",
 				"long": "A rather stale looking loaf of bread." ,
 				"area": "Midgaard",
 				"id": 7,
@@ -105,44 +90,10 @@
 				]
 			}, {
 				"name": "Short Sword", 
-				"short": "a Short Sword",
-				"long": "A sharp looking short sword with a hilt wrapped in leather." ,
-				"area": "Midgaard",
-				"id": 1, 
-				"level": 1,
-				"itemType": "weapon",
-				"material": "iron", 
-				"diceNum": 2, 
-				"diceSides": 4, 
-				"attackType": "slice", 
-				"attackElement": "",
-				"weight": 4,
-				"slot": "hands",
-				"equipped": false,
-				"flags": []
-			}, {
-				"name": "Short Sword", 
-				"short": "a Short Sword",
+				"short": "A Short Sword",
 				"long": "A sharp looking short sword with a hilt wrapped in leather." ,
 				"area": "Midgaard",
 				"id": 8,
-				"level": 1,
-				"itemType": "weapon",
-				"material": "iron", 
-				"diceNum": 2, 
-				"diceSides": 4, 
-				"attackType": "slice", 
-				"attackElement": "",
-				"weight": 4,
-				"slot": "hands",
-				"equipped": false,
-				"flags": []
-			}, {
-				"name": "Short Sword", 
-				"short": "a Short Sword",
-				"long": "A sharp looking short sword with a hilt wrapped in leather." ,
-				"area": "Midgaard",
-				"id": 6, 
 				"level": 1,
 				"itemType": "weapon",
 				"material": "iron", 
@@ -166,13 +117,13 @@
 			"exits" : [
 				{
 					"cmd" : "south",
-					"vnum" : 1
+					"id" : 1
                 }
 			], 
 			"monsters" : [],
 			"items" : [{
 				"name": "Tattered Buckler", 
-				"short": "a Tattered Buckler",
+				"short": "A Tattered Buckler",
 				"long": "A round buckler that looks like its seen heavy use." ,
 				"area": "Midgaard",
 				"id": 2, 
@@ -197,7 +148,7 @@
 			"exits" : [
 				{
 					"cmd" : "west",
-					"vnum" : 1
+					"id" : 1
                 }
 			], 
 			"monsters" : [],
@@ -212,7 +163,7 @@
 			"exits" : [
 				{
 					"cmd" : "north",
-					"vnum" : 1
+					"id" : 1
                 }
 			], 
 			"monsters" : [],
@@ -227,13 +178,13 @@
 			"exits" : [
 				{
 					"cmd" : "east",
-					"vnum" : 1
+					"id" : 1
                 }
 			], 
 			"monsters" : [],
 			"items" : [{
 				"name": "Leather Helmet", 
-				"short": "a Leather Helmet",
+				"short": "A Leather Helmet",
 				"long": "" ,
 				"area": "Midgaard",
 				"id": 3, 

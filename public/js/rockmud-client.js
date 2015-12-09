@@ -1,0 +1,133 @@
+window.onload = function() {
+	'use strict';
+	var ws = io.connect(''),
+	terminal = document.getElementById('terminal'),
+	aliases = {	
+		n: 'north',
+		e: 'east',
+		w: 'west',
+		s: 'south',
+		u: 'up',
+		d: 'down',
+		l: 'look',
+		ls: 'look',
+		i: 'inventory',
+		sc: 'score',
+		eq: 'equipment',
+		q: 'quaff',
+		c: 'cast',
+		k: 'kill',
+		re: 'rest',
+		sl: 'sleep',
+		h: 'help',
+		wh: 'where',
+		aff: 'affect',
+		ooc: 'chat',
+		slist: 'skills',
+		skill: 'skills',
+		desc: 'description',
+		re: 'rest'
+	},
+	movement = ['north', 'east', 'south', 'west'],
+	display = function(r) {
+		if (!r.styleClass) {
+			r.styleClass = '';
+		}
+
+		if (r.element === undefined) {
+			terminal.innerHTML += '<div class="' + r.styleClass + '">' + r.msg + '</div>';
+		} else {
+			terminal.innerHTML += '<' + r.element + ' class="' + r.styleClass + '">' + r.msg + '</' + r.element + '>';
+		}
+
+		return parseCmd(r);
+	},
+	parseCmd = function(r) {
+		if (r.msg !== undefined) {
+			r.msg = r.msg.replace(/ /g, ' ').trim();
+			ws.emit(r.emit, r);
+		}
+	},
+	changeMudState = function(state) {
+		document.getElementById('cmd').dataset.mudState = state;
+	},		
+	checkMovement = function(cmdStr, fn) {
+		if (movement.toString().indexOf(cmdStr) !== -1) {
+			return fn(true, 'move ' + cmdStr);
+		} else {
+			return fn(false, cmdStr);
+		}
+	},
+	checkAlias = function(cmdStr, fn) { 
+		var keys = Object.keys(aliases),
+		i = 0,
+		cmd,
+		msg,
+		keyLength = keys.length,
+		cmdArr = cmdStr.split(' ');
+
+		cmd = cmdArr[0].toLowerCase();
+		msg = cmdArr.slice(1).toString().replace(/,/g, ' ');
+
+		for (i; i < keyLength; i += 1) {
+			if (keys[i] === cmd) {
+				if (msg === '') {
+					return fn(aliases[keys[i]]);
+				} else {
+					return fn(aliases[keys[i]] + ' ' + msg);
+				}
+			}	
+		}
+
+		return fn(cmd + ' ' + msg);
+	};
+
+	document.getElementById('console').onsubmit = function (e) {
+		var node = document.getElementById('cmd'),
+		messageNodes = [],
+		msg = node.value.toLowerCase().trim();
+
+		display({
+			msg : checkAlias(msg, function(cmd) {
+				 return checkMovement(cmd, function(wasMov, cmd) {
+					return cmd;
+				});
+			}),
+			emit : (function () {
+				var res = node.dataset.mudState;
+
+				if (res === 'login') {
+					return 'login';
+				} else if (msg === 'quit' || msg === 'disconnect') {
+					return 'quit';
+				} else if (res === 'selectRace') {
+					return 'raceSelection';
+				} else if (res === 'selectClass') {
+					return 'classSelection';
+				} else if (res === 'createPassword') {
+					return 'setPassword';
+				} else if (res === 'enterPassword') {
+					return 'password';
+				} else {
+					return 'cmd';
+				}
+			}()),
+			styleClass: 'cmd'
+		});
+			
+		node.value = '';
+		node.focus();
+
+		return false;
+	};
+
+	document.getElementById('cmd').focus();
+
+	ws.on('msg', function(r) {
+		display(r);
+
+		if (r.res) {
+			changeMudState(r.res);
+		}
+	});
+};

@@ -1,94 +1,128 @@
 'use strict';
-
 var fs = require('fs'),
-io = require('../server').io,
-players = require('../server').players,
-areas = require('../server').areas,
+World = require('./world').world,
+io = World.io,
+players = World.players,
+time = World.time,
+areas = World.areas,
 
 Room = function() {
- 
-};
-
-// Before an area is loaded into areas[] we roll some dyanmic values for its objects
-Room.prototype.rollArea = function() {
 
 };
 
-// Returns an entire area, uses rollArea to roll dynamic values
-Room.prototype.getArea = function(areaName, fn) {
-	this.checkArea(areaName, function(fnd, area) {
-		if (fnd) {
-			return fn(area);
-		} else {
-			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
-				return fn(JSON.parse(area));	
-			});
+Room.prototype.checkExitCriteria = function(target, roomObj, fn) {
+	return fn(true);
+};
+
+Room.prototype.checkEntranceCriteria = function(target, roomObj, fn) {
+	return fn(true);
+};
+
+
+// Rolls values for Mobs (including their equipment)
+Room.prototype.rollMob = function(mob, fn) {
+	var diceMod, // Added to all generated totals 
+	refId = Math.random().toString().replace('0.', ''),
+	hp,
+	mv, 
+	mana,
+	str,
+	dex,
+	wis,
+	int,
+	con,
+	wait,
+	raceObj,
+	ac;
+
+	mob.refId = refId;
+
+	World.getMob(mob.race, function(raceObj, err) {
+		if (err) {
+			
 		}
-	});
-};
 
-// Return boolean after checking if the area is in areas[]
-Room.prototype.checkArea = function(areaName, fn) {
-	if (areas.length > 0) {
-		areas.forEach(function(area) {
-			if (areaName === area.name.toLowerCase()) {
-				return fn(true, area);
-			} else {
-				return fn(false);
+		console.log('MOB:');
+		console.log(mob);
+		console.log('Race Obj:');
+		console.log(raceObj);
+		
+		World.extend(mob, raceObj, function(mob, err) {
+			if (err) {
+
 			}
 		});
-	} else {
-		return fn(false);
-	}
+	});
+
+	return fn(mob);
 };
 
-// Returns a string (html) representation of a room for
-Room.prototype.getDisplayHTML = function(roomObj, fn) {
+Room.prototype.getDisplayHTML = function(roomObj, exits, playersInRoom, monsters, items, fn) {
 	var room = this,
 	i = 0,
-	roomStr = '';
+	displayHTML = '';
 
-	room.getExits(roomObj, function(exits) {
-		room.getPlayers(roomObj, function(playersInRoom) {
-			room.getItems(roomObj, {specific: 'short'}, function(items) {	
-				room.getMonsters(roomObj, {specific: 'short'}, function(monsters) {							
-					
-					if (exits.length > 0) {
-					 	roomStr += '<li class="room-exits">Visible Exits: ' + 
-					 	exits.toString().replace(/,/g, ', ') + '</li>';
-					} else {
-						roomStr += '<li class="room-exits">Visible Exits: None!</li>';
-					}
-					
-					if (playersInRoom.length > 0 || monsters.length > 0) {
-						roomStr += '<li>Here:' + playersInRoom.toString().replace(/,/g, '. ') + 
-						' ' + monsters.toString().replace(/,/g, '. ') + '</li>';
-					}
-					
-					if (items.length > 0) {
-						roomStr += '<li>Items: ' + items.toString().replace(/,/g, ', ') + 
-						'</li>';
-					}							
-				});
-			});
-		});
-	});
+	if (arguments.length === 2) {
+		fn = exits;
+		exits = roomObj.exits;
+		playersInRoom = roomObj.playersInRoom;
+		monsters = roomObj.monsters;
+		items = roomObj.items;
+	}
 
-	roomStr = '<h2 class="room-title">' + roomObj.title + '</h2>' + 
-	'<p class="room-content">' + roomObj.content + '</p>' + 
-	'<ul>' + roomStr + '</ul>';
+	if (exits.length > 0) {
+		displayHTML += '<ul class="room-exits inline-list"><li class="list-label">Exits: </li>';
+
+		for (i; i < exits.length; i += 1) {
+			displayHTML += '<li>' + exits[i].cmd + '</li>';
+		}
+
+		displayHTML += '</ul>';
+	} else {
+		displayHTML += '<p class="room-exits">Visible Exits: None.</p>';
+	}
+
+	i = 0;
+
+	if (items.length > 0) {
+		displayHTML += '<ul class="room-here inline-list">';
+
+		for (i; i < items.length; i += 1) {
+			displayHTML += '<li class="room-item">' + items[i].short + '.</li>';
+		}
+	}
+
+	i = 0;
+
+	if (monsters.length > 0 || playersInRoom.length > 0) {
+		for (i; i < monsters.length; i += 1) {
+			if (!monsters[i].short) {
+				displayHTML += '<li class="room-monster">' + monsters[i].name + ' is ' + 
+				 monsters[i].position + ' here.</li>';
+			} else {
+				displayHTML += '<li class="room-monster">' + monsters[i].short + ' is ' + 
+				 monsters[i].position + ' here.</li>';
+			}
+		}
+
+		i = 0;
+
+		for (i; i < playersInRoom.length; i += 1) {
+			displayHTML += '<li class="room-player">' + playersInRoom[i].name 
+				+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here.</li>';
+		}
+
+		displayHTML += '</ul>';
+	}
+
+	displayHTML = '<h2 class="room-title">' + roomObj.title + '</h2>' + 
+	'<p class="room-content">' + roomObj.content + '</p>' + displayHTML;
 	
-	room.checkArea(roomObj.area, function(fnd, area) {
-		if (!fnd) { //  area was in areas[]
-			room.loadArea(roomObj.area);
-		}
-
-		if (typeof fn === 'function') {
-			return fn(roomStr);
-		} else {
-			return roomStr;
-		}
-	});
+	if (typeof fn === 'function') {
+		return fn(displayHTML, roomObj);
+	} else {
+		return displayHTML;
+	}
 };
 
 // Refreshes the area reference in areas[]
@@ -112,130 +146,40 @@ Room.prototype.updateArea = function(areaName, fn) {
 	}
 };
 
-// Refreshes the area reference in areas[]
-Room.prototype.loadArea = function(areaName, fn) {
-	var  i = 0;
-
-	fs.readFile('./areas/' + areaName + '.json', function (err, area) {
-		var area = JSON.parse(area);
-
-		areas[i] = area;
-		
-		if (typeof fn === 'function') {
-			return fn(true);
-		}
-	});
-};
-
-// Return a room in memory as an object, pass in the area name and the room vnum {area: 'Midgaard', vnum: 1}
-Room.prototype.getRoomObject = function(areaQuery, fn) {
-	this.checkArea(areaQuery.area, function(fnd, area) {
-		var i = 0;
-		
-		if (fnd) { 
-			for (i; i < area.rooms.length; i += 1) {
-				if (area.rooms[i].id === areaQuery.id) {		
-					return fn(area.rooms[i]);
-				} 
-			}
-		}
-	});
-};
-
-Room.prototype.getExits = function(room, fn) {
-	var arr = [],
-	i = 0;
-
-	for (i; i < room.exits.length; i += 1) {
-		arr.push(room.exits[i].cmd);
-	}
-
-	return fn(arr);
-};
-
-// This needs to look like getItems() for returning a player obj based on room
-Room.prototype.getPlayers = function(room, fn) {
-	var arr = [],
-	player,
-	i = 0;
-
-	for (i; i < players.length; i += 1) {
-		player = io.sockets.connected[players[i].sid].player;
-
-		if (player.roomid === room.id) {
-			arr.push(' ' + player.name + ' the ' + player.race + ' is ' + player.position + ' here');
-		}
-	}
-
-	return fn(arr);
-};
-
-Room.prototype.getItems = function(room, optObj, fn) {
-	var arr = [],
-	i = 0;
-
-	if (optObj.specific != undefined) {
-		if (room.items.length > 0) {
-			for (i; i < room.items.length; i += 1) {
-				arr.push(room.items[i][optObj.specific]);
-			}
-			return fn(arr);
-		} else {
-			return fn(arr);
-		}
-	} else {
-		if (room.items.length > 0) {
-			for (i; i < room.items.length; i += 1) {
-				arr.push(room.items[i]);
-			}
-			return fn(arr);
-		} else {
-			return fn(arr);
-		}
-	}
-};
-
-Room.prototype.getMonsters = function(room, optObj, fn) {
-	var arr = [],
-	i = 0;
-
-	if (optObj.specific !== undefined) {
-		if (room.monsters.length > 0) {
-			for (i; i < room.monsters.length; i += 1) {
-				arr.push(room.monsters[i][optObj.specific]);
-			}
-			
-			return fn(arr);
-		} else {
-			return fn(arr);
-		}
-	} else {
-		if (room.monsters.length > 0) {
-			for (i; i < room.monsters.length; i += 1) {
-				arr.push(room.monsters[i]);
-			}			
-			return fn(arr);
-		} else {
-			return fn(arr);
-		}
-	}
-};
-
 // does a string match an exit in the room
-Room.prototype.checkExit = function(roomObj, r, fn) { 
+Room.prototype.checkExit = function(roomObj, direction, fn) { 
 	var i = 0;
 
 	if (roomObj.exits.length > 0) {
 		for (i; i < roomObj.exits.length; i += 1) {
-			if (r.cmd === roomObj.exits[i].cmd) {
-				return fn(true, roomObj.exits[i].vnum);
+			if (direction === roomObj.exits[i].cmd) {
+				return fn(true, roomObj.exits[i]);
 			}
 		}
-		return fn(false);
+		return fn(false, null);
 	} else {
-		return fn(false);
+		return fn(false, null);
 	}
-	
+};
+
+// return all the rooms connected to this one
+Room.prototype.getAdjacent = function(roomObj, depth, r, fn) {
+	var i = 0;
+
+};
+
+Room.prototype.getDisplay = function(areaName, roomId, fn) {
+	var room = this;
+
+	World.getRoomObject(areaName, roomId, function(roomObj) {
+		roomObj.playersInRoom = [];
+		World.getPlayersByRoomId(roomId, function(players) {
+			roomObj.playersInRoom = players;
+			room.getDisplayHTML(roomObj, function(displayHTML) {
+				return fn(displayHTML, roomObj);
+			});
+		});
+	});
 };
 
 // does a string match any monsters in the room
@@ -248,11 +192,11 @@ Room.prototype.checkMonster = function(r, s, fn) {
 
 	// Split to account for target modifier (IE: 2.boar)
 	parts = r.msg.split('.');
-	if(parts.length === 2) {
+	
+	if (parts.length === 2) {
 		findIndex = parseInt(parts[0])-1;
 		findMonster = parts[1];
-	}
-	else {
+	} else {
 		findIndex = 0;
 		findMonster = r.msg;
 	}
@@ -271,7 +215,7 @@ Room.prototype.checkMonster = function(r, s, fn) {
 		} else {
 			fn(false);
 		}
-	});	
+	});
 };
 
 // Remove a monster from a room
@@ -279,46 +223,22 @@ Room.prototype.removeMonster = function(roomQuery, monster, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.monsters = roomObj.monsters.filter(function(item, i) {
 			return (item.id !== monster.id);
-		});	
+		});
+
 		return fn(true);
 	});
 };
 
-// callback with boolean if item with the supplied string matches room item, and first matched item as
-// second argument if applicable
-Room.prototype.checkItem = function(r, s, fn) {
-	var msgPatt,
-	items,
-	parts,
-	findIndex,
-	findItem;
-
-	// Split to account for target modifier (IE: 2.longsword)
-	parts = r.msg.split('.');
-
-	if (parts.length === 2) {
-		findIndex = parseInt(parts[0])-1;
-		findItem = parts[1];
-	} else {
-		findIndex = 0;
-		findItem = r.msg;
+/*
+	{
+		data: 'items', // Room property
+		value: '' // Required value, r.msg
 	}
-
-	msgPatt = new RegExp('^' + findItem);
-
-	this.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
-		items = roomObj.items.filter(function (item, i) {
-			if (msgPatt.test(item.name.toLowerCase())) {
-				return true;
-			}
-		});
-
-		if (items.length > 0 && findIndex in items) {
-			fn(true, items[findIndex]);
-		} else {
-			fn(false);
-		}
-	});
+*/
+Room.prototype.checkItem = function(r, s, fn) {
+	return this.search({
+		data: 'items',
+		value: r.msg}, fn);
 };
 
 Room.prototype.addCorpse = function(s, monster, fn) {
@@ -340,7 +260,7 @@ Room.prototype.addCorpse = function(s, monster, fn) {
 	return fn();
 };
 
-Room.prototype.removeItemFromRoom = function(roomQuery, fn) {
+Room.prototype.removeItem = function(roomQuery, fn) {
 	this.getRoomObject(roomQuery, function(roomObj) {
 		roomObj.items = roomObj.items.filter(function(item, i) {
 			if (item.id !== roomQuery.item.id) {
@@ -360,66 +280,41 @@ Room.prototype.addItem = function(itemOpt, fn) {
 	return fn();
 };
 
-// Emit a message to all the rooms players
-Room.prototype.msgToRoom = function(msgOpt, exclude, fn) {
-	var i = 0,
-	s;
+/*
+	Example query object:
+	{
+		data: 'items', // Room property
+		value: '' // Required value, r.msg
+	}
+	
 
-	for (i; i < players.length; i += 1) {				
-		s = io.sockets.connected[players[i].sid];
-		if (exclude === undefined || exclude === true) {
-			if (s.player.name !== msgOpt.playerName && s.player.roomid === msgOpt.roomid) {
-				s.emit('msg', {
-					msg: msgOpt.msg, 
-					styleClass: msgOpt.styleClass
-				});
-			} 
-		} else {
-			if (s.player.roomid === msgOpt.roomid) {
-				s.emit('msg', {
-					msg: msgOpt.msg, 
-					styleClass: msgOpt.styleClass
-				});
-			} 
+	The methids line getItemFromRoom above should call this function
+*/
+Room.prototype.search = function(roomObj, query, fn) {
+	var msgPatt,
+	results,
+	// Split to account for target modifier (IE: 2.boar)
+	parts = query.value.split('.'),
+	findIndex,
+	toFind;
+
+	if (parts.length === 2) {
+		findIndex = parseInt(parts[0])-1;
+		toFind = parts[1];
+	} else {
+		findIndex = 0;
+		toFind = query.value;
+	}
+
+	msgPatt = new RegExp('^' + toFind);
+
+	results = roomObj[query.value].filter(function (item, i) {
+		if (msgPatt.test(item.name.toLowerCase())) {
+			return true;
 		}
-	}
+	});
 
-	if (typeof fn === 'function') {
-		return fn();
-	}
-};
-
-// Emit a message to all the players in an area
-Room.prototype.msgToArea = function(msgOpt, exclude, fn) {
-	var i = 0,
-	s;
-
-	for (i; i < players.length; i += 1) {				
-		s = io.sockets.socket(players[i].sid);
-		if (exclude === undefined || exclude === true) {
-			if (s.player.name !== msgOpt.playerName && s.player.area === msgOpt.area) {
-				s.emit('msg', {
-					msg: msgOpt.msg, 
-					styleClass: msgOpt.styleClass
-				});
-			} 
-		} else {
-			if (s.player.area === msgOpt.area) {
-				s.emit('msg', {
-					msg: msgOpt.msg, 
-					styleClass: msgOpt.styleClass
-				});
-			} 
-		}
-	}
-
-	if (typeof fn === 'function') {
-		return fn();
-	}
-};
-
-Room.prototype.search = function() {
-
+	return results;
 };
 
 module.exports.room = new Room();

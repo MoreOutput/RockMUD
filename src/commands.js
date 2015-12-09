@@ -3,86 +3,107 @@
 * users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
 */
 'use strict';
-
 var fs = require('fs'),
 util = require('util'),
+World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
-io = require('../server').io,
-players = require('../server').players,
-time = require('../server').time,
-areas = require('../server').areas,
+Dice = require('./dice').roller,
+players = World.players,
+time = World.time,
+areas = World.areas,
 
-Cmd = function () {
+Cmd = function () {};
 
-};
+Cmd.prototype.fire = function(commandName, target, command, fn) {
+	return this[commandName](target, command, fn);
+}
 
-Cmd.prototype.move = function(r, s) {
-	if (s.player.position !== 'fighting' && s.player.position !== 'resting' && s.player.position !== 'sleeping' && s.player.cmv > 5 && s.player.wait === 0) {
-		r.cmd = r.msg;
+// Puts any target object into a defined room after verifying criteria
+Cmd.prototype.move = function(target, command, fn) {
+	var world = this,
+	direction = command.msg,
+	s;
 
-		Room.getRoomObject({
-			area: s.player.area,
-			id: s.player.roomid
-		}, function(roomObj) {
-			Room.checkExit(roomObj, r, function(fnd) {
-				if (fnd) {
-					Room.msgToRoom({
-						msg: s.player.name + ' the ' + s.player.race + ' walks ' + r.cmd + '.', 
-						playerName: s.player.name, 
-						roomid: s.player.roomid
-					}, true);
+	if (target.player) {
+		target = target.player;
+		s = target;
+	}
 
-					s.player.cmv = Math.round((s.player.cmv - (12 - s.player.dex/4)));	
-					s.player.roomid = roomObj.id;
+	if (target.position !== 'fighting' && target.position 
+		!== 'resting' && target.position !== 'sleeping' 
+		&& target.cmv > 5 && target.wait === 0) {
 
-					if (roomObj.terrianMod) {
-						s.player.wait = roomObj.terrianMod;
-					} else {
-						s.player.wait = 1;
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			Room.checkExit(roomObj, direction, function(isValidExit, exitObj) {
+				if (exitObj) {
+					if (!exitObj.area) {
+						exitObj.area = roomObj.area;
 					}
 
-					Character.updatePlayer(s);
+					World.getRoomObject(exitObj.area, exitObj.id, function(targetRoom) {
+						Room.checkExitCriteria(target, targetRoom, function(clearToMove) {
+							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {
+								if (clearToMove) {
+									// check against dex, con, current hp and carry weight for a mod to movement cost
+									Dice.movementCheck(target, targetRoom, function(moveMod) {
+										target.cmv = Math.round((target.cmv - ( (12) - target.dex/4)));
+										target.roomid = roomObj.id;
 
-					Room.getDisplayHTML(roomObj, function(displayHTML) {
-						s.emit('msg', {
-							msg: displayHTML, 
-							styleClass: 'room'
-						});
+										if (targetRoom.terrianMod) {
+											target.wait += targetRoom.terrianMod;
+										} else {
+											target.wait += 1;
+										}
 
-						Room.msgToRoom({
-							msg: s.player.name + ' the ' + s.player.race + ' enters the room.', 
-							playerName: s.player.name, 
-							roomid: roomObj.id
-						}, true, function() {
-							return Character.prompt(s);
+										// NOTE WE MADE NEED TO SEND PROMPTS
+
+										if (target.isPlayer) {
+											Character.updatePlayer(target);
+
+											Room.getDisplayHTML(targetRoom, function(displayHTML) {
+												World.msgPlayer(target, {
+													msg: displayHTML,
+													styleClass: 'room'
+												});
+											});
+										}
+
+										World.msgRoom(targetRoom, {
+											msg: target.name + ' a ' + target.race + ' enters the room.',
+											playerName: target.name
+										});
+
+										World.msgRoom(roomObj, {
+											msg: target.name + ' leaves the room'
+										});
+									});
+								} else {
+									target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
+								}
+							});
 						});
 					});
 				} else {
-					s.emit('msg', {
-						msg: 'There is no exit in that direction.', 
-						styleClass: 'error'
-					});
+					target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
 
-					return Character.prompt(s);
+					if (target.isPlayer) {
+						World.msgPlayer(target, {
+							msg: 'There is no exit in that direction.', 
+							styleClass: 'error'
+						});
+					}
 				}
 			});
 		});
-	} else if (s.player.wait !== 0) {
-		s.emit('msg', {
-			msg: 'You cant move that fast!', 
-			styleClass: 'error'
-		});
-
-		return Character.prompt(s);
 	} else {
-		s.emit('msg', {
-			msg: 'You cant move right now!', 
-			styleClass: 'error'
-		});
-
-		return Character.prompt(s);
+		if (target.isPlayer) {
+			World.msgPlayer(target, {
+				msg: 'There is no exit in that direction.', 
+				styleClass: 'error'
+			});
+		}
 	}
 };
 
@@ -241,19 +262,13 @@ Cmd.prototype.kill = function(r, s) {
 	});
 };
 
-Cmd.prototype.look = function(r, s) {
-	if (r.msg === '') { 
-		Room.getRoomObject({
-			area: s.player.area,
-			id: s.player.roomid
-		}, function(roomObj) {
-			Room.getDisplayHTML(roomObj, function(displayHTML) {
-				s.emit('msg', {
-					msg: displayHTML, 
-					styleClass: 'room'
-				});
-
-				return Character.prompt(s);
+Cmd.prototype.look = function(target, command) {
+	if (command.msg === '') { 
+		// if no arguments are given we display the current room
+		Room.getDisplay(target.area, target.roomid, function(displayHTML, roomObj) {
+			return World.msgPlayer(target, {
+				msg: displayHTML,
+				styleClass: 'room'
 			});
 		});
 	} else {
@@ -372,7 +387,7 @@ Cmd.prototype.achat = function(r, s) {
 		});
 	} else {
 		r.msg = 'You do not have permission to execute this command.';
-		s.emit('msg', r);		
+		s.emit('msg', r);
 		return Character.prompt(s);
 	}
 };
@@ -518,18 +533,18 @@ Cmd.prototype.inventory = function(r, s) {
 Cmd.prototype.score = function(r, s) { 
 	var i = 0,
 	score = '<div class="score-name">' + s.player.name + 
-	' <div class="score-title">' + s.player.title + '</div></div>' +
+	'<span class="score-title">' + s.player.title + '</span></div>' +
 	'<ul class="score-info">' + 
-		'<li class="stat-hp">HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
+		'<li class="stat-hp first">HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
 		'<li class="stat-mana">Mana: ' + s.player.cmana + '/' + s.player.mana +'</li>' +
 		'<li class="stat-mv">Moves: ' + s.player.cmv + '/' + s.player.mv +'</li>' +
 		'<li class="stat-level">You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
 		'<li class="stat-xp">XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
 		'<li class="stat-position">Position: ' + s.player.position + '</li>' +
-		'<li class="stat-carry">Carrying ' + s.player.load + '/' + Character.getLoad(s) + ' pounds.</li>' +
+		'<li class="stat-carry last">Carrying ' + s.player.load + '/' + Character.getLoad(s) + ' pounds.</li>' +
 	'</ul>' +
 	'<ul class="score-stats">' + 
-		'<li class="stat-str">STR: ' + s.player.str + '</li>' +
+		'<li class="stat-str first">STR: ' + s.player.str + '</li>' +
 		'<li class="stat-wis">WIS: ' + s.player.wis + '</li>' +
 		'<li class="stat-int">INT: ' + s.player.int + '</li>' +
 		'<li class="stat-dex">DEX: ' + s.player.dex + '</li>' +
@@ -537,7 +552,7 @@ Cmd.prototype.score = function(r, s) {
 		'<li class="stat-armor">Armor: ' + s.player.ac + '</li>' +
 		'<li class="stat-gold">Gold: ' + s.player.gold + '</li>' +
 		'<li class="stat-hunger">Hunger: ' + s.player.hunger + '</li>' +
-		'<li class="stat-thirst">Thirst: ' + s.player.thirst + '</li>' +
+		'<li class="stat-thirst last">Thirst: ' + s.player.thirst + '</li>' +
 	'</ul>';
 
 	if (s.player.affects.length > 0) {
@@ -591,7 +606,7 @@ Cmd.prototype.xyzzy = function(s) {
 		roomid: s.player.roomid,
 		styleClass: 'error'
 	}, true, function() {
-		s.emit('msg', {msg: 'Nothing happens, why would it?', styleClass: 'error' });
+		s.emit('msg', {msg: 'Nothing happens. Why would it?', styleClass: 'error' });
 
 		return Character.prompt(s);
 	});
@@ -657,7 +672,7 @@ Cmd.prototype.restore = function(r, s) {
 };
  
 // Stops all game combat, does not heal
-Cmd.prototype.calm = function(r, s) {
+Cmd.prototype.peace = function(r, s) {
 	if (s.player.role === 'admin') {
 
 	} else {

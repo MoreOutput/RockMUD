@@ -1,0 +1,18 @@
+{
+    "name": "", 
+    "short": "",
+    "long": "" ,
+    "area": "",
+    "id": "",
+    "level": 0,
+    "itemType": "",
+    "material": "", 
+    "diceNum": 1, 
+    "diceSides": 1, 
+    "attackType": "", 
+    "attackElement": "",
+    "weight": 0,
+    "slot": "",
+    "equipped": false,
+    "flags": []
+}
