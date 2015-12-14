@@ -18,45 +18,6 @@ Room.prototype.checkEntranceCriteria = function(target, roomObj, fn) {
 	return fn(true);
 };
 
-
-// Rolls values for Mobs (including their equipment)
-Room.prototype.rollMob = function(mob, fn) {
-	var diceMod, // Added to all generated totals 
-	refId = Math.random().toString().replace('0.', ''),
-	hp,
-	mv, 
-	mana,
-	str,
-	dex,
-	wis,
-	int,
-	con,
-	wait,
-	raceObj,
-	ac;
-
-	mob.refId = refId;
-
-	World.getMob(mob.race, function(raceObj, err) {
-		if (err) {
-			
-		}
-
-		console.log('MOB:');
-		console.log(mob);
-		console.log('Race Obj:');
-		console.log(raceObj);
-		
-		World.extend(mob, raceObj, function(mob, err) {
-			if (err) {
-
-			}
-		});
-	});
-
-	return fn(mob);
-};
-
 Room.prototype.getDisplayHTML = function(roomObj, exits, playersInRoom, monsters, items, fn) {
 	var room = this,
 	i = 0,
@@ -122,27 +83,6 @@ Room.prototype.getDisplayHTML = function(roomObj, exits, playersInRoom, monsters
 		return fn(displayHTML, roomObj);
 	} else {
 		return displayHTML;
-	}
-};
-
-// Refreshes the area reference in areas[]
-Room.prototype.updateArea = function(areaName, fn) {
-	var  i = 0;
-
-	for (i; i < areas.length; i += 1) {
-		if (areaName === areas[i].name) {
-			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
-				var area = JSON.parse(area);
-				
-				areas[i] = area;
-				
-				if (typeof fn === 'function') {
-					return fn(true);
-				}
-			});
-		} else {
-			return fn(false);
-		}
 	}
 };
 

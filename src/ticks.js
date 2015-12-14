@@ -26,34 +26,31 @@ World = require('./world').world;
 				}
 			}
 		}
-	}, 800);
+	}, 1100);
 
 	// AI Ticks for monsters
 	setInterval(function() {
 		var i = 0,
 		numToProcess = 3, // Areas to process per tick (randomly selected)
 		s;
-		/*
-		if (World.players.length > 0) {
-			Dice.randomPick(numToProcess, World.areas.length, function(areasToProcess) {
-				for (i; i < World.areas.length; i += 1) {
-					// if an areas alwasyProcess property is set to true
-					if (i === areasToProcess) {
-						World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
-							monsters.forEach(function(monster, i) {
-								if (monster.chp >= 1 && monster.onAlive) {
+
+		if (World.areas.length) {
+			for (i; i < World.areas.length; i += 1) {
+				World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
+					monsters.forEach(function(monster, i) {
+						if (monster.chp >= 1 && monster.onAlive) {
+							// 60% to run onAlive on each call
+							World.dice.roll(1, 10, function(roll) {
+								if (roll > 4 || monster.alwaysAlive === true) {
 									monster.onAlive();
 								}
-							});
-						});
-					} else {
-						return false;
-					}
-				}
-			});
+							})
+						}
+					});
+				});
+			}
 		}
-		*/
-	}, 1000);
+	}, 1000); // 1 minute
 
 	// AI Ticks for areas
 	setInterval(function() {
@@ -61,7 +58,7 @@ World = require('./world').world;
 		areasToProcess = 5, // Areas to process per tick (randomly selected)
 		s;
 
-	}, 1000);
+	}, 3600000); // 1 hour
 
 /*
 	// Regen, Hunger and Thirst Tick 

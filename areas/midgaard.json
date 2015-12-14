@@ -47,11 +47,27 @@
 					"templates": [],
 					"ac": 20,
 					"itemType": "mob",
+					"items": [{
+						"name": "Midgaard city key", 
+						"short": "small key",
+						"long": "A thin gold key with a ruby embbeded to the end." ,
+						"area": "Midgaard",
+						"id": 10,
+						"level": 1,
+						"itemType": "key",
+						"material": "gold", 
+						"weight": 0,
+						"slot": "",
+						"value": 1000,
+						"equipped": false,
+						"flags": [{
+							"key": true, 
+							"id": 4, 
+							"area": "Midgaard"
+						}]
+					}],
 					"behaviors": [{
-						"module" : "midgaard-mayor",
-						"parameters": {
-							"interval": 1000 
-						}
+						"module" : "mayor"
 					}]
 				}, {
 					"name": "Boar",
@@ -68,12 +84,7 @@
 					"templates": [],
 					"ac": 6,
 					"itemType": "mob",
-					"behaviors": [{
-						"module" : "wander",
-						"parameters": {
-							"setInterval": 1000 
-						}
-					}]
+					"behaviors": []
 				}
 			],
 			"items" : [{

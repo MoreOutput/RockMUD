@@ -2,12 +2,13 @@
     "name": "Dwarf",
     "con": 2,
     "int": -1,
-    "hp": 5,
+    "hp": 10,
     "ac": 1,
     "playable": true,
     "attackType": {
         "type": "punch",
-        "mod": 1
+        "mod": 1,
+        "dice": "1d6"
     },
     "racial" : ["darkvision"]
 }

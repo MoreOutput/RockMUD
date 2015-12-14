@@ -3,8 +3,10 @@
     "con": 1,
     "wis": 1,
     "playable": true,
+    "trains": 5,
     "attackType": {
         "type": "punch",
-        "mod": 1
+        "mod": 1,
+        "dice": "1d6"
     }
 }

@@ -3,10 +3,12 @@
     "str": 3,
     "int": -2,
     "dex": -1,
-    "hp": 10,
+    "hp": 20,
     "playable": true,
+    "size": 4,
     "attackType": {
         "type": "smash",
-        "mod": 2
+        "mod": 2,
+        "dice": "1d6+2"
     }
 }

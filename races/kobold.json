@@ -3,5 +3,6 @@
     "dex": 1,
     "playable": false,
     "attackType": "claw",
+    "size": 1,
     "racial" : ["darkvision"]
 }

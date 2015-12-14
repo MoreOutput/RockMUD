@@ -56,8 +56,6 @@ Cmd.prototype.move = function(target, command, fn) {
 											target.wait += targetRoom.terrianMod;
 										}
 
-										// NOTE WE MAY NEED TO SEND PROMPTS
-
 										if (target.isPlayer) {
 											Character.updatePlayer(target);
 
@@ -207,19 +205,20 @@ Cmd.prototype.kill = function(r, s) {
 		if (fnd) {
 			Combat.begin(s, target, function(contFight, target) { // the first round qualifiers
 				var combatInterval;
+
 				Character.prompt(s);
 
 				if (contFight) {
 					// Combat Loop
 					combatInterval = setInterval(function() {
-						if (s.player.position === 'fighting' && target.position === 'fighting') {	
+						if (s.player.position === 'fighting' && target.position === 'fighting') {
 							
 							Combat.fight(s, target, function(contFight) {
 								if (!contFight) {
 									target.position = 'dead';
 
 									clearInterval(combatInterval);
-								
+
 									Room.removeMonster({
 										area: s.player.area,
 										id: s.player.roomid
@@ -263,16 +262,18 @@ Cmd.prototype.look = function(target, command) {
 	if (command.msg === '') { 
 		// if no arguments are given we display the current room
 		Room.getDisplay(target.area, target.roomid, function(displayHTML, roomObj) {
-			return World.msgPlayer(target, {
+			World.msgPlayer(target, {
 				msg: displayHTML,
 				styleClass: 'room'
+			}, function() {
+				return Character.prompt(target);
 			});
 		});
 	} else {
 		// Gave us a noun, so lets see if something matches it in the room. 
 		Room.checkMonster(r, s, function(fnd, monster) {
 			Room.checkItem(r, s, function(fnd, item) {
-				return Character.prompt(s);
+				return Character.prompt(target);
 			});
 		});
 	}
@@ -283,25 +284,26 @@ Cmd.prototype.where = function(r, s) {
 	'<li>Your Name: ' + Character[s.id].name + '</li>' +
 	'<li>Current Area: ' + Character[s.id].area + '</li>' +
 	'<li>Room Number: ' + Character[s.id].id + '</li>'  +
-	'</ul>';	
+	'</ul>';
 
 	r.styleClass = 'playerinfo where';
-	
+
 	s.emit('msg', r);
+
 	return Character.prompt(s);
 };
 
 
 /** Communication Channels **/
 Cmd.prototype.say = function(target, command) {
-	World.msgToPlayer(target, {
+	World.msgPlayer(target, {
 		msg: 'You say> ' + command.msg, 
 		styleClass: 'cmd-say'
 	});
-	
-	World.getRoomObject(target.area, target.roomId, function(roomObj) {
+
+	World.getRoomObject(target.area, target.roomid, function(roomObj) {
 		World.msgRoom(roomObj, {
-			msg: target.name + ' says> ' + command.msg +  '.', 
+			msg: target.name + ' says> ' + command.msg, 
 			playerName: target.name
 		});
 	});
@@ -314,7 +316,7 @@ Cmd.prototype.yell = function(target, command) {
 	});
 	
 	World.msgArea(target.area, {
-		msg: target.name + ' yells> ' + command.msg +  '.', 
+		msg: target.name + ' yells> ' + command.msg, 
 		playerName: s.player.name
 	});
 };
@@ -341,7 +343,7 @@ Cmd.prototype.tell = function(r, s) {
 	s.emit('msg', {msg: 'You tell ' + r.playerName + '> ' + r.msg, styleClass: 'cmd-say'});
 	
 	Character.msgToPlayer({
-		msg: s.player.name + ' tells you> ' + r.msg +  '.', 
+		msg: s.player.name + ' tells you> ' + r.msg, 
 		playerName: s.player.name
 	}, true);
 };
@@ -352,7 +354,7 @@ Cmd.prototype.reply = function(r, s) {
 	s.emit('msg', {msg: 'You reply to ' + s.player.reply + '> ' + r.msg, styleClass: 'cmd-say'});
 	
 	Character.msgToPlayer({
-		msg: s.player.name + ' tells you> ' + r.msg +  '.', 
+		msg: s.player.name + ' tells you> ' + r.msg, 
 		playerName: s.player.name
 	}, true);
 };

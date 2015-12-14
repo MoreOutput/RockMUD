@@ -90,7 +90,6 @@ Character.prototype.getPassword = function(s, fn) {
 					character.addPlayer(s, function(added, msg) {
 						if (added) {
 								World.motd(s, function() {
-									
 									Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
 										s.emit('msg', {
 											msg: displayHTML,
@@ -148,11 +147,21 @@ Character.prototype.addPlayer = function(s, fn) {
 Character.prototype.create = function(r, s, fn) { 
 	var character = this;
 
+	s.player.hp += 100;
+	s.player.chp += 100;
+	s.player.mana += 100;
+	s.player.cmana += 100;
+	s.player.mv += 100;
+	s.player.cmv += 100;
 	s.player.isPlayer = true;
 	s.player.salt = '';
 	s.player.password = '';
 	s.player.created = new Date();
 	s.player.saved = null;
+	s.player.role = 'player';
+	s.player.area = "Midgaard";
+	s.player.roomid = 1;
+	s.player.trains += 25;
 	s.player.settings = {
 		autosac: false,
 		autoloot: true,
@@ -187,14 +196,14 @@ Character.prototype.create = function(r, s, fn) {
 
 							World.motd(s, function() {
 								Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
-									fn(s);
-									
-									s.emit('msg', {
+									World.msgPlayer(s, {
 										msg: displayHTML, 
 										styleClass: 'room'
 									});
 
 									character.prompt(s);
+
+									fn(s);
 								});
 							});
 						
@@ -244,6 +253,7 @@ Character.prototype.rollStats = function(player, fn) {
 	}
 			
 	player.carry = player.str * 10;
+
 	return fn(player);
 };
 
@@ -254,8 +264,6 @@ Character.prototype.newCharacter = function(r, s, fn) {
 
 	World.getPlayableRaces(function(races) {
 		World.getPlayableClasses(function(classes) {
-			s.player = World.mobTemplate;
-
 			for (i; i < races.length; i += 1) {
 				str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
 
@@ -670,10 +678,10 @@ Character.prototype.level = function(s, fn) {
 
 };
 
-/*
-* Checks, used to add variety to different game endeavours.
-*/
+// Add in gear modifiers and return the updated object
+Character.prototype.calculateGear = function() {
 
+};
 
 module.exports.character = new Character();
  

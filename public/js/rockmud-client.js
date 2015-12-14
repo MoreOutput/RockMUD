@@ -13,7 +13,10 @@ window.onload = function() {
 		ls: 'look',
 		i: 'inventory',
 		sc: 'score',
+		stats: 'score',
 		eq: 'equipment',
+		equip: 'wear',
+		we: 'wear',
 		q: 'quaff',
 		c: 'cast',
 		k: 'kill',
@@ -21,12 +24,13 @@ window.onload = function() {
 		sl: 'sleep',
 		h: 'help',
 		wh: 'where',
-		aff: 'affect',
+		aff: 'affects',
 		ooc: 'chat',
 		slist: 'skills',
 		skill: 'skills',
 		desc: 'description',
-		re: 'rest'
+		re: 'rest',
+		r: 'recall'
 	},
 	movement = ['north', 'east', 'south', 'west'],
 	display = function(r) {
