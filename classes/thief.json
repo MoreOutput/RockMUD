@@ -5,6 +5,7 @@
     "mv": 10,
     "dex": 2,
     "gold": 40,
+    "mainStat": "dex",
     "skills": [
         {
             "name": "backstab",

@@ -66,7 +66,7 @@ Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 		hash = crypto.createHmac('sha512', salt).update(hash).digest('hex');
 	} 
 			
-	return fn(hash);	
+	return fn(hash);
 };
 
 Character.prototype.generateSalt = function(fn) {
@@ -90,7 +90,6 @@ Character.prototype.getPassword = function(s, fn) {
 					character.addPlayer(s, function(added, msg) {
 						if (added) {
 								World.motd(s, function() {
-									
 									Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
 										s.emit('msg', {
 											msg: displayHTML,
@@ -128,49 +127,48 @@ Character.prototype.getPassword = function(s, fn) {
 Character.prototype.addPlayer = function(s, fn) {
 	var  i = 0;	
 
-	if (World.players.length > 0) {
-		for (i; i < World.players.length; i += 1) {
-			if (s.player.name === players[i].name) {
-				return fn(false, 'Already Logged in. Disconnecting...Refresh the page and relog.');
-			}
+	for (i; i < World.players.length; i += 1) {
+		if (s.player.name === players[i].name) {
+			return fn(false, 'Already Logged in. Disconnecting...Refresh the page and relog.');
 		}
-		
-		World.players.push({
-			name: s.player.name, 
-			sid: s.id,
-			area: s.player.area,
-			roomid: s.player.roomid
-		});
-
-		return fn(true);
-	} else {
-		World.players.push({
-			name: s.player.name, 
-			sid: s.id,
-			area: s.player.area,
-			roomid: s.player.roomid
-		});
-
-		return fn(true);
 	}
+	
+	World.players.push({
+		name: s.player.name, 
+		sid: s.id,
+		area: s.player.area,
+		roomid: s.player.roomid
+	});
+
+	return fn(true);
 };
 
 //  A New Character is saved
 Character.prototype.create = function(r, s, fn) { 
 	var character = this;
 
+	s.player.hp += 100;
+	s.player.chp += 100;
+	s.player.mana += 100;
+	s.player.cmana += 100;
+	s.player.mv += 100;
+	s.player.cmv += 100;
 	s.player.isPlayer = true;
 	s.player.salt = '';
 	s.player.password = '';
 	s.player.created = new Date();
 	s.player.saved = null;
+	s.player.role = 'player';
+	s.player.area = "Midgaard";
+	s.player.roomid = 1;
+	s.player.trains += 25;
 	s.player.settings = {
 		autosac: false,
 		autoloot: true,
 		autodrink: {enabled: true, itemId: ''},
 		wimpy: {enabled: false, hp: 0},
 		channels: {
-			blocked: [flame]
+			blocked: ['flame']
 		}
 	};
 
@@ -197,15 +195,15 @@ Character.prototype.create = function(r, s, fn) {
 							s.join('mud');
 
 							World.motd(s, function() {
-								World.getRoomDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
-									fn(s);
-									
-									s.emit('msg', {
+								Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
+									World.msgPlayer(s, {
 										msg: displayHTML, 
 										styleClass: 'room'
 									});
 
 									character.prompt(s);
+
+									fn(s);
 								});
 							});
 						
@@ -255,6 +253,7 @@ Character.prototype.rollStats = function(player, fn) {
 	}
 			
 	player.carry = player.str * 10;
+
 	return fn(player);
 };
 
@@ -265,8 +264,6 @@ Character.prototype.newCharacter = function(r, s, fn) {
 
 	World.getPlayableRaces(function(races) {
 		World.getPlayableClasses(function(classes) {
-			s.player = World.mobTemplate;
-
 			for (i; i < races.length; i += 1) {
 				str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
 
@@ -641,16 +638,16 @@ Character.prototype.getLoad = function(s, fn) {
 };
 
 // Updates a players reference in players[] with some data attached to the socket
-Character.prototype.updatePlayer = function(s, fn) {
+Character.prototype.updatePlayer = function(player, fn) {
 	var  i = 0;
 
 	for (i; i < World.players.length; i += 1) {
-		if (s.player.name === players[i].name) {
-			players[i] = {
-				name: s.player.name, 
-				sid: s.id,
-				area: s.player.area,
-				roomid: s.player.roomid
+		if (player.name === World.players[i].name) {
+			World.players[i] = {
+				name: player.name, 
+				sid: player.sid,
+				area: player.area,
+				roomid: player.roomid
 			};
 			
 			if (typeof fn === 'function') {
@@ -660,11 +657,19 @@ Character.prototype.updatePlayer = function(s, fn) {
 	}
 };
 
-Character.prototype.prompt = function(s) {
-	return s.emit('msg', {
-		msg: s.player.chp + '/'  + s.player.hp + 'hp - ' +
-			s.player.cmana + '/'  + s.player.mana + 'm - ' +  
-			s.player.cmv + '/'  + s.player.mv +'mv - ' + s.player.wait + 'w',
+Character.prototype.prompt = function(target) {
+	var player;
+
+	if (target.player) {
+		player = target.player;
+	} else {
+		player = target;
+	}
+
+	return World.msgPlayer(target, {
+		msg: player.chp + '/'  + player.hp + 'hp - ' +
+			player.cmana + '/'  + player.mana + 'm - ' +  
+			player.cmv + '/'  + player.mv +'mv - ' + player.wait + 'w',
 		styleClass: 'cprompt'
 	});
 };
@@ -673,10 +678,10 @@ Character.prototype.level = function(s, fn) {
 
 };
 
-/*
-* Checks, used to add variety to different game endeavours.
-*/
+// Add in gear modifiers and return the updated object
+Character.prototype.calculateGear = function() {
 
+};
 
 module.exports.character = new Character();
  

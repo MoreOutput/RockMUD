@@ -101,6 +101,9 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 					} else {
 						s.join('creation'); // creation is one of two rooms, 'mud' being the other
 						
+						s.player = World.mobTemplate;
+						s.player.name = name;
+
 						Character.newCharacter(r, s, function(s) {
 							s.on('cmd', function (r) { 
 								parseCmd(r, s);

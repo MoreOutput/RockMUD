@@ -50,12 +50,12 @@ Roller.prototype.randomPick = function(number, upperBound, fn) {
 	} else {
 		return resultArr;
 	}
-}
+};
 
 Roller.prototype.movementCheck = function(target, roomObj, fn) {
 	if (typeof fn == 'function') {
 		return fn();
 	}
-}
+};
 
 module.exports.roller = new Roller();

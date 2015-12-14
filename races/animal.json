@@ -1,5 +1,6 @@
 {
     "name": "Animal",
     "playable": false,
-    "attackType": "claw"
+    "attackType": "claw",
+    "size": 2
 }

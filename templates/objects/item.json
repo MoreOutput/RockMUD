@@ -12,6 +12,7 @@
     "attackType": "", 
     "attackElement": "",
     "weight": 0,
+    "value": 0,
     "slot": "",
     "equipped": false,
     "flags": []
