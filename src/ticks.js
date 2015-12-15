@@ -42,7 +42,7 @@ World = require('./world').world;
 							// 60% to run onAlive on each call
 							World.dice.roll(1, 10, function(roll) {
 								if (roll > 4 || monster.alwaysAlive === true) {
-									monster.onAlive();
+									monster.onAlive(roll);
 								}
 							})
 						}

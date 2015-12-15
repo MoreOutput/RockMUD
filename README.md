@@ -84,16 +84,14 @@ JSON templates used to enhance in-game items.
 Templates for in game messages.
 
 **/templates/objects**  
-Item templates extend objects into certain items based on their template[] and itemType properties.'
+Item templates extend objects into certain items based on their template[] and itemType properties.
 
-    * entity.json is the default object attached to all 'living' objects upon initial load.
-
-    * item.json is the default object attached to all 'non-living' objects upon initial load.
-
-    * Fields in any passed in objects overwrite template definitions, templates are used to ensure objects have the minimum required properties. 
+* entity.json is the default object attached to all 'living' objects upon initial load.
+* item.json is the default object attached to all 'non-living' objects upon initial load.
+* Fields in any passed in objects overwrite template definitions, templates are used to ensure objects have the minimum required properties. 
 
 **/ai**  
-Mob specific AI scripts. RockMUD core aims to have 3: midgaard-blacksmith.js, aggie.js and midgaard-mayor.js
+Mob specific AI scripts. RockMUD core aims to have 3: blacksmith.js, aggie.js and mayor.js
 
 **/tools**  
 Eventual location of building and admin tools.

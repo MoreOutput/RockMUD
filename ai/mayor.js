@@ -15,11 +15,19 @@ module.exports = {
 		'Welcome! Be sure to visit our world-famous Midgardian shops!'
 	],
 	moveDirections: ['gate', 'north', 'east', 'west', 'south'],
-	onAlive: function() {
-		Cmd.fire('say', this, {
-			msg: this.exclimations[1]
-		}, function() {
-			
-		});
+	onAlive: function(roll) {
+		if (roll > 3) {
+			Cmd.fire('say', this, {
+				msg: this.exclimations[1]
+			}, function() {
+				
+			});
+		} else {
+			Cmd.fire('move', this, {
+				cmd: 'east'
+			}, function() {
+
+			});
+		}
 	}
 }

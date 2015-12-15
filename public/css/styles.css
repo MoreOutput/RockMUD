@@ -1,218 +1,87 @@
+/*
+red: #ff0033;
+green: #60f066;
+blue: #0066ff;
+*/
 html, body {
-background-color: #111;
-color: #efefef;
+background-color: #000;
+color: #fff;
 padding: .4em;
+font-family: 'Open Sans', sans-serif;
 }
 html, body a {
-color: #ff55ff;
+color: #60f066;
 }
-h1,h2,h3 {
-font-weight: bold;
-}
-ul {
-padding: 0;
-margin: auto 0 auto 0;
-}
-.inline-list {
-padding: 0 0 2px 0;
-margin: 0;
-}
-.inline-list li {
-display: inline-block;
-padding-right: 5px;
-}
-.cmd-who {
-float: left;
-text-align: left;
-}
-.cmd-who li {
-width: 95%;
-padding: 2px 0 2px 0;
-display: inline-block;
-}
-.cmd-who .name {
-float: left;
-font-weight: bold;
-padding: 0 3px 0 0;
-}
-.cmd-who .level {
-float: left;
-padding: 0 3px 0 0;
-}
-.cmd-who .race {
-float: left;
-padding: 0 3px 0 0;
-}
-.cmd-who .class {
-float: left;
-}
-.motd {
-color: red;
-padding: 5px 0 5px 0;
-margin: 5px 0 5px 0;
-border-top: 1px dashed #fff;
-border-bottom: 1px dashed #fff;
-font-weight: bold;
-}
-.alert {
-color: red;
-font-weight: bold;
-}
-.alertmsg {
-color: #fff;
-font-style: italic;
-}
-#inputwrapper form {
-background-color: #555;
-}
-#inputwrapper form input {
-width: 100%;
-border: none;
-background-color: #eee;
-color: #111;
-}		
-.subtext {
-width: 100%;
-display: inline-block;
-clear: both;
+h1,h2,h3,h4,h5,h6,.title {
 color: #ddd;
+font-family: 'Playfair Display', serif;
 }
-.room {
-padding: 5px 0 5px 0;
+#terminal {
 }
-.room-title {
-color: yellow;
-font-weight: bold;
-}
-.room-exits {
-color: red;
-}
-#cmd-active {
-min-width: 20px;
-max-width: 200px;
-border-bottom: 1px solid #000;
-}
-.cmd {
-clear: both;
-display: block;
-width: 95%;
-color: yellow;
-}
-.cmd-wear {
-font-weight: bold;
-}
-.enter-name {
-clear: both;
-display: block;
-font-weight: bold;
-}
-.room {
-margin: 0;
-color: #ddd;
-}
-.room  h2 {
-padding: 0;
-margin: 0;
-}
-.room ul {
-padding: 0;
-margin: 0;
-}
-.cprompt {
-font-weight: bold;
-color: #fff;
-margin: 5px 0 5px 0;
-}
-.error {
-color: #ff0000;
-}
-.cmd-kill {
-clear: both;
-display: inline-block;
-}
-.player-hit {
-display: block;
-padding: 0;
-margin: 0;
-font-size: 1.1em;
-color: #ff0000;
-}
-.player-miss {
-display: block;
-padding: 0;
-margin: 0;
-font-size: 1.1em;
-color: #00ffff;
-}
-.foe-hit {
-display: block;
-padding: 0;
-margin: 0;
-font-size: 1.1em;
-color: #ffff00;
-}
-.foe-miss {
-display: block;
-padding: 0;
-margin: 0;
-font-size: 1.1em;
-color: #fff;
+.opening-title {
+text-shadow: 1px 0 #ff0033;
 }
 .score {
-width: 50%;
-min-width: 400px;
-border: 3px solid #eee;
-display: block;
+border-bottom: 1px solid #eee;
+display: inline-block;
+}
+.score h1, h4 {
+border-bottom: 1px solid #eee;
+}
+.score h4 {
+text-shadow: none;
+border-bottom: 1px solid #000;
+}
+.score .score-level {
+color: #ff0033;
 }
 .score .score-name {
-width: 100%;
-display: inline-block;
-font-size: 1.5em;
-background-color: #fff;
-color: #000;
-padding: 3px 0 3px 0;
-text-align: center;
 }
-.score .score-title {
-color: #333;
+.score .saves {
+background-color: #111;
+padding: .5em;
+margin-bottom: .75em;
+border: 1px solid #888;
 }
-.score .score-info {
-float: left;
-width: 40%;
-padding: 20px 0 20px 20px;
-}
-.score .score-stats {
-float: left;
-width: 40%;
-padding: 20px 0 20px 0;
-}
-.score .score-affects {
-clear: both;
-text-align: center;
-width: 100%;
-padding: 20px 0;
-}
-.score .score-affects li{
-display: inline;
-}
-.score .stat-hp {
-font-size: 1.75em;
-color: #ff0000;
-}
-.score .stat-mana {
-font-size: 1.75em;
-color: #00ffff;
-}
-.score .stat-mv {
-font-size: 1.75em;
-color: #ffff00;
+.score .saves li{
+list-style-type: square;
 }
 .score .stat-gold {
-color: #ffff00;
+color: yellow;
 }
-.small {
-font-size: 80%;
+.score .stat-hp {
+color: #ff0033;
 }
-.bold {
-font-weight: bold;
+.score .stat-mana {
+color: #0066ff;
+}
+.score .stat-mv {
+color: #60f066;
+}
+.cmd {
+color: #888;
+font-style: italic;
+}
+.motd {
+border-top: 1px dashed purple;
+border-bottom: 1px dashed purple;
+color: #ff0033;
+padding: .5em 0 .5em 0;
+}
+.room {
+display: inline-block;
+border-bottom: 1px dashed purple;
+}
+.room .room-title{
+color: #ddd;
+}
+.room .room-exits {
+color: #ff0033;
+}
+.ux {
+padding-bottom: 3em;
+}
+.ux h5{
+font-size: 2em;
+color: #fff;
 }

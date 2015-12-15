@@ -27,8 +27,8 @@ Cmd.prototype.move = function(target, command, fn) {
 	s;
 
 	if (target.player) {
-		target = target.player;
 		s = target;
+		target = target.player;
 	}
 
 	if (target.position !== 'fighting' && target.position 
@@ -73,9 +73,17 @@ Cmd.prototype.move = function(target, command, fn) {
 										World.msgRoom(roomObj, {
 											msg: target.name + ' leaves the room'
 										});
+
+										if (typeof fn === 'function') {
+											return fn(true, roomObj, targetRoom);
+										}
 									});
 								} else {
 									target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
+
+									if (typeof fn === 'function') {
+										return fn(true, roomObj, targetRoom);
+									}
 								}
 							});
 						});
@@ -83,21 +91,25 @@ Cmd.prototype.move = function(target, command, fn) {
 				} else {
 					target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
 
-					if (target.isPlayer) {
-						World.msgPlayer(target, {
-							msg: 'There is no exit in that direction.', 
-							styleClass: 'error'
-						});
+					World.msgPlayer(target, {
+						msg: 'There is no exit in that direction.', 
+						styleClass: 'error'
+					});
+
+					if (typeof fn === 'function') {
+						return fn(false);
 					}
-				}
+			}
 			});
 		});
 	} else {
-		if (target.isPlayer) {
-			World.msgPlayer(target, {
-				msg: 'You cannot do that now.', 
-				styleClass: 'error'
-			});
+		World.msgPlayer(target, {
+			msg: 'You cannot do that now.', 
+			styleClass: 'error'
+		});
+
+		if (typeof fn === 'function') {
+			return fn(false);
 		}
 	}
 };
