@@ -14,7 +14,7 @@
 			"id" : 1,
 			"title" : "Town Square",
 			"area": "Midgaard",
-			"content" : "Welcome to the first room.",
+			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
 				{
 					"cmd" : "north",
@@ -124,7 +124,7 @@
 			"id" : 2,
 			"title" : "North of Town Square",
 			"area": "Midgaard",
-			"content" : "Richly adorned houses line the pebbled street that stretches to the north and south.",
+			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
 				{
 					"cmd" : "south",
@@ -153,7 +153,7 @@
 			"id" : 3,
 			"title" : "East of Town Square",
 			"area": "Midgaard",
-			"content" : "Beautiful shops line the pebbled street that leads to the east and west.",
+			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"terrian" : "stone-road",
 			"terrianMod": 0,
 			"exits" : [
@@ -170,7 +170,7 @@
 			"id" : 4,
 			"title" : "South of Town Square",
 			"area": "Midgaard",
-			"content" : "The pebbled street leads north and south from here.",
+			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
 				{
 					"cmd" : "north",
@@ -185,7 +185,7 @@
 			"id" : 5,
 			"title" : "West of Town Square",
 			"area": "Midgaard",
-			"content" : "Beautiful shops line the pebbled street that stretches to the east and west.",
+			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
 				{
 					"cmd" : "east",

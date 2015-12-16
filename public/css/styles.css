@@ -8,6 +8,7 @@ background-color: #000;
 color: #fff;
 padding: .4em;
 font-family: 'Open Sans', sans-serif;
+font-size: 1em;
 }
 html, body a {
 color: #60f066;
@@ -16,10 +17,19 @@ h1,h2,h3,h4,h5,h6,.title {
 color: #ddd;
 font-family: 'Playfair Display', serif;
 }
-#terminal {
+.row {
+padding-bottom: .25em;
+}
+#terminal .subtext {
+font-style: italic;
+}
+#inputwrapper {
+margin: 1.5em 0;
 }
 .opening-title {
-text-shadow: 1px 0 #ff0033;
+font-size: 3em;
+text-shadow: 2px 2px #ff0033;
+color: #fff;
 }
 .score {
 border-bottom: 1px solid #eee;
@@ -62,11 +72,34 @@ color: #60f066;
 color: #888;
 font-style: italic;
 }
+.cmd-chat {
+color: #fff;
+}
+.cmd-chat .msg-name {
+color: yellow;
+font-weight: bold;
+}
+.cmd-say {
+color: #fff;
+}
+.cmd-say .msg-name {
+font-weight: bold;
+color: #60f066;
+}
+.cmd-yell {
+color: #fff;
+}
+.cmd-yell .msg-name {
+font-weight: bold;
+color: purple;
+}
 .motd {
-border-top: 1px dashed purple;
-border-bottom: 1px dashed purple;
+border-top: 1px dashed yellow;
+border-bottom: 1px dashed yellow;
 color: #ff0033;
-padding: .5em 0 .5em 0;
+padding: .4em 0 .5em 0;
+margin: .5em 0 1em 0;
+font-weight: bold;
 }
 .room {
 display: inline-block;
@@ -77,6 +110,13 @@ color: #ddd;
 }
 .room .room-exits {
 color: #ff0033;
+}
+.enter-name {
+	font-weight: bold;
+}
+.logout-msg {
+	font-weight: bold;
+	color: #ff0033;
 }
 .ux {
 padding-bottom: 3em;

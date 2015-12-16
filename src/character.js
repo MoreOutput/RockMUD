@@ -146,7 +146,8 @@ Character.prototype.addPlayer = function(s, fn) {
 //  A New Character is saved
 Character.prototype.create = function(r, s, fn) { 
 	var character = this;
-
+	
+	s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
 	s.player.hp += 100;
 	s.player.chp += 100;
 	s.player.mana += 100;
@@ -155,7 +156,6 @@ Character.prototype.create = function(r, s, fn) {
 	s.player.cmv += 100;
 	s.player.isPlayer = true;
 	s.player.salt = '';
-	s.player.password = '';
 	s.player.created = new Date();
 	s.player.saved = null;
 	s.player.role = 'player';
@@ -387,12 +387,15 @@ Character.prototype.save = function(s, fn) {
 
 	if (s.player !== undefined) {
 		s.player.modified = new Date().toString();
-	
+		console.log('./players/' + s.player.name.toLowerCase() + '.json');
+
 		fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
 			if (err) {
-				return s.emit('msg', {msg: 'Error saving character.'});
+				return World.msgPlayer(s, {msg: 'Error saving character.'});
 			} else {
-				character.updatePlayer(s, function() {
+			console.log('here232')		
+				character.updatePlayer(s.player, function() {
+					console.log('here2')
 					if (typeof fn === 'function') {
 						return fn();
 					}

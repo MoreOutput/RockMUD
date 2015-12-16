@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 	<head>
-		<title>RockMUD v0.1.9</title>
+		<title>RockMUD</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<meta name="HandheldFriendly" content="true" />
@@ -11,27 +11,23 @@
 	</head>
 	<body>
 		<div id="mudwrapper" class="container">
-			<div id="terminal" class="row">
-				<div id="screen-start" class="col-1">
-					<h1>Welcome to RockMUD v0.1.9</h1>
-					<div class="subtext">
-						<p>
-							<i>
-								Checkout the code on 
-								<a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>.
-							</i>
-						</p>
+			<div id="terminal">
+				<div class="row">
+					<div class="col-md-12">
+						<h1 class="opening-title">Welcome to RockMUD v0.1.9</h1>
+						<div class="subtext">
+							<p>
+								Checkout the code on <a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>.
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
 			<div class="row">
-				<hr />
-			</div>
-			<div class="row">
-				<div id="inputwrapper" class="col-1">
+				<div id="inputwrapper" class="col-md-12">
 					<form id="console">
 						<div class="form-group">
-							<input class="user-input form-control" id="cmd" type="input" value="" placeholder="Enter Command" mud-state="login" />
+							<input class="user-input form-control" id="cmd" type="input" value="" placeholder="Enter a Command -- type 'help newbie' for help" mud-state="login" />
 						</div>
 					</form>
 				</div>

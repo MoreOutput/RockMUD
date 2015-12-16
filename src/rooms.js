@@ -32,7 +32,7 @@ Room.prototype.getDisplayHTML = function(roomObj, exits, playersInRoom, monsters
 	}
 
 	if (exits.length > 0) {
-		displayHTML += '<ul class="room-exits inline-list"><li class="list-label">Exits: </li>';
+		displayHTML += '<ul class="room-exits list-inline"><li class="list-label">Exits: </li>';
 
 		for (i; i < exits.length; i += 1) {
 			displayHTML += '<li>' + exits[i].cmd + '</li>';
@@ -46,7 +46,7 @@ Room.prototype.getDisplayHTML = function(roomObj, exits, playersInRoom, monsters
 	i = 0;
 
 	if (items.length > 0) {
-		displayHTML += '<ul class="room-here inline-list">';
+		displayHTML += '<ul class="room-here list-inline">';
 
 		for (i; i < items.length; i += 1) {
 			displayHTML += '<li class="room-item">' + items[i].short + '.</li>';
@@ -76,8 +76,8 @@ Room.prototype.getDisplayHTML = function(roomObj, exits, playersInRoom, monsters
 		displayHTML += '</ul>';
 	}
 
-	displayHTML = '<h2 class="room-title">' + roomObj.title + '</h2>' + 
-	'<p class="room-content">' + roomObj.content + '</p>' + displayHTML;
+	displayHTML = '<div class="room"><h2 class="room-title">' + roomObj.title + '</h2>' + 
+	'<p class="room-content">' + roomObj.content + '</p>' + displayHTML + '</div>';
 	
 	if (typeof fn === 'function') {
 		return fn(displayHTML, roomObj);

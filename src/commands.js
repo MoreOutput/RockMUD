@@ -117,32 +117,47 @@ Cmd.prototype.move = function(target, command, fn) {
 Cmd.prototype.who = function(target, command) {
 	var str = '', 
 	player,
+	displayName = '',
 	i = 0;
 	
 	if (World.players.length > 0) {
 		for (i; i < World.players.length; i += 1) {
 			player = World.io.sockets.connected[World.players[i].sid].player; // A visible player in players[]
 
-			str += '<li>' + player.name[0].toUpperCase() + player.name.slice(1) + ' ';
+			displayName = player.displayName;
 
 			if (player.title === '') {
-				str += 'a level ' + player.level +
-					' ' + player.race + 
-					' ' + player.charClass;
+				displayName += ' a level ' + player.level + ' ' + player.race + ' ' + player.charClass;
 			} else {
-				str += player.title;
-			}					
+				displayName += ' ' + player.title;
+			}
 
-			str += ' (' + player.role + ')</li>';
+			str += '<tr>' +
+				'<td class="who-lvl">' + player.level + '</td>' +
+				'<td class="who-race">' + player.race + '</td>' +
+				'<td class="who-class">' + player.charClass + '</td>' +
+				'<td class="who-player">' + displayName + '</td>' +
+			'</tr>';
 		}
-					
+
+		str = '<div class="cmd-who"><h2>Visible Players</h2><table class="table who-list">' +
+			'<thead>' +
+				'<tr>' +
+					'<td width="5%">Level</td>' +
+					'<td width="5%">Race</td>' +
+					'<td width="5%">Class</td>' +
+					'<td width="85%">Player</td>' +
+				'</tr>' +
+			'</thead><tbody>' + str + '</tbody>' +
+		'</table></div>'
+		
 		World.msgPlayer(target, {
-			msg: '<h2>Visible Players</h2><ul class="who-list">' + str + '</ul>', 
+			msg: str, 
 			styleClass: 'who-cmd'
 		});
 	} else {
 		World.msgPlayer(target, {
-			msg: '<h2>No Visible Players</h2>', 
+			msg: '<div class="cmd-who"><h2>No Visible Players</h2></div>', 
 			styleClass: 'who-cmd'
 		});
 	}
@@ -309,13 +324,13 @@ Cmd.prototype.where = function(r, s) {
 /** Communication Channels **/
 Cmd.prototype.say = function(target, command) {
 	World.msgPlayer(target, {
-		msg: 'You say> ' + command.msg, 
+		msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>', 
 		styleClass: 'cmd-say'
 	});
 
 	World.getRoomObject(target.area, target.roomid, function(roomObj) {
 		World.msgRoom(roomObj, {
-			msg: target.name + ' says> ' + command.msg, 
+			msg: '<div class="cmd-say"><span class="msg-name">' + target.name + ' says></span> ' + command.msg + '</div>', 
 			playerName: target.name
 		});
 	});
@@ -323,12 +338,12 @@ Cmd.prototype.say = function(target, command) {
 
 Cmd.prototype.yell = function(target, command) {
 	World.msgToPlayer(target, {
-		msg: 'You yell> ' + command.msg, 
+		msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' + command.msg + '</div>', 
 		styleClass: 'cmd-yell'
 	});
 	
 	World.msgArea(target.area, {
-		msg: target.name + ' yells> ' + command.msg, 
+		msg: '<div class="cmd-yell"><span class="msg-name">' + target.name + ' yells></span> ' + command.msg + '</div>', 
 		playerName: s.player.name
 	});
 };
@@ -336,13 +351,13 @@ Cmd.prototype.yell = function(target, command) {
 
 Cmd.prototype.chat = function(target, command) {
 	World.msgPlayer(target, {
-		msg: 'You chat> ' + command.msg,
+		msg: '<div class="cmd-chat"><span class="msg-name">You chat></span> ' + command.msg + '</div>',
 		element: 'blockquote',
 		styleClass: 'msg cmd-chat'
 	});
 
 	World.msgWorld(target, {
-		msg: target.name + '> ' + command.msg,
+		msg: '<div class="cmd-chat"><span class="msg-name">' + target.name + '></span> ' + command.msg + '</div>',
 		element: 'blockquote',
 		styleClass: 'chatmsg'
 	});

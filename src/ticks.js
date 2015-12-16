@@ -30,10 +30,7 @@ World = require('./world').world;
 
 	// AI Ticks for monsters
 	setInterval(function() {
-		var i = 0,
-		numToProcess = 3, // Areas to process per tick (randomly selected)
-		s;
-
+		var i = 0;
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
 				World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
@@ -50,7 +47,7 @@ World = require('./world').world;
 				});
 			}
 		}
-	}, 1000); // 1 minute
+	}, 30000); // 30 seconds
 
 	// AI Ticks for areas
 	setInterval(function() {

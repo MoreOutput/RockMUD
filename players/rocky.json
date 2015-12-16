@@ -1,11 +1,12 @@
 {
-    "name": "rocky",
+    "name": "Rocky",
     "lastname": "",
     "title": "",
     "role": "player",
     "sex": "",
     "charClass": "thief",
-    "level": 0,
+    "displayName": "Rocky",
+    "level": 50,
     "exp": 0,
     "expToLevel": 0,
     "position": "standing",
@@ -152,11 +153,11 @@
     "autosac": false,
     "behaviors": [],
     "race": "elf",
-    "password": "21f1aa4111c218d5e741e0d94b12134117109266aab387d02ae156e759b6bb2b909f909057c505bfe1adaa5f930f645af4506ca6ccf4f4a5f56b8aa85f6aeb7f",
+    "password": "ba6089e8757699fa49eef82e31254a5c4454ac6b017ce254103e3b327bf83aed6b7b9b3cb63ffe5b2a6f1d9b229c568af2235c3f2518a5b10d9ba21b679c0a00",
     "isPlayer": true,
-    "salt": "b747829651f240caa7048e9fe9121d0ec2014ee9ceebe7136a118beb2df178fce6b31c971dc4580769f0aa745cd8d719dcad3c30f6da6266b0afade19f3df257fd4d484f4582587681da11dbe88e00395156e98166ac7ce34163bc5eb876e27b980543018660bfad4d2af85bebd6dbf437a5bc90c888d1eac7e50eb95d581387",
-    "created": "2015-12-15T00:17:19.405Z",
-    "saved": null,
+    "salt": "23da2c6fa90e272924a73f1b4ca98b8dfa607307ad4244250c5698d5d26d458a972f869fabf63da2f4657b43d51a67a0efa809d81b76add46bcc6cfc2018a659cafef15dab516dba36d8da1c6d5a29026f8c841105243dbc8109c59440666c034a9d2a5e8ab9bc32503a2ff720b075ea07d193f59d2f9772cf4c2eb888316924",
+    "created": "2015-12-16T04:30:19.644Z",
+    "saved": "2015-12-16T04:30:19.659Z",
     "settings": {
         "autosac": false,
         "autoloot": true,
@@ -174,5 +175,7 @@
             ]
         }
     },
-    "carry": 100
+    "carry": 100,
+    "modified": "Tue Dec 15 2015 23:40:08 GMT-0500 (Eastern Standard Time)",
+    "sid": "Z9fU6AZHxu3G0LvdAAAA"
 }

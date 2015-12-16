@@ -353,8 +353,6 @@ World.prototype.loadArea = function(areaName, fn) {
 				for (i; i < area.rooms.length; i += 1) {
 					if (area.rooms[i].monsters.length > 0) {
 						world.rollMob(area.rooms[i].monsters, function(mobs) {
-							area.rooms[i].monsters = mobs;
-
 							world.areas.push(area);
 
 							return fn(area, false);

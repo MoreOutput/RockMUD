@@ -39,9 +39,9 @@ window.onload = function() {
 		}
 
 		if (r.element === undefined) {
-			terminal.innerHTML += '<div class="' + r.styleClass + '">' + r.msg + '</div>';
+			terminal.innerHTML += '<div class="row"><div class="col-md-12 ' + r.styleClass + '">' + r.msg + '</div></div>';
 		} else {
-			terminal.innerHTML += '<' + r.element + ' class="' + r.styleClass + '">' + r.msg + '</' + r.element + '>';
+			terminal.innerHTML += '<div class="row"><' + r.element + ' class="col-md-12 ' + r.styleClass + '">' + r.msg + '</' + r.element + '></div>';
 		}
 
 		return parseCmd(r);
