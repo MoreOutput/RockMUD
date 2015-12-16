@@ -1,9 +1,6 @@
 {
   "name": "RockMUD",
   "subdomain": "moreoutput.rockmud",
-  "scripts": {
-    "start": "server.js"
-  },
   "dependencies": {
     "socket.io": ">= 1.0.0"
   },
