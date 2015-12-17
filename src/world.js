@@ -348,6 +348,9 @@ World.prototype.loadArea = function(areaName, fn) {
 				mob,
 				item;
 
+
+				console.log(err);
+				console.log(area);
 				area = JSON.parse(area);
 
 				for (i; i < area.rooms.length; i += 1) {
