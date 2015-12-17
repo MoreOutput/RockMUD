@@ -544,32 +544,48 @@ Cmd.prototype.inventory = function(r, s) {
 
 Cmd.prototype.score = function(target, command, fn) {
 	var i = 0,
-	score = '<section class="score"><div><h1>' + 
+	score = '<section class="row score"><div class="col-md-12"><h1>' + 
 		'<span class="score-name">' + target.displayName + '</span>' + 
 		'<span class="score-title">' + target.title + '</span> ' + 
 		'<span class="score-level"> (' + target.level + ')</span></h1></div>' +
 		'<div class="stats">' +
-			'<div class="col-md-6 row">' +
+			'<div class="col-md-6">' +
+				'<div class="row">' + 
 				'<ul class="col-md-12 score-info list-inline">' +
 					'<li class="stat-hp first"><label>HP:</label> <strong>' +  target.chp + '</strong>/' + target.hp + ' </li>' +
 					'<li class="stat-mana"><label>Mana:</label> <strong>' + target.cmana + '</strong>/' + target.mana + '</li>' +
 					'<li class="stat-mv"><label>Moves:</label> <strong>' + target.cmv + '</strong>/' + target.mv + '</li>' +
 					'<li class="stat-levl"><label>Level:</label> ' +  target.level + '</li>' +
 				'</ul>' +
-				'<ul class="col-md-6 score-stats list-unstyled">' +
+				'<ul class="col-md-3 score-stats list-unstyled">' +
 					'<li class="stat-str first"><label>STR:</label> ' + target.str + ' (20)</li>' +
 					'<li class="stat-wis"><label>WIS:</label> ' + target.wis + ' (26) </li>' +
 					'<li class="stat-int"><label>INT:</label> ' + target.int + ' (18)</li>' +
 					'<li class="stat-dex"><label>DEX:</label> ' + target.dex + ' (14)</li>' +
 					'<li class="stat-con"><label>CON:</label> ' + target.con + ' (20)</li>' +
 				'</ul>' +
-				'<ul class="col-md-6 score-stats list-unstyled">' +
+				'<ul class="col-md-3 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
 					'<li class="stat-gold"><label>Gold:</label> ' + target.gold + '</li>' +
 					'<li class="stat-hunger"><label>Hunger:</label>' + target.hunger +'</li>' +
 					'<li class="stat-thirst"><label>Thirst:</label> 0</li>' +
 					'<li class="stat-trains last"><label>Trains:</label> ' + target.thirst + '</li>' +
 				'</ul>' +
+				'<div class="stat-details">' +
+					'<ul class="col-md-3 score-stats list-unstyled">' +
+						'<li class="stat-position"><label>Hit Bonus: </label> 3</li>' +
+						'<li class="stat-position"><label>Damage Bonus: </label> 3</li>' +
+						'<li class="stat-position"><label>Magic resistance: </label> -3</li>' +
+						'<li class="stat-position"><label>Melee resistance: </label> -3</li>' +
+						'<li class="stat-position"><label>Poison resistance: </label> -3</li>' +
+						'<li class="stat-position"><label>Detection: </label> 2</li>' +
+						'<li class="stat-position"><label>Knowledge: </label> 2</li>' +
+						'<li class="stat-position"><label>Evasion: </label> 2</li>' +
+					'</ul>' +
+					'<div class="col-md-3 score-img">' +
+						'<img width="100%" src="http://content.turbine.com/sites/www.lotro.com/f2p/images/race/dwarf.png" />' +
+					'</div>' +
+				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
 					'<li class="stat-position"><label>Position: </label> ' + target.position + '</li>' +
 					'<li class="stat-level">You are a level ' + target.level + ' ' + target.race + ' '+  target.charClass + '.</li>' +
@@ -577,29 +593,7 @@ Cmd.prototype.score = function(target, command, fn) {
 					'<li class="stat-xp">You need <strong>' + target.exp + '</strong> experience for your next level.</li>' +
 					'<li class="stat-killcnt last">You have slain 100 foes.</li>' +
 				'</ul>' +
-			'</div>' +
-			'<div class="col-md-6 saves row">' +
-				'<div class="col-md-12">' +
-					'<h4>Details</h4>' +
-					'<ul class="col-md-6">' +
-						'<li class="stat-hit-bonus"><label>Hit Bonus: </label> 3</li>' +
-						'<li class="stat-damage-bonus"><label>Damage Bonus: </label> 3</li>' +
-						'<li class="stat-magic-res"><label>Magic resistance: </label> -3</li>' +
-						'<li class="stat-melee-res"><label>Melee resistance: </label> -3</li>' +
-						'<li class="stat-posison-res"><label>Poison resistance: </label> -3</li>' +
-						'<li class="stat-detection"><label>Detection: </label> 2</li>' +
-						'<li class="stat-knowledge"><label>Knowledge: </label> 2</li>' +
-						'<li class="stat-evasion"><label>Evasion: </label> 2</li>' +
-					'</ul>' +
-					'<div class="col-md-6">' +
-						'<img width="75%" src="http://content.turbine.com/sites/www.lotro.com/f2p/images/race/dwarf.png" />' +
-					'</div>' +
-				'</div>' +
-				'<div class="col-md-12">' +
-					'<h4>Languages</h4>' +
-					'<ul class="stat-languages list-inline">' +
-						'<li class="stat-language">Common, Elven</li>' +
-					'</ul>' +
+			'</div>'
 				'</div>' +
 			'</div></section>';
 

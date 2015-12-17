@@ -4,11 +4,11 @@ green: #60f066;
 blue: #0066ff;
 */
 html, body {
-background-color: #000;
+background-color: #333;
 color: #fff;
-padding: .4em;
+padding: 0 .4em;
 font-family: 'Open Sans', sans-serif;
-font-size: 1em;
+font-size: .9em;
 }
 html, body a {
 color: #60f066;
@@ -21,12 +21,25 @@ margin-top: 0;
 }
 .row {
 padding-bottom: .25em;
+width: 800px;
+}
+#mudwrapper {
+max-width: 900px;
+}
+#terminal {
+background-color: #000;
+padding: 1em;
+height: 700px;
+overflow: auto;
 }
 #terminal .subtext {
 font-style: italic;
 }
 #inputwrapper {
-margin: 1.5em 0;
+margin: 1.5em auto;
+}
+#inputwrapper {
+width: 900px;
 }
 .opening-title {
 font-size: 3em;
@@ -35,8 +48,8 @@ color: #fff;
 }
 .score {
 border-bottom: 1px solid #eee;
-display: inline-block;
 margin-bottom: .25em;
+display: inline-block;
 }
 .score h1, h4 {
 border-bottom: 1px solid #eee;
@@ -47,14 +60,6 @@ border-bottom: 1px solid #000;
 }
 .score .score-level {
 color: #ff0033;
-}
-.score .score-name {
-}
-.score .saves {
-background-color: #111;
-padding: .5em;
-margin-bottom: .75em;
-border: 1px solid #888;
 }
 .score .saves li{
 list-style-type: square;

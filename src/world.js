@@ -412,7 +412,7 @@ World.prototype.motd = function(s, fn) {
 			throw err;
 		}
 	
-		s.emit('msg', {msg : JSON.parse(data).motd, res: 'logged', styleClass: 'motd'});
+		s.emit('msg', {msg : '<div class="motd">' + JSON.parse(data).motd + '</div>', res: 'logged'});
 	
 		return fn();
 	});
