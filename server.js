@@ -44,7 +44,7 @@ io = require('socket.io')(server);
 
 World.setup(io, cfg, function(Character, Cmds, Skills) {
 
-	server.listen(cfg.port);
+	server.listen(process.env.PORT || cfg.port);
 
 	console.log(cfg.name + ' is ready to rock and roll on port ' + cfg.port);
 

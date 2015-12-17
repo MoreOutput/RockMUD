@@ -553,7 +553,6 @@ Cmd.prototype.score = function(target, command, fn) {
 		'<span class="score-name">' + target.displayName + '</span>' + 
 		'<span class="score-title">' + target.title + '</span> ' + 
 		'<span class="score-level"> (' + target.level + ')</span></h1></div>' +
-
 		'<div class="stats">' +
 			'<div class="col-md-6 row">' +
 				'<ul class="col-md-12 score-info list-inline">' +
@@ -588,14 +587,14 @@ Cmd.prototype.score = function(target, command, fn) {
 				'<div class="col-md-12">' +
 					'<h4>Details</h4>' +
 					'<ul class="col-md-6">' +
-						'<li class="stat-position"><label>Hit Bonus: </label> 3</li>' +
-						'<li class="stat-position"><label>Damage Bonus: </label> 3</li>' +
-						'<li class="stat-position"><label>Magic resistance: </label> -3</li>' +
-						'<li class="stat-position"><label>Melee resistance: </label> -3</li>' +
-						'<li class="stat-position"><label>Poison resistance: </label> -3</li>' +
-						'<li class="stat-position"><label>Detection: </label> 2</li>' +
-						'<li class="stat-position"><label>Knowledge: </label> 2</li>' +
-						'<li class="stat-position"><label>Evasion: </label> 2</li>' +
+						'<li class="stat-hit-bonus"><label>Hit Bonus: </label> 3</li>' +
+						'<li class="stat-damage-bonus"><label>Damage Bonus: </label> 3</li>' +
+						'<li class="stat-magic-res"><label>Magic resistance: </label> -3</li>' +
+						'<li class="stat-melee-res"><label>Melee resistance: </label> -3</li>' +
+						'<li class="stat-posison-res"><label>Poison resistance: </label> -3</li>' +
+						'<li class="stat-detection"><label>Detection: </label> 2</li>' +
+						'<li class="stat-knowledge"><label>Knowledge: </label> 2</li>' +
+						'<li class="stat-evasion"><label>Evasion: </label> 2</li>' +
 					'</ul>' +
 					'<div class="col-md-6">' +
 						'<img width="75%" src="http://content.turbine.com/sites/www.lotro.com/f2p/images/race/dwarf.png" />' +
