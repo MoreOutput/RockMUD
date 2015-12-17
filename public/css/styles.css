@@ -28,7 +28,7 @@ max-width: 900px;
 }
 #terminal {
 background-color: #000;
-padding: 1em;
+padding: 1em 1em 2em 1em;
 height: 700px;
 overflow: auto;
 }

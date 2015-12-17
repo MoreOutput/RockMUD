@@ -32,6 +32,7 @@ window.onload = function() {
 		re: 'rest',
 		r: 'recall'
 	},
+	isScrolledToBottom = false,
 	movement = ['north', 'east', 'south', 'west'],
 	display = function(r) {
 		if (!r.styleClass) {
@@ -42,6 +43,12 @@ window.onload = function() {
 			terminal.innerHTML += '<div class="row"><div class="col-md-12 ' + r.styleClass + '">' + r.msg + '</div></div>';
 		} else {
 			terminal.innerHTML += '<div class="row"><' + r.element + ' class="col-md-12 ' + r.styleClass + '">' + r.msg + '</' + r.element + '></div>';
+		}
+
+		isScrolledToBottom = terminal.scrollHeight - terminal.clientHeight <= terminal.scrollTop + 1;
+
+		if (!isScrolledToBottom) {
+			terminal.scrollTop = terminal.scrollHeight - terminal.clientHeight;
 		}
 
 		return parseCmd(r);
