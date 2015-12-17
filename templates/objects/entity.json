@@ -24,6 +24,7 @@
     "wait": 0,
     "ac": 10,
     "weight": 0,
+    "maxWeight": 0,
     "gold": 5,
     "hunger": 0,
     "thirst": 0,

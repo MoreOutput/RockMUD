@@ -16,6 +16,8 @@ color: #60f066;
 h1,h2,h3,h4,h5,h6,.title {
 color: #ddd;
 font-family: 'Playfair Display', serif;
+padding-top: 0;
+margin-top: 0;
 }
 .row {
 padding-bottom: .25em;
@@ -34,6 +36,7 @@ color: #fff;
 .score {
 border-bottom: 1px solid #eee;
 display: inline-block;
+margin-bottom: .25em;
 }
 .score h1, h4 {
 border-bottom: 1px solid #eee;
@@ -59,7 +62,7 @@ list-style-type: square;
 .score .stat-gold {
 color: yellow;
 }
-.score .stat-hp {
+#score .stat-hp {
 color: #ff0033;
 }
 .score .stat-mana {
@@ -105,18 +108,18 @@ font-weight: bold;
 display: inline-block;
 border-bottom: 1px dashed purple;
 }
-.room .room-title{
+.room .room-title {
 color: #ddd;
 }
 .room .room-exits {
 color: #ff0033;
 }
 .enter-name {
-	font-weight: bold;
+font-weight: bold;
 }
 .logout-msg {
-	font-weight: bold;
-	color: #ff0033;
+font-weight: bold;
+color: #ff0033;
 }
 .ux {
 padding-bottom: 3em;

@@ -547,46 +547,71 @@ Cmd.prototype.inventory = function(r, s) {
 	}
 };
 
-Cmd.prototype.score = function(r, s) { 
+Cmd.prototype.score = function(target, command, fn) {
 	var i = 0,
-	score = '<div class="score-name">' + s.player.name + 
-	'<span class="score-title">' + s.player.title + '</span></div>' +
-	'<ul class="score-info">' + 
-		'<li class="stat-hp first">HP: ' + s.player.chp + '/' + s.player.hp +'</li>' +
-		'<li class="stat-mana">Mana: ' + s.player.cmana + '/' + s.player.mana +'</li>' +
-		'<li class="stat-mv">Moves: ' + s.player.cmv + '/' + s.player.mv +'</li>' +
-		'<li class="stat-level">You are a level '+ s.player.level + ' ' + s.player.race + ' ' + s.player.charClass + '</li>' +
-		'<li class="stat-xp">XP: ' + s.player.exp + '/' + s.player.expToLevel + '</li>' +  
-		'<li class="stat-position">Position: ' + s.player.position + '</li>' +
-		'<li class="stat-carry last">Carrying ' + s.player.load + '/' + Character.getLoad(s) + ' pounds.</li>' +
-	'</ul>' +
-	'<ul class="score-stats">' + 
-		'<li class="stat-str first">STR: ' + s.player.str + '</li>' +
-		'<li class="stat-wis">WIS: ' + s.player.wis + '</li>' +
-		'<li class="stat-int">INT: ' + s.player.int + '</li>' +
-		'<li class="stat-dex">DEX: ' + s.player.dex + '</li>' +
-		'<li class="stat-con">CON: ' + s.player.con + '</li>' +
-		'<li class="stat-armor">Armor: ' + s.player.ac + '</li>' +
-		'<li class="stat-gold">Gold: ' + s.player.gold + '</li>' +
-		'<li class="stat-hunger">Hunger: ' + s.player.hunger + '</li>' +
-		'<li class="stat-thirst last">Thirst: ' + s.player.thirst + '</li>' +
-	'</ul>';
+	score = '<section class="score"><div><h1>' + 
+		'<span class="score-name">' + target.displayName + '</span>' + 
+		'<span class="score-title">' + target.title + '</span> ' + 
+		'<span class="score-level"> (' + target.level + ')</span></h1></div>' +
 
-	if (s.player.affects.length > 0) {
-		score += '<ul class="score-affects">';
+		'<div class="stats">' +
+			'<div class="col-md-6 row">' +
+				'<ul class="col-md-12 score-info list-inline">' +
+					'<li class="stat-hp first"><label>HP:</label> <strong>' +  target.chp + '</strong>/' + target.hp + ' </li>' +
+					'<li class="stat-mana"><label>Mana:</label> <strong>' + target.cmana + '</strong>/' + target.mana + '</li>' +
+					'<li class="stat-mv"><label>Moves:</label> <strong>' + target.cmv + '</strong>/' + target.mv + '</li>' +
+					'<li class="stat-levl"><label>Level:</label> ' +  target.level + '</li>' +
+				'</ul>' +
+				'<ul class="col-md-6 score-stats list-unstyled">' +
+					'<li class="stat-str first"><label>STR:</label> ' + target.str + ' (20)</li>' +
+					'<li class="stat-wis"><label>WIS:</label> ' + target.wis + ' (26) </li>' +
+					'<li class="stat-int"><label>INT:</label> ' + target.int + ' (18)</li>' +
+					'<li class="stat-dex"><label>DEX:</label> ' + target.dex + ' (14)</li>' +
+					'<li class="stat-con"><label>CON:</label> ' + target.con + ' (20)</li>' +
+				'</ul>' +
+				'<ul class="col-md-6 score-stats list-unstyled">' +
+					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
+					'<li class="stat-gold"><label>Gold:</label> ' + target.gold + '</li>' +
+					'<li class="stat-hunger"><label>Hunger:</label>' + target.hunger +'</li>' +
+					'<li class="stat-thirst"><label>Thirst:</label> 0</li>' +
+					'<li class="stat-trains last"><label>Trains:</label> ' + target.thirst + '</li>' +
+				'</ul>' +
+				'<ul class="col-md-12 list-unstyled">' +
+					'<li class="stat-position"><label>Position: </label> ' + target.position + '</li>' +
+					'<li class="stat-level">You are a level ' + target.level + ' ' + target.race + ' '+  target.charClass + '.</li>' +
+					'<li class="stat-carry">You are carrying ' + target.weight + '/' + target.maxWeight + ' pounds.</li>' +
+					'<li class="stat-xp">You need <strong>' + target.exp + '</strong> experience for your next level.</li>' +
+					'<li class="stat-killcnt last">You have slain 100 foes.</li>' +
+				'</ul>' +
+			'</div>' +
+			'<div class="col-md-6 saves row">' +
+				'<div class="col-md-12">' +
+					'<h4>Details</h4>' +
+					'<ul class="col-md-6">' +
+						'<li class="stat-position"><label>Hit Bonus: </label> 3</li>' +
+						'<li class="stat-position"><label>Damage Bonus: </label> 3</li>' +
+						'<li class="stat-position"><label>Magic resistance: </label> -3</li>' +
+						'<li class="stat-position"><label>Melee resistance: </label> -3</li>' +
+						'<li class="stat-position"><label>Poison resistance: </label> -3</li>' +
+						'<li class="stat-position"><label>Detection: </label> 2</li>' +
+						'<li class="stat-position"><label>Knowledge: </label> 2</li>' +
+						'<li class="stat-position"><label>Evasion: </label> 2</li>' +
+					'</ul>' +
+					'<div class="col-md-6">' +
+						'<img width="75%" src="http://content.turbine.com/sites/www.lotro.com/f2p/images/race/dwarf.png" />' +
+					'</div>' +
+				'</div>' +
+				'<div class="col-md-12">' +
+					'<h4>Languages</h4>' +
+					'<ul class="stat-languages list-inline">' +
+						'<li class="stat-language">Common, Elven</li>' +
+					'</ul>' +
+				'</div>' +
+			'</div></section>';
 
-		for (i; i < s.player.affects; i += 1) {
-			score += '<li>' + affects[i].name + '</li>';
-		}
+	World.msgPlayer(target, { msg: score });
 
-		score += '</ul>';
-	} else {
-		score += '<ul class="score-affects"><li>No Affects</li></ul>';
-	}
-	
-	s.emit('msg', {msg: score, element: 'section', styleClass: 'score' });
-	
-	return Character.prompt(s);
+	return Character.prompt(target);
 };
 
 Cmd.prototype.help = function(r, s) {

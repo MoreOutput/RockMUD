@@ -146,7 +146,7 @@ Character.prototype.addPlayer = function(s, fn) {
 //  A New Character is saved
 Character.prototype.create = function(r, s, fn) { 
 	var character = this;
-	
+
 	s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
 	s.player.hp += 100;
 	s.player.chp += 100;
@@ -630,14 +630,10 @@ Character.prototype.wear = function(r, s, item, fn) {
 	}
 };
 
-Character.prototype.getLoad = function(s, fn) {
+Character.prototype.getLoad = function(s) {
 	var load = Math.round((s.player.str + s.player.con / 4) * 10);
-			
-	if (typeof fn === 'function') {
-		fn(load);
-	} else {
-		return load;
-	}
+	
+	return load;
 };
 
 // Updates a players reference in players[] with some data attached to the socket
