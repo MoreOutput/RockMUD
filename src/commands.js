@@ -140,7 +140,7 @@ Cmd.prototype.who = function(target, command) {
 			'</tr>';
 		}
 
-		str = '<div class="cmd-who"><h2>Visible Players</h2><table class="table who-list">' +
+		str = '<div class="cmd-who"><h2>Visible Players</h2><table class="table table-condensed who-list">' +
 			'<thead>' +
 				'<tr>' +
 					'<td width="5%">Level</td>' +
@@ -324,13 +324,12 @@ Cmd.prototype.where = function(r, s) {
 /** Communication Channels **/
 Cmd.prototype.say = function(target, command) {
 	World.msgPlayer(target, {
-		msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>', 
-		styleClass: 'cmd-say'
+		msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>'
 	});
 
 	World.getRoomObject(target.area, target.roomid, function(roomObj) {
 		World.msgRoom(roomObj, {
-			msg: '<div class="cmd-say"><span class="msg-name">' + target.name + ' says></span> ' + command.msg + '</div>', 
+			msg: '<div class="cmd-say"><span class="msg-name">' + target.name + ' says></span> ' + command.msg + '</div>',
 			playerName: target.name
 		});
 	});
@@ -338,12 +337,11 @@ Cmd.prototype.say = function(target, command) {
 
 Cmd.prototype.yell = function(target, command) {
 	World.msgToPlayer(target, {
-		msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' + command.msg + '</div>', 
-		styleClass: 'cmd-yell'
+		msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' + command.msg + '</div>'
 	});
 	
 	World.msgArea(target.area, {
-		msg: '<div class="cmd-yell"><span class="msg-name">' + target.name + ' yells></span> ' + command.msg + '</div>', 
+		msg: '<div class="cmd-yell"><span class="msg-name">' + target.name + ' yells></span> ' + command.msg + '</div>',
 		playerName: s.player.name
 	});
 };
@@ -351,15 +349,12 @@ Cmd.prototype.yell = function(target, command) {
 
 Cmd.prototype.chat = function(target, command) {
 	World.msgPlayer(target, {
-		msg: '<div class="cmd-chat"><span class="msg-name">You chat></span> ' + command.msg + '</div>',
-		element: 'blockquote',
-		styleClass: 'msg cmd-chat'
+		msg: '<div class="cmd-chat"><span class="msg-name">You chat></span> ' + command.msg + '</div>'
 	});
 
 	World.msgWorld(target, {
 		msg: '<div class="cmd-chat"><span class="msg-name">' + target.name + '></span> ' + command.msg + '</div>',
-		element: 'blockquote',
-		styleClass: 'chatmsg'
+		playerName: target.name
 	});
 };
 

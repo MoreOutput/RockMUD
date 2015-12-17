@@ -449,10 +449,7 @@ World.prototype.msgRoom = function(roomObj, msgObj, fn) {
 		if (s.player && s.player.name !== msgObj.playerName 
 			&& s.player.roomid === roomObj.id) {
 
-			world.msgPlayer(s, {
-				msg: msgObj.msg,
-				styleClass: 'room-msg'
-			});
+			world.msgPlayer(s, msgObj);
 		}
 	}
 
@@ -470,11 +467,8 @@ World.prototype.msgArea = function(areaName, msgObj, fn) {
 	for (i; i < world.players.length; i += 1) {
 		s = world.io.sockets.connected[target.sid];
 
-		if (s.player.name !== msgOpt.playerName && s.player.area === areaName) {
-			world.msgPlayer(s, {
-				msg: msgOpt.msg,
-				styleClass: 'area-msg'
-			});
+		if (s.player.name !== msgObj.playerName && s.player.area === areaName) {
+			world.msgPlayer(s, msgObj);
 		}
 	}
 
@@ -483,13 +477,20 @@ World.prototype.msgArea = function(areaName, msgObj, fn) {
 	}
 };
 
-// Emit a message to all the players in an area
+// Emit a message to all the players in the
 World.prototype.msgWorld = function(target, msgObj, fn) {
 	var world = this,
 	i = 0,
-	s = world.io.sockets.connected[target.sid];
+	s;
 
-	s.in('mud').broadcast.emit('msg', msgObj);
+	for (i; i < world.players.length; i += 1) {
+		s = world.io.sockets.connected[world.players[i].sid];
+
+		if (s.player && s.player.name !== msgObj.playerName) {
+
+			world.msgPlayer(s, msgObj);
+		}
+	}
 
 	if (typeof fn === 'function') {
 		return fn();

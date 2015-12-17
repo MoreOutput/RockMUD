@@ -1,0 +1,173 @@
+{
+    "name": "qwerty",
+    "lastname": "",
+    "title": "",
+    "role": "player",
+    "sex": "",
+    "charClass": "fighter",
+    "level": 1,
+    "exp": 0,
+    "expToLevel": 0,
+    "position": "standing",
+    "alignment": "",
+    "chp": 200,
+    "hp": 210,
+    "cmana": 200,
+    "mana": 200,
+    "cmv": 200,
+    "mv": 200,
+    "str": 12,
+    "wis": 9,
+    "int": 9,
+    "dex": 10,
+    "con": 11,
+    "wait": 0,
+    "ac": 10,
+    "weight": 0,
+    "maxWeight": 0,
+    "gold": 5,
+    "hunger": 0,
+    "thirst": 0,
+    "load": 3,
+    "visible": true,
+    "attackType": "punch",
+    "area": "Midgaard",
+    "roomid": 1,
+    "recall": "1",
+    "description": "A brand new citizen.",
+    "reply": "",
+    "following": "",
+    "short": "",
+    "trains": 25,
+    "size": 3,
+    "eq": [
+        {
+            "name": "Head",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Necklace 1",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Necklace 2",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Body",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "Chest",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "About Body",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "Right Arm",
+            "item": null,
+            "slot": "arms"
+        },
+        {
+            "name": "Left Arm",
+            "item": null,
+            "slot": "arms"
+        },
+        {
+            "name": "Right Hand",
+            "item": null,
+            "dual": false,
+            "slot": "hands"
+        },
+        {
+            "name": "Left Hand",
+            "item": null,
+            "dual": false,
+            "slot": "hands"
+        },
+        {
+            "name": "Ring 1",
+            "item": null,
+            "slot": "fingers"
+        },
+        {
+            "name": "Ring 2",
+            "item": null,
+            "slot": "fingers"
+        },
+        {
+            "name": "Right Leg",
+            "item": null,
+            "slot": "legs"
+        },
+        {
+            "name": "Left Leg",
+            "item": null,
+            "slot": "legs"
+        },
+        {
+            "name": "Feet",
+            "item": null,
+            "slot": "feet"
+        },
+        {
+            "name": "Floating",
+            "item": null,
+            "slot": "floating"
+        }
+    ],
+    "items": [],
+    "affects": [],
+    "racial": [],
+    "skills": [
+        [
+            {
+                "name": "Bash",
+                "id": "bash",
+                "train": 65,
+                "maxTrain": 95,
+                "mod": 0,
+                "type": "melee",
+                "wait": 2
+            }
+        ]
+    ],
+    "skillList": "[object Object]",
+    "prevent": [],
+    "autoloot": true,
+    "autosac": false,
+    "behaviors": [],
+    "race": "ogre",
+    "password": "2e275091c6256190ae62d86dc3483fa1781db9797f234b74f15a0637027caaa15ff4e613ecf09f8660bc9d2b7ff174e62d135eee2d9246075a170539f3ecb653",
+    "displayName": "Qwerty",
+    "isPlayer": true,
+    "salt": "756339210063c5abb060e9aca6911c693dd8f9ae81c0fdc6c893b109d0187b26d1b38e10b1c36491966a2e1e4c108c245d4ba50b680f97a17e7420f00ee7905df73e6a75bfba49f046ff4b780a9968452d9ebbb243468c265ce9929deec73c808f143deeb445b5b2b90b14a55459f1c44d92f9959eb731a73481def9c434eb6d",
+    "created": "2015-12-17T03:49:37.976Z",
+    "saved": null,
+    "settings": {
+        "autosac": false,
+        "autoloot": true,
+        "autodrink": {
+            "enabled": true,
+            "itemId": ""
+        },
+        "wimpy": {
+            "enabled": false,
+            "hp": 0
+        },
+        "channels": {
+            "blocked": [
+                "flame"
+            ]
+        }
+    },
+    "carry": 120
+}

@@ -387,15 +387,12 @@ Character.prototype.save = function(s, fn) {
 
 	if (s.player !== undefined) {
 		s.player.modified = new Date().toString();
-		console.log('./players/' + s.player.name.toLowerCase() + '.json');
 
 		fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
 			if (err) {
 				return World.msgPlayer(s, {msg: 'Error saving character.'});
 			} else {
-			console.log('here232')		
 				character.updatePlayer(s.player, function() {
-					console.log('here2')
 					if (typeof fn === 'function') {
 						return fn();
 					}
