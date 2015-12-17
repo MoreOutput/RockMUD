@@ -342,15 +342,12 @@ World.prototype.loadArea = function(areaName, fn) {
 		if (fnd) {
 			return fn(area, true);
 		} else {
-			fs.readFile('./areas/' + areaName + '.json', function (err, area) {
+			fs.readFile('./areas/' + areaName.toLowerCase() + '.json', function (err, area) {
 				var i = 0,
 				room,
 				mob,
 				item;
 
-
-				console.log(err);
-				console.log(area);
 				area = JSON.parse(area);
 
 				for (i; i < area.rooms.length; i += 1) {
