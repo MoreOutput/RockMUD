@@ -128,7 +128,7 @@ Character.prototype.addPlayer = function(s, fn) {
 	var  i = 0;	
 
 	for (i; i < World.players.length; i += 1) {
-		if (s.player.name === players[i].name) {
+		if (s.player.name === World.players[i].name) {
 			return fn(false, 'Already Logged in. Disconnecting...Refresh the page and relog.');
 		}
 	}
