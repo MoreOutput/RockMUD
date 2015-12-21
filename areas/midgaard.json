@@ -22,14 +22,15 @@
 				}, {
 					"cmd" : "east",
 					"id" : 3
-                }, {
+				}, {
 					"cmd" : "south",
 					"id" : 4
-                }, {
+				}, {
 					"cmd" : "west",
-                    "id" : 5
-                }
-			], 
+					"id" : 5
+				}
+			],
+			"playersInRoom": [],
 			"monsters" : [
 				{
 					"name": "Rufus",
@@ -129,8 +130,9 @@
 				{
 					"cmd" : "south",
 					"id" : 1
-                }
-			], 
+				}
+			],
+			"playersInRoom": [],
 			"monsters" : [],
 			"items" : [{
 				"name": "Tattered Buckler", 
@@ -160,8 +162,9 @@
 				{
 					"cmd" : "west",
 					"id" : 1
-                }
-			], 
+				}
+			],
+			"playersInRoom": [],
 			"monsters" : [],
 			"items" : [],
 			"flags" : []
@@ -175,8 +178,9 @@
 				{
 					"cmd" : "north",
 					"id" : 1
-                }
-			], 
+				}
+			],
+			"playersInRoom": [],
 			"monsters" : [],
 			"items" : [],
 			"flags" : []
@@ -190,8 +194,9 @@
 				{
 					"cmd" : "east",
 					"id" : 1
-                }
-			], 
+				}
+			],
+			"playersInRoom": [],
 			"monsters" : [],
 			"items" : [{
 				"name": "Leather Helmet", 

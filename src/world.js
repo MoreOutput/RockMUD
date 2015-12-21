@@ -418,20 +418,48 @@ World.prototype.motd = function(s, fn) {
 	});
 };
 
+World.prototype.prompt = function(target) {
+	var player;
+
+	if (target.player) {
+		player = target.player;
+	} else {
+		player = target;
+	}
+
+	if (player) {
+		return this.msgPlayer(target, {
+			msg: player.chp + '/'  + player.hp + 'hp - ' +
+				player.cmana + '/'  + player.mana + 'm - ' +  
+				player.cmv + '/'  + player.mv +'mv - ' + player.wait + 'w',
+			styleClass: 'cprompt',
+			noPrompt: true
+		});
+	}
+};
+
 World.prototype.msgPlayer = function(target, msgObj, fn) {
 	var world = this,
+	newMsg = {},
 	s;
 
 	if (target.player) {
 		s = target;
+		target = target.player;
 	} else if (target.sid) {
 		s = world.io.sockets.connected[target.sid];
 	}
 
-	if (s) {
-		s.emit('msg', msgObj);
-	}
+	if (target.isPlayer) {
+		if (s) {
+			s.emit('msg', msgObj);
 
+			if (!msgObj.noPrompt) {
+				world.prompt(target);
+			}
+		}
+	}
+	
 	if (typeof fn === 'function') {
 		return fn(s);
 	}

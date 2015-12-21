@@ -15,7 +15,7 @@
     "hp": 200,
     "cmana": 200,
     "mana": 200,
-    "cmv": 200,
+    "cmv": 92,
     "mv": 210,
     "str": 10,
     "wis": 10,
@@ -182,6 +182,6 @@
         }
     },
     "carry": 100,
-    "modified": "Thu Dec 17 2015 00:21:40 GMT-0500 (Eastern Standard Time)",
-    "sid": "kXOxKi4UMMqWsyt8AAAC"
+    "modified": "Mon Dec 21 2015 04:35:02 GMT-0500 (Eastern Standard Time)",
+    "sid": "-Q4rA4pJtksJC_jdAAAB"
 }

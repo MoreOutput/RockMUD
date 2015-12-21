@@ -18,17 +18,18 @@ Room.prototype.checkEntranceCriteria = function(target, roomObj, fn) {
 	return fn(true);
 };
 
-Room.prototype.getDisplayHTML = function(roomObj, exits, playersInRoom, monsters, items, fn) {
+Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 	var room = this,
 	i = 0,
-	displayHTML = '';
+	displayHTML = '',
+	exits = roomObj.exits,
+	playersInRoom = roomObj.playersInRoom,
+	monsters = roomObj.monsters,
+	items = roomObj.items;
 
 	if (arguments.length === 2) {
-		fn = exits;
-		exits = roomObj.exits;
-		playersInRoom = roomObj.playersInRoom;
-		monsters = roomObj.monsters;
-		items = roomObj.items;
+		fn = options;
+		options = null;
 	}
 
 	if (exits.length > 0) {
@@ -69,8 +70,10 @@ Room.prototype.getDisplayHTML = function(roomObj, exits, playersInRoom, monsters
 		i = 0;
 
 		for (i; i < playersInRoom.length; i += 1) {
-			displayHTML += '<li class="room-player">' + playersInRoom[i].name 
-				+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here.</li>';
+			if (!options || !options.hidePlayer || options.hidePlayer !== playersInRoom[i].name ) {
+				displayHTML += '<li class="room-player">' + playersInRoom[i].name 
+					+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here.</li>';
+			}
 		}
 
 		displayHTML += '</ul>';
@@ -112,7 +115,6 @@ Room.prototype.getDisplay = function(areaName, roomId, fn) {
 	var room = this;
 
 	World.getRoomObject(areaName, roomId, function(roomObj) {
-		roomObj.playersInRoom = [];
 		World.getPlayersByRoomId(roomId, function(players) {
 			roomObj.playersInRoom = players;
 			room.getDisplayHTML(roomObj, function(displayHTML) {
@@ -120,6 +122,15 @@ Room.prototype.getDisplay = function(areaName, roomId, fn) {
 			});
 		});
 	});
+};
+
+// Remove a player from a room
+Room.prototype.removePlayer = function(player, roomObj, fn) {
+	roomObj.playersInRoom = roomObj.playersInRoom.filter(function(item, i) {
+		return (item.id !== player.id);
+	});
+
+	return fn(true);
 };
 
 // does a string match any monsters in the room
@@ -159,14 +170,12 @@ Room.prototype.checkMonster = function(r, s, fn) {
 };
 
 // Remove a monster from a room
-Room.prototype.removeMonster = function(roomQuery, monster, fn) {
-	this.getRoomObject(roomQuery, function(roomObj) {
-		roomObj.monsters = roomObj.monsters.filter(function(item, i) {
-			return (item.id !== monster.id);
-		});
-
-		return fn(true);
+Room.prototype.removeMonster = function(monster, roomObj, fn) {
+	roomObj.monsters = roomObj.monsters.filter(function(item, i) {
+		return (item.id !== monster.id);
 	});
+
+	return fn(true);
 };
 
 /*

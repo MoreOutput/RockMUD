@@ -17,7 +17,7 @@ Character = function () {
 Character.prototype.login = function(r, s, fn) {
 	var name = r.msg.replace(/_.*/,'').toLowerCase();
 	
-	if (r.msg.length > 3 ) {
+	if (r.msg.length > 2) {
 		if  (/^[a-z]+$/g.test(r.msg) === true && /[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
 			fs.stat('./players/' + name + '.json', function (err, stat) {
 				if (err === null) {
@@ -31,7 +31,7 @@ Character.prototype.login = function(r, s, fn) {
 		}
 	} else {
 		s.emit('msg', {
-			msg: 'Invalid name choice, must be more than three characters.',
+			msg: 'Invalid name choice, must be more than two characters.',
 			res: 'login',
 			styleClass: 'error'
 		});
@@ -91,14 +91,12 @@ Character.prototype.getPassword = function(s, fn) {
 						if (added) {
 								World.motd(s, function() {
 									Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
-										s.emit('msg', {
+										World.msgPlayer(s, {
 											msg: displayHTML,
 											styleClass: 'room'
+										}, function() {
+											fn(s);
 										});
-
-										fn(s);
-										
-										return character.prompt(s);
 									});
 								});
 						} else {
@@ -200,8 +198,6 @@ Character.prototype.create = function(r, s, fn) {
 										msg: displayHTML, 
 										styleClass: 'room'
 									});
-
-									character.prompt(s);
 
 									fn(s);
 								});
@@ -651,23 +647,6 @@ Character.prototype.updatePlayer = function(player, fn) {
 			} 
 		}
 	}
-};
-
-Character.prototype.prompt = function(target) {
-	var player;
-
-	if (target.player) {
-		player = target.player;
-	} else {
-		player = target;
-	}
-
-	return World.msgPlayer(target, {
-		msg: player.chp + '/'  + player.hp + 'hp - ' +
-			player.cmana + '/'  + player.mana + 'm - ' +  
-			player.cmv + '/'  + player.mv +'mv - ' + player.wait + 'w',
-		styleClass: 'cprompt'
-	});
 };
 
 Character.prototype.level = function(s, fn) {

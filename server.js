@@ -80,14 +80,14 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						*/
 						} else {
 							s.emit('msg', {msg: cmdObj.cmd + 'is not a valid command.', styleClass: 'error'});
-							return Character.prompt(s);
+							return World.prompt(s);
 						}
 					} else {
-						return Character.prompt(s);
+						return World.prompt(s);
 					}
 				} else {
 					s.emit('msg', {msg: 'Invalid characters in command!', styleClass: 'error'});
-					return Character.prompt(s);
+					return World.prompt(s);
 				}
 			};
 
@@ -126,7 +126,8 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				World.msgPlayer(s, {
 					msg: 'Add a little to a little and there will be a big pile.',
 					emit: 'disconnect',
-					styleClass: 'logout-msg'
+					styleClass: 'logout-msg',
+					noPrompt: true
 				});
 
 				s.leave('mud');

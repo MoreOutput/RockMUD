@@ -36,18 +36,17 @@ World = require('./world').world;
 				World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
 					monsters.forEach(function(monster, i) {
 						if (monster.chp >= 1 && monster.onAlive) {
-							// 60% to run onAlive on each call
 							World.dice.roll(1, 10, function(roll) {
-								if (roll > 4 || monster.alwaysAlive === true) {
+								if (!monster.onAliveCheck || monster.onAliveCheck > roll) {
 									monster.onAlive(roll);
 								}
-							})
+							});
 						}
 					});
 				});
 			}
 		}
-	}, 30000); // 30 seconds
+	}, 20000); // 20 seconds
 
 	// AI Ticks for areas
 	setInterval(function() {
