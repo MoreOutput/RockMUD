@@ -471,12 +471,10 @@ World.prototype.msgRoom = function(roomObj, msgObj, fn) {
 	i = 0,
 	s;
 
-	for (i; i < world.players.length; i += 1) {
-		s = world.io.sockets.connected[world.players[i].sid];
+	for (i; i < roomObj.playersInRoom.length; i += 1) {
+		s = world.io.sockets.connected[roomObj.playersInRoom[i].sid];
 
-		if (s.player && s.player.name !== msgObj.playerName 
-			&& s.player.roomid === roomObj.id) {
-
+		if (s.player && s.player.name !== msgObj.playerName) {
 			world.msgPlayer(s, msgObj);
 		}
 	}
@@ -522,6 +520,44 @@ World.prototype.msgWorld = function(target, msgObj, fn) {
 
 	if (typeof fn === 'function') {
 		return fn();
+	}
+};
+
+World.prototype.search = function(searchArr, command, fn) {
+	var msgPatt,
+	matches = [],
+	results,
+	i = 0;
+
+	if (command.msg.length >= 3) {
+		msgPatt = new RegExp(command.msg);
+
+		for (i; i < searchArr.length; i += 1) {
+			if (msgPatt.test(searchArr[i].name.toLowerCase()) ) {
+				matches.push(searchArr[i]);
+			}
+		}
+
+		if (matches) {
+			if (matches.length > 1 && command.number > 1) {
+				i = 0;
+				for (i; i < matches.length; i += 1) {
+					if (command.number === i) {
+						results = matches[i];
+					}
+				}
+			} else {
+				results = matches[0];
+			}
+		}
+
+		if (results) {
+			return fn(results);
+		} else {
+			return fn(false);
+		}
+	} else {
+		return fn(false);
 	}
 };
 

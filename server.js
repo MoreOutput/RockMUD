@@ -122,7 +122,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		});
 
 		s.on('quit', function () {
-			Character.save(s, function() {
+			Character.save(s.player, function() {
 				World.msgPlayer(s, {
 					msg: 'Add a little to a little and there will be a big pile.',
 					emit: 'disconnect',

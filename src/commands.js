@@ -78,7 +78,7 @@ Cmd.prototype.move = function(target, command, fn) {
 										});
 
 										World.msgRoom(roomObj, {
-											msg: '<strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong>'
+											msg: '<span class="yellow"><strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong></div>'
 										});
 
 										if (typeof fn === 'function') {
@@ -140,14 +140,14 @@ Cmd.prototype.who = function(target, command) {
 			}
 
 			str += '<tr>' +
-				'<td class="who-lvl">' + player.level + '</td>' +
-				'<td class="who-race">' + player.race + '</td>' +
-				'<td class="who-class">' + player.charClass + '</td>' +
+				'<td class="who-lvl yellow">' + player.level + '</td>' +
+				'<td class="who-race green">' + player.race + '</td>' +
+				'<td class="who-class red">' + player.charClass + '</td>' +
 				'<td class="who-player">' + displayName + '</td>' +
 			'</tr>';
 		}
 
-		str = '<div class="cmd-who"><h2>Visible Players</h2><table class="table table-condensed who-list">' +
+		str = '<div class="cmd-who"><h2>Visible Players</h2><table class="table table-condensed table-no-border who-list">' +
 			'<thead>' +
 				'<tr>' +
 					'<td width="5%">Level</td>' +
@@ -173,7 +173,7 @@ Cmd.prototype.who = function(target, command) {
 Cmd.prototype.get = function(target, command, fn) {
 	if (command.msg !== '') {
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
-			Room.search(roomObj.items, command, function(item) {
+			World.search(roomObj.items, command, function(item) {
 				if (item) {
 					Room.remove('items', item, roomObj, function(removed, roomObj) {
 						Character.addToInventory(item, target, function(canAdd) {
@@ -212,32 +212,32 @@ Cmd.prototype.get = function(target, command, fn) {
 };
 
 Cmd.prototype.drop = function(target, command, fn) {
-	if (r.msg !== '') {
+	if (command.msg !== '') {
 		Character.checkInventory(r, s, function(fnd, item) {
 			if (fnd) {
-				Character.removeFromInventory(s, item, function(removed) {
+				Character.removeFromInventory(target, item, function(removed) {
 					if (removed) {
-						Room.addItem({area: s.player.area, id: s.player.roomid, item: item}, function() {
-							s.emit('msg', {
+						Room.addItem({area: target.area, id: target.roomid, item: item}, function() {
+							World.msgPlayer(target, {
 								msg: 'You dropped ' + item.short,
 								styleClass: 'get'
 							});
 							
-							return World.prompt(s);
+							
 						});
 					} else {
-						s.emit('msg', {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
-						return World.prompt(s);
+						World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
+						
 					}
 				});
 			} else {
-				s.emit('msg', {msg: 'That item is not here.', styleClass: 'error'});
-				return World.prompt(s);
+				World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
+				
 			}
 		});
 	} else {
-		s.emit('msg', {msg: 'Drop what?', styleClass: 'error'});
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'Drop what?', styleClass: 'error'});
+		
 	}
 };
 
@@ -246,7 +246,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 Cmd.prototype.kill = function(target, command) {
 	Room.checkMonster(r, s, function(fnd, target) {
 		if (fnd) {
-			Combat.begin(s, target, function(contFight, target) { // the first round qualifiers
+			Combat.begin(target, target, function(contFight, target) { // the first round qualifiers
 				var combatInterval;
 
 				Character.prompt(s);
@@ -254,37 +254,37 @@ Cmd.prototype.kill = function(target, command) {
 				if (contFight) {
 					// Combat Loop
 					combatInterval = setInterval(function() {
-						if (s.player.position === 'fighting' && target.position === 'fighting') {
+						if (target.position === 'fighting' && target.position === 'fighting') {
 							
-							Combat.fight(s, target, function(contFight) {
+							Combat.fight(target, target, function(contFight) {
 								if (!contFight) {
 									target.position = 'dead';
 
 									clearInterval(combatInterval);
 
 									Room.removeMonster({
-										area: s.player.area,
-										id: s.player.roomid
+										area: target.area,
+										id: target.roomid
 									}, target, function(removed) {
 										if (removed) { 
-											Room.addCorpse(s, target, function(corpse) {
-												Combat.calXP(s, target, function(earnedXP) {
-													s.player.position = 'standing';
-													s.player.wait = 0;
+											Room.addCorpse(target, target, function(corpse) {
+												Combat.calXP(target, target, function(earnedXP) {
+													target.position = 'standing';
+													target.wait = 0;
 
 													if (earnedXP > 0) {
-														s.emit('msg', {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
+														World.msgPlayer(target, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
 													} else {
-														s.emit('msg', {msg: 'You won but learned nothing.', styleClass: 'victory'});
+														World.msgPlayer(target, {msg: 'You won but learned nothing.', styleClass: 'victory'});
 													}
 												});
 											});
 										}
 									});
 
-								} else if (s.player.chp <= 0) {
+								} else if (target.chp <= 0) {
 									clearInterval(combatInterval);
-									s.emit('msg', {msg: 'You died!', styleClass: 'combat-death'});
+									World.msgPlayer(target, {msg: 'You died!', styleClass: 'combat-death'});
 									//Character.death(s);
 								}	
 
@@ -295,8 +295,8 @@ Cmd.prototype.kill = function(target, command) {
 				}
 			});
 		} else {
-			s.emit('msg', {msg: 'There is nothing by that name here.', styleClass: 'error'});
-			return World.prompt(s);
+			World.msgPlayer(target, {msg: 'There is nothing by that name here.', styleClass: 'error'});
+			
 		}
 	});
 };
@@ -324,8 +324,8 @@ Cmd.prototype.look = function(target, command) {
 	}
 };
 
-Cmd.prototype.where = function(r, s) {
-	r.msg = '<ul>' + 
+Cmd.prototype.where = function(target, command) {
+	command.msg = '<ul>' + 
 	'<li>Your Name: ' + Character[s.id].name + '</li>' +
 	'<li>Current Area: ' + Character[s.id].area + '</li>' +
 	'<li>Room Number: ' + Character[s.id].id + '</li>' +
@@ -333,9 +333,9 @@ Cmd.prototype.where = function(r, s) {
 
 	r.styleClass = 'playerinfo where';
 
-	s.emit('msg', r);
+	World.msgPlayer(target, r);
 
-	return World.prompt(s);
+	
 };
 
 
@@ -360,7 +360,7 @@ Cmd.prototype.yell = function(target, command) {
 	
 	World.msgArea(target.area, {
 		msg: '<div class="cmd-yell"><span class="msg-name">' + target.name + ' yells></span> ' + command.msg + '</div>',
-		playerName: s.player.name
+		playerName: target.name
 	});
 };
 
@@ -377,25 +377,25 @@ Cmd.prototype.chat = function(target, command) {
 };
 
 /*
-Cmd.prototype.tell = function(r, s) {
+Cmd.prototype.tell = function(target, command) {
 	var i  = 0;
 	
-	s.emit('msg', {msg: 'You tell ' + r.playerName + '> ' + r.msg, styleClass: 'cmd-say'});
+	World.msgPlayer(target, {msg: 'You tell ' + r.playerName + '> ' + command.msg, styleClass: 'cmd-say'});
 	
-	Character.msgToPlayer({
-		msg: s.player.name + ' tells you> ' + r.msg, 
-		playerName: s.player.name
+	Charactecommand.msgToPlayer({
+		msg: target.name + ' tells you> ' + command.msg, 
+		playerName: target.name
 	}, true);
 };
 
-Cmd.prototype.reply = function(r, s) {
+Cmd.prototype.reply = function(target, command) {
 	var i  = 0;
 	
-	s.emit('msg', {msg: 'You reply to ' + s.player.reply + '> ' + r.msg, styleClass: 'cmd-say'});
+	World.msgPlayer(target, {msg: 'You reply to ' + target.reply + '> ' + command.msg, styleClass: 'cmd-say'});
 	
-	Character.msgToPlayer({
-		msg: s.player.name + ' tells you> ' + r.msg, 
-		playerName: s.player.name
+	Charactecommand.msgToPlayer({
+		msg: target.name + ' tells you> ' + command.msg, 
+		playerName: target.name
 	}, true);
 };
 */
@@ -418,117 +418,114 @@ Cmd.prototype.achat = function(target, command) {
 };
 
 // Viewing the time
-Cmd.prototype.time = function(r, s) {
+Cmd.prototype.time = function(target, command) {
 
 };
 
 /** Related to Saving and character adjustment/interaction **/
 
-Cmd.prototype.save = function(r, s) {
-	Character.save(s, function() {
-		s.emit('msg', {msg: s.player.name + ' was saved! Whew!', styleClass: 'save'});
-		return World.prompt(s);
+Cmd.prototype.save = function(target, command, fn) {
+	Character.save(target, function() {
+		World.msgPlayer(target, {msg: target.displayName + ' was saved. Whew!', styleClass: 'save'});
+		
+		if (typeof fn === 'function') {
+			return fn();
+		}
 	});
 };
 
-Cmd.prototype.title = function(r, s) {
-	if (r.msg.length < 40) {
-		if (r.msg != 'title') {
-			s.player.title = r.msg;
+Cmd.prototype.title = function(target, command) {
+	if (command.msg.length < 40) {
+		if (command.msg != 'title') {
+			target.title = command.msg;
 		} else {
-			s.player.title = ' a level ' + s.player.level + ' ' + s.player.race + ' ' + s.player.charClass;
+			target.title = ' a level ' + target.level + ' ' + target.race + ' ' + target.charClass;
 		}
 
-		Character.updatePlayer(s, function(updated) {
-			s.emit('msg', {msg: 'Your title was changed!', styleClass: 'save'});
-			return World.prompt(s);
+		Character.updatePlayer(target, function(updated) {
+			World.msgPlayer(target, {msg: 'Your title was changed!', styleClass: 'save'});
 		});
 	} else {
-		s.emit('msg', {msg: 'Not a valid title.', styleClass: 'save'});
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'Title is too long, try another.', styleClass: 'save'});
 	}
 };
 
 // View equipment
-Cmd.prototype.equipment = function(r, s) {
+Cmd.prototype.equipment = function(target, command) {
 	var eqStr = '',
 	i = 0;	
 	
-	for (i; i < s.player.eq.length; i += 1) {	
-		eqStr += '<li class="slot-' + s.player.eq[i].slot.replace(/ /g, '') + 
-			'">' + s.player.eq[i].name + ': ';
+	for (i; i < target.eq.length; i += 1) {	
+		eqStr += '<li class="eq-slot-' + target.eq[i].slot.replace(/ /g, '') + 
+			'"><label>' + target.eq[i].name + '</label>: ';
 		
-		if (s.player.eq[i].item === null || s.player.eq[i].item === '') {
+		if (target.eq[i].item === null || target.eq[i].item === '') {
 			eqStr += ' Nothing</li>';
 		} else {
-			eqStr += '<strong>'  + s.player.eq[i].item.short + '</strong></li>';
+			eqStr += '<label>'  + target.eq[i].item.short + '</label></li>';
 		}
 	}
 	
-	s.emit('msg', {
-		msg: '<h3>You are wearing:</h3>' +
-			'<ul class="equipment-list">' +
-		eqStr + '</ul>', 
+	World.msgPlayer(target, {
+		msg: '<div class="eq-cmd"><h1>You are wearing:</h1>' +
+			'<ul class="list-unstyled equipment-list">' +
+		eqStr + '</ul></div>', 
 		styleClass: 'cmd-eq' 
 	});
-	
-	return World.prompt(s);
 };
 
 // Current skills
-Cmd.prototype.skills = function(r, s) {
+Cmd.prototype.skills = function(target, command) {
 	var skills = '',
 	i = 0;
 	
-	if (s.player.skills.length > 0) {
-		for (i; i < s.player.skills.length; i += 1) {
-			skills += s.player.skills[i].name;
+	if (target.skills.length > 0) {
+		for (i; i < target.skills.length; i += 1) {
+			skills += target.skills[i].name;
 		}
 		
-		s.emit('msg', {msg: 'skills', styleClass: 'eq' });
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'skills', styleClass: 'eq' });
+		
 	} else {
-		s.emit('msg', {msg: 'skills', styleClass: 'eq' });
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'skills', styleClass: 'eq' });
+		
 	}
 };
 
-Cmd.prototype.wear = function(r, s) {
-	if (r.msg !== '') {
-		Character.checkInventory(r, s, function(fnd, item) {
-			if (fnd) {
-				 Character.wear(r, s, item, function(wearSuccess, msg) {
-					s.emit('msg', {msg: msg, styleClass: 'cmd-wear'});
-					return World.prompt(s);
+Cmd.prototype.wear = function(target, command) {
+	if (command.msg !== '') {
+		World.search(target.items, command, function(item) {
+			if (item) {
+				 Character.wear(target, item, function(msg) {
+					World.msgPlayer(target, {msg: msg, styleClass: 'cmd-wear'});
 				});
 			} else {
-				s.emit('msg', {msg: 'That item is not here.', styleClass: 'error'});
-				return World.prompt(s);
+				World.msgPlayer(target, {msg: 'You do not have that item.', styleClass: 'error'});
 			}
 		});
 	} else {
-		s.emit('msg', {msg: 'Wear what?', styleClass: 'error'});
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'Wear what?', styleClass: 'error'});
+		
 	}
 };
 
 /*
-Cmd.prototype.remove = function(r, s) {
-	if (r.msg !== '') {
+Cmd.prototype.remove = function(target, command) {
+	if (command.msg !== '') {
 		Character.checkInventory(r, s, function(fnd, item) {
 			if (fnd) {
 				Character.remove(r, s, item, function(removeSuccess, msg) {
-					s.emit('msg', {msg: msg, styleClass: 'cmd-wear'});
-					return World.prompt(s);
+					World.msgPlayer(target, {msg: msg, styleClass: 'cmd-wear'});
+					
 				});
 			} else {
-				s.emit('msg', {msg: 'You are not wearing that.', styleClass: 'error'});
-				return World.prompt(s);
+				World.msgPlayer(target, {msg: 'You are not wearing that.', styleClass: 'error'});
+				
 			}
 		});
 	} else {
-		s.emit('msg', {msg: 'Remove what?', styleClass: 'error'});
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'Remove what?', styleClass: 'error'});
+		
 	}
 }
 */
@@ -581,18 +578,17 @@ Cmd.prototype.score = function(target, command, fn) {
 					'<li class="stat-gold"><label>Gold:</label> ' + target.gold + '</li>' +
 					'<li class="stat-hunger"><label>Hunger:</label>' + target.hunger +'</li>' +
 					'<li class="stat-thirst"><label>Thirst:</label> 0</li>' +
-					'<li class="stat-trains last"><label>Trains:</label> ' + target.thirst + '</li>' +
+					'<li class="stat-trains last"><label>Trains:</label> ' + target.trains + '</li>' +
 				'</ul>' +
 				'<div class="stat-details">' +
 					'<ul class="col-md-3 score-stats list-unstyled">' +
-						'<li class="stat-position"><label>Hit Bonus: </labels> 3</li>' +
-						'<li class="stat-position"><label>Damage Bonus: </label> 3</li>' +
+						'<li class="stat-hitroll"><label>Hit Bonus: </labels> 3</li>' +
+						'<li class="stat-damroll"><label>Damage Bonus: </label> 3</li>' +
 						'<li class="stat-position"><label>Magic resistance: </label> -3</li>' +
 						'<li class="stat-position"><label>Melee resistance: </label> -3</li>' +
 						'<li class="stat-position"><label>Poison resistance: </label> -3</li>' +
 						'<li class="stat-position"><label>Detection: </label> 2</li>' +
 						'<li class="stat-position"><label>Knowledge: </label> 2</li>' +
-						'<li class="stat-position"><label>Evasion: </label> 2</li>' +
 					'</ul>' +
 					'<div class="col-md-3 score-img">' +
 						'<img width="100%" src="http://content.turbine.com/sites/www.lotro.com/f2p/images/race/dwarf.png" />' +
@@ -612,43 +608,39 @@ Cmd.prototype.score = function(target, command, fn) {
 	World.msgPlayer(target, { msg: score });
 };
 
-Cmd.prototype.help = function(r, s) {
+Cmd.prototype.help = function(target, command) {
 	// if we don't list a specific help file we return help.json
 	var helpTxt = '';
 
-	if (r.msg !== '') {
-		fs.readFile('./help/' + r.msg + '.json', function (err, data) {
+	if (command.msg !== '') {
+		fs.readFile('./help/' + command.msg + '.json', function (err, data) {
 			if (!err) {
 				data = JSON.parse(data);
 
 				helpTxt = '<h2>Help: ' + data.name + '</h2> ' + data.description + 
 				'<p class="small">Related: '+ data.related.toString() + '</p>';
 
-				s.emit('msg', {msg: helpTxt, styleClass: 'cmd-help' });
+				World.msgPlayer(target, {msg: helpTxt, styleClass: 'cmd-help' });
 
-				return World.prompt(s);
+				
 			} else {
-				s.emit('msg', {msg: 'No help file found.', styleClass: 'error' });	
-
-				return World.prompt(s);
+				World.msgPlayer(target, {msg: 'No help file found.', styleClass: 'error' });
 			}
 		});	
 	} else {
-		s.emit('msg', {msg: 'Help you with what exactly?', styleClass: 'error' });
-
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'Help you with what exactly?', styleClass: 'error' });
 	}
 };
 
-Cmd.prototype.xyzzy = function(s) {
-	Room.msgToRoom({
-		msg: s.player.name + 	' tries to xyzzy but nothing happens.', 
-		roomid: s.player.roomid,
-		styleClass: 'error'
-	}, true, function() {
-		s.emit('msg', {msg: 'Nothing happens. Why would it?', styleClass: 'error' });
+Cmd.prototype.xyzzy = function(target, command) {
+	World.getRoomObject(target.area, target.roomid, function(roomObj) {
+		World.msgRoom(roomObj, {
+			msg: target.name + 	' tries to xyzzy but nothing happens.', 
+			roomid: target.roomid,
+			playerName: target.name
+		});
 
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'Nothing happens. Why would it?', styleClass: 'error' });
 	});
 };
 
@@ -661,21 +653,21 @@ Cmd.prototype.xyzzy = function(s) {
 * Syntax: json objectType (item, room, monster or player)
 * typing 'json' alone will give the json object for the entire current room. 
 */
-Cmd.prototype.json = function(r, s) {
-	if (s.player.role === 'admin' && r.msg) {
+Cmd.prototype.json = function(target, command) {
+	if (target.role === 'admin' && command.msg) {
 		Character.checkInventory(r,s,function(fnd,item) {
 			if (fnd) {
-				s.emit('msg', {msg: util.inspect(item, {depth: null})});
+				World.msgPlayer(target, {msg: util.inspect(item, {depth: null})});
 			} else {
 				Room.checkItem(r, s, function (fnd, item) {
 					if (fnd) {
-						s.emit('msg', {msg: util.inspect(item, {depth: null})});
+						World.msgPlayer(target, {msg: util.inspect(item, {depth: null})});
 					} else {
 						Room.checkMonster(r, s, function (fnd, monster) {
 								if (fnd) {
-									s.emit('msg', {msg: util.inspect(monster, {depth: null})});
+									World.msgPlayer(target, {msg: util.inspect(monster, {depth: null})});
 								} else {
-									s.emit('msg', {msg: 'Target not found.', styleClass: 'error' });
+									World.msgPlayer(target, {msg: 'Target not found.', styleClass: 'error' });
 								}
 							}
 						);
@@ -684,7 +676,7 @@ Cmd.prototype.json = function(r, s) {
 			}
 		});
 	} else {
-		s.emit('msg', {msg: 'Jason who?', styleClass: 'error' });
+		World.msgPlayer(target, {msg: 'Jason who?', styleClass: 'error' });
 	}
 };
 
@@ -692,32 +684,29 @@ Cmd.prototype.json = function(r, s) {
 * An in game reboot. 
 * Stops all combat, reloads all active areas, saves players, and clears all corpses / items with a decay flag
 */
-Cmd.prototype.reboot = function(r, s) {
-	if (s.player.role === 'admin') {
+Cmd.prototype.reboot = function(target, command) {
+	if (target.role === 'admin') {
 
 	} else {
-		s.emit('msg', {msg: 'No.', styleClass: 'error' });	
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'No.', styleClass: 'error' });
 	}
 };
 
 // Fully heal everyone on the MUD
-Cmd.prototype.restore = function(r, s) {
-	if (s.player.role === 'admin') {
+Cmd.prototype.restore = function(target, command) {
+	if (target.role === 'admin') {
 
 	} else {
-		s.emit('msg', {msg: 'You do not possess that kind of power.', styleClass: 'error' });	
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'You do not possess that kind of power.', styleClass: 'error' });
 	}
 };
- 
+
 // Stops all game combat, does not heal
-Cmd.prototype.peace = function(r, s) {
-	if (s.player.role === 'admin') {
+Cmd.prototype.peace = function(target, command) {
+	if (target.role === 'admin') {
 
 	} else {
-		s.emit('msg', {msg: 'You do not possess that kind of power.', styleClass: 'error' });	
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'You do not possess that kind of power.', styleClass: 'error' });
 	}
 };
 

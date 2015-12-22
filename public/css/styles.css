@@ -7,7 +7,7 @@ html, body {
 background-color: #000;
 color: #fff;
 padding: 0 .4em;
-font-family: 'Open Sans', sans-serif;
+font-family: 'Montserrat', sans-serif;  
 font-size: 1em;
 }
 html, body a {
@@ -20,7 +20,7 @@ padding-top: 0;
 margin-top: 0;
 }
 .row {
-width: 100%;
+    margin-bottom: .15em;
 }
 #terminal {
 background-color: #000;
@@ -42,7 +42,6 @@ color: #fff;
 .score {
 border-bottom: 1px solid #eee;
 margin-bottom: .25em;
-display: inline-block;
 }
 .score h1, h4 {
 border-bottom: 1px solid #eee;
@@ -106,8 +105,7 @@ margin: .5em 0 1em 0;
 font-weight: bold;
 }
 .room {
-display: inline-block;
-border-bottom: 1px dashed purple;
+border-bottom: 1px dashed #eee;
 }
 .room .room-title {
 color: #ddd;
@@ -123,5 +121,28 @@ font-weight: bold;
 color: #ff0033;
 }
 .error {
-    color: yellow;
+color: yellow;
+}
+.table-no-border>thead>tr>th, 
+.table-no-border>tbody>tr>th, 
+.table-no-border>tfoot>tr>th, 
+.table-no-border>thead>tr>td, 
+.table-no-border>tbody>tr>td, 
+.table-no-border>tfoot>tr>td {
+border-top: none; 
+}
+.red {
+color: #ff0033;
+}
+.green {
+color: #60f066;
+}
+.blue {
+color: #0066ff;
+}
+.yellow {
+color: yellow;
+}
+.grey {
+color: #eee;
 }

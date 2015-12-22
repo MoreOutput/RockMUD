@@ -46,9 +46,10 @@ Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 
 	i = 0;
 
-	if (items.length > 0) {
-		displayHTML += '<ul class="room-here list-inline">';
+	displayHTML += '<ul class="room-here list-inline">';
 
+
+	if (items.length > 0) {
 		for (i; i < items.length; i += 1) {
 			displayHTML += '<li class="room-item">' + items[i].short + '.</li>';
 		}
@@ -75,9 +76,9 @@ Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 					+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here.</li>';
 			}
 		}
-
-		displayHTML += '</ul>';
 	}
+
+	displayHTML += '</ul>';
 
 	displayHTML = '<div class="room"><h2 class="room-title">' + roomObj.title + '</h2>' + 
 	'<p class="room-content">' + roomObj.content + '</p>' + displayHTML + '</div>';
@@ -122,44 +123,6 @@ Room.prototype.getDisplay = function(areaName, roomId, fn) {
 			});
 		});
 	});
-};
-
-Room.prototype.search = function(searchArr, command, fn) {
-	var msgPatt,
-	matches = [],
-	results,
-	i = 0;
-
-	if (command.msg.length >= 3) {
-		msgPatt = new RegExp(command.msg);
-
-		for (i; i < searchArr.length; i += 1) {
-			if (msgPatt.test(searchArr[i].name.toLowerCase()) ) {
-				matches.push(searchArr[i]);
-			}
-		}
-
-		if (matches) {
-			if (matches.length > 1 && command.number > 1) {
-				i = 0;
-				for (i; i < matches.length; i += 1) {
-					if (command.number === i) {
-						results = matches[i];
-					}
-				}
-			} else {
-				results = matches[0];
-			}
-		}
-
-		if (results) {
-			return fn(results);
-		} else {
-			return fn(false);
-		}
-	} else {
-		return fn(false);
-	}
 };
 
 Room.prototype.remove = function(arrayName, target, roomObj, fn) {

@@ -147,7 +147,7 @@ Character.prototype.addPlayer = function(s, fn) {
 	return fn(true);
 };
 
-//  A New Character is saved
+// A New Character is saved
 Character.prototype.create = function(r, s, fn) { 
 	var character = this;
 
@@ -163,9 +163,10 @@ Character.prototype.create = function(r, s, fn) {
 	s.player.created = new Date();
 	s.player.saved = null;
 	s.player.role = 'player';
-	s.player.area = "Midgaard";
+	s.player.area = 'Midgaard';
 	s.player.roomid = 1;
 	s.player.trains += 25;
+	s.player.deaths = 0;
 	s.player.settings = {
 		autosac: false,
 		autoloot: true,
@@ -391,28 +392,27 @@ Character.prototype.classSelection = function(r, fn) {
 	});
 };
 
-Character.prototype.save = function(s, fn) {
+Character.prototype.save = function(player, fn) {
 	var character = this;
 
-	if (s.player !== undefined) {
-		s.player.modified = new Date().toString();
+	player.modified = new Date().toString();
 
-		fs.writeFile('./players/' + s.player.name.toLowerCase() + '.json', JSON.stringify(s.player, null, 4), function (err) {
-			if (err) {
-				return World.msgPlayer(s, {msg: 'Error saving character.'});
-			} else {
-				character.updatePlayer(s.player, function() {
-					if (typeof fn === 'function') {
-						return fn();
-					}
-				})
-			}
-		});
-	}
+	fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null, 4), function (err) {
+		if (err) {
+			return World.msgPlayer(player, {msg: 'Error saving character.'});
+		} else {
+			character.updatePlayer(player, function() {
+				if (typeof fn === 'function') {
+					return fn();
+				}
+			})
+		}
+	});
 };
 
-Character.prototype.getModifier = function(s, stat, fn) {
-	var mod = Math.round(s.player[stat]/3);
+// Roll a modifier for a stat
+Character.prototype.getModifier = function(target, stat, fn) {
+	var mod = Math.round(target[stat]/3);
 	
 	if (!fn) {
 		return mod;
@@ -491,42 +491,6 @@ Character.prototype.thirst = function(s, fn) {
 	}
 };
 
-// callback with boolean if item with the supplied string matches inventory item, and first matched item as
-// second argument if applicable
-Character.prototype.checkInventory = function(r, s, fn) {
-	var msgPatt,
-	items,
-	parts,
-	findIndex,
-	findItem;
-
-	// Split to account for target modifier (IE: 2.longsword)
-	parts = r.msg.split('.');
-
-	if (parts.length === 2) {
-		findIndex = parseInt(parts[0]) - 1;
-		findItem = parts[1];
-	} else {
-		findIndex = 0;
-		findItem = r.msg;
-	}
-
-	msgPatt = new RegExp('^' + findItem);
-
-	items = s.player.items.filter(function(item, i) {
-		if (msgPatt.test(item.name.toLowerCase())) {
-			return true;
-		}
-	});
-
-	if (items.length > 0 && findIndex in items) {
-		fn(true, items[findIndex]);
-	} else {
-		fn(false);
-	}
-};
-
-
 // push an item into a players inventory, checks items to ensure a player can use it
 Character.prototype.addToInventory = function(item, player, fn) {
 	player.items.push(item);
@@ -586,53 +550,52 @@ Character.prototype.removeFromInventory = function(s, itemObj, fn) {
 	}
 };
 
-Character.prototype.wear = function(r, s, item, fn) {
-	var i = 0,
-	replacedItem;	
+Character.prototype.wear = function(target, item, fn) {
+    var i = 0,
+    replacedItem;
 
-	for (i; i < s.player.eq.length; i += 1) {	
-		if (item.slot === s.player.eq[i].slot && item.equipped === false) {
-			if (item.itemType === 'weapon') {
-				 item.equipped = true;
-				 
-				// Wielding weapons
-				if (item.weight < (20 + s.player.str)) { // Dual check
+    for (i; i < target.eq.length; i += 1) {   
+        if (item.slot === target.eq[i].slot && item.equipped === false) {
+            if (item.itemType === 'weapon') {
+                item.equipped = true;
 
-				}
+                if (item.weight < (20 + target.str)) { // Dual check
 
-				if (s.player.eq[i].dual === false && s.player.eq[i].item === null) {
-					s.player.eq[i].item = item;
+                }
 
-					fn(true, 'You wield a ' + item.short + ' in your ' + s.player.eq[i].name);
-					break;
-				}
-			} else {
-				// Wearing Armor
-				if (s.player.eq[i].item === null) {
-					item.equipped = true;
-					s.player.eq[i].item = item;
+                if (target.eq[i].dual === false && target.eq[i].item === null) {
+                    target.eq[i].item = item;
 
-					s.player.ac = s.player.ac + item.ac;
-					
-					return fn(true, 'You wear a ' + item.short + ' on your ' + s.player.eq[i].name);
-				} else {
-					item.equipped = true;
-					s.player.eq[i].item.equipped = false;
+                    fn('You wield a ' + item.short + ' in your ' + target.eq[i].name);
+                    break;
+                }
+            } else {
+                // Wearing Armor
+                if (target.eq[i].item === null) {
+                    item.equipped = true;
+                    target.eq[i].item = item;
 
-					replacedItem = s.player.eq[i].item;
-					s.player.eq[i].item = item;
+                    target.ac = target.ac + item.ac;
+                    
+                    return fn('You wear a ' + item.short + ' on your ' + target.eq[i].name);
+                } else {
+                    item.equipped = true;
+                    target.eq[i].item.equipped = false;
 
-					s.player.ac = s.player.ac - replacedItem.ac;
+                    replacedItem = target.eq[i].item;
+                    target.eq[i].item = item;
 
-					s.player.ac = s.player.ac + item.ac
+                    target.ac = target.ac - replacedItem.ac;
 
-					return fn(true, 'You wear ' + item.short + ' on your ' + 
-						s.player.eq[i].name + ' and remove ' + 
-						replacedItem.short);
-				}
-			}
-		} 
-	}
+                    target.ac = target.ac + item.ac
+
+                    return fn('You wear ' + item.short + ' on your ' + 
+                        target.eq[i].name + ' and remove ' + 
+                        replacedItem.short);
+                }
+            }
+        } 
+    }
 };
 
 Character.prototype.getLoad = function(s) {
