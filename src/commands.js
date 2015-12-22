@@ -533,25 +533,24 @@ Cmd.prototype.remove = function(r, s) {
 }
 */
 
-Cmd.prototype.inventory = function(r, s) {
+Cmd.prototype.inventory = function(target, command) {
 	var iStr = '',
 	i = 0;
 	
-	if (s.player.items.length > 0) {
-		for (i; i < s.player.items.length; i += 1) {
-			if (!s.player.items[i].equipped) {
-				iStr += '<li>' + s.player.items[i].short + '</li>';
+	if (target.items.length > 0) {
+		for (i; i < target.items.length; i += 1) {
+			if (!target.items[i].equipped) {
+				iStr += '<li>' + target.items[i].short + ' (<label>type:</label> ' + target.items[i].itemType +
+				', <label>weight:</label> ' + target.items[i].weight + ')</li>';
 			} else {
-				iStr += '<li>' + s.player.items[i].short + ' (Equipped) </li>';
-			}		
-			
+				iStr += '<li>' + target.items[i].short + ' (Equipped) '+ ' (<label>type:</label> ' + target.items[i].itemType +
+				', <label>weight:</label> ' + target.items[i].weight + ')</li>';
+			}
 		}
 		
-		s.emit('msg', {msg: '<ul>' + iStr + '</ul>', styleClass: 'inventory' });
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: '<div class="cmd-i"><h1>Your Inventory</h1><ul>' + iStr + '</ul></div>', styleClass: 'inventory' });
 	} else {
-		s.emit('msg', {msg: 'No items in your inventory, can carry ' + s.player.carry + ' pounds of gear.', styleClass: 'inventory' });
-		return World.prompt(s);
+		World.msgPlayer(target, {msg: 'No items in your inventory, can carry ' + target.carry + ' pounds of items and treasure.'});
 	}
 };
 

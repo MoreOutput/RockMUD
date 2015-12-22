@@ -17,6 +17,7 @@
     "value": 0,
     "slot": "",
     "decay": 0,
+    "condition": "good",
     "equipped": false,
     "value": 0
 }
