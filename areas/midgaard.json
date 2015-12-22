@@ -89,17 +89,18 @@
 				}
 			],
 			"items" : [{
-				"name": "Bread",
-				"short": "A loaf of bread",
+				"name": "Loaf of Bread",
+				"short": "A brown loaf of bread",
 				"long": "A rather stale looking loaf of bread." ,
 				"area": "Midgaard",
 				"id": 7,
 				"level": 1,
 				"itemType": "food",
 				"weight": 0.5,
-				"flags": [
-					{"hunger": -5}
-				]
+				"diceNum": 1,
+				"diceSides": 6,
+				"diceMod": 1,
+				"flags": []
 			}, {
 				"name": "Short Sword", 
 				"short": "A Short Sword",

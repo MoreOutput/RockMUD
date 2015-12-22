@@ -46,8 +46,6 @@ Cmd.prototype.move = function(target, command, fn) {
 						Room.checkExitCriteria(target, targetRoom, function(clearToMove) {
 							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {
 								if (clearToMove) {
-
-										// check against dex, con, current hp and carry weight for a mod to movement cost
 									Dice.movementCheck(target, targetRoom, function(moveMod) {
 										target.cmv = Math.round((target.cmv - ( (12) - target.dex/4)));
 
@@ -65,11 +63,11 @@ Cmd.prototype.move = function(target, command, fn) {
 												styleClass: 'room'
 											});
 
-											Room.removePlayer(target, roomObj, function() {
+											Room.remove('playersInRoom', target, roomObj, function() {
 												targetRoom.playersInRoom.push(target);
 											});
 										} else {
-											Room.removeMonster(target, roomObj, function() {
+											Room.remove('monsters', target, roomObj, function() {
 												targetRoom.monsters.push(target);
 											});
 										}
@@ -174,46 +172,38 @@ Cmd.prototype.who = function(target, command) {
 
 Cmd.prototype.get = function(target, command, fn) {
 	if (command.msg !== '') {
-		Room.checkItem(target, command, function(fnd, item) {
-			if (fnd) {
-				Character.addToInventory(target, item, function(added) {
-					if (added) {
-						Room.removeItemFromRoom({area: target.area, id: target.roomid, item: item}, function() {
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			Room.search(roomObj.items, command, function(item) {
+				if (item) {
+					Room.remove('items', item, roomObj, function(removed, roomObj) {
+						Character.addToInventory(item, target, function(canAdd) {
+							World.msgRoom(roomObj, {
+								msg: target.name + ' picks up ' + item.short,
+								playerName: target.name,
+								styleClass: 'cmd-get'
+							});
+
 							World.msgPlayer(target, {
 								msg: 'You pick up ' + item.short,
 								styleClass: 'cmd-get'
 							});
 
-							World.getRoomObject(target.area, target.roomid, function(roomObj) {
-								World.msgRoom(roomObj, {
-									msg: target.name + ' picks up ' + item.short,
-									playerName: target.name,
-									styleClass: 'cmd-get'
-								});
-
-								if (typeof fn === 'function') {
-									return fn(target, roomObj, item);
-								}
-							});
+							if (typeof fn === 'function') {
+								return fn(target, roomObj, item);
+							}
 						});
-					} else {
-						World.msgPLayer(target, {msg: 'Could not pick up a ' + item.short, styleClass: 'error'});
+					});
+				} else {
+					World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
 
-						if (typeof fn === 'function') {
-							return fn(target, roomObj, item);
-						}
+					if (typeof fn === 'function') {
+						return fn(target, roomObj, false);
 					}
-				});
-			} else {
-				World.msgPLayer(target, {msg: 'That item is not here.', styleClass: 'error'});
-
-				if (typeof fn === 'function') {
-					return fn(target, roomObj, item);
 				}
-			}
+			});
 		});
 	} else {
-		World.msgPLayer(target, {msg: 'Get what?', styleClass: 'error'});
+		World.msgPlayer(target, {msg: 'Get what?', styleClass: 'error'});
 
 		if (typeof fn === 'function') {
 			return fn(target, roomObj, item);
@@ -236,7 +226,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 							return World.prompt(s);
 						});
 					} else {
-						s.emit('msg', {msg: 'Could not drop a ' + item.short, styleClass: 'error'});					
+						s.emit('msg', {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
 						return World.prompt(s);
 					}
 				});
@@ -253,7 +243,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 
 
 // For attacking in-game monsters
-Cmd.prototype.kill = function(r, s) {
+Cmd.prototype.kill = function(target, command) {
 	Room.checkMonster(r, s, function(fnd, target) {
 		if (fnd) {
 			Combat.begin(s, target, function(contFight, target) { // the first round qualifiers
@@ -316,7 +306,7 @@ Cmd.prototype.look = function(target, command) {
 		// if no arguments are given we display the current room
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.getDisplayHTML(roomObj, {
-				hidePlayer: target.name
+				hideCallingPlayer: target.name
 			},function(displayHTML, roomObj) {
 				World.msgPlayer(target, {
 					msg: displayHTML,
@@ -338,7 +328,7 @@ Cmd.prototype.where = function(r, s) {
 	r.msg = '<ul>' + 
 	'<li>Your Name: ' + Character[s.id].name + '</li>' +
 	'<li>Current Area: ' + Character[s.id].area + '</li>' +
-	'<li>Room Number: ' + Character[s.id].id + '</li>'  +
+	'<li>Room Number: ' + Character[s.id].id + '</li>' +
 	'</ul>';
 
 	r.styleClass = 'playerinfo where';
@@ -410,26 +400,20 @@ Cmd.prototype.reply = function(r, s) {
 };
 */
 
-Cmd.prototype.achat = function(r, s) { 
-	var msg = r.msg;
-
-	if (s.player.role === 'admin') {
-		s.emit('msg', {
-			msg: 'You achat> ' + msg,
-			element: 'blockquote',
-			styleClass: 'adminmsg'
+Cmd.prototype.achat = function(target, command) { 
+	if (target.role === 'admin') {
+		World.msgPlayer(target, {
+			msg: '<div class="cmd-chat"><span class="msg-name">You chat></span> ' + command.msg + '</div>'
 		});
 
-		s.in('mud').broadcast.emit('msg', {
-			msg: s.player.name + ' the Admin> ' + msg,
-			element: 'blockquote',
-			styleClass: 'adminmsg'
+		World.msgWorld(target, {
+			msg: '<div class="cmd-chat"><span class="msg-name">' + target.name + '></span> ' + command.msg + '</div>',
+			playerName: target.name
 		});
 	} else {
-		r.msg = 'You do not have permission to execute this command.';
-		s.emit('msg', r);
-
-		return World.prompt(s);
+		World.msgPlayer(target, {
+			msg: '<div class="error">You are not powerful enough to speak directly with gods.</div>'
+		});
 	}
 };
 
@@ -452,7 +436,7 @@ Cmd.prototype.title = function(r, s) {
 		if (r.msg != 'title') {
 			s.player.title = r.msg;
 		} else {
-			s.player.title = 'a level ' + s.player.level + ' ' + s.player.race + ' ' + s.player.charClass;
+			s.player.title = ' a level ' + s.player.level + ' ' + s.player.race + ' ' + s.player.charClass;
 		}
 
 		Character.updatePlayer(s, function(updated) {

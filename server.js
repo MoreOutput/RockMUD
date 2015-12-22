@@ -79,7 +79,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							return Spells[r.cmd](r, s); 
 						*/
 						} else {
-							s.emit('msg', {msg: cmdObj.cmd + 'is not a valid command.', styleClass: 'error'});
+							s.emit('msg', {msg: cmdObj.cmd + ' is not a valid command.', styleClass: 'error'});
 							return World.prompt(s);
 						}
 					} else {
@@ -140,9 +140,19 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			if (s.player !== undefined) {
 				for (i; i < World.players.length; i += 1) {	
 					if (World.players[i].name === s.player.name) {
-						World.players.splice(i, 1);	
+						World.players.splice(i, 1);
 					}
 				}
+
+				World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
+					var j = 0;
+
+					for (j; j < roomObj.playersInRoom.length; j += 1) {
+						if (roomObj.playersInRoom[j].name === s.player.name) {
+							roomObj.playersInRoom.splice(j, 1);
+						}
+					}
+				});
 			}
 		});
 	});

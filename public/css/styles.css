@@ -73,6 +73,9 @@ color: #60f066;
 color: #888;
 font-style: italic;
 }
+.cmd-get {
+color: #60f066;
+}
 .cmd-chat {
 color: #fff;
 }
@@ -119,10 +122,6 @@ font-weight: bold;
 font-weight: bold;
 color: #ff0033;
 }
-.ux {
-padding-bottom: 3em;
-}
-.ux h5{
-font-size: 2em;
-color: #fff;
+.error {
+    color: yellow;
 }

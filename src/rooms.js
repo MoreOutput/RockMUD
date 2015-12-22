@@ -70,7 +70,7 @@ Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 		i = 0;
 
 		for (i; i < playersInRoom.length; i += 1) {
-			if (!options || !options.hidePlayer || options.hidePlayer !== playersInRoom[i].name ) {
+			if (!options || !options.hideCallingPlayer || options.hideCallingPlayer !== playersInRoom[i].name ) {
 				displayHTML += '<li class="room-player">' + playersInRoom[i].name 
 					+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here.</li>';
 			}
@@ -124,70 +124,57 @@ Room.prototype.getDisplay = function(areaName, roomId, fn) {
 	});
 };
 
-// Remove a player from a room
-Room.prototype.removePlayer = function(player, roomObj, fn) {
-	roomObj.playersInRoom = roomObj.playersInRoom.filter(function(item, i) {
-		return (item.id !== player.id);
-	});
-
-	return fn(true);
-};
-
-// does a string match any monsters in the room
-Room.prototype.checkMonster = function(r, s, fn) {
+Room.prototype.search = function(searchArr, command, fn) {
 	var msgPatt,
-	monsters,
-	parts,
-	findIndex,
-	findMonster;
+	matches = [],
+	results,
+	i = 0;
 
-	// Split to account for target modifier (IE: 2.boar)
-	parts = r.msg.split('.');
-	
-	if (parts.length === 2) {
-		findIndex = parseInt(parts[0])-1;
-		findMonster = parts[1];
-	} else {
-		findIndex = 0;
-		findMonster = r.msg;
-	}
+	if (command.msg.length >= 3) {
+		msgPatt = new RegExp(command.msg);
 
-	msgPatt = new RegExp('^' + findMonster);
-
-	this.getRoomObject({area: s.player.area, id: s.player.roomid}, function(roomObj) {
-		monsters = roomObj.monsters.filter(function (item, i) {
-			if (msgPatt.test(item.name.toLowerCase())) {
-				return true;
+		for (i; i < searchArr.length; i += 1) {
+			if (msgPatt.test(searchArr[i].name.toLowerCase()) ) {
+				matches.push(searchArr[i]);
 			}
-		});
-
-		if (monsters.length > 0 && findIndex in monsters) {
-			fn(true, monsters[findIndex]);
-		} else {
-			fn(false);
 		}
-	});
-};
 
-// Remove a monster from a room
-Room.prototype.removeMonster = function(monster, roomObj, fn) {
-	roomObj.monsters = roomObj.monsters.filter(function(item, i) {
-		return (item.id !== monster.id);
-	});
+		if (matches) {
+			if (matches.length > 1 && command.number > 1) {
+				i = 0;
+				for (i; i < matches.length; i += 1) {
+					if (command.number === i) {
+						results = matches[i];
+					}
+				}
+			} else {
+				results = matches[0];
+			}
+		}
 
-	return fn(true);
-};
-
-/*
-	{
-		data: 'items', // Room property
-		value: '' // Required value, r.msg
+		if (results) {
+			return fn(results);
+		} else {
+			return fn(false);
+		}
+	} else {
+		return fn(false);
 	}
-*/
-Room.prototype.checkItem = function(r, s, fn) {
-	return this.search({
-		data: 'items',
-		value: r.msg}, fn);
+};
+
+Room.prototype.remove = function(arrayName, target, roomObj, fn) {
+	var i = 0,
+	newArr = [];
+
+	for (i; i < roomObj[arrayName].length; i += 1) {
+		if (roomObj[arrayName][i].name !== target.name) {
+			newArr.push(roomObj[arrayName][i]);
+		}
+	}
+
+	roomObj[arrayName] = newArr;
+
+	return fn(true, roomObj);
 };
 
 Room.prototype.addCorpse = function(s, monster, fn) {
@@ -207,63 +194,6 @@ Room.prototype.addCorpse = function(s, monster, fn) {
 	});
 	
 	return fn();
-};
-
-Room.prototype.removeItem = function(roomQuery, fn) {
-	this.getRoomObject(roomQuery, function(roomObj) {
-		roomObj.items = roomObj.items.filter(function(item, i) {
-			if (item.id !== roomQuery.item.id) {
-				return true;
-			}			
-		});
-		
-		return fn(true);
-	});
-};
-
-Room.prototype.addItem = function(itemOpt, fn) {
-	this.getRoomObject(itemOpt, function(roomObj) {
-		roomObj.items.push(itemOpt.item);		
-	});
-	
-	return fn();
-};
-
-/*
-	Example query object:
-	{
-		data: 'items', // Room property
-		value: '' // Required value, r.msg
-	}
-	
-
-	The methids line getItemFromRoom above should call this function
-*/
-Room.prototype.search = function(roomObj, query, fn) {
-	var msgPatt,
-	results,
-	// Split to account for target modifier (IE: 2.boar)
-	parts = query.value.split('.'),
-	findIndex,
-	toFind;
-
-	if (parts.length === 2) {
-		findIndex = parseInt(parts[0])-1;
-		toFind = parts[1];
-	} else {
-		findIndex = 0;
-		toFind = query.value;
-	}
-
-	msgPatt = new RegExp('^' + toFind);
-
-	results = roomObj[query.value].filter(function (item, i) {
-		if (msgPatt.test(item.name.toLowerCase())) {
-			return true;
-		}
-	});
-
-	return results;
 };
 
 module.exports.room = new Room();

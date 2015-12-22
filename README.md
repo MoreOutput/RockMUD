@@ -6,10 +6,8 @@ RockMUD
 Goals:
 * A Diku-like MUD experience from within the browser.
 * Enable Development, and to keep things simple
-* Easy client GUI creation; triggering client side events.
 * Real-time browser OLC and world management.
 * Accessible content
-* GUI world building tools
 
 Notes on dependencies: 
 * Socket.io 1.0 or greater is required.

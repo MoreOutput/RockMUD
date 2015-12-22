@@ -11,7 +11,7 @@ Skill = function() {
 };
 
 /*
-* Passive Skills and Racials
+* Passive Skills
 */
 Skill.prototype.darkvision = function(r, s) {
 	return {
@@ -31,16 +31,35 @@ Skill.prototype.darkvision = function(r, s) {
 * Melee Skills
 */
 Skill.prototype.bash = function(r, s) {
-	var addWait = 2,
-	msgToPlayer = '',
-	msgToRoom = '',
-	msgToTarget = '',
-	minLevel = 1; 
+	return {
+		minLevel: 1,
+		type: 'passive',
+		maxTrain: 100,
+		position: 'fighting',
+		onUse: function() {
+			// Smash a target doing damage
 
-	if (s.player.position === 'fighting') {
-		s.emit('msg', {msg: 'BASH!', styleClass: 'skill bash'});
-	} else {
-		// Not advanced enough to use the skill
+		},
+		onBlocked: function() {
+			// if blocked with a shield basher has 10% of falling down
+		}
+	}
+};
+
+/*
+* Magic Skills
+*/
+Skill.prototype.spark = function(r, s) {
+	return {
+		minLevel: 1,
+		type: 'passive',
+		maxTrain: 100,
+		position: ['fighting', 'standing'],
+		onUse: function() {
+			// Damage in battle
+			
+			// Lights up a room outside of battle
+		}
 	}
 };
 

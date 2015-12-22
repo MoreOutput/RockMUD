@@ -90,11 +90,17 @@ Character.prototype.getPassword = function(s, fn) {
 					character.addPlayer(s, function(added, msg) {
 						if (added) {
 								World.motd(s, function() {
-									Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
-										World.msgPlayer(s, {
-											msg: displayHTML,
-											styleClass: 'room'
-										}, function() {
+									World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
+										roomObj.playersInRoom.push(s.player);
+
+										Room.getDisplayHTML(roomObj, {
+											hideCallingPlayer: s.player.name
+										},function(displayHTML, roomObj) {
+											World.msgPlayer(s, {
+												msg: displayHTML,
+												styleClass: 'room'
+											});
+
 											fn(s);
 										});
 									});
@@ -194,12 +200,19 @@ Character.prototype.create = function(r, s, fn) {
 
 							World.motd(s, function() {
 								Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
-									World.msgPlayer(s, {
-										msg: displayHTML, 
-										styleClass: 'room'
+									World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
+										roomObj.playersInRoom.push(s.player);
+										Room.getDisplayHTML(roomObj, {
+											hideCallingPlayer: s.player.name
+										},function(displayHTML, roomObj) {
+											World.msgPlayer(s, {
+												msg: displayHTML,
+												styleClass: 'room'
+											});
+											fn(s);
+										});
 									});
 
-									fn(s);
 								});
 							});
 						
@@ -515,9 +528,8 @@ Character.prototype.checkInventory = function(r, s, fn) {
 
 
 // push an item into a players inventory, checks items to ensure a player can use it
-Character.prototype.addToInventory = function(s, item, fn) {
-	s.player.items.push(item);
-	
+Character.prototype.addToInventory = function(item, player, fn) {
+	player.items.push(item);
 	fn(true);
 };
 

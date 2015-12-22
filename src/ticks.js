@@ -28,6 +28,14 @@ World = require('./world').world;
 		}
 	}, 1100);
 
+	// Areas reload when they are devoid of players or when they have the property: reload: true.
+	setInterval(function() {
+		var i = 0,
+		areasToProcess = 5, // Areas to process per tick (randomly selected)
+		s;
+
+	}, 3600000); // 1 hour
+
 	// AI Ticks for monsters
 	setInterval(function() {
 		var i = 0;
@@ -37,9 +45,7 @@ World = require('./world').world;
 					monsters.forEach(function(monster, i) {
 						if (monster.chp >= 1 && monster.onAlive) {
 							World.dice.roll(1, 10, function(roll) {
-								if (!monster.onAliveCheck || monster.onAliveCheck > roll) {
-									monster.onAlive(roll);
-								}
+								monster.onAlive(roll);
 							});
 						}
 					});
@@ -48,7 +54,7 @@ World = require('./world').world;
 		}
 	}, 20000); // 20 seconds
 
-	// AI Ticks for areas
+	// AI Ticks for areas 
 	setInterval(function() {
 		var i = 0,
 		areasToProcess = 5, // Areas to process per tick (randomly selected)
