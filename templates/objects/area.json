@@ -12,5 +12,6 @@
     "age": 0,
     "state": "good",
     "weather": {},
+    "messages": [],
     "rooms" : []
 }

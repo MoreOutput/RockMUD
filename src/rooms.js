@@ -46,12 +46,11 @@ Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 
 	i = 0;
 
-	displayHTML += '<ul class="room-here list-inline">';
-
+	displayHTML += '<ul class="room-here list-unstyled">';
 
 	if (items.length > 0) {
 		for (i; i < items.length; i += 1) {
-			displayHTML += '<li class="room-item">' + items[i].short + '.</li>';
+			displayHTML += '<li class="room-item">A ' + items[i].short + '</li>';
 		}
 	}
 
@@ -60,11 +59,11 @@ Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 	if (monsters.length > 0 || playersInRoom.length > 0) {
 		for (i; i < monsters.length; i += 1) {
 			if (!monsters[i].short) {
-				displayHTML += '<li class="room-monster">' + monsters[i].name + ' is ' + 
-				 monsters[i].position + ' here.</li>';
+				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' + 
+				 monsters[i].position + ' here</li>';
 			} else {
 				displayHTML += '<li class="room-monster">' + monsters[i].short + ' is ' + 
-				 monsters[i].position + ' here.</li>';
+				 monsters[i].position + ' here</li>';
 			}
 		}
 
@@ -73,7 +72,7 @@ Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 		for (i; i < playersInRoom.length; i += 1) {
 			if (!options || !options.hideCallingPlayer || options.hideCallingPlayer !== playersInRoom[i].name ) {
 				displayHTML += '<li class="room-player">' + playersInRoom[i].name 
-					+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here.</li>';
+					+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here</li>';
 			}
 		}
 	}

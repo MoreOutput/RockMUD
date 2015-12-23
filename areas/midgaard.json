@@ -9,6 +9,10 @@
 	"saved": "",
 	"author": "",
 	"alwaysProcess": true,
+	"messages": [
+		{"msg": "A cool breeze passes through."}, 
+		{"msg": "You hear the distant howl of wolves."}
+	],
 	"rooms" : [
 		{
 			"id" : 1,
@@ -64,7 +68,8 @@
 						"flags": [{
 							"key": true, 
 							"id": 4, 
-							"area": "Midgaard"
+							"area": "Midgaard",
+							"short": "golden key"
 						}]
 					}],
 					"behaviors": [{
@@ -90,7 +95,7 @@
 			],
 			"items" : [{
 				"name": "Loaf of Bread",
-				"short": "A brown loaf of bread",
+				"short": "brown loaf of bread",
 				"long": "A rather stale looking loaf of bread." ,
 				"area": "Midgaard",
 				"id": 7,
@@ -103,7 +108,7 @@
 				"flags": []
 			}, {
 				"name": "Short Sword", 
-				"short": "A Short Sword",
+				"short": "Short Sword",
 				"long": "A sharp looking short sword with a hilt wrapped in leather." ,
 				"area": "Midgaard",
 				"id": 8,
@@ -137,7 +142,7 @@
 			"monsters" : [],
 			"items" : [{
 				"name": "Tattered Buckler", 
-				"short": "A Tattered Buckler",
+				"short": "Tattered Buckler",
 				"long": "A round buckler that looks like its seen heavy use." ,
 				"area": "Midgaard",
 				"id": 2, 
@@ -201,7 +206,7 @@
 			"monsters" : [],
 			"items" : [{
 				"name": "Leather Helmet", 
-				"short": "A Leather Helmet",
+				"short": "Leather Helmet",
 				"long": "" ,
 				"area": "Midgaard",
 				"id": 3, 

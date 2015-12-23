@@ -6,27 +6,27 @@ blue: #0066ff;
 html, body {
 background-color: #000;
 color: #fff;
-padding: 0 .4em;
-font-family: 'Montserrat', sans-serif;  
-font-size: 1em;
+font-family: 'Montserrat', sans-serif;
+font-size: .96em;
 }
 html, body a {
 color: #60f066;
 }
-h1,h2,h3,h4,h5,h6,.title {
+h1, h2, h3, h4, h5, h6, .title {
 color: #ddd;
 font-family: 'Playfair Display', serif;
 padding-top: 0;
 margin-top: 0;
 }
 .row {
-    margin-bottom: .15em;
+margin-bottom: .4em;
 }
 #terminal {
 background-color: #000;
 padding: 1em 1em 2em 1em;
 height: 700px; 
 overflow: auto;
+border: 1px solid #555;
 }
 #terminal .subtext {
 font-style: italic;
@@ -112,6 +112,9 @@ color: #ddd;
 }
 .room .room-exits {
 color: #ff0033;
+}
+.room-item {
+color: #eee;
 }
 .enter-name {
 font-weight: bold;

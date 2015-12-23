@@ -290,6 +290,10 @@ World.prototype.rollMob = function(mobArr, fn) {
 		(function(mob, index) {
 			mob.refId = (refId += index);
 
+			if (!mob.displayName) {
+				mob.displayName = mob.name[0].toUpperCase() + mob.name.slice(1);
+			}
+
 			world.extend(mob, world.mobTemplate, function(mob) {
 				world.getRace(mob.race, function(raceObj, err) {
 					world.extend(mob, raceObj, function(mob, err) {

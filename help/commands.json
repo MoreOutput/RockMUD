@@ -1,0 +1,9 @@
+{
+    "name" : "Commands",
+    "related" : ["Newbie"],
+    "type" : "Help",
+    "levels" : "All",
+    "restrict": 0,
+    "description" : "COMMANDS",
+    "Alias" : "Cmd"
+}

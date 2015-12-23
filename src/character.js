@@ -13,7 +13,7 @@ World = require('./world').world,
 Character = function () {
 
 };
-
+ 
 Character.prototype.login = function(r, s, fn) {
 	var name = r.msg.replace(/_.*/,'').toLowerCase();
 	
@@ -235,14 +235,11 @@ Character.prototype.rollStats = function(player, fn) {
 	raceKey, // property of the race defines in raceList
 	classKey; // property of the class defines in classList
 
-
-	// TODO: abstract these abilities
-
 	for (i; i < World.races.length; i += 1) {// looking for race
-		if (World.races[i].name.toLowerCase() === player.race) { // found race		
+		if (World.races[i].name.toLowerCase() === player.race) { // found race
 			for (raceKey in player) {
-				if (player[raceKey] in World.races[i] && raceKey !== 'name') { // found, add in stat bonus						
-						player[player[raceKey]] = player[player[raceKey]] + World.races[i][player[raceKey]];	
+				if (player[raceKey] in World.races[i] && raceKey !== 'name') { // found, add in stat bonus
+						player[player[raceKey]] = player[player[raceKey]] + World.races[i][player[raceKey]];
 				}
 			}
 		}
@@ -261,7 +258,7 @@ Character.prototype.rollStats = function(player, fn) {
 			}
 		}
 	}
-			
+
 	player.carry = player.str * 10;
 
 	return fn(player);
@@ -279,7 +276,7 @@ Character.prototype.newCharacter = function(r, s, fn) {
 
 				if	(races.length - 1 === i) {
 					s.emit('msg', {msg: s.player.name + ' is a new character! There are three more steps until ' + s.player.name + 
-					' is saved. The next step is to select your race: <ul>' + str + '</ul><p class="tip">You can learn more about each race by typing help race name</p>', res: 'selectRace', styleClass: 'race-selection'});		
+					' is saved. The <strong>first step</strong> is to select your race: <ul>' + str + '</ul><p class="tip">You can learn more about each race by typing help race name</p>', res: 'selectRace', styleClass: 'race-selection'});		
 
 					s.on('raceSelection', function (r) { 
 						var cmdArr = r.msg.split(' ');
@@ -298,7 +295,7 @@ Character.prototype.newCharacter = function(r, s, fn) {
 
 									if	(classes.length - 1 === i) {
 										s.emit('msg', {
-											msg: 'Great, two more steps to go! Now time to select a class for ' + s.player.name + '. Pick one of the following: <ul>' + 
+											msg: 'Great, <strong>two more steps to go!</strong> Now time to select a class for ' + s.player.name + '. Pick one of the following: <ul>' + 
 											str + '</ul>', 
 											res: 'selectClass', 
 											styleClass: 'race-selection'
@@ -312,8 +309,8 @@ Character.prototype.newCharacter = function(r, s, fn) {
 													s.player.charClass = r.msg;
 													
 													s.emit('msg', {
-														msg: s.player.name + ' is a ' + s.player.charClass + '! One more step before ' + s.player.name + 
-														' is saved. Please define a password (8 or more characters):', 
+														msg: s.player.name + ' is a ' + s.player.charClass + '! <strong>One more step before ' + s.player.name + 
+														' is saved</strong>. Please define a password (8 or more characters):', 
 														res: 'createPassword', 
 														styleClass: 'race-selection'
 													});
@@ -530,24 +527,19 @@ Character.prototype.getWeapons = function(creature, fn) {
 	}
 };
 
-Character.prototype.removeFromInventory = function(s, itemObj, fn) {
-	var i = 0;
+Character.prototype.remove = function(arrayName, target, player, fn) {
+	var i = 0,
+	newArr = [];
 
-	if (s.player.items.length > 0) {
-		s.player.items = s.player.items.filter(function(item, i) {
-			if (item.id !== itemObj.id) {
-				return true;
-			}		
-		});
-	
-		if (typeof fn === 'function') {
-			return fn(true);
-		}	
-	} else {
-		if (typeof fn === 'function') {
-			return fn(false);
+	for (i; i < player[arrayName].length; i += 1) {
+		if (player[arrayName][i].name !== target.name) {
+			newArr.push(player[arrayName][i]);
 		}
 	}
+
+	player[arrayName] = newArr;
+
+	return fn(true, player);
 };
 
 Character.prototype.wear = function(target, item, fn) {

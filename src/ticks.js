@@ -5,7 +5,7 @@ Character = require('./character').character,
 World = require('./world').world;
 
 (function() {
-	// Automated wait-state removal
+	// wait-state removal
 	setInterval(function() {
 		var i = 0,
 		s;
@@ -30,9 +30,7 @@ World = require('./world').world;
 
 	// Areas reload when they are devoid of players or when they have the property: reload: true.
 	setInterval(function() {
-		var i = 0,
-		areasToProcess = 5, // Areas to process per tick (randomly selected)
-		s;
+		var i = 0;
 
 	}, 3600000); // 1 hour
 
@@ -57,10 +55,14 @@ World = require('./world').world;
 	// AI Ticks for areas 
 	setInterval(function() {
 		var i = 0,
-		areasToProcess = 5, // Areas to process per tick (randomly selected)
 		s;
 
 	}, 3600000); // 1 hour
+
+	// Area messages, every three minutes the mud has a 50% chance of giving the player a random message found in area.messages
+	setInterval(function() {
+
+	}, 180000); // 3 minutes
 
 /*
 	// Regen, Hunger and Thirst Tick 

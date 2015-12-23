@@ -45,6 +45,15 @@ Cmd.prototype.move = function(target, command, fn) {
 					Room.getDisplay(exitObj.area, exitObj.id, function(displayHTML, targetRoom) {
 						Room.checkExitCriteria(target, targetRoom, function(clearToMove) {
 							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {
+
+								/*
+								World.checkEntranceEvents(targetRooom, function() {
+									World.checkEvent('onExit', targetRoom, function() {
+
+									});
+								});
+								*/
+
 								if (clearToMove) {
 									Dice.movementCheck(target, targetRoom, function(moveMod) {
 										target.cmv = Math.round((target.cmv - ( (12) - target.dex/4)));
@@ -213,34 +222,30 @@ Cmd.prototype.get = function(target, command, fn) {
 
 Cmd.prototype.drop = function(target, command, fn) {
 	if (command.msg !== '') {
-		Character.checkInventory(r, s, function(fnd, item) {
-			if (fnd) {
-				Character.removeFromInventory(target, item, function(removed) {
-					if (removed) {
-						Room.addItem({area: target.area, id: target.roomid, item: item}, function() {
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			World.search(target.items, command, function(item) {
+				if (item) {
+					Character.remove('items', item, target, function(removed, target) {
+						if (removed) {
+							roomObj.items.push(item);
+
 							World.msgPlayer(target, {
 								msg: 'You dropped ' + item.short,
-								styleClass: 'get'
+								styleClass: 'cmd-drop blue'
 							});
-							
-							
-						});
-					} else {
-						World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
-						
-					}
-				});
-			} else {
-				World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
-				
-			}
+						} else {
+							World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
+						}
+					});
+				} else {
+					World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
+				}
+			});
 		});
 	} else {
-		World.msgPlayer(target, {msg: 'Drop what?', styleClass: 'error'});
-		
+		World.msgPlayer(target, {msg: 'Drop nothing? How do you drop nothing?.', styleClass: 'error'});
 	}
 };
-
 
 // For attacking in-game monsters
 Cmd.prototype.kill = function(target, command) {
@@ -315,10 +320,34 @@ Cmd.prototype.look = function(target, command) {
 			});
 		});
 	} else {
-		// Gave us a noun, so lets see if something matches it in the room. 
-		Room.checkMonster(r, s, function(fnd, monster) {
-			Room.checkItem(r, s, function(fnd, item) {
-				return World.prompt(target);
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			World.search(roomObj.items, command, function(item) {
+				if (item) {
+					World.msgPlayer(target, {
+						msg: item.long,
+						styleClass: 'cmd-look'
+					});
+				} else {
+					 World.search(roomObj.monsters, command, function(monster) {
+						if (monster) {
+							World.msgPlayer(target, {
+								msg: monster.long,
+								styleClass: 'cmd-look'
+							});
+						} else {
+							 World.search(target.items, command, function(item) {
+								if (item) {
+									return World.msgPlayer(target, {
+										msg: item.long,
+										styleClass: 'cmd-look'
+									});
+								} else {
+									return  World.msgPlayer(target, {msg: 'You do not see that here.', styleClass: 'error'});
+								}
+							});
+						}
+					});
+				}
 			});
 		});
 	}
@@ -333,9 +362,7 @@ Cmd.prototype.where = function(target, command) {
 
 	r.styleClass = 'playerinfo where';
 
-	World.msgPlayer(target, r);
-
-	
+	return World.msgPlayer(target, r);
 };
 
 
@@ -347,7 +374,7 @@ Cmd.prototype.say = function(target, command) {
 
 	World.getRoomObject(target.area, target.roomid, function(roomObj) {
 		World.msgRoom(roomObj, {
-			msg: '<div class="cmd-say"><span class="msg-name">' + target.name + ' says></span> ' + command.msg + '</div>',
+			msg: '<div class="cmd-say"><span class="msg-name">' + target.displayName + ' says></span> ' + command.msg + '</div>',
 			playerName: target.name
 		});
 	});
@@ -359,7 +386,7 @@ Cmd.prototype.yell = function(target, command) {
 	});
 	
 	World.msgArea(target.area, {
-		msg: '<div class="cmd-yell"><span class="msg-name">' + target.name + ' yells></span> ' + command.msg + '</div>',
+		msg: '<div class="cmd-yell"><span class="msg-name">' + target.displayName + ' yells></span> ' + command.msg + '</div>',
 		playerName: target.name
 	});
 };
@@ -371,34 +398,56 @@ Cmd.prototype.chat = function(target, command) {
 	});
 
 	World.msgWorld(target, {
-		msg: '<div class="cmd-chat"><span class="msg-name">' + target.name + '></span> ' + command.msg + '</div>',
+		msg: '<div class="cmd-chat"><span class="msg-name">' + target.displayName + '></span> ' + command.msg + '</div>',
 		playerName: target.name
 	});
 };
 
-/*
-Cmd.prototype.tell = function(target, command) {
-	var i  = 0;
-	
-	World.msgPlayer(target, {msg: 'You tell ' + r.playerName + '> ' + command.msg, styleClass: 'cmd-say'});
-	
-	Charactecommand.msgToPlayer({
-		msg: target.name + ' tells you> ' + command.msg, 
-		playerName: target.name
-	}, true);
+Cmd.prototype.tell = function(target, command, fn) {
+	if (command.msg) {
+		World.getPlayerByName(command.msg, function(player) {
+			if (player) {
+				World.msgPlayer(player, {
+					msg: '<strong>' + player.displayName + ' tells you></strong> ' + command.msg,
+					styleClass: 'red'
+				}, function() {
+					target.reply = player.name;
+
+					return fn(target, player);
+				});
+
+				World.msgPlayer(target, {msg: 'You tell ' + target.displayName + '> ' + command.msg, styleClass: 'cmd-say red'});
+			} else {
+				World.msgPlayer(target, {msg: 'You do not see that person.', styleClass: 'error'});
+			}
+		});
+	} else {
+		return World.msgPlayer(target, {msg: 'Tell who?', styleClass: 'error'});
+	}
 };
 
 Cmd.prototype.reply = function(target, command) {
-	var i  = 0;
-	
-	World.msgPlayer(target, {msg: 'You reply to ' + target.reply + '> ' + command.msg, styleClass: 'cmd-say'});
-	
-	Charactecommand.msgToPlayer({
-		msg: target.name + ' tells you> ' + command.msg, 
-		playerName: target.name
-	}, true);
+	if (command.msg && target.reply) {
+		World.getPlayerByName(target.reply, function(player) {
+			if (player) {
+				World.msgPlayer(player, {
+					msg: '<strong>' + player.displayName + ' replies></strong> ' + command.msg,
+					styleClass: 'red'
+				}, function() {
+					target.reply = player.name;
+
+					return fn(target, player);
+				});
+
+				World.msgPlayer(target, {msg: 'You reply ' + target.displayName + '> ' + command.msg, styleClass: 'cmd-say red'});
+			} else {
+				World.msgPlayer(target, {msg: 'They arent there anymore.', styleClass: 'error'});
+			}
+		});
+	} else {
+		return World.msgPlayer(target, {msg: 'Takes more than that to reply to someone.', styleClass: 'error'});
+	}
 };
-*/
 
 Cmd.prototype.achat = function(target, command) { 
 	if (target.role === 'admin') {
@@ -412,7 +461,7 @@ Cmd.prototype.achat = function(target, command) {
 		});
 	} else {
 		World.msgPlayer(target, {
-			msg: '<div class="error">You are not powerful enough to speak directly with gods.</div>'
+			msg: '<div class="error">You are not powerful enough to speak directly with gods!</div>'
 		});
 	}
 };
@@ -609,27 +658,23 @@ Cmd.prototype.score = function(target, command, fn) {
 };
 
 Cmd.prototype.help = function(target, command) {
-	// if we don't list a specific help file we return help.json
-	var helpTxt = '';
-
-	if (command.msg !== '') {
-		fs.readFile('./help/' + command.msg + '.json', function (err, data) {
-			if (!err) {
-				data = JSON.parse(data);
-
-				helpTxt = '<h2>Help: ' + data.name + '</h2> ' + data.description + 
-				'<p class="small">Related: '+ data.related.toString() + '</p>';
-
-				World.msgPlayer(target, {msg: helpTxt, styleClass: 'cmd-help' });
-
-				
-			} else {
-				World.msgPlayer(target, {msg: 'No help file found.', styleClass: 'error' });
-			}
-		});	
-	} else {
-		World.msgPlayer(target, {msg: 'Help you with what exactly?', styleClass: 'error' });
+	if (!command.msg) {
+		command.msg = 'help';
 	}
+
+	fs.readFile('./help/' + command.msg + '.json', function (err, data) {
+		var helpTxt = '';
+		if (!err) {
+			data = JSON.parse(data);
+
+			helpTxt = '<h2>Help: ' + data.name + '</h2> ' + data.description + 
+			'<p class="small">Related: '+ data.related.toString() + '</p>';
+
+			World.msgPlayer(target, {msg: helpTxt, styleClass: 'cmd-help' });
+		} else {
+			World.msgPlayer(target, {msg: 'No help file found.', styleClass: 'error' });
+		}
+	});
 };
 
 Cmd.prototype.xyzzy = function(target, command) {
