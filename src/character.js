@@ -527,12 +527,12 @@ Character.prototype.getWeapons = function(creature, fn) {
 	}
 };
 
-Character.prototype.remove = function(arrayName, target, player, fn) {
+Character.prototype.remove = function(arrayName, item, player, fn) {
 	var i = 0,
 	newArr = [];
 
 	for (i; i < player[arrayName].length; i += 1) {
-		if (player[arrayName][i].name !== target.name) {
+		if (player[arrayName][i].name !== item.name) {
 			newArr.push(player[arrayName][i]);
 		}
 	}

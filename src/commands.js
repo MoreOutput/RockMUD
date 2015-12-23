@@ -182,37 +182,76 @@ Cmd.prototype.who = function(target, command) {
 Cmd.prototype.get = function(target, command, fn) {
 	if (command.msg !== '') {
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
-			World.search(roomObj.items, command, function(item) {
-				if (item) {
-					Room.remove('items', item, roomObj, function(removed, roomObj) {
-						Character.addToInventory(item, target, function(canAdd) {
-							World.msgRoom(roomObj, {
-								msg: target.name + ' picks up ' + item.short,
-								playerName: target.name,
-								styleClass: 'cmd-get'
-							});
+			var i = 0,
+			item,
+			itemLen;
 
-							World.msgPlayer(target, {
-								msg: 'You pick up ' + item.short,
-								styleClass: 'cmd-get'
-							});
+			if (command.msg !== 'all') {
+				World.search(roomObj.items, command, function(item) {
+					if (item) {
+						Room.remove('items', item, roomObj, function(removed, roomObj) {
+							Character.addToInventory(item, target, function(added) {
+								if (added) {
+									World.msgRoom(roomObj, {
+										msg: target.displayName + ' picks up ' + item.short,
+										playerName: target.name,
+										styleClass: 'cmd-get yellow'
+									});
 
-							if (typeof fn === 'function') {
-								return fn(target, roomObj, item);
+									World.msgPlayer(target, {
+										msg: 'You pick up ' + item.short,
+										styleClass: 'cmd-get blue'
+									});
+
+									if (typeof fn === 'function') {
+										return fn(target, roomObj, item);
+									}
+								}
+							});
+						});
+					} else {
+						World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
+
+						if (typeof fn === 'function') {
+							return fn(target, roomObj, false);
+						}
+					}
+				});
+			} else {
+				itemLen = roomObj.items.length;
+
+				for (i; i < itemLen; i += 1) {
+					if (i === 0) {
+						item = roomObj.items[i];
+					} else {
+						item = roomObj.items[i - 1];
+					}
+
+					Room.remove('items', item, roomObj, function(removed, newRoom) {
+						Character.addToInventory(item, target, function(added) {
+							if (i === itemLen - 1) {
+								World.msgRoom(newRoom, {
+									msg: target.displayName + ' picks up everything he can.',
+									playerName: target.name,
+									styleClass: 'cmd-get-all yellow'
+								});
+
+								World.msgPlayer(target, {
+									msg: 'You grab everything',
+									styleClass: 'cmd-get-all blue'
+								});
+
+								if (typeof fn === 'function') {
+									return fn(target, newRoom, item);
+								}
 							}
 						});
 					});
-				} else {
-					World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
-
-					if (typeof fn === 'function') {
-						return fn(target, roomObj, false);
-					}
 				}
-			});
+			}
 		});
 	} else {
-		World.msgPlayer(target, {msg: 'Get what?', styleClass: 'error'});
+		World.msgPlayer(target, {msg: 'Get what? Specify a target or try get all.', styleClass: 'error'});
 
 		if (typeof fn === 'function') {
 			return fn(target, roomObj, item);
@@ -221,26 +260,67 @@ Cmd.prototype.get = function(target, command, fn) {
 };
 
 Cmd.prototype.drop = function(target, command, fn) {
-	if (command.msg !== '') {
+	if (command.msg !== '' && target.items.length !== 0) {
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
-			World.search(target.items, command, function(item) {
-				if (item) {
+			var i = 0,
+			itemLen,
+			itemArr,
+			item;
+
+			if (command.msg !== 'all') {
+				World.search(target.items, command, function(item) {
+					if (item) {
+						Character.remove('items', item, target, function(removed, target) {
+							if (removed) {
+								roomObj.items.push(item);
+
+								World.msgRoom(newRoom, {
+									msg: target.displayName + 'drops a ' + item.short,
+									playerName: target.name,
+									styleClass: 'cmd-get-all yellow'
+								});
+
+								World.msgPlayer(target, {
+									msg: 'You dropped ' + item.short,
+									styleClass: 'cmd-drop blue'
+								});
+							} else {
+								World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
+							}
+						});
+					} else {
+						World.msgPlayer(target, {msg: 'You do not have that item.', styleClass: 'error'});
+					}
+				});
+			} else {
+				itemLen = target.items.length;
+				itemArr = target.items;
+
+				for (i; i < itemLen; i += 1) {
+					item = itemArr[i];
+					
 					Character.remove('items', item, target, function(removed, target) {
 						if (removed) {
 							roomObj.items.push(item);
 
-							World.msgPlayer(target, {
-								msg: 'You dropped ' + item.short,
-								styleClass: 'cmd-drop blue'
-							});
+							if (roomObj.items.length === itemLen) {
+								World.msgRoom(roomObj, {
+									msg: target.displayName + ' drops everything they are carrying',
+									playerName: target.name,
+									styleClass: 'cmd-get-all yellow'
+								});
+
+								World.msgPlayer(target, {
+									msg: 'You drop everything',
+									styleClass: 'cmd-drop blue'
+								});
+							}
 						} else {
 							World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
 						}
 					});
-				} else {
-					World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
 				}
-			});
+			}
 		});
 	} else {
 		World.msgPlayer(target, {msg: 'Drop nothing? How do you drop nothing?.', styleClass: 'error'});
@@ -291,17 +371,14 @@ Cmd.prototype.kill = function(target, command) {
 									clearInterval(combatInterval);
 									World.msgPlayer(target, {msg: 'You died!', styleClass: 'combat-death'});
 									//Character.death(s);
-								}	
-
-								Character.prompt(s);
-							});	
+								}
+							});
 						}	
 					}, 1800);
 				}
 			});
 		} else {
 			World.msgPlayer(target, {msg: 'There is nothing by that name here.', styleClass: 'error'});
-			
 		}
 	});
 };
