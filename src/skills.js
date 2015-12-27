@@ -1,5 +1,5 @@
 'use strict';
-var Dice = require('./dice').roller,
+var World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 io = require('../server').io,

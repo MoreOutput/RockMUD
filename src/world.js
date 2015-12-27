@@ -469,7 +469,7 @@ World.prototype.msgPlayer = function(target, msgObj, fn) {
 	}
 }
 
-// Emit a message to all the rooms players
+// Emit a message to all a given rooms players
 World.prototype.msgRoom = function(roomObj, msgObj, fn) {
 	var world = this,
 	i = 0,
@@ -527,17 +527,27 @@ World.prototype.msgWorld = function(target, msgObj, fn) {
 	}
 };
 
+// TODO -- generalize search across source
+// target arrayName itemToMatch fn -> updates and returns target and items
+// array itemToMatch fn -> returns found items
 World.prototype.search = function(searchArr, command, fn) {
 	var msgPatt,
 	matches = [],
 	results,
+	item,
 	i = 0;
 
 	if (command.msg.length >= 3) {
 		msgPatt = new RegExp(command.msg);
 
 		for (i; i < searchArr.length; i += 1) {
-			if (msgPatt.test(searchArr[i].name.toLowerCase()) ) {
+			if (searchArr[i].item) {
+				item = searchArr[i].item;
+			} else {
+				item = searchArr[i];
+			}
+
+			if (item && msgPatt.test(item.name.toLowerCase()) ) {
 				matches.push(searchArr[i]);
 			}
 		}
@@ -563,6 +573,30 @@ World.prototype.search = function(searchArr, command, fn) {
 	} else {
 		return fn(false);
 	}
+};
+
+
+World.prototype.remove = function(arrayName, item, target, fn) {
+	var i = 0,
+	newArr = [];
+
+	if (arrayName !== 'eq') {
+		for (i; i < target[arrayName].length; i += 1) {
+			if (target[arrayName][i].name !== item.name) {
+				newArr.push(target[arrayName][i]);
+			}
+		}
+
+		target[arrayName] = newArr;
+	} else {
+		for (i; i < target[arrayName].length; i += 1) {
+			if (target[arrayName][i].item && target[arrayName][i].item.name === item.name) {
+				target[arrayName][i].item = null;
+			}
+		}
+	}
+
+	return fn(true, target, item);
 };
 
 /*

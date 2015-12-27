@@ -1,6 +1,6 @@
 'use strict';
-var Dice = require('../src/dice').roller,
-Cmd = require('../src/commands').cmd,
+var Cmd = require('../src/commands').cmd,
+Room = require('../src/rooms').room,
 World = require('../src/world').world;
 
 /*
@@ -10,7 +10,7 @@ World = require('../src/world').world;
 
 module.exports = {
 	exclimations: [
-		'What a beautiful city.', 
+		'What a beautiful city.',
 		'Welcome! Be sure to visit our world-famous Midgardian shops!',
 		'I lock up the city each evening, be sure to get your affairs in order before nightfall.',
 		'Each day before sunrise I lower the bridge and open the city.'
@@ -21,7 +21,7 @@ module.exports = {
 
 		if (roll > 3) {
 			// Most of the time we just proclaim something
-			Cmd.fire('say',mayor, {
+			Cmd.fire('say', mayor, {
 				msg: mayor.exclimations[parseInt(Math.random() * ((mayor.exclimations.length)))]
 			});
 		} else {
@@ -37,4 +37,4 @@ module.exports = {
 			});
 		}
 	}
-}
+};

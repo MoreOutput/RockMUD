@@ -58,4 +58,56 @@ Roller.prototype.movementCheck = function(target, roomObj, fn) {
 	}
 };
 
+Roller.prototype.getDexMod = function(target, mod, fn) {
+	var sizeMod = 0;
+
+	if (!mod) {
+		mod = 0;
+	}
+
+	if (target.size < 3) {
+		sizeMod += target.size;
+	} else if (target.size > 3) {
+		sizeMod = -(target.size - 2);
+	}
+
+	if (target.con > 12) {
+		return Math.ceil( (target.dex/6) + mod + sizeMod);
+	} else {
+		return 0;
+	}
+};
+
+Roller.prototype.getConMod = function(target, mod, fn) {
+	var sizeMod = 0;
+
+	if (!mod) {
+		mod = 0;
+	}
+
+	if (target.size < 3) {
+		sizeMod = -(target.size - 2);
+	} else if (target.size > 3) {
+		sizeMod += ( target.size );
+	}
+
+	if (target.con > 12) {
+		return Math.ceil( (target.con/6) + mod + sizeMod);
+	} else {
+		return 0;
+	}
+};
+
+Roller.prototype.getIntMod = function(target, mod, fn) {
+	if (!mod) {
+		mod = 0;
+	}
+
+	if (target.int > 13) {
+		return Math.ceil( (target.int/6) + mod);
+	} else {
+		return 0;
+	}
+};
+
 module.exports.roller = new Roller();

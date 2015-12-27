@@ -18,6 +18,10 @@ Room.prototype.checkEntranceCriteria = function(target, roomObj, fn) {
 	return fn(true);
 };
 
+Room.prototype.getByPosition = function() {
+
+};
+
 Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 	var room = this,
 	i = 0,
@@ -124,19 +128,22 @@ Room.prototype.getDisplay = function(areaName, roomId, fn) {
 	});
 };
 
-Room.prototype.remove = function(arrayName, target, roomObj, fn) {
-	var i = 0,
-	newArr = [];
+Room.prototype.removeItem = function(item, roomObj, fn) {
+	World.remove('items', item, roomObj, function(removed, item, roomObj) {
+		return fn(true, roomObj, item);
+	});
+};
 
-	for (i; i < roomObj[arrayName].length; i += 1) {
-		if (roomObj[arrayName][i].name !== target.name) {
-			newArr.push(roomObj[arrayName][i]);
-		}
-	}
+Room.prototype.removePlayer = function(player, roomObj, fn) {
+	World.remove('playersInRoom', player, roomObj, function(removed, player, roomObj) {
+		return fn(true, roomObj, player);
+	});
+};
 
-	roomObj[arrayName] = newArr;
-
-	return fn(true, roomObj);
+Room.prototype.removeMob = function(mob, roomObj, fn) {
+	World.remove('monsters', mob, roomObj, function(removed, mob, roomObj) {
+		return fn(true, roomObj);
+	});
 };
 
 Room.prototype.addCorpse = function(s, monster, fn) {

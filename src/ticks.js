@@ -1,6 +1,5 @@
 'use strict';
 var fs = require('fs'),
-Dice = require('./dice').roller,
 Character = require('./character').character,
 World = require('./world').world;
 
@@ -59,32 +58,35 @@ World = require('./world').world;
 
 	}, 3600000); // 1 hour
 
-	// Area messages, every three minutes the mud has a 50% chance of giving the player a random message found in area.messages
+	// Area messages, every three minutes the mud has a 50% chance of giving the player
+	// a random message found in room.messages (with area.messages being checked if theres nothing)
 	setInterval(function() {
 
 	}, 180000); // 3 minutes
 
-/*
 	// Regen, Hunger and Thirst Tick 
 	setInterval(function() { 
 		var i = 0,
-		s; 
+		player; 
 
-		if (players.length > 0) {	
-			for (i; i < players.length; i += 1) {
-				s = io.sockets.connected[players[i].sid];		
-				Character.hunger(s, function() {
-					Character.thirst(s, function() {
-						Character.hpRegen(s, function(total) {
-							Character.updatePlayer(s, function() {
-								Character.prompt(s);
+		if (World.players.length > 0) {
+			for (i; i < World.players.length; i += 1) {
+				player = World.io.sockets.connected[World.players[i].sid].player;
+				Character.hunger(player, function(target) {
+					Character.thirst(target, function(target) {
+						Character.hpRegen(target, function(target, addedHP) {
+							Character.manaRegen(target, function(target, addedMana) {
+								Character.mvRegen(target, function(target, addedMv) {
+									Character.updatePlayer(target);
+								});
 							});
 						});
 					});
-				});					
-			}		
-		}	
-	}, 60000 * 3);	
+				});
+			}
+		}
+	}, 32000);
+/*
 
 	// Saving characters Tick
 	setInterval(function() {

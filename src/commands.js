@@ -9,7 +9,6 @@ World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
-Dice = require('./dice').roller,
 players = World.players,
 time = World.time,
 areas = World.areas,
@@ -55,7 +54,7 @@ Cmd.prototype.move = function(target, command, fn) {
 								*/
 
 								if (clearToMove) {
-									Dice.movementCheck(target, targetRoom, function(moveMod) {
+									World.dice.movementCheck(target, targetRoom, function(moveMod) {
 										target.cmv = Math.round((target.cmv - ( (12) - target.dex/4)));
 
 										target.roomid = targetRoom.id;
@@ -72,11 +71,11 @@ Cmd.prototype.move = function(target, command, fn) {
 												styleClass: 'room'
 											});
 
-											Room.remove('playersInRoom', target, roomObj, function() {
+											Room.removePlayer(target, roomObj, function() {
 												targetRoom.playersInRoom.push(target);
 											});
 										} else {
-											Room.remove('monsters', target, roomObj, function() {
+											Room.removeMob(target, roomObj, function() {
 												targetRoom.monsters.push(target);
 											});
 										}
@@ -189,7 +188,7 @@ Cmd.prototype.get = function(target, command, fn) {
 			if (command.msg !== 'all') {
 				World.search(roomObj.items, command, function(item) {
 					if (item) {
-						Room.remove('items', item, roomObj, function(removed, roomObj) {
+						Room.removeItem(item, roomObj, function(removed, roomObj) {
 							Character.addToInventory(item, target, function(added) {
 								if (added) {
 									World.msgRoom(roomObj, {
@@ -270,14 +269,14 @@ Cmd.prototype.drop = function(target, command, fn) {
 			if (command.msg !== 'all') {
 				World.search(target.items, command, function(item) {
 					if (item) {
-						Character.remove('items', item, target, function(removed, target) {
+						Character.removeItem(item, target, function(removed, target) {
 							if (removed) {
 								roomObj.items.push(item);
 
 								World.msgRoom(newRoom, {
 									msg: target.displayName + 'drops a ' + item.short,
 									playerName: target.name,
-									styleClass: 'cmd-get-all yellow'
+									styleClass: 'cmd-drop yellow'
 								});
 
 								World.msgPlayer(target, {
@@ -299,7 +298,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 				for (i; i < itemLen; i += 1) {
 					item = itemArr[i];
 					
-					Character.remove('items', item, target, function(removed, target) {
+					Character.removeItem(item, target, function(removed, target) {
 						if (removed) {
 							roomObj.items.push(item);
 
@@ -307,12 +306,12 @@ Cmd.prototype.drop = function(target, command, fn) {
 								World.msgRoom(roomObj, {
 									msg: target.displayName + ' drops everything they are carrying',
 									playerName: target.name,
-									styleClass: 'cmd-get-all yellow'
+									styleClass: 'cmd-drop-all yellow'
 								});
 
 								World.msgPlayer(target, {
 									msg: 'You drop everything',
-									styleClass: 'cmd-drop blue'
+									styleClass: 'cmd-drop-all blue'
 								});
 							}
 						} else {
@@ -328,58 +327,60 @@ Cmd.prototype.drop = function(target, command, fn) {
 };
 
 // For attacking in-game monsters
-Cmd.prototype.kill = function(target, command) {
-	Room.checkMonster(r, s, function(fnd, target) {
-		if (fnd) {
-			Combat.begin(target, target, function(contFight, target) { // the first round qualifiers
-				var combatInterval;
+Cmd.prototype.kill = function(target, command, fn) {
+	World.getRoomObject(target.area, target.roomid, function(roomObj) {
+		World.search(roomObj.monsters, command, function(fnd, target) {
+			if (fnd) {
+				Combat.begin(target, target, function(contFight, target) { // the first round qualifiers
+					var combatInterval;
 
-				Character.prompt(s);
+					Character.prompt(s);
 
-				if (contFight) {
-					// Combat Loop
-					combatInterval = setInterval(function() {
-						if (target.position === 'fighting' && target.position === 'fighting') {
-							
-							Combat.fight(target, target, function(contFight) {
-								if (!contFight) {
-									target.position = 'dead';
+					if (contFight) {
+						// Combat Loop
+						combatInterval = setInterval(function() {
+							if (target.position === 'fighting' && target.position === 'fighting') {
+								
+								Combat.fight(target, target, function(contFight) {
+									if (!contFight) {
+										target.position = 'dead';
 
-									clearInterval(combatInterval);
+										clearInterval(combatInterval);
 
-									Room.removeMonster({
-										area: target.area,
-										id: target.roomid
-									}, target, function(removed) {
-										if (removed) { 
-											Room.addCorpse(target, target, function(corpse) {
-												Combat.calXP(target, target, function(earnedXP) {
-													target.position = 'standing';
-													target.wait = 0;
+										Room.removeMonster({
+											area: target.area,
+											id: target.roomid
+										}, target, function(removed) {
+											if (removed) { 
+												Room.addCorpse(target, target, function(corpse) {
+													Combat.calXP(target, target, function(earnedXP) {
+														target.position = 'standing';
+														target.wait = 0;
 
-													if (earnedXP > 0) {
-														World.msgPlayer(target, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
-													} else {
-														World.msgPlayer(target, {msg: 'You won but learned nothing.', styleClass: 'victory'});
-													}
+														if (earnedXP > 0) {
+															World.msgPlayer(target, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
+														} else {
+															World.msgPlayer(target, {msg: 'You won but learned nothing.', styleClass: 'victory'});
+														}
+													});
 												});
-											});
-										}
-									});
+											}
+										});
 
-								} else if (target.chp <= 0) {
-									clearInterval(combatInterval);
-									World.msgPlayer(target, {msg: 'You died!', styleClass: 'combat-death'});
-									//Character.death(s);
-								}
-							});
-						}	
-					}, 1800);
-				}
-			});
-		} else {
-			World.msgPlayer(target, {msg: 'There is nothing by that name here.', styleClass: 'error'});
-		}
+									} else if (target.chp <= 0) {
+										clearInterval(combatInterval);
+										World.msgPlayer(target, {msg: 'You died!', styleClass: 'combat-death'});
+										//Character.death(s);
+									}
+								});
+							}	
+						}, 1800);
+					}
+				});
+			} else {
+				World.msgPlayer(target, {msg: 'There is nothing by that name here.', styleClass: 'error'});
+			}
+		});
 	});
 };
 
@@ -631,30 +632,28 @@ Cmd.prototype.wear = function(target, command) {
 		});
 	} else {
 		World.msgPlayer(target, {msg: 'Wear what?', styleClass: 'error'});
-		
 	}
 };
 
-/*
 Cmd.prototype.remove = function(target, command) {
 	if (command.msg !== '') {
-		Character.checkInventory(r, s, function(fnd, item) {
-			if (fnd) {
-				Character.remove(r, s, item, function(removeSuccess, msg) {
-					World.msgPlayer(target, {msg: msg, styleClass: 'cmd-wear'});
-					
+		Character.getItem(target.eq, command, function(item) {
+			if (item) {
+				Character.removeEq(item, target, function(removed, target, item) {
+					if (removed) {
+						World.msgPlayer(target, {msg: 'Removed a ' + item.short, styleClass: 'cmd-wear'});
+					} else {
+						World.msgPlayer(target, {msg: 'Could not remove a ' + item.short, styleClass: 'error'});
+					}
 				});
 			} else {
 				World.msgPlayer(target, {msg: 'You are not wearing that.', styleClass: 'error'});
-				
 			}
 		});
 	} else {
 		World.msgPlayer(target, {msg: 'Remove what?', styleClass: 'error'});
-		
 	}
 }
-*/
 
 Cmd.prototype.inventory = function(target, command) {
 	var iStr = '',
@@ -692,22 +691,22 @@ Cmd.prototype.score = function(target, command, fn) {
 					'<li class="stat-mv"><label>Moves:</label> <strong>' + target.cmv + '</strong>/' + target.mv + '</li>' +
 					'<li class="stat-levl"><label>Level:</label> ' +  target.level + '</li>' +
 				'</ul>' +
-				'<ul class="col-md-3 score-stats list-unstyled">' +
+				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-str first"><label>STR:</label> ' + target.str + ' (20)</li>' +
 					'<li class="stat-wis"><label>WIS:</label> ' + target.wis + ' (26) </li>' +
 					'<li class="stat-int"><label>INT:</label> ' + target.int + ' (18)</li>' +
 					'<li class="stat-dex"><label>DEX:</label> ' + target.dex + ' (14)</li>' +
 					'<li class="stat-con"><label>CON:</label> ' + target.con + ' (20)</li>' +
 				'</ul>' +
-				'<ul class="col-md-3 score-stats list-unstyled">' +
+				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
 					'<li class="stat-gold"><label>Gold:</label> ' + target.gold + '</li>' +
-					'<li class="stat-hunger"><label>Hunger:</label>' + target.hunger +'</li>' +
-					'<li class="stat-thirst"><label>Thirst:</label> 0</li>' +
+					'<li class="stat-hunger"><label>Hunger:</label> ' + target.hunger +'</li>' +
+					'<li class="stat-thirst"><label>Thirst:</label> ' + target.thirst +'</li>' +
 					'<li class="stat-trains last"><label>Trains:</label> ' + target.trains + '</li>' +
 				'</ul>' +
 				'<div class="stat-details">' +
-					'<ul class="col-md-3 score-stats list-unstyled">' +
+					'<ul class="col-md-2 score-stats list-unstyled">' +
 						'<li class="stat-hitroll"><label>Hit Bonus: </labels> 3</li>' +
 						'<li class="stat-damroll"><label>Damage Bonus: </label> 3</li>' +
 						'<li class="stat-position"><label>Magic resistance: </label> -3</li>' +
@@ -716,8 +715,7 @@ Cmd.prototype.score = function(target, command, fn) {
 						'<li class="stat-position"><label>Detection: </label> 2</li>' +
 						'<li class="stat-position"><label>Knowledge: </label> 2</li>' +
 					'</ul>' +
-					'<div class="col-md-3 score-img">' +
-						'<img width="100%" src="http://content.turbine.com/sites/www.lotro.com/f2p/images/race/dwarf.png" />' +
+					'<div class="col-md-3 score-affects">' +
 					'</div>' +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +

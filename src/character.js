@@ -8,12 +8,11 @@
 var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms').room,
-Dice = require('./dice').roller,
 World = require('./world').world,
 Character = function () {
 
 };
- 
+
 Character.prototype.login = function(r, s, fn) {
 	var name = r.msg.replace(/_.*/,'').toLowerCase();
 	
@@ -133,7 +132,7 @@ Character.prototype.addPlayer = function(s, fn) {
 
 	for (i; i < World.players.length; i += 1) {
 		if (s.player.name === World.players[i].name) {
-			return fn(false, 'Already Logged in. Disconnecting...Refresh the page and relog.');
+			return fn(false, 'Already Logged in. Disconnecting...Refresh the page and login again');
 		}
 	}
 	
@@ -418,74 +417,140 @@ Character.prototype.getModifier = function(target, stat, fn) {
 	}
 };
 
-Character.prototype.hpRegen = function(s, fn) {
-	var conMod = this.getModifier(s, 'con');
+Character.prototype.hpRegen = function(target, fn) {
+	var conMod = World.dice.getConMod(target);
 
-	if (s.player.chp < s.player.hp) {
-		if (s.player.position === 'sleeping') {
-			conMod = conMod + 2;
+	if (target.chp < target.hp) {
+		if (target.position === 'sleeping') {
+			conMod += 2;
+		} else if (target.position === 'resting') {
+			conMod += 1;
 		}
 
-		Dice.roll(1 * (s.player.level + conMod), 8, function(total) {
-			fn(s.player.chp + total);
-		});
-	} else {
-		fn(s.player.chp);
-	}
-}
+		World.dice.roll(conMod, 8, function(total) {
+			total = total + target.level;
 
-Character.prototype.hunger = function(s, fn) {
-	var character = this,
-	conMod = Math.ceil(s.player.con/3);
-	
-	if (s.player.hunger < 10) {
-		Dice.roll(1, 4, function(total) {
-			if ((total + conMod) < s.player.con/2) { 
-				s.player.hunger = s.player.hunger + 1;
-			}			
-						
-			if (s.player.hunger >= 5) {	
-				if (total < 4) {
-					s.player.chp = s.player.chp - (s.player.chp / 5 + conMod);
-				}
-			
-				s.emit('msg', {msg: 'You are hungry.', styleClass: 'hunger'});
-		
-				fn();
+			target.chp += total;
+
+			if (target.chp > target.hp) {
+				targer.chp = target.hp;
 			}
+
+			fn(target, total);
 		});
 	} else {
-		s.player.chp = (s.player.chp - 10 + conMod);
-		s.emit('msg', {msg: 'You are dying of hunger.', styleClass: 'hunger'});
-		
-		fn();
+		fn(target, 0);
 	}
 };
 
-Character.prototype.thirst = function(s, fn) {
-	var character = this,
-	dexMod = Math.ceil(s.player.dex/3);
+Character.prototype.manaRegen = function(target, fn) {
+	var intMod = World.dice.getIntMod(target);
 
-	if (s.player.thirst < 10) {
-		Dice.roll(1, 4, function(total) {
-			if (total + dexMod < 5) { 
-				s.player.chp = s.player.chp - (s.player.chp / 4 + dexMod);
-			}			
-						
-			if (s.player.thirst >= 5) {
-				s.player.chp = s.player.chp - 1;
+	if (target.cmana < target.mana) {
+		if (target.position === 'sleeping') {
+			intMod += 2;
+		} else if (target.position === 'resting') {
+			intMod += 1;
+		}
+
+		World.dice.roll(intMod, 8, function(total) {
+			total = total + target.level;
+
+			target.chp += total;
+
+			if (target.cmana  > target.mana ) {
+				targer.cmana  = target.mana ;
 			}
 
-			s.emit('msg', {msg: 'You need to find something to drink.', styleClass: 'thirst'});
+			fn(target, total);
+		});
+	} else {
+		fn(target, 0);
+	}
+};
 
-			fn();
+Character.prototype.mvRegen = function(target, fn) {
+	var dexMod = World.dice.getDexMod(target);
+
+	if (target.cmv < target.mv) {
+		if (target.position === 'sleeping') {
+			dexMod += 3;
+		} else if (target.position === 'resting') {
+			dexMod += 2;
+		}
+
+		World.dice.roll(dexMod, 8, function(total) {
+			target.cmv += total;
+
+			if (target.cmv > target.mv) {
+				targer.cmv = target.mv;
+			}
+
+			fn(target, total);
+		});
+	} else {
+		fn(target, 0);
+	}
+};
+
+Character.prototype.hunger = function(target, fn) {
+	var character = this,
+	conMod = World.dice.getConMod(target);
+
+	if (target.hunger < 10) {
+		World.dice.roll(1, 5, function(total) {
+			if ((total + conMod) < target.con/2 || total === 5) { 
+				target.hunger = target.hunger + 1;
+			}
+
+			if (target.hunger >= 5) {
+				if (total < 4) {
+					target.chp = target.chp - (target.chp / 5 + conMod);
+				}
+
+				World.msgPlayer(target, {msg: 'You are hungry.', styleClass: 'hunger'});
+
+				fn(target);
+			}
+		});
+	} else {
+		target.chp = (target.chp - 8 + conMod);
+		
+		World.msgPlayer(target, {msg: 'You are dying of hunger.', styleClass: 'hunger'});
+		
+		fn(target);
+	}
+};
+
+Character.prototype.thirst = function(target, fn) {
+	var character = this,
+	dexMod = Math.ceil(target.dex/3);
+
+	if (target.thirst < 10) {
+		World.dice.roll(1, 5, function(total) {
+			if (total + dexMod < 5 || total === 5) { 
+				target.chp = target.chp - (target.chp / 4 + dexMod);
+			}			
+						
+			if (target.thirst >= 5) {
+				target.chp = target.chp - 1;
+			}
+
+			World.msgPlayer(target, {msg: 'You need to find something to drink.', styleClass: 'thirst'});
+
+			fn(target);
 		});	
 	} else {
-		s.player.chp = (s.player.chp - 5 + dexMod);
-		s.emit('msg', {msg: 'You are dying of thirst.', styleClass: 'thirst'});
+		target.chp = (target.chp - 5 + dexMod);
+		World.msgPlayer(target, {msg: 'You are dying of thirst.', styleClass: 'thirst'});
 		
-		fn();
+		fn(target);
 	}
+};
+
+// Removes experience and gained levels from character
+Character.prototype.experienceRot = function() {
+
 };
 
 // push an item into a players inventory, checks items to ensure a player can use it
@@ -527,20 +592,21 @@ Character.prototype.getWeapons = function(creature, fn) {
 	}
 };
 
-Character.prototype.remove = function(arrayName, item, player, fn) {
-	var i = 0,
-	newArr = [];
-
-	for (i; i < player[arrayName].length; i += 1) {
-		if (player[arrayName][i].name !== item.name) {
-			newArr.push(player[arrayName][i]);
-		}
-	}
-
-	player[arrayName] = newArr;
-
-	return fn(true, player);
+Character.prototype.removeItem = function(arrayName, item, player, fn) {
+	World.remove('item', item, player, function() {
+		return fn(true, player, item);
+	});
 };
+
+Character.prototype.removeEq  = function(arrayName, item, player, fn) {
+	World.remove('eq', item, player, function() {
+		return fn(true, player, item);
+	});
+}
+
+Character.prototype.getItem = function(eqArr, command, fn) {
+	World.search(eqArr, command, fn);
+}
 
 Character.prototype.wear = function(target, item, fn) {
     var i = 0,

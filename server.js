@@ -69,21 +69,25 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
 					}
 
-					if (cmdObj.cmd) {
-						if (cmdObj.cmd in Cmds) {
-							return Cmds[cmdObj.cmd](s.player, cmdObj);
-						} else if (cmdObj.cmd in Skills) {
-							return Skills[r.cmd](s.player, cmdObj);
-						/*
-						} else if (r.msg === 'cast' && r.cmd in Skills) {
-							return Spells[r.cmd](r, s); 
-						*/
+					if (cmdObj.msg === '' || cmdObj.msg.length >= 3) {
+						if (cmdObj.cmd) {
+							if (cmdObj.cmd in Cmds) {
+								return Cmds[cmdObj.cmd](s.player, cmdObj);
+							} else if (cmdObj.cmd in Skills) {
+								return Skills[r.cmd](s.player, cmdObj);
+							/*
+							} else if (r.msg === 'cast' && r.cmd in Skills) {
+								return Spells[r.cmd](r, s); 
+							*/
+							} else {
+								s.emit('msg', {msg: cmdObj.cmd + ' is not a valid command.', styleClass: 'error'});
+								return World.prompt(s);
+							}
 						} else {
-							s.emit('msg', {msg: cmdObj.cmd + ' is not a valid command.', styleClass: 'error'});
 							return World.prompt(s);
 						}
 					} else {
-						return World.prompt(s);
+						s.emit('msg', {msg: 'You have to be more specific with you command.', styleClass: 'error'});
 					}
 				} else {
 					s.emit('msg', {msg: 'Invalid characters in command!', styleClass: 'error'});

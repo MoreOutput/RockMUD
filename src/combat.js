@@ -1,5 +1,5 @@
 'use strict';
-var Dice = require('./dice').roller,
+var World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = function() {
@@ -27,7 +27,7 @@ Combat.prototype.begin = function(s, target, fn) {
 	s.player.position = 'fighting';
 	target.position = 'fighting'; 
 	
-	Dice.roll(s.player.dex/4, 20, function(total) { // Roll against AC
+	World.World.dice.roll(s.player.dex/4, 20, function(total) { // Roll against AC
 		var i = 0;
 
 		if (total > target.ac) {
@@ -45,7 +45,7 @@ Combat.prototype.begin = function(s, target, fn) {
 */
 Combat.prototype.attackerRound = function(s, target, fn) {
 	var combat = this;
-	Dice.roll(s.player.dex/4, 20, function(total) { // Roll against AC
+	World.dice.roll(s.player.dex/4, 20, function(total) { // Roll against AC
 		var i = 0;
 
 		if (total > target.ac) {
@@ -64,7 +64,7 @@ Combat.prototype.attackerRound = function(s, target, fn) {
 */
 Combat.prototype.targetRound = function(s, target, fn) {
 	var combat = this;
-	Dice.roll(target.dex/4, 20, function(total) { // Roll against AC
+	World.dice.roll(target.dex/4, 20, function(total) { // Roll against AC
 		if (total > s.player.ac) {		
 			combat.round(target, s, 0, function(s, damage) {
 				return fn(s, target);
@@ -81,14 +81,14 @@ Combat.prototype.targetRound = function(s, target, fn) {
 Combat.prototype.calXP = function(s, target, fn) {
 	if ((target.level) >= (s.player.level - 5)) {
 		if (target.level >= s.player.level) {
-			Dice.roll(1, 4, 1, function(total) {
+			World.dice.roll(1, 4, 1, function(total) {
 				var exp;
 				exp = ((target.level - s.player.level) * total) + 1 * (total * 45);
 				s.player.exp = exp + s.player.exp;
 				return fn( exp );
 			});
 		} else {
-			Dice.roll(1, 4, function(total) {
+			World.dice.roll(1, 4, function(total) {
 				return fn(total * 10);
 			});
 		}
@@ -99,13 +99,13 @@ Combat.prototype.calXP = function(s, target, fn) {
 
 // Calculate the total damage done with a melee hit
 Combat.prototype.meleeDamage = function(attacker, opponent, weapon, fn) {
-	Dice.roll(1, 20, function(total) {
-		total = total + Dice.roll(1, attacker.str/4);
-		total = total - Dice.roll(1, opponent.ac/3);
+	World.dice.roll(1, 20, function(total) {
+		total = total + World.dice.roll(1, attacker.str/4);
+		total = total - World.dice.roll(1, opponent.ac/3);
 
 		if (typeof weapon !== 'function') {
 			// Passed in weapon
-			total += Dice.roll(weapon.diceNum, weapon.diceSides);
+			total += World.dice.roll(weapon.diceNum, weapon.diceSides);
 			return fn(total, weapon);
 		} else {
 			// Unarmed Damage

@@ -40,11 +40,11 @@ text-shadow: 2px 2px #ff0033;
 color: #fff;
 }
 .score {
-border-bottom: 1px solid #eee;
+border-bottom: 1px dashed #eee;
 margin-bottom: .25em;
 }
 .score h1, h4 {
-border-bottom: 1px solid #eee;
+border-bottom: 1px dashed #eee;
 }
 .score h4 {
 text-shadow: none;
