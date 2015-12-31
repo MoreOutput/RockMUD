@@ -30,8 +30,7 @@ window.onload = function() {
 		skill: 'skills',
 		desc: 'description',
 		re: 'rest',
-		r: 'recall',
-		he: 'help'
+		r: 'recall'
 	},
 	isScrolledToBottom = false,
 	movement = ['north', 'east', 'south', 'west'],

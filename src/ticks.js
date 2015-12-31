@@ -27,11 +27,12 @@ World = require('./world').world;
 		}
 	}, 1100);
 
-	// Areas reload when they are devoid of players or when they have the property: reload: true.
+	// Areas refresh when they are devoid of players for at least four minutes 
+	// or when they have the property alwaysReload: true.
 	setInterval(function() {
 		var i = 0;
 
-	}, 3600000); // 1 hour
+	}, 240000); // 4 minutes
 
 	// AI Ticks for monsters
 	setInterval(function() {
@@ -49,7 +50,7 @@ World = require('./world').world;
 				});
 			}
 		}
-	}, 20000); // 20 seconds
+	}, 25000); // 25 seconds
 
 	// AI Ticks for areas 
 	setInterval(function() {

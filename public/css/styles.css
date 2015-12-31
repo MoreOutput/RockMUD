@@ -7,12 +7,16 @@ html, body {
 background-color: #000;
 color: #fff;
 font-family: 'Montserrat', sans-serif;
-font-size: .96em;
+font-size: .9em;
 padding-top: .5em;
 height: 100%;
 }
 html, body a {
 color: #60f066;
+}
+.sans-serif {
+font-family: 'Montserrat', sans-serif;
+
 }
 h1, h2, h3, h4, h5, h6, .title {
 color: #ddd;

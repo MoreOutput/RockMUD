@@ -699,14 +699,14 @@ Cmd.prototype.score = function(target, command, fn) {
 					'<li class="stat-mv"><label>Moves:</label> <strong>' + target.cmv + '</strong>/' + target.mv + '</li>' +
 					'<li class="stat-levl"><label>Level:</label> ' +  target.level + '</li>' +
 				'</ul>' +
-				'<ul class="col-md-2 score-stats list-unstyled">' +
+				'<ul class="col-md-1 score-stats list-unstyled">' +
 					'<li class="stat-str first"><label>STR:</label> ' + target.str + ' (20)</li>' +
 					'<li class="stat-wis"><label>WIS:</label> ' + target.wis + ' (26) </li>' +
 					'<li class="stat-int"><label>INT:</label> ' + target.int + ' (18)</li>' +
 					'<li class="stat-dex"><label>DEX:</label> ' + target.dex + ' (14)</li>' +
 					'<li class="stat-con"><label>CON:</label> ' + target.con + ' (20)</li>' +
 				'</ul>' +
-				'<ul class="col-md-2 score-stats list-unstyled">' +
+				'<ul class="col-md-1 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
 					'<li class="stat-gold"><label>Gold:</label> ' + target.gold + '</li>' +
 					'<li class="stat-hunger"><label>Hunger:</label> ' + target.hunger +'</li>' +
@@ -723,7 +723,9 @@ Cmd.prototype.score = function(target, command, fn) {
 						'<li class="stat-position"><label>Detection: </label> 2</li>' +
 						'<li class="stat-position"><label>Knowledge: </label> 2</li>' +
 					'</ul>' +
-					'<div class="col-md-3 score-affects">' +
+					'<div class="col-md-2 score-affects">' +
+						'<h6 class="sans-serif">Affected by:</h6>' +
+						'<p>You don\'t feel affected by anything.</p>'
 					'</div>' +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +

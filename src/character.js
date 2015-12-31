@@ -509,24 +509,30 @@ Character.prototype.hunger = function(target, fn) {
 	conMod = World.dice.getConMod(target);
 
 	if (target.hunger < 10) {
-		World.dice.roll(1, 5, function(total) {
-			if ((total + conMod) < target.con/2 || total === 5) { 
-				target.hunger = target.hunger + 1;
+		World.dice.roll(1, conMod, function(total) {
+			if (total >= conMod - 2) {
+				target.hunger += 1;
 			}
 
 			if (target.hunger >= 5) {
-				if (total < 4) {
-					target.chp = target.chp - (target.chp / 5 + conMod);
+				target.chp -= World.dice.roll(1, 10 + target.hunger) - conMod;
+
+				if (target.chp < target.hp) {
+					target.chp = 0;
 				}
 
-				World.msgPlayer(target, {msg: 'You are hungry.', styleClass: 'hunger'});
-
-				fn(target);
+				World.msgPlayer(target, {msg: 'You feel hungry.', styleClass: 'hunger'});
 			}
+
+			fn(target);
 		});
 	} else {
-		target.chp = (target.chp - 8 + conMod);
-		
+		target.chp -= World.dice.roll(1, 10 + target.level + target.hunger + 1);
+
+		if (target.chp < target.hp) {
+			target.chp = 0;
+		}
+
 		World.msgPlayer(target, {msg: 'You are dying of hunger.', styleClass: 'hunger'});
 		
 		fn(target);
@@ -535,26 +541,35 @@ Character.prototype.hunger = function(target, fn) {
 
 Character.prototype.thirst = function(target, fn) {
 	var character = this,
-	dexMod = Math.ceil(target.dex/3);
+	dexMod = World.dice.getDexMod(target);
 
 	if (target.thirst < 10) {
 		World.dice.roll(1, 5, function(total) {
-			if (total + dexMod < 5 || total === 5) { 
-				target.chp = target.chp - (target.chp / 4 + dexMod);
-			}			
-						
-			if (target.thirst >= 5) {
-				target.chp = target.chp - 1;
+			if (total >= dexMod - 2) {
+				target.thirst += 1;
 			}
 
-			World.msgPlayer(target, {msg: 'You need to find something to drink.', styleClass: 'thirst'});
+			if (target.thirst >= 5) {
+				target.chp -= World.dice.roll(1, 10 + target.thirst) - dexMod;
+
+				if (target.chp < target.hp) {
+					target.chp = 0;
+				}
+
+				World.msgPlayer(target, {msg: 'You could use something to drink.', styleClass: 'hunger'});
+			}
 
 			fn(target);
 		});	
 	} else {
-		target.chp = (target.chp - 5 + dexMod);
+		target.chp -= World.dice.roll(1, 10 + target.level + target.thirst + 1);
+
+		if (target.chp < target.hp) {
+			target.chp = 0;
+		}
+
 		World.msgPlayer(target, {msg: 'You are dying of thirst.', styleClass: 'thirst'});
-		
+
 		fn(target);
 	}
 };
@@ -602,13 +617,13 @@ Character.prototype.removeEq  = function(item, player, fn) {
 	World.remove('eq', item, player, function(removed, player, item) {
 		return fn(true, item, player);
 	});
-}
+};
 
 Character.prototype.getItem = function(eqArr, command, fn) {
 	World.search(eqArr, command, function(slot) {
 		return fn(slot.item)
 	});
-}
+};
 
 Character.prototype.wear = function(target, item, fn) {
 	var i = 0,
