@@ -467,7 +467,7 @@ Cmd.prototype.say = function(target, command) {
 };
 
 Cmd.prototype.yell = function(target, command) {
-	World.msgToPlayer(target, {
+	World.msgPlayer(target, {
 		msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' + command.msg + '</div>'
 	});
 	

@@ -15,7 +15,7 @@
     "hp": 200,
     "cmana": 200,
     "mana": 200,
-    "cmv": 20,
+    "cmv": 210,
     "mv": 210,
     "str": 10,
     "wis": 10,
@@ -34,7 +34,7 @@
     "weight": 0,
     "maxWeight": 120,
     "gold": 45,
-    "hunger": 0,
+    "hunger": 10,
     "thirst": 0,
     "load": 3,
     "visible": true,
@@ -226,6 +226,6 @@
         }
     },
     "carry": 100,
-    "modified": "Wed Dec 30 2015 01:02:47 GMT-0500 (Eastern Standard Time)",
-    "sid": "EDt8r9ohZfPfZfHtAAAA"
+    "modified": "Thu Dec 31 2015 03:15:40 GMT-0500 (Eastern Standard Time)",
+    "sid": "R1ytHdYbixwJTPOXAAAB"
 }

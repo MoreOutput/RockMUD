@@ -331,7 +331,7 @@ World.prototype.rollMob = function(mobArr, fn) {
 									mobArr[index] = mob;
 								}
 
-								if (index === mobArr.length - 1) {   
+								if (index === mobArr.length - 1) {
 									if (mobArr.length !== 1) {
 										return fn(mobArr);
 									} else {
@@ -431,7 +431,8 @@ World.prototype.motd = function(s, fn) {
 };
 
 World.prototype.prompt = function(target) {
-	var player;
+	var player,
+	prompt;
 
 	if (target.player) {
 		player = target.player;
@@ -439,11 +440,17 @@ World.prototype.prompt = function(target) {
 		player = target;
 	}
 
+	prompt = '<' + player.chp + '/'  + player.hp + '<span class="red">hp</span>><' +
+		player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' + 
+		player.cmv + '/'  + player.mv +'<span class="yellow">mv</span>>';
+
+	if (player.level >= 50) {
+		prompt += '<' + player.wait + 'w>';
+	}
+
 	if (player) {
 		return this.msgPlayer(target, {
-			msg: player.chp + '/'  + player.hp + 'hp - ' +
-				player.cmana + '/'  + player.mana + 'm - ' +  
-				player.cmv + '/'  + player.mv +'mv - ' + player.wait + 'w',
+			msg: prompt,
 			styleClass: 'cprompt',
 			noPrompt: true
 		});
@@ -503,7 +510,7 @@ World.prototype.msgArea = function(areaName, msgObj, fn) {
 	s;
 
 	for (i; i < world.players.length; i += 1) {
-		s = world.io.sockets.connected[target.sid];
+		s = world.io.sockets.connected[world.players[i].sid];
 
 		if (s.player.name !== msgObj.playerName && s.player.area === areaName) {
 			world.msgPlayer(s, msgObj);
