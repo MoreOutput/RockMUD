@@ -43,10 +43,7 @@ World = require('./src/world').world,
 io = require('socket.io')(server);
 
 World.setup(io, cfg, function(Character, Cmds, Skills) {
-
 	server.listen(process.env.PORT || cfg.port);
-
-	console.log(cfg.name + ' is ready to rock and roll on port ' + cfg.port);
 
 	io.on('connection', function (s) {
 		s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
@@ -87,7 +84,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							return World.prompt(s);
 						}
 					} else {
-						s.emit('msg', {msg: 'You have to be more specific with you command.', styleClass: 'error'});
+						s.emit('msg', {msg: 'You have to be more specific with your command.', styleClass: 'error'});
 					}
 				} else {
 					s.emit('msg', {msg: 'Invalid characters in command!', styleClass: 'error'});
@@ -101,7 +98,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						s.join('mud'); // mud is one of two rooms, 'creation' being the other
 						Character.load(name, s, function (s) {
 							Character.getPassword(s, function(s) {
-								s.on('cmd', function (r) { 
+								s.on('cmd', function (r) {
 									parseCmd(r, s);
 								});
 							});
@@ -114,7 +111,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						s.player.sid = s.id;
 
 						Character.newCharacter(r, s, function(s) {
-							s.on('cmd', function (r) { 
+							s.on('cmd', function (r) {
 								parseCmd(r, s);
 							});
 						});

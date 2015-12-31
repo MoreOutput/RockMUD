@@ -596,51 +596,51 @@ Character.prototype.getItem = function(eqArr, command, fn) {
 }
 
 Character.prototype.wear = function(target, item, fn) {
-    var i = 0,
-    replacedItem;
+	var i = 0,
+	replacedItem;
 
-    for (i; i < target.eq.length; i += 1) {   
-        if (item.slot === target.eq[i].slot && item.equipped === false) {
-            if (item.itemType === 'weapon') {
-                item.equipped = true;
+	for (i; i < target.eq.length; i += 1) {   
+		if (item.slot === target.eq[i].slot && item.equipped === false) {
+			if (item.itemType === 'weapon') {
+				item.equipped = true;
 
-                if (item.weight < (20 + target.str)) { // Dual check
+				if (item.weight < (20 + target.str)) { // Dual check
 
-                }
+				}
 
-                if (target.eq[i].dual === false && target.eq[i].item === null) {
-                    target.eq[i].item = item;
+				if (target.eq[i].dual === false && target.eq[i].item === null) {
+					target.eq[i].item = item;
 
-                    fn('You wield a ' + item.short + ' in your ' + target.eq[i].name);
-                    break;
-                }
-            } else {
-                // Wearing Armor
-                if (target.eq[i].item === null) {
-                    item.equipped = true;
-                    target.eq[i].item = item;
+					fn('You wield a ' + item.short + ' in your ' + target.eq[i].name);
+					break;
+				}
+			} else {
+				// Wearing Armor
+				if (target.eq[i].item === null) {
+					item.equipped = true;
+					target.eq[i].item = item;
 
-                    target.ac = target.ac + item.ac;
-                    
-                    return fn('You wear a ' + item.short + ' on your ' + target.eq[i].name);
-                } else {
-                    item.equipped = true;
-                    target.eq[i].item.equipped = false;
+					target.ac = target.ac + item.ac;
+					
+					return fn('You wear a ' + item.short + ' on your ' + target.eq[i].name);
+				} else {
+					item.equipped = true;
+					target.eq[i].item.equipped = false;
 
-                    replacedItem = target.eq[i].item;
-                    target.eq[i].item = item;
+					replacedItem = target.eq[i].item;
+					target.eq[i].item = item;
 
-                    target.ac = target.ac - replacedItem.ac;
+					target.ac = target.ac - replacedItem.ac;
 
-                    target.ac = target.ac + item.ac
+					target.ac = target.ac + item.ac
 
-                    return fn('You wear ' + item.short + ' on your ' + 
-                        target.eq[i].name + ' and remove ' + 
-                        replacedItem.short);
-                }
-            }
-        } 
-    }
+					return fn('You wear ' + item.short + ' on your ' + 
+						target.eq[i].name + ' and remove ' + 
+						replacedItem.short);
+				}
+			}
+		} 
+	}
 };
 
 Character.prototype.getLoad = function(s) {
@@ -679,4 +679,3 @@ Character.prototype.calculateGear = function() {
 };
 
 module.exports.character = new Character();
- 

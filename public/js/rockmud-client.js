@@ -34,6 +34,7 @@ window.onload = function() {
 	},
 	isScrolledToBottom = false,
 	movement = ['north', 'east', 'south', 'west'],
+	playerIsLogged = false,
 	display = function(r) {
 		if (!r.styleClass) {
 			r.styleClass = '';
@@ -87,7 +88,7 @@ window.onload = function() {
 				} else {
 					return fn(aliases[keys[i]] + ' ' + msg);
 				}
-			}	
+			}
 		}
 
 		return fn(cmd + ' ' + msg);
@@ -107,6 +108,10 @@ window.onload = function() {
 			emit : (function () {
 				var res = node.dataset.mudState;
 
+				if (playerIsLogged === false && res === 'login') {
+					node.type = 'password';
+				}
+
 				if (res === 'login') {
 					return 'login';
 				} else if (msg === 'quit' || msg === 'disconnect') {
@@ -120,6 +125,9 @@ window.onload = function() {
 				} else if (res === 'enterPassword') {
 					return 'password';
 				} else {
+					node.type = 'text';
+					playerIsLogged = true;
+
 					return 'cmd';
 				}
 			}()),
