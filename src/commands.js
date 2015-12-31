@@ -782,6 +782,7 @@ Cmd.prototype.xyzzy = function(target, command) {
 * typing 'json' alone will give the json object for the entire current room. 
 */
 Cmd.prototype.json = function(target, command) {
+	// try to use JSON.stringify(cmdObj, null, 4) so we can remove util module
 	if (target.role === 'admin' && command.msg) {
 		Character.checkInventory(r,s,function(fnd,item) {
 			if (fnd) {

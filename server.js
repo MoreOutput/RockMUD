@@ -123,17 +123,26 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		});
 
 		s.on('quit', function () {
-			Character.save(s.player, function() {
+			if (s.player.position !== 'fighting') {
+				Character.save(s.player, function() {
+					World.msgPlayer(s, {
+						msg: 'Add a little to a little and there will be a big pile.',
+						emit: 'disconnect',
+						styleClass: 'logout-msg',
+						noPrompt: true
+					});
+
+					s.leave('mud');
+					s.disconnect();
+				});
+			} else {
 				World.msgPlayer(s, {
-					msg: 'Add a little to a little and there will be a big pile.',
+					msg: 'You are fighting! Finish up before quitting',
 					emit: 'disconnect',
 					styleClass: 'logout-msg',
 					noPrompt: true
 				});
-
-				s.leave('mud');
-				s.disconnect();
-			});
+			}
 		});
 
 		s.on('disconnect', function () {

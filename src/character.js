@@ -412,11 +412,16 @@ Character.prototype.hpRegen = function(target, fn) {
 	// unless the charcter is a fighter they have 
 	// a 10% chance of skipping hp regen
 
-	if (target.chp < target.hp) {
+	if (target.chp < target.hp && target.thirst < 5 && target.hunger < 6) {
 		if (target.position === 'sleeping') {
 			conMod += 3;
 		} else {
 			conMod += 1;
+		}
+
+
+		if (target.thirst >= 3 || target.hunger >= 3) {
+			conMod -= 1;
 		}
 
 		World.dice.roll(conMod, 4, function(total) {
@@ -438,7 +443,7 @@ Character.prototype.hpRegen = function(target, fn) {
 Character.prototype.manaRegen = function(target, fn) {
 	var intMod = World.dice.getIntMod(target);
 
-	if (target.cmana < target.mana) {
+	if (target.cmana < target.mana && target.thirst < 5 && target.hunger < 6) {
 		// unless the charcter is a wizard they have 
 		// a 10% chance of skipping mana regen
 
@@ -446,6 +451,10 @@ Character.prototype.manaRegen = function(target, fn) {
 			intMod += 2;
 		} else {
 			intMod += 1;
+		}
+
+		if (target.thirst >= 3 || target.hunger >= 3) {
+			intMod -= 1;
 		}
 
 		World.dice.roll(intMod, 8, function(total) {
@@ -470,11 +479,15 @@ Character.prototype.mvRegen = function(target, fn) {
 	// unless the charcter is a thief they have 
 	// a 10% chance of skipping move regen
 
-	if (target.cmv < target.mv) {
+	if (target.cmv < target.mv && target.thirst < 5 && target.hunger < 6) {
 		if (target.position === 'sleeping') {
 			dexMod += 3;
 		} else {
 			dexMod += 1;
+		}
+
+		if (target.thirst >= 3 || target.hunger >= 3) {
+			dexMod -= 1;
 		}
 
 		World.dice.roll(dexMod, 8, function(total) {
