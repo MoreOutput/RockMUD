@@ -592,20 +592,22 @@ Character.prototype.getWeaponSlots = function(player, fn) {
 	}
 };
 
-Character.prototype.removeItem = function(arrayName, item, player, fn) {
-	World.remove('item', item, player, function() {
-		return fn(true, player, item);
+Character.prototype.removeItem = function(item, roomObj, fn) {
+	World.remove('items', item, roomObj, function(roomObj, item) {
+		return fn(true, item, roomObj);
 	});
 };
 
-Character.prototype.removeEq  = function(arrayName, item, player, fn) {
-	World.remove('eq', item, player, function() {
-		return fn(true, player, item);
+Character.prototype.removeEq  = function(item, player, fn) {
+	World.remove('eq', item, player, function(removed, player, item) {
+		return fn(true, item, player);
 	});
 }
 
 Character.prototype.getItem = function(eqArr, command, fn) {
-	World.search(eqArr, command, fn);
+	World.search(eqArr, command, function(slot) {
+		return fn(slot.item)
+	});
 }
 
 Character.prototype.wear = function(target, item, fn) {

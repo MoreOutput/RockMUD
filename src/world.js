@@ -604,6 +604,7 @@ World.prototype.remove = function(arrayName, item, target, fn) {
 
 		target[arrayName] = newArr;
 	} else {
+		console.log(item);
 		for (i; i < target[arrayName].length; i += 1) {
 			if (target[arrayName][i].item && target[arrayName][i].item.name === item.name) {
 				target[arrayName][i].item = null;

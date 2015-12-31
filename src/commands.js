@@ -647,7 +647,7 @@ Cmd.prototype.remove = function(target, command) {
 	if (command.msg !== '') {
 		Character.getItem(target.eq, command, function(item) {
 			if (item) {
-				Character.removeEq(item, target, function(removed, target, item) {
+				Character.removeEq(item, target, function(removed, item, target) {
 					if (removed) {
 						World.msgPlayer(target, {msg: 'Removed a ' + item.short, styleClass: 'cmd-wear'});
 					} else {
@@ -751,7 +751,7 @@ Cmd.prototype.help = function(target, command) {
 			data = JSON.parse(data);
 
 			helpTxt = '<h2>Help: ' + data.name + '</h2> ' + data.description + 
-			'<p class="small">Related: '+ data.related.toString() + '</p>';
+			'<p class="small">Related: '+ data.related.toString().replace(',', ', ') + '</p>';
 
 			World.msgPlayer(target, {msg: helpTxt, styleClass: 'cmd-help' });
 		} else {

@@ -173,6 +173,24 @@
             "slot": "hands",
             "equipped": true,
             "flags": []
+        },
+        {
+            "name": "Short Sword",
+            "short": "Short Sword",
+            "long": "A sharp looking short sword with a hilt wrapped in leather.",
+            "area": "Midgaard",
+            "id": 8,
+            "level": 1,
+            "itemType": "weapon",
+            "material": "iron",
+            "diceNum": 2,
+            "diceSides": 4,
+            "attackType": "slice",
+            "attackElement": "",
+            "weight": 4,
+            "slot": "hands",
+            "equipped": false,
+            "flags": []
         }
     ],
     "affects": [],
@@ -226,6 +244,6 @@
         }
     },
     "carry": 100,
-    "modified": "Thu Dec 31 2015 03:15:40 GMT-0500 (Eastern Standard Time)",
-    "sid": "R1ytHdYbixwJTPOXAAAB"
+    "modified": "Thu Dec 31 2015 04:17:34 GMT-0500 (Eastern Standard Time)",
+    "sid": "UULXFZ67GeKz4kbgAAAB"
 }
