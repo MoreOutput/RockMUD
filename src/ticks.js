@@ -64,7 +64,8 @@ World = require('./world').world;
 
 	}, 180000); // 3 minutes
 
-	// Regen, Hunger and Thirst Tick 
+
+	// Regen (Player only ATM);
 	setInterval(function() { 
 		var i = 0,
 		player; 
@@ -72,20 +73,36 @@ World = require('./world').world;
 		if (World.players.length > 0) {
 			for (i; i < World.players.length; i += 1) {
 				player = World.io.sockets.connected[World.players[i].sid].player;
-				Character.hunger(player, function(target) {
-					Character.thirst(target, function(target) {
-						Character.hpRegen(target, function(target, addedHP) {
-							Character.manaRegen(target, function(target, addedMana) {
-								Character.mvRegen(target, function(target, addedMv) {
-									Character.updatePlayer(target);
-								});
-							});
+
+				Character.hpRegen(player, function(player, addedHP) {
+					Character.manaRegen(player, function(player, addedMana) {
+						Character.mvRegen(player, function(player, addedMv) {
+							Character.updatePlayer(player);
 						});
 					});
 				});
 			}
 		}
-	}, 32000);
+	}, 50000);
+
+	// Hunger and Thirst Tick 
+	setInterval(function() { 
+		var i = 0,
+		player; 
+
+		if (World.players.length > 0) {
+			for (i; i < World.players.length; i += 1) {
+				player = World.io.sockets.connected[World.players[i].sid].player;
+
+				Character.hunger(player, function(target) {
+					Character.thirst(target, function(target) {
+						Character.updatePlayer(target);
+						
+					});
+				});
+			}
+		}
+	}, 120000);
 /*
 
 	// Saving characters Tick

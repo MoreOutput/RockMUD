@@ -275,6 +275,14 @@ World.prototype.getPlayersByArea = function(areaName, fn) {
 /*
 * Area and item setup on boot
 */
+
+// Rolls values for a single item
+World.prototype.rollItem = function(item, fn) {
+	var world = this,
+	refId = Math.random().toString().replace('0.', '');
+
+	return fn(item);
+};
 // Rolls values for Mobs, including their equipment
 World.prototype.rollMob = function(mobArr, fn) {
 	var world = this,

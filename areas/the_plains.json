@@ -26,8 +26,8 @@
 			], 
 			"monsters" : [
 				{
-					"name": "Boar",
-					"area": "Midgaard",
+					"name": "Bison",
+					"area": "The Plains",
 					"level": 1,
 					"short": "A large boar",
 					"long": "",
@@ -38,7 +38,8 @@
 					"hp": 100,
 					"chp": 100,
 					"position": "standing",
-					"ac": 6
+					"ac": 6,
+					"spawnNumber": 8
 				}
 			],
 			"items" : [],

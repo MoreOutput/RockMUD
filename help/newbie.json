@@ -4,5 +4,5 @@
 	"type" : "Help",
 	"levels" : "All",
 	"restrict": 0,
-	"description" : "Send a message to everyone on the mud below level 10 and above level 50. See HELP CHANNELS for a comprehensive overview of communication commands."
+	"description" : "<p>The newbie guide.</p>"
 }

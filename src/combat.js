@@ -21,159 +21,125 @@ You swing and miss a Red Dragon with barbaric intensity (14)
 * Starting combat, begin() much return true and the target node for a fight to continue
 * otherwise both parties are left in the state prior. Beginning combat does not add Wait.
 */
-Combat.prototype.begin = function(s, target, fn) {
-	var combat = this;
 
-	s.player.position = 'fighting';
-	target.position = 'fighting'; 
+Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
+	var combat = this;
 	
-	World.World.dice.roll(s.player.dex/4, 20, function(total) { // Roll against AC
-		var i = 0;
 
-		if (total > target.ac) {
-			combat.round(s, target, 0, function(s, damage) {
-				return fn(true, target);
-			});
-		} else {
-			return s.emit('msg', {msg: 'You swing and miss ' +  target.short, styleClass: 'player-miss'});
-		}
-	});
-};
-
-/*
-* The AC roll for the attacker
-*/
-Combat.prototype.attackerRound = function(s, target, fn) {
-	var combat = this;
-	World.dice.roll(s.player.dex/4, 20, function(total) { // Roll against AC
-		var i = 0;
-
-		if (total > target.ac) {
-			combat.round(s, target, 0, function(s, damage) {
-				return fn(s, target);
-			});
-		} else {
-			s.emit('msg', {msg: 'You swing and miss ' +  target.short, styleClass: 'player-miss'});
-			return fn(s, target);	
-		}
-	});
-};
-
-/*
-* The AC roll for the target
-*/
-Combat.prototype.targetRound = function(s, target, fn) {
-	var combat = this;
-	World.dice.roll(target.dex/4, 20, function(total) { // Roll against AC
-		if (total > s.player.ac) {		
-			combat.round(target, s, 0, function(s, damage) {
-				return fn(s, target);
-			});		
-		} else {
-			s.emit('msg', {
-				msg: target.short + ' misses '+ ' you!',
-				styleClass: 'foe-miss'
-			});
-		}
-	});
-};
-
-Combat.prototype.calXP = function(s, target, fn) {
-	if ((target.level) >= (s.player.level - 5)) {
-		if (target.level >= s.player.level) {
-			World.dice.roll(1, 4, 1, function(total) {
-				var exp;
-				exp = ((target.level - s.player.level) * total) + 1 * (total * 45);
-				s.player.exp = exp + s.player.exp;
-				return fn( exp );
-			});
-		} else {
-			World.dice.roll(1, 4, function(total) {
-				return fn(total * 10);
-			});
-		}
-	} else {
-		return fn(0);
-	}
-};
-
-// Calculate the total damage done with a melee hit
-Combat.prototype.meleeDamage = function(attacker, opponent, weapon, fn) {
-	World.dice.roll(1, 20, function(total) {
-		total = total + World.dice.roll(1, attacker.str/4);
-		total = total - World.dice.roll(1, opponent.ac/3);
-
-		if (typeof weapon !== 'function') {
-			// Passed in weapon
-			total += World.dice.roll(weapon.diceNum, weapon.diceSides);
-			return fn(total, weapon);
-		} else {
-			// Unarmed Damage
-			return weapon(total, weapon);
-		}	
-	});
-};
-
-Combat.prototype.round = function(s, target, mod, fn) {
-	var combat = this;
 	// Is a player attacking something
-	if (s.player) {
-		if (s.player.wait > 0) {
-			s.player.wait -= 1;
-		} else {
-			s.player.wait = 0;
-		}
-		
-		Character.getWeapons(s.player, function(weapons) {
-			var i = 0;
-			for (i; i < weapons.length; i += 1) {
-				combat.meleeDamage(s.player, target, weapons[i], function(total) {
-					s.emit('msg', {
-						msg: 'You ' + weapons[i].attackType + ' ' + target.short + '(' + total + ')', 
-						styleClass: 'player-hit'
-					});
-
-					target.chp = (target.chp - total);
-
-					return fn(s, total);
-				});
-			}
-		});
+	if (attacker.wait > 0) { 
+		attacker.wait -= 1;
 	} else {
-		Character.getWeapons(s, function(weapons) {
-			var i = 0;
-			for (i; i < weapons.length; i += 1) {
-				combat.meleeDamage(s, target.player, weapons[i], function(total) {
-					target.player.chp = (target.player.chp - total);
-					return fn(target, total);
-				});
-			}
-		});
+		attacker.wait = 0;
 	}
-};
 
-/*
-* If begin() was successful then we can move to running this function until:
-* 1) attacker or target hits 0 chps.
-* 2) a skill or command ends the battle -- flee for example
-* 3) the target or attacker changes postions to sleeping, or 'prone'
-* Each player gets one round of attacks against their target
-*/
-Combat.prototype.fight = function(s, target, fn) {
-	var combat = this;
-	combat.attackerRound(s, target, function(s, target) {	
-		if (target.chp > 0) {
-			combat.targetRound(s, target, function(s, target) {
-				return fn(true);
+	Character.getWeaponSlots(attacker, function(weaponSlots) {
+		var attackerMods = World.dice.getMods(attacker),
+		opponentMods = World.dice.getMods(opponent),
+		i = 0,
+		weapon;
+
+		//Character.getShield(opponent, function(shield) {
+
+		//});
+
+		if (!weaponSlots.length) {
+			weaponSlots = [{
+				name: 'Right Hand',
+				item: {
+					name: 'Fists',
+					level: attacker.level,
+					diceNum: attacker.diceNum,
+					diceSides: attacker.diceSides,
+					itemType: 'weapon',
+					equipped: true,
+					attackType: attacker.attackType,
+					material: 'flesh'
+				},
+				dual: false,
+				slot: 'hands'
+			}]
+		}
+
+		for (i; i < weaponSlots.length; i += 1) {
+			weapon = weaponSlots[i].item;
+
+			World.dice.roll(1, 20, (attackerMods.dex - opponent.meleeRes), function(attackerRoll) {
+				World.dice.roll(1, 20, (opponent.ac + (opponentMods.dex - attacker.knowledge)), function(opponentRoll) {
+					// Total amounts of hits in the round
+					var numOfAttacks = (attacker.hitRoll - opponent.level) + attackerMods.dex,
+					j = 0;
+
+					if (numOfAttacks < 0) {
+						numOfAttacks = 0;
+					}
+
+					if (attackerRoll > opponentRoll) {
+						numOfAttacks += 1;
+					}
+
+					if (attackerMods.str > opponentMods.str) {
+						if (World.dice.roll(1, 20) > 8) {
+							numOfAttacks += 1;
+						}
+					}
+
+					if (attackerMods.dex > opponentMods.dex) {
+						if (World.dice.roll(1, 20) > 12) {
+							numOfAttacks += 1;
+						}
+					}
+					
+					for (j; j < numOfAttacks; j += 1) {
+
+						// Roll damage per hit
+						World.dice.roll(weapon.diceNum + attackerMods.str, weapon.diceSides, attackerMods.str, function(damage) {
+							damage = Math.round(damage + (attacker.damRoll/4) );
+							damage -= opponent.ac;
+
+							if (attackerMods.str > 2) {
+								damage += 1;
+							}
+
+							if (damage < 0) {
+								damage = 0;
+							}
+
+							World.msgPlayer(attacker, {
+								msg: 'You ' + weapon.attackType + ' ' + opponent.short + ' <span class="red">(' + damage + ')</span>',
+								noPrompt: true,
+								styleClass: 'player-hit grey'
+							});
+							
+							World.msgPlayer(opponent, {
+								msg: attacker.short + ' hits you with some intensity <span class="red">(' + damage + ')</span>',
+								noPrompt: true,
+								styleClass: 'player-hit yellow'
+							});
+							
+							/*
+							TODO: array for player name
+							if (roomObj.playersInRoom.length > 0) {
+								World.dice.roll(1, 10, function(total) {
+									if (total > 8) {
+										World.msgRoom(roomObj, {
+											msg: 'You can hear nothin over the hectic sounds of fighting.',
+											styleClass: 'player-hit-room grey',
+											playerName: attacker.name
+										});
+									}
+								});
+							}
+							*/
+							opponent.chp -= damage;
+						});
+					}
+
+					return fn(attacker, opponent, roomObj);
+				});
 			});
-		} else {
-			return fn(false);
 		}
 	});
 };
-
-Combat.prototype.createMessage = function(s, target, fn) {
-	var messagePatt;
-}
 
 module.exports.combat = new Combat();

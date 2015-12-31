@@ -1,5 +1,6 @@
 {
-    "name": "Fighter",
+    "name": "Warrior",
+    "abbr": "War",
     "minLevel": 0,
     "playable": true,
     "hp": 10,

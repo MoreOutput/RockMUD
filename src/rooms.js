@@ -130,39 +130,34 @@ Room.prototype.getDisplay = function(areaName, roomId, fn) {
 
 Room.prototype.removeItem = function(item, roomObj, fn) {
 	World.remove('items', item, roomObj, function(removed, item, roomObj) {
-		return fn(true, roomObj, item);
+		return fn(roomObj, item);
 	});
 };
 
 Room.prototype.removePlayer = function(player, roomObj, fn) {
 	World.remove('playersInRoom', player, roomObj, function(removed, player, roomObj) {
-		return fn(true, roomObj, player);
+		return fn(roomObj, player);
 	});
 };
 
 Room.prototype.removeMob = function(mob, roomObj, fn) {
 	World.remove('monsters', mob, roomObj, function(removed, mob, roomObj) {
-		return fn(true, roomObj);
+		return fn(roomObj, mob);
 	});
 };
 
-Room.prototype.addCorpse = function(s, monster, fn) {
-	this.getRoomObject({
-		area: s.player.area,
-		id: s.player.roomid
-	}, function(roomObj) {
-		monster.short = 'rotting corpse of a ' + monster.name;
-		monster.flags.push({decay: 5});
-		monster.itemType = 'corpse';
-		monster.corpse = true;
-		monster.weight = monster.weight - 2;
-		monster.chp = 0;
-		monster.hp = 0;
+Room.prototype.addCorpse = function(roomObj, corpse, fn) {
+	corpse.short = 'rotting corpse of a ' + monster.name;
+	corpse.decay = 1;
+	corpse.itemType = 'corpse';
+	corpse.corpse = true;
+	corpse.weight = corpse.weight - 1;
+	corpse.chp = 0;
+	corpse.hp = 0;
 
-		roomObj.items.push(monster);
-	});
-	
-	return fn();
+	roomObj.items.push(monster);
+
+	return fn(roomObj);
 };
 
 module.exports.room = new Room();

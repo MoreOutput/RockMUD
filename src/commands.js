@@ -23,16 +23,11 @@ Cmd.prototype.fire = function(commandName, target, command, fn) {
 Cmd.prototype.move = function(target, command, fn) {
 	var world = this,
 	direction = command.msg,
-	s;
-
-	if (target.player) {
-		s = target;
-		target = target.player;
-	}
+	dexMod = World.dice.getDexMod(target);
 
 	if (target.position !== 'fighting' && target.position 
 		!== 'resting' && target.position !== 'sleeping' 
-		&& target.cmv > 5 && target.wait === 0) {
+		&& target.cmv > (4 - dexMod) && target.wait === 0) {
 
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.checkExit(roomObj, direction, function(isValidExit, exitObj) {
@@ -44,7 +39,6 @@ Cmd.prototype.move = function(target, command, fn) {
 					Room.getDisplay(exitObj.area, exitObj.id, function(displayHTML, targetRoom) {
 						Room.checkExitCriteria(target, targetRoom, function(clearToMove) {
 							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {
-
 								/*
 								World.checkEntranceEvents(targetRooom, function() {
 									World.checkEvent('onExit', targetRoom, function() {
@@ -54,8 +48,12 @@ Cmd.prototype.move = function(target, command, fn) {
 								*/
 
 								if (clearToMove) {
-									World.dice.movementCheck(target, targetRoom, function(moveMod) {
-										target.cmv = Math.round((target.cmv - ( (12) - target.dex/4)));
+									World.dice.roll(1, 4, function(moveRoll) {
+										target.cmv -= Math.round(4 + moveRoll - dexMod);
+
+										if (target.cmv < 0) {
+											target.cmv = 0;
+										}
 
 										target.roomid = targetRoom.id;
 
@@ -95,6 +93,10 @@ Cmd.prototype.move = function(target, command, fn) {
 									});
 								} else {
 									target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
+
+									if (target.cmv < 0) {
+										target.cmv = 0;
+									}
 
 									if (typeof fn === 'function') {
 										return fn(true, roomObj, targetRoom);
@@ -172,7 +174,7 @@ Cmd.prototype.who = function(target, command) {
 		});
 	} else {
 		World.msgPlayer(target, {
-			msg: '<div class="cmd-who"><h2>No Visible Players</h2></div>', 
+			msg: '<div class="cmd-who"><h2>No Visible Players</h2></div>',
 			styleClass: 'who-cmd'
 		});
 	}
@@ -327,61 +329,67 @@ Cmd.prototype.drop = function(target, command, fn) {
 };
 
 // For attacking in-game monsters
-Cmd.prototype.kill = function(target, command, fn) {
-	World.getRoomObject(target.area, target.roomid, function(roomObj) {
-		World.search(roomObj.monsters, command, function(fnd, target) {
-			if (fnd) {
-				Combat.begin(target, target, function(contFight, target) { // the first round qualifiers
-					var combatInterval;
+Cmd.prototype.kill = function(player, command) {
+	if (player.position !== 'sleeping' && player.position !== 'resting') {
+		World.getRoomObject(player.area, player.roomid, function(roomObj) {
+			World.search(roomObj.monsters, command, function(opponent) {
+				if (opponent && opponent.roomid === player.roomid) {
+					opponent.position = 'fighting';
+					player.position = 'fighting';
 
-					Character.prompt(s);
+					Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) { // the first round qualifiers
+						var combatInterval;
+						
+						World.prompt(player);
 
-					if (contFight) {
-						// Combat Loop
-						combatInterval = setInterval(function() {
-							if (target.position === 'fighting' && target.position === 'fighting') {
-								
-								Combat.fight(target, target, function(contFight) {
-									if (!contFight) {
-										target.position = 'dead';
+						if (opponent.chp > 0) {
+							combatInterval = setInterval(function() {
+								World.getRoomObject(player.area, player.roomid, function(roomObj) {
+									Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) {
+										Combat.round(opponent, player, roomObj, function(opponent, player, roomObj) {
+											World.prompt(player);
+										/*
+										if (contFight) {
+											clearInterval(combatInterval);
+											World.msgPlayer(player, {msg: 'You died!', styleClass: 'combat-death'});
+										} else {
+											opponent.position = 'dead';
 
-										clearInterval(combatInterval);
+											clearInterval(combatInterval);
 
-										Room.removeMonster({
-											area: target.area,
-											id: target.roomid
-										}, target, function(removed) {
-											if (removed) { 
-												Room.addCorpse(target, target, function(corpse) {
-													Combat.calXP(target, target, function(earnedXP) {
-														target.position = 'standing';
-														target.wait = 0;
+											Room.removeMob(opponent, roomObj, function(roomObj, opponent) {
+												if (roomObj) {
+													Room.addCorpse(roomObj, opponent, function(roomObj, corpse) {
+														World.dice.calXP(player, opponent, function(earnedXP) {
+															player.xp += earnedXP;
+															player.position = 'standing';
+															player.wait = 0;
 
-														if (earnedXP > 0) {
-															World.msgPlayer(target, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
-														} else {
-															World.msgPlayer(target, {msg: 'You won but learned nothing.', styleClass: 'victory'});
-														}
+															if (earnedXP > 0) {
+																World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
+															} else {
+																World.msgPlayer(player, {msg: 'You won but learned nothing.', styleClass: 'victory'});
+															}
+														});
 													});
-												});
-											}
+												}
+											});
+										}
+										*/
 										});
-
-									} else if (target.chp <= 0) {
-										clearInterval(combatInterval);
-										World.msgPlayer(target, {msg: 'You died!', styleClass: 'combat-death'});
-										//Character.death(s);
-									}
+									});
 								});
-							}	
-						}, 1800);
-					}
-				});
-			} else {
-				World.msgPlayer(target, {msg: 'There is nothing by that name here.', styleClass: 'error'});
-			}
+							}, 1800);
+						}
+					});
+				} else {
+					World.msgPlayer(player, {msg: 'There is nothing by that name here.', styleClass: 'error'});
+				}
+			});
 		});
-	});
+	} else {
+		World.msgPlayer(player, {msg: 'Hard to do that from this position.', styleClass: 'combat-death'});
+	}
 };
 
 Cmd.prototype.look = function(target, command) {
@@ -589,7 +597,7 @@ Cmd.prototype.equipment = function(target, command) {
 		if (target.eq[i].item === null || target.eq[i].item === '') {
 			eqStr += ' Nothing</li>';
 		} else {
-			eqStr += '<label>'  + target.eq[i].item.short + '</label></li>';
+			eqStr += '<label class="yellow">'  + target.eq[i].item.short + '</label></li>';
 		}
 	}
 	
@@ -722,8 +730,8 @@ Cmd.prototype.score = function(target, command, fn) {
 					'<li class="stat-position"><label>Position: </label> ' + target.position + '</li>' +
 					'<li class="stat-level">You are a level ' + target.level + ' ' + target.race + ' '+  target.charClass + '.</li>' +
 					'<li class="stat-carry">You are carrying ' + target.weight + '/' + target.maxWeight + ' pounds.</li>' +
-					'<li class="stat-xp">You need <strong>' + target.exp + '</strong> experience for your next level.</li>' +
-					'<li class="stat-killcnt last">You have slain 100 foes.</li>' +
+					'<li class="stat-xp">You need <strong>' + target.xp + '</strong> experience for your next level.</li>' +
+					'<li class="stat-killcnt last">You have slain ' + target.killed +' foes.</li>' +
 				'</ul>' +
 			'</div>'
 				'</div>' +

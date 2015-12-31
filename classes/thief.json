@@ -1,11 +1,13 @@
 {
     "name": "Thief",
+    "abbr": "Thi",
     "minLevel": 0,
     "playable": true,
     "mv": 10,
     "dex": 2,
     "gold": 40,
     "mainStat": "dex",
+    "banRace": ["Ogre"],
     "skills": [
         {
             "name": "backstab",

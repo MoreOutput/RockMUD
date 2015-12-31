@@ -1,21 +1,21 @@
 {
-    "name": "Rocky",
+    "name": "test",
     "lastname": "",
+    "displayName": "Test",
     "title": "",
     "role": "player",
     "sex": "",
     "charClass": "thief",
-    "displayName": "Rocky",
-    "level": 50,
-    "xp": 0,
-    "xpToLevel": 0,
+    "level": 1,
+    "exp": 0,
+    "expToLevel": 0,
     "position": "standing",
     "alignment": "",
     "chp": 200,
     "hp": 200,
     "cmana": 200,
     "mana": 200,
-    "cmv": 20,
+    "cmv": 182,
     "mv": 210,
     "str": 10,
     "wis": 10,
@@ -25,14 +25,14 @@
     "wait": 0,
     "ac": 10,
     "damRoll": 1,
-    "hitRoll": 2,
+    "hitRoll": 1,
     "magicRes": 0,
     "meleeRes": 0,
     "poisonRes": 0,
     "detection": 0,
     "knowledge": 0,
     "weight": 0,
-    "maxWeight": 120,
+    "maxWeight": 0,
     "gold": 45,
     "hunger": 0,
     "thirst": 0,
@@ -49,11 +49,6 @@
     "trains": 25,
     "size": 3,
     "killed": 0,
-    "languages": [
-        {
-            "name": "common"
-        }
-    ],
     "eq": [
         {
             "name": "Head",
@@ -97,24 +92,7 @@
         },
         {
             "name": "Right Hand",
-            "item": {
-                "name": "Short Sword",
-                "short": "Short Sword",
-                "long": "A sharp looking short sword with a hilt wrapped in leather.",
-                "area": "Midgaard",
-                "id": 8,
-                "level": 1,
-                "itemType": "weapon",
-                "material": "iron",
-                "diceNum": 2,
-                "diceSides": 4,
-                "attackType": "slice",
-                "attackElement": "",
-                "weight": 4,
-                "slot": "hands",
-                "equipped": true,
-                "flags": []
-            },
+            "item": null,
             "dual": false,
             "slot": "hands"
         },
@@ -155,26 +133,7 @@
             "slot": "floating"
         }
     ],
-    "items": [
-        {
-            "name": "Short Sword",
-            "short": "Short Sword",
-            "long": "A sharp looking short sword with a hilt wrapped in leather.",
-            "area": "Midgaard",
-            "id": 8,
-            "level": 1,
-            "itemType": "weapon",
-            "material": "iron",
-            "diceNum": 2,
-            "diceSides": 4,
-            "attackType": "slice",
-            "attackElement": "",
-            "weight": 4,
-            "slot": "hands",
-            "equipped": true,
-            "flags": []
-        }
-    ],
+    "items": [],
     "affects": [],
     "racial": [],
     "skills": [
@@ -202,12 +161,14 @@
     "autoloot": true,
     "autosac": false,
     "behaviors": [],
+    "sid": "PpOm4twBqQ-fTkH_AAAA",
     "race": "elf",
-    "password": "ba6089e8757699fa49eef82e31254a5c4454ac6b017ce254103e3b327bf83aed6b7b9b3cb63ffe5b2a6f1d9b229c568af2235c3f2518a5b10d9ba21b679c0a00",
+    "password": "a818de7ba8452ae1728fa224643e6d0656aaa4d90123e454e06d1702cdc8b9b49daf4584f16026347412f6fc3f5afa64028fb651fce0933a4b3db1a0e8a0044e",
     "isPlayer": true,
-    "salt": "23da2c6fa90e272924a73f1b4ca98b8dfa607307ad4244250c5698d5d26d458a972f869fabf63da2f4657b43d51a67a0efa809d81b76add46bcc6cfc2018a659cafef15dab516dba36d8da1c6d5a29026f8c841105243dbc8109c59440666c034a9d2a5e8ab9bc32503a2ff720b075ea07d193f59d2f9772cf4c2eb888316924",
-    "created": "2015-12-16T04:30:19.644Z",
-    "saved": "2015-12-16T04:30:19.659Z",
+    "salt": "97c15d820b5be8d86a9065d92008c6a7f201e4d9f83dd29a5de8275e7cf8a4ad493d51be88945aec648c1066f71a2dc34f018ee852f9902f0d7e96f3afcc19eb77cd42e89518c30a122f533ff3ce549ba6efd0b9477b1e704e1e09ce45e94062deea7d5d9312cb4bc5d0ec3599af7d88fec59435bce8408f72d5183fb9d7ffa6",
+    "created": "2015-12-27T02:31:55.720Z",
+    "saved": "2015-12-27T02:31:55.735Z",
+    "deaths": 0,
     "settings": {
         "autosac": false,
         "autoloot": true,
@@ -226,6 +187,5 @@
         }
     },
     "carry": 100,
-    "modified": "Wed Dec 30 2015 01:02:47 GMT-0500 (Eastern Standard Time)",
-    "sid": "EDt8r9ohZfPfZfHtAAAA"
+    "modified": "Sat Dec 26 2015 21:32:10 GMT-0500 (Eastern Standard Time)"
 }

@@ -128,16 +128,16 @@ Character.prototype.getPassword = function(s, fn) {
 
 // Add a player reference object to the players array
 Character.prototype.addPlayer = function(s, fn) {
-	var  i = 0;	
+	var i = 0;
 
 	for (i; i < World.players.length; i += 1) {
 		if (s.player.name === World.players[i].name) {
-			return fn(false, 'Already Logged in. Disconnecting...Refresh the page and login again');
+			return fn(false, 'Already Logged in. Disconnecting. Refresh the page and try to login again.');
 		}
 	}
 	
 	World.players.push({
-		name: s.player.name, 
+		name: s.player.name,
 		sid: s.id,
 		area: s.player.area,
 		roomid: s.player.roomid
@@ -178,7 +178,6 @@ Character.prototype.create = function(r, s, fn) {
 
 	character.rollStats(s.player, function(player) {
 		s.player = player;
-	
 		character.generateSalt(function(salt) {
 			s.player.salt = salt;
 			character.hashPassword(salt, s.player.password, 1000, function(hash) {
@@ -186,7 +185,7 @@ Character.prototype.create = function(r, s, fn) {
 
 				fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
 					var i = 0;
-		
+
 					if (err) {
 						throw err;
 					}
@@ -259,6 +258,7 @@ Character.prototype.rollStats = function(player, fn) {
 	}
 
 	player.carry = player.str * 10;
+	player.ac = World.dice.getDexMod(player) + 2;
 
 	return fn(player);
 };
@@ -366,7 +366,7 @@ Character.prototype.raceSelection = function(r, s, fn) {
 
 				return fn(r, s, false);
 			} else {
-				s.emit('msg', {msg: 'No help file found for this race.', styleClass: 'error' });	
+				s.emit('msg', {msg: 'No help file found for this race.', styleClass: 'error' });
 
 				return fn(r, s, false);
 			}
@@ -406,34 +406,26 @@ Character.prototype.save = function(player, fn) {
 	});
 };
 
-// Roll a modifier for a stat
-Character.prototype.getModifier = function(target, stat, fn) {
-	var mod = Math.round(target[stat]/3);
-	
-	if (!fn) {
-		return mod;
-	} else {
-		return fn(mod);
-	}
-};
-
 Character.prototype.hpRegen = function(target, fn) {
 	var conMod = World.dice.getConMod(target);
 
+	// unless the charcter is a fighter they have 
+	// a 10% chance of skipping hp regen
+
 	if (target.chp < target.hp) {
 		if (target.position === 'sleeping') {
-			conMod += 2;
-		} else if (target.position === 'resting') {
+			conMod += 3;
+		} else {
 			conMod += 1;
 		}
 
-		World.dice.roll(conMod, 8, function(total) {
+		World.dice.roll(conMod, 4, function(total) {
 			total = total + target.level;
 
 			target.chp += total;
 
 			if (target.chp > target.hp) {
-				targer.chp = target.hp;
+				target.chp = target.hp;
 			}
 
 			fn(target, total);
@@ -447,9 +439,12 @@ Character.prototype.manaRegen = function(target, fn) {
 	var intMod = World.dice.getIntMod(target);
 
 	if (target.cmana < target.mana) {
+		// unless the charcter is a wizard they have 
+		// a 10% chance of skipping mana regen
+
 		if (target.position === 'sleeping') {
 			intMod += 2;
-		} else if (target.position === 'resting') {
+		} else {
 			intMod += 1;
 		}
 
@@ -459,7 +454,7 @@ Character.prototype.manaRegen = function(target, fn) {
 			target.chp += total;
 
 			if (target.cmana  > target.mana ) {
-				targer.cmana  = target.mana ;
+				target.cmana  = target.mana ;
 			}
 
 			fn(target, total);
@@ -472,18 +467,21 @@ Character.prototype.manaRegen = function(target, fn) {
 Character.prototype.mvRegen = function(target, fn) {
 	var dexMod = World.dice.getDexMod(target);
 
+	// unless the charcter is a thief they have 
+	// a 10% chance of skipping move regen
+
 	if (target.cmv < target.mv) {
 		if (target.position === 'sleeping') {
 			dexMod += 3;
-		} else if (target.position === 'resting') {
-			dexMod += 2;
+		} else {
+			dexMod += 1;
 		}
 
 		World.dice.roll(dexMod, 8, function(total) {
 			target.cmv += total;
 
 			if (target.cmv > target.mv) {
-				targer.cmv = target.mv;
+				target.cmv = target.mv;
 			}
 
 			fn(target, total);
@@ -549,7 +547,7 @@ Character.prototype.thirst = function(target, fn) {
 };
 
 // Removes experience and gained levels from character
-Character.prototype.experienceRot = function() {
+Character.prototype.xpRot = function() {
 
 };
 
@@ -563,28 +561,17 @@ Character.prototype.addToInventory = function(item, player, fn) {
 * Returns all items that meet the query criteria, could be optimized if your
 * slots are consistent.
 */
-Character.prototype.getWeapons = function(creature, fn) {
+Character.prototype.getWeaponSlots = function(player, fn) {
 	var i = 0,
 	weapons = [];
 
-	for (i; i < creature.eq.length; i += 1) {	
-		if (creature.eq[i].slot === 'hands' && creature.eq[i].item !== null && creature.eq[i].item.itemType === 'weapon') {
-			weapons.push(creature.eq[i].item);
+	for (i; i < player.eq.length; i += 1) {
+		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
+			&& player.eq[i].item.itemType === 'weapon') {
+			weapons.push(player.eq[i]);
 		}
 	}
 
-	if (weapons.length === 0) {
-		weapons.push({
-			attackType: creature.attackType,
-			itemType: 'fist',
-			material: 'flesh',
-			weight: 0,
-			slot: 'hands',
-			diceNum: 2,
-			diceSides: 2
-		});
-	}
-	
 	if (typeof fn === 'function') {
 		return fn(weapons);
 	} else {

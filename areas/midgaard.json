@@ -7,11 +7,12 @@
 	"reloads": 0,
 	"created": "",
 	"saved": "",
-	"author": "",
+	"author": "Rocky",
 	"alwaysProcess": true,
 	"messages": [
 		{"msg": "A cool breeze passes through."}, 
-		{"msg": "You hear the distant howl of wolves."}
+		{"msg": "You hear the distant howl of wolves.", "limit": "night"},
+		{"msg": "The bustle and noise of the city can be too much for many people."}
 	],
 	"rooms" : [
 		{
@@ -83,7 +84,7 @@
 					"area": "Midgaard",
 					"weight": 120,
 					"diceNum": 2, 
-					"diceSides": 8,
+					"diceSides": 6,
 					"dice": "2d8",
 					"position": "standing",
 					"attackType": "bite",
