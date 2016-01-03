@@ -24,7 +24,6 @@ You swing and miss a Red Dragon with barbaric intensity (14)
 
 Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 	var combat = this;
-	
 
 	// Is a player attacking something
 	if (attacker.wait > 0) { 
@@ -33,10 +32,13 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 		attacker.wait = 0;
 	}
 
-	Character.getWeaponSlots(attacker, function(weaponSlots) {
+	Character.getSlotsWithWeapons(attacker, function(weaponSlots) {
 		var attackerMods = World.dice.getMods(attacker),
 		opponentMods = World.dice.getMods(opponent),
 		i = 0,
+		attackerRoundTxt = '',
+		opponentRoundTxt = '',
+		roomRoundTxt = '',
 		weapon;
 
 		//Character.getShield(opponent, function(shield) {
@@ -85,55 +87,67 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 					}
 
 					if (attackerMods.dex > opponentMods.dex) {
-						if (World.dice.roll(1, 20) > 12) {
+						if (World.dice.roll(1, 20) > 15) {
 							numOfAttacks += 1;
 						}
 					}
 					
 					for (j; j < numOfAttacks; j += 1) {
-
 						// Roll damage per hit
-						World.dice.roll(weapon.diceNum + attackerMods.str, weapon.diceSides, attackerMods.str, function(damage) {
-							damage = Math.round(damage + (attacker.damRoll/4) );
+						World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str, function(damage) {
+							damage = Math.round(damage + (attacker.damRoll/2) + (attacker.level) );
 							damage -= opponent.ac;
 
 							if (attackerMods.str > 2) {
-								damage += 1;
+								damage += attackerMods.str;
+							} else {
+								damage -= 1;
 							}
 
 							if (damage < 0) {
 								damage = 0;
 							}
 
-							World.msgPlayer(attacker, {
-								msg: 'You ' + weapon.attackType + ' ' + opponent.short + ' <span class="red">(' + damage + ')</span>',
-								noPrompt: true,
-								styleClass: 'player-hit grey'
-							});
-							
-							World.msgPlayer(opponent, {
-								msg: attacker.short + ' hits you with some intensity <span class="red">(' + damage + ')</span>',
-								noPrompt: true,
-								styleClass: 'player-hit yellow'
-							});
-							
-							/*
-							TODO: array for player name
-							if (roomObj.playersInRoom.length > 0) {
-								World.dice.roll(1, 10, function(total) {
-									if (total > 8) {
-										World.msgRoom(roomObj, {
-											msg: 'You can hear nothin over the hectic sounds of fighting.',
-											styleClass: 'player-hit-room grey',
-											playerName: attacker.name
-										});
-									}
-								});
+							if (attacker.isPlayer) {
+								attackerRoundTxt +=  '<div>You ' + weapon.attackType + ' a ' + opponent.displayName + ' <span class="red">(' + damage + ')</span></div>';
+							} else {
+								opponentRoundTxt +=  '<div>' + attacker.displayName + ' ' + weapon.attackType + 's you with some intensity <span class="red">(' + damage + ')</span></div>';
 							}
-							*/
+
 							opponent.chp -= damage;
 						});
 					}
+
+					if (attackerRoundTxt) {
+						World.msgPlayer(attacker, {
+							msg: attackerRoundTxt,
+							noPrompt: true,
+							styleClass: 'player-hit grey'
+						});
+					}
+					
+					if (opponentRoundTxt) {
+						World.msgPlayer(opponent, {
+							msg: opponentRoundTxt,
+							noPrompt: true,
+							styleClass: 'player-hit yellow'
+						});
+					}
+					
+					/*
+					TODO: array for player name
+					if (roomObj.playersInRoom.length > 0) {
+						World.dice.roll(1, 10, function(total) {
+							if (total > 8) {
+								World.msgRoom(roomObj, {
+									msg: 'You can hear nothin over the hectic sounds of fighting.',
+									styleClass: 'player-hit-room grey',
+									playerName: attacker.name
+								});
+							}
+						});
+					}
+					*/
 
 					return fn(attacker, opponent, roomObj);
 				});

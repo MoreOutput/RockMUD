@@ -28,7 +28,6 @@ World = require('./world').world;
 	}, 1100);
 
 	// Areas refresh when they are devoid of players for at least four minutes 
-	// or when they have the property alwaysReload: true.
 	setInterval(function() {
 		var i = 0;
 
@@ -59,10 +58,19 @@ World = require('./world').world;
 
 	}, 3600000); // 1 hour
 
-	// Area messages, every three minutes the mud has a 50% chance of giving the player
-	// a random message found in room.messages (with area.messages being checked if theres nothing)
 	setInterval(function() {
-
+		var i = 0;
+		
+		if (World.areas.length) {
+			for (i; i < World.areas.length; i += 1) {
+				if (World.areas[i].messages.length) {
+					World.msgArea(World.areas[i].name, {
+						msg: World.areas[i].messages[World.dice.roll(1, World.areas[i].messages.length) - 1].msg,
+						randomPlayer: true // this options randomizes who hears the message
+					});
+				}
+			}
+		}
 	}, 180000); // 3 minutes
 
 
@@ -98,7 +106,6 @@ World = require('./world').world;
 				Character.hunger(player, function(target) {
 					Character.thirst(target, function(target) {
 						Character.updatePlayer(target);
-						
 					});
 				});
 			}

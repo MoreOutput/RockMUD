@@ -1,8 +1,8 @@
 {
-	"name" : "Newbie",
+	"name" : "The Newbie Guidebook (Incomplete)",
 	"related" : ["Channels", "Movement", "Guide", "Newbie"],
 	"type" : "Help",
 	"levels" : "All",
 	"restrict": 0,
-	"description" : "<p>The newbie guide.</p>"
+	"description" : "This guide is incomplete. Good luck."
 }

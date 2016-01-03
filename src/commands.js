@@ -30,7 +30,7 @@ Cmd.prototype.move = function(target, command, fn) {
 		&& target.cmv > (4 - dexMod) && target.wait === 0) {
 
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
-			Room.checkExit(roomObj, direction, function(isValidExit, exitObj) {
+			Room.checkExit(roomObj, direction, function(exitObj) {
 				if (exitObj) {
 					if (!exitObj.area) {
 						exitObj.area = roomObj.area;
@@ -69,11 +69,11 @@ Cmd.prototype.move = function(target, command, fn) {
 												styleClass: 'room'
 											});
 
-											Room.removePlayer(target, roomObj, function() {
+											Room.removePlayer(roomObj, target, function(roomObj, target) {
 												targetRoom.playersInRoom.push(target);
 											});
 										} else {
-											Room.removeMob(target, roomObj, function() {
+											Room.removeMob(roomObj, target, function(roomObj, target) {
 												targetRoom.monsters.push(target);
 											});
 										}
@@ -106,8 +106,6 @@ Cmd.prototype.move = function(target, command, fn) {
 						});
 					});
 				} else {
-					target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
-
 					World.msgPlayer(target, {
 						msg: 'There is no exit in that direction.', 
 						styleClass: 'error'
@@ -190,17 +188,17 @@ Cmd.prototype.get = function(target, command, fn) {
 			if (command.msg !== 'all') {
 				World.search(roomObj.items, command, function(item) {
 					if (item) {
-						Room.removeItem(item, roomObj, function(removed, roomObj) {
-							Character.addToInventory(item, target, function(added) {
-								if (added) {
+						Room.removeItem(roomObj, item, function(roomObj, item) {
+							Character.addToInventory(target, item, function(target, item) {
+								if (item) {
 									World.msgRoom(roomObj, {
-										msg: target.displayName + ' picks up ' + item.short,
+										msg: target.displayName + ' picks up a ' + item.short,
 										playerName: target.name,
 										styleClass: 'cmd-get yellow'
 									});
 
 									World.msgPlayer(target, {
-										msg: 'You pick up ' + item.short,
+										msg: 'You pick up a ' + item.short,
 										styleClass: 'cmd-get blue'
 									});
 
@@ -228,10 +226,10 @@ Cmd.prototype.get = function(target, command, fn) {
 						item = roomObj.items[i - 1];
 					}
 
-					Room.remove('items', item, roomObj, function(removed, newRoom) {
-						Character.addToInventory(item, target, function(added) {
+					Room.removeItem(roomObj, item, function(roomObj, item) {
+						Character.addToInventory(target, item, function(target, item) {
 							if (i === itemLen - 1) {
-								World.msgRoom(newRoom, {
+								World.msgRoom(roomObj, {
 									msg: target.displayName + ' picks up everything he can.',
 									playerName: target.name,
 									styleClass: 'cmd-get-all yellow'
@@ -243,7 +241,7 @@ Cmd.prototype.get = function(target, command, fn) {
 								});
 
 								if (typeof fn === 'function') {
-									return fn(target, newRoom, item);
+									return fn(target, roomObj, item);
 								}
 							}
 						});
@@ -271,19 +269,20 @@ Cmd.prototype.drop = function(target, command, fn) {
 			if (command.msg !== 'all') {
 				World.search(target.items, command, function(item) {
 					if (item) {
-						Character.removeItem(item, target, function(removed, target) {
-							if (removed) {
-								roomObj.items.push(item);
+						Character.removeItem(target, item, function(target, item) {
+							if (item) {
+								Room.addItem(roomObj, item, function(roomObj, item) {
 
-								World.msgRoom(newRoom, {
-									msg: target.displayName + 'drops a ' + item.short,
-									playerName: target.name,
-									styleClass: 'cmd-drop yellow'
-								});
+									World.msgRoom(roomObj, {
+										msg: target.displayName + 'drops a ' + item.short,
+										playerName: target.name,
+										styleClass: 'cmd-drop yellow'
+									});
 
-								World.msgPlayer(target, {
-									msg: 'You dropped ' + item.short,
-									styleClass: 'cmd-drop blue'
+									World.msgPlayer(target, {
+										msg: 'You drop a ' + item.short,
+										styleClass: 'cmd-drop blue'
+									});
 								});
 							} else {
 								World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
@@ -300,22 +299,22 @@ Cmd.prototype.drop = function(target, command, fn) {
 				for (i; i < itemLen; i += 1) {
 					item = itemArr[i];
 					
-					Character.removeItem(item, target, function(removed, target) {
-						if (removed) {
-							roomObj.items.push(item);
+					Character.removeItem(target, item, function(target, item) {
+						if (item) {
+							Room.addItem(roomObj, item, function(roomObj, item) {
+								if (roomObj.items.length === itemLen) {
+									World.msgRoom(roomObj, {
+										msg: target.displayName + ' drops everything they are carrying',
+										playerName: target.name,
+										styleClass: 'cmd-drop-all yellow'
+									});
 
-							if (roomObj.items.length === itemLen) {
-								World.msgRoom(roomObj, {
-									msg: target.displayName + ' drops everything they are carrying',
-									playerName: target.name,
-									styleClass: 'cmd-drop-all yellow'
-								});
-
-								World.msgPlayer(target, {
-									msg: 'You drop everything',
-									styleClass: 'cmd-drop-all blue'
-								});
-							}
+									World.msgPlayer(target, {
+										msg: 'You drop everything',
+										styleClass: 'cmd-drop-all blue'
+									});
+								}
+							});
 						} else {
 							World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
 						}
@@ -324,7 +323,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 			}
 		});
 	} else {
-		World.msgPlayer(target, {msg: 'Drop nothing? How do you drop nothing?.', styleClass: 'error'});
+		World.msgPlayer(target, {msg: 'Drop nothing? How do you drop nothing?', styleClass: 'error'});
 	}
 };
 
@@ -337,9 +336,11 @@ Cmd.prototype.kill = function(player, command) {
 					opponent.position = 'fighting';
 					player.position = 'fighting';
 
-					Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) { // the first round qualifiers
+					Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) {
 						var combatInterval;
 						
+						player.wait += 1;
+
 						World.prompt(player);
 
 						if (opponent.chp > 0) {
@@ -647,8 +648,8 @@ Cmd.prototype.remove = function(target, command) {
 	if (command.msg !== '') {
 		Character.getItem(target.eq, command, function(item) {
 			if (item) {
-				Character.removeEq(item, target, function(removed, item, target) {
-					if (removed) {
+				Character.removeEq(target, item, function(target, item) {
+					if (item) {
 						World.msgPlayer(target, {msg: 'Removed a ' + item.short, styleClass: 'cmd-wear'});
 					} else {
 						World.msgPlayer(target, {msg: 'Could not remove a ' + item.short, styleClass: 'error'});
@@ -663,24 +664,37 @@ Cmd.prototype.remove = function(target, command) {
 	}
 }
 
-Cmd.prototype.inventory = function(target, command) {
+Cmd.prototype.inventory = function(player, command) {
 	var iStr = '',
 	i = 0;
+
+	iStr += '<table class="table table-condensed table-no-border i-table"><thead><tr>' +
+		'<td class="i-name-header">Item Name</td>' +
+		'<td class="i-equipped-header green">Equipped</td>' +
+		'<td class="i-type-header">Type</td>' +
+		'<td class="i-weight-header">Weight</td>' +
+		'</tr></thead><tbody>';
 	
-	if (target.items.length > 0) {
-		for (i; i < target.items.length; i += 1) {
-			if (!target.items[i].equipped) {
-				iStr += '<li>' + target.items[i].short + ' (<label>type:</label> ' + target.items[i].itemType +
-				', <label>weight:</label> ' + target.items[i].weight + ')</li>';
+	if (player.items.length > 0) {
+		iStr += '<tr>';
+
+		for (i; i < player.items.length; i += 1) {
+			iStr += '<td class="i-name">' + player.items[i].name + '</td>';
+
+			if (!player.items[i].equipped) {
+				iStr += '<td class="i-equipped">No</td>';
 			} else {
-				iStr += '<li>' + target.items[i].short + ' (Equipped) '+ ' (<label>type:</label> ' + target.items[i].itemType +
-				', <label>weight:</label> ' + target.items[i].weight + ')</li>';
+				iStr += '<td class="i-equipped">Yes</td>';
 			}
+
+			iStr += '<td class="i-type">' + player.items[i].itemType + '</td>';
+
+			iStr += '<td class="i-weight">' + player.items[i].weight + '</td></tr>';
 		}
-		
-		World.msgPlayer(target, {msg: '<div class="cmd-i"><h1>Your Inventory</h1><ul>' + iStr + '</ul></div>', styleClass: 'inventory' });
+
+		World.msgPlayer(player, {msg: '<h1>Your Inventory</h1>' + iStr + '</tbody></table>'});
 	} else {
-		World.msgPlayer(target, {msg: 'No items in your inventory, can carry ' + target.carry + ' pounds of items and treasure.'});
+		World.msgPlayer(player, {msg: 'No items in your inventory, can carry ' + player.carry + ' pounds of items and treasure.'});
 	}
 };
 
@@ -825,8 +839,18 @@ Cmd.prototype.reboot = function(target, command) {
 
 // Fully heal everyone on the MUD
 Cmd.prototype.restore = function(target, command) {
-	if (target.role === 'admin') {
+	var i = 0,
+	s;
 
+	if (target.role === 'admin') {
+		for (i; i < World.players.length; i += 1) {
+			s = World.io.sockets.connected[World.players[i].sid];
+			s.player.chp = s.player.hp;
+			s.player.cmana = s.player.mana;
+			s.player.cmv = s.player.mv;
+		}
+
+		World.msgWorld(target, {msg: 'You feel refreshed!'});
 	} else {
 		World.msgPlayer(target, {msg: 'You do not possess that kind of power.', styleClass: 'error' });
 	}

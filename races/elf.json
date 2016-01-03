@@ -3,9 +3,5 @@
     "int": 2,
     "con": -1,
     "playable": true,
-    "attackType": {
-        "type": "punch",
-        "mod": 1,
-        "dice": "1d6+1"
-    }
+    "attackType": "punch"
 }

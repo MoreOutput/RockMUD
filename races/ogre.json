@@ -6,9 +6,8 @@
     "hp": 20,
     "playable": true,
     "size": 4,
-    "attackType": {
-        "type": "smash",
-        "mod": 2,
-        "dice": "1d6+2"
-    }
+    "damRoll": 2,
+    "meleeRes": 1,
+    "magicRes": -3,
+    "attackType": "smash"
 }

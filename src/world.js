@@ -276,33 +276,90 @@ World.prototype.getPlayersByArea = function(areaName, fn) {
 * Area and item setup on boot
 */
 
-// Rolls values for a single item
-World.prototype.rollItem = function(item, fn) {
+World.prototype.rollItems = function(itemArr, fn) {
 	var world = this,
-	refId = Math.random().toString().replace('0.', '');
-
-	return fn(item);
-};
-// Rolls values for Mobs, including their equipment
-World.prototype.rollMob = function(mobArr, fn) {
-	var world = this,
-	diceMod, // Added to all generated totals 
-	refId = Math.random().toString().replace('0.', ''),
+	diceMod,
+	refId = Math.random().toString().replace('0.', 'item-'),
 	i = 0;
 
-	if (!Array.isArray(mobArr)) {
-		mobArr = [mobArr];
-	};
+	for (i; i < itemArr.length; i += 1) {
+		(function(item, index) {
+			var chanceRoll = world.dice.roll(1, 20);
+
+			item.refId = refId += index;
+
+			if (!item.displayName) {
+				item.displayName = 'a ' + item.short;
+			}
+
+			world.extend(item, world.itemTemplate, function(item) {
+				var i = 0,
+				ai; // ai module
+
+				if (chanceRoll === 20) {
+					item.diceNum += 1;
+					item.diceSides += 2;
+				} else if (chanceRoll > 18) {
+					item.diceNum += 1;
+				} else if (chanceRoll === 1 && item.diceNum > 1) {
+					item.diceNum -= 1
+					item.weight += 2;
+				}
+
+				if (item.behaviors.length > 0) {
+					for (i; i < item.behaviors.length; i += 1) {
+						ai = item.behaviors[i];
+
+						world.getAI(ai, function(behavior) {
+							world.extend(item, behavior, function() {
+								itemArr[index] = item;
+							});
+						});
+					}
+				} else {
+					itemArr[index] = item;
+				}
+
+				if (index === itemArr.length - 1) {
+					return fn(itemArr);
+				}
+			});
+		}(itemArr[i], i));
+	}
+}
+// Rolls values for Mobs, including their equipment
+World.prototype.rollMobs = function(mobArr, fn) {
+	var world = this,
+	diceMod, // Added to all generated totals 
+	refId = Math.random().toString().replace('0.', 'mob-'),
+	i = 0;
 
 	for (i; i < mobArr.length; i += 1) {
 		(function(mob, index) {
-			mob.refId = (refId += index);
+			mob.refId = refId += index;
 
 			if (!mob.displayName) {
 				mob.displayName = mob.name[0].toUpperCase() + mob.name.slice(1);
 			}
 
 			world.extend(mob, world.mobTemplate, function(mob) {
+
+
+				if (!mob.hp) {
+					mob.hp = mob.con * 9 +  mob.con;
+					mob.chp = mob.hp;
+				}
+
+				if (!mob.mana) {
+					mob.mana = mob.mana * 8 +  mob.int;
+					mob.cmana = mob.mana;
+				}
+
+				if (!mob.mv) {
+					mob.mv = mob.mv * 9 +  mob.dex;
+					mob.cmv = mob.mv;
+				}
+
 				world.getRace(mob.race, function(raceObj, err) {
 					world.extend(mob, raceObj, function(mob, err) {
 						world.getClass(mob.charClass, function(classObj, err) {
@@ -332,11 +389,7 @@ World.prototype.rollMob = function(mobArr, fn) {
 								}
 
 								if (index === mobArr.length - 1) {
-									if (mobArr.length !== 1) {
-										return fn(mobArr);
-									} else {
-										return fn(mobArr);
-									}
+									return fn(mobArr);
 								}
 							});
 						});
@@ -364,10 +417,14 @@ World.prototype.loadArea = function(areaName, fn) {
 
 				for (i; i < area.rooms.length; i += 1) {
 					if (area.rooms[i].monsters.length > 0) {
-						world.rollMob(area.rooms[i].monsters, function(mobs) {
+						world.rollMobs(area.rooms[i].monsters, function(mobs) {
 							world.areas.push(area);
 
-							return fn(area, false);
+							if (area.rooms[i].items.length > 0) {
+								world.rollItems(area.rooms[i].items, function(items) {
+									return fn(area, false);
+								});
+							}
 						});
 					}
 				}
@@ -510,10 +567,14 @@ World.prototype.msgArea = function(areaName, msgObj, fn) {
 	s;
 
 	for (i; i < world.players.length; i += 1) {
-		s = world.io.sockets.connected[world.players[i].sid];
+		if ( (!msgObj.randomPlayer || msgObj.randomPlayer === false)
+			|| (msgObj.randomPlayer === true && world.dice.roll(1,10) > 6) ) {
 
-		if (s.player.name !== msgObj.playerName && s.player.area === areaName) {
-			world.msgPlayer(s, msgObj);
+			s = world.io.sockets.connected[world.players[i].sid];
+
+			if (s.player.name !== msgObj.playerName && s.player.area === areaName) {
+				world.msgPlayer(s, msgObj);
+			}
 		}
 	}
 
@@ -542,7 +603,6 @@ World.prototype.msgWorld = function(target, msgObj, fn) {
 	}
 };
 
-// TODO -- generalize search across source
 // target arrayName itemToMatch fn -> updates and returns target and items
 // array itemToMatch fn -> returns found items
 World.prototype.search = function(searchArr, command, fn) {
@@ -590,37 +650,11 @@ World.prototype.search = function(searchArr, command, fn) {
 	}
 };
 
-
-World.prototype.remove = function(arrayName, item, target, fn) {
-	var i = 0,
-	newArr = [];
-
-	if (arrayName !== 'eq') {
-		for (i; i < target[arrayName].length; i += 1) {
-			if (target[arrayName][i].name !== item.name) {
-				newArr.push(target[arrayName][i]);
-			}
-		}
-
-		target[arrayName] = newArr;
-	} else {
-		console.log(item);
-		for (i; i < target[arrayName].length; i += 1) {
-			if (target[arrayName][i].item && target[arrayName][i].item.name === item.name) {
-				target[arrayName][i].item = null;
-			}
-		}
-	}
-
-	return fn(true, target, item);
-};
-
 /*
 	RockMUD extend(target, obj2, callback);
 	
 	Target gains all properties from obj2 that arent in the current object, all numbers are added together,
 	arrays are concatenated, and functions are fired with the result being given to @target's properties.
-	
 */
 World.prototype.extend = function(target, obj2, fn) {
 	var prop;

@@ -580,16 +580,16 @@ Character.prototype.xpRot = function() {
 };
 
 // push an item into a players inventory, checks items to ensure a player can use it
-Character.prototype.addToInventory = function(item, player, fn) {
+Character.prototype.addToInventory = function(player, item, fn) {
 	player.items.push(item);
-	fn(true);
+	fn(player, item);
 };
 
 /*
 * Returns all items that meet the query criteria, could be optimized if your
 * slots are consistent.
 */
-Character.prototype.getWeaponSlots = function(player, fn) {
+Character.prototype.getSlotsWithWeapons = function(player, fn) {
 	var i = 0,
 	weapons = [];
 
@@ -607,16 +607,54 @@ Character.prototype.getWeaponSlots = function(player, fn) {
 	}
 };
 
-Character.prototype.removeItem = function(item, roomObj, fn) {
-	World.remove('items', item, roomObj, function(roomObj, item) {
-		return fn(true, item, roomObj);
-	});
+Character.prototype.getStatsFromItems = function(items, fn) {
+	var character = this,
+	itemMods = {};
+
+
 };
 
-Character.prototype.removeEq  = function(item, player, fn) {
-	World.remove('eq', item, player, function(removed, player, item) {
-		return fn(true, item, player);
-	});
+Character.prototype.getStatsFromAffects = function(affects, fn) {
+
+};
+
+Character.prototype.getStatsFromEq = function(eq, fn) {
+
+};
+
+Character.prototype.getStr = function(player, mod, fn) {
+	Character
+	.statsFromItems
+	.statsFromAffects
+}
+
+Character.prototype.removeItem = function(player, item, fn) {
+	var i = 0,
+	newArr = [];
+
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].refId !== item.refId) {
+			newArr.push(player.items[i]);
+		}
+	}
+
+	player.items = newArr;
+
+	return fn(player, item);
+};
+
+Character.prototype.removeEq  = function(player, item, fn) {
+	var i = 0;
+
+	item.equipped = false;
+
+	for (i; i < player.eq.length; i += 1) {
+		if (player.eq[i].item && player.eq[i].item.refId === item.refId) {
+			player.eq[i].item = null;
+		}
+	}
+
+	return fn (player, item)
 };
 
 Character.prototype.getItem = function(eqArr, command, fn) {

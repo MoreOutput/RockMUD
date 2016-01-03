@@ -93,6 +93,11 @@ Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 	}
 };
 
+Room.prototype.addItem = function(roomObj, item, fn) {
+	roomObj.items.push(item);
+	return fn(roomObj, item);
+};
+
 // does a string match an exit in the room
 Room.prototype.checkExit = function(roomObj, direction, fn) { 
 	var i = 0;
@@ -100,12 +105,12 @@ Room.prototype.checkExit = function(roomObj, direction, fn) {
 	if (roomObj.exits.length > 0) {
 		for (i; i < roomObj.exits.length; i += 1) {
 			if (direction === roomObj.exits[i].cmd) {
-				return fn(true, roomObj.exits[i]);
+				return fn(roomObj.exits[i]);
 			}
 		}
-		return fn(false, null);
+		return fn(null);
 	} else {
-		return fn(false, null);
+		return fn(null);
 	}
 };
 
@@ -128,22 +133,49 @@ Room.prototype.getDisplay = function(areaName, roomId, fn) {
 	});
 };
 
-Room.prototype.removeItem = function(item, roomObj, fn) {
-	World.remove('items', item, roomObj, function(removed, item, roomObj) {
-		return fn(roomObj, item);
-	});
+Room.prototype.removeItem = function(roomObj, item, fn) {
+	var i = 0,
+	newArr = [];
+
+	for (i; i < roomObj.items.length; i += 1) {
+		if (roomObj.items[i].refId !== item.refId) {
+			newArr.push(roomObj.items[i]);
+		}
+	}
+
+	roomObj.items = newArr;
+
+	return fn(roomObj, item);
 };
 
-Room.prototype.removePlayer = function(player, roomObj, fn) {
-	World.remove('playersInRoom', player, roomObj, function(removed, player, roomObj) {
-		return fn(roomObj, player);
-	});
+Room.prototype.removePlayer = function(roomObj, player, fn) {
+	var i = 0,
+	newArr = [];
+
+	for (i; i < roomObj.playersInRoom.length; i += 1) {
+		if (roomObj.playersInRoom[i].name !== player.name) {
+			newArr.push(roomObj.playersInRoom[i]);
+		}
+	}
+
+	roomObj.playersInRoom = newArr;
+
+	return fn(roomObj, player);
 };
 
-Room.prototype.removeMob = function(mob, roomObj, fn) {
-	World.remove('monsters', mob, roomObj, function(removed, mob, roomObj) {
-		return fn(roomObj, mob);
-	});
+Room.prototype.removeMob = function(roomObj, mob, fn) {
+	var i = 0,
+	newArr = [];
+
+	for (i; i < roomObj.monsters.length; i += 1) {
+		if (roomObj.monsters[i].refId !== mob.refId) {
+			newArr.push(roomObj.monsters[i]);
+		}
+	}
+
+	roomObj.monsters = newArr;
+
+	return fn(roomObj, mob);
 };
 
 Room.prototype.addCorpse = function(roomObj, corpse, fn) {

@@ -45,6 +45,9 @@ border: 1px solid #555;
 #terminal .subtext {
 font-style: italic;
 }
+#terminal .row {
+width: 99%;
+}
 #inputwrapper {
 padding-top: 1em;
 width: 100%;
@@ -119,9 +122,6 @@ padding: .4em 0 .5em 0;
 margin: .5em 0 1em 0;
 font-weight: bold;
 }
-.room {
-border-bottom: 1px dashed #eee;
-}
 .room .room-title {
 color: #ddd;
 }
@@ -147,7 +147,7 @@ color: yellow;
 .table-no-border>thead>tr>td, 
 .table-no-border>tbody>tr>td, 
 .table-no-border>tfoot>tr>td {
-border-top: none; 
+border-top: none;
 }
 .red {
 color: #ff0033;

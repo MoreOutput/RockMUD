@@ -5,6 +5,7 @@
     "displayName": "",
     "area": "",
     "id": "",
+    "refId": "",
     "level": 1,
     "itemType": "",
     "material": "", 
@@ -17,7 +18,11 @@
     "value": 0,
     "slot": "",
     "decay": 0,
-    "condition": "good",
+    "durability": 100,
+    "maxDurability": 100,
+    "condition": "excellent",
     "equipped": false,
-    "value": 0
+    "value": 0,
+    "behaviors": [],
+    "modifiers": {}
 }
