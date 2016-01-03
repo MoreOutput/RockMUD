@@ -116,7 +116,7 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 									damage += 5;
 								}
 
-								if v (attackerMods.str > 2) {
+								if (attackerMods.str > 2) {
 									damage += attackerMods.str;
 								}
 
