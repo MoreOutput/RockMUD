@@ -71,15 +71,19 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 					var numOfAttacks = Math.round((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4),
 					j = 0;
 
-					if (numOfAttacks < 0) {
-						numOfAttacks = 0;
+					if (numOfAttacks <= 0) {
+						numOfAttacks = 1;
 					}
 
 					if (attackerRoll > opponentRoll) {
 						numOfAttacks += 1;
 					}
 
-					if (numOfAttacks <= 3 && attackerMods.str > opponentMods.str) {
+					if (attacker.knowledge > opponent.strMod && World.dice.roll(1, 2) === 1) {
+						numOfAttacks += 1;
+					}
+
+					if (numOfAttacks <= 3 && attackerMods.str > opponentMods.dex) {
 						if (World.dice.roll(1, 2) === 2) {
 							numOfAttacks += 1;
 						}
@@ -91,19 +95,28 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 						}
 					}
 
-					console.log(attacker.name, numOfAttacks, attackerMods, attacker.str);
+					if (numOfAttacks === 1 && World.dice.roll(1, 4) === 4) {
+						numOfAttacks = 2;
+					}
+
+					if (attackerRoll > 25) {
+						numOfAttacks += 1;
+					}
 
 					if (numOfAttacks) {
 						for (j; j < numOfAttacks; j += 1) {
 							World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str, function(damage) {
-								damage = Math.round(damage + (attacker.damRoll/2) + (attacker.level) );
+								var blocked = false,
+								dodged = false;
+
+								damage = Math.round(damage * World.dice.roll(1, 3) + (attacker.damRoll/2) + (attacker.level/3) );
 								damage -= opponent.ac;
 
 								if (attackerMods.str > opponentMods.con) {
 									damage += 5;
 								}
 
-								if (attackerMods.str > 2) {
+								if v (attackerMods.str > 2) {
 									damage += attackerMods.str;
 								}
 
@@ -118,6 +131,8 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 								if (opponent.isPlayer) {
 									opponentRoundTxt +=  '<div>' + attacker.displayName + ' ' + weapon.attackType + 's you with some intensity <span class="red">(' + damage + ')</span></div>';
 								}
+
+								damage -= opponent.ac;
 
 								opponent.chp -= damage;
 							});

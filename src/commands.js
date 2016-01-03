@@ -380,7 +380,7 @@ Cmd.prototype.kill = function(player, command) {
 										});
 									});
 								});
-							}, 1800);
+							}, 1900);
 						}
 					});
 				} else {

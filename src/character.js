@@ -166,6 +166,11 @@ Character.prototype.create = function(r, s, fn) {
 	s.player.roomid = 1;
 	s.player.trains += 25;
 	s.player.deaths = 0;
+	s.player.str = 10;
+	s.player.int = 10;
+	s.player.wis = 10;
+	s.player.con = 10;
+	s.player.dex = 10;
 	s.player.settings = {
 		autosac: false,
 		autoloot: true,

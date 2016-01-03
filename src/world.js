@@ -628,7 +628,7 @@ World.prototype.search = function(searchArr, command, fn) {
 			if (matches.length > 1 && command.number > 1) {
 				i = 0;
 				for (i; i < matches.length; i += 1) {
-					if (command.number === i) {
+					if (command.number - 1 === i) {
 						results = matches[i];
 					}
 				}
