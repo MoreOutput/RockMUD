@@ -343,8 +343,6 @@ World.prototype.rollMobs = function(mobArr, fn) {
 			}
 
 			world.extend(mob, world.mobTemplate, function(mob) {
-
-
 				if (!mob.hp) {
 					mob.hp = mob.con * 9 +  mob.con;
 					mob.chp = mob.hp;
@@ -416,17 +414,16 @@ World.prototype.loadArea = function(areaName, fn) {
 				area = JSON.parse(area);
 
 				for (i; i < area.rooms.length; i += 1) {
-					if (area.rooms[i].monsters.length > 0) {
-						world.rollMobs(area.rooms[i].monsters, function(mobs) {
-							world.areas.push(area);
-
-							if (area.rooms[i].items.length > 0) {
-								world.rollItems(area.rooms[i].items, function(items) {
+					(function(room) {
+						world.rollMobs(room.monsters, function(mobs) {
+							world.rollItems(room.items, function(items) {
+								if (i === area.rooms.length) {
+									world.areas.push(area);
 									return fn(area, false);
-								});
-							}
+								}
+							});
 						});
-					}
+					}(area.rooms[i]))
 				}
 			});
 		}
@@ -662,7 +659,7 @@ World.prototype.extend = function(target, obj2, fn) {
 	if (obj2) {
 		for (prop in obj2) {
 			if (target[prop]) {
-				if (target[prop].isArray) {
+				if (target[prop].isArray || prop === 'diceNum' || prop === 'diceSides') {
 					target[prop] = obj2[prop];
 				} else if (!isNaN(target[prop])) {
 					target[prop] += obj2[prop];

@@ -1,6 +1,8 @@
 {
     "name": "Animal",
+    "abbv": "ani",
     "playable": false,
     "attackType": "claw",
-    "size": 2
+    "size": 2,
+    "str": -4
 }

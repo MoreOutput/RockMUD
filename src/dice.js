@@ -61,7 +61,7 @@ Roller.prototype.getDexMod = function(target, mod, fn) {
 	}
 
 	if (target.con > 12) {
-		return Math.ceil( (target.dex/6) + mod + sizeMod);
+		return Math.round( (target.dex/6) + mod + sizeMod);
 	} else {
 		return 0;
 	}
@@ -81,7 +81,7 @@ Roller.prototype.getConMod = function(target, mod, fn) {
 	}
 
 	if (target.con > 12) {
-		return Math.ceil( (target.con/6) + mod + sizeMod);
+		return Math.round( (target.con/6) + mod + sizeMod);
 	} else {
 		return 0;
 	}
@@ -113,7 +113,7 @@ Roller.prototype.getStrMod = function(target, mod, fn) {
 	}
 
 	if (target.con > 12) {
-		return Math.ceil( (target.str/6) + mod + sizeMod);
+		return Math.round( (target.str/6) + mod + sizeMod);
 	} else {
 		return 0;
 	}
@@ -125,7 +125,7 @@ Roller.prototype.getWisMod = function(target, mod, fn) {
 	}
 
 	if (target.wis > 13) {
-		return Math.ceil( (target.wis/6) + mod);
+		return Math.round( (target.wis/8) + mod);
 	} else {
 		return 0;
 	}

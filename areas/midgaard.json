@@ -84,7 +84,7 @@
 				}, {
 					"name": "Boar",
 					"short": "A large brown boar",
-					"race": "",
+					"race": "animal",
 					"id": 6,
 					"area": "Midgaard",
 					"weight": 120,

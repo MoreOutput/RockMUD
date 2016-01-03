@@ -68,8 +68,7 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 
 			World.dice.roll(1, 20, (attackerMods.dex - opponent.meleeRes), function(attackerRoll) {
 				World.dice.roll(1, 20, (opponent.ac + (opponentMods.dex - attacker.knowledge)), function(opponentRoll) {
-					// Total amounts of hits in the round
-					var numOfAttacks = (attacker.hitRoll - opponent.level) + attackerMods.dex,
+					var numOfAttacks = Math.round((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4),
 					j = 0;
 
 					if (numOfAttacks < 0) {
@@ -80,42 +79,57 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 						numOfAttacks += 1;
 					}
 
-					if (attackerMods.str > opponentMods.str) {
-						if (World.dice.roll(1, 20) > 8) {
+					if (numOfAttacks <= 3 && attackerMods.str > opponentMods.str) {
+						if (World.dice.roll(1, 2) === 2) {
 							numOfAttacks += 1;
 						}
 					}
 
-					if (attackerMods.dex > opponentMods.dex) {
-						if (World.dice.roll(1, 20) > 15) {
+					if (numOfAttacks <= 3 && attackerMods.dex > opponentMods.dex) {
+						if (World.dice.roll(1, 2) === 2) {
 							numOfAttacks += 1;
 						}
 					}
-					
-					for (j; j < numOfAttacks; j += 1) {
-						// Roll damage per hit
-						World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str, function(damage) {
-							damage = Math.round(damage + (attacker.damRoll/2) + (attacker.level) );
-							damage -= opponent.ac;
 
-							if (attackerMods.str > 2) {
-								damage += attackerMods.str;
-							} else {
-								damage -= 1;
-							}
+					console.log(attacker.name, numOfAttacks, attackerMods, attacker.str);
 
-							if (damage < 0) {
-								damage = 0;
-							}
+					if (numOfAttacks) {
+						for (j; j < numOfAttacks; j += 1) {
+							World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str, function(damage) {
+								damage = Math.round(damage + (attacker.damRoll/2) + (attacker.level) );
+								damage -= opponent.ac;
 
-							if (attacker.isPlayer) {
-								attackerRoundTxt +=  '<div>You ' + weapon.attackType + ' a ' + opponent.displayName + ' <span class="red">(' + damage + ')</span></div>';
-							} else {
-								opponentRoundTxt +=  '<div>' + attacker.displayName + ' ' + weapon.attackType + 's you with some intensity <span class="red">(' + damage + ')</span></div>';
-							}
+								if (attackerMods.str > opponentMods.con) {
+									damage += 5;
+								}
 
-							opponent.chp -= damage;
-						});
+								if (attackerMods.str > 2) {
+									damage += attackerMods.str;
+								}
+
+								if (damage < 0) {
+									damage = 0;
+								}
+
+								if (attacker.isPlayer) {
+									attackerRoundTxt +=  '<div>You ' + weapon.attackType + ' a ' + opponent.displayName + ' <span class="red">(' + damage + ')</span></div>';
+								}
+
+								if (opponent.isPlayer) {
+									opponentRoundTxt +=  '<div>' + attacker.displayName + ' ' + weapon.attackType + 's you with some intensity <span class="red">(' + damage + ')</span></div>';
+								}
+
+								opponent.chp -= damage;
+							});
+						}
+					} else {
+						if (attacker.isPlayer) {
+							attackerRoundTxt +=  '<div>Your ' + weapon.attackType + ' misses a ' + opponent.displayName + '</div>';
+						}
+
+						if (opponent.isPlayer) {
+							opponentRoundTxt +=  '<div>' + attacker.displayName + ' ' + weapon.attackType + 's misses you! </div>';
+						}
 					}
 
 					if (attackerRoundTxt) {

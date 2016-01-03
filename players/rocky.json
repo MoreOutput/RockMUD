@@ -1,12 +1,12 @@
 {
     "name": "Rocky",
     "lastname": "",
-    "title": "",
+    "title": "the admin",
     "role": "admin",
     "sex": "",
     "charClass": "thief",
     "displayName": "Rocky",
-    "level": 50,
+    "level": 1,
     "xp": 0,
     "xpToLevel": 0,
     "position": "standing",
@@ -196,6 +196,8 @@
     "autosac": false,
     "behaviors": [],
     "race": "elf",
+    "diceNum": 1,
+    "diceSides": 6,
     "password": "ba6089e8757699fa49eef82e31254a5c4454ac6b017ce254103e3b327bf83aed6b7b9b3cb63ffe5b2a6f1d9b229c568af2235c3f2518a5b10d9ba21b679c0a00",
     "isPlayer": true,
     "salt": "23da2c6fa90e272924a73f1b4ca98b8dfa607307ad4244250c5698d5d26d458a972f869fabf63da2f4657b43d51a67a0efa809d81b76add46bcc6cfc2018a659cafef15dab516dba36d8da1c6d5a29026f8c841105243dbc8109c59440666c034a9d2a5e8ab9bc32503a2ff720b075ea07d193f59d2f9772cf4c2eb888316924",
@@ -219,6 +221,6 @@
         }
     },
     "carry": 100,
-    "modified": "Sat Jan 02 2016 20:38:40 GMT-0500 (Eastern Standard Time)",
-    "sid": "sGv9Ljl59Zjq8ORtAAAB"
+    "modified": "Sat Jan 02 2016 22:31:40 GMT-0500 (EST)",
+    "sid": "UvnCPJsDZE5mVGVvAAAA"
 }
