@@ -66,7 +66,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
 					}
 
-					if (cmdObj.msg === '' || cmdObj.msg.length >= 3) {
+					if (cmdObj.msg === '' || cmdObj.msg.length >= 3 && s.player.wait === 0) {
 						if (cmdObj.cmd) {
 							if (cmdObj.cmd in Cmds) {
 								return Cmds[cmdObj.cmd](s.player, cmdObj);

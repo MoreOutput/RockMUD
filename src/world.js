@@ -498,7 +498,7 @@ World.prototype.prompt = function(target) {
 		player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' + 
 		player.cmv + '/'  + player.mv +'<span class="yellow">mv</span>>';
 
-	if (player.level >= 50) {
+	if (player.level >= 1) {
 		prompt += '<' + player.wait + 'w>';
 	}
 
@@ -650,8 +650,7 @@ World.prototype.search = function(searchArr, command, fn) {
 /*
 	RockMUD extend(target, obj2, callback);
 	
-	Target gains all properties from obj2 that arent in the current object, all numbers are added together,
-	arrays are concatenated, and functions are fired with the result being given to @target's properties.
+	Target gains all properties from obj2 that arent in the current object, all numbers are added together
 */
 World.prototype.extend = function(target, obj2, fn) {
 	var prop;
@@ -659,9 +658,9 @@ World.prototype.extend = function(target, obj2, fn) {
 	if (obj2) {
 		for (prop in obj2) {
 			if (target[prop]) {
-				if (target[prop].isArray || prop === 'diceNum' || prop === 'diceSides') {
+				if (target[prop].isArray) {
 					target[prop] = obj2[prop];
-				} else if (!isNaN(target[prop])) {
+				} else if ( !isNaN(target[prop]) ) {
 					target[prop] += obj2[prop];
 				}
 			} else {

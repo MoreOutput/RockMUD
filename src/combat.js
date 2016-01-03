@@ -56,7 +56,8 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 					itemType: 'weapon',
 					equipped: true,
 					attackType: attacker.attackType,
-					material: 'flesh'
+					material: 'flesh',
+					modifiers: {}
 				},
 				dual: false,
 				slot: 'hands'
@@ -73,6 +74,10 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 
 					if (numOfAttacks <= 0) {
 						numOfAttacks = 1;
+					}
+
+					if (weapon.modifiers && weapon.modifiers.numOfAttacks) {
+						numOfAttacks += weapon.modifiers.numOfAttacks;
 					}
 
 					if (attackerRoll > opponentRoll) {
@@ -105,24 +110,41 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 
 					if (numOfAttacks) {
 						for (j; j < numOfAttacks; j += 1) {
+							// chance roll
 							World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str, function(damage) {
 								var blocked = false,
 								dodged = false;
 
-								damage = Math.round(damage * World.dice.roll(1, 3) + (attacker.damRoll/2) + (attacker.level/3) );
-								damage -= opponent.ac;
+								damage = Math.round(damage * World.dice.roll(1, 2) + (attacker.damRoll/2) + (attacker.level/3) + attackerMods.str );
 
 								if (attackerMods.str > opponentMods.con) {
-									damage += 5;
+									damage += attackerMods.str;
 								}
 
 								if (attackerMods.str > 2) {
 									damage += attackerMods.str;
 								}
 
+								if (weapon.modifiers.numOfAttacks) {
+									numOfAttacks += weapon.modifiers.numOfAttacks;
+								}
+
+
+								if (attacker.damRoll > opponent.meleeRes) {
+									damage += attackerMods.str;
+								}
+
+								damage -= Math.round(opponent.ac/3);
+
+								if (numOfAttacks > 3 && j > 3) {
+									damage = Math.round( damage / 2 );
+								}
+
 								if (damage < 0) {
 									damage = 0;
 								}
+
+								opponent.chp -= damage;
 
 								if (attacker.isPlayer) {
 									attackerRoundTxt +=  '<div>You ' + weapon.attackType + ' a ' + opponent.displayName + ' <span class="red">(' + damage + ')</span></div>';
@@ -131,10 +153,6 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 								if (opponent.isPlayer) {
 									opponentRoundTxt +=  '<div>' + attacker.displayName + ' ' + weapon.attackType + 's you with some intensity <span class="red">(' + damage + ')</span></div>';
 								}
-
-								damage -= opponent.ac;
-
-								opponent.chp -= damage;
 							});
 						}
 					} else {

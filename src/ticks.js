@@ -25,7 +25,7 @@ World = require('./world').world;
 				}
 			}
 		}
-	}, 1100);
+	}, 1900);
 
 	// Areas refresh when they are devoid of players for at least four minutes 
 	setInterval(function() {

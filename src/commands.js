@@ -17,7 +17,7 @@ Cmd = function () {};
 
 Cmd.prototype.fire = function(commandName, target, command, fn) {
 	return this[commandName](target, command, fn);
-}
+};
 
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
@@ -25,9 +25,8 @@ Cmd.prototype.move = function(target, command, fn) {
 	direction = command.msg,
 	dexMod = World.dice.getDexMod(target);
 
-	if (target.position !== 'fighting' && target.position 
-		!== 'resting' && target.position !== 'sleeping' 
-		&& target.cmv > (4 - dexMod) && target.wait === 0) {
+	if (target.position === 'standing' || target.position 
+		=== 'fleeing' && target.cmv > (4 - dexMod) && target.wait === 0) {
 
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.checkExit(roomObj, direction, function(exitObj) {
@@ -327,6 +326,37 @@ Cmd.prototype.drop = function(target, command, fn) {
 	}
 };
 
+Cmd.prototype.flee = function(player, command) {
+	var cmd = this;
+
+	if (player.opponent) {
+		World.dice.roll(1, 20, World.dice.getDexMod(player), function(fleeCheck) {
+			if (fleeCheck > 10 && player.wait === 0) {
+				player.position = 'fleeing';
+				player.opponent.position = 'standing';
+
+				if (!command.msg) {
+					command.msg = 'south';
+				}
+
+				cmd.move(player, command, function() {
+					player.wait += 1;
+					
+					player.position = 'standing';
+
+					World.msgPlayer(player.opponent, {msg: '<p>' + player.displayName + ' fled south!</p>', styleClass: 'grey'});
+					World.msgPlayer(player, {msg: '<p>You fled south!</p>', styleClass: 'grey'});
+				});
+			} else {
+				player.wait += 1;
+				player.position = 'standing';
+
+				World.msgPlayer(player, {msg: 'You try to flee and fail!', styleClass: 'green'});
+			}
+		});
+	}
+};
+
 // For attacking in-game monsters
 Cmd.prototype.kill = function(player, command) {
 	if (player.position !== 'sleeping' && player.position !== 'resting') {
@@ -336,47 +366,65 @@ Cmd.prototype.kill = function(player, command) {
 					opponent.position = 'fighting';
 					player.position = 'fighting';
 
+					opponent.opponent = player;
+					player.opponent = opponent;
+
+					World.msgPlayer(player, {
+						msg: 'You scream and charge a ' + opponent.name,
+						noPrompt: true
+					});
+
 					Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) {
 						var combatInterval;
 						
-						player.wait += 1;
+						player.wait += 2;
 
 						World.prompt(player);
 
 						if (opponent.chp > 0) {
 							combatInterval = setInterval(function() {
+								if (player.position !== 'fighting' || opponent.position !== 'fighting') {
+									World.prompt(player);
+									clearInterval(combatInterval);
+								}
+
 								World.getRoomObject(player.area, player.roomid, function(roomObj) {
 									Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) {
 										Combat.round(opponent, player, roomObj, function(opponent, player, roomObj) {
+											if (player.position !== 'fighting' || opponent.position !== 'fighting') {
+												clearInterval(combatInterval);
+											}
+
 											World.prompt(player);
-										/*
-										if (contFight) {
-											clearInterval(combatInterval);
-											World.msgPlayer(player, {msg: 'You died!', styleClass: 'combat-death'});
-										} else {
-											opponent.position = 'dead';
 
-											clearInterval(combatInterval);
+											/*
+											if (contFight) {
+												clearInterval(combatInterval);
+												World.msgPlayer(player, {msg: 'You died!', styleClass: 'combat-death'});
+											} else {
+												opponent.position = 'dead';
 
-											Room.removeMob(opponent, roomObj, function(roomObj, opponent) {
-												if (roomObj) {
-													Room.addCorpse(roomObj, opponent, function(roomObj, corpse) {
-														World.dice.calXP(player, opponent, function(earnedXP) {
-															player.xp += earnedXP;
-															player.position = 'standing';
-															player.wait = 0;
+												clearInterval(combatInterval);
 
-															if (earnedXP > 0) {
-																World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
-															} else {
-																World.msgPlayer(player, {msg: 'You won but learned nothing.', styleClass: 'victory'});
-															}
+												Room.removeMob(opponent, roomObj, function(roomObj, opponent) {
+													if (roomObj) {
+														Room.addCorpse(roomObj, opponent, function(roomObj, corpse) {
+															World.dice.calXP(player, opponent, function(earnedXP) {
+																player.xp += earnedXP;
+																player.position = 'standing';
+																player.wait = 0;
+
+																if (earnedXP > 0) {
+																	World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
+																} else {
+																	World.msgPlayer(player, {msg: 'You won but learned nothing.', styleClass: 'victory'});
+																}
+															});
 														});
-													});
-												}
-											});
-										}
-										*/
+													}
+												});
+											}
+											*/
 										});
 									});
 								});
