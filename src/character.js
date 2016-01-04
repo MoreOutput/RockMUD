@@ -398,6 +398,10 @@ Character.prototype.save = function(player, fn) {
 
 	player.modified = new Date().toString();
 
+	if (player.opponent) {
+		player.opponent = null;;
+	};
+
 	fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null, 4), function (err) {
 		if (err) {
 			return World.msgPlayer(player, {msg: 'Error saving character.'});

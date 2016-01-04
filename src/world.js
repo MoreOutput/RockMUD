@@ -498,7 +498,7 @@ World.prototype.prompt = function(target) {
 		player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' + 
 		player.cmv + '/'  + player.mv +'<span class="yellow">mv</span>>';
 
-	if (player.level >= 1) {
+	if (player.role === 'admin') {
 		prompt += '<' + player.wait + 'w>';
 	}
 

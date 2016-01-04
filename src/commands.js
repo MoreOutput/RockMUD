@@ -349,7 +349,7 @@ Cmd.prototype.flee = function(player, command) {
 				});
 			} else {
 				player.wait += 1;
-				player.position = 'standing';
+				player.position = 'fighting';
 
 				World.msgPlayer(player, {msg: 'You try to flee and fail!', styleClass: 'green'});
 			}
@@ -383,19 +383,15 @@ Cmd.prototype.kill = function(player, command) {
 
 						if (opponent.chp > 0) {
 							combatInterval = setInterval(function() {
-								if (player.position !== 'fighting' || opponent.position !== 'fighting') {
-									World.prompt(player);
-									clearInterval(combatInterval);
-								}
-
 								World.getRoomObject(player.area, player.roomid, function(roomObj) {
 									Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) {
 										Combat.round(opponent, player, roomObj, function(opponent, player, roomObj) {
 											if (player.position !== 'fighting' || opponent.position !== 'fighting') {
+												World.prompt(player);
 												clearInterval(combatInterval);
+											} else {
+												World.prompt(player);
 											}
-
-											World.prompt(player);
 
 											/*
 											if (contFight) {
@@ -767,6 +763,7 @@ Cmd.prototype.score = function(target, command, fn) {
 					'<li class="stat-int"><label>INT:</label> ' + target.int + ' (18)</li>' +
 					'<li class="stat-dex"><label>DEX:</label> ' + target.dex + ' (14)</li>' +
 					'<li class="stat-con"><label>CON:</label> ' + target.con + ' (20)</li>' +
+					'<li class="stat-con"><label>Position:</label> ' + target.position + '</li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
@@ -787,7 +784,7 @@ Cmd.prototype.score = function(target, command, fn) {
 					'</ul>' +
 					'<div class="col-md-2 score-affects">' +
 						'<h6 class="sans-serif">Affected by:</h6>' +
-						'<p>You don\'t feel affected by anything.</p>'
+						'<p>You don\'t feel affected by anything.</p>' +
 					'</div>' +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
