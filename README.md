@@ -1,7 +1,7 @@
 RockMUD
 ===============================
 
-**RockMUD (0.1.9) is a WebSockets MUD server built with node.js.**
+**RockMUD (0.2.0) is a WebSockets MUD server built with node.js.**
 
 Goals:
 * A Diku-like MUD experience from within the browser.

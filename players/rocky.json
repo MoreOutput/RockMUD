@@ -11,11 +11,11 @@
     "xpToLevel": 0,
     "position": "standing",
     "alignment": "",
-    "chp": 200,
+    "chp": 0,
     "hp": 200,
     "cmana": 200,
     "mana": 200,
-    "cmv": 180,
+    "cmv": 210,
     "mv": 210,
     "str": 15,
     "wis": 10,
@@ -35,7 +35,7 @@
     "maxWeight": 120,
     "gold": 45,
     "hunger": 10,
-    "thirst": 3,
+    "thirst": 10,
     "load": 3,
     "visible": true,
     "attackType": "punch",
@@ -138,7 +138,36 @@
             "slot": "floating"
         }
     ],
-    "items": [],
+    "items": [
+        {
+            "name": "Loaf of Bread",
+            "short": "brown loaf of bread",
+            "long": "A rather stale looking loaf of bread.",
+            "area": "Midgaard",
+            "id": "7",
+            "level": 2,
+            "itemType": "food",
+            "weight": 0.5,
+            "diceNum": 1,
+            "diceSides": 6,
+            "diceMod": 1,
+            "flags": [],
+            "refId": "item-74409621534869070",
+            "displayName": "a brown loaf of bread",
+            "material": "",
+            "attackType": "",
+            "attackElement": "",
+            "value": 0,
+            "slot": "",
+            "decay": 0,
+            "durability": 100,
+            "maxDurability": 100,
+            "condition": "excellent",
+            "equipped": false,
+            "behaviors": [],
+            "modifiers": {}
+        }
+    ],
     "affects": [],
     "racial": [],
     "skills": [
@@ -192,6 +221,7 @@
         }
     },
     "carry": 100,
-    "modified": "Sun Jan 03 2016 02:04:53 GMT-0500 (Eastern Standard Time)",
-    "sid": "-LZD1f4PbBFge59cAAAA"
+    "modified": "Sun Jan 03 2016 21:01:30 GMT-0500 (EST)",
+    "sid": "4E4v-oeFsawZJ42OAAAA",
+    "opponent": null
 }

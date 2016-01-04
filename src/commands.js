@@ -763,7 +763,6 @@ Cmd.prototype.score = function(target, command, fn) {
 					'<li class="stat-int"><label>INT:</label> ' + target.int + ' (18)</li>' +
 					'<li class="stat-dex"><label>DEX:</label> ' + target.dex + ' (14)</li>' +
 					'<li class="stat-con"><label>CON:</label> ' + target.con + ' (20)</li>' +
-					'<li class="stat-con"><label>Position:</label> ' + target.position + '</li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
@@ -788,7 +787,7 @@ Cmd.prototype.score = function(target, command, fn) {
 					'</div>' +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
-					'<li class="stat-position"><label>Position: </label> ' + target.position + '</li>' +
+					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span></li>' +
 					'<li class="stat-level">You are a level ' + target.level + ' ' + target.race + ' '+  target.charClass + '.</li>' +
 					'<li class="stat-carry">You are carrying ' + target.weight + '/' + target.maxWeight + ' pounds.</li>' +
 					'<li class="stat-xp">You need <strong>' + target.xp + '</strong> experience for your next level.</li>' +

@@ -371,7 +371,7 @@ Character.prototype.raceSelection = function(r, s, fn) {
 
 				return fn(r, s, false);
 			} else {
-				s.emit('msg', {msg: 'No help file found for this race.', styleClass: 'error' });
+				s.emit('msg', {msg: 'No help file found fcor this race.', styleClass: 'error' });
 
 				return fn(r, s, false);
 			}
@@ -523,8 +523,8 @@ Character.prototype.hunger = function(target, fn) {
 				target.hunger += 1;
 			}
 
-			if (target.hunger >= 5) {
-				target.chp -= World.dice.roll(1, 10 + target.hunger) - conMod;
+			if (target.hunger > 5) {
+				target.chp -= World.dice.roll(1, 5 + target.hunger) - conMod;
 
 				if (target.chp < target.hp) {
 					target.chp = 0;
@@ -536,7 +536,7 @@ Character.prototype.hunger = function(target, fn) {
 			fn(target);
 		});
 	} else {
-		target.chp -= World.dice.roll(1, 10 + target.level + target.hunger + 1);
+		target.chp -= World.dice.roll(1, 5 + target.level + target.hunger);
 
 		if (target.chp < target.hp) {
 			target.chp = 0;

@@ -3,11 +3,9 @@ var World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = function() {
-	/*
-	fs.readFile('./templates/messages/combat.json', function (err, r) {
-		world.combatMessages = JSON.parse(r);
-	});
-	*/	
+	this.statusReport = [
+		{msg: ' is still in perfect health!'}
+	];
 };
 
 /*
@@ -130,7 +128,6 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 										numOfAttacks += weapon.modifiers.numOfAttacks;
 									}
 
-
 									if (attacker.damRoll > opponent.meleeRes) {
 										damage += attackerMods.str;
 									}
@@ -167,20 +164,20 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 						}
 
 						if (attackerRoundTxt) {
-							World.msgPlayer(attacker, {
+							World.msgPlayer(attacker, {	
 								msg: attackerRoundTxt,
 								noPrompt: true,
 								styleClass: 'player-hit grey'
 							});
 						}
 						
-						if (opponentRoundTxt) {
-							World.msgPlayer(opponent, {
-								msg: opponentRoundTxt,
-								noPrompt: true,
-								styleClass: 'player-hit yellow'
-							});
-						}
+						opponentRoundTxt += '<div>' + attacker.displayName +  combat.statusReport[0].msg + '</div>';
+
+						World.msgPlayer(opponent, {
+							msg: opponentRoundTxt,
+							noPrompt: true,
+							styleClass: 'player-hit yellow'
+						});
 						
 						/*
 						TODO: array for player name

@@ -14,5 +14,6 @@
     "weather": {},
     "messages": [],
     "rooms" : [],
-    "behaviors": []
+    "behaviors": [],
+    "checksWithoutPlayers": 0
 }
