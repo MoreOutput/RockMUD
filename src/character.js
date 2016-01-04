@@ -205,7 +205,6 @@ Character.prototype.create = function(r, s, fn) {
 							World.motd(s, function() {
 								Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
 									World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
-										roomObj.playersInRoom.push(s.player);
 										Room.getDisplayHTML(roomObj, {
 											hideCallingPlayer: s.player.name
 										},function(displayHTML, roomObj) {
