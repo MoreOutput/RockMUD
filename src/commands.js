@@ -786,7 +786,7 @@ Cmd.prototype.score = function(target, command, fn) {
 					'<li class="stat-trains last"><label>Trains:</label> ' + target.trains + '</li>' +
 				'</ul>' +
 				'<div class="stat-details">' +
-					'<ul class="col-md-2 score-stats list-unstyled">' +
+					'<ul class="col-md-3 score-stats list-unstyled">' +
 						'<li class="stat-hitroll"><label>Hit Bonus: </labels> 3</li>' +
 						'<li class="stat-damroll"><label>Damage Bonus: </label> 3</li>' +
 						'<li class="stat-position"><label>Magic resistance: </label> -3</li>' +
@@ -795,7 +795,7 @@ Cmd.prototype.score = function(target, command, fn) {
 						'<li class="stat-position"><label>Detection: </label> 2</li>' +
 						'<li class="stat-position"><label>Knowledge: </label> 2</li>' +
 					'</ul>' +
-					'<div class="col-md-2 score-affects">' +
+					'<div class="col-md-3 score-affects">' +
 						'<h6 class="sans-serif">Affected by:</h6>' +
 						'<p>You don\'t feel affected by anything.</p>' +
 					'</div>' +

@@ -23,8 +23,8 @@ padding-top: 0;
 margin-top: 0;
 }
 #mudwrapper.container {
-float: left;
 width: 100%;
+max-width: 1200px;
 padding-bottom: .5em;
 height: 90%;
 }
@@ -34,7 +34,6 @@ margin-bottom: .3em;
 #terminal {
 background-color: #000;
 padding: 1em 1em 1em 1em;
-width:100%;
 height: 100%;
 min-height:100%;
 overflow: auto;
@@ -49,6 +48,7 @@ width: 99%;
 #inputwrapper {
 padding-top: 1em;
 width: 100%;
+max-width: 1200px;
 }
 .opening-title {
 font-size: 3em;
