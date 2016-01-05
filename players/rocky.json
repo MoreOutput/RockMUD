@@ -15,7 +15,7 @@
     "hp": 200,
     "cmana": 200,
     "mana": 200,
-    "cmv": 210,
+    "cmv": 189,
     "mv": 210,
     "str": 15,
     "wis": 10,
@@ -40,7 +40,7 @@
     "visible": true,
     "attackType": "punch",
     "area": "Midgaard",
-    "roomid": 1,
+    "roomid": 5,
     "recall": "1",
     "description": "A brand new citizen.",
     "reply": "",
@@ -221,7 +221,7 @@
         }
     },
     "carry": 100,
-    "modified": "Sun Jan 03 2016 21:01:30 GMT-0500 (EST)",
-    "sid": "4E4v-oeFsawZJ42OAAAA",
+    "modified": "Mon Jan 04 2016 20:30:41 GMT-0500 (Eastern Standard Time)",
+    "sid": "nhaZOL7U_eJeCvQEAAAB",
     "opponent": null
 }

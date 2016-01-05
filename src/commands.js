@@ -160,7 +160,7 @@ Cmd.prototype.who = function(target, command) {
 					'<td width="5%">Level</td>' +
 					'<td width="5%">Race</td>' +
 					'<td width="5%">Class</td>' +
-					'<td width="85%">Player</td>' +
+					'<td width="85%">Name</td>' +
 				'</tr>' +
 			'</thead><tbody>' + str + '</tbody>' +
 		'</table></div>'

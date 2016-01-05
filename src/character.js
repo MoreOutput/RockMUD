@@ -97,7 +97,7 @@ Character.prototype.getPassword = function(s, fn) {
 										},function(displayHTML, roomObj) {
 											World.msgPlayer(s, {
 												msg: displayHTML,
-												styleClass: 'room'
+												styleClass: 'room',
 											});
 
 											fn(s);

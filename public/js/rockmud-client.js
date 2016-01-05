@@ -2,6 +2,7 @@ window.onload = function() {
 	'use strict';
 	var ws = io.connect(''),
 	terminal = document.getElementById('terminal'),
+	node = document.getElementById('cmd'),
 	aliases = {	
 		n: 'north',
 		e: 'east',
@@ -34,7 +35,7 @@ window.onload = function() {
 	},
 	isScrolledToBottom = false,
 	movement = ['north', 'east', 'south', 'west'],
-	playerIsLogged = false,
+	playerIsLogged = null,
 	display = function(r) {
 		if (!r.styleClass) {
 			r.styleClass = '';
@@ -95,8 +96,7 @@ window.onload = function() {
 	};
 
 	document.getElementById('console').onsubmit = function (e) {
-		var node = document.getElementById('cmd'),
-		messageNodes = [],
+		var messageNodes = [],
 		msg = node.value.toLowerCase().trim();
 
 		display({
@@ -107,10 +107,6 @@ window.onload = function() {
 			}),
 			emit : (function () {
 				var res = node.dataset.mudState;
-
-				if (playerIsLogged === false && res === 'login') {
-					node.type = 'password';
-				}
 
 				if (res === 'login') {
 					return 'login';
@@ -125,9 +121,6 @@ window.onload = function() {
 				} else if (res === 'enterPassword') {
 					return 'password';
 				} else {
-					node.type = 'text';
-					playerIsLogged = true;
-
 					return 'cmd';
 				}
 			}()),
@@ -144,6 +137,12 @@ window.onload = function() {
 
 	ws.on('msg', function(r) {
 		display(r);
+
+		if (r.res && r.res.toLowerCase().indexOf('password') !== -1) {
+			node.type = 'password';
+		} else {
+			node.type = 'text';
+		}
 
 		if (r.res) {
 			changeMudState(r.res);
