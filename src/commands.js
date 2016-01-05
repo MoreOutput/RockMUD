@@ -370,7 +370,7 @@ Cmd.prototype.kill = function(player, command) {
 					player.opponent = opponent;
 
 					World.msgPlayer(player, {
-						msg: 'You scream and charge a ' + opponent.name,
+						msg: 'You scream and charge at a ' + opponent.name,
 						noPrompt: true
 					});
 
@@ -389,25 +389,27 @@ Cmd.prototype.kill = function(player, command) {
 												World.prompt(player);
 												clearInterval(combatInterval);
 											} else {
-												World.prompt(player);
-											}
+												if (opponent.chp <= 0) {
+													clearInterval(combatInterval);
 
-											/*
-											if (contFight) {
-												clearInterval(combatInterval);
-												World.msgPlayer(player, {msg: 'You died!', styleClass: 'combat-death'});
-											} else {
-												opponent.position = 'dead';
+													opponent.position = 'dead';
+													opponent.opponent = null;
+													opponent.killed = player.name;
 
-												clearInterval(combatInterval);
+													player.opponent = null;
+													player.position = 'standing';
 
-												Room.removeMob(opponent, roomObj, function(roomObj, opponent) {
-													if (roomObj) {
-														Room.addCorpse(roomObj, opponent, function(roomObj, corpse) {
-															World.dice.calXP(player, opponent, function(earnedXP) {
+													Room.removeMob(roomObj, opponent, function(roomObj, opponent) {
+														World.dice.calXP(player, opponent, function(earnedXP) {
+															Room.addCorpse(roomObj, opponent, function(roomObj, corpse) {
 																player.xp += earnedXP;
 																player.position = 'standing';
-																player.wait = 0;
+																
+																if (player.wait > 0) {
+																	player.wait -= 1;
+																} else {
+																	player.wait = 0;
+																}
 
 																if (earnedXP > 0) {
 																	World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
@@ -416,10 +418,23 @@ Cmd.prototype.kill = function(player, command) {
 																}
 															});
 														});
-													}
-												});
+													});
+												} else if (player.chp <= 0 || player.position === 'dead') {
+													clearInterval(combatInterval);
+													// Player Death
+													opponent.position = 'standing';
+													opponent.chp = opponent.hp;
+													opponent.opponent = null;
+
+													player.position = 'standing';
+													player.chp = player.hp;
+													player.opponent = null;
+
+													World.msgPlayer(player, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
+												} else {
+													World.prompt(player);
+												}
 											}
-											*/
 										});
 									});
 								});

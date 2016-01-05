@@ -11,11 +11,11 @@
     "xpToLevel": 0,
     "position": "standing",
     "alignment": "",
-    "chp": 0,
+    "chp": 141,
     "hp": 200,
     "cmana": 200,
     "mana": 200,
-    "cmv": 189,
+    "cmv": 192,
     "mv": 210,
     "str": 15,
     "wis": 10,
@@ -40,7 +40,7 @@
     "visible": true,
     "attackType": "punch",
     "area": "Midgaard",
-    "roomid": 5,
+    "roomid": 4,
     "recall": "1",
     "description": "A brand new citizen.",
     "reply": "",
@@ -221,7 +221,7 @@
         }
     },
     "carry": 100,
-    "modified": "Mon Jan 04 2016 20:30:41 GMT-0500 (Eastern Standard Time)",
-    "sid": "nhaZOL7U_eJeCvQEAAAB",
+    "modified": "Mon Jan 04 2016 21:53:12 GMT-0500 (Eastern Standard Time)",
+    "sid": "-WrINaLqM8Ty7lNPAAAC",
     "opponent": null
 }

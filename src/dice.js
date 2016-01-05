@@ -157,14 +157,14 @@ Roller.prototype.calXP = function(player, xpOpt, fn) {
 
 	if (xpOpt.level >= (player.level - 6)) {
 		if (xpOpt.level >= player.level) {
-			World.dice.roll(1, 4, 1, function(total) {
+			dice.roll(1, 4, 1, function(total) {
 				var xp;
-				xp = (((xpOpt.level - player.level) * total) + 1) * (total * 4);
+				xp = (((xpOpt.level - player.level) * total) + 1) * (total * 4) + dice.roll(1, 10);
 				
 				return fn(xp);
 			});
 		} else {
-			World.dice.roll(1, 2, function(total) {
+			dice.roll(1, 2, function(total) {
 				return fn(total * 10);
 			});
 		}

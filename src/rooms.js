@@ -179,7 +179,10 @@ Room.prototype.removeMob = function(roomObj, mob, fn) {
 };
 
 Room.prototype.addCorpse = function(roomObj, corpse, fn) {
-	corpse.short = 'rotting corpse of a ' + monster.name;
+	var room = this;
+
+	corpse.level = 1;
+	corpse.short = 'rotting corpse of a ' + corpse.name;
 	corpse.decay = 1;
 	corpse.itemType = 'corpse';
 	corpse.corpse = true;
@@ -187,9 +190,9 @@ Room.prototype.addCorpse = function(roomObj, corpse, fn) {
 	corpse.chp = 0;
 	corpse.hp = 0;
 
-	roomObj.items.push(monster);
-
-	return fn(roomObj);
+	room.addItem(roomObj, corpse, function(roomObj, corpse) {
+		return fn(roomObj, corpse);
+	})
 };
 
 module.exports.room = new Room();

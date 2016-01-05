@@ -171,7 +171,7 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 							});
 						}
 						
-						opponentRoundTxt += '<div>' + attacker.displayName +  combat.statusReport[0].msg + '</div>';
+						opponentRoundTxt += '<div>' + attacker.displayName +  combat.statusReport[0].msg + ' (' + attacker.chp + '/' + attacker.hp + ')</div>';
 
 						World.msgPlayer(opponent, {
 							msg: opponentRoundTxt,

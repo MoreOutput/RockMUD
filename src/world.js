@@ -358,7 +358,7 @@ World.prototype.rollMobs = function(mobArr, fn) {
 								mob.isPlayer = false;
 
 								if (!mob.hp) {
-									mob.hp = 50 * mob.level + 1 +  mob.con;
+									mob.hp = (50 * (mob.level + 1));
 									mob.chp = mob.hp;
 								}
 
@@ -459,7 +459,26 @@ World.prototype.getAllMonstersFromArea = function(areaName, fn) {
 
 		return fn(mobArr);
 	});
-}
+};
+
+World.prototype.getAlItemsFromArea = function(areaName, fn) {
+	var world = this;
+
+	world.loadArea(areaName, function(area) {
+		var i = 0,
+		itemArr = [];
+
+		for (i; i < area.rooms.length; i += 1) {
+			if (area.rooms[i].items.length > 0) {
+				itemArr = itemArr.concat(area.rooms[i].items);
+			} else {
+				break;
+			}
+		}
+
+		return fn(itemArr);
+	});
+};
 
 World.prototype.checkArea = function(areaName, fn) {
 	var i = 0;

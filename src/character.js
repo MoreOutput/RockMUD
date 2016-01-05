@@ -109,8 +109,7 @@ Character.prototype.getPassword = function(s, fn) {
 								s.emit('msg', {msg: 'Error logging in, please retry.'});
 								return s.disconnect();
 							} else {
-								s.emit('msg', {msg: msg});
-								s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
+								s.emit('msg', {msg: msg, res: 'end'});
 							}
 						}
 					});
@@ -128,7 +127,8 @@ Character.prototype.getPassword = function(s, fn) {
 
 // Add a player reference object to the players array
 Character.prototype.addPlayer = function(s, fn) {
-	var i = 0;
+	var i = 0,
+	x = null;
 
 	for (i; i < World.players.length; i += 1) {
 		if (s.player.name === World.players[i].name) {
@@ -218,7 +218,6 @@ Character.prototype.create = function(r, s, fn) {
 
 								});
 							});
-						
 						} else {
 							s.emit('msg', {msg: 'Error logging in, please retry.'});
 							s.disconnect();

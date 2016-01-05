@@ -144,6 +144,10 @@ window.onload = function() {
 			node.type = 'text';
 		}
 
+		if (r.res === 'end') {
+			window.location.reload();
+		}
+
 		if (r.res) {
 			changeMudState(r.res);
 		}
