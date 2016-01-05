@@ -903,9 +903,9 @@ Cmd.prototype.restore = function(admin, command) {
 	if (admin.role === 'admin') {
 		for (i; i < World.players.length; i += 1) {
 			player = World.players[i];
-			player = player.hp;
-			player = player.mana;
-			player = player.mv;
+			player.chp = player.hp;
+			player.cmana = player.mana;
+			player.cmv = player.mv;
 		}
 
 		World.msgWorld(admin, {msg: 'You feel refreshed!'});
