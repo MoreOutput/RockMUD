@@ -343,21 +343,6 @@ World.prototype.rollMobs = function(mobArr, fn) {
 			}
 
 			world.extend(mob, world.mobTemplate, function(mob) {
-				if (!mob.hp) {
-					mob.hp = mob.con * 9 +  mob.con;
-					mob.chp = mob.hp;
-				}
-
-				if (!mob.mana) {
-					mob.mana = mob.mana * 8 +  mob.int;
-					mob.cmana = mob.mana;
-				}
-
-				if (!mob.mv) {
-					mob.mv = mob.mv * 9 +  mob.dex;
-					mob.cmv = mob.mv;
-				}
-
 				world.getRace(mob.race, function(raceObj, err) {
 					world.extend(mob, raceObj, function(mob, err) {
 						world.getClass(mob.charClass, function(classObj, err) {
@@ -371,6 +356,22 @@ World.prototype.rollMobs = function(mobArr, fn) {
 								mob.wis += world.dice.roll(4, 6) - (mob.size * 3) + 2;
 								mob.con += world.dice.roll(4, 6) - (mob.size * 3) + 2;
 								mob.isPlayer = false;
+
+								if (!mob.hp) {
+									mob.hp = 50 * mob.level + 1 +  mob.con;
+									mob.chp = mob.hp;
+								}
+
+								if (!mob.mana) {
+									mob.mana = 50 * 8 +  mob.int;
+									mob.cmana = mob.mana;
+								}
+
+								if (!mob.mv) {
+									mob.mv = 50* 9 +  mob.dex;
+									mob.cmv = mob.mv;
+								}
+
 
 								if (mob.behaviors.length > 0) {
 									for (i; i < mob.behaviors.length; i += 1) {

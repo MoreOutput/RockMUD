@@ -376,7 +376,6 @@ Cmd.prototype.kill = function(player, command) {
 
 					Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) {
 						var combatInterval;
-						
 						player.wait += 2;
 
 						World.prompt(player);
