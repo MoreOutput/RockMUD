@@ -136,7 +136,7 @@ Cmd.prototype.who = function(target, command) {
 	
 	if (World.players.length > 0) {
 		for (i; i < World.players.length; i += 1) {
-			player = World.io.sockets.connected[World.players[i].sid].player; // A visible player in players[]
+			player = World.players[i]; // A visible player in players[]
 
 			displayName = player.displayName;
 
@@ -896,21 +896,21 @@ Cmd.prototype.reboot = function(target, command) {
 };
 
 // Fully heal everyone on the MUD
-Cmd.prototype.restore = function(target, command) {
+Cmd.prototype.restore = function(admin, command) {
 	var i = 0,
-	s;
+	player;
 
-	if (target.role === 'admin') {
+	if (admin.role === 'admin') {
 		for (i; i < World.players.length; i += 1) {
-			s = World.io.sockets.connected[World.players[i].sid];
-			s.player.chp = s.player.hp;
-			s.player.cmana = s.player.mana;
-			s.player.cmv = s.player.mv;
+			player = World.players[i];
+			player = player.hp;
+			player = player.mana;
+			player = player.mv;
 		}
 
-		World.msgWorld(target, {msg: 'You feel refreshed!'});
+		World.msgWorld(admin, {msg: 'You feel refreshed!'});
 	} else {
-		World.msgPlayer(target, {msg: 'You do not possess that kind of power.', styleClass: 'error' });
+		World.msgPlayer(admin, {msg: 'You do not possess that kind of power.', styleClass: 'error' });
 	}
 };
 

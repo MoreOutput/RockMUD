@@ -7,20 +7,20 @@ World = require('./world').world;
 	// wait-state removal
 	setInterval(function() {
 		var i = 0,
-		s;
+		player;
 		
 		if (World.players.length > 0) {
 			for (i; i < World.players.length; i += 1) {
-				s = World.io.sockets.connected[World.players[i].sid];
+				player = World.players[i];
 
-				if (s.player.position === 'sleeping' || 
-					s.player.position === 'resting' || 
-					s.player.position === 'standing') {
+				if (player.position === 'sleeping' || 
+					player.position === 'resting' || 
+					player.position === 'standing') {
 					
-					if (s.player.wait > 0) {
-						s.player.wait -= 1;
+					if (player.wait > 0) {
+						player.wait -= 1;
 					} else {
-						s.player.wait = 0;
+						player.wait = 0;
 					}
 				}
 			}
@@ -81,7 +81,7 @@ World = require('./world').world;
 
 		if (World.players.length > 0) {
 			for (i; i < World.players.length; i += 1) {
-				player = World.io.sockets.connected[World.players[i].sid].player;
+				player = World.players[i];
 
 				Character.hpRegen(player, function(player, addedHP) {
 					Character.manaRegen(player, function(player, addedMana) {
@@ -101,7 +101,7 @@ World = require('./world').world;
 
 		if (World.players.length > 0) {
 			for (i; i < World.players.length; i += 1) {
-				player = World.io.sockets.connected[World.players[i].sid].player;
+				player = World.players[i];
 
 				Character.hunger(player, function(target) {
 					Character.thirst(target, function(target) {

@@ -109,6 +109,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						s.player = World.mobTemplate;
 						s.player.name = name;
 						s.player.sid = s.id;
+						s.player.socket = s;
 
 						Character.newCharacter(r, s, function(s) {
 							s.on('cmd', function (r) {

@@ -129,7 +129,7 @@ World.prototype.getPlayableRaces = function(fn) {
 
 	world.races.forEach(function(race, i) {
 		if (race.playable === true) {
-			playableRaces.push (race);
+			playableRaces.push(race);
 		}
 
 		if (world.races.length - 1 === i) {
@@ -214,7 +214,7 @@ World.prototype.getPlayersByRoomId = function(roomId, fn) {
 		player = world.players[i];
 
 		if (player.roomid === roomId) {
-			arr.push(world.io.sockets.connected[player.sid].player);
+			arr.push(player);
 		}
 	}
 
@@ -231,7 +231,7 @@ World.prototype.getPlayerBySocket = function(socketId, fn) {
 		player = world.players[i];
 
 		if (player.sid === socketId) {
-			return fn(world.io.sockets.connected[player.sid].player);
+			return fn(player);
 		}
 	}
 
@@ -248,7 +248,7 @@ World.prototype.getPlayerByName = function(playerName, fn) {
 		player = world.players[i];
 
 		if (player.name.toLowerCase() === playerName.toLowerCase()) {
-			return fn(world.io.sockets.connected[player.sid].player);
+			return fn(player);
 		}
 	}
 
@@ -265,7 +265,7 @@ World.prototype.getPlayersByArea = function(areaName, fn) {
 		player = world.players[i];
 
 		if (player.area === areaName) {
-			arr.push(world.io.sockets.connected[player.sid].player);
+			arr.push(player);
 		}
 	}
 
@@ -539,8 +539,8 @@ World.prototype.msgPlayer = function(target, msgObj, fn) {
 	if (target.player) {
 		s = target;
 		target = target.player;
-	} else if (target.sid) {
-		s = world.io.sockets.connected[target.sid];
+	} else if (target.isPlayer) {
+		s = target.socket;
 	}
 
 	if (target.isPlayer) {
@@ -565,7 +565,7 @@ World.prototype.msgRoom = function(roomObj, msgObj, fn) {
 	s;
 
 	for (i; i < roomObj.playersInRoom.length; i += 1) {
-		s = world.io.sockets.connected[roomObj.playersInRoom[i].sid];
+		s = world.players[i].socket;
 
 		if (s.player && s.player.name !== msgObj.playerName) {
 			world.msgPlayer(s, msgObj);
@@ -587,7 +587,7 @@ World.prototype.msgArea = function(areaName, msgObj, fn) {
 		if ( (!msgObj.randomPlayer || msgObj.randomPlayer === false)
 			|| (msgObj.randomPlayer === true && world.dice.roll(1,10) > 6) ) {
 
-			s = world.io.sockets.connected[world.players[i].sid];
+			s = world.players[i].socket;
 
 			if (s.player.name !== msgObj.playerName && s.player.area === areaName) {
 				world.msgPlayer(s, msgObj);
@@ -607,10 +607,9 @@ World.prototype.msgWorld = function(target, msgObj, fn) {
 	s;
 
 	for (i; i < world.players.length; i += 1) {
-		s = world.io.sockets.connected[world.players[i].sid];
+		s = world.players[i].socket;
 
 		if (s.player && s.player.name !== msgObj.playerName) {
-
 			world.msgPlayer(s, msgObj);
 		}
 	}

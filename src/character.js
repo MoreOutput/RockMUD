@@ -52,6 +52,7 @@ Character.prototype.load = function(name, s, fn) {
 		}
 
 		s.player.sid = s.id;
+		s.player.socket = s;
 		
 		return fn(s);
 	});
@@ -136,12 +137,7 @@ Character.prototype.addPlayer = function(s, fn) {
 		}
 	}
 	
-	World.players.push({
-		name: s.player.name,
-		sid: s.id,
-		area: s.player.area,
-		roomid: s.player.roomid
-	});
+	World.players.push(s.player);
 
 	return fn(true);
 };
@@ -406,7 +402,7 @@ Character.prototype.save = function(player, fn) {
 		} else {
 			character.updatePlayer(player, function() {
 				if (typeof fn === 'function') {
-					return fn();
+					return fn(player);
 				}
 			})
 		}
@@ -730,15 +726,10 @@ Character.prototype.updatePlayer = function(player, fn) {
 
 	for (i; i < World.players.length; i += 1) {
 		if (player.name === World.players[i].name) {
-			World.players[i] = {
-				name: player.name, 
-				sid: player.sid,
-				area: player.area,
-				roomid: player.roomid
-			};
+			World.players[i] = player;
 			
 			if (typeof fn === 'function') {
-				fn(true);
+				fn(player);
 			} 
 		}
 	}
