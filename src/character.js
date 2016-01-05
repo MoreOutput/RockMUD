@@ -144,7 +144,8 @@ Character.prototype.addPlayer = function(s, fn) {
 
 // A New Character is saved
 Character.prototype.create = function(r, s, fn) { 
-	var character = this;
+	var character = this,
+	socket;
 
 	s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
 	s.player.hp += 100;
@@ -177,12 +178,15 @@ Character.prototype.create = function(r, s, fn) {
 		}
 	};
 
+	socket = s.player.socket;
+
 	character.rollStats(s.player, function(player) {
 		s.player = player;
 		character.generateSalt(function(salt) {
 			s.player.salt = salt;
 			character.hashPassword(salt, s.player.password, 1000, function(hash) {
 				s.player.password = hash;
+				s.player.socket = null;
 
 				fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
 					var i = 0;
@@ -191,6 +195,7 @@ Character.prototype.create = function(r, s, fn) {
 						throw err;
 					}
 
+					s.player.socket = socket;
 					s.player.saved = new Date();
 
 					character.addPlayer(s, function(added) {

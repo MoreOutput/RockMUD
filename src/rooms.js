@@ -114,7 +114,12 @@ Room.prototype.checkExit = function(roomObj, direction, fn) {
 	}
 };
 
-// return all the rooms connected to this one
+// return all the rooms connected to this one, default depth of two
+/*
+	{
+		direction.roomObj.direction.roomObj <- how depth will work
+	}
+*/
 Room.prototype.getAdjacent = function(roomObj, depth, r, fn) {
 	var i = 0;
 
@@ -178,6 +183,40 @@ Room.prototype.removeMob = function(roomObj, mob, fn) {
 	return fn(roomObj, mob);
 };
 
+Room.prototype.processEvents = function(roomObj, target, eventName, fn) {
+	var room = this;
+
+	room.fireMobEvents
+
+	return fn(roomObj);
+};
+
+Room.prototype.fireMobEvents = function(roomObj, eventName, fn) {
+	var i = 0,
+	newArr = [];
+
+	for (i; i < roomObj.monsters.length; i += 1) {
+		if (roomObj.monsters[i].onVisit) {
+			roomObj.monsters[i].onVisit(roomObj);
+		}
+	}
+
+	return fn(roomObj);
+};
+
+Room.prototype.fireItemEvents = function(roomObj, eventName, fn) {
+	var i = 0,
+	newArr = [];
+
+	for (i; i < roomObj.monsters.length; i += 1) {
+		if (roomObj.monsters[i].onVisit) {
+			roomObj.monsters[i].onVisit(roomObj);
+		}
+	}
+
+	return fn(roomObj);
+};
+
 Room.prototype.addCorpse = function(roomObj, corpse, fn) {
 	var room = this;
 
@@ -192,7 +231,7 @@ Room.prototype.addCorpse = function(roomObj, corpse, fn) {
 
 	room.addItem(roomObj, corpse, function(roomObj, corpse) {
 		return fn(roomObj, corpse);
-	})
+	});
 };
 
 module.exports.room = new Room();

@@ -60,35 +60,37 @@ Cmd.prototype.move = function(target, command, fn) {
 											target.wait += targetRoom.terrianMod;
 										}
 
-										if (target.isPlayer) {
-											Character.updatePlayer(target);
+										//Room.processEvents(targetRoom, target, 'onVisit', function() {
+											if (target.isPlayer) {
+												Character.updatePlayer(target);
 
-											World.msgPlayer(target, {
-												msg: displayHTML,
-												styleClass: 'room'
+												World.msgPlayer(target, {
+													msg: displayHTML,
+													styleClass: 'room'
+												});
+
+												Room.removePlayer(roomObj, target, function(roomObj, target) {
+													targetRoom.playersInRoom.push(target);
+												});
+											} else {
+												Room.removeMob(roomObj, target, function(roomObj, target) {
+													targetRoom.monsters.push(target);
+												});
+											}
+
+											World.msgRoom(targetRoom, {
+												msg:'<strong>' + target.name + '</strong> a ' + target.race + ' enters the room.',
+												playerName: target.name
 											});
 
-											Room.removePlayer(roomObj, target, function(roomObj, target) {
-												targetRoom.playersInRoom.push(target);
+											World.msgRoom(roomObj, {
+												msg: '<span class="yellow"><strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong></div>'
 											});
-										} else {
-											Room.removeMob(roomObj, target, function(roomObj, target) {
-												targetRoom.monsters.push(target);
-											});
-										}
 
-										World.msgRoom(targetRoom, {
-											msg:'<strong>' + target.name + '</strong> a ' + target.race + ' enters the room.',
-											playerName: target.name
-										});
-
-										World.msgRoom(roomObj, {
-											msg: '<span class="yellow"><strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong></div>'
-										});
-
-										if (typeof fn === 'function') {
-											return fn(true, roomObj, targetRoom);
-										}
+											if (typeof fn === 'function') {
+												return fn(true, roomObj, targetRoom);
+											}
+										//});
 									});
 								} else {
 									target.cmv = Math.round((target.cmv - (7 - target.dex/4)));

@@ -372,7 +372,6 @@ World.prototype.rollMobs = function(mobArr, fn) {
 									mob.cmv = mob.mv;
 								}
 
-
 								if (mob.behaviors.length > 0) {
 									for (i; i < mob.behaviors.length; i += 1) {
 										ai = mob.behaviors[i];
