@@ -388,7 +388,8 @@ Character.prototype.classSelection = function(r, fn) {
 };
 
 Character.prototype.save = function(player, fn) {
-	var character = this;
+	var character = this,
+	socket = player.socket;
 
 	player.modified = new Date().toString();
 
@@ -396,10 +397,14 @@ Character.prototype.save = function(player, fn) {
 		player.opponent = null;;
 	};
 
+	player.socket = null;
+
 	fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null, 4), function (err) {
 		if (err) {
+			player.socket = socket;
 			return World.msgPlayer(player, {msg: 'Error saving character.'});
 		} else {
+			player.socket = socket;
 			character.updatePlayer(player, function() {
 				if (typeof fn === 'function') {
 					return fn(player);
