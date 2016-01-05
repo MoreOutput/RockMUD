@@ -57,8 +57,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 					cmdObj = {
 						cmd:  cmdArr[0].toLowerCase(),
 						msg: cmdArr.slice(1).join(' ').toLowerCase(),
-						number: 1, // Command target
-						socketId: s.player.sid
+						number: 1 // Command target
 					};
 					
 					if (!isNaN(parseInt(cmdObj.msg[0]))) {
