@@ -3,6 +3,7 @@ window.onload = function() {
 	var ws = io.connect(''),
 	terminal = document.getElementById('terminal'),
 	node = document.getElementById('cmd'),
+	rowCnt = 0,
 	aliases = {	
 		n: 'north',
 		e: 'east',
@@ -37,14 +38,26 @@ window.onload = function() {
 	movement = ['north', 'east', 'south', 'west'],
 	playerIsLogged = null,
 	display = function(r) {
+		var i = 0;
+
 		if (!r.styleClass) {
 			r.styleClass = '';
 		}
 
 		if (r.element === undefined) {
-			terminal.innerHTML += '<div class="row"><div class="col-md-12 ' + r.styleClass + '">' + r.msg + '</div></div>';
+			terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><div class="col-md-12 ' + r.styleClass + '">' + r.msg + '</div></div>';
 		} else {
-			terminal.innerHTML += '<div class="row"><' + r.element + ' class="col-md-12 ' + r.styleClass + '">' + r.msg + '</' + r.element + '></div>';
+			terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><' + r.element + ' class="col-md-12 ' + r.styleClass + '">' + r.msg + '</' + r.element + '></div>';
+		}
+
+		rowCnt += 1;
+
+		if (rowCnt > 200) {
+			for (i; i < 100; i += 1) {
+				terminal.removeChild(document.getElementById( (i + 1) ));
+			}
+
+			rowCnt = 0;
 		}
 
 		isScrolledToBottom = terminal.scrollHeight - terminal.clientHeight <= terminal.scrollTop + 1;
