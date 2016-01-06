@@ -19,6 +19,14 @@ Cmd.prototype.fire = function(commandName, target, command, fn) {
 	return this[commandName](target, command, fn);
 };
 
+Cmd.prototype.emote = function(target, command) {
+	World.getRoomObject(target.area, target.roomid, function(roomObj) {
+		World.msgRoom(roomObj, {
+			msg: '<div class="cmd-emote">' + target.displayName + ' ' + command.msg + '</div>'
+		});
+	});
+};
+
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
 	var world = this,
