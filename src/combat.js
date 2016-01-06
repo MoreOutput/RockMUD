@@ -164,7 +164,7 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 						}
 
 						if (attackerRoundTxt) {
-							World.msgPlayer(attacker, {	
+							World.msgPlayer(attacker, {
 								msg: attackerRoundTxt,
 								noPrompt: true,
 								styleClass: 'player-hit grey'

@@ -38,14 +38,6 @@ Cmd.prototype.move = function(target, command, fn) {
 					Room.getDisplay(exitObj.area, exitObj.id, function(displayHTML, targetRoom) {
 						Room.checkExitCriteria(target, targetRoom, function(clearToMove) {
 							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {
-								/*
-								World.checkEntranceEvents(targetRooom, function() {
-									World.checkEvent('onExit', targetRoom, function() {
-
-									});
-								});
-								*/
-
 								if (clearToMove) {
 									World.dice.roll(1, 4, function(moveRoll) {
 										target.cmv -= Math.round(4 + moveRoll - dexMod);
@@ -60,37 +52,37 @@ Cmd.prototype.move = function(target, command, fn) {
 											target.wait += targetRoom.terrianMod;
 										}
 
-										//Room.processEvents(targetRoom, target, 'onVisit', function() {
-											if (target.isPlayer) {
-												Character.updatePlayer(target);
+										if (target.isPlayer) {
+											Character.updatePlayer(target);
 
-												World.msgPlayer(target, {
-													msg: displayHTML,
-													styleClass: 'room'
-												});
-
-												Room.removePlayer(roomObj, target, function(roomObj, target) {
-													targetRoom.playersInRoom.push(target);
-												});
-											} else {
-												Room.removeMob(roomObj, target, function(roomObj, target) {
-													targetRoom.monsters.push(target);
-												});
-											}
-
-											World.msgRoom(targetRoom, {
-												msg:'<strong>' + target.name + '</strong> a ' + target.race + ' enters the room.',
-												playerName: target.name
+											World.msgPlayer(target, {
+												msg: displayHTML,
+												styleClass: 'room'
 											});
 
-											World.msgRoom(roomObj, {
-												msg: '<span class="yellow"><strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong></div>'
+											Room.removePlayer(roomObj, target, function(roomObj, target) {
+												targetRoom.playersInRoom.push(target);
 											});
+										} else {
+											Room.removeMob(roomObj, target, function(roomObj, target) {
+												targetRoom.monsters.push(target);
+											});
+										}
 
+										World.msgRoom(targetRoom, {
+											msg:'<strong>' + target.name + '</strong> a ' + target.race + ' enters the room.',
+											playerName: target.name
+										});
+
+										World.msgRoom(roomObj, {
+											msg: '<span class="yellow"><strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong></div>'
+										});
+
+										Room.processEvents(targetRoom, target, 'onVisit', function(targetRoom, target) {
 											if (typeof fn === 'function') {
 												return fn(true, roomObj, targetRoom);
 											}
-										//});
+										});
 									});
 								} else {
 									target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
@@ -363,88 +355,101 @@ Cmd.prototype.flee = function(player, command) {
 Cmd.prototype.kill = function(player, command) {
 	if (player.position !== 'sleeping' && player.position !== 'resting') {
 		World.getRoomObject(player.area, player.roomid, function(roomObj) {
-			World.search(roomObj.monsters, command, function(opponent) {
-				if (opponent && opponent.roomid === player.roomid) {
-					opponent.position = 'fighting';
-					player.position = 'fighting';
+			var processFight = function(player, opponent) {
+				opponent.position = 'fighting';
+				player.position = 'fighting';
 
-					opponent.opponent = player;
-					player.opponent = opponent;
+				opponent.opponent = player;
+				player.opponent = opponent;
 
-					World.msgPlayer(player, {
-						msg: 'You scream and charge at a ' + opponent.name,
-						noPrompt: true
-					});
+				World.msgPlayer(player, {
+					msg: 'You scream and charge at a ' + opponent.name,
+					noPrompt: true
+				});
 
-					Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) {
-						var combatInterval;
-						player.wait += 2;
+				Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) {
+					var combatInterval;
+					player.wait += 2;
 
-						World.prompt(player);
+					World.prompt(player);
+					World.prompt(opponent);
 
-						if (opponent.chp > 0) {
-							combatInterval = setInterval(function() {
-								World.getRoomObject(player.area, player.roomid, function(roomObj) {
-									Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) {
-										Combat.round(opponent, player, roomObj, function(opponent, player, roomObj) {
-											if (player.position !== 'fighting' || opponent.position !== 'fighting') {
-												World.prompt(player);
+					if (opponent.chp > 0) {
+						combatInterval = setInterval(function() {
+							World.getRoomObject(player.area, player.roomid, function(roomObj) {
+								Combat.round(player, opponent, roomObj, function(player, opponent, roomObj) {
+									Combat.round(opponent, player, roomObj, function(opponent, player, roomObj) {
+										if (player.position !== 'fighting' || opponent.position !== 'fighting') {
+											World.prompt(player);
+											World.prompt(opponent);
+											clearInterval(combatInterval);
+										} else {
+											if (opponent.chp <= 0) {
 												clearInterval(combatInterval);
-											} else {
-												if (opponent.chp <= 0) {
-													clearInterval(combatInterval);
 
-													opponent.position = 'dead';
-													opponent.opponent = null;
-													opponent.killed = player.name;
+												opponent.position = 'dead';
+												opponent.opponent = null;
+												opponent.killed = player.name;
 
-													player.opponent = null;
-													player.position = 'standing';
+												player.opponent = null;
+												player.position = 'standing';
 
-													Room.removeMob(roomObj, opponent, function(roomObj, opponent) {
-														World.dice.calXP(player, opponent, function(earnedXP) {
-															Room.addCorpse(roomObj, opponent, function(roomObj, corpse) {
-																player.xp += earnedXP;
-																player.position = 'standing';
-																
-																if (player.wait > 0) {
-																	player.wait -= 1;
-																} else {
-																	player.wait = 0;
-																}
+												Room.removeMob(roomObj, opponent, function(roomObj, opponent) {
+													World.dice.calXP(player, opponent, function(earnedXP) {
+														Room.addCorpse(roomObj, opponent, function(roomObj, corpse) {
+															player.xp += earnedXP;
+															player.position = 'standing';
+															
+															if (player.wait > 0) {
+																player.wait -= 1;
+															} else {
+																player.wait = 0;
+															}
 
-																if (earnedXP > 0) {
-																	World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
-																} else {
-																	World.msgPlayer(player, {msg: 'You won but learned nothing.', styleClass: 'victory'});
-																}
-															});
+															if (earnedXP > 0) {
+																World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
+															} else {
+																World.msgPlayer(player, {msg: 'You won but learned nothing.', styleClass: 'victory'});
+															}
 														});
 													});
-												} else if (player.chp <= 0 || player.position === 'dead') {
-													clearInterval(combatInterval);
-													// Player Death
-													opponent.position = 'standing';
-													opponent.chp = opponent.hp;
-													opponent.opponent = null;
+												});
+											} else if (player.chp <= 0 || player.position === 'dead') {
+												clearInterval(combatInterval);
+												// Player Death
+												opponent.position = 'standing';
+												opponent.chp = opponent.hp;
+												opponent.opponent = null;
 
-													player.position = 'standing';
-													player.chp = player.hp;
-													player.opponent = null;
+												player.position = 'standing';
+												player.chp = player.hp;
+												player.opponent = null;
 
-													World.msgPlayer(player, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
-												} else {
-													World.prompt(player);
-												}
+												World.msgPlayer(player, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
+											} else {
+												World.prompt(player);
+												World.prompt(opponent);
 											}
-										});
+										}
 									});
 								});
-							}, 1900);
+							});
+						}, 1900);
+					}
+				});
+			}
+
+			World.search(roomObj.monsters, command, function(opponent) {
+				if (opponent && opponent.roomid === player.roomid) {
+					processFight(player, opponent);
+				} else {
+					World.search(roomObj.playersInRoom, command, function(opponent) {
+						if (opponent && opponent.roomid === player.roomid) {
+							processFight(player, opponent);
+						} else {
+							World.msgPlayer(player, {msg: 'There is nothing by that name here.', styleClass: 'error'});
 						}
 					});
-				} else {
-					World.msgPlayer(player, {msg: 'There is nothing by that name here.', styleClass: 'error'});
 				}
 			});
 		});

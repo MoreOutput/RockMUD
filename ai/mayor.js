@@ -19,22 +19,24 @@ module.exports = {
 	onAlive: function(roll) {
 		var mayor = this;
 
-		if (roll > 3) {
-			// Most of the time we just proclaim something
-			Cmd.fire('say', mayor, {
-				msg: mayor.exclimations[parseInt(Math.random() * ((mayor.exclimations.length)))]
-			});
-		} else {
-			// Sometimes we move to a new room
-			Cmd.fire('move', mayor, {
-				msg:  mayor.moveDirections[parseInt(Math.random() * ((mayor.moveDirections.length)))]
-			}, function() {
-				if (roll === 1) {
-					Cmd.fire('say', mayor, {
-						msg: 'I am always losing my key!'
-					});
-				}
-			});
-		}
+		World.dice.roll(1, 10, function(roll) {
+			if (roll > 3) {
+				// Most of the time we just proclaim something
+				Cmd.fire('say', mayor, {
+					msg: mayor.exclimations[parseInt(Math.random() * ((mayor.exclimations.length)))]
+				});
+			} else {
+				// Sometimes we move to a new room
+				Cmd.fire('move', mayor, {
+					msg:  mayor.moveDirections[parseInt(Math.random() * ((mayor.moveDirections.length)))]
+				}, function() {
+					if (roll === 1) {
+						Cmd.fire('say', mayor, {
+							msg: 'I am always losing my key!'
+						});
+					}
+				});
+			}
+		});
 	}
 };

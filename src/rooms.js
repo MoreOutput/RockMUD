@@ -7,7 +7,7 @@ time = World.time,
 areas = World.areas,
 
 Room = function() {
-
+	this.events = ['onVisit', 'onExit', 'onEnter', ''];
 };
 
 Room.prototype.checkExitCriteria = function(target, roomObj, fn) {
@@ -183,38 +183,20 @@ Room.prototype.removeMob = function(roomObj, mob, fn) {
 	return fn(roomObj, mob);
 };
 
-Room.prototype.processEvents = function(roomObj, target, eventName, fn) {
+Room.prototype.processEvents = function(roomObj, player, eventName, fn) {
 	var room = this;
 
-	room.fireMobEvents
-
-	return fn(roomObj);
-};
-
-Room.prototype.fireMobEvents = function(roomObj, eventName, fn) {
-	var i = 0,
-	newArr = [];
-
-	for (i; i < roomObj.monsters.length; i += 1) {
-		if (roomObj.monsters[i].onVisit) {
-			roomObj.monsters[i].onVisit(roomObj);
-		}
+	if (eventName) {
+		World.processEvents(roomObj, player, roomObj, eventName, function() {
+			World.processEvents(roomObj.monsters, player, roomObj, eventName, function() {
+				World.processEvents(roomObj.items, player, roomObj, eventName, function() {
+					return fn(roomObj, player);
+				});
+			});
+		});
+	} else {
+		return fn(roomObj, player);
 	}
-
-	return fn(roomObj);
-};
-
-Room.prototype.fireItemEvents = function(roomObj, eventName, fn) {
-	var i = 0,
-	newArr = [];
-
-	for (i; i < roomObj.monsters.length; i += 1) {
-		if (roomObj.monsters[i].onVisit) {
-			roomObj.monsters[i].onVisit(roomObj);
-		}
-	}
-
-	return fn(roomObj);
 };
 
 Room.prototype.addCorpse = function(roomObj, corpse, fn) {

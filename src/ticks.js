@@ -41,9 +41,7 @@ World = require('./world').world;
 				World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
 					monsters.forEach(function(monster, i) {
 						if (monster.chp >= 1 && monster.onAlive) {
-							World.dice.roll(1, 10, function(roll) {
-								monster.onAlive(roll);
-							});
+							monster.onAlive();
 						}
 					});
 				});

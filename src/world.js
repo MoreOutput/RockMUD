@@ -276,7 +276,7 @@ World.prototype.getPlayersByArea = function(areaName, fn) {
 * Area and item setup on boot
 */
 
-World.prototype.rollItems = function(itemArr, fn) {
+World.prototype.rollItems = function(itemArr, roomid, fn) {
 	var world = this,
 	diceMod,
 	refId = Math.random().toString().replace('0.', 'item-'),
@@ -306,6 +306,8 @@ World.prototype.rollItems = function(itemArr, fn) {
 					item.weight += 2;
 				}
 
+				item.roomid = roomid;
+
 				if (item.behaviors.length > 0) {
 					for (i; i < item.behaviors.length; i += 1) {
 						ai = item.behaviors[i];
@@ -328,7 +330,7 @@ World.prototype.rollItems = function(itemArr, fn) {
 	}
 }
 // Rolls values for Mobs, including their equipment
-World.prototype.rollMobs = function(mobArr, fn) {
+World.prototype.rollMobs = function(mobArr, roomid, fn) {
 	var world = this,
 	diceMod, // Added to all generated totals 
 	refId = Math.random().toString().replace('0.', 'mob-'),
@@ -356,6 +358,7 @@ World.prototype.rollMobs = function(mobArr, fn) {
 								mob.wis += world.dice.roll(4, 6) - (mob.size * 3) + 2;
 								mob.con += world.dice.roll(4, 6) - (mob.size * 3) + 2;
 								mob.isPlayer = false;
+								mob.roomid = roomid;
 
 								if (!mob.hp) {
 									mob.hp = (50 * (mob.level + 1));
@@ -415,8 +418,8 @@ World.prototype.loadArea = function(areaName, fn) {
 
 				for (i; i < area.rooms.length; i += 1) {
 					(function(room) {
-						world.rollMobs(room.monsters, function(mobs) {
-							world.rollItems(room.items, function(items) {
+						world.rollMobs(room.monsters, room.id, function(mobs) {
+							world.rollItems(room.items, room.id, function(items) {
 								if (i === area.rooms.length) {
 									world.areas.push(area);
 									return fn(area, false);
@@ -628,7 +631,7 @@ World.prototype.search = function(searchArr, command, fn) {
 	i = 0;
 
 	if (command.msg.length >= 3) {
-		msgPatt = new RegExp(command.msg);
+		msgPatt = new RegExp(command.msg.toLowerCase());
 
 		for (i; i < searchArr.length; i += 1) {
 			if (searchArr[i].item) {
@@ -706,5 +709,24 @@ World.prototype.shuffle = function (arr) {
 
 	return arr;
 }
+
+World.prototype.processEvents = function(itemToProcess, player, roomObj, eventName, fn) {
+	var isArr = Array.isArray(itemToProcess),
+	i = 0;
+
+	if (isArr) {
+		for (i; i < itemToProcess.length; i += 1) {
+			if (itemToProcess[i][eventName]) {
+				itemToProcess[i][eventName](player, roomObj);
+			}
+		}
+	} else {
+		if (itemToProcess && itemToProcess[eventName]) {
+			itemToProcess[eventName](player, roomObj);
+		}
+	}
+
+	return fn(player, roomObj);
+};
 
 module.exports.world = new World();
