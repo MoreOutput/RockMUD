@@ -38,6 +38,7 @@
 			"monsters" : [
 				{
 					"name": "Rufus",
+					"level": 15,
 					"short": "Rufus, the mayor of Midgaard",
 					"description": "",
 					"race": "human",
@@ -80,6 +81,7 @@
 					}]
 				}, {
 					"name": "Boar",
+					"level": 3,
 					"short": "A large brown boar",
 					"race": "animal",
 					"id": 6,
@@ -90,7 +92,9 @@
 					"position": "standing",
 					"attackType": "bite",
 					"templates": [],
-					"ac": 2,
+					"ac": 7,
+					"hp": 90,
+					"chp": 90,
 					"itemType": "mob",
 					"behaviors": []
 				}
@@ -107,19 +111,7 @@
 				"diceNum": 1,
 				"diceSides": 6,
 				"diceMod": 1,
-				"flags": []
-			}, {
-				"name": "Loaf of Bread",
-				"short": "brown loaf of bread",
-				"long": "A rather stale looking loaf of bread." ,
-				"area": "Midgaard",
-				"id": 7,
-				"level": 1,
-				"itemType": "food",
-				"weight": 0.5,
-				"diceNum": 1,
-				"diceSides": 6,
-				"diceMod": 1,
+				"decay": 7,
 				"flags": []
 			}, {
 				"name": "Short Sword", 
@@ -131,7 +123,8 @@
 				"itemType": "weapon",
 				"material": "iron", 
 				"diceNum": 2, 
-				"diceSides": 6, 
+				"diceSides": 8,
+				"diceMod": 5,
 				"attackType": "slice", 
 				"attackElement": "",
 				"weight": 4,
@@ -188,6 +181,7 @@
 			"playersInRoom": [],
 			"monsters" : [{
 				"name": "Large boar",
+				"level": 6,
 				"short": "A large mean looking boar",
 				"behaviors": [{
 					"module": "aggie"

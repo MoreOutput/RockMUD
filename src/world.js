@@ -361,7 +361,12 @@ World.prototype.rollMobs = function(mobArr, roomid, fn) {
 								mob.roomid = roomid;
 
 								if (!mob.hp) {
-									mob.hp = (50 * (mob.level + 1));
+									if (mob.level > 5) {
+										mob.hp = (40 * (mob.level + 1));
+									} else {
+										mob.hp = (50 * (mob.level + 1));
+									}
+
 									mob.chp = mob.hp;
 								}
 

@@ -148,20 +148,20 @@ Roller.prototype.getMods = function(player, mod) {
 	};
 };
 
-Roller.prototype.calXP = function(player, xpOpt, fn) {
+Roller.prototype.calExp = function(player, expOpt, fn) {
 	var dice = this;
 
-	if (!xpOpt.level) {
-		xpOpt.level = 1;
+	if (!expOpt.level) {
+		expOpt.level = 1;
 	}
 
-	if (xpOpt.level >= (player.level - 6)) {
-		if (xpOpt.level >= player.level) {
-			dice.roll(1, 4, 1, function(total) {
-				var xp;
-				xp = (((xpOpt.level - player.level) * total) + 1) * (total * 4) + dice.roll(1, 10);
+	if (expOpt.level >= (player.level - 6)) {
+		if (expOpt.level >= player.level) {
+			dice.roll(1, 4, function(total) {
+				var exp;
+				exp = ((((expOpt.level - player.level)) * total) + 1) * (total * Math.abs(expOpt.level - player.level)) + dice.roll(1, 10) + 20;
 				
-				return fn(xp);
+				return fn(exp);
 			});
 		} else {
 			dice.roll(1, 2, function(total) {

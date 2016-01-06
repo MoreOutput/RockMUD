@@ -29,12 +29,6 @@ module.exports = {
 				// Sometimes we move to a new room
 				Cmd.fire('move', mayor, {
 					msg:  mayor.moveDirections[parseInt(Math.random() * ((mayor.moveDirections.length)))]
-				}, function() {
-					if (roll === 1) {
-						Cmd.fire('say', mayor, {
-							msg: 'I am always losing my key!'
-						});
-					}
 				});
 			}
 		});

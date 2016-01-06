@@ -346,7 +346,7 @@ Cmd.prototype.flee = function(player, command) {
 					player.position = 'standing';
 
 					World.msgPlayer(player.opponent, {msg: '<p>' + player.displayName + ' fled south!</p>', styleClass: 'grey'});
-					World.msgPlayer(player, {msg: '<p>You fled south!</p>', styleClass: 'grey'});
+					World.msgPlayer(player, {msg: '<p>You fled ' + command.msg +'!</p>', styleClass: 'grey'});
 				});
 			} else {
 				player.position = 'fighting';
@@ -405,9 +405,9 @@ Cmd.prototype.kill = function(player, command) {
 												player.position = 'standing';
 
 												Room.removeMob(roomObj, opponent, function(roomObj, opponent) {
-													World.dice.calXP(player, opponent, function(earnedXP) {
+													World.dice.calExp(player, opponent, function(exp) {
 														Room.addCorpse(roomObj, opponent, function(roomObj, corpse) {
-															player.xp += earnedXP;
+															player.exp += exp;
 															player.position = 'standing';
 															
 															if (player.wait > 0) {
@@ -416,8 +416,8 @@ Cmd.prototype.kill = function(player, command) {
 																player.wait = 0;
 															}
 
-															if (earnedXP > 0) {
-																World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + earnedXP + ' experience points.', styleClass: 'victory'});
+															if (exp > 0) {
+																World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + exp + ' experience points.', styleClass: 'victory'});
 															} else {
 																World.msgPlayer(player, {msg: 'You won but learned nothing.', styleClass: 'victory'});
 															}

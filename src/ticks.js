@@ -109,7 +109,27 @@ World = require('./world').world;
 				});
 			}
 		}
+	}, 240000); // 4 minutes
+
+	setInterval(function() {
+		var s;
+
+		if (World.players.length > 0) {
+			fs.readFile('./templates/messages/motd.json', function (err, data) {
+				var i = 0,
+				alert = World.shuffle(JSON.parse(data).alerts)[0];
+
+				for (i; i < World.players.length; i += 1) {
+					World.msgPlayer(World.players[i], {
+						msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
+							+ alert.replace(/@.*@/, World.players[i].displayName) + '</span></span>'
+					});
+				}
+			});	
+		}	
 	}, 120000);
+
+
 /*
 
 	// Saving characters Tick
@@ -129,43 +149,7 @@ World = require('./world').world;
 			}
 		}
 	}, 60000 * 12);
-
-	// Random alert to all logged in players
-	setInterval(function() {
-		var s,
-		shuffle = function (arr) {
-			var i = arr.length - 1,
-			j = Math.floor(Math.random() * i),
-			temp;
-			
-			for (i; i > 0; i -= 1) {
-				temp = arr[i];
-				arr[i] = arr[j];
-				arr[j] = temp;
-				
-				j = Math.floor (Math.random() * i);
-			} 
-			
-			return arr;
-		};
-
-		if (players.length > 0) {	
-			fs.readFile('./motd.json', function (err, data) {
-				var i = 0,
-				alert = shuffle(JSON.parse(data).alerts)[0];
-
-				io.sockets.to('mud').emit('msg', {
-					msg: '<span class="alert">ALERT: </span><span class="alertmsg"> ' + alert + '</span>',
-					styleClass: 'alert'
-				});
-
-				for (i; i < players.length; i += 1) {
-					s = io.sockets.connected[players[i].sid];
-					Character.prompt(s);				
-				}	
-			});	
-		}	
-	}, 50000);
+	
 */
 
 	// Time -- Increase minute, hours, days and years.

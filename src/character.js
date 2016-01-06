@@ -428,10 +428,7 @@ Character.prototype.hpRegen = function(target, fn) {
 	if (target.chp < target.hp && target.thirst < 5 && target.hunger < 6) {
 		if (target.position === 'sleeping') {
 			conMod += 3;
-		} else {
-			conMod += 1;
 		}
-
 
 		if (target.thirst >= 3 || target.hunger >= 3) {
 			conMod -= 1;
@@ -462,8 +459,6 @@ Character.prototype.manaRegen = function(target, fn) {
 
 		if (target.position === 'sleeping') {
 			intMod += 2;
-		} else {
-			intMod += 1;
 		}
 
 		if (target.thirst >= 3 || target.hunger >= 3) {
@@ -522,29 +517,39 @@ Character.prototype.hunger = function(target, fn) {
 	conMod = World.dice.getConMod(target);
 
 	if (target.hunger < 10) {
-		World.dice.roll(1, conMod, function(total) {
-			if (total >= conMod - 2) {
+		World.dice.roll(1, 12 + conMod, function(total) {
+			if (total > 9) {
 				target.hunger += 1;
 			}
 
 			if (target.hunger > 5) {
-				target.chp -= World.dice.roll(1, 5 + target.hunger) - conMod;
+				target.chp -= Math.round(World.dice.roll(1, 5 + target.hunger) + (target.level - conMod));
 
 				if (target.chp < target.hp) {
 					target.chp = 0;
 				}
 
-				World.msgPlayer(target, {msg: 'You feel hungry.', styleClass: 'hunger'});
+				World.dice.roll(1, 2, function(msgRoll) {
+					if (msgRoll === 1) {
+						World.msgPlayer(target, {msg: 'You feel hungry.', styleClass: 'hunger'});
+					} else {
+						World.msgPlayer(target, {msg: 'Your stomach begins to growl.', styleClass: 'hunger'});
+					}
+				});
 			}
 
 			fn(target);
 		});
 	} else {
-		target.chp -= World.dice.roll(1, 5 + target.level + target.hunger);
+		/*
+		Need death before this can be completed
+
+		target.chp -= (World.dice.roll(1, 5 + target.hunger) - conMod) * 2;
 
 		if (target.chp < target.hp) {
 			target.chp = 0;
 		}
+		*/
 
 		World.msgPlayer(target, {msg: 'You are dying of hunger.', styleClass: 'hunger'});
 		
@@ -557,32 +562,42 @@ Character.prototype.thirst = function(target, fn) {
 	dexMod = World.dice.getDexMod(target);
 
 	if (target.thirst < 10) {
-		World.dice.roll(1, 5, function(total) {
-			if (total >= dexMod - 2) {
+		World.dice.roll(1, 12 + dexMod, function(total) {
+			if (total > 10) {
 				target.thirst += 1;
 			}
 
-			if (target.thirst >= 5) {
-				target.chp -= World.dice.roll(1, 10 + target.thirst) - dexMod;
+			if (target.thirst > 5) {
+				target.chp -= Math.round(World.dice.roll(1, 5 + target.thirst) + (target.level - dexMod));
 
 				if (target.chp < target.hp) {
 					target.chp = 0;
 				}
 
-				World.msgPlayer(target, {msg: 'You could use something to drink.', styleClass: 'hunger'});
+				World.dice.roll(1, 2, function(msgRoll) {
+					if (msgRoll === 1) {
+						World.msgPlayer(target, {msg: 'You are thirsty.', styleClass: 'thirst'});
+					} else {
+						World.msgPlayer(target, {msg: 'Your lips are parched.', styleClass: 'thirst'});
+					}
+				});
 			}
 
 			fn(target);
-		});	
+		});
 	} else {
-		target.chp -= World.dice.roll(1, 10 + target.level + target.thirst + 1);
+		/*
+		Need death before this can be completed
+
+		target.chp -= (World.dice.roll(1, 5 + target.hunger) - conMod) * 2;
 
 		if (target.chp < target.hp) {
 			target.chp = 0;
 		}
+		*/
 
 		World.msgPlayer(target, {msg: 'You are dying of thirst.', styleClass: 'thirst'});
-
+		
 		fn(target);
 	}
 };

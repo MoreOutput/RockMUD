@@ -110,7 +110,7 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 						if (numOfAttacks) {
 							for (j; j < numOfAttacks; j += 1) {
 								// chance roll
-								World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str, function(damage) {
+								World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str + weapon.diceMod, function(damage) {
 									var blocked = false,
 									dodged = false;
 
