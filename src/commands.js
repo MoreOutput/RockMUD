@@ -321,7 +321,8 @@ Cmd.prototype.drop = function(target, command, fn) {
 };
 
 Cmd.prototype.flee = function(player, command) {
-	var cmd = this;
+	var cmd = this,
+	directions = ['north', 'east', 'west', 'south'];
 
 	if (player.opponent) {
 		World.dice.roll(1, 20, World.dice.getDexMod(player), function(fleeCheck) {
@@ -330,22 +331,23 @@ Cmd.prototype.flee = function(player, command) {
 				player.opponent.position = 'standing';
 
 				if (!command.msg) {
-					command.msg = 'south';
+					command.msg = directions[World.dice.roll(1, directions.length) - 1];
 				}
 
 				cmd.move(player, command, function() {
-					player.wait += 1;
-					
 					player.position = 'standing';
 
 					World.msgPlayer(player.opponent, {msg: '<p>' + player.displayName + ' fled south!</p>', styleClass: 'grey'});
 					World.msgPlayer(player, {msg: '<p>You fled south!</p>', styleClass: 'grey'});
 				});
 			} else {
-				player.wait += 1;
 				player.position = 'fighting';
 
 				World.msgPlayer(player, {msg: 'You try to flee and fail!', styleClass: 'green'});
+			}
+
+			if (World.dice.roll(1, 10) > 5) {
+				player.wait += 1;
 			}
 		});
 	}
