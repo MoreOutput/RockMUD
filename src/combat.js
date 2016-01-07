@@ -145,7 +145,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 									}
 
 									if (opponent.isPlayer) {
-										msgForOpponent +=  '<div>' + attacker.displayName + ' ' + weapon.attackType + 's you with some intensity <span class="red">(' + damage + ')</span></div>';
+										msgForOpponent +=  '<div>A ' + attacker.displayName + 's ' + weapon.attackType + ' hits you with some intensity <span class="red">(' + damage + ')</span></div>';
 									}
 								});
 							}
@@ -155,7 +155,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							}
 
 							if (opponent.isPlayer) {
-								msgForOpponent +=  '<div class="grey">' + attacker.displayName + ' ' + weapon.attackType + 's misses you! </div>';
+								msgForOpponent +=  '<div class="grey">' + attacker.displayName + ' tries to ' + weapon.attackType + ' you and misses! </div>';
 							}
 						}
 
