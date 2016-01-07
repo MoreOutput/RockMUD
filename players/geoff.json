@@ -41,7 +41,7 @@
     "visible": true,
     "diceNum": 0,
     "diceSides": 0,
-    "attackType": "claw",
+    "attackType": "punch",
     "area": "Midgaard",
     "roomid": 1,
     "recall": "1",

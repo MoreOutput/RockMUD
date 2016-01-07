@@ -20,7 +20,7 @@ You swing and miss a Red Dragon with barbaric intensity (14)
 * otherwise both parties are left in the state prior. Beginning combat does not add Wait.
 */
 
-Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
+Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	var combat = this;
 
 	// Is a player attacking something
@@ -35,14 +35,10 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 			var attackerMods = World.dice.getMods(attacker),
 			opponentMods = World.dice.getMods(opponent),
 			i = 0,
-			attackerRoundTxt = '',
-			opponentRoundTxt = '',
+			msgForAttacker = '',
+			msgForOpponent = '',
 			roomRoundTxt = '',
 			weapon;
-
-			//Character.getShield(opponent, function(shield) {
-
-			//});
 
 			if (!weaponSlots.length) {
 				weaponSlots = [{
@@ -56,7 +52,8 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 						equipped: true,
 						attackType: attacker.attackType,
 						material: 'flesh',
-						modifiers: {}
+						modifiers: {},
+						diceMod: 0
 					},
 					dual: false,
 					slot: 'hands'
@@ -109,7 +106,6 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 
 						if (numOfAttacks) {
 							for (j; j < numOfAttacks; j += 1) {
-								// chance roll
 								World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str + weapon.diceMod, function(damage) {
 									var blocked = false,
 									dodged = false;
@@ -145,40 +141,24 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 									opponent.chp -= damage;
 
 									if (attacker.isPlayer) {
-										attackerRoundTxt +=  '<div>You ' + weapon.attackType + ' a ' + opponent.displayName + ' <span class="red">(' + damage + ')</span></div>';
+										msgForAttacker +=  '<div>You ' + weapon.attackType + ' a ' + opponent.displayName + ' <span class="red">(' + damage + ')</span></div>';
 									}
 
 									if (opponent.isPlayer) {
-										opponentRoundTxt +=  '<div>' + attacker.displayName + ' ' + weapon.attackType + 's you with some intensity <span class="red">(' + damage + ')</span></div>';
+										msgForOpponent +=  '<div>' + attacker.displayName + ' ' + weapon.attackType + 's you with some intensity <span class="red">(' + damage + ')</span></div>';
 									}
 								});
 							}
 						} else {
 							if (attacker.isPlayer) {
-								attackerRoundTxt +=  '<div>Your ' + weapon.attackType + ' misses a ' + opponent.displayName + '</div>';
+								msgForAttacker +=  '<div class="grey">Your ' + weapon.attackType + ' misses a ' + opponent.displayName + '</div>';
 							}
 
 							if (opponent.isPlayer) {
-								opponentRoundTxt +=  '<div>' + attacker.displayName + ' ' + weapon.attackType + 's misses you! </div>';
+								msgForOpponent +=  '<div class="grey">' + attacker.displayName + ' ' + weapon.attackType + 's misses you! </div>';
 							}
 						}
 
-						if (attackerRoundTxt) {
-							World.msgPlayer(attacker, {
-								msg: attackerRoundTxt,
-								noPrompt: true,
-								styleClass: 'player-hit grey'
-							});
-						}
-						
-						opponentRoundTxt += '<div>' + attacker.displayName +  combat.statusReport[0].msg + ' (' + attacker.chp + '/' + attacker.hp + ')</div>';
-
-						World.msgPlayer(opponent, {
-							msg: opponentRoundTxt,
-							noPrompt: true,
-							styleClass: 'player-hit yellow'
-						});
-						
 						/*
 						TODO: array for player name
 						if (roomObj.playersInRoom.length > 0) {
@@ -193,8 +173,8 @@ Combat.prototype.round = function(attacker, opponent, roomObj, fn) {
 							});
 						}
 						*/
-
-						return fn(attacker, opponent, roomObj);
+						
+						return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent);
 					});
 				});
 			}

@@ -139,8 +139,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				World.msgPlayer(s, {
 					msg: 'You are fighting! Finish up before quitting',
 					emit: 'disconnect',
-					styleClass: 'logout-msg',
-					noPrompt: true
+					styleClass: 'logout-msg'
 				});
 			}
 		});
