@@ -83,7 +83,8 @@ Cmd.prototype.move = function(target, command, fn) {
 										});
 
 										World.msgRoom(roomObj, {
-											msg: '<span class="yellow"><strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong></div>'
+											msg: '<span class="yellow"><strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong></div>',
+											playerName: target.name
 										});
 
 										Room.processEvents(targetRoom, target, 'onVisit', function(targetRoom, target) {
