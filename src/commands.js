@@ -531,7 +531,7 @@ Cmd.prototype.where = function(target, command) {
 
 /** Communication Channels **/
 Cmd.prototype.say = function(target, command) {
-	if (cmd.msg !== '') {
+	if (command.msg !== '') {
 		World.msgPlayer(target, {
 			msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>'
 		});
@@ -551,7 +551,7 @@ Cmd.prototype.say = function(target, command) {
 };
 
 Cmd.prototype.yell = function(target, command) {
-	if (cmd.msg !== '') {
+	if (command.msg !== '') {
 		World.msgPlayer(target, {
 			msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' + command.msg + '</div>'
 		});
@@ -570,7 +570,7 @@ Cmd.prototype.yell = function(target, command) {
 
 
 Cmd.prototype.chat = function(target, command) {
-	if (cmd.msg !== '') {
+	if (command.msg !== '') {
 		World.msgPlayer(target, {
 			msg: '<div class="cmd-chat"><span class="msg-name">You chat></span> ' + command.msg + '</div>'
 		});
