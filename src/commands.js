@@ -843,7 +843,7 @@ Cmd.prototype.score = function(target, command, fn) {
 					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span></li>' +
 					'<li class="stat-level">You are a level ' + target.level + ' ' + target.race + ' '+  target.charClass + '.</li>' +
 					'<li class="stat-carry">You are carrying ' + target.weight + '/' + target.maxWeight + ' pounds.</li>' +
-					'<li class="stat-xp">You need <strong>' + target.expToLevel + '</strong> experience for your next level.</li>' +
+					'<li class="stat-xp">You need <strong>' + (target.expToLevel - target.exp) + '</strong> experience for your next level.</li>' +
 					'<li class="stat-killcnt last">You have slain ' + target.killed +' foes.</li>' +
 				'</ul>' +
 			'</div>'

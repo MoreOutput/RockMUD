@@ -396,7 +396,7 @@ Character.prototype.save = function(player, fn) {
 	var character = this,
 	socket = player.socket;
 
-	player.modified = new Date().toString();
+	player.saved = new Date().toString();
 
 	if (player.opponent) {
 		player.opponent = null;;

@@ -8,7 +8,7 @@
     "displayName": "Rocky",
     "level": 1,
     "exp": 0,
-    "expToLevel": 0,
+    "expToLevel": 1000,
     "position": "standing",
     "alignment": "",
     "chp": 200,
@@ -221,7 +221,6 @@
         }
     },
     "carry": 100,
-    "modified": "Wed Jan 06 2016 02:13:38 GMT-0500 (Eastern Standard Time)",
     "sid": "9ifh5_9IS7m_zMv2AAAA",
     "opponent": null,
     "socket": null

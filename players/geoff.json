@@ -152,7 +152,7 @@
             }
         ]
     ],
-    "skillList": "[object Object]",
+    "skillList": [],
     "prevent": [],
     "autoloot": true,
     "autosac": false,
@@ -182,6 +182,5 @@
             ]
         }
     },
-    "carry": 120,
-    "modified": "Tue Jan 05 2016 20:46:04 GMT-0500 (Eastern Standard Time)"
+    "carry": 120
 }
