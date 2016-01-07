@@ -76,18 +76,16 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 								return Spells[r.cmd](r, s); 
 							*/
 							} else {
-								s.emit('msg', {msg: cmdObj.cmd + ' is not a valid command.', styleClass: 'error'});
-								return World.prompt(s);
+								World.msgPlayer(s, {msg: cmdObj.cmd + ' is not a valid command.', styleClass: 'error'});
 							}
 						} else {
 							return World.prompt(s);
 						}
 					} else {
-						s.emit('msg', {msg: 'You have to be more specific with your command.', styleClass: 'error'});
+						World.msgPlayer(s, {msg: 'You have to be more specific with your command.', styleClass: 'error'});
 					}
 				} else {
-					s.emit('msg', {msg: 'Invalid characters in command!', styleClass: 'error'});
-					return World.prompt(s);
+					World.msgPlayer(s, {msg: 'Invalid characters in command!', styleClass: 'error'});
 				}
 			};
 

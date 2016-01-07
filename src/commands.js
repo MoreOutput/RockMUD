@@ -438,11 +438,11 @@ Cmd.prototype.kill = function(player, command) {
 										msgForOpponent += msgForOpponent2;
 
 										if (player.isPlayer) {
-											msgForPlayer += '<div class="rnd-status">A ' + opponent.name + ' is in great shape! (' + opponent.chp + '/' + opponent.hp +')</div>'
+											msgForPlayer += '<div class="rnd-status">A ' + opponent.name + ' is in great shape! (' + opponent.chp + '/' + opponent.hp +')</div>';
 										}
 
 										if (opponent.isPlayer) {
-											msgForOpponent += '<div class="rnd-status">A ' + player.name + ' is in great shape! (' + player.chp + '/' + player.hp +')</div>'
+											msgForOpponent += '<div class="rnd-status">A ' + player.name + ' is in great shape! (' + player.chp + '/' + player.hp +')</div>';
 										}
 
 										World.msgPlayer(player, {
