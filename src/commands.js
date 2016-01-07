@@ -531,39 +531,60 @@ Cmd.prototype.where = function(target, command) {
 
 /** Communication Channels **/
 Cmd.prototype.say = function(target, command) {
-	World.msgPlayer(target, {
-		msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>'
-	});
-
-	World.getRoomObject(target.area, target.roomid, function(roomObj) {
-		World.msgRoom(roomObj, {
-			msg: '<div class="cmd-say"><span class="msg-name">' + target.displayName + ' says></span> ' + command.msg + '</div>',
-			playerName: target.name
+	if (cmd.msg !== '') {
+		World.msgPlayer(target, {
+			msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>'
 		});
-	});
+
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			World.msgRoom(roomObj, {
+				msg: '<div class="cmd-say"><span class="msg-name">' + target.displayName + ' says></span> ' + command.msg + '</div>',
+				playerName: target.name
+			});
+		});
+	} else {
+		World.msgPlayer(target, {
+			msg: 'You have nothing to say.',
+			styleClass: 'error'
+		});
+	}
 };
 
 Cmd.prototype.yell = function(target, command) {
-	World.msgPlayer(target, {
-		msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' + command.msg + '</div>'
-	});
-	
-	World.msgArea(target.area, {
-		msg: '<div class="cmd-yell"><span class="msg-name">' + target.displayName + ' yells></span> ' + command.msg + '</div>',
-		playerName: target.name
-	});
+	if (cmd.msg !== '') {
+		World.msgPlayer(target, {
+			msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' + command.msg + '</div>'
+		});
+		
+		World.msgArea(target.area, {
+			msg: '<div class="cmd-yell"><span class="msg-name">' + target.displayName + ' yells></span> ' + command.msg + '</div>',
+			playerName: target.name
+		});
+	} else {
+		World.msgPlayer(target, {
+			msg: 'You open your mouth to yell and nothing comes out. You feel like an idiot.',
+			styleClass: 'error'
+		});
+	}
 };
 
 
 Cmd.prototype.chat = function(target, command) {
-	World.msgPlayer(target, {
-		msg: '<div class="cmd-chat"><span class="msg-name">You chat></span> ' + command.msg + '</div>'
-	});
+	if (cmd.msg !== '') {
+		World.msgPlayer(target, {
+			msg: '<div class="cmd-chat"><span class="msg-name">You chat></span> ' + command.msg + '</div>'
+		});
 
-	World.msgWorld(target, {
-		msg: '<div class="cmd-chat"><span class="msg-name">' + target.displayName + '></span> ' + command.msg + '</div>',
-		playerName: target.name
-	});
+		World.msgWorld(target, {
+			msg: '<div class="cmd-chat"><span class="msg-name">' + target.displayName + '></span> ' + command.msg + '</div>',
+			playerName: target.name
+		});
+	} else {
+		World.msgPlayer(target, {
+			msg: 'You cannot chat nothing, no one can.',
+			styleClass: 'error'
+		});
+	}
 };
 
 Cmd.prototype.tell = function(target, command, fn) {

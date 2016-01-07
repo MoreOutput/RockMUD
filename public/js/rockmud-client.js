@@ -35,7 +35,7 @@ window.onload = function() {
 		r: 'recall'
 	},
 	isScrolledToBottom = false,
-	movement = ['north', 'east', 'south', 'west'],
+	movement = ['north', 'east', 'south', 'west', 'down', 'up'],
 	playerIsLogged = null,
 	display = function(r) {
 		var i = 0;
@@ -76,7 +76,7 @@ window.onload = function() {
 	},
 	changeMudState = function(state) {
 		document.getElementById('cmd').dataset.mudState = state;
-	},		
+	},
 	checkMovement = function(cmdStr, fn) {
 		if (movement.toString().indexOf(cmdStr) !== -1) {
 			return fn(true, 'move ' + cmdStr);
