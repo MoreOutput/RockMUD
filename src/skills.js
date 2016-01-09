@@ -46,21 +46,4 @@ Skill.prototype.bash = function(r, s) {
 	}
 };
 
-/*
-* Magic Skills
-*/
-Skill.prototype.spark = function(r, s) {
-	return {
-		minLevel: 1,
-		type: 'passive',
-		maxTrain: 100,
-		position: ['fighting', 'standing'],
-		onUse: function() {
-			// Damage in battle
-			
-			// Lights up a room outside of battle
-		}
-	}
-};
-
 module.exports.skill = new Skill();

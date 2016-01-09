@@ -9,6 +9,7 @@ World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
+Skills = require('./skills').skills,
 players = World.players,
 time = World.time,
 areas = World.areas,
@@ -369,6 +370,34 @@ Cmd.prototype.flee = function(player, command) {
 			if (World.dice.roll(1, 10) < 6) {
 				player.wait += 1;
 			}
+		});
+	}
+};
+
+// triggering spell skills
+Cmd.prototype.cast = function(player, command, fn) {
+	var cmd = this;
+	console.log(command);
+
+	if (command.msg) {
+		if (command.msg in Skills) {
+				if (player.position !== 'sleeping' && player.position !== 'resting') {
+					World.getRoomObject(player.area, player.roomid, function(roomObj) {
+						World.search(roomObj.monsters, command, function(opponent) {
+							return Spells[command.msg](player, opponent, command, function(attackObj) {
+								cmd.kill(player, command, attackObj, fn);
+							});
+						});
+					});
+				}
+		} else {
+			World.msgPlayer(player, {
+				msg: 'You do not know that spell.'
+			});
+		}
+	} else {
+		World.msgPlayer(player, {
+			msg: 'You do not know that spell.'
 		});
 	}
 };

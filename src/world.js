@@ -114,6 +114,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	var Character = require('./character').character,
 	Cmds = require('./commands').cmd,
 	Skills = require('./skills').skill,
+	Spells= require('./skills').spell,
 	Room = require('./rooms').room,
 	Ticks = require('./ticks');
 
