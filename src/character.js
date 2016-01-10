@@ -547,7 +547,9 @@ Character.prototype.hunger = function(target, fn) {
 				});
 			}
 
-			fn(target);
+			if (typeof fn === 'function') {
+				fn(target);
+			}
 		});
 	} else {
 		/*
@@ -562,7 +564,9 @@ Character.prototype.hunger = function(target, fn) {
 
 		World.msgPlayer(target, {msg: 'You are dying of hunger.', styleClass: 'hunger'});
 		
-		fn(target);
+		if (typeof fn === 'function') {
+			fn(target);
+		}
 	}
 };
 
@@ -592,7 +596,9 @@ Character.prototype.thirst = function(target, fn) {
 				});
 			}
 
-			fn(target);
+			if (typeof fn === 'function') {
+				fn(target);
+			}
 		});
 	} else {
 		/*
@@ -606,8 +612,10 @@ Character.prototype.thirst = function(target, fn) {
 		*/
 
 		World.msgPlayer(target, {msg: 'You are dying of thirst.', styleClass: 'thirst'});
-		
-		fn(target);
+
+		if (typeof fn === 'function') {
+			fn(target);
+		}
 	}
 };
 

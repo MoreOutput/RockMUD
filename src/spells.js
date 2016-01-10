@@ -2,9 +2,6 @@
 var World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
-io = require('../server').io,
-players = require('../server').players,
-areas = require('../server').areas,
 
 Spell = function() {
 
@@ -29,7 +26,6 @@ Spell.prototype.spark = function(player, opponent, roomObj, command, fn) {
 			// Damage roll
 			World.dice.roll(player.level / 2 + 1, 20 + intMod + player.mana/20, intMod, function(damage) {
 				damage -= opponent.magicRes;
-
 				damage -= opponent.ac;
 
 				opponent.chp -= damage;
