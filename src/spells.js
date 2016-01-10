@@ -1,7 +1,5 @@
 'use strict';
 var World = require('./world').world,
-Character = require('./character').character,
-Room = require('./rooms').room,
 
 Spell = function() {
 
@@ -16,14 +14,12 @@ Spell.prototype.spark = function(player, opponent, roomObj, command, fn) {
 		if (cost < player.cmana) {
 			intMod = World.dice.getIntMod(player),
 			oppIntMod = World.dice.getIntMod(opponent);
-			// Roll a spell hit check
-			// remove mana here
 
 			player.wait += 2;
 			player.cmana -= (cost - intMod);
 			// Failure check
 			// World.dice.spellCheck(player, opponent, fn);
-			// Damage roll
+
 			World.dice.roll(player.level / 2 + 1, 20 + intMod + player.mana/20, intMod, function(damage) {
 				damage -= opponent.magicRes;
 				damage -= opponent.ac;
