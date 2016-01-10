@@ -84,9 +84,7 @@ World = require('./world').world;
 
 				Character.hpRegen(player, function(player, addedHP) {
 					Character.manaRegen(player, function(player, addedMana) {
-						Character.mvRegen(player, function(player, addedMv) {
-							Character.updatePlayer(player);
-						});
+						Character.mvRegen(player);
 					});
 				});
 			}

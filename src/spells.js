@@ -11,6 +11,8 @@ Spell = function() {
 };
 
 Spell.prototype.spark = function(player, opponent, roomObj, command, fn) {
+    var intMod = World.dice.getIntMod(player),
+    opponent = World.dice.getIntMod(opponent);
     // Roll a spell hit check
     // remove mana here
 
@@ -18,6 +20,8 @@ Spell.prototype.spark = function(player, opponent, roomObj, command, fn) {
 
 
     World.msgPlayer(player, {msg: "ZAP!"});
+
+    return fn(player, opponent, roomObj, command);
 
 };
 

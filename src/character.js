@@ -410,11 +410,8 @@ Character.prototype.save = function(player, fn) {
 			return World.msgPlayer(player, {msg: 'Error saving character.'});
 		} else {
 			player.socket = socket;
-			character.updatePlayer(player, function() {
-				if (typeof fn === 'function') {
-					return fn(player);
-				}
-			})
+
+			return fn(player);
 		}
 	});
 };
@@ -505,10 +502,14 @@ Character.prototype.mvRegen = function(target, fn) {
 				target.cmv = target.mv;
 			}
 
-			fn(target, total);
+			if (typeof fn === 'function') {
+				fn(target, total);
+			}
 		});
 	} else {
-		fn(target, 0);
+		if (typeof fn === 'function') {
+			fn(target, total);
+		}
 	}
 };
 
@@ -743,21 +744,6 @@ Character.prototype.getLoad = function(s) {
 	var load = Math.round((s.player.str + s.player.con / 4) * 10);
 	
 	return load;
-};
-
-// Updates a players reference in players[] with some data attached to the socket
-Character.prototype.updatePlayer = function(player, fn) {
-	var  i = 0;
-
-	for (i; i < World.players.length; i += 1) {
-		if (player.name === World.players[i].name) {
-			World.players[i] = player;
-			
-			if (typeof fn === 'function') {
-				fn(player);
-			} 
-		}
-	}
 };
 
 Character.prototype.level = function(s, fn) {

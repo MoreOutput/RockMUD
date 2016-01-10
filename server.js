@@ -53,13 +53,19 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				var cmdArr = r.msg.split(' '),
 				cmdObj ={};
 
+				if (cmdArr.length === 1) {
+					cmdArr[1] = '';
+				}
+
 				if (/[`~@#$%^&*()-+={}[]|<>]+$/g.test(r.msg) === false) {
 					cmdObj = {
-						cmd:  cmdArr[0].toLowerCase(),
-						msg: cmdArr.slice(1).join(' ').toLowerCase(),
-						number: 1 // Command target
+						cmd: cmdArr[0].toLowerCase(), // {cast} spark boar
+						msg: cmdArr.slice(1).join(' '), // cast {spark boar}
+						arg: cmdArr[1].toLowerCase(), // cast {spark} boar
+						input: cmdArr.slice(2).join(' '), // cast spark {boar ...}
+						number: 1 // argument target -- cast spark 2.boar
 					};
-					
+
 					if (!isNaN(parseInt(cmdObj.msg[0]))) {
 						cmdObj.number = parseInt(cmdObj.msg[0]);
 						cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');

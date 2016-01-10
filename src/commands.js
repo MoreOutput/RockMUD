@@ -63,8 +63,6 @@ Cmd.prototype.move = function(target, command, fn) {
 										}
 
 										if (target.isPlayer) {
-											Character.updatePlayer(target);
-
 											World.msgPlayer(target, {
 												msg: displayHTML,
 												styleClass: 'room'
@@ -379,14 +377,14 @@ Cmd.prototype.flee = function(player, command) {
 Cmd.prototype.cast = function(player, command, fn) {
 	var cmd = this;
 
+	console.log('casting a spell', command);
+
 	if (command.msg) {
-		console.log(command.msg);
-		console.log(Spells);
 		if (command.msg in Spells) {
 				if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fleeing') {
 					World.getRoomObject(player.area, player.roomid, function(roomObj) {
 						World.search(roomObj.monsters, command, function(mob) {
-							return Spells[command.msg](player, mob, roomObj, command, function() {
+							return Spells[command.arg](player, mob, roomObj, command, function() {
 								if (!player.opponent && player.position !== 'fighting') {
 									cmd.kill(player, command, roomObj, fn);
 								}
@@ -635,9 +633,7 @@ Cmd.prototype.title = function(target, command) {
 			target.title = ' a level ' + target.level + ' ' + target.race + ' ' + target.charClass;
 		}
 
-		Character.updatePlayer(target, function(updated) {
-			World.msgPlayer(target, {msg: 'Your title was changed!', styleClass: 'save'});
-		});
+		World.msgPlayer(target, {msg: 'Your title was changed!', styleClass: 'save'});
 	} else {
 		World.msgPlayer(target, {msg: 'Title is too long, try another.', styleClass: 'save'});
 	}
