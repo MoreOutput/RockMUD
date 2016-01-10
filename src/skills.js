@@ -46,4 +46,4 @@ Skill.prototype.bash = function(r, s) {
 	}
 };
 
-module.exports.skill = new Skill();
+module.exports.skills = new Skill();

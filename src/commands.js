@@ -10,6 +10,7 @@ Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
 Skills = require('./skills').skills,
+Spells = require('./spells').spells,
 players = World.players,
 time = World.time,
 areas = World.areas,
@@ -377,15 +378,18 @@ Cmd.prototype.flee = function(player, command) {
 // triggering spell skills
 Cmd.prototype.cast = function(player, command, fn) {
 	var cmd = this;
-	console.log(command);
 
 	if (command.msg) {
-		if (command.msg in Skills) {
-				if (player.position !== 'sleeping' && player.position !== 'resting') {
+		console.log(command.msg);
+		console.log(Spells);
+		if (command.msg in Spells) {
+				if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fleeing') {
 					World.getRoomObject(player.area, player.roomid, function(roomObj) {
-						World.search(roomObj.monsters, command, function(opponent) {
-							return Spells[command.msg](player, opponent, command, function(attackObj) {
-								cmd.kill(player, command, attackObj, fn);
+						World.search(roomObj.monsters, command, function(mob) {
+							return Spells[command.msg](player, mob, roomObj, command, function() {
+								if (!player.opponent && player.position !== 'fighting') {
+									cmd.kill(player, command, roomObj, fn);
+								}
 							});
 						});
 					});
@@ -403,130 +407,16 @@ Cmd.prototype.cast = function(player, command, fn) {
 };
 
 // For attacking in-game monsters
-Cmd.prototype.kill = function(player, command) {
-	if (player.position !== 'sleeping' && player.position !== 'resting') {
+Cmd.prototype.kill = function(player, command, attackObj, fn) {
+	if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fighting') {
 		World.getRoomObject(player.area, player.roomid, function(roomObj) {
-			var processFight = function(player, opponent) {
-				opponent.position = 'fighting';
-				player.position = 'fighting';
-
-				opponent.opponent = player;
-				player.opponent = opponent;
-
-				World.msgPlayer(player, {
-					msg: 'You scream and charge at a ' + opponent.name,
-					noPrompt: true
-				});
-
-				Combat.attack(player, opponent, roomObj, function(player, opponent, roomObj) {
-					var combatInterval;
-					player.wait += 2;
-
-					World.prompt(player);
-					World.prompt(opponent);
-
-					if (opponent.chp > 0) {
-						combatInterval = setInterval(function() {
-							World.getRoomObject(player.area, player.roomid, function(roomObj) {
-								// Each round is two attacks
-								Combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
-									Combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2) {
-										var processEndOfMobCombat = function(combatInterval, player, mob) {
-											clearInterval(combatInterval);
-
-											mob.position = 'dead';
-											mob.opponent = null;
-											mob.killedBy = player.name;
-
-											player.opponent = null;
-											player.position = 'standing';
-
-											Room.removeMob(roomObj, mob, function(roomObj, mob) {
-												World.dice.calExp(player, mob, function(exp) {
-													Room.addCorpse(roomObj, mob, function(roomObj, corpse) {
-														player.exp += exp;
-														player.position = 'standing';
-														
-														if (player.wait > 0) {
-															player.wait -= 1;
-														} else {
-															player.wait = 0;
-														}
-
-														if (exp > 0) {
-															World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + exp + ' experience points.', styleClass: 'victory'});
-														} else {
-															World.msgPlayer(player, {msg: 'You won but learned nothing.', styleClass: 'victory'});
-														}
-													});
-												});
-											});
-										};
-
-										msgForPlayer += msgForPlayer2;
-										msgForOpponent += msgForOpponent2;
-
-										if (player.isPlayer) {
-											msgForPlayer += '<div class="rnd-status">A ' + opponent.name + ' is in great shape! (' + opponent.chp + '/' + opponent.hp +')</div>';
-										}
-
-										if (opponent.isPlayer) {
-											msgForOpponent += '<div class="rnd-status">A ' + player.name + ' is in great shape! (' + player.chp + '/' + player.hp +')</div>';
-										}
-
-										World.msgPlayer(player, {
-											msg: msgForPlayer,
-											noPrompt: true,
-											styleClass: 'player-hit yellow'
-										});
-
-										World.msgPlayer(opponent, {
-											msg: msgForOpponent,
-											noPrompt: true,
-											styleClass: 'player-hit yellow'
-										});
-
-										if (player.position !== 'fighting' || opponent.position !== 'fighting') {
-											World.prompt(player);
-											World.prompt(opponent);
-											clearInterval(combatInterval);
-										} else {
-											if (opponent.chp <= 0) {
-												processEndOfMobCombat(combatInterval, player, opponent);
-											} else if ( (!player.isPlayer && player.chp <= 0)) {
-												processEndOfMobCombat(combatInterval, opponent, opponent);
-											} else if (player.isPlayer && (player.chp <= 0 || player.position === 'dead')) {
-												clearInterval(combatInterval);
-												// Player Death
-												opponent.position = 'standing';
-												opponent.chp = opponent.hp;
-												opponent.opponent = null;
-
-												player.position = 'standing';
-												player.chp = player.hp;
-												player.opponent = null;
-
-												World.msgPlayer(player, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
-											} else {
-												World.prompt(player);
-												World.prompt(opponent);
-											}
-										}
-									});
-								});
-							});
-						}, 1900);
-					}
-				});
-			}
-
 			World.search(roomObj.monsters, command, function(opponent) {
 				if (opponent && opponent.roomid === player.roomid) {
-					processFight(player, opponent);
+					Combat.processFight(player, opponent);
 				} else {
 					World.search(roomObj.playersInRoom, command, function(opponent) {
 						if (opponent && opponent.roomid === player.roomid) {
-							processFight(player, opponent);
+							Combat.processFight(player, opponent);
 						} else {
 							World.msgPlayer(player, {msg: 'There is nothing by that name here.', styleClass: 'error'});
 						}

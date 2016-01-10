@@ -182,4 +182,125 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	}
 };
 
+Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
+	var combat = this;
+
+	opponent.position = 'fighting';
+	player.position = 'fighting';
+
+	opponent.opponent = player;
+	player.opponent = opponent;
+
+	World.msgPlayer(player, {
+		msg: 'You scream and charge at a ' + opponent.name,
+		noPrompt: true
+	});
+
+	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj) {
+		var combatInterval;
+		player.wait += 2;
+
+		World.prompt(player);
+		World.prompt(opponent);
+
+		if (opponent.chp > 0) {
+			combatInterval = setInterval(function() {
+				World.getRoomObject(player.area, player.roomid, function(roomObj) {
+					combat.round(combatInterval, player, opponent, roomObj);
+				});
+			}, 1900);
+		}
+	});
+};
+
+Combat.prototype.processEndOfMobCombat = function(combatInterval, player, opponent, roomObj)  {
+	clearInterval(combatInterval);
+
+	opponent.position = 'dead';
+	opponent.opponent = null;
+	opponent.killedBy = player.name;
+
+	player.opponent = null;
+	player.position = 'standing';
+
+	Room.removeMob(roomObj, opponent, function(roomObj, opponent) {
+		World.dice.calExp(player, opponent, function(exp) {
+			Room.addCorpse(roomObj, opponent, function(roomObj, corpse) {
+				player.exp += exp;
+				player.position = 'standing';
+				
+				if (player.wait > 0) {
+					player.wait -= 1;
+				} else {
+					player.wait = 0;
+				}
+
+				if (exp > 0) {
+					World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + exp + ' experience points.', styleClass: 'victory'});
+				} else {
+					World.msgPlayer(player, {msg: 'You won but learned nothing.', styleClass: 'victory'});
+				}
+			});
+		});
+	});
+};
+
+Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn) {
+	var combat = this;
+
+	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
+		combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2) {
+			msgForPlayer += msgForPlayer2;
+			msgForOpponent += msgForOpponent2;
+
+			if (player.isPlayer) {
+				msgForPlayer += '<div class="rnd-status">A ' + opponent.name + ' is in great shape! (' + opponent.chp + '/' + opponent.hp +')</div>';
+			}
+
+			if (opponent.isPlayer) {
+				msgForOpponent += '<div class="rnd-status">A ' + player.name + ' is in great shape! (' + player.chp + '/' + player.hp +')</div>';
+			}
+
+			World.msgPlayer(player, {
+				msg: msgForPlayer,
+				noPrompt: true,
+				styleClass: 'player-hit yellow'
+			});
+
+			World.msgPlayer(opponent, {
+				msg: msgForOpponent,
+				noPrompt: true,
+				styleClass: 'player-hit yellow'
+			});
+
+			if (player.position !== 'fighting' || opponent.position !== 'fighting') {
+				World.prompt(player);
+				World.prompt(opponent);
+				clearInterval(combatInterval);
+			} else {
+				if (opponent.chp <= 0) {
+					combat.processEndOfMobCombat(combatInterval, player, opponent, roomObj);
+				} else if ( (!player.isPlayer && player.chp <= 0)) {
+					combat.processEndOfMobCombat(combatInterval, opponent, player, roomObj);
+				} else if (player.isPlayer && (player.chp <= 0 || player.position === 'dead')) {
+					clearInterval(combatInterval);
+					// Player Death
+					opponent.position = 'standing';
+					opponent.chp = opponent.hp;
+					opponent.opponent = null;
+
+					player.position = 'standing';
+					player.chp = player.hp;
+					player.opponent = null;
+
+					World.msgPlayer(player, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
+				} else {
+					World.prompt(player);
+					World.prompt(opponent);
+				}
+			}
+		});
+	});
+}
+
 module.exports.combat = new Combat();

@@ -6,22 +6,19 @@ io = require('../server').io,
 players = require('../server').players,
 areas = require('../server').areas,
 
-Skill = function() {
+Spell = function() {
 
 };
 
-Skill.prototype.spark = function(player, opponent, roomObj, command, fn) {
-    return {
-        minLevel: 1,
-        type: 'passive',
-        maxTrain: 100,
-        position: ['fighting', 'standing'],
-        onUse: function() {
-            // Damage in battle
-            
-            // Lights up a room outside of battle
-        }
-    }
+Spell.prototype.spark = function(player, opponent, roomObj, command, fn) {
+    // Roll a spell hit check
+    // remove mana here
+
+    player.cmana -= (50 - player.level) - intMod;
+
+
+    World.msgPlayer(player, {msg: "ZAP!"});
+
 };
 
-module.exports.skill = new Skill();
+module.exports.spells = new Spell();

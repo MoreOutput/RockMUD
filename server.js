@@ -71,10 +71,6 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 								return Cmds[cmdObj.cmd](s.player, cmdObj);
 							} else if (cmdObj.cmd in Skills) {
 								return Skills[r.cmd](s.player, cmdObj);
-							/*
-							} else if (r.msg === 'cast' && r.cmd in Skills) {
-								return Spells[r.cmd](r, s); 
-							*/
 							} else {
 								World.msgPlayer(s, {msg: cmdObj.cmd + ' is not a valid command.', styleClass: 'error'});
 							}
