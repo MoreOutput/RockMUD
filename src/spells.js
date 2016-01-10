@@ -11,18 +11,41 @@ Spell = function() {
 };
 
 Spell.prototype.spark = function(player, opponent, roomObj, command, fn) {
-    var intMod = World.dice.getIntMod(player),
-    opponent = World.dice.getIntMod(opponent);
-    // Roll a spell hit check
-    // remove mana here
+	var intMod,
+	cost = 40 - player.level,
+	oppIntMod;
 
-    player.cmana -= (50 - player.level) - intMod;
+	if (command.input || player.opponent) {
+		if (cost < player.cmana) {
+			intMod = World.dice.getIntMod(player),
+			oppIntMod = World.dice.getIntMod(opponent);
+			// Roll a spell hit check
+			// remove mana here
 
+			player.wait += 2;
+			player.cmana -= (cost - intMod);
+			// Failure check
+			// World.dice.spellCheck(player, opponent, fn);
+			// Damage roll
+			World.dice.roll(player.level / 2 + 1, 20 + intMod + player.mana/20, intMod, function(damage) {
+				damage -= opponent.magicRes;
 
-    World.msgPlayer(player, {msg: "ZAP!"});
+				damage -= opponent.ac;
 
-    return fn(player, opponent, roomObj, command);
+				opponent.chp -= damage;
 
+				World.msgPlayer(player, {msg: 'You cast spark and burn a ' + opponent.displayName + ' with maiming intensity! (' + damage +')'});
+
+				World.msgPlayer(opponent, {msg: player.displayName + ' casts spark and burns you ' + opponent.displayName + ' with maiming intensity! (' + damage +')'});
+
+				return fn(player, opponent, roomObj, command);
+			});
+		} else {
+			World.msgPlayer(player, {msg: 'You dont have enough mana to cast spark!', styleClass: 'error'});
+		}
+	} else {
+		World.msgPlayer(player, {msg: 'You need to point out a victim.', styleClass: 'error'});
+	}
 };
 
 module.exports.spells = new Spell();

@@ -66,9 +66,15 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						number: 1 // argument target -- cast spark 2.boar
 					};
 
-					if (!isNaN(parseInt(cmdObj.msg[0]))) {
-						cmdObj.number = parseInt(cmdObj.msg[0]);
-						cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
+					if (cmdObj.input && 	!isNaN(parseInt(cmdObj.input[0])) || (!cmdObj.input && !isNaN(parseInt(cmdObj.msg[0]))) ) {
+
+						if (!cmdObj.input) {
+							cmdObj.number = parseInt(cmdObj.msg[0]);
+							cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
+						} else {
+							cmdObj.number = parseInt(cmdObj.input[0]);
+							cmdObj.input = cmdObj.input.replace(/^[0-9][.]/, '');
+						}
 					}
 
 					if (cmdObj.msg === '' || cmdObj.msg.length >= 3 && s.player.wait === 0) {
@@ -84,7 +90,11 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							return World.prompt(s);
 						}
 					} else {
-						World.msgPlayer(s, {msg: 'You have to be more specific with your command.', styleClass: 'error'});
+						if (s.player.wait > 0) {
+							World.msgPlayer(s, {msg: 'You cant do that just yet!', styleClass: 'error'});
+						} else {
+							World.msgPlayer(s, {msg: 'You have to be more specific with your command.', styleClass: 'error'});
+						}
 					}
 				} else {
 					World.msgPlayer(s, {msg: 'Invalid characters in command!', styleClass: 'error'});

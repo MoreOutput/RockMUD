@@ -101,9 +101,7 @@ World = require('./world').world;
 				player = World.players[i];
 
 				Character.hunger(player, function(target) {
-					Character.thirst(target, function(target) {
-						Character.updatePlayer(target);
-					});
+					Character.thirst(target);
 				});
 			}
 		}

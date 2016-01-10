@@ -440,10 +440,14 @@ Character.prototype.hpRegen = function(target, fn) {
 				target.chp = target.hp;
 			}
 
-			fn(target, total);
+			if (typeof fn === 'function') {
+				fn(target, total);
+			}
 		});
 	} else {
-		fn(target, 0);
+		if (typeof fn === 'function') {
+			fn(target, 0);
+		}
 	}
 };
 
@@ -471,11 +475,15 @@ Character.prototype.manaRegen = function(target, fn) {
 				target.cmana  = target.mana ;
 			}
 
-			fn(target, total);
+			if (typeof fn === 'function') {
+				fn(target, total);
+			}
 		});
 	} else {
-		fn(target, 0);
-	}
+		if (typeof fn === 'function') {
+			fn(target, 0);
+		}
+}
 };
 
 Character.prototype.mvRegen = function(target, fn) {
@@ -508,7 +516,7 @@ Character.prototype.mvRegen = function(target, fn) {
 		});
 	} else {
 		if (typeof fn === 'function') {
-			fn(target, total);
+			fn(target, 0);
 		}
 	}
 };

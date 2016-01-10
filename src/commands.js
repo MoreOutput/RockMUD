@@ -377,19 +377,32 @@ Cmd.prototype.flee = function(player, command) {
 Cmd.prototype.cast = function(player, command, fn) {
 	var cmd = this;
 
-	console.log('casting a spell', command);
-
-	if (command.msg) {
-		if (command.msg in Spells) {
+	if (command.arg) {
+		if (command.arg in Spells) {
 				if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fleeing') {
 					World.getRoomObject(player.area, player.roomid, function(roomObj) {
-						World.search(roomObj.monsters, command, function(mob) {
-							return Spells[command.arg](player, mob, roomObj, command, function() {
+						if (!command.input && player.opponent) {
+							return Spells[command.arg](player, player.opponent, roomObj, command, function() {
 								if (!player.opponent && player.position !== 'fighting') {
 									cmd.kill(player, command, roomObj, fn);
 								}
 							});
-						});
+						} else {
+							World.search(roomObj.monsters, command, function(mob) {
+								if (mob) {
+									return Spells[command.arg](player, mob, roomObj, command, function() {
+										if (!player.opponent && player.position !== 'fighting') {
+											cmd.kill(player, command, roomObj, fn);
+										}
+									});
+								} else {
+									World.msgPlayer(player, {
+										msg: 'You do not see anything by that name here.',
+										styleClass: 'error'
+									});
+								}
+							});
+						}
 					});
 				}
 		} else {

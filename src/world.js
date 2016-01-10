@@ -637,7 +637,11 @@ World.prototype.search = function(searchArr, command, fn) {
 	i = 0;
 
 	if (command.msg.length >= 3) {
-		msgPatt = new RegExp(command.msg.toLowerCase());
+		if (!command.input) {
+			msgPatt = new RegExp(command.arg.toLowerCase());
+		} else {
+			msgPatt = new RegExp(command.input.toLowerCase());
+		}
 
 		for (i; i < searchArr.length; i += 1) {
 			if (searchArr[i].item) {
