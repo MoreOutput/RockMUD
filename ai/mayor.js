@@ -28,7 +28,7 @@ module.exports = {
 			} else {
 				// Sometimes we move to a new room
 				Cmd.fire('move', mayor, {
-					msg:  mayor.moveDirections[parseInt(Math.random() * ((mayor.moveDirections.length)))]
+					arg:  mayor.moveDirections[parseInt(Math.random() * ((mayor.moveDirections.length)))]
 				});
 			}
 		});
