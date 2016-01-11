@@ -1,6 +1,6 @@
 window.onload = function() {
 	'use strict';
-	var ws = io.connect('http://127.0.0.1:3000/', {transports:['websocket']}),
+	var ws = io.connect('', {transports:['websocket']}),
 	terminal = document.getElementById('terminal'),
 	node = document.getElementById('cmd'),
 	rowCnt = 0,
