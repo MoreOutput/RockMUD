@@ -41,7 +41,7 @@ server = http.createServer(function (req, res) {
 }),
 World = require('./src/world').world,
 io = require('socket.io')(server, {
-	transports: ['websocket']
+	//transports: ['websocket']
 });
 
 World.setup(io, cfg, function(Character, Cmds, Skills) {
