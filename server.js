@@ -39,17 +39,17 @@ server = http.createServer(function (req, res) {
 		});
 	}
 }),
-World = require('./src/world').world,
-io = require('socket.io')(server, {
-	transports: ['websocket']
-});
+World = require('./src/world').world;
 
-World.setup(io, cfg, function(Character, Cmds, Skills) {
+World.setup(cfg, function(Character, Cmds, Skills) {
+	World.io = require('socket.io')(server, {
+		path: '/socket.io',
+		transports: ['websocket']
+	});
+
 	server.listen(process.env.PORT || cfg.port);
 
-	io.listen(server);
-
-	io.on('connection', function (s) {
+	World.io.on('connection', function (s) {
 		s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 
 		s.on('login', function (r) {
@@ -136,7 +136,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			}
 		});
 
-		s.on('quit', function () {
+		World.io.on('quit', function () {
 			if (s.player.position !== 'fighting') {
 				Character.save(s.player, function() {
 					World.msgPlayer(s, {
@@ -158,7 +158,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			}
 		});
 
-		s.on('disconnect', function () {
+		World.io.on('disconnect', function () {
 			var i = 0;
 			if (s.player !== undefined) {
 				for (i; i < World.players.length; i += 1) {	
