@@ -14,7 +14,7 @@ module.exports = {
 
         if (target.isPlayer && target.roomid === mob.roomid && mob.position !== 'fighting') {
             Cmd.fire('kill', mob, {
-                msg: target.name
+                arg: target.name
             });
         }
     }

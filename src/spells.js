@@ -26,9 +26,11 @@ Spell.prototype.spark = function(player, opponent, roomObj, command, fn) {
 
 				opponent.chp -= damage;
 
-				World.msgPlayer(player, {msg: 'You cast spark and burn a ' + opponent.displayName + ' with maiming intensity! (' + damage +')'});
+				World.msgPlayer(player, {msg: 'You cast spark and burn a ' + opponent.displayName 
+					+ ' with maiming intensity! (' + damage +')'});
 
-				World.msgPlayer(opponent, {msg: player.displayName + ' casts spark and burns you ' + opponent.displayName + ' with maiming intensity! (' + damage +')'});
+				World.msgPlayer(opponent, {msg: player.displayName + ' casts spark and burns you ' 
+					+ opponent.displayName + ' with maiming intensity! (' + damage +')'});
 
 				return fn(player, opponent, roomObj, command);
 			});

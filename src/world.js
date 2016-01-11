@@ -636,43 +636,39 @@ World.prototype.search = function(searchArr, command, fn) {
 	item,
 	i = 0;
 
-	if (command.msg.length >= 3) {
-		if (!command.input) {
-			msgPatt = new RegExp(command.arg.toLowerCase());
+	if (!command.input) {
+		msgPatt = new RegExp(command.arg.toLowerCase());
+	} else {
+		msgPatt = new RegExp(command.input.toLowerCase());
+	}
+
+	for (i; i < searchArr.length; i += 1) {
+		if (searchArr[i].item) {
+			item = searchArr[i].item;
 		} else {
-			msgPatt = new RegExp(command.input.toLowerCase());
+			item = searchArr[i];
 		}
 
-		for (i; i < searchArr.length; i += 1) {
-			if (searchArr[i].item) {
-				item = searchArr[i].item;
-			} else {
-				item = searchArr[i];
-			}
-
-			if (item && msgPatt.test(item.name.toLowerCase()) ) {
-				matches.push(searchArr[i]);
-			}
+		if (item && msgPatt.test(item.name.toLowerCase()) ) {
+			matches.push(searchArr[i]);
 		}
+	}
 
-		if (matches) {
-			if (matches.length > 1 && command.number > 1) {
-				i = 0;
-				for (i; i < matches.length; i += 1) {
-					if (command.number - 1 === i) {
-						results = matches[i];
-					}
+	if (matches) {
+		if (matches.length > 1 && command.number > 1) {
+			i = 0;
+			for (i; i < matches.length; i += 1) {
+				if (command.number - 1 === i) {
+					results = matches[i];
 				}
-			} else {
-				results = matches[0];
 			}
-		}
-
-		if (results) {
-			return fn(results);
 		} else {
-			return fn(false);
+			results = matches[0];
 		}
+	}
+
+	if (results) {
+		return fn(results);
 	} else {
 		return fn(false);
 	}
