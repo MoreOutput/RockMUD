@@ -40,7 +40,9 @@ server = http.createServer(function (req, res) {
 	}
 }),
 World = require('./src/world').world,
-io = require('socket.io')(server);
+io = require('socket.io')(server, {
+	transports: ['websocket']
+});
 
 World.setup(io, cfg, function(Character, Cmds, Skills) {
 	server.listen(process.env.PORT || cfg.port);
@@ -48,7 +50,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 	io.on('connection', function (s) {
 		s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 
-		s.on('login', function (r) {	
+		s.on('login', function (r) {
 			var parseCmd = function(r, s) {
 				var cmdArr = r.msg.split(' '),
 				cmdObj ={};
