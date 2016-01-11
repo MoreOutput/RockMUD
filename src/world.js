@@ -110,7 +110,7 @@ World = function() {
 	});
 };
 
-World.prototype.setup = function(cfg, fn) {
+World.prototype.setup = function(socketIO, cfg, fn) {
 	var Character = require('./character').character,
 	Cmds = require('./commands').cmd,
 	Skills = require('./skills').skills,
@@ -118,6 +118,7 @@ World.prototype.setup = function(cfg, fn) {
 	Room = require('./rooms').room,
 	Ticks = require('./ticks');
 
+	this.io = socketIO;
 	this.dice = require('./dice').roller;
 
 	return fn(Character, Cmds, Skills);
