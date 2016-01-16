@@ -30,27 +30,139 @@ Cmd.prototype.emote = function(target, command) {
 };
 
 Cmd.prototype.eat = function(target, command) {
+	if (command.msg !== '') {
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			var i = 0,
+			item,
+			itemLen;
 
+			World.search(target.items, command, function(item) {
+				if (item.itemType === 'food') {
+					Character.removeItem(target, item, function(target, item) {
+						World.dice.roll(item.diceNum, item.diceSides, function(roll) {
+							target.hunger -= roll;
+
+							if (target.hunger < 0) {
+								target.hunger = 0;
+							}
+
+							World.msgRoom(roomObj, {
+								msg: target.displayName + ' eats a ' + item.short,
+								playerName: target.name,
+								styleClass: 'cmd-drop yellow'
+							});
+
+							World.msgPlayer(target, {
+								msg: 'You eat a ' + item.short,
+								styleClass: 'cmd-drop blue'
+							});
+
+							item = null;
+						});
+					});
+				} else {
+					World.msgPlayer(target, {msg: 'You can\'t eat something you dont have.', styleClass: 'error'});
+				}
+			});
+		});
+	} else {
+		World.msgPlayer(target, {msg: 'Eat what?', styleClass: 'error'});
+	}
 };
 
 Cmd.prototype.drink = function(target, command) {
+	if (command.msg !== '') {
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			var i = 0,
+			item,
+			itemLen;
 
+			World.search(target.items, command, function(item) {
+				if (item.itemType === 'drink') {
+					Character.removeItem(target, item, function(target, item) {
+						World.dice.roll(item.diceNum, item.diceSides, function(roll) {
+							target.thirst -= roll;
+
+							if (target.thirst < 0) {
+								target.thirst = 0;
+							}
+
+							World.msgRoom(roomObj, {
+								msg: target.displayName + ' drinks from a ' + item.short,
+								playerName: target.name,
+								styleClass: 'cmd-drop yellow'
+							});
+
+							World.msgPlayer(target, {
+								msg: 'You drink from a ' + item.short,
+								styleClass: 'cmd-drop blue'
+							});
+
+							item = null;
+						});
+					});
+				} else {
+					World.msgPlayer(target, {msg: 'You can\'t drink something you dont have.', styleClass: 'error'});
+				}
+			});
+		});
+	} else {
+		World.msgPlayer(target, {msg: 'Drink from what?', styleClass: 'error'});
+	}
 };
 
 Cmd.prototype.sleep = function(target, command) {
+	if (target.position === 'standing' || target.position === 'resting') {
+		target.position = 'sleeping';
 
+		World.msgPlayer(target, {msg: 'You lie down and go to sleep.', styleClass: 'cmd-sleep'});
+
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			World.msgRoom(roomObj, {
+				msg: target.displayName + ' lies down and goes to sleep.',
+				playerName: target.name,
+				styleClass: 'cmd-sleep'
+			});
+		});
+	} else {
+		World.msgPlayer(target, {msg: 'You can\'t go to sleep in this position.'});
+	}
 };
 
 Cmd.prototype.rest = function(target, command) {
+	if (target.position === 'standing' || target.position === 'sleeping') {
+		target.position = 'sleeping';
 
-};
+		World.msgPlayer(target, {msg: 'You begin resting.', styleClass: 'cmd-rest'});
 
-Cmd.prototype.wake = function(target, command) {
-
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			World.msgRoom(roomObj, {
+				msg: target.displayName + ' begins to rest.',
+				playerName: target.name,
+				styleClass: 'cmd-sleep'
+			});
+		});
+	} else {
+		World.msgPlayer(target, {msg: 'You can\'t rest right now.'});
+	}
 };
 
 Cmd.prototype.stand = function(target, command) {
+	if (target.position === 'sleeping' || target.position === 'resting') {
+		target.position = 'standing';
 
+		World.msgPlayer(target, {msg: 'You wake and stand up.', styleClass: 'cmd-wake'});
+
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			World.msgRoom(roomObj, {
+				msg: target.displayName + ' stands up.',
+				playerName: target.name,
+				styleClass: 'cmd-sleep'
+			});
+		});
+	} else {
+		World.msgPlayer(target, {msg: 'You aren\'t sleeping.'});
+	}
 };
 
 // Puts any target object into a defined room after verifying criteria

@@ -32,7 +32,8 @@ window.onload = function() {
 		skill: 'skills',
 		desc: 'description',
 		re: 'rest',
-		r: 'recall'
+		r: 'recall',
+		wake: 'stand'
 	},
 	isScrolledToBottom = false,
 	movement = ['north', 'east', 'south', 'west', 'down', 'up'],
@@ -153,6 +154,7 @@ window.onload = function() {
 
 		if (r.res && r.res.toLowerCase().indexOf('password') !== -1) {
 			node.type = 'password';
+			node.defaultValue = '';
 		} else {
 			node.type = 'text';
 		}

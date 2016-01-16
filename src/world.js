@@ -572,6 +572,8 @@ World.prototype.msgRoom = function(roomObj, msgObj, fn) {
 	i = 0,
 	s;
 
+	if (!roomObj.isPlayer)
+
 	for (i; i < roomObj.playersInRoom.length; i += 1) {
 		s = world.players[i].socket;
 
