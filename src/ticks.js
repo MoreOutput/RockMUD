@@ -48,7 +48,7 @@ World = require('./world').world;
 			}
 		}
 	//}, 1000); // 25 seconds
-	}, 35000); // 25 seconds
+	}, 30000); // 30 seconds
 
 	// AI Ticks for areas 
 	setInterval(function() {

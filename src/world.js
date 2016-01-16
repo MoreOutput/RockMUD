@@ -338,6 +338,11 @@ World.prototype.rollMobs = function(mobArr, roomid, fn) {
 	i = 0;
 
 	for (i; i < mobArr.length; i += 1) {
+		if (mobArr[i].spawn && mobArr[i].spawn > 1 ) {
+			mobArr[i].spawn -= 1;
+			mobArr.push(JSON.parse(JSON.stringify(mobArr[i])));
+		}
+
 		(function(mob, index) {
 			mob.refId = refId += index;
 
@@ -367,19 +372,28 @@ World.prototype.rollMobs = function(mobArr, roomid, fn) {
 									} else {
 										mob.hp = (50 * (mob.level + 1));
 									}
-
-									mob.chp = mob.hp;
+								} else {
+									mob.hp += (mob.level + world.dice.roll(1, mob.con));
 								}
-
+								
+								mob.chp = mob.hp;
+								
 								if (!mob.mana) {
 									mob.mana = 50 * 8 +  mob.int;
-									mob.cmana = mob.mana;
+								} else {
+									mob.mana += (mob.level + world.dice.roll(1, mob.int));
 								}
+								
+								mob.cmana = mob.mana;
 
 								if (!mob.mv) {
 									mob.mv = 50* 9 +  mob.dex;
 									mob.cmv = mob.mv;
+								} else {
+									mob.mv += (mob.level + world.dice.roll(1, mob.dex));
 								}
+
+								mob.cmv = mob.mv;
 
 								if (mob.behaviors.length > 0) {
 									for (i; i < mob.behaviors.length; i += 1) {

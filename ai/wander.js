@@ -9,9 +9,13 @@ module.exports = {
         var mob = this;
 
         World.dice.roll(1, 10, function(roll) {
+            var direction;
+
             if (roll > 2) {
+                direction = mob.moveDirections[parseInt(Math.random() * ((mob.moveDirections.length)))];
+
                 Cmd.fire('move', mob, {
-                    arg:  mayor.moveDirections[parseInt(Math.random() * ((mayor.moveDirections.length)))]
+                    arg:  direction
                 });
             }
         });

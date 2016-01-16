@@ -20,7 +20,7 @@ module.exports = {
 		var mayor = this;
 
 		World.dice.roll(1, 10, function(roll) {
-			if (roll > 3) {
+			if (roll > 9) {
 				// Most of the time we just proclaim something
 				Cmd.fire('say', mayor, {
 					msg: mayor.exclimations[parseInt(Math.random() * ((mayor.exclimations.length)))]

@@ -168,19 +168,17 @@ Cmd.prototype.stand = function(target, command) {
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
 	var world = this,
-	direction = command.msg,
+	direction = command.arg,
 	dexMod = World.dice.getDexMod(target);
 
 	if (target.position === 'standing' || target.position 
 		=== 'fleeing' && target.cmv > (4 - dexMod) && target.wait === 0) {
-
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.checkExit(roomObj, direction, function(exitObj) {
 				if (exitObj) {
 					if (!exitObj.area) {
 						exitObj.area = roomObj.area;
 					}
-
 					Room.getDisplay(exitObj.area, exitObj.id, function(displayHTML, targetRoom) {
 						Room.checkExitCriteria(target, targetRoom, function(clearToMove) {
 							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {
