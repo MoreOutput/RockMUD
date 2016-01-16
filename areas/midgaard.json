@@ -96,7 +96,10 @@
 					"hp": 90,
 					"chp": 90,
 					"itemType": "mob",
-					"behaviors": []
+					"spawn": "2",
+					"behaviors": [{  
+						"module" : "wander"
+					}]
 				}
 			],
 			"items" : [{

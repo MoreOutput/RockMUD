@@ -28,18 +28,18 @@
 				{
 					"name": "Bison",
 					"area": "The Plains",
-					"level": 1,
+					"level": 5,
 					"short": "A large boar",
 					"long": "",
 					"id": 6,
 					"type": "monster",
 					"race": "animal",
 					"limit": 2,
-					"hp": 100,
-					"chp": 100,
+					"hp": 200,
+					"chp": 200,
 					"position": "standing",
-					"ac": 6,
-					"spawnNumber": 8
+					"ac": 8,
+					"spawn": 8
 				}
 			],
 			"items" : [],
