@@ -125,29 +125,6 @@ World = require('./world').world;
 		}	
 	}, 120000);
 
-
-/*
-
-	// Saving characters Tick
-	setInterval(function() {
-		var i = 0,
-		s;
-		
-		if (players.length > 0) {
-			for (i; i < players.length; i += 1) {
-				s = io.sockets.connected[players[i].sid];
-				
-				if (s.position === 'sleeping' || 
-					s.position === 'resting' || 
-					s.position === 'standing') {			
-					Character.save(s);			
-				}							
-			}
-		}
-	}, 60000 * 12);
-	
-*/
-
 	// Time -- Increase minute, hours, days and years.
 	// time data is saved to data/time.json every 12 hours
 }());

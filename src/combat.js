@@ -3,9 +3,7 @@ var World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = function() {
-	this.statusReport = [
-		{msg: ' is still in perfect health!'}
-	];
+
 };
 
 /*
@@ -196,9 +194,14 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 		noPrompt: true
 	});
 
+	World.msgPlayer(opponent, {
+		msg: 'A ' + player.displayName +' screams and charges at you!',
+		noPrompt: true
+	});
+
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj) {
 		var combatInterval;
-		player.wait += 2;
+		player.wait += 1;
 
 		World.prompt(player);
 		World.prompt(opponent);
@@ -250,55 +253,59 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
 		combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2) {
-			msgForPlayer += msgForPlayer2;
-			msgForOpponent += msgForOpponent2;
+			Character.getStatusReport(opponent, function(opponent, oppStatus) {
+				Character.getStatusReport(player, function(player, playerStatus) {
+					msgForPlayer += msgForPlayer2;
+					msgForOpponent += msgForOpponent2;
 
-			if (player.isPlayer) {
-				msgForPlayer += '<div class="rnd-status">A ' + opponent.name + ' is in great shape! (' + opponent.chp + '/' + opponent.hp +')</div>';
-			}
+					if (player.isPlayer) {
+						msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg + ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+					}
 
-			if (opponent.isPlayer) {
-				msgForOpponent += '<div class="rnd-status">A ' + player.name + ' is in great shape! (' + player.chp + '/' + player.hp +')</div>';
-			}
+					if (opponent.isPlayer) {
+						msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg + ' (' + player.chp + '/' + player.hp +')</div>';
+					}
 
-			World.msgPlayer(player, {
-				msg: msgForPlayer,
-				noPrompt: true,
-				styleClass: 'player-hit yellow'
+					World.msgPlayer(player, {
+						msg: msgForPlayer,
+						noPrompt: true,
+						styleClass: 'player-hit yellow'
+					});
+
+					World.msgPlayer(opponent, {
+						msg: msgForOpponent,
+						noPrompt: true,
+						styleClass: 'player-hit yellow'
+					});
+
+					if (player.position !== 'fighting' || opponent.position !== 'fighting') {
+						World.prompt(player);
+						World.prompt(opponent);
+						clearInterval(combatInterval);
+					} else {
+						if (opponent.chp <= 0) {
+							combat.processEndOfMobCombat(combatInterval, player, opponent, roomObj);
+						} else if ( (!player.isPlayer && player.chp <= 0)) {
+							combat.processEndOfMobCombat(combatInterval, opponent, player, roomObj);
+						} else if (player.isPlayer && (player.chp <= 0 || player.position === 'dead')) {
+							clearInterval(combatInterval);
+							// Player Death
+							opponent.position = 'standing';
+							opponent.chp = opponent.hp;
+							opponent.opponent = null;
+
+							player.position = 'standing';
+							player.chp = player.hp;
+							player.opponent = null;
+
+							World.msgPlayer(player, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
+						} else {
+							World.prompt(player);
+							World.prompt(opponent);
+						}
+					}
+				});
 			});
-
-			World.msgPlayer(opponent, {
-				msg: msgForOpponent,
-				noPrompt: true,
-				styleClass: 'player-hit yellow'
-			});
-
-			if (player.position !== 'fighting' || opponent.position !== 'fighting') {
-				World.prompt(player);
-				World.prompt(opponent);
-				clearInterval(combatInterval);
-			} else {
-				if (opponent.chp <= 0) {
-					combat.processEndOfMobCombat(combatInterval, player, opponent, roomObj);
-				} else if ( (!player.isPlayer && player.chp <= 0)) {
-					combat.processEndOfMobCombat(combatInterval, opponent, player, roomObj);
-				} else if (player.isPlayer && (player.chp <= 0 || player.position === 'dead')) {
-					clearInterval(combatInterval);
-					// Player Death
-					opponent.position = 'standing';
-					opponent.chp = opponent.hp;
-					opponent.opponent = null;
-
-					player.position = 'standing';
-					player.chp = player.hp;
-					player.opponent = null;
-
-					World.msgPlayer(player, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
-				} else {
-					World.prompt(player);
-					World.prompt(opponent);
-				}
-			}
 		});
 	});
 }

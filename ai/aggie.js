@@ -12,7 +12,7 @@ module.exports = {
     onVisit: function(target, roomObj) {
         var mob = this;
 
-        if (target.isPlayer && target.roomid === mob.roomid && mob.position !== 'fighting') {
+        if (mob.position === 'standing' && target.isPlayer && target.roomid === mob.roomid) {
             Cmd.fire('kill', mob, {
                 arg: target.name
             });

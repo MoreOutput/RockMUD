@@ -29,6 +29,30 @@ Cmd.prototype.emote = function(target, command) {
 	});
 };
 
+Cmd.prototype.eat = function(target, command) {
+
+};
+
+Cmd.prototype.drink = function(target, command) {
+
+};
+
+Cmd.prototype.sleep = function(target, command) {
+
+};
+
+Cmd.prototype.rest = function(target, command) {
+
+};
+
+Cmd.prototype.wake = function(target, command) {
+
+};
+
+Cmd.prototype.stand = function(target, command) {
+
+};
+
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
 	var world = this,
@@ -629,13 +653,19 @@ Cmd.prototype.time = function(target, command) {
 /** Related to Saving and character adjustment/interaction **/
 
 Cmd.prototype.save = function(target, command, fn) {
-	Character.save(target, function() {
-		World.msgPlayer(target, {msg: target.displayName + ' was saved. Whew!', styleClass: 'save'});
-		
-		if (typeof fn === 'function') {
-			return fn();
-		}
-	});
+	if (target.position === 'standing' && target.wait === 0) {
+		Character.save(target, function() {
+			World.msgPlayer(target, {msg: target.displayName + ' was saved. Whew!', styleClass: 'save'});
+		});
+	} else if (target.position !== 'standing') {
+		World.msgPlayer(target, {msg: 'You can\'t save while ' + target.position + '.', styleClass: 'save'});
+	} else {
+		World.msgPlayer(target, {msg: 'You can\'t save just yet!', styleClass: 'error'});
+	}
+
+	if (typeof fn === 'function') {
+		return fn(target, command);
+	}
 };
 
 Cmd.prototype.title = function(target, command) {

@@ -10,7 +10,20 @@ crypto = require('crypto'),
 Room = require('./rooms').room,
 World = require('./world').world,
 Character = function () {
-
+	this.statusReport = [
+		{msg: ' is bleeding all over the place and looks nearly dead!', percentage: 0},
+		{msg: ' is bleeding profusely and showing serious signs of fatigue!', percentage: 10},
+		{msg: ' has some major cuts and brusies.', percentage: 20},
+		{msg: ' has some large cuts and looks exhausted!', percentage: 30},
+		{msg: ' has some minor cuts and brusies.', percentage: 40},
+		{msg: ' is tired and bruised.', percentage: 50},
+		{msg: ' is hurt and showing signs of fatigue.', percentage: 60},
+		{msg: ' is looking tired and wounded.', percentage: 70},
+		{msg: ' is barely wounded.', percentage: 80},
+		{msg: ' is in great shape.', percentage: 90},
+		{msg: ' still seems in perfect health!', percentage: 95},
+		{msg: ' is in perfect health!', percentage: 100}
+	];
 };
 
 Character.prototype.login = function(r, s, fn) {
@@ -717,16 +730,7 @@ Character.prototype.wear = function(target, item, fn) {
 			if (item.itemType === 'weapon') {
 				item.equipped = true;
 
-				if (item.weight < (20 + target.str)) { // Dual check
-
-				}
-
-				if (target.eq[i].dual === false && target.eq[i].item === null) {
-					target.eq[i].item = item;
-
-					fn('You wield a ' + item.short + ' in your ' + target.eq[i].name);
-					break;
-				}
+				fn('You wield a ' + item.short + ' in your ' + target.eq[i].name);
 			} else {
 				// Wearing Armor
 				if (target.eq[i].item === null) {
@@ -756,6 +760,20 @@ Character.prototype.wear = function(target, item, fn) {
 	}
 };
 
+Character.prototype.getStatusReport = function(player, fn) {
+	var i = 0;
+
+	for (i; i < this.statusReport.length; i += 1) {
+		if (this.statusReport[i].percentage > ((player.chp/player.hp) * 100) ) {
+			if (typeof fn === 'function') {
+				return fn(player, this.statusReport[i]);
+			} else {
+				return null;
+			}
+		}
+	}
+}
+
 Character.prototype.getLoad = function(s) {
 	var load = Math.round((s.player.str + s.player.con / 4) * 10);
 	
@@ -770,5 +788,7 @@ Character.prototype.level = function(s, fn) {
 Character.prototype.calculateGear = function() {
 
 };
+
+
 
 module.exports.character = new Character();
