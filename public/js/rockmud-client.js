@@ -154,7 +154,6 @@ window.onload = function() {
 
 		if (r.res && r.res.toLowerCase().indexOf('password') !== -1) {
 			node.type = 'password';
-			node.defaultValue = '';
 		} else {
 			node.type = 'text';
 		}
