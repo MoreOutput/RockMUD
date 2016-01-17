@@ -1,14 +1,24 @@
 {
-    "year": "2015",
-    "month": "March",
-    "day": 8,
-    "hour": 12,
-    "minute": 13,
-    "name": "The year of MUD",
-    "holidays": [],
-    "months": [{
-        "real": "Janurary",
-        "mud": "Janurary",
+    "tick": 1,
+    "year": 2015,
+    "month": {
+        "id": "Janurary",
+        "displayName": "Janurary",
         "abbv": "Jan"
+    },
+    "day": 1,
+    "hour": 0,
+    "minute": 0,
+    "yearName": "",
+    "holiday": null,
+    "modified": null,
+    "hoursInDay": 24,
+    "hoursOfLight": 12,
+    "hoursOfNight": 12,
+    "months": [{
+        "id": "Janurary",
+        "displayName": "Janurary",
+        "abbv": "Jan",
+        "holiday": null
     }]
 }

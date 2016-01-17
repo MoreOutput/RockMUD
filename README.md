@@ -15,7 +15,7 @@ Notes on dependencies:
 * Development aims to keep up with latest node release.
 
 Some things Currently in 0.1.9:
-* No command whitelisting (add a command function, and it becomes a in-game command instantly)
+* No command whitelisting (add a command function, and it becomes a in-game command instantly). Because of this RockMUD does not rely on parsing commands on a tick.
 * Character creation (Races, Classes, Stats, Passwords) and saving as json files (/players).
 * Channels
 * Uniform way of scripting commands -- with permission checking
@@ -89,7 +89,7 @@ Item templates extend objects into certain items based on their template[] and i
 * Fields in any passed in objects overwrite template definitions, templates are used to ensure objects have the minimum required properties. 
 
 **/ai**  
-Mob specific AI scripts. RockMUD core aims to have 3: blacksmith.js, aggie.js and mayor.js
+Mob specific AI scripts. RockMUD core aims to have 4: shopkeeper.js, wander.js, aggie.js and mayor.js
 
 **/tools**  
 Eventual location of building and admin tools.
@@ -109,4 +109,4 @@ Time and Weather data, saved to the file every hour of uptime.
 * Clone the repo
 * cd RockMUD (to enter cloned repo)
 * npm install (to install socket.io)
-* npm start or node server.js to start the server (defaults to http://127.0.0.1:8000)
+* npm start or node server.js to start the server (defaults to http://127.0.0.1:3000)

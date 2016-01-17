@@ -4,6 +4,30 @@ Character = require('./character').character,
 World = require('./world').world;
 
 (function() {
+	// time
+	setInterval(function() {
+		if (World.time.tick === 2) {
+			World.time.tick = 1;
+			World.time.minute += 1;
+		}
+
+		if (World.time.minute === 60) {
+			World.time.minute = 1;
+			World.time.hour += 1;
+		}
+
+		if (World.time.hour === 24) {
+			World.time.hour = 1;
+			World.time.day += 1;
+		}
+
+		if (World.time.day === 30) {
+			World.time.day = 0;	
+		}
+
+		World.time.tick += 1;
+	}, 1000);
+
 	// wait-state removal
 	setInterval(function() {
 		var i = 0,
@@ -89,7 +113,7 @@ World = require('./world').world;
 				});
 			}
 		}
-	}, 50000);
+	}, 60000);
 
 	// Hunger and Thirst Tick 
 	setInterval(function() { 
