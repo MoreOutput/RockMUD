@@ -32,6 +32,14 @@
 				}, {
 					"cmd" : "west",
 					"id" : 5
+				},
+				{
+					"cmd" : "down",
+					"id" : 6,
+					"door": {
+						"isOpen": false,
+						"name": "gate"
+					}
 				}
 			],
 			"playersInRoom": [],
@@ -242,6 +250,26 @@
 				"equipped": false,
 				"flags": []
 			}],
+			"flags" : []
+		},
+		{
+			"id" : 6,
+			"title" : "Beneath Town Square",
+			"area": "Midgaard",
+			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
+			"exits" : [
+				{
+					"cmd" : "up",
+					"id" : 1,
+					"door": {
+						"name": "gate",
+						"isOpen": "false"
+					}
+				}
+			],
+			"playersInRoom": [],
+			"monsters" : [],
+			"items" : [],
 			"flags" : []
 		}
 	]

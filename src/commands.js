@@ -165,6 +165,17 @@ Cmd.prototype.stand = function(target, command) {
 	}
 };
 
+Cmd.prototype.open = function(target, command, fn) {
+	if (target.position === 'standing' 
+		|| target.position === 'resting' 
+		|| target.position === 'fighting') {
+
+		 
+	} else {
+		World.msgPlayer(target, {msg: 'You cannot open things right now.'})
+	}
+}
+
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
 	var world = this,
@@ -179,6 +190,7 @@ Cmd.prototype.move = function(target, command, fn) {
 					if (!exitObj.area) {
 						exitObj.area = roomObj.area;
 					}
+
 					Room.getDisplay(exitObj.area, exitObj.id, function(displayHTML, targetRoom) {
 						Room.checkExitCriteria(target, targetRoom, function(clearToMove) {
 							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {

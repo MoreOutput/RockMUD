@@ -109,4 +109,4 @@ Time and Weather data, saved to the file every hour of uptime.
 * Clone the repo
 * cd RockMUD (to enter cloned repo)
 * npm install (to install socket.io)
-* npm start or node server.js to start the server (defaults to http://127.0.0.1:8000)
+* npm start or node server.js to start the server (defaults to http://127.0.0.1:3000)
