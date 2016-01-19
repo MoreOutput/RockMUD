@@ -15,6 +15,7 @@ window.onload = function() {
 		ls: 'look',
 		i: 'inventory',
 		sc: 'score',
+		o: 'open',
 		stats: 'score',
 		eq: 'equipment',
 		equip: 'wear',

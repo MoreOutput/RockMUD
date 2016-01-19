@@ -6,6 +6,9 @@ World = require('./world').world;
 (function() {
 	// time
 	setInterval(function() {
+		var i = 0,
+		areaMsg;
+
 		if (World.time.tick === 2) {
 			World.time.tick = 1;
 			World.time.minute += 1;
@@ -21,12 +24,32 @@ World = require('./world').world;
 			World.time.day += 1;
 		}
 
+		if (World.time.hour === World.time.hourOfLight && World.time.minute === 1) {
+			// Morning
+			World.time.isDay = true;
+			areaMsg = 'The sun appears over the horizon.';
+		} else if (World.time.hour <= World.time.hoursOfNight && World.time.minute === 1) {
+			// nightfall
+			World.time.isDay = false;
+			areaMsg = 'The sun fades fully from view as night falls.';
+		}
+
+		if (World.areas.length && areaMsg) {
+			for (i; i < World.areas.length; i += 1) {
+				if (World.areas[i].messages.length) {
+					World.msgArea(World.areas[i].name, {
+						msg: areaMsg
+					});
+				}
+			}
+		}
+
 		if (World.time.day === 30) {
 			World.time.day = 0;	
 		}
 
 		World.time.tick += 1;
-	}, 1000);
+	}, 500);
 
 	// wait-state removal
 	setInterval(function() {

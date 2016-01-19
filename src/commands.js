@@ -769,7 +769,35 @@ Cmd.prototype.achat = function(target, command) {
 
 // Viewing the time
 Cmd.prototype.time = function(target, command) {
+	var timeStr,
+	hr,
+	min;
 
+	if (World.time.hour < 10) {
+		hr = '0' + World.time.hour;
+	} else {
+		hr = World.time.hour;
+	}
+
+	if (World.time.minute < 10) {
+		min = '0' + World.time.minute;
+	} else {
+		min = World.time.minute;
+	}
+
+	timeStr = 'Todays date: ' + World.time.month.id + '/' + World.time.day + '/' 
+		+ World.time.year + ' (' + hr + ':' + min + '), the ' + World.time.title;
+
+	if (World.time.isDay) {
+		timeStr += ' (Day)';
+	} else {
+		timeStr += ' (Night)';
+	}
+
+	World.msgPlayer(target, {
+		msg: timeStr,
+		styleClass: 'cmd-time'
+	});
 };
 
 /** Related to Saving and character adjustment/interaction **/
