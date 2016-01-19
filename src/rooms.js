@@ -7,14 +7,35 @@ time = World.time,
 areas = World.areas,
 
 Room = function() {
-	this.events = ['onVisit', 'onExit', 'onEnter', ''];
+	this.events = ['onVisit', 'onExit', 'onEnter'];
 };
 
-Room.prototype.checkExitCriteria = function(target, roomObj, fn) {
-	return fn(true);
+Room.prototype.checkExitCriteria = function(targetRoom, exitObj, player, fn) {
+	var i = 0,
+	targetExit;
+
+	for (i; i < targetRoom.exits.length; i += 1) {
+		if (exitObj.id === targetRoom.id && targetRoom.exits[i].door) {
+			if (targetRoom.exits[i].door.name === exitObj.door.name || targetRoom.exits[i].door.id
+				 && exitObj.door.id && targetRoom.exits[i].door.id === exitObj.door.id) {
+				targetExit = targetRoom.exits[i];
+			}
+		}
+	}
+
+	if (targetExit) {
+		if (!exitObj.key) {
+			return fn(true, targetExit);
+		} else {
+			// door needs a key
+			return fn(false, false);
+		}
+	} else {
+		return fn(true, false);
+	}
 };
 
-Room.prototype.checkEntranceCriteria = function(target, roomObj, fn) {
+Room.prototype.checkEntranceCriteria = function(roomObj, exitObj, player, fn) {
 	return fn(true);
 };
 
@@ -105,6 +126,8 @@ Room.prototype.checkExit = function(roomObj, direction, fn) {
 	if (roomObj.exits.length > 0) {
 		for (i; i < roomObj.exits.length; i += 1) {
 			if (direction === roomObj.exits[i].cmd) {
+				return fn(roomObj.exits[i]);
+			} else if (roomObj.exits[i].door && roomObj.exits[i].door.name === direction) {
 				return fn(roomObj.exits[i]);
 			}
 		}

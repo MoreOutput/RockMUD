@@ -4,7 +4,7 @@ Character = require('./character').character,
 World = require('./world').world;
 
 (function() {
-	// time
+	// time, saved to time.json every 12 hours
 	setInterval(function() {
 		var i = 0,
 		areaMsg;
@@ -45,7 +45,7 @@ World = require('./world').world;
 		}
 
 		if (World.time.day === 30) {
-			World.time.day = 0;	
+			World.time.day = 0;
 		}
 
 		World.time.tick += 1;
@@ -171,7 +171,4 @@ World = require('./world').world;
 			});	
 		}	
 	}, 120000);
-
-	// Time -- Increase minute, hours, days and years.
-	// time data is saved to data/time.json every 12 hours
 }());

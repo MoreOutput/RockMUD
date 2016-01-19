@@ -166,20 +166,49 @@ Cmd.prototype.stand = function(target, command) {
 };
 
 Cmd.prototype.open = function(target, command, fn) {
+	var dexMod = World.dice.getDexMod(target);
+
 	if (target.position === 'standing' 
 		|| target.position === 'resting' 
 		|| target.position === 'fighting') {
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			Room.checkExit(roomObj, command.arg, function(exitObj) {
+				if (exitObj.door && !exitObj.door.isOpen) {
+					World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
+						Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
+							if (clearToMove) {
+								exitObj.door.isOpen = true;
+								targetExit.door.isOpen = true;
 
-		 
+								World.msgPlayer(target, {msg: 'You open a ' + exitObj.door.name + ' ' + exitObj.cmd + ' from here.', styleClass: 'cmd-wake'});
+
+								World.msgRoom(roomObj, {
+									msg: target.displayName + ' opens a ' + exitObj.door.name + '.',
+									playerName: target.name,
+									styleClass: 'cmd-sleep'
+								});
+
+								World.msgRoom(targetRoom, {
+									msg: 'A ' + exitObj.door.name + ' opens to the ' + targetExit.cmd +'.',
+									playerName: target.name,
+									styleClass: 'cmd-sleep'
+								});
+							} else {
+
+							}
+						});
+					});
+				}
+			});
+		});
 	} else {
-		World.msgPlayer(target, {msg: 'You cannot open things right now.'})
+		World.msgPlayer(target, {msg: 'You cannot open things right now.'});
 	}
 }
 
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
-	var world = this,
-	direction = command.arg,
+	var direction = command.arg,
 	dexMod = World.dice.getDexMod(target);
 
 	if (target.position === 'standing' || target.position 
@@ -190,72 +219,82 @@ Cmd.prototype.move = function(target, command, fn) {
 					if (!exitObj.area) {
 						exitObj.area = roomObj.area;
 					}
+					if (!exitObj.door || exitObj.door.isOpen === true ) {
+						Room.getDisplay(exitObj.area, exitObj.id, function(displayHTML, targetRoom) {
+							Room.checkExitCriteria(roomObj, exitObj, target, function(clearToMove) {
+								Room.checkEntranceCriteria(targetRoom, exitObj, target, function(clearToMove) {
+									if (clearToMove) {
+										World.dice.roll(1, 4, function(moveRoll) {
+											target.cmv -= Math.round(4 + moveRoll - dexMod);
 
-					Room.getDisplay(exitObj.area, exitObj.id, function(displayHTML, targetRoom) {
-						Room.checkExitCriteria(target, targetRoom, function(clearToMove) {
-							Room.checkEntranceCriteria(target, targetRoom, function(clearToMove) {
-								if (clearToMove) {
-									World.dice.roll(1, 4, function(moveRoll) {
-										target.cmv -= Math.round(4 + moveRoll - dexMod);
+											if (target.cmv < 0) {
+												target.cmv = 0;
+											}
+
+											target.roomid = targetRoom.id;
+
+											if (targetRoom.terrianMod) {
+												target.wait += targetRoom.terrianMod;
+											}
+
+											if (target.isPlayer) {
+												World.msgPlayer(target, {
+													msg: displayHTML,
+													styleClass: 'room'
+												});
+
+												Room.removePlayer(roomObj, target, function(roomObj, target) {
+													targetRoom.playersInRoom.push(target);
+												});
+											} else {
+												Room.removeMob(roomObj, target, function(roomObj, target) {
+													targetRoom.monsters.push(target);
+												});
+											}
+
+											World.msgRoom(targetRoom, {
+												msg:'<strong>' + target.name + '</strong> the ' + target.race + ' enters the room.',
+												playerName: target.name
+											});
+
+											World.msgRoom(roomObj, {
+												msg: '<span class="yellow"><strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong></div>',
+												playerName: target.name
+											});
+
+											Room.processEvents(targetRoom, target, 'onVisit', function(targetRoom, target) {
+												if (typeof fn === 'function') {
+													return fn(true, roomObj, targetRoom);
+												}
+											});
+										});
+									} else {
+										target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
 
 										if (target.cmv < 0) {
 											target.cmv = 0;
 										}
 
-										target.roomid = targetRoom.id;
-
-										if (targetRoom.terrianMod) {
-											target.wait += targetRoom.terrianMod;
+										if (typeof fn === 'function') {
+											return fn(true, roomObj, targetRoom);
 										}
-
-										if (target.isPlayer) {
-											World.msgPlayer(target, {
-												msg: displayHTML,
-												styleClass: 'room'
-											});
-
-											Room.removePlayer(roomObj, target, function(roomObj, target) {
-												targetRoom.playersInRoom.push(target);
-											});
-										} else {
-											Room.removeMob(roomObj, target, function(roomObj, target) {
-												targetRoom.monsters.push(target);
-											});
-										}
-
-										World.msgRoom(targetRoom, {
-											msg:'<strong>' + target.name + '</strong> a ' + target.race + ' enters the room.',
-											playerName: target.name
-										});
-
-										World.msgRoom(roomObj, {
-											msg: '<span class="yellow"><strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong></div>',
-											playerName: target.name
-										});
-
-										Room.processEvents(targetRoom, target, 'onVisit', function(targetRoom, target) {
-											if (typeof fn === 'function') {
-												return fn(true, roomObj, targetRoom);
-											}
-										});
-									});
-								} else {
-									target.cmv = Math.round((target.cmv - (7 - target.dex/4)));
-
-									if (target.cmv < 0) {
-										target.cmv = 0;
 									}
-
-									if (typeof fn === 'function') {
-										return fn(true, roomObj, targetRoom);
-									}
-								}
+								});
 							});
 						});
-					});
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You need to open a ' + exitObj.door.name + ' first.' ,
+							styleClass: 'error'
+						});
+
+						if (typeof fn === 'function') {
+							return fn(false);
+						}
+					}
 				} else {
 					World.msgPlayer(target, {
-						msg: 'There is no exit in that direction.', 
+						msg: 'There is no exit in that direction.',
 						styleClass: 'error'
 					});
 
@@ -516,6 +555,8 @@ Cmd.prototype.flee = function(player, command) {
 				player.wait += 1;
 			}
 		});
+	} else {
+		World.msgPlayer(player, {msg: 'Flee from what? You are\'nt fighting anything...', styleClass: 'green'});
 	}
 };
 

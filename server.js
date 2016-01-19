@@ -79,7 +79,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						}
 					}
 
-					if (cmdObj.msg === '' || cmdObj.msg.length >= 3 && s.player.wait === 0) {
+					if (cmdObj.msg === '' || cmdObj.msg.length >= 2 && s.player.wait === 0) {
 						if (cmdObj.cmd) {
 							if (cmdObj.cmd in Cmds) {
 								return Cmds[cmdObj.cmd](s.player, cmdObj);
