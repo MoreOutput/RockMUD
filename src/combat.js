@@ -199,20 +199,40 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 		noPrompt: true
 	});
 
-	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj) {
-		var combatInterval;
-		player.wait += 1;
+	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
+		Character.getStatusReport(opponent, function(opponent, oppStatus) {
+			Character.getStatusReport(player, function(player, playerStatus) {
+				var combatInterval;
 
-		World.prompt(player);
-		World.prompt(opponent);
+				player.wait += 1;
 
-		if (opponent.chp > 0) {
-			combatInterval = setInterval(function() {
-				World.getRoomObject(player.area, player.roomid, function(roomObj) {
-					combat.round(combatInterval, player, opponent, roomObj);
+				if (player.isPlayer) {
+					msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg + ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+				}
+
+				if (opponent.isPlayer) {
+					msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg + ' (' + player.chp + '/' + player.hp +')</div>';
+				}
+
+				World.msgPlayer(player, {
+					msg: msgForPlayer,
+					styleClass: 'player-hit yellow'
 				});
-			}, 1900);
-		}
+
+				World.msgPlayer(opponent, {
+					msg: msgForOpponent,
+					styleClass: 'player-hit yellow'
+				});
+
+				if (opponent.chp > 0) {
+					combatInterval = setInterval(function() {
+						World.getRoomObject(player.area, player.roomid, function(roomObj) {
+							combat.round(combatInterval, player, opponent, roomObj);
+						});
+					}, 1900);
+				}
+			});
+		});
 	});
 };
 

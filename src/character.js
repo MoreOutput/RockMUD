@@ -764,7 +764,7 @@ Character.prototype.getStatusReport = function(player, fn) {
 	var i = 0;
 
 	for (i; i < this.statusReport.length; i += 1) {
-		if (this.statusReport[i].percentage > ((player.chp/player.hp) * 100) ) {
+		if (this.statusReport[i].percentage >= ((player.chp/player.hp) * 100) ) {
 			if (typeof fn === 'function') {
 				return fn(player, this.statusReport[i]);
 			} else {
