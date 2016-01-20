@@ -198,11 +198,54 @@ Cmd.prototype.open = function(target, command, fn) {
 							}
 						});
 					});
+				} else {
+					World.msgPlayer(target, {msg: 'Nothing to open in that direction.'});
 				}
 			});
 		});
 	} else {
 		World.msgPlayer(target, {msg: 'You cannot open things right now.'});
+	}
+};
+
+Cmd.prototype.close = function(target, command, fn) {
+	var dexMod = World.dice.getDexMod(target);
+
+	if (target.position === 'standing' 
+		|| target.position === 'resting' 
+		|| target.position === 'fighting') {
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			Room.checkExit(roomObj, command.arg, function(exitObj) {
+				if (exitObj.door && exitObj.door.isOpen === true) {
+					World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
+						Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
+							if (clearToMove) {
+								exitObj.door.isOpen = false;
+								targetExit.door.isOpen = false;
+
+								World.msgPlayer(target, {msg: 'You close a ' + exitObj.door.name + ' ' + exitObj.cmd + ' from here.', styleClass: 'cmd-wake'});
+
+								World.msgRoom(roomObj, {
+									msg: target.displayName + ' closes a ' + exitObj.door.name + '.',
+									playerName: target.name,
+									styleClass: 'cmd-sleep'
+								});
+
+								World.msgRoom(targetRoom, {
+									msg: 'A ' + exitObj.door.name + ' closes to the ' + targetExit.cmd +'.',
+									playerName: target.name,
+									styleClass: 'cmd-sleep'
+								});
+							} else {
+								World.msgPlayer(target, {msg: 'Nothing you can close in that direction.'});
+							}
+						});
+					});
+				}
+			});
+		});
+	} else {
+		World.msgPlayer(target, {msg: 'You cannot close anything right now.'});
 	}
 }
 
@@ -556,7 +599,7 @@ Cmd.prototype.flee = function(player, command) {
 			}
 		});
 	} else {
-		World.msgPlayer(player, {msg: 'Flee from what? You are\'nt fighting anything...', styleClass: 'green'});
+		World.msgPlayer(player, {msg: 'Flee from what? You aren\'t fighting anything...', styleClass: 'green'});
 	}
 };
 
