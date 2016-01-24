@@ -1,0 +1,10 @@
+{
+    "name": "Gnome",
+    "str": 5,
+    "int": 3,
+    "dex": 2,
+    "hp": 23,
+    "playable": true,
+    "size": 3,
+    "attackType": "smash"
+}

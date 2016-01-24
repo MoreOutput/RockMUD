@@ -427,7 +427,7 @@ Character.prototype.save = function(player, fn) {
 Character.prototype.hpRegen = function(target, fn) {
 	var conMod = World.dice.getConMod(target);
 
-	// unless the charcter is a fighter they have 
+	// unless the character is a fighter they have 
 	// a 10% chance of skipping hp regen
 
 	if (target.chp < target.hp && target.thirst < 5 && target.hunger < 6) {
@@ -463,7 +463,7 @@ Character.prototype.manaRegen = function(target, fn) {
 	var intMod = World.dice.getIntMod(target);
 
 	if (target.cmana < target.mana && target.thirst < 5 && target.hunger < 6) {
-		// unless the charcter is a wizard they have 
+		// unless the character is a wizard they have 
 		// a 10% chance of skipping mana regen
 
 		if (target.position === 'sleeping') {
@@ -497,7 +497,7 @@ Character.prototype.manaRegen = function(target, fn) {
 Character.prototype.mvRegen = function(target, fn) {
 	var dexMod = World.dice.getDexMod(target);
 
-	// unless the charcter is a thief they have 
+	// unless the character is a thief they have 
 	// a 10% chance of skipping move regen
 
 	if (target.cmv < target.mv && target.thirst < 5 && target.hunger < 6) {

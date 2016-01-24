@@ -1,0 +1,10 @@
+{
+    "name": "Halfling",
+    "str": 2,
+    "int": 1,
+    "dex": 4,
+    "hp": 22,
+    "playable": true,
+    "size": 2,
+    "attackType": "punch"
+}

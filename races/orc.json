@@ -1,0 +1,10 @@
+{
+    "name": "Orc",
+    "str": 6,
+    "int": 2,
+    "dex": 1,
+    "hp": 26,
+    "playable": true,
+    "size": 3,
+    "attackType": "smash"
+}
