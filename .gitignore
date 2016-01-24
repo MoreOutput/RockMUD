@@ -2,6 +2,7 @@ lib-cov
 *.seed
 *.log
 *.csv
+*.bat
 *.dat
 *.out
 *.pid
@@ -18,3 +19,5 @@ node_modules
 npm-debug.log
 notes.md
 design.html
+
+players/*
