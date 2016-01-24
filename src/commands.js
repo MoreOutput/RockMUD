@@ -171,7 +171,7 @@ Cmd.prototype.open = function(target, command, fn) {
 		|| target.position === 'fighting') {
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.checkExit(roomObj, command.arg, function(exitObj) {
-				if (exitObj.door && !exitObj.door.isOpen) {
+				if (exitObj && exitObj.door && !exitObj.door.isOpen) {
 					World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
 						Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
 							if (clearToMove) {
@@ -217,7 +217,7 @@ Cmd.prototype.close = function(target, command, fn) {
 		|| target.position === 'fighting') {
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.checkExit(roomObj, command.arg, function(exitObj) {
-				if (exitObj.door && exitObj.door.isOpen === true) {
+				if (exitObj && exitObj.door && exitObj.door.isOpen === true) {
 					World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
 						Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
 							if (clearToMove) {
@@ -247,6 +247,8 @@ Cmd.prototype.close = function(target, command, fn) {
 							}
 						});
 					});
+				} else {
+					World.msgPlayer(target, {msg: 'Nothing to close.'});
 				}
 			});
 		});
@@ -261,7 +263,7 @@ Cmd.prototype.unlock = function(target, command, fn) {
 		|| target.position === 'fighting') {
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.checkExit(roomObj, command.arg, function(exitObj) {
-				if (exitObj.door && exitObj.door.isOpen === true) {
+				if (exitObj && exitObj.door && exitObj.door.isOpen === true) {
 					World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
 						Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
 							if (clearToMove) {
@@ -308,7 +310,7 @@ Cmd.prototype.move = function(target, command, fn) {
 					if (!exitObj.area) {
 						exitObj.area = roomObj.area;
 					}
-					if (!exitObj.door || exitObj.door.isOpen === true ) {
+					if (!exitObj || !exitObj.door || exitObj.door.isOpen === true ) {
 						Room.getDisplay(exitObj.area, exitObj.id, function(displayHTML, targetRoom) {
 							Room.checkExitCriteria(roomObj, exitObj, target, function(clearToMove) {
 								Room.checkEntranceCriteria(targetRoom, exitObj, target, function(clearToMove) {
