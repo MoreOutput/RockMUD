@@ -395,6 +395,10 @@ World.prototype.rollMobs = function(mobArr, roomid, fn) {
 
 								mob.cmv = mob.mv;
 
+								if (mob.gold > 0) {
+									mob.gold += world.dice.roll(1, 8);
+								}
+
 								if (mob.behaviors.length > 0) {
 									for (i; i < mob.behaviors.length; i += 1) {
 										ai = mob.behaviors[i];

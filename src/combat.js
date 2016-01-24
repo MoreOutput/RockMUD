@@ -3,7 +3,32 @@ var World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = function() {
+	this.adjective = [
+		{value: 'weak', damage: 0},
+		{value: 'some', damage: 1},
+		{value: '', damage: 10},
+		{value: '', damage: 20},
+		{value: '', damage: 25},
+		{value: '', damage: 40},
+		{value: '', damage: 50},
+		{value: '', damage: 60},
+		{value: '', damage: 70},
+		{value: '', damage: 80},
+		{value: '', damage: 90}
+	];
 
+	this.abstractNouns = [
+		{value: '', damage: 0},
+		{value: '', damage: 0},
+		{value: '', damage: 0},
+		{value: '', damage: 0},
+		{value: '', damage: 0},
+		{value: '', damage: 0},
+		{value: '', damage: 0},
+		{value: '', damage: 0},
+		{value: '', damage: 0},
+		{value: '', damage: 0}
+	];
 };
 
 /*
@@ -249,8 +274,21 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 	Room.removeMob(roomObj, opponent, function(roomObj, opponent) {
 		World.dice.calExp(player, opponent, function(exp) {
 			Room.addCorpse(roomObj, opponent, function(roomObj, corpse) {
-				player.exp += exp;
+				var endOfCombatMsg = '';
+
 				player.position = 'standing';
+				
+				if (exp > 0) {
+					player.exp += exp;
+					endOfCombatMsg = 'You won the fight! You learn some things, resulting in ' + exp + ' experience points.';
+ 				} else {
+					endOfCombatMsg ='You won but learned nothing.';
+				}
+
+				if (opponent.gold) {
+					player.gold += opponent.gold;
+					endOfCombatMsg += ' <span class="yellow">You find ' + opponent.gold + ' coins on the corpse.</span>';
+				}
 				
 				if (player.wait > 0) {
 					player.wait -= 1;
@@ -258,11 +296,7 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 					player.wait = 0;
 				}
 
-				if (exp > 0) {
-					World.msgPlayer(player, {msg: 'You won the fight! You learn some things, resulting in ' + exp + ' experience points.', styleClass: 'victory'});
-				} else {
-					World.msgPlayer(player, {msg: 'You won but learned nothing.', styleClass: 'victory'});
-				}
+				World.msgPlayer(player, {msg: endOfCombatMsg, styleClass: 'victory'});
 			});
 		});
 	});

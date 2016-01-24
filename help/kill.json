@@ -1,9 +1,0 @@
-{
-	"name" : "Kill",
-	"related" : ["Combat", "Death", "Delete", "Quit"],
-	"type" : "Command",
-	"levels" : "All",
-	"restrict": 0,
-	"description" : "Triggers an attack. The attacker is at the top of the combat round. First combatant to reach zero HP expires.",
-	"Alias" : "k"
-}

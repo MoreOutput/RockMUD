@@ -1,9 +1,0 @@
-{
-    "name" : "Help",
-    "related" : ["Newbie", "Channels"],
-    "type" : "Help",
-    "levels" : "All",
-    "restrict": 0,
-    "description" : "The help command allows you to find and read in-game help files.",
-    "Alias" : "h"
-}

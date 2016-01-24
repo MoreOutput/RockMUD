@@ -1,9 +1,0 @@
-{
-	"name" : "Flame",
-	"related" : ["Channels", "Say", "Yell", "Flame", "Tell"],
-	"type" : "Command",
-	"levels" : "All",
-	"restrict": 0,
-	"description" : "This channel is off by default and is intended for all r-rated language. See HELP CHANNELS for a comprehensive overview of communication commands.",
-	"Alias" : ""
-}

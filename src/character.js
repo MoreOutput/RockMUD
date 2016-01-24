@@ -665,6 +665,24 @@ Character.prototype.getSlotsWithWeapons = function(player, fn) {
 	}
 };
 
+Character.prototype.getLights = function(player, fn) {
+	var i = 0,
+	lights = [];
+
+	for (i; i < player.eq.length; i += 1) {
+		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
+			&& player.eq[i].item.itemType === 'light' && player.eq[i].item.decay >= 1) {
+			lights.push(player.eq[i]);
+		}
+	}
+
+	if (typeof fn === 'function') {
+		return fn(lights);
+	} else {
+		return lights;
+	}
+};
+
 Character.prototype.getStatsFromItems = function(items, fn) {
 	var character = this,
 	itemMods = {};
@@ -729,7 +747,8 @@ Character.prototype.wear = function(target, item, fn) {
 		if (item.slot === target.eq[i].slot && item.equipped === false) {
 			if (item.itemType === 'weapon') {
 				item.equipped = true;
-
+				target.eq[i].item = item;
+				
 				fn('You wield a ' + item.short + ' in your ' + target.eq[i].name);
 			} else {
 				// Wearing Armor

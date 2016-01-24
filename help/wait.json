@@ -1,9 +1,0 @@
-{
-    "name" : "Wait",
-    "related" : [],
-    "type" : "Help",
-    "levels" : "All",
-    "restrict": "admin",
-    "description" :"Wait-state (ws) is the generated time in-game actions take to recover from. 1ws equals roughly 800ms.",
-    "Alias" : ""
-}

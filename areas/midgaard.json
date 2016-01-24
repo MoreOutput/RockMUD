@@ -103,6 +103,7 @@
 					"ac": 7,
 					"hp": 90,
 					"chp": 90,
+					"gold": 0,
 					"itemType": "mob",
 					"spawn": "2",
 					"behaviors": [{  
@@ -192,13 +193,14 @@
 			"playersInRoom": [],
 			"monsters" : [{
 				"name": "Large boar",
-				"level": 6,
+				"level": 4,
 				"short": "A large mean looking boar",
 				"diceNum": 2,
 				"diceSides": 6,
-				"diceMod": 3,
+				"diceMod": 2,
 				"hp": 120,
 				"chp": 120,
+				"gold": 30,
 				"behaviors": [{
 					"module": "aggie"
 				}]
@@ -228,6 +230,10 @@
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
+				{
+					"cmd" : "west",
+					"id" : 8
+				},
 				{
 					"cmd" : "east",
 					"id" : 1
@@ -265,6 +271,22 @@
 						"name": "gate",
 						"isOpen": "false"
 					}
+				}
+			],
+			"playersInRoom": [],
+			"monsters" : [],
+			"items" : [],
+			"flags" : []
+		},
+		{
+			"id" : 8,
+			"title" : "West of Town Square2",
+			"area": "Midgaard",
+			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
+			"exits" : [
+				{
+					"cmd" : "east",
+					"id" : 5
 				}
 			],
 			"playersInRoom": [],

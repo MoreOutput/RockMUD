@@ -166,8 +166,6 @@ Cmd.prototype.stand = function(target, command) {
 };
 
 Cmd.prototype.open = function(target, command, fn) {
-	var dexMod = World.dice.getDexMod(target);
-
 	if (target.position === 'standing' 
 		|| target.position === 'resting' 
 		|| target.position === 'fighting') {
@@ -209,8 +207,6 @@ Cmd.prototype.open = function(target, command, fn) {
 };
 
 Cmd.prototype.close = function(target, command, fn) {
-	var dexMod = World.dice.getDexMod(target);
-
 	if (target.position === 'standing' 
 		|| target.position === 'resting' 
 		|| target.position === 'fighting') {
@@ -247,7 +243,46 @@ Cmd.prototype.close = function(target, command, fn) {
 	} else {
 		World.msgPlayer(target, {msg: 'You cannot close anything right now.'});
 	}
-}
+};
+
+Cmd.prototype.unlock = function(target, command, fn) {
+	if (target.position === 'standing' 
+		|| target.position === 'resting' 
+		|| target.position === 'fighting') {
+		World.getRoomObject(target.area, target.roomid, function(roomObj) {
+			Room.checkExit(roomObj, command.arg, function(exitObj) {
+				if (exitObj.door && exitObj.door.isOpen === true) {
+					World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
+						Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
+							if (clearToMove) {
+								exitObj.door.isOpen = false;
+								targetExit.door.isOpen = false;
+
+								World.msgPlayer(target, {msg: 'You close a ' + exitObj.door.name + ' ' + exitObj.cmd + ' from here.', styleClass: 'cmd-wake'});
+
+								World.msgRoom(roomObj, {
+									msg: target.displayName + ' closes a ' + exitObj.door.name + '.',
+									playerName: target.name,
+									styleClass: 'cmd-sleep'
+								});
+
+								World.msgRoom(targetRoom, {
+									msg: 'A ' + exitObj.door.name + ' closes to the ' + targetExit.cmd +'.',
+									playerName: target.name,
+									styleClass: 'cmd-sleep'
+								});
+							} else {
+								World.msgPlayer(target, {msg: 'Nothing you can close in that direction.'});
+							}
+						});
+					});
+				}
+			});
+		});
+	} else {
+		World.msgPlayer(target, {msg: 'You cannot close anything right now.'});
+	}
+};
 
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
@@ -677,6 +712,7 @@ Cmd.prototype.look = function(target, command) {
 			Room.getDisplayHTML(roomObj, {
 				hideCallingPlayer: target.name
 			},function(displayHTML, roomObj) {
+				// get light
 				World.msgPlayer(target, {
 					msg: displayHTML,
 					styleClass: 'room'
@@ -1091,15 +1127,9 @@ Cmd.prototype.help = function(target, command) {
 		command.msg = 'help';
 	}
 
-	fs.readFile('./help/' + command.msg + '.json', function (err, data) {
-		var helpTxt = '';
+	fs.readFile('./help/' + command.msg + '.html', 'utf8', function (err, data) {
 		if (!err) {
-			data = JSON.parse(data);
-
-			helpTxt = '<h2>Help: ' + data.name + '</h2> ' + data.description + 
-			'<p class="small">Related: '+ data.related.toString().replace(/,/g, ', ') + '</p>';
-
-			World.msgPlayer(target, {msg: helpTxt, styleClass: 'cmd-help' });
+			World.msgPlayer(target, {msg: data, styleClass: 'cmd-help' });
 		} else {
 			World.msgPlayer(target, {msg: 'No help file found.', styleClass: 'error' });
 		}

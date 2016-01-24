@@ -1,9 +1,0 @@
-{
-	"name" : "Room",
-	"related" : ["Channels", "Areas", "Chat", "Movement", "Combat", "Look"],
-	"type" : "Command",
-	"levels" : "All",
-	"restrict": 0,
-	"description" : "A Room is the space you currently reside in. An Area is made up of related Rooms, and the world of many Areas. To see your current room use the look command.",
-	"Alias" : ""
-}

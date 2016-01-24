@@ -16,7 +16,7 @@
     "hoursInDay": 24,
     "hourOfLight": 1,
     "hourOfNight": 12,
-    "isDay": true,
+    "isDay": false,
     "months": [{
         "id": 1,
         "displayName": "Janurary",

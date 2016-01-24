@@ -1,0 +1,31 @@
+{
+    "name": "Mage",
+    "abbr": "Mag",
+    "minLevel": 0,
+    "playable": true,
+    "mana": 30,
+    "int": 2,
+    "mainStat": "int",
+    "skills": [
+        {
+            "name": "Spark",
+            "id": "spark",
+            "train": 65,
+            "maxTrain": 95,
+            "mod": 2,
+            "type": "spell",
+            "wait": 2
+        }
+    ],
+    "skillList": {
+        "spark": {
+            "name": "Spark",
+            "id": "spark",
+            "train": 65,
+            "maxTrain": 95,
+            "mod": 2,
+            "type": "spell",
+            "wait": 2
+        }
+    }
+}

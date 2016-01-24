@@ -1,7 +1,7 @@
 {
 	"motd": "Entering RockMUD, try to use the following help commands if you're a mudding newbie: HELP CHANNELS, HELP NEWBIE, and HELP MOVEMENT",
 	"alerts": [
-		"Commands are not case sensitive.",
+		"Commands are not case sensitive. Use HELP COMMANDS to see the current command list.",
 		"Think of this as an example newbie help tick."
 	]
 }

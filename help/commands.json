@@ -1,9 +1,0 @@
-{
-    "name" : "Commands",
-    "related" : ["Newbie"],
-    "type" : "Help",
-    "levels" : "All",
-    "restrict": 0,
-    "description" : "Use the 'commands' command to see a list of the available commands; documented ones anyway.",
-    "Alias" : "Cmd"
-}
