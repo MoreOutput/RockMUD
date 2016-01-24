@@ -304,6 +304,7 @@ Cmd.prototype.move = function(target, command, fn) {
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.checkExit(roomObj, direction, function(exitObj) {
 				if (exitObj) {
+					// REMOVE WHEN ROLLING AREAS
 					if (!exitObj.area) {
 						exitObj.area = roomObj.area;
 					}
@@ -341,12 +342,12 @@ Cmd.prototype.move = function(target, command, fn) {
 											}
 
 											World.msgRoom(targetRoom, {
-												msg:'<strong>' + target.name + '</strong> the ' + target.race + ' enters the room.',
+												msg:'<strong>' + target.displayName + '</strong> enters the room from the ' + exitObj.cmd,
 												playerName: target.name
 											});
 
 											World.msgRoom(roomObj, {
-												msg: '<span class="yellow"><strong>' + target.name + '</strong> leaves the room <strong>heading ' + direction + '</strong></div>',
+												msg: '<span class="yellow">' + target.displayName + ' leaves the room heading <strong>' + direction + '</strong></div>',
 												playerName: target.name
 											});
 

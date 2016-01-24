@@ -89,6 +89,7 @@
 					}]
 				}, {
 					"name": "Boar",
+					"displayName": "A brown boar",
 					"level": 3,
 					"short": "A large brown boar",
 					"race": "animal",
@@ -109,6 +110,29 @@
 					"behaviors": [{  
 						"module" : "wander"
 					}]
+				}, {
+					"name": "Shackleton",
+					"displayName": "The mayors dog",
+					"level": 15,
+					"short": "Shackleton, the Mayors famous canine.",
+					"description": "",
+					"race": "human",
+					"id": 100,
+					"area": "Midgaard",
+					"weight": 115,
+					"diceNum": 2, 
+					"diceSides": 8,
+					"diceMod": 5,
+					"str": 13,
+					"position": "standing",
+					"attackType": "maw",
+					"damRoll": 10,
+					"hitRoll": 10,
+					"templates": [],
+					"ac": 10,
+					"itemType": "mob",
+					"items": [],
+					"behaviors": []
 				}
 			],
 			"items" : [{
