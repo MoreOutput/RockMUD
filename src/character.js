@@ -383,7 +383,7 @@ Character.prototype.raceSelection = function(r, s, fn) {
 
 				return fn(r, s, false);
 			} else {
-				s.emit('msg', {msg: 'No help file found fcor this race.', styleClass: 'error' });
+				s.emit('msg', {msg: 'No help file found for this race.', styleClass: 'error' });
 
 				return fn(r, s, false);
 			}
