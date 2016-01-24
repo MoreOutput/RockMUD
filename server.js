@@ -41,6 +41,7 @@ server = http.createServer(function (req, res) {
 }),
 World = require('./src/world').world,
 io = require('socket.io')(server, {
+	log: false,
 	transports: ['websocket']
 });
 
