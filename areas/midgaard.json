@@ -9,9 +9,8 @@
 	"saved": "",
 	"author": "Rocky",
 	"messages": [
-		{"msg": "A cool breeze blows through the streets of Midgaard."}, 
-		{"msg": "Wolves howl in the distance.", "limit": "night"},
-		{"msg": "The bustle of the city can be too much for many people."}
+		{"msg": "A cool breeze blows through the streets of Midgaard."},
+		{"msg": "The bustle of the city can be distracting. Keep an eye out for thieves."}
 	],
 	"rooms" : [
 		{
@@ -38,6 +37,7 @@
 					"id" : 6,
 					"door": {
 						"isOpen": false,
+						"openMsg": "A foul smell flows in from below.",
 						"name": "gate"
 					}
 				}
@@ -84,7 +84,7 @@
 							"short": "golden key"
 						}]
 					}],
-					"behaviors": [{  
+					"behaviors": [{
 						"module" : "mayor"
 					}]
 				}, {
@@ -191,20 +191,7 @@
 				}
 			],
 			"playersInRoom": [],
-			"monsters" : [{
-				"name": "Large boar",
-				"level": 4,
-				"short": "A large mean looking boar",
-				"diceNum": 2,
-				"diceSides": 6,
-				"diceMod": 2,
-				"hp": 120,
-				"chp": 120,
-				"gold": 30,
-				"behaviors": [{
-					"module": "aggie"
-				}]
-			}],
+			"monsters" : [],
 			"items" : [],
 			"flags" : []
 		},
@@ -274,7 +261,20 @@
 				}
 			],
 			"playersInRoom": [],
-			"monsters" : [],
+			"monsters" : [{
+				"name": "Large boar",
+				"level": 4,
+				"short": "A large mean looking boar",
+				"diceNum": 2,
+				"diceSides": 6,
+				"diceMod": 2,
+				"hp": 120,
+				"chp": 120,
+				"gold": 30,
+				"behaviors": [{
+					"module": "aggie"
+				}]
+			}],
 			"items" : [],
 			"flags" : []
 		},

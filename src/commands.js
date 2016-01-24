@@ -186,6 +186,11 @@ Cmd.prototype.open = function(target, command, fn) {
 									styleClass: 'cmd-sleep'
 								});
 
+
+								if (exitObj.door.openMsg) {
+									World.msgPlayer(target, {msg: exitObj.door.openMsg, styleClass: 'yellow'});
+								}
+
 								World.msgRoom(targetRoom, {
 									msg: 'A ' + exitObj.door.name + ' opens to the ' + targetExit.cmd +'.',
 									playerName: target.name,
@@ -220,6 +225,11 @@ Cmd.prototype.close = function(target, command, fn) {
 								targetExit.door.isOpen = false;
 
 								World.msgPlayer(target, {msg: 'You close a ' + exitObj.door.name + ' ' + exitObj.cmd + ' from here.', styleClass: 'cmd-wake'});
+
+
+								if (exitObj.closeMsg) {
+									World.msgPlayer(target, exitObj.closeMsg);
+								}
 
 								World.msgRoom(roomObj, {
 									msg: target.displayName + ' closes a ' + exitObj.door.name + '.',

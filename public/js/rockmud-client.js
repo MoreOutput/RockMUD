@@ -62,7 +62,7 @@ window.onload = function() {
 
 		rowCnt += 1;
 
-		if (rowCnt > 200) {
+		if (rowCnt > 150) {
 			for (i; i < 100; i += 1) {
 				terminal.removeChild(document.getElementById( (i + 1) ));
 			}
