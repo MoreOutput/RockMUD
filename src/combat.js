@@ -160,7 +160,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 											}
 
 											if (opponent.isPlayer) {
-												msgForOpponent +=  '<div>A ' + attacker.displayName + 's ' + weapon.attackType 
+												msgForOpponent +=  '<div>' + attacker.displayName + 's ' + weapon.attackType 
 													+ ' hits you with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' + damage + ')</span></div>';
 											}
 										});
