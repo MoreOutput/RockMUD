@@ -4,31 +4,17 @@ Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = function() {
 	this.adjective = [
-		{value: 'weak', damage: 0},
-		{value: 'some', damage: 1},
-		{value: '', damage: 10},
-		{value: '', damage: 20},
-		{value: '', damage: 25},
-		{value: '', damage: 40},
-		{value: '', damage: 50},
-		{value: '', damage: 60},
-		{value: '', damage: 70},
-		{value: '', damage: 80},
-		{value: '', damage: 90}
+		{value: 'weak', damage: 5},
+		{value: 'some', damage: 10},
+		{value: 'maiming', damage: 20},
+		{value: 'MAIMING', damage: 25},
+		{value: '*MAIMING*', damage: 30},
+		{value: 'great', damage: 40},
+		{value: 'devestating', damage: 50},
+		{value: 'DEVESTATING', damage: 60}
 	];
 
-	this.abstractNouns = [
-		{value: '', damage: 0},
-		{value: '', damage: 0},
-		{value: '', damage: 0},
-		{value: '', damage: 0},
-		{value: '', damage: 0},
-		{value: '', damage: 0},
-		{value: '', damage: 0},
-		{value: '', damage: 0},
-		{value: '', damage: 0},
-		{value: '', damage: 0}
-	];
+	this.abstractNouns = ['intensity', 'force', 'strength', 'power'];
 };
 
 /*
@@ -42,6 +28,40 @@ You swing and miss a Red Dragon with barbaric intensity (14)
 * Starting combat, begin() much return true and the target node for a fight to continue
 * otherwise both parties are left in the state prior. Beginning combat does not add Wait.
 */
+
+Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, opponentMods, fn) {
+	var numOfAttacks = Math.round((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4);
+
+	if (numOfAttacks <= 0) {
+		numOfAttacks = 1;
+	}
+
+	if (weapon.modifiers && weapon.modifiers.numOfAttacks) {
+		numOfAttacks += weapon.modifiers.numOfAttacks;
+	}
+
+	if (attacker.knowledge > opponentMods.str && World.dice.roll(1, 2) === 1) {
+		numOfAttacks += 1;
+	}
+
+	if (numOfAttacks <= 3 && attackerMods.str > opponentMods.dex) {
+		if (World.dice.roll(1, 2) === 2) {
+			numOfAttacks += 1;
+		}
+	}
+
+	if (numOfAttacks <= 3 && attackerMods.dex > opponentMods.dex) {
+		if (World.dice.roll(1, 2) === 2) {
+			numOfAttacks += 1;
+		}
+	}
+
+	if (numOfAttacks === 1 && World.dice.roll(1, 4) === 4) {
+		numOfAttacks = 2;
+	}
+
+	return fn(numOfAttacks);
+};
 
 Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	var combat = this;
@@ -88,100 +108,70 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 
 				World.dice.roll(1, 20, (attackerMods.dex - opponent.meleeRes), function(attackerRoll) {
 					World.dice.roll(1, 20, (opponent.ac + (opponentMods.dex - attacker.knowledge)), function(opponentRoll) {
-						var numOfAttacks = Math.round((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4),
-						j = 0;
+						combat.getNumberOfAttacks(attacker, weapon, attackerMods, opponentMods, function(numOfAttacks) {
+							var j = 0;
 
-						if (numOfAttacks <= 0) {
-							numOfAttacks = 1;
-						}
+							if (numOfAttacks) {
+								for (j; j < numOfAttacks; j += 1) {
+									World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str + weapon.diceMod, function(damage) {
+										var blocked = false,
+										dodged = false;
 
-						if (weapon.modifiers && weapon.modifiers.numOfAttacks) {
-							numOfAttacks += weapon.modifiers.numOfAttacks;
-						}
+										damage = Math.round(damage * World.dice.roll(1, 2) + (attacker.damRoll/2) + (attacker.level/3) + attackerMods.str );
 
-						if (attackerRoll > opponentRoll) {
-							numOfAttacks += 1;
-						}
+										if (attackerMods.str > opponentMods.con) {
+											damage += attackerMods.str;
+										}
 
-						if (attacker.knowledge > opponent.strMod && World.dice.roll(1, 2) === 1) {
-							numOfAttacks += 1;
-						}
+										if (attackerMods.str > 2) {
+											damage += attackerMods.str;
+										}
 
-						if (numOfAttacks <= 3 && attackerMods.str > opponentMods.dex) {
-							if (World.dice.roll(1, 2) === 2) {
-								numOfAttacks += 1;
+										if (weapon.modifiers.numOfAttacks) {
+											numOfAttacks += weapon.modifiers.numOfAttacks;
+										}
+
+										if (attacker.damRoll > opponent.meleeRes) {
+											damage += attackerMods.str;
+										}
+
+										damage -= Math.round(opponent.ac/3);
+
+										if (numOfAttacks > 3 && j > 3) {
+											damage = Math.round( damage / 2 );
+										}
+
+										if (damage < 0) {
+											damage = 0;
+										}
+
+										combat.getDamageAdjective(damage, function(adjective) {
+											var abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
+
+											opponent.chp -= damage;
+
+											if (attacker.isPlayer) {
+												msgForAttacker +=  '<div>You ' + weapon.attackType + ' a ' + opponent.displayName 
+													+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' + damage + ')</span></div>';
+											}
+
+											if (opponent.isPlayer) {
+												msgForOpponent +=  '<div>A ' + attacker.displayName + 's ' + weapon.attackType 
+													+ ' hits you with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' + damage + ')</span></div>';
+											}
+										});
+									});
+								}
+							} else {
+								if (attacker.isPlayer) {
+									msgForAttacker +=  '<div class="grey">Your ' + weapon.attackType + ' misses a ' + opponent.displayName + '</div>';
+								}
+
+								if (opponent.isPlayer) {
+									msgForOpponent +=  '<div class="grey">' + attacker.displayName + ' tries to ' + weapon.attackType + ' you and misses! </div>';
+								}
 							}
-						}
-
-						if (numOfAttacks <= 3 && attackerMods.dex > opponentMods.dex) {
-							if (World.dice.roll(1, 2) === 2) {
-								numOfAttacks += 1;
-							}
-						}
-
-						if (numOfAttacks === 1 && World.dice.roll(1, 4) === 4) {
-							numOfAttacks = 2;
-						}
-
-						if (attackerRoll > 25) {
-							numOfAttacks += 1;
-						}
-
-						if (numOfAttacks) {
-							for (j; j < numOfAttacks; j += 1) {
-								World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str + weapon.diceMod, function(damage) {
-									var blocked = false,
-									dodged = false;
-
-									damage = Math.round(damage * World.dice.roll(1, 2) + (attacker.damRoll/2) + (attacker.level/3) + attackerMods.str );
-
-									if (attackerMods.str > opponentMods.con) {
-										damage += attackerMods.str;
-									}
-
-									if (attackerMods.str > 2) {
-										damage += attackerMods.str;
-									}
-
-									if (weapon.modifiers.numOfAttacks) {
-										numOfAttacks += weapon.modifiers.numOfAttacks;
-									}
-
-									if (attacker.damRoll > opponent.meleeRes) {
-										damage += attackerMods.str;
-									}
-
-									damage -= Math.round(opponent.ac/3);
-
-									if (numOfAttacks > 3 && j > 3) {
-										damage = Math.round( damage / 2 );
-									}
-
-									if (damage < 0) {
-										damage = 0;
-									}
-
-									opponent.chp -= damage;
-
-									if (attacker.isPlayer) {
-										msgForAttacker +=  '<div>You ' + weapon.attackType + ' a ' + opponent.displayName + ' <span class="red">(' + damage + ')</span></div>';
-									}
-
-									if (opponent.isPlayer) {
-										msgForOpponent +=  '<div>A ' + attacker.displayName + 's ' + weapon.attackType + ' hits you with some intensity <span class="red">(' + damage + ')</span></div>';
-									}
-								});
-							}
-						} else {
-							if (attacker.isPlayer) {
-								msgForAttacker +=  '<div class="grey">Your ' + weapon.attackType + ' misses a ' + opponent.displayName + '</div>';
-							}
-
-							if (opponent.isPlayer) {
-								msgForOpponent +=  '<div class="grey">' + attacker.displayName + ' tries to ' + weapon.attackType + ' you and misses! </div>';
-							}
-						}
-
+						});
 						/*
 						TODO: array for player name
 						if (roomObj.playersInRoom.length > 0) {
@@ -204,6 +194,19 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 		});
 	}
 };
+
+Combat.prototype.getDamageAdjective = function(damage, fn) {
+	var i = 0;
+
+	for (i; i < this.adjective.length; i += 1) {
+		if (this.adjective[i].damage >= damage ) {
+			return fn(this.adjective[i].value);
+		}
+	}
+
+	return fn(this.adjective[1].value);
+};
+
 
 Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 	var combat = this;
