@@ -141,6 +141,10 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 											damage = Math.round( damage / 2 );
 										}
 
+										if (attackerRoll === 20) {
+											damage = damage * 2;
+										}
+
 										if (damage < 0) {
 											damage = 0;
 										}
@@ -273,6 +277,14 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 
 	player.opponent = null;
 	player.position = 'standing';
+
+	// Until dead is in if a player dies we reset
+	if (opponent.position === 'dead' && opponent.isPlayer) {
+		opponent.position = 'standing';
+		opponent.chp = opponent.hp;
+
+		World.msgPlayer(player, {msg: 'At the moment player death is impossible', styleClass: 'red'});
+	}
 
 	Room.removeMob(roomObj, opponent, function(roomObj, opponent) {
 		World.dice.calExp(player, opponent, function(exp) {

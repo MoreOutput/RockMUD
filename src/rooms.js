@@ -7,7 +7,7 @@ time = World.time,
 areas = World.areas,
 
 Room = function() {
-	this.events = ['onVisit', 'onExit', 'onEnter'];
+
 };
 
 Room.prototype.checkExitCriteria = function(targetRoom, exitObj, player, fn) {

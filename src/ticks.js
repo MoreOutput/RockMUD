@@ -45,7 +45,7 @@ World = require('./world').world;
 		}
 
 		if (World.time.day === 30) {
-			World.time.day = 0;
+			World.time.day = 1;
 		}
 
 		World.time.tick += 1;
@@ -123,7 +123,7 @@ World = require('./world').world;
 				}
 			}
 		}
-	}, 180000); // 3 minutes
+	}, 360000); // 6 minutes
 
 
 	// Regen (Player only ATM);
@@ -168,13 +168,11 @@ World = require('./world').world;
 				var i = 0,
 				alert = World.shuffle(JSON.parse(data).alerts)[0];
 
-				for (i; i < World.players.length; i += 1) {
-					World.msgPlayer(World.players[i], {
-						msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
-							+ alert.replace(/@.*@/, World.players[i].displayName) + '</span></span>'
-					});
-				}
-			});	
-		}	
-	}, 120000);
+				World.msgWorld(false, {
+					msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
+						+ alert.replace(/@.*@/, World.players[i].displayName) + '</span></span>'
+				});
+			});
+		}
+	}, 240000);
 }());

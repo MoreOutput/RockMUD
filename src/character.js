@@ -372,18 +372,13 @@ Character.prototype.raceSelection = function(r, s, fn) {
 			return fn(r, s, false);
 		});
 	} else {
-		fs.readFile('./help/' + r.msg + '.json', function (err, data) {
+		fs.readFile('./help/' + r.msg + '.html', 'utf-8', function (err, data) {
 			if (!err) {
-				data = JSON.parse(data);
-
-				helpTxt = '<h2>Race Profile: ' + data.name + '</h2> ' + data.description + 
-				'<h3>Benefits:</h3><p class="small">Related: '+ data.related.toString() + '</p>';
-
-				s.emit('msg', {msg: helpTxt, styleClass: 'cmd-help' });
+				s.emit('msg', {msg: data, styleClass: 'cmd-help' });
 
 				return fn(r, s, false);
 			} else {
-				s.emit('msg', {msg: 'No help file found fcor this race.', styleClass: 'error' });
+				s.emit('msg', {msg: 'No help file found for this race.', styleClass: 'error' });
 
 				return fn(r, s, false);
 			}
@@ -748,7 +743,7 @@ Character.prototype.wear = function(target, item, fn) {
 			if (item.itemType === 'weapon') {
 				item.equipped = true;
 				target.eq[i].item = item;
-				
+
 				fn('You wield a ' + item.short + ' in your ' + target.eq[i].name);
 			} else {
 				// Wearing Armor

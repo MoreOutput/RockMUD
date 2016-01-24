@@ -104,7 +104,7 @@
 					"ac": 7,
 					"hp": 90,
 					"chp": 90,
-					"gold": 0,
+					"gold": 1,
 					"itemType": "mob",
 					"spawn": "2",
 					"behaviors": [{  
@@ -114,7 +114,7 @@
 					"name": "Shackleton",
 					"displayName": "The mayors dog",
 					"level": 15,
-					"short": "Shackleton, the Mayors famous canine.",
+					"short": "Shackleton, the Mayors famous canine",
 					"description": "",
 					"race": "human",
 					"id": 100,
@@ -124,7 +124,7 @@
 					"diceSides": 8,
 					"diceMod": 5,
 					"str": 13,
-					"position": "standing",
+					"position": "resting",
 					"attackType": "maw",
 					"damRoll": 10,
 					"hitRoll": 10,
@@ -294,7 +294,7 @@
 				"diceMod": 2,
 				"hp": 120,
 				"chp": 120,
-				"gold": 30,
+				"gold": 3,
 				"behaviors": [{
 					"module": "aggie"
 				}]
