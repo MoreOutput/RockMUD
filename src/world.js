@@ -91,6 +91,9 @@ World = function() {
 						loadTemplates('mob', function(err, mobTemplate) {
 							loadTemplates('item', function(err, itemTemplate) {
 								loadAI(function() {
+
+									World.ticks = require('./ticks');
+
 									world.time = time;
 									world.races = races;
 									world.classes = classes;
@@ -115,8 +118,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	Cmds = require('./commands').cmd,
 	Skills = require('./skills').skills,
 	Spells= require('./skills').spells,
-	Room = require('./rooms').room,
-	Ticks = require('./ticks');
+	Room = require('./rooms').room;
 
 	this.io = socketIO;
 	this.dice = require('./dice').roller;

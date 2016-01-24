@@ -352,11 +352,11 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 						World.prompt(opponent);
 						clearInterval(combatInterval);
 					} else {
-						if (opponent.chp <= 0) {
+						if (opponent.chp <= 0 && !opponent.isPlayer) {
 							combat.processEndOfMobCombat(combatInterval, player, opponent, roomObj);
-						} else if ( (!player.isPlayer && player.chp <= 0)) {
+						} else if (player.chp <= 0 && !player.isPlayer) {
 							combat.processEndOfMobCombat(combatInterval, opponent, player, roomObj);
-						} else if (player.isPlayer && (player.chp <= 0 || player.position === 'dead')) {
+						} else if (player.isPlayer && player.chp <= 0 || opponent.isPlayer && opponent.chp <= 0) {
 							clearInterval(combatInterval);
 							// Player Death
 							opponent.position = 'standing';
@@ -368,6 +368,7 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 							player.opponent = null;
 
 							World.msgPlayer(player, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
+							World.msgPlayer(opponent, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
 						} else {
 							World.prompt(player);
 							World.prompt(opponent);
