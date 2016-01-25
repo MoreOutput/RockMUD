@@ -48,9 +48,7 @@ World = function() {
 	loadTemplates = function (tempType, fn) {
 		var tmpArr = [];
 
-		if (tempType === 'messages') {
-			loadFileSet('./templates/messages/', fn);
-		} else if (tempType === 'area') {
+		if (tempType === 'area') {
 			fs.readFile('./templates/objects/area.json', function (err, r) {
 				return  fn(err, JSON.parse(r));
 			});
@@ -79,31 +77,26 @@ World = function() {
 	world.itemTemplate = {};
 	world.areaTemplate = {};
 	world.mobTemplate = {};
-	world.messageTemplates = []; // Templates that merge with various message types
 	world.ai = {};
 
-	// embrace callback hell
+	// embrace callback hell!
 	loadTime(function(err, time) {
 		loadRaces(function(err, races) {
 			loadClasses(function(err, classes) {
-				loadTemplates('messages', function(err, msgTemplates) {
-					loadTemplates('area', function(err, areaTemplate) {
-						loadTemplates('mob', function(err, mobTemplate) {
-							loadTemplates('item', function(err, itemTemplate) {
-								loadAI(function() {
+				loadTemplates('area', function(err, areaTemplate) {
+					loadTemplates('mob', function(err, mobTemplate) {
+						loadTemplates('item', function(err, itemTemplate) {
+							loadAI(function() {
+								world.time = time;
+								world.races = races;
+								world.classes = classes;
+								world.areaTemplate = areaTemplate;
+								world.itemTemplate = itemTemplate;
+								world.mobTemplate = mobTemplate;
+								
+								world.ticks = require('./ticks');
 
-									World.ticks = require('./ticks');
-
-									world.time = time;
-									world.races = races;
-									world.classes = classes;
-									world.messageTemplates = msgTemplates;
-									world.areaTemplate = areaTemplate;
-									world.itemTemplate = itemTemplate;
-									world.mobTemplate = mobTemplate;
-
-									return world;
-								});
+								return world;
 							});
 						});
 					});
@@ -521,12 +514,12 @@ World.prototype.checkArea = function(areaName, fn) {
 };
 
 World.prototype.motd = function(s, fn) {
-	fs.readFile('./templates/messages/motd.json', function (err, data) {
+	fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
 		if (err) {
 			throw err;
 		}
 	
-		s.emit('msg', {msg : '<div class="motd">' + JSON.parse(data).motd + '</div>', res: 'logged'});
+		s.emit('msg', {msg : '<div class="motd">' + html + '</div>', res: 'logged'});
 	
 		return fn();
 	});

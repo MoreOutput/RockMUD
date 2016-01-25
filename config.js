@@ -5,7 +5,7 @@ exports.server = {
 		name: 'RockMUD',
 		version: '0.2.0',
 		website: 'https://github.com/MoreOutput/RockMUD',
-		description: ''
+		description: 'Websockets MUD Engine'
 	},
 	admins: []
 };

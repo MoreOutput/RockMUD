@@ -161,17 +161,16 @@ World = require('./world').world;
 	}, 240000); // 4 minutes
 
 	setInterval(function() {
-		var s;
+		var s,
+		alerts = [
+			'Commands are not case sensitive. Use HELP COMMANDS to see the current command list.',
+			'Think of this as an example newbie help tick.'
+		];
 
 		if (World.players.length > 0) {
-			fs.readFile('./templates/messages/motd.json', function (err, data) {
-				var i = 0,
-				alert = World.shuffle(JSON.parse(data).alerts)[0];
-
-				World.msgWorld(false, {
-					msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
-						+ alert.replace(/@.*@/, World.players[i].displayName) + '</span></span>'
-				});
+			World.msgWorld(false, {
+				msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
+					+ alerts[World.dice.roll(1, alerts.length) - 1] + '</span></span>'
 			});
 		}
 	}, 240000);
