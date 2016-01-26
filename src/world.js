@@ -427,27 +427,24 @@ World.prototype.loadArea = function(areaName, fn) {
 		if (fnd) {
 			return fn(area, true);
 		} else {
-			fs.readFile('./areas/' + areaName.toLowerCase() + '.json', function (err, area) {
-				var i = 0,
-				room,
-				mob,
-				item;
+			var area = require('../areas/midgaard'),
+			i = 0,
+			room,
+			mob,
+			item;
 
-				area = JSON.parse(area);
-
-				for (i; i < area.rooms.length; i += 1) {
-					(function(room) {
-						world.rollMobs(room.monsters, room.id, function(mobs) {
-							world.rollItems(room.items, room.id, function(items) {
-								if (i === area.rooms.length) {
-									world.areas.push(area);
-									return fn(area, false);
-								}
-							});
+			for (i; i < area.rooms.length; i += 1) {
+				(function(room) {
+					world.rollMobs(room.monsters, room.id, function(mobs) {
+						world.rollItems(room.items, room.id, function(items) {
+							if (i === area.rooms.length) {
+								world.areas.push(area);
+								return fn(area, false);
+							}
 						});
-					}(area.rooms[i]))
-				}
-			});
+					});
+				}(area.rooms[i]));
+			}
 		}
 	});
 };

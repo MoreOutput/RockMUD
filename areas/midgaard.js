@@ -1,4 +1,6 @@
-{
+'use strict';
+
+module.exports = {
 	"name" : "Midgaard",
 	"id" : 1,
 	"type" : "city",
@@ -37,7 +39,9 @@
 					"id" : 6,
 					"door": {
 						"isOpen": false,
-						"openMsg": "A foul smell flows in from below.",
+						"isLocked": true,
+						"openMsg": {"msg": "A foul smell flows in from below."},
+						"unlockMsg": {"msg": "You hear something moving under the gate.", "check": {"type": "awareness"}},
 						"name": "gate"
 					}
 				}
@@ -280,15 +284,20 @@
 					"id" : 1,
 					"door": {
 						"name": "gate",
-						"isOpen": "false"
+						"isOpen": false,
+						"isLocked": true,
+						"key": {
+							"id": 101
+						}
 					}
 				}
 			],
 			"playersInRoom": [],
 			"monsters" : [{
-				"name": "Large boar",
+				"name": "Large alligator",
 				"level": 4,
-				"short": "A large mean looking boar",
+				"race": "animal",
+				"short": "A large mean looking alligator",
 				"diceNum": 2,
 				"diceSides": 6,
 				"diceMod": 2,
@@ -319,4 +328,4 @@
 			"flags" : []
 		}
 	]
-}
+};
