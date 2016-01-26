@@ -3,7 +3,7 @@ RockMUD
 
 **RockMUD (0.2.0) is a Node powered WebSockets MUD server**
 
-Find the latest on this Heroku hobby instance: http://rockmud.heroku.com
+Try the latest on this Heroku hobby instance: http://rockmud.heroku.com
 
 Goals:
 * A Diku-like MUD experience from within the browser.
