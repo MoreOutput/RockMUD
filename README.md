@@ -54,8 +54,8 @@ Core logic for dice rolls is in its own module. Is attached to world.dice. ex: w
 **ticks.js**
 There is no single heartbeat timer. This controls the games timed events -- other than the core combat loop which is in Combat.js
 
-**commands.js, skills.js**
-All game commands are in found in these two files. Creating the function (test) in Commands.js adds the command (test) to the game.
+**commands.js, skills.js, spells.js**
+All game commands are in found in these three files. Creating the function (test) in Commands.js adds the command (test) to the game.
 
 ##Directory Breakdown##
 **/classes**
@@ -81,7 +81,7 @@ JSON templates used to enhance in-game items; and to ensure default values.
 
 * entity.json is the default object attached to all 'living' objects upon initial load.
 * item.json is the default object attached to all 'non-living' objects upon initial load.
-* Fields in any passed in objects overwrite those in the template.
+* Properties in any passed in objects overwrite those in the template.
 
 **/templates/html**  
 HTML templates mainly retrieved to ease complex display. For RockMUD core this means character creation screens.
