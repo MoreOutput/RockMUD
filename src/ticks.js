@@ -123,10 +123,10 @@ World = require('./world').world;
 				}
 			}
 		}
-	}, 360000); // 6 minutes
+	}, 720000); // 12 minutes
 
 
-	// Regen (Player only ATM);
+	// Player Regen
 	setInterval(function() { 
 		var i = 0,
 		player; 

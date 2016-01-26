@@ -1,4 +1,7 @@
 'use strict';
+var Cmd = require('../src/commands').cmd,
+Room = require('../src/rooms').room,
+World = require('../src/world').world;
 
 module.exports = {
 	"name" : "Midgaard",
@@ -40,8 +43,8 @@ module.exports = {
 					"door": {
 						"isOpen": false,
 						"isLocked": true,
-						"openMsg": {"msg": "A foul smell flows in from below."},
-						"unlockMsg": {"msg": "You hear something moving under the gate.", "check": {"type": "awareness"}},
+						"openMsg": "A foul smell flows in from below.",
+						"unlockMsg": "You hear something moving under the gate.",
 						"name": "gate"
 					}
 				}
