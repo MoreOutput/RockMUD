@@ -82,7 +82,7 @@ JSON templates used to enhance in-game items; and to ensure default values.
 * Fields in any passed in objects overwrite those in the template.
 
 **/templates/html**  
-HTML templates used; mainly retrieved to ease complex display. For RockMUD core this mainly means character creation screens.
+HTML templates mainly retrieved to ease complex display. For RockMUD core this means character creation screens.
 
 **/ai**  
 Mob specific AI scripts. This are merged into game items after they are loaded from their respective area files. AI can be written directly into the area file; ai scripts are outlined here when they can be reused. RockMUD core aims to have 4: shopkeeper.js, wander.js, aggie.js and mayor.js.
