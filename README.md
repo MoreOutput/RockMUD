@@ -1,7 +1,7 @@
 RockMUD
 ===============================
 
-**RockMUD (0.2.0) is a WebSockets MUD server built with node.js.**
+**RockMUD (0.2.0) is a Node powered WebSockets MUD server**
 
 Goals:
 * A Diku-like MUD experience from within the browser.
@@ -14,12 +14,11 @@ Notes on dependencies:
 * Default terminal loads Bootstrap from CDN
 * Development aims to keep up with latest node release.
 
-Some things Currently in 0.1.9:
+Some things Currently in 0.2.0:
 * No command whitelisting (add a command function, and it becomes a in-game command instantly). Because of this RockMUD does not rely on parsing commands on a tick.
 * Character creation (Races, Classes, Stats, Passwords) and saving as json files (/players).
 * Channels
 * Uniform way of scripting commands -- with permission checking
-* JSON world definition
 * Command aliases defined client side.
 * Various 'standard' commands (see: HELP COMMANDS)
 * Basic Combat (see: kill <mob name>)
@@ -36,7 +35,7 @@ All design/data elements of RockMUD must be either valid JSON or .js files. Plea
 
 ##Core Modules, found in /src :##
 **world.js**
-Functions that have game-wide reach. In memory data -- World.races, World.players and etc.
+Functions that have game-wide reach. In memory data -- World.races, World.players, World.msgPlayer() are a few examples.
 
 **room.js**
 Used to interact with loaded areas found in World.areas[]
@@ -53,8 +52,8 @@ Core logic for dice rolls is in its own module. Is attached to world.dice. ex: w
 **ticks.js**
 There is no single heartbeat timer. This controls the games timed events -- other than the core combat loop which is in Combat.js
 
-**commands.js, skills.js and spells.js**
-All game commands are in found in these three files. Creating the function "test" in Commands.js adds the command 'test' to the game.
+**commands.js, skills.js**
+All game commands are in found in these two files. Creating the function (test) in Commands.js adds the command (test) to the game.
 
 ##Directory Breakdown##
 **/classes**
@@ -64,7 +63,7 @@ Game classes.
 Game races.
 
 **/help**
-In-game help files.
+In-game help files. Help files are written in HTML.
 
 **/src**
 Location of the core modules.
@@ -73,26 +72,20 @@ Location of the core modules.
 Player files as flat json data.
 
 **/areas**  
-JSON files representing areas.
-
-**/templates**  
-JSON templates used to enhance in-game items.
-
-**/templates/messages**  
-Templates for in game messages.
+JS files representing areas.
 
 **/templates/objects**  
-Item templates extend objects into certain items based on their template[] and itemType properties.
+JSON templates used to enhance in-game items; and to ensure default values.
 
 * entity.json is the default object attached to all 'living' objects upon initial load.
 * item.json is the default object attached to all 'non-living' objects upon initial load.
-* Fields in any passed in objects overwrite template definitions, templates are used to ensure objects have the minimum required properties. 
+* Fields in any passed in objects overwrite those in the template.
+
+**/templates/html**  
+HTML templates used; mainly retrieved to ease complex display. For RockMUD core this mainly means character creation screens.
 
 **/ai**  
-Mob specific AI scripts. RockMUD core aims to have 4: shopkeeper.js, wander.js, aggie.js and mayor.js
-
-**/tools**  
-Eventual location of building and admin tools.
+Mob specific AI scripts. This are merged into game items after they are loaded from their respective area files. AI can be written directly into the area file; ai scripts are outlined here when they can be reused. RockMUD core aims to have 4: shopkeeper.js, wander.js, aggie.js and mayor.js.
 
 ##Files##
 **/config.json**  
