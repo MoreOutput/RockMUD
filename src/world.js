@@ -368,7 +368,7 @@ World.prototype.rollMobs = function(mobArr, roomid, fn) {
 										mob.hp = (50 * (mob.level + 1));
 									}
 								} else {
-									mob.hp += (mob.level + world.dice.roll(1, mob.con));
+									mob.hp += (mob.level + world.dice.roll(1, mob.con/4));
 								}
 								
 								mob.chp = mob.hp;
@@ -511,7 +511,7 @@ World.prototype.checkArea = function(areaName, fn) {
 };
 
 World.prototype.motd = function(s, fn) {
-	fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
+	fs.readFile('./templates/html/motd.html', 'utf-8', function (err, html) {
 		if (err) {
 			throw err;
 		}

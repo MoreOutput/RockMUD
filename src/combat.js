@@ -87,7 +87,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 				weaponSlots = [{
 					name: 'Right Hand',
 					item: {
-						name: 'Fists',
+						name: 'Fighting with your bare hands!',
 						level: attacker.level,
 						diceNum: attacker.diceNum,
 						diceSides: attacker.diceSides,
@@ -117,9 +117,9 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 										var blocked = false,
 										dodged = false;
 
-										damage = Math.round(damage * World.dice.roll(1, 2) + (attacker.damRoll/2) + (attacker.level/3) + attackerMods.str );
+										damage = Math.round(damage + (attacker.damRoll/2) + (attacker.level/3) + attackerMods.str + attacker.str/3);
 
-										if (attackerMods.str > opponentMods.con) {
+										if (attackerMods.str >= opponentMods.con) {
 											damage += attackerMods.str;
 										}
 

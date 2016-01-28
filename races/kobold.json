@@ -4,5 +4,8 @@
     "playable": false,
     "attackType": "claw",
     "size": 1,
-    "racial" : ["darkvision"]
+    "racial" : ["darkvision"],
+    "diceNum": 1,
+    "diceSides": 4,
+    "diceMod": 1
 }

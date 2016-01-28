@@ -1,6 +1,6 @@
 {
     "name": "Ogre",
-    "str": 3,
+    "str": 4,
     "int": -2,
     "dex": -1,
     "hp": 20,
@@ -9,5 +9,7 @@
     "damRoll": 2,
     "meleeRes": 1,
     "magicRes": -3,
-    "attackType": "smash"
+    "attackType": "smash",
+    "diceNum": 1,
+    "diceSides": 12
 }

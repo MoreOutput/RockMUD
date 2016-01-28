@@ -1,6 +1,6 @@
 {
     "name": "Fighter",
-    "abbr": "Fig",
+    "classAbbr": "Fig",
     "minLevel": 0,
     "playable": true,
     "hp": 10,

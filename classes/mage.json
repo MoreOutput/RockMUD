@@ -1,6 +1,6 @@
 {
     "name": "Mage",
-    "abbr": "Mag",
+    "classAbbr": "Mag",
     "minLevel": 0,
     "playable": true,
     "mana": 30,

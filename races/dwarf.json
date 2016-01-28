@@ -6,5 +6,7 @@
     "ac": 1,
     "playable": true,
     "attackType": "punch",
-    "racial" : ["darkvision"]
+    "racial" : ["darkvision"],
+    "diceNum": 1,
+    "diceSides": 10
 }

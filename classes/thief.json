@@ -1,6 +1,6 @@
 {
     "name": "Thief",
-    "abbr": "Thi",
+    "classAbbr": "Thi",
     "minLevel": 0,
     "playable": true,
     "mv": 10,

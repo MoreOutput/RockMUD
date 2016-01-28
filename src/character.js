@@ -176,11 +176,11 @@ Character.prototype.create = function(r, s, fn) {
 	s.player.roomid = 1;
 	s.player.trains += 25;
 	s.player.deaths = 0;
-	s.player.str = 10;
-	s.player.int = 10;
-	s.player.wis = 10;
-	s.player.con = 10;
-	s.player.dex = 10;
+	s.player.str += 10;
+	s.player.int += 10;
+	s.player.wis += 10;
+	s.player.con += 10;
+	s.player.dex += 10;
 	s.player.settings = {
 		autosac: false,
 		autoloot: true,
@@ -251,17 +251,22 @@ Character.prototype.rollStats = function(player, fn) {
 	classKey; // property of the class defines in classList
 
 	for (i; i < World.races.length; i += 1) {// looking for race
-		if (World.races[i].name.toLowerCase() === player.race) { // found race
+		if (World.races[i].name.toLowerCase() === player.race.toLowerCase()) { // found race
 			for (raceKey in player) {
-				if (player[raceKey] in World.races[i] && raceKey !== 'name') { // found, add in stat bonus
-						player[player[raceKey]] = player[player[raceKey]] + World.races[i][player[raceKey]];
+
+				if (raceKey in World.races[i] && raceKey !== 'name') { // found, add in stat bonus
+					if (isNaN(World.races[i][raceKey])) {
+						player[raceKey] = World.races[i][raceKey];
+					} else {
+						player[raceKey] += World.races[i][raceKey];
+					}
 				}
 			}
 		}
 	}
 
 	for (j; j < World.classes.length; j += 1) { // looking through classes
-		if (World.classes[j].name.toLowerCase() === player.charClass) { // class match found
+		if (World.classes[j].name.toLowerCase() === player.charClass.toLowerCase()) { // class match found
 			for (classKey in player) {
 				if (classKey in World.classes[j] && classKey !== 'name') {
 					if (!World.classes[j][classKey].length) {
@@ -291,8 +296,8 @@ Character.prototype.newCharacter = function(r, s, fn) {
 				str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
 
 				if	(races.length - 1 === i) {
-					s.emit('msg', {msg: s.player.name + ' is a new character! There are three more steps until ' + s.player.name + 
-					' is saved. The <strong>first step</strong> is to select your race: <ul>' + str + '</ul><p class="tip">You can learn more about each race by typing help race name</p>', res: 'selectRace', styleClass: 'race-selection'});		
+					s.emit('msg', {msg: s.player.name + ' is a new character! There are three steps until ' + s.player.name + 
+					' is saved. The <strong>first step</strong> is to select a race: <ul>' + str + '</ul><p class="tip">You can learn more about each race by typing help race name</p>', res: 'selectRace', styleClass: 'race-selection'});		
 
 					s.on('raceSelection', function (r) { 
 						var cmdArr = r.msg.split(' ');
