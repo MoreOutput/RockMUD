@@ -21,6 +21,21 @@ Cmd.prototype.fire = function(commandName, target, command, fn) {
 	return this[commandName](target, command, fn);
 };
 
+Cmd.prototype.scan = function(target, command) {
+	World.getRoomObject(target.area, target.roomid, function(roomObj) {
+		Room.getAdjacent(roomObj, function(rooms) {
+			var i = 0,
+			scanStr = '';
+
+			for (i; i < rooms.length; i += 1) {
+				scanStr += Room.getBrief(rooms[i]);
+			}
+
+			World.msgPlayer(target, {msg: scanStr});
+		});
+	});
+};
+
 Cmd.prototype.emote = function(target, command) {
 	World.getRoomObject(target.area, target.roomid, function(roomObj) {
 		World.msgRoom(roomObj, {

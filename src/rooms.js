@@ -137,15 +137,43 @@ Room.prototype.checkExit = function(roomObj, direction, fn) {
 	}
 };
 
+// Get an exit by direction; empty direction results in an array of all exit objects
+Room.prototype.getExit = function(roomObj, direction, fn) { 
+	var i = 0;
+
+	if (roomObj.exits.length > 0) {
+		for (i; i < roomObj.exits.length; i += 1) {
+			if (direction === roomObj.exits[i].cmd) {
+				return fn(roomObj.exits[i]);
+			} else if (roomObj.exits[i].door && roomObj.exits[i].door.name === direction) {
+				return fn(roomObj.exits[i]);
+			}
+		}
+		return fn(null);
+	} else {
+		return fn(null);
+	}
+};
+
 // return all the rooms connected to this one, default depth of two
 /*
 	{
 		direction.roomObj.direction.roomObj <- how depth will work
 	}
 */
-Room.prototype.getAdjacent = function(roomObj, depth, r, fn) {
-	var i = 0;
+Room.prototype.getAdjacent = function(roomObj, fn) {
+	var i = 0,
+	roomArr = [];
 
+	for (i; i < roomObj.exits.length; i += 1) {
+		if (!roomObj.exits[i].door || roomObj.exits[i].door.isOpen) {
+			World.getRoomObject(roomObj.area, roomObj.exits[i].id, function(fndRoom) {
+				roomArr.push(fndRoom);
+			});
+		}
+	}
+
+	return fn(roomArr);
 };
 
 Room.prototype.getDisplay = function(areaName, roomId, fn) {
@@ -159,6 +187,54 @@ Room.prototype.getDisplay = function(areaName, roomId, fn) {
 			});
 		});
 	});
+};
+
+// Return a brief overview of a room
+Room.prototype.getBrief = function(roomObj, options, fn) {
+	var room = this,
+	i = 0,
+	displayHTML = '',
+	playersInRoom = roomObj.playersInRoom,
+	monsters = roomObj.monsters;
+
+	if (monsters.length > 0 || playersInRoom.length > 0) {
+		displayHTML += '<ul class="room-here list-inline">';
+		
+		for (i; i < monsters.length; i += 1) {
+			if (!monsters[i].short) {
+				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' + 
+				 monsters[i].position + ' there/li>';
+			} else {
+				displayHTML += '<li class="room-monster">' + monsters[i].short + ' is ' + 
+				 monsters[i].position + ' there</li>';
+			}
+		}
+
+		i = 0;
+
+		for (i; i < playersInRoom.length; i += 1) {
+			if (!options || !options.hideCallingPlayer || options.hideCallingPlayer !== playersInRoom[i].name ) {
+				displayHTML += '<li class="room-player">' + playersInRoom[i].name 
+					+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' there</li>';
+			}
+		}
+
+		displayHTML += '</ul>';
+	} else {
+		displayHTML += '<p>Nothing you can see.</p>';
+	}
+
+	displayHTML = '<div class="room"><strong class="room-title">' + roomObj.title + '</strong>' + displayHTML;
+
+	if (roomObj.brief) {
+		displayHTML += '<p class="room-content">' + roomObj.brief + '</p>';
+	}
+
+	if (typeof fn === 'function') {
+		return fn(displayHTML, roomObj);
+	} else {
+		return displayHTML;
+	}
 };
 
 Room.prototype.removeItem = function(roomObj, item, fn) {
