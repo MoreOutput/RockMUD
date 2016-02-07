@@ -429,7 +429,7 @@ World.prototype.loadArea = function(areaName, fn) {
 		if (fnd) {
 			return fn(area, true);
 		} else {
-			area = require('../areas/' + areaName);
+			area = require('../areas/' + areaName.toLowerCase());
 
 			world.setupArea(area, function(area) {
 				world.areas.push(area);
@@ -464,15 +464,24 @@ World.prototype.setupArea = function(area, fn) {
 
 World.prototype.reloadArea = function(area, fn) {
 	var world = this,
+	newArea,
 	i = 0;
 
-	require.cache[require.resolve('../areas/' + area.name)] = null;
+	newArea = require('../areas/' + area.name.toLowerCase());
 
-	area = require('../areas/' + area.name);
+	world.setupArea(newArea, function(newArea) {
+		var i = 0;
 
-	world.setupArea(area, function(area) {
+		for (i; i < area.rooms.length; i +=1) {
+			if (area.rooms[i].playersInRoom) {
+				newArea.rooms[i].playersInRoom = area.rooms[i].playersInRoom;
+			}
+		}
+		
+		require.cache[require.resolve('../areas/' + area.name.toLowerCase())] = null;
+
 		if (typeof fn === 'function') {
-			return fn(area);
+			return fn(newArea);
 		}
 	});
 };

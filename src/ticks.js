@@ -74,25 +74,57 @@ World = require('./world').world;
 		}
 	}, 1900);
 
-	// Areas refresh when they are devoid of players for at least four minutes
-	// if the area is not empty the respawnTick property on the area object increments by one
+	// If the area is not empty the respawnTick property on the area object increments by one
 	// areas with players 'in' them respawn every X ticks; where X is the value of
 	// area.respawnOn (default is 3 -- 12 minutes). A respawnOn value of zero prevents respawn.
 	// areas do not update if someone is fighting
 	setInterval(function() {
-		var i = 0;
+		var i = 0,
+		j = 0,
+		k = 0,
+		refresh = true;
+		
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
 				(function(area, index) {
-					World.reloadArea(area, function(area) {
-						World.areas[index] = area;
-					});
+					if (area.respawnOn > 0) {
+						area.respawnTick += 1;
+					}
+
+					for (j; j < area.rooms.length; j += 1) {
+						(function(room, index, roomIndex) {
+							if (room.playersInRoom) {
+								for (k; k < room.playersInRoom.length; k += 1) {
+									if (room.playersInRoom[k].position === 'fighting') {
+										refresh = false;
+										area.respawnTick -= 1;
+									}
+								}
+
+								// if players were in the area roll a check to delay respawn
+								World.dice.roll(1, 20, function(roll) {
+									if (roll > 18) {
+										area.respawnTick -= 1;
+									}
+								});
+							}
+
+							if (World.areas.length - 1 === index 
+								&& roomIndex === area.rooms.length - 1) {
+								if ((area.respawnTick === area.respawnOn && area.respawnOn > 0 && refresh)) {
+									World.reloadArea(area, function(area) {
+										area.respawnTick = 0;
+
+										World.areas[index] = area;
+									});
+								}
+							}
+						}(area.rooms[j], index, j));
+					}
 				}(World.areas[i], i))
 			}
 		}
-
-	//}, 240000); // 4 minutes
-	}, 5000);
+	}, 240000); // 4 minutes
 
 	// decay timer, anything at zero rots away
 	setInterval(function() {
