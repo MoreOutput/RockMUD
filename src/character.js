@@ -1,4 +1,3 @@
-
 /*
 * Characters.js controls everything dealing with a 'Character' which includes in game creatures.
 * No in game commands are defiend here; Commands.js does share some function names with this module, 

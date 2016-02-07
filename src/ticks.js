@@ -75,12 +75,26 @@ World = require('./world').world;
 	}, 1900);
 
 	// Areas refresh when they are devoid of players for at least four minutes
+	// if the area is not empty the respawnTick property on the area object increments by one
+	// areas with players 'in' them respawn every X ticks; where X is the value of
+	// area.respawnOn (default is 3 -- 12 minutes). A respawnOn value of zero prevents respawn.
+	// areas do not update if someone is fighting
 	setInterval(function() {
 		var i = 0;
+		if (World.areas.length) {
+			for (i; i < World.areas.length; i += 1) {
+				(function(area, index) {
+					World.reloadArea(area, function(area) {
+						World.areas[index] = area;
+					});
+				}(World.areas[i], i))
+			}
+		}
 
-	}, 240000); // 4 minutes
+	//}, 240000); // 4 minutes
+	}, 5000);
 
-	// non player corpses are removed every 8 minutes
+	// decay timer, anything at zero rots away
 	setInterval(function() {
 		var i = 0;
 

@@ -15,5 +15,7 @@
     "messages": [],
     "rooms" : [],
     "behaviors": [],
-    "checksWithoutPlayers": 0
+    "checksWithoutPlayers": 0,
+    "respawnOn": 3,
+    "respawnTick": 0
 }

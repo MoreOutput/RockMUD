@@ -17,6 +17,8 @@ module.exports = {
 		{"msg": "A cool breeze blows through the streets of Midgaard."},
 		{"msg": "The bustle of the city can be distracting. Keep an eye out for thieves."}
 	],
+	"respawnOn": 3,
+	"respawnTick": 0,
 	"rooms" : [
 		{
 			"id" : 1,

@@ -421,30 +421,58 @@ World.prototype.rollMobs = function(mobArr, roomid, fn) {
 };
 
 World.prototype.loadArea = function(areaName, fn) {
-	var world = this;
+	var world = this,
+	i = 0,
+	area;
 
 	world.checkArea(areaName, function(fnd, area) {
 		if (fnd) {
 			return fn(area, true);
 		} else {
-			var area = require('../areas/midgaard'),
-			i = 0,
-			room,
-			mob,
-			item;
+			area = require('../areas/' + areaName);
 
-			for (i; i < area.rooms.length; i += 1) {
-				(function(room) {
-					world.rollMobs(room.monsters, room.id, function(mobs) {
-						world.rollItems(room.items, room.id, function(items) {
-							if (i === area.rooms.length) {
-								world.areas.push(area);
-								return fn(area, false);
-							}
-						});
-					});
-				}(area.rooms[i]));
-			}
+			world.setupArea(area, function(area) {
+				world.areas.push(area);
+
+				return fn(area);
+			});
+		}
+	});
+};
+
+World.prototype.setupArea = function(area, fn) {
+	var world = this,
+	i = 0,
+	room,
+	mob,
+	item;
+
+	for (i; i < area.rooms.length; i += 1) {
+		(function(room) {
+			world.rollMobs(room.monsters, room.id, function(mobs) {
+				world.rollItems(room.items, room.id, function(items) {
+					if (i === area.rooms.length) {
+						if (typeof fn === 'function') {
+							return fn(area);
+						}
+					}
+				});
+			});
+		}(area.rooms[i]));
+	}
+}
+
+World.prototype.reloadArea = function(area, fn) {
+	var world = this,
+	i = 0;
+
+	require.cache[require.resolve('../areas/' + area.name)] = null;
+
+	area = require('../areas/' + area.name);
+
+	world.setupArea(area, function(area) {
+		if (typeof fn === 'function') {
+			return fn(area);
 		}
 	});
 };

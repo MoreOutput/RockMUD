@@ -17,7 +17,7 @@ Notes on dependencies:
 * Development aims to keep up with latest node release.
 
 Some things Currently in 0.2.0:
-* No command whitelisting (add a command function, and it becomes a in-game command instantly). Because of this RockMUD does not rely on parsing commands on a tick.
+* No command whitelisting (add a command function, and it becomes a in-game command instantly). RockMUD does not rely on parsing commands on a tick.
 * Character creation (Races, Classes, Stats, Passwords) and saving as json files (/players).
 * Channels
 * Uniform way of scripting commands -- with permission checking
