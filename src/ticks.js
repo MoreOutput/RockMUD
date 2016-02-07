@@ -80,19 +80,42 @@ World = require('./world').world;
 	// area.respawnOn (default is 3 -- 12 minutes). A respawnOn value of zero prevents respawn.
 	// areas do not update if someone is fighting
 	setInterval(function() {
-		var i = 0;
+		var i = 0,
+		j = 0,
+		k = 0,
+		canRefresh = true;
+		
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
 				(function(area, index) {
-					World.reloadArea(area, function(area) {
-						World.areas[index] = area;
-					});
+					for (j; j < area.rooms.length; j += 1) {
+						(function(room, index, roomIndex) {
+							if (room.playersInRoom) {
+								if (area.respawnOn > 0) {
+									area.respawnTick += 1;
+								}
+
+//								if (area)
+
+								for (k; k < room.playersInRoom.length; k += 1) {
+									if (room.playersInRoom[k].position === 'fighting') {
+										canRefresh = false;
+									}
+								}
+							}
+
+							if (World.areas.length - 1 === index 
+								&& roomIndex === area.rooms.length - 1) {
+								World.reloadArea(area, function(area) {
+									World.areas[index] = area;
+								});
+							}
+						}(area.rooms[j], index, j));
+					}
 				}(World.areas[i], i))
 			}
 		}
-
-	//}, 240000); // 4 minutes
-	}, 5000);
+	}, 240000); // 4 minutes
 
 	// decay timer, anything at zero rots away
 	setInterval(function() {
