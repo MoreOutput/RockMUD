@@ -86,12 +86,8 @@ module.exports = {
 						"slot": "",
 						"value": 1000,
 						"equipped": false,
-						"flags": [{
-							"key": true, 
-							"id": 4, 
-							"area": "Midgaard",
-							"short": "golden key"
-						}]
+						"isKey": true,
+						"flags": []
 					}],
 					"behaviors": [{
 						"module" : "mayor"
@@ -223,7 +219,21 @@ module.exports = {
 			],
 			"playersInRoom": [],
 			"monsters" : [],
-			"items" : [],
+			"items" : [{
+				"name": "Sewer key", 
+				"short": "small rusty key",
+				"long": "A small rusty key made of low quality iron." ,
+				"area": "Midgaard",
+				"id": 101,
+				"level": 1,
+				"itemType": "key",
+				"material": "iron", 
+				"weight": 0,
+				"slot": "",
+				"value": 1,
+				"equipped": false,
+				"isKey": true
+			}],
 			"flags" : []
 		},
 		{
