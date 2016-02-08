@@ -682,6 +682,44 @@ Character.prototype.getLights = function(player, fn) {
 	}
 };
 
+// All keys in the characters inventory
+Character.prototype.getKeys = function(player, fn) {
+	var i = 0,
+	lights = [];
+
+	for (i; i < player.eq.length; i += 1) {
+		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
+			&& player.eq[i].item.itemType === 'light' && player.eq[i].item.decay >= 1) {
+			lights.push(player.eq[i]);
+		}
+	}
+
+	if (typeof fn === 'function') {
+		return fn(lights);
+	} else {
+		return lights;
+	}
+};
+
+// if a character has a specific key
+Character.prototype.hasKey = function(player, fn) {
+	var i = 0,
+	lights = [];
+
+	for (i; i < player.eq.length; i += 1) {
+		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
+			&& player.eq[i].item.itemType === 'light' && player.eq[i].item.decay >= 1) {
+			lights.push(player.eq[i]);
+		}
+	}
+
+	if (typeof fn === 'function') {
+		return fn(lights);
+	} else {
+		return lights;
+	}
+};
+
 Character.prototype.getStatsFromItems = function(items, fn) {
 	var character = this,
 	itemMods = {};

@@ -326,7 +326,7 @@ module.exports = {
 		},
 		{
 			"id" : 8,
-			"title" : "West of Town Square2",
+			"title" : "Heading to the western gate",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [

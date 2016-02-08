@@ -276,38 +276,31 @@ Cmd.prototype.unlock = function(target, command, fn) {
 	if (target.position === 'standing' 
 		|| target.position === 'resting' 
 		|| target.position === 'fighting') {
+		// get current room
+		// get target exit
+		// if exit is locked
+		// check player inventory for key
+		// if key matches
+		// unlock
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.checkExit(roomObj, command.arg, function(exitObj) {
-				if (exitObj && exitObj.door && exitObj.door.isOpen === true) {
+				if (exitObj && exitObj.door && exitObj.door.isOpen === false && exitObj.door.isLocked === true) {
 					World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
-						Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
-							if (clearToMove) {
-								exitObj.door.isOpen = false;
-								targetExit.door.isOpen = false;
-
-								World.msgPlayer(target, {msg: 'You close a ' + exitObj.door.name + ' ' + exitObj.cmd + ' from here.', styleClass: 'cmd-wake'});
-
-								World.msgRoom(roomObj, {
-									msg: target.displayName + ' closes a ' + exitObj.door.name + '.',
-									playerName: target.name,
-									styleClass: 'cmd-sleep'
-								});
-
-								World.msgRoom(targetRoom, {
-									msg: 'A ' + exitObj.door.name + ' closes to the ' + targetExit.cmd +'.',
-									playerName: target.name,
-									styleClass: 'cmd-sleep'
-								});
+						Character.searchForKey(x, y, function(key) {
+							if (key) {
+								exitObj.door.isLocked = false;
 							} else {
-								World.msgPlayer(target, {msg: 'Nothing you can close in that direction.'});
+								World.msgPlayer(target, {msg: 'You don\'t seem to have the key.', styleClass: 'error'});
 							}
 						});
 					});
+				} else {
+					World.msgPlayer(target, {msg: 'That doesn\'t require unlocking.', styleClass: 'error'});
 				}
 			});
 		});
 	} else {
-		World.msgPlayer(target, {msg: 'You cannot close anything right now.'});
+		World.msgPlayer(target, {msg: 'You aren\'t in a position to unlock anything right now.'});
 	}
 };
 
@@ -734,7 +727,7 @@ Cmd.prototype.kill = function(player, command, attackObj, fn) {
 };
 
 Cmd.prototype.look = function(target, command) {
-	if (command.msg === '') { 
+	if (command.msg === '') {
 		// if no arguments are given we display the current room
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.getDisplayHTML(roomObj, {
