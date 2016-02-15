@@ -443,6 +443,10 @@ Character.prototype.hpRegen = function(target, fn) {
 			conMod -= 1;
 		}
 
+		if (!conMod) {
+			conMod = 1;
+		}
+
 		World.dice.roll(conMod, 4, function(total) {
 			total = total + target.level;
 
@@ -476,6 +480,10 @@ Character.prototype.manaRegen = function(target, fn) {
 
 		if (target.thirst >= 3 || target.hunger >= 3) {
 			intMod -= 1;
+		}
+
+		if (!intMod) {
+			conMod = World.dice.roll(1, 2) - 1;
 		}
 
 		World.dice.roll(intMod, 8, function(total) {
@@ -513,6 +521,10 @@ Character.prototype.mvRegen = function(target, fn) {
 
 		if (target.thirst >= 3 || target.hunger >= 3) {
 			dexMod -= 1;
+		}
+
+		if (!dexMod) {
+			dexMod = 1;
 		}
 
 		World.dice.roll(dexMod, 8, function(total) {
