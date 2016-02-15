@@ -702,21 +702,21 @@ Character.prototype.getKeys = function(player, fn) {
 };
 
 // if a character has a specific key
-Character.prototype.hasKey = function(player, fn) {
+// keyId is the id found on exitObj.door.id
+Character.prototype.hasKey = function(player, keyId, fn) {
 	var i = 0,
-	lights = [];
+	key;
 
-	for (i; i < player.eq.length; i += 1) {
-		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
-			&& player.eq[i].item.itemType === 'light' && player.eq[i].item.decay >= 1) {
-			lights.push(player.eq[i]);
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].isKey && player.items[i].id === keyId) {
+			key = player.items[i];
 		}
 	}
 
 	if (typeof fn === 'function') {
-		return fn(lights);
+		return fn(key);
 	} else {
-		return lights;
+		return key;
 	}
 };
 

@@ -44,7 +44,8 @@ module.exports = {
 					"id" : 6,
 					"door": {
 						"isOpen": false,
-						"isLocked": true,
+						"locked": true,
+						"key": 101,
 						"openMsg": "A foul smell flows in from below.",
 						"unlockMsg": "You hear something moving under the gate.",
 						"name": "gate"
@@ -298,10 +299,8 @@ module.exports = {
 					"door": {
 						"name": "gate",
 						"isOpen": false,
-						"isLocked": true,
-						"key": {
-							"id": 101
-						}
+						"locked": true,
+						"key": 101
 					}
 				}
 			],

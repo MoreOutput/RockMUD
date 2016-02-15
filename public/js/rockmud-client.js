@@ -42,7 +42,8 @@ window.onload = function() {
 		desc: 'description',
 		re: 'rest',
 		r: 'recall',
-		wake: 'stand'
+		wake: 'stand',
+		g: 'get'
 	},
 	isScrolledToBottom = false,
 	movement = ['north', 'east', 'south', 'west', 'down', 'up'],

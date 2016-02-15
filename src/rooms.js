@@ -24,14 +24,13 @@ Room.prototype.checkExitCriteria = function(targetRoom, exitObj, player, fn) {
 	}
 
 	if (targetExit) {
-		if (!exitObj.key) {
+		if (exitObj.door.locked === false) {
 			return fn(true, targetExit);
 		} else {
-			// door needs a key
-			return fn(false, false);
+			return fn(false, targetExit);
 		}
 	} else {
-		return fn(true, false);
+		return fn(false, false);
 	}
 };
 
