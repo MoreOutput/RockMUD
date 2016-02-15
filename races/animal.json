@@ -3,7 +3,7 @@
     "abbv": "ani",
     "playable": false,
     "attackType": "claw",
-    "size": 2,
+    "size": {"value": 2, "display": "small"},
     "diceNum": 1,
     "diceSides": 6
 }

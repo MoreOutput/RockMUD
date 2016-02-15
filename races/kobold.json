@@ -3,7 +3,7 @@
     "dex": 1,
     "playable": false,
     "attackType": "claw",
-    "size": 1,
+    "size": {"value": 1, "display": "tiny"},
     "racial" : ["darkvision"],
     "diceNum": 1,
     "diceSides": 4,

@@ -5,7 +5,7 @@
     "dex": -1,
     "hp": 20,
     "playable": true,
-    "size": 4,
+    "size": {"value": 4, "display": "large"},
     "damRoll": 2,
     "meleeRes": 1,
     "magicRes": -3,

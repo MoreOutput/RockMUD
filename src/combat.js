@@ -117,28 +117,26 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 										var blocked = false,
 										dodged = false;
 
-										damage = Math.round(damage + (attacker.damRoll/2) + (attacker.level/3) + attackerMods.str + attacker.str/3);
+										damage = damage + (attacker.damRoll/2) + (attacker.level/3) + attackerMods.str + attacker.str/3;
 
 										if (attackerMods.str >= opponentMods.con) {
-											damage += attackerMods.str;
+											damage += attackerMods.str/2;
 										}
 
 										if (attackerMods.str > 2) {
 											damage += attackerMods.str;
 										}
 
-										if (weapon.modifiers.numOfAttacks) {
-											numOfAttacks += weapon.modifiers.numOfAttacks;
-										}
-
 										if (attacker.damRoll > opponent.meleeRes) {
 											damage += attackerMods.str;
+										} else if (attacker.damRoll > opponent.meleeRes) {
+											damage -= opponent.meleeRes/2
 										}
 
-										damage -= Math.round(opponent.ac/3);
+										damage -= opponent.ac/3;
 
 										if (numOfAttacks > 3 && j > 3) {
-											damage = Math.round( damage / 2 );
+											damage =damage / 2;
 										}
 
 										if (attackerRoll === 20) {
@@ -147,6 +145,8 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 
 										if (damage < 0) {
 											damage = 0;
+										} else {
+											damage = Math.round(damage);
 										}
 
 										combat.getDamageAdjective(damage, function(adjective) {
@@ -160,7 +160,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 											}
 
 											if (opponent.isPlayer) {
-												msgForOpponent +=  '<div>A ' + attacker.displayName + 's ' + weapon.attackType 
+												msgForOpponent +=  '<div>' + attacker.displayName + 's ' + weapon.attackType 
 													+ ' hits you with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' + damage + ')</span></div>';
 											}
 										});

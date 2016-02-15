@@ -50,7 +50,7 @@
     "following": "",
     "short": "",
     "trains": 0,
-    "size": 3,
+    "size": {"value": 3, "display": "medium"},
     "killed": 0,
     "eq": [{
         "name": "Head",

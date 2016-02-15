@@ -109,6 +109,7 @@ module.exports = {
 					"hp": 90,
 					"chp": 90,
 					"gold": 1,
+					"size": {"value": 2, "display": "small"},
 					"itemType": "mob",
 					"spawn": "2",
 					"behaviors": [{  
@@ -316,6 +317,7 @@ module.exports = {
 				"hp": 120,
 				"chp": 120,
 				"gold": 3,
+				"size": {"value": 3, "display": "medium"},
 				"behaviors": [{
 					"module": "aggie"
 				}]
