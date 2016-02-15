@@ -21,6 +21,7 @@
     "durability": 100,
     "maxDurability": 100,
     "condition": "excellent",
+    "isKey": false,
     "equipped": false,
     "value": 0,
     "behaviors": [],

@@ -372,13 +372,13 @@ World.prototype.rollMobs = function(mobArr, roomid, fn) {
 								}
 								
 								mob.chp = mob.hp;
-								
+
 								if (!mob.mana) {
 									mob.mana = 50 * 8 +  mob.int;
 								} else {
 									mob.mana += (mob.level + world.dice.roll(1, mob.int));
 								}
-								
+
 								mob.cmana = mob.mana;
 
 								if (!mob.mv) {

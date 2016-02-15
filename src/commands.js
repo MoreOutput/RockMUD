@@ -166,7 +166,10 @@ Cmd.prototype.stand = function(target, command) {
 	if (target.position === 'sleeping' || target.position === 'resting') {
 		target.position = 'standing';
 
-		World.msgPlayer(target, {msg: 'You wake and stand up.', styleClass: 'cmd-wake'});
+		World.msgPlayer(target, {
+			msg: 'You wake and stand up.',
+			styleClass: 'cmd-wake'
+		});
 
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			World.msgRoom(roomObj, {
@@ -201,7 +204,6 @@ Cmd.prototype.open = function(target, command, fn) {
 									styleClass: 'cmd-sleep'
 								});
 
-
 								if (exitObj.door.openMsg) {
 									World.msgPlayer(target, {msg: exitObj.door.openMsg, styleClass: 'yellow'});
 								}
@@ -212,7 +214,7 @@ Cmd.prototype.open = function(target, command, fn) {
 									styleClass: 'cmd-sleep'
 								});
 							} else {
-
+								World.msgPlayer(target, {msg: 'It can\'t be opened right now.'});
 							}
 						});
 					});
@@ -239,8 +241,10 @@ Cmd.prototype.close = function(target, command, fn) {
 								exitObj.door.isOpen = false;
 								targetExit.door.isOpen = false;
 
-								World.msgPlayer(target, {msg: 'You close a ' + exitObj.door.name + ' ' + exitObj.cmd + ' from here.', styleClass: 'cmd-wake'});
-
+								World.msgPlayer(target, {
+									msg: 'You close a ' + exitObj.door.name + ' ' + exitObj.cmd + ' from here.',
+									styleClass: 'cmd-wake'
+								});
 
 								if (exitObj.closeMsg) {
 									World.msgPlayer(target, exitObj.closeMsg);
@@ -273,41 +277,72 @@ Cmd.prototype.close = function(target, command, fn) {
 };
 
 Cmd.prototype.unlock = function(target, command, fn) {
-	if (target.position === 'standing' 
-		|| target.position === 'resting' 
-		|| target.position === 'fighting') {
-		World.getRoomObject(target.area, target.roomid, function(roomObj) {
-			Room.checkExit(roomObj, command.arg, function(exitObj) {
-				if (exitObj && exitObj.door && exitObj.door.isOpen === true) {
-					World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
-						Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
-							if (clearToMove) {
-								exitObj.door.isOpen = false;
-								targetExit.door.isOpen = false;
-
-								World.msgPlayer(target, {msg: 'You close a ' + exitObj.door.name + ' ' + exitObj.cmd + ' from here.', styleClass: 'cmd-wake'});
-
-								World.msgRoom(roomObj, {
-									msg: target.displayName + ' closes a ' + exitObj.door.name + '.',
-									playerName: target.name,
-									styleClass: 'cmd-sleep'
+	if (command.msg) {
+		if (target.position === 'standing' 
+			|| target.position === 'resting' 
+			|| target.position === 'fighting') {
+			World.getRoomObject(target.area, target.roomid, function(roomObj) {
+				Room.checkExit(roomObj, command.arg, function(exitObj) {
+					if (exitObj && exitObj.door && exitObj.door.locked === true) {
+						World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
+							Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
+								Character.hasKey(target, targetExit.door.key, function(key) {
+									if (key) {
+										exitObj.door.locked = false;
+										World.msgPlayer(target, {msg: 'You unlock the ' + exitObj.door.name + ' with a ' + key.short, styleClass: 'error'});
+									} else {
+										World.msgPlayer(target, {msg: 'You don\'t seem to have the key.', styleClass: 'error'});
+									}
 								});
-
-								World.msgRoom(targetRoom, {
-									msg: 'A ' + exitObj.door.name + ' closes to the ' + targetExit.cmd +'.',
-									playerName: target.name,
-									styleClass: 'cmd-sleep'
-								});
-							} else {
-								World.msgPlayer(target, {msg: 'Nothing you can close in that direction.'});
-							}
+							});
 						});
-					});
-				}
+					} else {
+						World.msgPlayer(target, {msg: 'That doesn\'t require unlocking.', styleClass: 'error'});
+					}
+				});
 			});
-		});
+		} else {
+			World.msgPlayer(target, {msg: 'You aren\'t in a position to unlock anything right now.'});
+		}
 	} else {
-		World.msgPlayer(target, {msg: 'You cannot close anything right now.'});
+		World.msgPlayer(target, {msg: 'You try to unlock nothing and look like an idiot.'});
+	}
+};
+
+Cmd.prototype.lock = function(target, command, fn) {
+	if (command.msg) {
+		if (target.position === 'standing' 
+			|| target.position === 'resting' 
+			|| target.position === 'fighting') {
+			World.getRoomObject(target.area, target.roomid, function(roomObj) {
+				Room.checkExit(roomObj, command.arg, function(exitObj) {
+					if (exitObj && exitObj.door && exitObj.door.locked === false) {
+						World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
+							Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
+								Character.hasKey(target, targetExit.door.key, function(key) {
+									if (key) {
+										if (exitObj.door.isOpen === true) {
+											exitObj.door.isOpen = false;
+										}
+
+										exitObj.door.locked = true;
+										World.msgPlayer(target, {msg: 'You lock the ' + exitObj.door.name + ' with a ' + key.short, styleClass: 'error'});
+									} else {
+										World.msgPlayer(target, {msg: 'You don\'t seem to have the key.', styleClass: 'error'});
+									}
+								});
+							});
+						});
+					} else {
+						World.msgPlayer(target, {msg: 'You cant lock that.', styleClass: 'error'});
+					}
+				});
+			});
+		} else {
+			World.msgPlayer(target, {msg: 'You aren\'t in a position to lock anything right now.'});
+		}
+	} else {
+		World.msgPlayer(target, {msg: 'Lock what?'});
 	}
 };
 
@@ -316,17 +351,15 @@ Cmd.prototype.move = function(target, command, fn) {
 	var direction = command.arg,
 	dexMod = World.dice.getDexMod(target);
 
-	if (target.position === 'standing' || target.position 
-		=== 'fleeing' && target.cmv > (4 - dexMod) && target.wait === 0) {
+	if (target.position === 'standing' 
+		|| target.position === 'fleeing' 
+		&& target.cmv > (4 - dexMod) 
+		&& target.wait === 0) {
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.checkExit(roomObj, direction, function(exitObj) {
 				if (exitObj) {
-					// REMOVE WHEN ROLLING AREAS
-					if (!exitObj.area) {
-						exitObj.area = roomObj.area;
-					}
 					if (!exitObj || !exitObj.door || exitObj.door.isOpen === true ) {
-						Room.getDisplay(exitObj.area, exitObj.id, function(displayHTML, targetRoom) {
+						Room.getDisplay(target.area, exitObj.id, function(displayHTML, targetRoom) {
 							Room.checkExitCriteria(roomObj, exitObj, target, function(clearToMove) {
 								Room.checkEntranceCriteria(targetRoom, exitObj, target, function(clearToMove) {
 									if (clearToMove) {
@@ -359,7 +392,7 @@ Cmd.prototype.move = function(target, command, fn) {
 											}
 
 											World.msgRoom(targetRoom, {
-												msg:'<strong>' + target.displayName + '</strong> enters the room from the ' + exitObj.cmd,
+												msg: '<strong>' + target.displayName + '</strong> enters the room from the ' + exitObj.cmd,
 												playerName: target.name
 											});
 
@@ -734,7 +767,7 @@ Cmd.prototype.kill = function(player, command, attackObj, fn) {
 };
 
 Cmd.prototype.look = function(target, command) {
-	if (command.msg === '') { 
+	if (command.msg === '') {
 		// if no arguments are given we display the current room
 		World.getRoomObject(target.area, target.roomid, function(roomObj) {
 			Room.getDisplayHTML(roomObj, {

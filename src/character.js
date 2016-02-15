@@ -682,6 +682,44 @@ Character.prototype.getLights = function(player, fn) {
 	}
 };
 
+// All keys in the characters inventory
+Character.prototype.getKeys = function(player, fn) {
+	var i = 0,
+	lights = [];
+
+	for (i; i < player.eq.length; i += 1) {
+		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
+			&& player.eq[i].item.itemType === 'light' && player.eq[i].item.decay >= 1) {
+			lights.push(player.eq[i]);
+		}
+	}
+
+	if (typeof fn === 'function') {
+		return fn(lights);
+	} else {
+		return lights;
+	}
+};
+
+// if a character has a specific key
+// keyId is the id found on exitObj.door.id
+Character.prototype.hasKey = function(player, keyId, fn) {
+	var i = 0,
+	key;
+
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].isKey && player.items[i].id === keyId) {
+			key = player.items[i];
+		}
+	}
+
+	if (typeof fn === 'function') {
+		return fn(key);
+	} else {
+		return key;
+	}
+};
+
 Character.prototype.getStatsFromItems = function(items, fn) {
 	var character = this,
 	itemMods = {};

@@ -44,7 +44,8 @@ module.exports = {
 					"id" : 6,
 					"door": {
 						"isOpen": false,
-						"isLocked": true,
+						"locked": true,
+						"key": 101,
 						"openMsg": "A foul smell flows in from below.",
 						"unlockMsg": "You hear something moving under the gate.",
 						"name": "gate"
@@ -86,12 +87,8 @@ module.exports = {
 						"slot": "",
 						"value": 1000,
 						"equipped": false,
-						"flags": [{
-							"key": true, 
-							"id": 4, 
-							"area": "Midgaard",
-							"short": "golden key"
-						}]
+						"isKey": true,
+						"flags": []
 					}],
 					"behaviors": [{
 						"module" : "mayor"
@@ -223,7 +220,21 @@ module.exports = {
 			],
 			"playersInRoom": [],
 			"monsters" : [],
-			"items" : [],
+			"items" : [{
+				"name": "Sewer key", 
+				"short": "small rusty key",
+				"long": "A small rusty key made of low quality iron." ,
+				"area": "Midgaard",
+				"id": 101,
+				"level": 1,
+				"itemType": "key",
+				"material": "iron", 
+				"weight": 0,
+				"slot": "",
+				"value": 1,
+				"equipped": false,
+				"isKey": true
+			}],
 			"flags" : []
 		},
 		{
@@ -288,10 +299,8 @@ module.exports = {
 					"door": {
 						"name": "gate",
 						"isOpen": false,
-						"isLocked": true,
-						"key": {
-							"id": 101
-						}
+						"locked": true,
+						"key": 101
 					}
 				}
 			],
@@ -316,7 +325,7 @@ module.exports = {
 		},
 		{
 			"id" : 8,
-			"title" : "West of Town Square2",
+			"title" : "Heading to the western gate",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
