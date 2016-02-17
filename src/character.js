@@ -183,7 +183,7 @@ Character.prototype.create = function(r, s, fn) {
 	s.player.settings = {
 		autosac: false,
 		autoloot: true,
-		autodrink: {enabled: true, itemId: ''},
+		autocoin: true,
 		wimpy: {enabled: false, hp: 0},
 		channels: {
 			blocked: ['flame']
