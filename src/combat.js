@@ -190,7 +190,6 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							});
 						}
 						*/
-						
 						return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent);
 					});
 				});
@@ -227,15 +226,14 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 	});
 
 	World.msgPlayer(opponent, {
-		msg: 'A ' + player.displayName +' screams and charges at you!',
+		msg: 'A ' + player.displayName + ' screams and charges at you!',
 		noPrompt: true
 	});
-
+	
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
 		Character.getStatusReport(opponent, function(opponent, oppStatus) {
 			Character.getStatusReport(player, function(player, playerStatus) {
 				var combatInterval;
-
 				player.wait += 1;
 
 				if (player.isPlayer) {

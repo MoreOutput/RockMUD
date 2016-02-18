@@ -353,19 +353,19 @@ World.prototype.rollMobs = function(mobArr, roomid, fn) {
 								var i = 0,
 								ai; // ai module
 
-								mob.str += world.dice.roll(4, 6) - (mob.size * 3) + 2;
-								mob.dex += world.dice.roll(4, 6) - (mob.size * 3) + 2;
-								mob.int += world.dice.roll(4, 6) - (mob.size * 3) + 2;
-								mob.wis += world.dice.roll(4, 6) - (mob.size * 3) + 2;
-								mob.con += world.dice.roll(4, 6) - (mob.size * 3) + 2;
+								mob.str += world.dice.roll(4, 6) - (mob.size.value * 3) + 2;
+								mob.dex += world.dice.roll(4, 6) - (mob.size.value * 3) + 2;
+								mob.int += world.dice.roll(4, 6) - (mob.size.value * 3) + 2;
+								mob.wis += world.dice.roll(4, 6) - (mob.size.value * 3) + 2;
+								mob.con += world.dice.roll(4, 6) - (mob.size.value * 3) + 2;
 								mob.isPlayer = false;
 								mob.roomid = roomid;
 
 								if (!mob.hp) {
 									if (mob.level > 5) {
-										mob.hp = (40 * (mob.level + 1));
+										mob.hp = (15 * (mob.level + 1));
 									} else {
-										mob.hp = (50 * (mob.level + 1));
+										mob.hp = (30 * (mob.level + 1));
 									}
 								} else {
 									mob.hp += (mob.level + world.dice.roll(1, mob.con/4));
