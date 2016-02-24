@@ -172,6 +172,19 @@ module.exports = {
 				"slot": "hands",
 				"equipped": false,
 				"flags": []
+			}, {
+				"name": "Burlap sack",
+				"short": "worn tan burlap sack",
+				"long": "A tan burlap sack with frizzed edges and various stains." ,
+				"area": "Midgaard",
+				"id": 27,
+				"level": 1,
+				"itemType": "container",
+				"weight": 1,
+				"items": [],
+				"isOpen": true,
+				"carryLimit": 50,
+				"flags": []
 			}],
 			"flags" : [],
 			"onEnter": ""

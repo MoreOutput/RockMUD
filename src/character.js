@@ -483,7 +483,7 @@ Character.prototype.manaRegen = function(target, fn) {
 		}
 
 		if (!intMod) {
-			conMod = World.dice.roll(1, 2) - 1;
+			intMod = World.dice.roll(1, 2) - 1;
 		}
 
 		World.dice.roll(intMod, 8, function(total) {
