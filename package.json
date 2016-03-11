@@ -1,14 +1,29 @@
 {
   "name": "RockMUD",
   "subdomain": "moreoutput.rockmud",
-  "scripts": {
-    "start": "server.js"
-  },
   "dependencies": {
     "socket.io": ">= 1.0.0"
   },
-  "version": "0.1.5-60",
+  "version": "0.1.8",
   "engines": {
-    "node": "0.10.x"
-  }
+    "node": ">= 4.0.0"
+  },
+  "description": "JavaScript mud server with websockets",
+  "main": "server.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MoreOutput/RockMUD.git"
+  },
+  "keywords": [
+    "websockets",
+    "mud",
+    "game"
+  ],
+  "author": "MoreOutput",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MoreOutput/RockMUD/issues"
+  },
+  "homepage": "https://github.com/MoreOutput/RockMUD"
 }

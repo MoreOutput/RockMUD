@@ -1,0 +1,11 @@
+{
+    "name": "Human",
+    "con": 1,
+    "wis": 1,
+    "playable": true,
+    "trains": 5,
+    "attackType": "punch",
+    "diceNum": 1,
+    "diceSides": 8,
+    "diceMod": 1
+}

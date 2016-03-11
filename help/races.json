@@ -1,9 +1,0 @@
-{
-	"name" : "Races",
-	"related" : ["Elf", "Ogre", "Human", "Dwarf"],
-	"type" : "Command",
-	"levels" : "All",
-	"restrict": 0,
-	"description" : "There are four default RockMUD races each with their own benefits. Read the help files on them to learn more. SEE: Human, Ogre, Elf, Dwarf",
-	"Alias" : ""
-}

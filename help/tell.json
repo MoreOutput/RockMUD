@@ -1,9 +1,0 @@
-{
-	"name" : "Tell",
-	"related" : ["Channels", "Say", "Yell", "Flame", "Tell"],
-	"type" : "Command",
-	"levels" : "All",
-	"restrict": 0,
-	"description" : "Send a message to a specific logged in player. See HELP CHANNELS for a comprehensive overview of communication commands.",
-	"Alias" : ""
-}

@@ -1,0 +1,12 @@
+{
+    "name": "Dwarf",
+    "con": 2,
+    "int": -1,
+    "hp": 10,
+    "ac": 1,
+    "playable": true,
+    "attackType": "punch",
+    "racial" : ["darkvision"],
+    "diceNum": 1,
+    "diceSides": 10
+}

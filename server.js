@@ -1,140 +1,182 @@
-/*
- * RockMUD a NodeJS WebSockets Mud Engine
- * Rocky Bevins, 2014 (moreoutput@gmail.com)
-*/
-'use strict';
-
+ 'use strict';
 var http = require('http'),
 fs = require('fs'),
 cfg = require('./config').server.game,
 server = http.createServer(function (req, res) {
-	if (req.url === '/' || req.url === '/index.html') {
-		fs.readFile('./public/index.html', function (err, data) {
-        	if (err) {
+	if (req.url === '/' || req.url === '/index.html' || req.url === '/design.html') {
+		if (req.url === '/') {
+			req.url = '/index.html';
+		}
+
+		fs.readFile('./public' + req.url, function (err, data) {
+			if (err) {
 				throw err;
 			}
 
 			res.writeHead(200, {'Content-Type': 'text/html'});
-        	res.write(data);
+			res.write(data);
 			res.end();
 		});
 	} else if (req.url === '/styles.css') {
 		fs.readFile('./public/css/styles.css', function (err, data) {
 			if (err) {
 				throw err;
-            }
+			}
 
-          	res.writeHead(200, {'Content-Type': 'text/css'});
-           	res.write(data);
-           	res.end();
-        });
-    } else if (req.url === '/client.js') {
-		fs.readFile('./public/js/client.js', function (err, data) {
+			res.writeHead(200, {'Content-Type': 'text/css'});
+			res.write(data);
+			res.end();
+		});
+	} else if (req.url === '/rockmud-client.js') {
+		fs.readFile('./public/js/rockmud-client.js', function (err, data) {
 			if (err) {
 				throw err;
-            }
+			}
 
-            res.writeHead(200, {'Content-Type': 'text/javascript'});
-            res.write(data);
-            res.end();
-        });
+			res.writeHead(200, {'Content-Type': 'text/javascript'});
+			res.write(data);
+			res.end();
+		});
 	}
 }),
-io = require('socket.io')(server);
+World = require('./src/world').world,
+io = require('socket.io')(server, {
+	log: false,
+	transports: ['websocket']
+});
 
-// considering referencing these within their respective modules, ex: Character.players rather than players[]
-module.exports.io = io; 
-module.exports.players = [];
-module.exports.areas = [];
-module.exports.time = fs.readFile('./data/time.json');
+World.setup(io, cfg, function(Character, Cmds, Skills) {
+	server.listen(process.env.PORT || cfg.port);
 
-var Character = require('./src/character').character,
-Cmds = require('./src/commands').cmd,
-Skills = require('./src/skills').skill,
-Ticks = require('./src/ticks');
+	io.on('connection', function (s) {
+		s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 
-server.listen(cfg.port);
+		s.on('login', function (r) {
+			var parseCmd = function(r, s) {
+				var cmdArr = r.msg.split(' '),
+				cmdObj ={};
 
-io.on('connection', function (s) {
-	s.on('login', function (r) {	
-		var parseCmd = function(r, s) {
-			var cmdArr = r.msg.split(' ');	
-			r.cmd = cmdArr[0].toLowerCase();
-			r.msg = cmdArr.slice(1).join(' ');
-		
-			if (/[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
-				if (r.cmd !== '') {
-					if (r.cmd in Cmds) {
-						return Cmds[r.cmd](r, s);
-					} else if (r.cmd in Skills) {
-						return Skills[r.cmd](r, s);
+				if (cmdArr.length === 1) {
+					cmdArr[1] = '';
+				}
+
+				if (/[`~@#$%^&*()-+={}[]|<>]+$/g.test(r.msg) === false) {
+					cmdObj = {
+						cmd: cmdArr[0].toLowerCase(), // {cast} spark boar
+						msg: cmdArr.slice(1).join(' '), // cast {spark boar}
+						arg: cmdArr[1].toLowerCase(), // cast {spark} boar
+						input: cmdArr.slice(2).join(' '), // cast spark {boar ...}
+						number: 1 // argument target -- cast spark 2.boar
+					};
+
+					if (cmdObj.input && 	!isNaN(parseInt(cmdObj.input[0])) || (!cmdObj.input && !isNaN(parseInt(cmdObj.msg[0]))) ) {
+
+						if (!cmdObj.input) {
+							cmdObj.number = parseInt(cmdObj.msg[0]);
+							cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
+						} else {
+							cmdObj.number = parseInt(cmdObj.input[0]);
+							cmdObj.input = cmdObj.input.replace(/^[0-9][.]/, '');
+						}
+					}
+
+					if (cmdObj.msg === '' || cmdObj.msg.length >= 2 && s.player.wait === 0) {
+						if (cmdObj.cmd) {
+							if (cmdObj.cmd in Cmds) {
+								return Cmds[cmdObj.cmd](s.player, cmdObj);
+							} else if (cmdObj.cmd in Skills) {
+								return Skills[r.cmd](s.player, cmdObj);
+							} else {
+								World.msgPlayer(s, {msg: cmdObj.cmd + ' is not a valid command.', styleClass: 'error'});
+							}
+						} else {
+							return World.prompt(s);
+						}
 					} else {
-						s.emit('msg', {msg: 'Not a valid command.', styleClass: 'error'});
-						return Character.prompt(s);
+						if (s.player.wait > 0) {
+							World.msgPlayer(s, {msg: 'You cant do that just yet!', styleClass: 'error'});
+						} else {
+							World.msgPlayer(s, {msg: 'You have to be more specific with your command.', styleClass: 'error'});
+						}
 					}
 				} else {
-					return Character.prompt(s);
+					World.msgPlayer(s, {msg: 'Invalid characters in command!', styleClass: 'error'});
 				}
-			} else {
-				s.emit('msg', {msg: 'Invalid characters in command.'});
-				return Character.prompt(s);
-			}
-		};
+			};
 
-		if (r.msg !== '') { // not checking slashes
-			return Character.login(r, s, function (name, s, fnd) {
-				if (fnd) {
-					s.join('mud'); // mud is one of two socket.io rooms, 'creation' the other				
-					Character.load(name, s, function (s) {						
-						Character.getPassword(s, function(s) {	
-							s.on('cmd', function (r) { 
+			if (r.msg !== '') {
+				return Character.login(r, s, function (name, s, fnd) {
+					if (fnd) {
+						s.join('mud'); // mud is one of two rooms, 'creation' being the other
+						Character.load(name, s, function (s) {
+							Character.getPassword(s, function(s) {
+								s.on('cmd', function (r) {
+									parseCmd(r, s);
+								});
+							});
+						});
+					} else {
+						s.join('creation'); // creation is one of two rooms, 'mud' being the other
+						
+						s.player = World.mobTemplate;
+						s.player.name = name;
+						s.player.sid = s.id;
+						s.player.socket = s;
+
+						Character.newCharacter(r, s, function(s) {
+							s.on('cmd', function (r) {
 								parseCmd(r, s);
 							});
 						});
+					}
+				});
+			} else {
+				return s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
+			}
+		});
+
+		s.on('quit', function () {
+			if (s.player.position !== 'fighting') {
+				Character.save(s.player, function() {
+					World.msgPlayer(s, {
+						msg: 'Add a little to a little and there will be a big pile.',
+						emit: 'disconnect',
+						styleClass: 'logout-msg',
+						noPrompt: true
 					});
-				} else {
-					s.join('creation'); // Character creation is its own socket.io room, 'mud' the other
-					s.player = {name:name};					
-					
-					Character.newCharacter(r, s, function(s) {			
-						s.on('cmd', function (r) { 
-							parseCmd(r, s);
-						});
-					});
+
+					s.leave('mud');
+					s.disconnect();
+				});
+			} else {
+				World.msgPlayer(s, {
+					msg: 'You are fighting! Finish up before quitting',
+					emit: 'disconnect',
+					styleClass: 'logout-msg'
+				});
+			}
+		});
+
+		s.on('disconnect', function () {
+			var i = 0;
+			if (s.player !== undefined) {
+				for (i; i < World.players.length; i += 1) {	
+					if (World.players[i].name === s.player.name) {
+						World.players.splice(i, 1);
+					}
 				}
-			});
-		} else {
-			return s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
-		}
-    });
 
-	// Quitting
-	s.on('quit', function () {
-		Character.save(s, function() {		
-			s.emit('msg', {
-				msg: 'Add a little to a little and there will be a big pile.',
-				emit: 'disconnect',
-				styleClass: 'logout-msg'
-			});
+				World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
+					var j = 0;
 
-			s.leave('mud');
-			s.disconnect();
+					for (j; j < roomObj.playersInRoom.length; j += 1) {
+						if (roomObj.playersInRoom[j].name === s.player.name) {
+							roomObj.playersInRoom.splice(j, 1);
+						}
+					}
+				});
+			}
 		});
 	});
-
-	// DC
-    s.on('disconnect', function () {
-		var i = 0;
-		if (s.player !== undefined) {
-			for (i; i < module.exports.players.length; i += 1) {	
-				if (module.exports.players[i].name === s.player.name) {
-					module.exports.players.splice(i, 1);	
-				}
-			}
-		}
-	});
-
-	s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 });
 
-console.log(cfg.name + ' is ready to rock and roll on port ' + cfg.port);

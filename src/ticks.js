@@ -1,114 +1,223 @@
 'use strict';
-
 var fs = require('fs'),
 Character = require('./character').character,
-io = require('../server').io,
-players = require('../server').players,
-areas = require('../server').areas,
-time = require('../server').time,
-timeConfig = require('../config').server.gameTime;
+World = require('./world').world;
 
 (function() {
-	// Automated wait-state removal
-	setInterval(function() { 
-		var i = 0,
-		s;
-
-		if (players.length > 0) {	
-			for (i; i < players.length; i += 1) {
-				s = io.sockets.connected[players[i].sid];
-
-				if (s.player.position === 'sleeping' || 
-					s.player.position === 'resting' || 
-					s.player.position === 'standing') {	
-					
-					if (s.player.wait > 0) {
-						s.player.wait -= 1;
-					} else {
-						s.player.wait = 0;
-					}
-				}
-			}		
-		}	
-	}, 800);	
-
-	// Regen, Hunger and Thirst Tick 
-	setInterval(function() { 
-		var i = 0,
-		s; 
-
-		if (players.length > 0) {	
-			for (i; i < players.length; i += 1) {
-				s = io.sockets.connected[players[i].sid];		
-				Character.hunger(s, function() {
-					Character.thirst(s, function() {
-						Character.hpRegen(s, function(total) {
-							Character.updatePlayer(s, function() {
-								Character.prompt(s);
-							});
-						});
-					});
-				});					
-			}		
-		}	
-	}, 60000 * 3);	
-
-	// Saving characters Tick
+	// time, saved to time.json every 12 hours
 	setInterval(function() {
 		var i = 0,
-		s;
-		
-		if (players.length > 0) {
-			for (i; i < players.length; i += 1) {
-				s = io.sockets.connected[players[i].sid];
-				
-				if (s.position === 'sleeping' || 
-					s.position === 'resting' || 
-					s.position === 'standing') {			
-					Character.save(s);			
-				}							
+		areaMsg;
+
+		if (World.time.tick === 2) {
+			World.time.tick = 1;
+			World.time.minute += 1;
+		}
+
+		if (World.time.minute === 60) {
+			World.time.minute = 1;
+			World.time.hour += 1;
+		}
+
+		if (World.time.hour === 24) {
+			World.time.hour = 1;
+			World.time.day += 1;
+		}
+
+		if (World.time.hour === World.time.hourOfLight && World.time.minute === 1) {
+			// Morning
+			World.time.isDay = true;
+			areaMsg = 'The sun appears over the horizon.';
+		} else if (World.time.hour <= World.time.hoursOfNight && World.time.minute === 1) {
+			// nightfall
+			World.time.isDay = false;
+			areaMsg = 'The sun fades fully from view as night falls.';
+		}
+
+		if (World.areas.length && areaMsg) {
+			for (i; i < World.areas.length; i += 1) {
+				if (World.areas[i].messages.length) {
+					World.msgArea(World.areas[i].name, {
+						msg: areaMsg
+					});
+				}
 			}
 		}
-	}, 60000 * 12);
 
-	// Random alert to all logged in players
+		if (World.time.day === 30) {
+			World.time.day = 1;
+		}
+
+		World.time.tick += 1;
+	}, 500);
+
+	// wait-state removal
+	setInterval(function() {
+		var i = 0,
+		player;
+		
+		if (World.players.length > 0) {
+			for (i; i < World.players.length; i += 1) {
+				player = World.players[i];
+
+				if (player.position === 'sleeping' || 
+					player.position === 'resting' || 
+					player.position === 'standing') {
+					
+					if (player.wait > 0) {
+						player.wait -= 1;
+					} else {
+						player.wait = 0;
+					}
+				}
+			}
+		}
+	}, 1900);
+
+	// If the area is not empty the respawnTick property on the area object increments by one
+	// areas with players 'in' them respawn every X ticks; where X is the value of
+	// area.respawnOn (default is 3 -- 12 minutes). A respawnOn value of zero prevents respawn.
+	// areas do not update if someone is fighting
+	setInterval(function() {
+		var i = 0,
+		j = 0,
+		k = 0,
+		refresh = true;
+		
+		if (World.areas.length) {
+			for (i; i < World.areas.length; i += 1) {
+				(function(area, index) {
+					if (area.respawnOn > 0) {
+						area.respawnTick += 1;
+					}
+
+					for (j; j < area.rooms.length; j += 1) {
+						(function(room, index, roomIndex) {
+							if (room.playersInRoom) {
+								for (k; k < room.playersInRoom.length; k += 1) {
+									if (room.playersInRoom[k].position === 'fighting') {
+										refresh = false;
+										area.respawnTick -= 1;
+									}
+								}
+
+								// if players were in the area roll a check to delay respawn
+								World.dice.roll(1, 20, function(roll) {
+									if (roll > 18) {
+										area.respawnTick -= 1;
+									}
+								});
+							}
+
+							if (World.areas.length - 1 === index 
+								&& roomIndex === area.rooms.length - 1) {
+								if ((area.respawnTick === area.respawnOn && area.respawnOn > 0 && refresh)) {
+									World.reloadArea(area, function(area) {
+										area.respawnTick = 0;
+
+										World.areas[index] = area;
+									});
+								}
+							}
+						}(area.rooms[j], index, j));
+					}
+				}(World.areas[i], i))
+			}
+		}
+	}, 240000); // 4 minutes
+
+	// decay timer, anything at zero rots away
+	setInterval(function() {
+		var i = 0;
+
+	}, 480000); // 8 minutes
+	
+	// AI Ticks for monsters
+	setInterval(function() {
+		var i = 0;
+		if (World.areas.length) {
+			for (i; i < World.areas.length; i += 1) {
+				World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
+					monsters.forEach(function(monster, i) {
+						if (monster.chp >= 1 && monster.onAlive) {
+							monster.onAlive();
+						}
+					});
+				});
+			}
+		}
+	//}, 1000); // 25 seconds
+	}, 25000); // 30 seconds
+
+	// AI Ticks for areas 
+	setInterval(function() {
+		var i = 0,
+		s;
+
+	}, 3600000); // 1 hour
+
+	setInterval(function() {
+		var i = 0;
+		
+		if (World.areas.length) {
+			for (i; i < World.areas.length; i += 1) {
+				if (World.areas[i].messages.length) {
+					World.msgArea(World.areas[i].name, {
+						msg: World.areas[i].messages[World.dice.roll(1, World.areas[i].messages.length) - 1].msg,
+						randomPlayer: true // this options randomizes who hears the message
+					});
+				}
+			}
+		}
+	}, 720000); // 12 minutes
+
+
+	// Player Regen
+	setInterval(function() { 
+		var i = 0,
+		player; 
+
+		if (World.players.length > 0) {
+			for (i; i < World.players.length; i += 1) {
+				player = World.players[i];
+
+				Character.hpRegen(player, function(player, addedHP) {
+					Character.manaRegen(player, function(player, addedMana) {
+						Character.mvRegen(player);
+					});
+				});
+			}
+		}
+	}, 60000);
+
+	// Hunger and Thirst Tick 
+	setInterval(function() { 
+		var i = 0,
+		player; 
+
+		if (World.players.length > 0) {
+			for (i; i < World.players.length; i += 1) {
+				player = World.players[i];
+
+				Character.hunger(player, function(target) {
+					Character.thirst(target);
+				});
+			}
+		}
+	}, 240000); // 4 minutes
+
 	setInterval(function() {
 		var s,
-		shuffle = function (arr) {
-			var i = arr.length - 1,
-			j = Math.floor(Math.random() * i),
-			temp;
-			
-			for (i; i > 0; i -= 1) {
-				temp = arr[i];
-				arr[i] = arr[j];
-				arr[j] = temp;
-				
-				j = Math.floor (Math.random() * i);
-			} 
-			
-			return arr;
-		};
+		alerts = [
+			'Commands are not case sensitive. Use HELP COMMANDS to see the current command list.',
+			'Think of this as an example newbie help tick.'
+		];
 
-		if (players.length > 0) {	
-			fs.readFile('./motd.json', function (err, data) {
-				var i = 0,
-				alert = shuffle(JSON.parse(data).alerts)[0];
-
-				io.sockets.to('mud').emit('msg', {
-					msg: '<span class="alert">ALERT: </span><span class="alertmsg"> ' + alert + '</span>',
-					styleClass: 'alert'
-				});
-
-				for (i; i < players.length; i += 1) {
-					s = io.sockets.connected[players[i].sid];
-					Character.prompt(s);				
-				}	
-			});	
-		}	
-	}, 50000);
-
-
-	// Time -- Increase minute, hours, days and years.
-	// time data is saved to data/time.json every 12 hours
+		if (World.players.length > 0) {
+			World.msgWorld(false, {
+				msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
+					+ alerts[World.dice.roll(1, alerts.length) - 1] + '</span></span>'
+			});
+		}
+	}, 240000);
 }());

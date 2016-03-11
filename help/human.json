@@ -1,9 +1,0 @@
-{
-	"name" : "Human",
-	"related" : ["Races"],
-	"type" : "Command",
-	"levels" : "All",
-	"restrict": 0,
-	"description" : "Human description.",
-	"Alias" : "Hum"
-}

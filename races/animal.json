@@ -1,0 +1,9 @@
+{
+    "name": "Animal",
+    "abbv": "ani",
+    "playable": false,
+    "attackType": "claw",
+    "size": {"value": 2, "display": "small"},
+    "diceNum": 1,
+    "diceSides": 6
+}

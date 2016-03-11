@@ -1,0 +1,28 @@
+{
+    "name": "Thief",
+    "classAbbr": "Thi",
+    "minLevel": 0,
+    "playable": true,
+    "mv": 10,
+    "dex": 2,
+    "gold": 40,
+    "mainStat": "dex",
+    "banRace": ["Ogre"],
+    "skills": [
+        {
+            "name": "backstab",
+            "train": 65,
+            "type": "starter"
+        }
+    ],
+    "skillList": [
+        {
+            "name": "Backstab",
+            "mod": 2,
+            "level": 1,
+            "maxTrain": 95,
+            "wait": 3,
+            "type": "starter"
+        }
+    ]
+}

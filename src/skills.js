@@ -1,6 +1,5 @@
 'use strict';
-
-var Dice = require('./dice').roller,
+var World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 io = require('../server').io,
@@ -12,17 +11,39 @@ Skill = function() {
 };
 
 /*
-* Melee Skills
+* Passive Skills
 */
-Skill.prototype.bash = function(r, s) {
-	var addWait = 10,
-	minLevel = 1; 
+Skill.prototype.darkvision = function(r, s) {
+	return {
+		minLevel: 1,
+		type: 'passive',
+		maxTrain: 100,
+		onMove: function(room) {
 
-	if (s.player.position === 'fighting' && s.player.class === 'fighter') {
-		s.emit('msg', {msg: 'BASH!', styleClass: 'skill bash'});
-	} else {
-		// Not advanced enough to use the skill
+		},
+		onBlind: function() {
+
+		}
 	}
 };
 
-module.exports.skill = new Skill();
+/*
+* Melee Skills
+*/
+Skill.prototype.bash = function(r, s) {
+	return {
+		minLevel: 1,
+		type: 'passive',
+		maxTrain: 100,
+		position: 'fighting',
+		onUse: function() {
+			// Smash a target doing damage
+
+		},
+		onBlocked: function() {
+			// if blocked with a shield basher has 10% of falling down
+		}
+	}
+};
+
+module.exports.skills = new Skill();

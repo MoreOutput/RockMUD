@@ -6,6 +6,9 @@ lib-cov
 *.out
 *.pid
 *.gz
+*~
+*.swp
+*.sublime-project
 
 pids
 logs
@@ -13,3 +16,5 @@ results
 
 node_modules
 npm-debug.log
+notes.md
+design.html

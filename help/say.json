@@ -1,9 +1,0 @@
-{
-	"name" : "Say",
-	"related" : ["Channels", "Say", "Yell", "Flame", "Tell", "Room"],
-	"type" : "Command",
-	"levels" : "All",
-	"restrict": 0,
-	"description" : "Send a message to everyone in the current Room. See HELP CHANNELS for a comprehensive overview of communication commands.",
-	"Alias" : ""
-}

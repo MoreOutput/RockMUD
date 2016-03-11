@@ -1,9 +1,0 @@
-{
-	"name" : "Elf",
-	"related" : ["Races"],
-	"type" : "Command",
-	"levels" : "All",
-	"restrict": 0,
-	"description" : "Elf description.",
-	"Alias" : "Elf"
-}

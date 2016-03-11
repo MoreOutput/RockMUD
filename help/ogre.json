@@ -1,9 +1,0 @@
-{
-	"name" : "Ogre",
-	"related" : ["Races"],
-	"type" : "Command",
-	"levels" : "All",
-	"restrict": 0,
-	"description" : "Ogre description.",
-	"Alias" : "Ogr"
-}

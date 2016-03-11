@@ -1,354 +1,164 @@
-/**
-Default  RockMUD styles
+/*
+red: #ff0033;
+green: #60f066;
+blue: #0066ff;
 */
 html, body {
-font: 1em 'Courier New', sans-serif;
-height: 100%;
-background-color: #111;
-padding: 0 0 0 0;
-margin: 0 0 0 0;
-text-align: center;
-}
-
-h1 {
-font-size: 1.2em;
-color: #eee;
-padding: 0;
-margin: 0;
-}
-
-h2 {
-font-size: 1.1em;
-color: #eee;
-padding: 0;
-margin: 0;
-}
-
-h3 {
+background-color: #000;
+color: #fff;
 font-size: .9em;
-color: #00ffff;
-padding: 0;
-margin: 0;
+padding-top: .5em;
+height: 100%;
 }
-
-a {
-color: green;
+html, body a {
+color: #60f066;
 }
-
-p {
-width: 90%;
-margin: 0;
-padding: 0;
+.sans-serif {
+font-family: sans-serif;
 }
-
-ul {
-padding: 0;
-margin: 0;
+h1, h2, h3, h4, h5, h6, .title {
+color: #ddd;
+font-family: serif;
+padding-top: 0;
+margin-top: 0;
 }
-
-ul li {
-display: block;
-padding: 1px 0 1px 0;
-list-style: none;
-list-style-type: none;
+#mudwrapper.container {
+width: 100%;
+max-width: 1200px;
+padding-bottom: .5em;
+height: 90%;
 }
-
-.btn, button {
-text-align: center;
-font-size: 1em;
-font-weight: bold;
-margin: 5px 10px 0 0;
-padding: 4px 8px 4px 8px;
--webkit-border-radius: 2px;
--moz-border-radius: 2px;
-cursor: pointer;
-border: 1px solid #3079ed;
-color: #fff;
-text-shadow: 0 1px rgba(0,0,0,0.1);
-background-color: #1685fc;
-background-image: -webkit-gradient(linear, left top, left bottom, from(#4d90fe), to(#4787ed));
-background-image: -webkit-linear-gradient(top, #4d90fe, #4787ed);
-background-image: -moz-linear-gradient(top, #4d90fe, #4787ed);
-background-image: -ms-linear-gradient(top, #4d90fe, #4787ed);
-background-image: -o-linear-gradient(top, #4d90fe, #4787ed);
-background-image: linear-gradient(top, #4d90fe, #4787ed);
+.row {
+margin-bottom: .3em;
 }
-
-/* Adjustments for resizing */
-@media screen and (max-width: 720px) {
-#mudwrapper { 
-width: 90%; 
-}
-
-#terminal { 
-width: 90%; 
-margin:0; 
-}
-}
-
-#mudwrapper {
-width: 90%;
-margin: 0 auto;
-text-align: left;
-background-color: #111;
-padding: 1%;
-}
-
 #terminal {
-width: 90%;
-background-color: #111;
-color: #fff;
-margin: 0 0 10px 0;
+background-color: #000;
+padding: 1em 1em 1em 1em;
+height: 100%;
+min-height:100%;
+overflow: auto;
+border: 1px solid #555;
 }
-
-#terminal .feed {
-padding: 3px 0 3px 0;
-}
-
-#screen-start {
-
-}
-
-.cmd-who {
-float: left;
-text-align: left;
-}
-
-.cmd-who li {
-width: 95%;
-padding: 2px 0 2px 0;
-display: inline-block;
-}
-
-.cmd-who .name {
-float: left;
-font-weight: bold;
-padding: 0 3px 0 0;
-}
-
-.cmd-who .level {
-float: left;
-padding: 0 3px 0 0;
-}
-
-.cmd-who .race {
-float: left;
-padding: 0 3px 0 0;
-}
-
-.cmd-who .class {
-float: left;
-}
-
-.motd {
-color: red;
-}
-
-.alert {
-color: red;
-font-weight: bold;
-}
-
-.alertmsg {
-color: #fff;
+#terminal .subtext {
 font-style: italic;
 }
-
-#inputwrapper form {
-background-color: #555;
-padding: 5px;
+#terminal .row {
+width: 99%;
 }
-
-#inputwrapper form input {
+#inputwrapper {
+padding-top: 1em;
 width: 100%;
-border: none;
-background-color: #555;
+max-width: 1200px;
+}
+.opening-title {
+font-size: 3em;
+text-shadow: 2px 2px #ff0033;
 color: #fff;
-}		
-
-.subtext {
-width: 100%;
-display: inline-block;
-clear: both;
-color: #ddd;
 }
-
-.room {
-padding: 5px 0 5px 0;
+.score {
+border-bottom: 1px dashed #eee;
+margin-bottom: .25em;
 }
-
-.room-title {
-color: yellow;
-font-weight: bold;
+.score h1, h4 {
+border-bottom: 1px dashed #eee;
 }
-
-.room-content {
-
-}
-
-.room-exits {
-color: red;
-}
-
-#cmd-active {
-min-width: 20px;
-max-width: 200px;
+.score h4 {
+text-shadow: none;
 border-bottom: 1px solid #000;
 }
-
-.order {
-
+.score .score-level {
+color: #ff0033;
 }
-
-.cmd {
-clear: both;
-display: block;
-width: 95%;
+.score .saves li{
+list-style-type: square;
+}
+.score .stat-gold {
 color: yellow;
 }
-
-.cmd-wear {
-font-weight: bold;
+#score .stat-hp {
+color: #ff0033;
 }
-
-.enter-name {
-clear: both;
-display: block;
-font-weight: bold;
-}
-
-.room {
-margin: 0;
-color: #ddd;;
-}
-
-.room  h2 {
-padding: 0;
-margin: 0;
-}
-
-.room ul {
-padding: 0;
-margin: 0;
-}
-
-.cprompt {
-font-weight: bold;
-color: #fff;
-margin: 5px 0 5px 0;
-}
-
-.error {
-color: #ff0000;
-}
-
-.cmd-kill {
-clear: both;
-display: inline-block;
-}
-
-.player-hit {
-display: block;
-padding: 0;
-margin: 0;
-font-size: 1.1em;
-color: #ff0000;
-}
-
-.player-miss {
-display: block;
-padding: 0;
-margin: 0;
-font-size: 1.1em;
-color: #00ffff;
-}
-
-.foe-hit {
-display: block;
-padding: 0;
-margin: 0;
-font-size: 1.1em;
-color: #ffff00;
-}
-
-.foe-miss {
-display: block;
-padding: 0;
-margin: 0;
-font-size: 1.1em;
-color: #fff;
-}
-
-/**
-Player Scores
-**/
-.score {
-width: 50%;
-min-width: 400px;
-border: 3px solid #eee;
-display: block;
-}
-
-.score .score-name {
-width: 100%;
-display: inline-block;
-font-size: 1.5em;
-background-color: #fff;
-color: #000;
-padding: 3px 0 3px 0;
-text-align: center;
-}
-
-.score .score-title {
-color: #333;
-}
-
-.score .score-info {
-float: left;
-width: 40%;
-padding: 20px 0 20px 20px;
-}
-
-.score .score-stats {
-float: left;
-width: 40%;
-padding: 20px 0 20px 0;
-}
-
-.score .score-affects {
-clear: both;
-text-align: center;
-width: 100%;
-padding: 20px 0;
-}
-
-.score .score-affects li{
-display: inline;
-}
-
-.score .stat-hp {
-font-size: 1.75em;
-color: #ff0000;
-}
-
 .score .stat-mana {
-font-size: 1.75em;
-color: #00ffff;
+color: #0066ff;
 }
-
 .score .stat-mv {
-font-size: 1.75em;
-color: #ffff00;
+color: #60f066;
 }
-
-.score .stat-gold {
-color: #ffff00;
+.cmd {
+color: #888;
+font-style: italic;
 }
-
-.small {
-font-size: 80%;
+.cmd-get {
+color: #60f066;
 }
-
-.bold {
+.cmd-chat {
+color: #fff;
+}
+.cmd-chat .msg-name {
+color: yellow;
 font-weight: bold;
+}
+.cmd-say {
+color: #fff;
+}
+.cmd-say .msg-name {
+font-weight: bold;
+color: #60f066;
+}
+.cmd-yell {
+color: #fff;
+}
+.cmd-yell .msg-name {
+font-weight: bold;
+color: purple;
+}
+.motd {
+border-top: 1px dashed yellow;
+border-bottom: 1px dashed yellow;
+color: #ff0033;
+padding: .8em 0 0 0;
+margin: .5em 0 1em 0;
+font-weight: bold;
+}
+.room .room-title {
+color: #ddd;
+}
+.room .room-exits {
+color: #ff0033;
+}
+.room-item {
+color: #eee;
+}
+.enter-name {
+font-weight: bold;
+}
+.logout-msg {
+font-weight: bold;
+color: #ff0033;
+}
+.error {
+color: yellow;
+}
+.table-no-border>thead>tr>th, 
+.table-no-border>tbody>tr>th, 
+.table-no-border>tfoot>tr>th, 
+.table-no-border>thead>tr>td, 
+.table-no-border>tbody>tr>td, 
+.table-no-border>tfoot>tr>td {
+border-top: none;
+}
+.red {
+color: #ff0033;
+}
+.green {
+color: #60f066;
+}
+.blue {
+color: #0066ff;
+}
+.yellow {
+color: yellow;
+}
+.grey {
+color: #eee;
 }

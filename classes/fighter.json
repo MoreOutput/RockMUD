@@ -1,0 +1,33 @@
+{
+    "name": "Fighter",
+    "classAbbr": "Fig",
+    "minLevel": 0,
+    "playable": true,
+    "hp": 10,
+    "str": 2,
+    "int": -1,
+    "wis": -1,
+    "con": 1,
+    "mainStat": "str",
+    "skills": [
+        {
+            "name": "Bash",
+            "id": "bash",
+            "train": 65,
+            "maxTrain": 95,
+            "mod": 0,
+            "type": "melee",
+            "wait": 2
+        }
+    ],
+    "skillList": {
+        "bash": {
+            "name": "bash",
+            "Display": "Bash",
+            "mod": 1,
+            "level": 1,
+            "maxTrain": 95,
+            "type": "melee"
+        }
+    }
+}

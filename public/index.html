@@ -1,32 +1,40 @@
 <!doctype html>
-<html>
+<html lang="en">
 	<head>
-		<title>RockMUD v0.1.7</title>
+		<title>RockMUD</title>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" /> 
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<meta name="HandheldFriendly" content="true" />
-		<link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
 		<link href="styles.css" rel="stylesheet" media="all" />
 	</head>
 	<body>
-		<div id="mudwrapper">
-			<div id="terminal" class="terminal">
-				<div id="screen-start">
-					<h1>Welcome to RockMUD v0.1.7</h1>
-					<div class="subtext">
-						<p>You can find out more about RockMUD on 
-							<a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>
-						</p>
+		<div id="mudwrapper" class="container">
+			<div id="terminal">
+				<div id="mudopen" class="row">
+					<div class="col-md-12">
+						<h1 class="opening-title">RockMUD v0.2.0</h1>
+						<div class="subtext">
+							<p>
+								Checkout the code on <a href="https://github.com/MoreOutput/RockMUD" target="_blank">GitHub</a>.
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
-			<div id="inputwrapper">
-				<form id="console">
-					<input class="user-input" id="cmd" type="input" value="" placeholder="Enter Command" mud-state="login" />
-				</form>
+		</div>
+		<div id="inputwrapper" class="container">
+			<div class="row">
+				<div class="col-md-12">
+					<form id="console" autocomplete="off">
+						<div class="form-group">
+							<input class="user-input form-control" id="cmd" type="input" value="" placeholder="Enter a Command -- type 'help newbie' for help" mud-state="login" />
+						</div>
+					</form>
+				</div>
 			</div>
-		</div>		
-		<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.3/dojo/dojo.js"></script>
-	    <script src="client.js"></script>
+		</div>
+		<script src="../socket.io/socket.io.js"></script>
+		<script src="rockmud-client.js"></script>
 	</body>
 </html>
