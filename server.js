@@ -158,7 +158,10 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		});
 
 		s.on('disconnect', function () {
-			var i = 0;
+			var i = 0,
+			j = 0,
+			roomObj;
+
 			if (s.player !== undefined) {
 				for (i; i < World.players.length; i += 1) {	
 					if (World.players[i].name === s.player.name) {
@@ -166,15 +169,13 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 					}
 				}
 
-				World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
-					var j = 0;
+				roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 
-					for (j; j < roomObj.playersInRoom.length; j += 1) {
-						if (roomObj.playersInRoom[j].name === s.player.name) {
-							roomObj.playersInRoom.splice(j, 1);
-						}
+				for (j; j < roomObj.playersInRoom.length; j += 1) {
+					if (roomObj.playersInRoom[j].name === s.player.name) {
+						roomObj.playersInRoom.splice(j, 1);
 					}
-				});
+				}
 			}
 		});
 	});

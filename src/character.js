@@ -98,34 +98,34 @@ Character.prototype.getPassword = function(s, fn) {
 	s.on('password', function (r) {
 		if (r.msg.length > 7) {
 			character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
+				var roomObj,
+				displayHTML;
+
 				if (s.player.password === hash) {
-					character.addPlayer(s, function(added, msg) {
-						if (added) {
-								World.motd(s, function() {
-									World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
-										roomObj.playersInRoom.push(s.player);
+					if (character.addPlayer(s)) {
+						World.sendMotd(s);
+						
+						roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+						roomObj.playersInRoom.push(s.player);
 
-										Room.getDisplayHTML(roomObj, {
-											hideCallingPlayer: s.player.name
-										},function(displayHTML, roomObj) {
-											World.msgPlayer(s, {
-												msg: displayHTML,
-												styleClass: 'room',
-											});
+						displayHTML = Room.getDisplayHTML(roomObj, {
+							hideCallingPlayer: s.player.name
+						});
 
-											fn(s);
-										});
-									});
-								});
+						World.msgPlayer(s, {
+							msg: displayHTML,
+							styleClass: 'room',
+						});
+
+						fn(s);
+					} else {
+						if (msg === undefined) {
+							s.emit('msg', {msg: 'Error logging in, please retry.'});
+							return s.disconnect();
 						} else {
-							if (msg === undefined) {
-								s.emit('msg', {msg: 'Error logging in, please retry.'});
-								return s.disconnect();
-							} else {
-								s.emit('msg', {msg: msg, res: 'end'});
-							}
+							s.emit('msg', {msg: msg, res: 'end'});
 						}
-					});
+					}
 				} else {
 					s.emit('msg', {msg: 'Wrong! You are flagged after 5 incorrect responses.', res: 'enterPassword'});
 					return s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
@@ -139,19 +139,19 @@ Character.prototype.getPassword = function(s, fn) {
 };
 
 // Add a player reference object to the players array
-Character.prototype.addPlayer = function(s, fn) {
+Character.prototype.addPlayer = function(s) {
 	var i = 0,
 	x = null;
 
 	for (i; i < World.players.length; i += 1) {
 		if (s.player.name === World.players[i].name) {
-			return fn(false, 'Already Logged in. Disconnecting. Refresh the page and try to login again.');
+			return false;
 		}
 	}
 	
 	World.players.push(s.player);
 
-	return fn(true);
+	return true;
 };
 
 // A New Character is saved
@@ -192,58 +192,59 @@ Character.prototype.create = function(r, s, fn) {
 
 	socket = s.player.socket;
 
-	character.rollStats(s.player, function(player) {
-		s.player = player;
-		character.generateSalt(function(salt) {
-			s.player.salt = salt;
-			character.hashPassword(salt, s.player.password, 1000, function(hash) {
-				s.player.password = hash;
-				s.player.socket = null;
+	s.player = character.rollStats(s.player);
 
-				fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
-					var i = 0;
+	character.generateSalt(function(salt) {
+		s.player.salt = salt;
 
-					if (err) {
-						throw err;
-					}
+		character.hashPassword(salt, s.player.password, 1000, function(hash) {
+			s.player.password = hash;
+			s.player.socket = null;
 
-					s.player.socket = socket;
-					s.player.saved = new Date();
+			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
+				var i = 0,
+				displayHTML,
+				roomObj;
 
-					character.addPlayer(s, function(added) {
-						if (added) {
-							s.leave('creation'); // No longer creating the character so leave the channel and join the game
-							s.join('mud');
+				if (err) {
+					throw err;
+				}
 
-							World.motd(s, function() {
-								Room.getDisplay(s.player.area, s.player.roomid, function(displayHTML, roomObj) {
-									World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
-										Room.getDisplayHTML(roomObj, {
-											hideCallingPlayer: s.player.name
-										},function(displayHTML, roomObj) {
-											World.msgPlayer(s, {
-												msg: displayHTML,
-												styleClass: 'room'
-											});
-											fn(s);
-										});
-									});
+				s.player.socket = socket;
+				s.player.saved = new Date();
+			
+				if (character.addPlayer(s)) {
+					s.leave('creation'); // No longer creating the character so leave the channel and join the game
+					s.join('mud');
 
-								});
-							});
-						} else {
-							s.emit('msg', {msg: 'Error logging in, please retry.'});
-							s.disconnect();
-						}
+					World.sendMotd(s);
+
+					displayHTML = Room.getDisplay(s.player.area, s.player.roomid);
+
+					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+
+					Room.getDisplayHTML(roomObj, {
+						hideCallingPlayer: s.player.name
 					});
-				});
+
+					World.msgPlayer(s, {
+						msg: displayHTML,
+						styleClass: 'room'
+					});
+
+					fn(s);
+				} else {
+					s.emit('msg', {msg: 'Error logging in, please retry.'});
+
+					s.disconnect();
+				}
 			});
 		});
 	});
 };
 
 // Rolling stats for a new character
-Character.prototype.rollStats = function(player, fn) { 
+Character.prototype.rollStats = function(player) { 
 	var i = 0,
 	j = 0,
 	raceKey, // property of the race defines in raceList
@@ -281,100 +282,97 @@ Character.prototype.rollStats = function(player, fn) {
 	player.carry = player.str * 10;
 	player.ac = World.dice.getDexMod(player) + 2;
 
-	return fn(player);
+	return player
 };
 
 Character.prototype.newCharacter = function(r, s, fn) {
 	var character = this,
 	i = 0,
-	str = '';
+	str = '',
+	races = World.getPlayableRaces(),
+	classes = World.getPlayableClasses();
 
-	World.getPlayableRaces(function(races) {
-		World.getPlayableClasses(function(classes) {
-			for (i; i < races.length; i += 1) {
-				str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
+	for (i; i < races.length; i += 1) {
+		str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
 
-				if	(races.length - 1 === i) {
-					s.emit('msg', {msg: s.player.name + ' is a new character! There are three steps until ' + s.player.name + 
-					' is saved. The <strong>first step</strong> is to select a race: <ul>' + str + '</ul><p class="tip">You can learn more about each race by typing help race name</p>', res: 'selectRace', styleClass: 'race-selection'});		
+		if	(races.length - 1 === i) {
+			s.emit('msg', {msg: s.player.name + ' is a new character! There are three steps until ' + s.player.name + 
+			' is saved. The <strong>first step</strong> is to select a race: <ul>' + str + '</ul><p class="tip">You can learn more about each race by typing help race name</p>', res: 'selectRace', styleClass: 'race-selection'});		
 
-					s.on('raceSelection', function (r) { 
-						var cmdArr = r.msg.split(' ');
+			s.on('raceSelection', function (r) { 
+				var cmdArr = r.msg.split(' ');
 
-						r.cmd = cmdArr[0].toLowerCase();
-						r.msg = cmdArr.slice(1).join(' ');
-			
-						character.raceSelection(r, s, function(r, s, fnd) {
-							if (fnd) {
-								i = 0;
-								str = '';
-								s.player.race = r.cmd;
+				r.cmd = cmdArr[0].toLowerCase();
+				r.msg = cmdArr.slice(1).join(' ');
+	
+				character.raceSelection(r, s, function(r, s, fnd) {
+					if (fnd) {
+						i = 0;
+						str = '';
+						s.player.race = r.cmd;
 
-								for (i; i < classes.length; i += 1) {
-									str += '<li>' + classes[i].name + '</li>';
+						for (i; i < classes.length; i += 1) {
+							str += '<li>' + classes[i].name + '</li>';
 
-									if	(classes.length - 1 === i) {
-										s.emit('msg', {
-											msg: 'Great, <strong>two more steps to go!</strong> Now time to select a class for ' + s.player.name + '. Pick one of the following: <ul>' + 
-											str + '</ul>', 
-											res: 'selectClass', 
-											styleClass: 'race-selection'
-										});
-										
-										s.on('classSelection', function(r) {
-											r.msg = r.msg.toLowerCase();
+							if	(classes.length - 1 === i) {
+								s.emit('msg', {
+									msg: 'Great, <strong>two more steps to go!</strong> Now time to select a class for ' + s.player.name + '. Pick one of the following: <ul>' + 
+									str + '</ul>', 
+									res: 'selectClass', 
+									styleClass: 'race-selection'
+								});
+								
+								s.on('classSelection', function(r) {
+									r.msg = r.msg.toLowerCase();
 
-											character.classSelection(r, function(fnd) {
-												if (fnd) {
-													s.player.charClass = r.msg;
-													
-													s.emit('msg', {
-														msg: s.player.name + ' is a ' + s.player.charClass + '! <strong>One more step before ' + s.player.name + 
-														' is saved</strong>. Please define a password (8 or more characters):', 
-														res: 'createPassword', 
-														styleClass: 'race-selection'
-													});
-										
-													s.on('setPassword', function(r) {
-														if (r.msg.length > 7) {
-															s.player.password = r.msg;
-															character.create(r, s, fn);
-														} else {
-															s.emit('msg', {msg: 'Password should be longer', styleClass: 'error' });
-														}
-													});
+									character.classSelection(r, function(fnd) {
+										if (fnd) {
+											s.player.charClass = r.msg;
+											
+											s.emit('msg', {
+												msg: s.player.name + ' is a ' + s.player.charClass + '! <strong>One more step before ' + s.player.name + 
+												' is saved</strong>. Please define a password (8 or more characters):', 
+												res: 'createPassword', 
+												styleClass: 'race-selection'
+											});
+								
+											s.on('setPassword', function(r) {
+												if (r.msg.length > 7) {
+													s.player.password = r.msg;
+													character.create(r, s, fn);
 												} else {
-													s.emit('msg', {msg: 'That class is not on the list, please try again', styleClass: 'error' });
+													s.emit('msg', {msg: 'Password should be longer', styleClass: 'error' });
 												}
-											}); 
-										});
-									}
-								}
-							} else if (!fnd && r.cmd !== 'help') {
-								s.emit('msg', {msg: 'That race is not on the list, please try again', styleClass: 'error' });
+											});
+										} else {
+											s.emit('msg', {msg: 'That class is not on the list, please try again', styleClass: 'error' });
+										}
+									}); 
+								});
 							}
-						});
-					});
-				}
-			}
-		});
-	});
+						}
+					} else if (!fnd && r.cmd !== 'help') {
+						s.emit('msg', {msg: 'That race is not on the list, please try again', styleClass: 'error' });
+					}
+				});
+			});
+		}
+	}
 };
 
 Character.prototype.raceSelection = function(r, s, fn) {
 	var i = 0,
+	races = World.getPlayableRaces(),
 	helpTxt;
 
 	if (r.cmd !== 'help') {
-		World.getPlayableRaces(function(races) {
-			for (i; i < races.length; i += 1) {
-				if (r.cmd === races[i].name.toLowerCase()) {
-					return fn(r, s, true);
-				}
+		for (i; i < races.length; i += 1) {
+			if (r.cmd === races[i].name.toLowerCase()) {
+				return fn(r, s, true);
 			}
+		}
 
-			return fn(r, s, false);
-		});
+		return fn(r, s, false);
 	} else {
 		fs.readFile('./help/' + r.msg + '.html', 'utf-8', function (err, data) {
 			if (!err) {
@@ -391,17 +389,16 @@ Character.prototype.raceSelection = function(r, s, fn) {
 };
 
 Character.prototype.classSelection = function(r, fn) {
-	var i = 0;
+	var i = 0,
+	classes = World.getPlayableClasses();
 
-	World.getPlayableClasses(function(classes) {
-		for (i; i < classes.length; i += 1) {
-			if (r.msg === classes[i].name.toLowerCase()) {
-				return fn(true)
-			}
+	for (i; i < classes.length; i += 1) {
+		if (r.msg === classes[i].name.toLowerCase()) {
+			return fn(true)
 		}
+	}
 
-		return fn(false);
-	});
+	return fn(false);
 };
 
 Character.prototype.save = function(player, fn) {
@@ -417,12 +414,11 @@ Character.prototype.save = function(player, fn) {
 	player.socket = null;
 
 	fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null, 4), function (err) {
+		player.socket = socket;
+		
 		if (err) {
-			player.socket = socket;
 			return World.msgPlayer(player, {msg: 'Error saving character.'});
 		} else {
-			player.socket = socket;
-
 			return fn(player);
 		}
 	});
@@ -468,42 +464,44 @@ Character.prototype.hpRegen = function(target, fn) {
 };
 
 Character.prototype.manaRegen = function(target, fn) {
-	var intMod = World.dice.getIntMod(target);
+	var intMod = World.dice.getIntMod(target),
+	chanceMod = World.dice.roll(1, 10);
 
 	if (target.cmana < target.mana && target.thirst < 5 && target.hunger < 6) {
-		// unless the charcter is a wizard they have 
+		// unless the charcter is a mage they have 
 		// a 10% chance of skipping mana regen
-
-		if (target.position === 'sleeping') {
-			intMod += 2;
-		}
-
-		if (target.thirst >= 3 || target.hunger >= 3) {
-			intMod -= 1;
-		}
-
-		if (!intMod) {
-			intMod = World.dice.roll(1, 2) - 1;
-		}
-
-		World.dice.roll(intMod, 8, function(total) {
-			total = total + target.level;
-
-			target.chp += total;
-
-			if (target.cmana  > target.mana ) {
-				target.cmana  = target.mana ;
+		if (target.charClass === 'mage' || (target.charClass !== 'mage' && chanceMod > 1)) {
+			if (target.position === 'sleeping') {
+				intMod += 2;
 			}
 
-			if (typeof fn === 'function') {
-				fn(target, total);
+			if (target.thirst >= 3 || target.hunger >= 3) {
+				intMod -= 1;
 			}
-		});
+
+			if (!intMod) {
+				intMod = World.dice.roll(1, 2) - 1;
+			}
+
+			World.dice.roll(intMod, 8, function(total) {
+				total = total + target.level;
+
+				target.cmana += total;
+
+				if (target.cmana  > target.mana ) {
+					target.cmana  = target.mana ;
+				}
+
+				if (typeof fn === 'function') {
+					fn(target, total);
+				}
+			});
+		}
 	} else {
 		if (typeof fn === 'function') {
 			fn(target, 0);
 		}
-}
+	}
 };
 
 Character.prototype.mvRegen = function(target, fn) {
@@ -649,9 +647,10 @@ Character.prototype.xpRot = function() {
 };
 
 // push an item into a players inventory, checks items to ensure a player can use it
-Character.prototype.addToInventory = function(player, item, fn) {
+Character.prototype.addToInventory = function(player, item) {
 	player.items.push(item);
-	fn(player, item);
+
+	return player;
 };
 
 /*
@@ -751,9 +750,35 @@ Character.prototype.getStr = function(player, mod, fn) {
 	Character
 	.statsFromItems
 	.statsFromAffects
-}
+};
 
-Character.prototype.removeItem = function(player, item, fn) {
+Character.prototype.getContainer = function(name, containers) {
+    var char = this,
+    i = 0;
+
+    for (i; i < containers.length; i += 1) {
+        if (containers[i].name.indexOf(name)) {
+            return containers[i];
+        }
+    }
+
+    return false;
+};
+
+Character.prototype.getContainers = function(player) {
+    var i = 0,
+    containers = [];
+
+    for (i; i < player.items.length; i += 1) {
+        if (player.items[i].itemType === 'container') {
+            containers.push(player.items[i]);
+        }       
+    }
+
+    return containers;
+};
+
+Character.prototype.removeItem = function(player, item) {
 	var i = 0,
 	newArr = [];
 
@@ -765,7 +790,7 @@ Character.prototype.removeItem = function(player, item, fn) {
 
 	player.items = newArr;
 
-	return fn(player, item);
+	return player;
 };
 
 Character.prototype.removeEq  = function(player, item, fn) {
@@ -783,9 +808,9 @@ Character.prototype.removeEq  = function(player, item, fn) {
 };
 
 Character.prototype.getItem = function(eqArr, command, fn) {
-	World.search(eqArr, command, function(slot) {
-		return fn(slot.item)
-	});
+	var slot = World.search(eqArr, command);
+	
+	return fn(slot.item)
 };
 
 Character.prototype.wear = function(target, item, fn) {

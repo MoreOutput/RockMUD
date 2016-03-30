@@ -134,15 +134,17 @@ World = require('./world').world;
 	
 	// AI Ticks for monsters
 	setInterval(function() {
-		var i = 0;
+		var i = 0,
+		monsters;
+
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
-				World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
-					monsters.forEach(function(monster, i) {
-						if (monster.chp >= 1 && monster.onAlive) {
-							monster.onAlive();
-						}
-					});
+				monsters = World.getAllMonstersFromArea(World.areas[i].name);
+				
+				monsters.forEach(function(monster, i) {
+					if (monster.chp >= 1 && monster.onAlive) {
+						monster.onAlive();
+					}
 				});
 			}
 		}
