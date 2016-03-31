@@ -244,7 +244,7 @@ Character.prototype.create = function(r, s, fn) {
 };
 
 // Rolling stats for a new character
-Character.prototype.rollStats = function(player) { 
+Character.prototype.rollStats = function(player) {
 	var i = 0,
 	j = 0,
 	raceKey, // property of the race defines in raceList
@@ -282,7 +282,7 @@ Character.prototype.rollStats = function(player) {
 	player.carry = player.str * 10;
 	player.ac = World.dice.getDexMod(player) + 2;
 
-	return player
+	return player;
 };
 
 Character.prototype.newCharacter = function(r, s, fn) {
@@ -424,13 +424,16 @@ Character.prototype.save = function(player, fn) {
 	});
 };
 
-Character.prototype.hpRegen = function(target, fn) {
-	var conMod = World.dice.getConMod(target);
+Character.prototype.hpRegen = function(target) {
+	var conMod = World.dice.getConMod(target),
+	total;
 
 	// unless the charcter is a fighter they have 
 	// a 10% chance of skipping hp regen
 
 	if (target.chp < target.hp && target.thirst < 5 && target.hunger < 6) {
+		total = World.dice.roll(conMod, 4);
+
 		if (target.position === 'sleeping') {
 			conMod += 3;
 		}
@@ -443,31 +446,23 @@ Character.prototype.hpRegen = function(target, fn) {
 			conMod = 1;
 		}
 
-		World.dice.roll(conMod, 4, function(total) {
-			total = total + target.level;
+		total = total + target.level;
 
-			target.chp += total;
+		target.chp += total;
 
-			if (target.chp > target.hp) {
-				target.chp = target.hp;
-			}
-
-			if (typeof fn === 'function') {
-				fn(target, total);
-			}
-		});
-	} else {
-		if (typeof fn === 'function') {
-			fn(target, 0);
+		if (target.chp > target.hp) {
+			target.chp = target.hp;
 		}
 	}
 };
 
-Character.prototype.manaRegen = function(target, fn) {
+Character.prototype.manaRegen = function(target) {
 	var intMod = World.dice.getIntMod(target),
-	chanceMod = World.dice.roll(1, 10);
+	chanceMod = World.dice.roll(1, 10),
+	total;
 
 	if (target.cmana < target.mana && target.thirst < 5 && target.hunger < 6) {
+		total = World.dice.roll(intMod, 8);
 		// unless the charcter is a mage they have 
 		// a 10% chance of skipping mana regen
 		if (target.charClass === 'mage' || (target.charClass !== 'mage' && chanceMod > 1)) {
@@ -483,34 +478,27 @@ Character.prototype.manaRegen = function(target, fn) {
 				intMod = World.dice.roll(1, 2) - 1;
 			}
 
-			World.dice.roll(intMod, 8, function(total) {
-				total = total + target.level;
+			total = total + target.level;
 
-				target.cmana += total;
+			target.cmana += total;
 
-				if (target.cmana  > target.mana ) {
-					target.cmana  = target.mana ;
-				}
-
-				if (typeof fn === 'function') {
-					fn(target, total);
-				}
-			});
-		}
-	} else {
-		if (typeof fn === 'function') {
-			fn(target, 0);
+			if (target.cmana  > target.mana ) {
+				target.cmana  = target.mana ;
+			}
 		}
 	}
 };
 
-Character.prototype.mvRegen = function(target, fn) {
-	var dexMod = World.dice.getDexMod(target);
+Character.prototype.mvRegen = function(target) {
+	var dexMod = World.dice.getDexMod(target),
+	total;
 
 	// unless the charcter is a thief they have 
 	// a 10% chance of skipping move regen
 
 	if (target.cmv < target.mv && target.thirst < 5 && target.hunger < 6) {
+		total = World.dice.roll(dexMod, 8);
+
 		if (target.position === 'sleeping') {
 			dexMod += 3;
 		} else {
@@ -525,54 +513,39 @@ Character.prototype.mvRegen = function(target, fn) {
 			dexMod = 1;
 		}
 
-		World.dice.roll(dexMod, 8, function(total) {
-			target.cmv += total;
+		target.cmv += total;
 
-			if (target.cmv > target.mv) {
-				target.cmv = target.mv;
-			}
-
-			if (typeof fn === 'function') {
-				fn(target, total);
-			}
-		});
-	} else {
-		if (typeof fn === 'function') {
-			fn(target, 0);
+		if (target.cmv > target.mv) {
+			target.cmv = target.mv;
 		}
 	}
 };
 
-Character.prototype.hunger = function(target, fn) {
+Character.prototype.hunger = function(target) {
 	var character = this,
-	conMod = World.dice.getConMod(target);
+	conMod = World.dice.getConMod(target),
+	total;
 
 	if (target.hunger < 10) {
-		World.dice.roll(1, 12 + conMod, function(total) {
-			if (total > 9) {
-				target.hunger += 1;
+		total = World.dice.roll(1, 12 + conMod);
+
+		if (total > 9) {
+			target.hunger += 1;
+		}
+
+		if (target.hunger > 5) {
+			target.chp -= Math.round(World.dice.roll(1, 5 + target.hunger) + (target.level - conMod));
+
+			if (target.chp < target.hp) {
+				target.chp = 0;
 			}
 
-			if (target.hunger > 5) {
-				target.chp -= Math.round(World.dice.roll(1, 5 + target.hunger) + (target.level - conMod));
-
-				if (target.chp < target.hp) {
-					target.chp = 0;
-				}
-
-				World.dice.roll(1, 2, function(msgRoll) {
-					if (msgRoll === 1) {
-						World.msgPlayer(target, {msg: 'You feel hungry.', styleClass: 'hunger'});
-					} else {
-						World.msgPlayer(target, {msg: 'Your stomach begins to growl.', styleClass: 'hunger'});
-					}
-				});
+			if (World.dice.roll(1, 2) === 1) {
+				World.msgPlayer(target, {msg: 'You feel hungry.', styleClass: 'hunger'});
+			} else {
+				World.msgPlayer(target, {msg: 'Your stomach begins to growl.', styleClass: 'hunger'});
 			}
-
-			if (typeof fn === 'function') {
-				fn(target);
-			}
-		});
+		}
 	} else {
 		/*
 		Need death before this can be completed
@@ -585,43 +558,34 @@ Character.prototype.hunger = function(target, fn) {
 		*/
 
 		World.msgPlayer(target, {msg: 'You are dying of hunger.', styleClass: 'hunger'});
-		
-		if (typeof fn === 'function') {
-			fn(target);
-		}
 	}
 };
 
-Character.prototype.thirst = function(target, fn) {
+Character.prototype.thirst = function(target) {
 	var character = this,
+	total,
 	dexMod = World.dice.getDexMod(target);
 
 	if (target.thirst < 10) {
-		World.dice.roll(1, 12 + dexMod, function(total) {
-			if (total > 10) {
-				target.thirst += 1;
+		total = World.dice.roll(1, 12 + dexMod);
+
+		if (total > 10) {
+			target.thirst += 1;
+		}
+
+		if (target.thirst > 5) {
+			target.chp -= Math.round(World.dice.roll(1, 5 + target.thirst) + (target.level - dexMod));
+
+			if (target.chp < target.hp) {
+				target.chp = 0;
 			}
 
-			if (target.thirst > 5) {
-				target.chp -= Math.round(World.dice.roll(1, 5 + target.thirst) + (target.level - dexMod));
-
-				if (target.chp < target.hp) {
-					target.chp = 0;
-				}
-
-				World.dice.roll(1, 2, function(msgRoll) {
-					if (msgRoll === 1) {
-						World.msgPlayer(target, {msg: 'You are thirsty.', styleClass: 'thirst'});
-					} else {
-						World.msgPlayer(target, {msg: 'Your lips are parched.', styleClass: 'thirst'});
-					}
-				});
+			if (World.dice.roll(1, 2) === 1) {
+				World.msgPlayer(target, {msg: 'You are thirsty.', styleClass: 'thirst'});
+			} else {
+				World.msgPlayer(target, {msg: 'Your lips are parched.', styleClass: 'thirst'});
 			}
-
-			if (typeof fn === 'function') {
-				fn(target);
-			}
-		});
+		}
 	} else {
 		/*
 		Need death before this can be completed
@@ -634,10 +598,6 @@ Character.prototype.thirst = function(target, fn) {
 		*/
 
 		World.msgPlayer(target, {msg: 'You are dying of thirst.', styleClass: 'thirst'});
-
-		if (typeof fn === 'function') {
-			fn(target);
-		}
 	}
 };
 
@@ -657,7 +617,7 @@ Character.prototype.addToInventory = function(player, item) {
 * Returns all items that meet the query criteria, could be optimized if your
 * slots are consistent.
 */
-Character.prototype.getSlotsWithWeapons = function(player, fn) {
+Character.prototype.getSlotsWithWeapons = function(player) {
 	var i = 0,
 	weapons = [];
 
@@ -668,14 +628,10 @@ Character.prototype.getSlotsWithWeapons = function(player, fn) {
 		}
 	}
 
-	if (typeof fn === 'function') {
-		return fn(weapons);
-	} else {
-		return weapons;
-	}
+	return weapons;
 };
 
-Character.prototype.getLights = function(player, fn) {
+Character.prototype.getLights = function(player) {
 	var i = 0,
 	lights = [];
 
@@ -686,11 +642,7 @@ Character.prototype.getLights = function(player, fn) {
 		}
 	}
 
-	if (typeof fn === 'function') {
-		return fn(lights);
-	} else {
-		return lights;
-	}
+	return lights;
 };
 
 // All keys in the characters inventory
@@ -793,7 +745,7 @@ Character.prototype.removeItem = function(player, item) {
 	return player;
 };
 
-Character.prototype.removeEq  = function(player, item, fn) {
+Character.prototype.removeEq = function(player, item, fn) {
 	var i = 0;
 
 	item.equipped = false;
@@ -804,13 +756,11 @@ Character.prototype.removeEq  = function(player, item, fn) {
 		}
 	}
 
-	return fn (player, item)
+	return true;
 };
 
-Character.prototype.getItem = function(eqArr, command, fn) {
-	var slot = World.search(eqArr, command);
-	
-	return fn(slot.item)
+Character.prototype.getItem = function(eqArr, command) {
+	return World.search(eqArr, command).item;
 };
 
 Character.prototype.wear = function(target, item, fn) {
@@ -823,7 +773,9 @@ Character.prototype.wear = function(target, item, fn) {
 				item.equipped = true;
 				target.eq[i].item = item;
 
-				fn('You wield a ' + item.short + ' in your ' + target.eq[i].name);
+				World.msgPlayer(target, {
+					msg:'You wield a ' + item.short + ' in your ' + target.eq[i].name 
+				});
 			} else {
 				// Wearing Armor
 				if (target.eq[i].item === null) {
@@ -831,8 +783,10 @@ Character.prototype.wear = function(target, item, fn) {
 					target.eq[i].item = item;
 
 					target.ac = target.ac + item.ac;
-					
-					return fn('You wear a ' + item.short + ' on your ' + target.eq[i].name);
+
+					World.msgPlayer(target, {
+						msg: 'You wear a ' + item.short + ' on your ' + target.eq[i].name
+					});
 				} else {
 					item.equipped = true;
 					target.eq[i].item.equipped = false;
@@ -844,27 +798,36 @@ Character.prototype.wear = function(target, item, fn) {
 
 					target.ac = target.ac + item.ac
 
-					return fn('You wear ' + item.short + ' on your ' + 
-						target.eq[i].name + ' and remove ' + 
-						replacedItem.short);
+					World.msgPlayer(target, {
+						msg: 'You wear ' + item.short + ' on your ' +  target.eq[i].name + ' and remove ' + replacedItem.short
+					});
 				}
 			}
 		} 
 	}
 };
 
-Character.prototype.getStatusReport = function(player, fn) {
+Character.prototype.getStatusReport = function(player) {
 	var i = 0;
 
 	for (i; i < this.statusReport.length; i += 1) {
 		if (this.statusReport[i].percentage >= ((player.chp/player.hp) * 100) ) {
-			if (typeof fn === 'function') {
-				return fn(player, this.statusReport[i]);
-			} else {
-				return null;
-			}
+			return player, this.statusReport[i];
 		}
 	}
+}
+
+Character.prototype.createCorpse = function(player) {
+	player.level = 1;
+	player.short = 'rotting corpse of a ' + player.name;
+	player.decay = 1;
+	player.itemType = 'corpse';
+	player.corpse = true;
+	player.weight = player.weight - 1;
+	player.chp = 0;
+	player.hp = 0;
+
+	return player;
 }
 
 Character.prototype.getLoad = function(s) {

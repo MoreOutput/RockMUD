@@ -256,7 +256,7 @@ World.prototype.getPlayerBySocket = function(socketId) {
 	return false;
 };
 
-World.prototype.getPlayerByName = function(playerName, fn) {
+World.prototype.getPlayerByName = function(playerName) {
 	var world = this,
 	arr = [],
 	player,
@@ -294,7 +294,7 @@ World.prototype.getPlayersByArea = function(areaName) {
 * Area and item setup on boot
 */
 
-World.prototype.rollItems = function(itemArr, roomid, fn) {
+World.prototype.rollItems = function(itemArr, roomid) {
 	var world = this,
 	diceMod,
 	refId = Math.random().toString().replace('0.', 'item-'),
@@ -344,7 +344,7 @@ World.prototype.rollItems = function(itemArr, roomid, fn) {
 	}
 }
 // Rolls values for Mobs, including their equipment
-World.prototype.rollMobs = function(mobArr, roomid, fn) {
+World.prototype.rollMobs = function(mobArr, roomid) {
 	var world = this,
 	diceMod, // Added to all generated totals 
 	refId = Math.random().toString().replace('0.', 'mob-'),
@@ -434,7 +434,7 @@ World.prototype.rollMobs = function(mobArr, roomid, fn) {
 	}
 };
 
-World.prototype.setupArea = function(area, fn) {
+World.prototype.setupArea = function(area) {
 	var world = this,
 	i = 0;
 
@@ -443,7 +443,7 @@ World.prototype.setupArea = function(area, fn) {
 		world.rollItems(area.rooms[i].items, area.rooms[i].id);
 	}
 
-	return fn(area);
+	return area;
 };
 
 World.prototype.getAreaByName = function(areaName) {
@@ -459,31 +459,25 @@ World.prototype.getAreaByName = function(areaName) {
 	return null;
 };
 
-World.prototype.reloadArea = function(area, fn) {
+World.prototype.reloadArea = function(area) {
 	var world = this,
 	newArea,
 	i = 0;
 
-	newArea = require('../areas/' + area.name.toLowerCase());
+	newArea = world.setupArea(require('../areas/' + area.name.toLowerCase()));
 
-	world.setupArea(newArea, function(newArea) {
-		var i = 0;
-
-		for (i; i < area.rooms.length; i +=1) {
-			if (area.rooms[i].playersInRoom) {
-				newArea.rooms[i].playersInRoom = area.rooms[i].playersInRoom;
-			}
+	for (i; i < area.rooms.length; i +=1) {
+		if (area.rooms[i].playersInRoom) {
+			newArea.rooms[i].playersInRoom = area.rooms[i].playersInRoom;
 		}
-		
-		require.cache[require.resolve('../areas/' + area.name.toLowerCase())] = null;
+	}
+	
+	require.cache[require.resolve('../areas/' + area.name.toLowerCase())] = null;
 
-		if (typeof fn === 'function') {
-			return fn(newArea);
-		}
-	});
+	return newArea;
 };
 
-World.prototype.getRoomObject = function(areaName, roomId, fn) {
+World.prototype.getRoomObject = function(areaName, roomId) {
 	var world = this,
 	area = world.getAreaByName(areaName),
 	i = 0;
@@ -495,7 +489,7 @@ World.prototype.getRoomObject = function(areaName, roomId, fn) {
 	}
 };
 
-World.prototype.getAllMonstersFromArea = function(areaName, fn) {
+World.prototype.getAllMonstersFromArea = function(areaName) {
 	var world = this,
 	area = world.getAreaByName(areaName),
 	i = 0,
@@ -510,7 +504,7 @@ World.prototype.getAllMonstersFromArea = function(areaName, fn) {
 	return mobArr;
 };
 
-World.prototype.getAlItemsFromArea = function(areaName, fn) {
+World.prototype.getAlItemsFromArea = function(areaName) {
 	var world = this,
 	area = world.getAreaByName(areaName),
 	i = 0,
@@ -556,7 +550,7 @@ World.prototype.prompt = function(target) {
 	}
 };
 
-World.prototype.msgPlayer = function(target, msgObj, fn) {
+World.prototype.msgPlayer = function(target, msgObj) {
 	var world = this,
 	newMsg = {},
 	s;
@@ -580,7 +574,7 @@ World.prototype.msgPlayer = function(target, msgObj, fn) {
 }
 
 // Emit a message to all a given rooms players
-World.prototype.msgRoom = function(roomObj, msgObj, fn) {
+World.prototype.msgRoom = function(roomObj, msgObj) {
 	var world = this,
 	i = 0,
 	s;
@@ -597,7 +591,7 @@ World.prototype.msgRoom = function(roomObj, msgObj, fn) {
 };
 
 // Emit a message to all the players in an area
-World.prototype.msgArea = function(areaName, msgObj, fn) {
+World.prototype.msgArea = function(areaName, msgObj) {
 	var world = this,
 	i = 0,
 	s;
@@ -616,7 +610,7 @@ World.prototype.msgArea = function(areaName, msgObj, fn) {
 };
 
 // Emit a message to all the players in the
-World.prototype.msgWorld = function(target, msgObj, fn) {
+World.prototype.msgWorld = function(target, msgObj) {
 	var world = this,
 	i = 0,
 	s;
@@ -632,7 +626,7 @@ World.prototype.msgWorld = function(target, msgObj, fn) {
 
 // target arrayName itemToMatch fn -> updates and returns target and items
 // array itemToMatch fn -> returns found items
-World.prototype.search = function(searchArr, command, fn) {
+World.prototype.search = function(searchArr, command) {
 	var msgPatt,
 	matches = [],
 	results,
@@ -675,7 +669,6 @@ World.prototype.search = function(searchArr, command, fn) {
 
 /*
 	RockMUD extend(target, obj2, callback);
-	
 	Target gains all properties from obj2 that arent in the current object, all numbers are added together
 */
 World.prototype.extend = function(target, obj2, fn) {

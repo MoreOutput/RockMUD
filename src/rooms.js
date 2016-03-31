@@ -10,7 +10,7 @@ Room = function() {
 
 };
 
-Room.prototype.checkExitCriteria = function(targetRoom, exitObj, player, fn) {
+Room.prototype.checkExitCriteria = function(targetRoom, exitObj, player) {
 	var i = 0,
 	targetExit;
 
@@ -34,8 +34,8 @@ Room.prototype.checkExitCriteria = function(targetRoom, exitObj, player, fn) {
 	}
 };
 
-Room.prototype.checkEntranceCriteria = function(roomObj, exitObj, player, fn) {
-	return fn(true);
+Room.prototype.checkEntranceCriteria = function(roomObj, exitObj, player) {
+	return true;
 };
 
 Room.prototype.getByPosition = function() {
@@ -130,20 +130,20 @@ Room.prototype.checkExit = function(roomObj, direction) {
 };
 
 // Get an exit by direction; empty direction results in an array of all exit objects
-Room.prototype.getExit = function(roomObj, direction, fn) { 
+Room.prototype.getExit = function(roomObj, direction) { 
 	var i = 0;
 
 	if (roomObj.exits.length > 0) {
 		for (i; i < roomObj.exits.length; i += 1) {
 			if (direction === roomObj.exits[i].cmd) {
-				return fn(roomObj.exits[i]);
+				return roomObj.exits[i];
 			} else if (roomObj.exits[i].door && roomObj.exits[i].door.name === direction) {
-				return fn(roomObj.exits[i]);
+				return roomObj.exits[i];
 			}
 		}
-		return fn(null);
+		return false
 	} else {
-		return fn(null);
+		return false;
 	}
 };
 
@@ -153,7 +153,7 @@ Room.prototype.getExit = function(roomObj, direction, fn) {
 		direction.roomObj.direction.roomObj <- how depth will work
 	}
 */
-Room.prototype.getAdjacent = function(roomObj, fn) {
+Room.prototype.getAdjacent = function(roomObj) {
 	var i = 0,
 	fndRoom,
 	roomArr = [];
@@ -161,14 +161,15 @@ Room.prototype.getAdjacent = function(roomObj, fn) {
 	for (i; i < roomObj.exits.length; i += 1) {
 		if (!roomObj.exits[i].door || roomObj.exits[i].door.isOpen) {
 			fndRoom = World.getRoomObject(roomObj.area, roomObj.exits[i].id);
+
 			roomArr.push(fndRoom);
 		}
 	}
 
-	return fn(roomArr);
+	return roomArr;
 };
 
-Room.prototype.getDisplay = function(areaName, roomId, fn) {
+Room.prototype.getDisplay = function(areaName, roomId) {
 	var room = this,
 	players =  World.getPlayersByRoomId(roomId),
 	roomObj = World.getRoomObject(areaName, roomId);
@@ -178,7 +179,7 @@ Room.prototype.getDisplay = function(areaName, roomId, fn) {
 };
 
 // Return a brief overview of a room
-Room.prototype.getBrief = function(roomObj, options, fn) {
+Room.prototype.getBrief = function(roomObj, options) {
 	var room = this,
 	i = 0,
 	displayHTML = '',
@@ -218,11 +219,7 @@ Room.prototype.getBrief = function(roomObj, options, fn) {
 		displayHTML += '<p class="room-content">' + roomObj.brief + '</p>';
 	}
 
-	if (typeof fn === 'function') {
-		return fn(displayHTML, roomObj);
-	} else {
-		
-	}
+	return displayHTML;
 };
 
 Room.prototype.removeItem = function(roomObj, item) {
@@ -286,21 +283,12 @@ Room.prototype.processEvents = function(roomObj, player, eventName, fn) {
 	}
 };
 
-Room.prototype.addCorpse = function(roomObj, corpse, fn) {
+Room.prototype.addCorpse = function(roomObj, corpse) {
 	var room = this;
 
-	corpse.level = 1;
-	corpse.short = 'rotting corpse of a ' + corpse.name;
-	corpse.decay = 1;
-	corpse.itemType = 'corpse';
-	corpse.corpse = true;
-	corpse.weight = corpse.weight - 1;
-	corpse.chp = 0;
-	corpse.hp = 0;
+	roomObj = room.addItem(roomObj, corpse);
 
-	room.addItem(roomObj, corpse, function(roomObj, corpse) {
-		return fn(roomObj, corpse);
-	});
+	return roomObj;
 };
 
 module.exports.room = new Room();

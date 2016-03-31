@@ -108,6 +108,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				return Character.login(r, s, function (name, s, fnd) {
 					if (fnd) {
 						s.join('mud'); // mud is one of two rooms, 'creation' being the other
+						
 						Character.load(name, s, function (s) {
 							Character.getPassword(s, function(s) {
 								s.on('cmd', function (r) {
