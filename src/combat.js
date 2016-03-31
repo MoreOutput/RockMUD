@@ -79,6 +79,8 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	damage = 0,
 	dodged = false,
 	blocked = false,
+	adjective,
+	abstractNoun,
 	weapon;
 
 	// Is a player attacking something
@@ -155,8 +157,9 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						damage = Math.round(damage);
 					}
 
-					var adjective = combat.getDamageAdjective(damage);
-					var abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
+					adjective = combat.getDamageAdjective(damage);
+					
+					abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
 
 					opponent.chp -= damage;
 
@@ -287,6 +290,7 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 	
 	if (exp > 0) {
 		player.exp += exp;
+
 		endOfCombatMsg = 'You won the fight! You learn some things, resulting in ' + exp + ' experience points.';
 	} else {
 		endOfCombatMsg ='You won but learned nothing.';
@@ -294,6 +298,7 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 
 	if (opponent.gold) {
 		player.gold += opponent.gold;
+
 		endOfCombatMsg += ' <span class="yellow">You find ' + opponent.gold + ' coins on the corpse.</span>';
 	}
 	
@@ -340,6 +345,7 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 			if (player.position !== 'fighting' || opponent.position !== 'fighting') {
 				World.prompt(player);
 				World.prompt(opponent);
+
 				clearInterval(combatInterval);
 			} else {
 				if (opponent.chp <= 0 && !opponent.isPlayer) {
