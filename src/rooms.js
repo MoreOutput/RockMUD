@@ -10,9 +10,10 @@ Room = function() {
 
 };
 
-Room.prototype.checkExitCriteria = function(targetRoom, exitObj, player) {
+// Given a room object and
+Room.prototype.getAdjacentExit = function(targetRoom, exitObj, player) {
 	var i = 0,
-	targetExit;
+	targetExit = false;
 
 	for (i; i < targetRoom.exits.length; i += 1) {
 		if (exitObj.id === targetRoom.id && targetRoom.exits[i].door) {
@@ -23,15 +24,7 @@ Room.prototype.checkExitCriteria = function(targetRoom, exitObj, player) {
 		}
 	}
 
-	if (targetExit) {
-		if (exitObj.door.locked === false) {
-			return targetExit;
-		} else {
-			return false;
-		}
-	} else {
-		return false;
-	}
+	return targetExit;
 };
 
 Room.prototype.checkEntranceCriteria = function(roomObj, exitObj, player) {
@@ -106,30 +99,10 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 Room.prototype.addItem = function(roomObj, item) {
 	roomObj.items.push(item);
-
-	roomObj;
 };
 
-// does a string match an exit in the room
-Room.prototype.checkExit = function(roomObj, direction) { 
-	var i = 0;
-
-	if (roomObj.exits.length > 0) {
-		for (i; i < roomObj.exits.length; i += 1) {
-			if (direction === roomObj.exits[i].cmd) {
-				return roomObj.exits[i];
-			} else if (roomObj.exits[i].door && roomObj.exits[i].door.name === direction) {
-				return roomObj.exits[i];
-			}
-		}
-
-		return false;
-	} else {
-		return false;
-	}
-};
-
-// Get an exit by direction; empty direction results in an array of all exit objects
+// Get an exit from a room by direction; 
+// empty direction results in an array of all exit objects
 Room.prototype.getExit = function(roomObj, direction) { 
 	var i = 0;
 

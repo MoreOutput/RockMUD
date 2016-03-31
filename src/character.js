@@ -609,8 +609,6 @@ Character.prototype.xpRot = function() {
 // push an item into a players inventory, checks items to ensure a player can use it
 Character.prototype.addToInventory = function(player, item) {
 	player.items.push(item);
-
-	return player;
 };
 
 /*
@@ -646,7 +644,7 @@ Character.prototype.getLights = function(player) {
 };
 
 // All keys in the characters inventory
-Character.prototype.getKeys = function(player, fn) {
+Character.prototype.getKeys = function(player) {
 	var i = 0,
 	lights = [];
 
@@ -657,30 +655,22 @@ Character.prototype.getKeys = function(player, fn) {
 		}
 	}
 
-	if (typeof fn === 'function') {
-		return fn(lights);
-	} else {
-		return lights;
-	}
+	return lights;
 };
 
 // if a character has a specific key
 // keyId is the id found on exitObj.door.id
-Character.prototype.hasKey = function(player, keyId, fn) {
+Character.prototype.getKey = function(player, keyId) {
 	var i = 0,
 	key;
 
 	for (i; i < player.items.length; i += 1) {
-		if (player.items[i].isKey && player.items[i].id === keyId) {
-			key = player.items[i];
+		if (player.items[i].isKey && player.items[i].id === keyId.toString()) {
+			return player.items[i];
 		}
 	}
 
-	if (typeof fn === 'function') {
-		return fn(key);
-	} else {
-		return key;
-	}
+	return false;
 };
 
 Character.prototype.getStatsFromItems = function(items, fn) {
@@ -724,10 +714,23 @@ Character.prototype.getContainers = function(player) {
     for (i; i < player.items.length; i += 1) {
         if (player.items[i].itemType === 'container') {
             containers.push(player.items[i]);
-        }       
+        }
     }
 
     return containers;
+};
+
+// returns a skill object in player.skills
+Character.prototype.getSkill = function(player, skillName) {
+    var i = 0;
+
+    for (i; i < player.skills.length; i += 1) {
+        if (player.skills[i].name === skillName) {
+            return player.skills[i];
+        }
+    }
+
+    return false;
 };
 
 Character.prototype.removeItem = function(player, item) {
@@ -741,8 +744,6 @@ Character.prototype.removeItem = function(player, item) {
 	}
 
 	player.items = newArr;
-
-	return player;
 };
 
 Character.prototype.removeEq = function(player, item, fn) {
@@ -759,8 +760,8 @@ Character.prototype.removeEq = function(player, item, fn) {
 	return true;
 };
 
-Character.prototype.getItem = function(eqArr, command) {
-	return World.search(eqArr, command).item;
+Character.prototype.getItem = function(player, command) {
+	return World.search(player.eq, command).item;
 };
 
 Character.prototype.wear = function(target, item, fn) {

@@ -17,10 +17,6 @@ areas = World.areas,
 
 Cmd = function () {};
 
-Cmd.prototype.fire = function(commandName, target, command, fn) {
-	return this[commandName](target, command, fn);
-};
-
 Cmd.prototype.scan = function(target, command) {
 	var roomObj,
 	rooms,
@@ -219,14 +215,14 @@ Cmd.prototype.open = function(target, command, fn) {
 		|| target.position === 'fighting') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
-		exitObj = Room.checkExit(roomObj, command.arg);
+		exitObj = Room.getExit(roomObj, command.arg);
 
 		if (exitObj && exitObj.door && !exitObj.door.isOpen) {
 			targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
 
-			targetExit = Room.checkExitCriteria(targetRoom, exitObj, target);
+			targetExit = Room.getAdjacentExit(targetRoom, exitObj, target);
 
-			if (targetExit) {
+			if (targetExit && !exitObj.door.locked) {
 				exitObj.door.isOpen = true;
 				targetExit.door.isOpen = true;
 
@@ -274,14 +270,14 @@ Cmd.prototype.close = function(target, command, fn) {
 		|| target.position === 'fighting') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
-		exitObj = Room.checkExit(roomObj, command.arg);
+		exitObj = Room.getExit(roomObj, command.arg);
 
 		if (exitObj && exitObj.door && exitObj.door.isOpen === true) {
 			targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
 
-			targetExit = Room.checkExitCriteria(targetRoom, exitObj, target);
+			targetExit = Room.getAdjacentExit(targetRoom, exitObj, target);
 
-			if (targetExit) {
+			if (targetExit && !exitObj.door.locked) {
 				exitObj.door.isOpen = false;
 				targetExit.door.isOpen = false;
 
@@ -316,31 +312,37 @@ Cmd.prototype.close = function(target, command, fn) {
 	}
 };
 
-Cmd.prototype.unlock = function(target, command, fn) {
+Cmd.prototype.unlock = function(target, command) {
+	var roomObj,
+	exitObj,
+	targetRoom,
+	targetExit,
+	key;
+
 	if (command.msg) {
 		if (target.position === 'standing' 
 			|| target.position === 'resting' 
 			|| target.position === 'fighting') {
-			World.getRoomObject(target.area, target.roomid, function(roomObj) {
-				Room.checkExit(roomObj, command.arg, function(exitObj) {
-					if (exitObj && exitObj.door && exitObj.door.locked === true) {
-						World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
-							Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
-								Character.hasKey(target, targetExit.door.key, function(key) {
-									if (key) {
-										exitObj.door.locked = false;
-										World.msgPlayer(target, {msg: 'You unlock the ' + exitObj.door.name + ' with a ' + key.short, styleClass: 'error'});
-									} else {
-										World.msgPlayer(target, {msg: 'You don\'t seem to have the key.', styleClass: 'error'});
-									}
-								});
-							});
-						});
-					} else {
-						World.msgPlayer(target, {msg: 'That doesn\'t require unlocking.', styleClass: 'error'});
-					}
-				});
-			});
+			
+			roomObj = World.getRoomObject(target.area, target.roomid);
+			exitObj = Room.getExit(roomObj, command.arg);
+			
+			if (exitObj && exitObj.door && exitObj.door.locked === true) {
+				targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
+
+				targetExit = Room.getAdjacentExit(targetRoom, exitObj, target);
+
+				key = Character.getKey(target, targetExit.door.key);
+
+				if (key) {
+					exitObj.door.locked = false;
+					World.msgPlayer(target, {msg: 'You unlock the ' + exitObj.door.name + ' with a ' + key.short, styleClass: 'error'});
+				} else {
+					World.msgPlayer(target, {msg: 'You don\'t seem to have the key.', styleClass: 'error'});
+				}
+			} else {
+				World.msgPlayer(target, {msg: 'That doesn\'t require unlocking.', styleClass: 'error'});
+			}
 		} else {
 			World.msgPlayer(target, {msg: 'You aren\'t in a position to unlock anything right now.'});
 		}
@@ -350,34 +352,41 @@ Cmd.prototype.unlock = function(target, command, fn) {
 };
 
 Cmd.prototype.lock = function(target, command, fn) {
+	var roomObj,
+	exitObj,
+	targetRoom,
+	targetExit,
+	key;
+
 	if (command.msg) {
 		if (target.position === 'standing' 
 			|| target.position === 'resting' 
 			|| target.position === 'fighting') {
-			World.getRoomObject(target.area, target.roomid, function(roomObj) {
-				Room.checkExit(roomObj, command.arg, function(exitObj) {
-					if (exitObj && exitObj.door && exitObj.door.locked === false) {
-						World.getRoomObject(roomObj.area, exitObj.id, function(targetRoom) {
-							Room.checkExitCriteria(targetRoom, exitObj, target, function(clearToMove, targetExit) {
-								Character.hasKey(target, targetExit.door.key, function(key) {
-									if (key) {
-										if (exitObj.door.isOpen === true) {
-											exitObj.door.isOpen = false;
-										}
+			
+			roomObj = World.getRoomObject(target.area, target.roomid);
+			exitObj = Room.getExit(roomObj, command.arg);
 
-										exitObj.door.locked = true;
-										World.msgPlayer(target, {msg: 'You lock the ' + exitObj.door.name + ' with a ' + key.short, styleClass: 'error'});
-									} else {
-										World.msgPlayer(target, {msg: 'You don\'t seem to have the key.', styleClass: 'error'});
-									}
-								});
-							});
-						});
-					} else {
-						World.msgPlayer(target, {msg: 'You cant lock that.', styleClass: 'error'});
+			if (exitObj && exitObj.door && exitObj.door.locked === false) {
+				targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
+
+				targetExit = Room.getAdjacentExit(targetRoom, exitObj, target);
+
+				key = Character.getKey(target, targetExit.door.key);
+
+				if (key) {
+					if (exitObj.door.isOpen === true) {
+						exitObj.door.isOpen = false;
 					}
-				});
-			});
+
+					exitObj.door.locked = true;
+
+					World.msgPlayer(target, {msg: 'You lock the ' + exitObj.door.name + ' with a ' + key.short, styleClass: 'error'});
+				} else {
+					World.msgPlayer(target, {msg: 'You don\'t seem to have the key.', styleClass: 'error'});
+				}
+			} else {
+				World.msgPlayer(target, {msg: 'You cant lock that.', styleClass: 'error'});
+			}
 		} else {
 			World.msgPlayer(target, {msg: 'You aren\'t in a position to lock anything right now.'});
 		}
@@ -394,7 +403,6 @@ Cmd.prototype.move = function(target, command, fn) {
 	displayHTML,
 	targetRoom,
 	exitObj,
-	targetExit,
 	moveRoll = World.dice.roll(1, 4),
 	roomObj;
 
@@ -404,7 +412,7 @@ Cmd.prototype.move = function(target, command, fn) {
 		&& target.wait === 0) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
-		exitObj = Room.checkExit(roomObj, direction);
+		exitObj = Room.getExit(roomObj, direction);
 
 		if (exitObj) {
 			if (!exitObj || !exitObj.door || exitObj.door.isOpen === true ) {
@@ -429,11 +437,12 @@ Cmd.prototype.move = function(target, command, fn) {
 						styleClass: 'room'
 					});
 
-					roomObj = Room.removePlayer(roomObj, target);
+					Room.removePlayer(roomObj, target);
 
 					targetRoom.playersInRoom.push(target);
 				} else {
-					targetRoom = Room.removeMob(roomObj, target);
+					Room.removeMob(roomObj, target);
+
 					targetRoom.monsters.push(target);
 				}
 
@@ -547,9 +556,9 @@ Cmd.prototype.get = function(target, command, fn) {
 				item = World.search(roomObj.items, command);
 
 				if (item) {
-					roomObj = Room.removeItem(roomObj, item);
+					Room.removeItem(roomObj, item);
 
-					target = Character.addToInventory(target, item);
+					Character.addToInventory(target, item);
 
 					if (item) {
 						World.msgRoom(roomObj, {
@@ -584,8 +593,9 @@ Cmd.prototype.get = function(target, command, fn) {
 						item = roomObj.items[i - 1];
 					}
 
-					roomObj = Room.removeItem(roomObj, item);
-					target = Character.addToInventory(target, item);
+					Room.removeItem(roomObj, item);
+
+					Character.addToInventory(target, item);
 
 					if (i === itemLen - 1) {
 						World.msgRoom(roomObj, {
@@ -630,11 +640,12 @@ Cmd.prototype.drop = function(target, command, fn) {
 
 			if (command.msg !== 'all') {
 				item = World.search(target.items, command);
+
 				if (item) {
-					target = Character.removeItem(target, item);
+					Character.removeItem(target, item);
 
 					if (item) {
-						roomObj = Room.addItem(roomObj, item);
+						Room.addItem(roomObj, item);
 
 						World.msgRoom(roomObj, {
 							msg: target.displayName + 'drops a ' + item.short,
@@ -659,10 +670,10 @@ Cmd.prototype.drop = function(target, command, fn) {
 				for (i; i < itemLen; i += 1) {
 					item = itemArr[i];
 					
-					target = Character.removeItem(target, item);
+					Character.removeItem(target, item);
 
 					if (item) {
-						roomObj = Room.addItem(roomObj, item);
+						Room.addItem(roomObj, item);
 
 						if (roomObj.items.length === itemLen) {
 							World.msgRoom(roomObj, {
@@ -740,6 +751,7 @@ Cmd.prototype.flee = function(player, command) {
 Cmd.prototype.cast = function(player, command, fn) {
 	var cmd = this,
 	mob,
+	skillObj,
 	roomObj;
 
 	if (player.position !== 'sleeping') {
@@ -748,8 +760,10 @@ Cmd.prototype.cast = function(player, command, fn) {
 					if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fleeing') {
 						roomObj = World.getRoomObject(player.area, player.roomid);
 						
+						skillObj = Character.getSkill(player, command.arg);
+
 						if (!command.input && player.opponent) {
-							return Spells[command.arg](player, player.opponent, roomObj, command, function() {
+							return Spells[command.arg](skillObj, player, player.opponent, roomObj, command, function() {
 								if (!player.opponent && player.position !== 'fighting') {
 									cmd.kill(player, command, roomObj, fn);
 								}
@@ -758,7 +772,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 							mob = World.search(roomObj.monsters, command);
 
 							if (mob) {
-								return Spells[command.arg](player, mob, roomObj, command, function() {
+								return Spells[command.arg](skillObj, player, mob, roomObj, command, function() {
 									if (!player.opponent && player.position !== 'fighting') {
 										cmd.kill(player, command, roomObj, fn);
 									}
@@ -1143,7 +1157,7 @@ Cmd.prototype.remove = function(target, command) {
 
 	if (target.position !== 'sleeping' && target.position !== 'resting') {
 		if (command.msg !== '') {
-			item = Character.getItem(target.eq, command);
+			item = Character.getItem(player, command);
 
 			if (item) {
 				removed = Character.removeEq(target, item);

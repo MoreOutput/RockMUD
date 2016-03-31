@@ -331,7 +331,7 @@ World.prototype.rollItems = function(itemArr, roomid) {
 				for (i; i < item.behaviors.length; i += 1) {
 					aiName = item.behaviors[i];
 
-					behavior = world.getAI(ai);
+					behavior = world.getAI(aiName);
 
 					item = world.extend(item, behavior);
 
@@ -579,12 +579,10 @@ World.prototype.msgRoom = function(roomObj, msgObj) {
 	i = 0,
 	s;
 
-	if (!roomObj.isPlayer)
-
 	for (i; i < roomObj.playersInRoom.length; i += 1) {
 		s = world.players[i].socket;
 
-		if (s.player && s.player.name !== msgObj.playerName) {
+		if (s.player && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id) {
 			world.msgPlayer(s, msgObj);
 		}
 	}

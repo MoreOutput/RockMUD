@@ -13,7 +13,7 @@ module.exports = {
         var mob = this;
 
         if (mob.position === 'standing' && target.isPlayer && target.roomid === mob.roomid) {
-            Cmd.fire('kill', mob, {
+            Cmd.kill(mob, {
                 arg: target.name
             });
         }
