@@ -104,7 +104,6 @@ World = function() {
 										}
 									
 										world.motd = '<div class="motd">' + html + '</div>';
-									
 									});
 
 									world.areas = areas;

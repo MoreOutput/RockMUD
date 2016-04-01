@@ -5,7 +5,7 @@ World = require('../src/world').world;
 
 module.exports = {
 	"name" : "Midgaard",
-	"id" : 1,
+	"id" : "1",
 	"type" : "city",
 	"levels" : "All",
 	"description" : "The first city.",
@@ -21,27 +21,27 @@ module.exports = {
 	"respawnTick": 0,
 	"rooms" : [
 		{
-			"id" : 1,
+			"id" : "1",
 			"title" : "Town Square",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
 				{
 					"cmd" : "north",
-					"id" : 2
+					"id" : "2"
 				}, {
 					"cmd" : "east",
-					"id" : 3
+					"id" : "3"
 				}, {
 					"cmd" : "south",
-					"id" : 4
+					"id" : "4"
 				}, {
 					"cmd" : "west",
-					"id" : 5
+					"id" : "5"
 				},
 				{
 					"cmd" : "down",
-					"id" : 6,
+					"id" : "6",
 					"door": {
 						"isOpen": false,
 						"locked": true,
@@ -181,7 +181,21 @@ module.exports = {
 				"level": 1,
 				"itemType": "container",
 				"weight": 1,
-				"items": [],
+				"items": [{
+					"name": "Sewer key", 
+					"short": "small rusty key",
+					"long": "A small rusty key made of low quality iron." ,
+					"area": "Midgaard",
+					"id": 101,
+					"level": 1,
+					"itemType": "key",
+					"material": "iron", 
+					"weight": 0,
+					"slot": "",
+					"value": 1,
+					"equipped": false,
+					"isKey": true
+				}],
 				"isOpen": true,
 				"carryLimit": 50,
 				"flags": []
@@ -190,14 +204,14 @@ module.exports = {
 			"onEnter": ""
 		},
 		{
-			"id" : 2,
+			"id" : "2",
 			"title" : "North of Town Square",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
 				{
 					"cmd" : "south",
-					"id" : 1
+					"id" : "1"
 				}
 			],
 			"playersInRoom": [],
@@ -220,7 +234,7 @@ module.exports = {
 			"flags" : []
 		},
 		{
-			"id" : 3,
+			"id" : "3",
 			"title" : "East of Town Square",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
@@ -229,37 +243,7 @@ module.exports = {
 			"exits" : [
 				{
 					"cmd" : "west",
-					"id" : 1
-				}
-			],
-			"playersInRoom": [],
-			"monsters" : [],
-			"items" : [{
-				"name": "Sewer key", 
-				"short": "small rusty key",
-				"long": "A small rusty key made of low quality iron." ,
-				"area": "Midgaard",
-				"id": 101,
-				"level": 1,
-				"itemType": "key",
-				"material": "iron", 
-				"weight": 0,
-				"slot": "",
-				"value": 1,
-				"equipped": false,
-				"isKey": true
-			}],
-			"flags" : []
-		},
-		{
-			"id" : 4,
-			"title" : "South of Town Square",
-			"area": "Midgaard",
-			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
-			"exits" : [
-				{
-					"cmd" : "north",
-					"id" : 1
+					"id" : "1"
 				}
 			],
 			"playersInRoom": [],
@@ -268,18 +252,34 @@ module.exports = {
 			"flags" : []
 		},
 		{
-			"id" : 5,
+			"id" : "4",
+			"title" : "South of Town Square",
+			"area": "Midgaard",
+			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
+			"exits" : [
+				{
+					"cmd" : "north",
+					"id" : "1"
+				}
+			],
+			"playersInRoom": [],
+			"monsters" : [],
+			"items" : [],
+			"flags" : []
+		},
+		{
+			"id" : "5",
 			"title" : "West of Town Square",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
 				{
 					"cmd" : "west",
-					"id" : 8
+					"id" : "8"
 				},
 				{
 					"cmd" : "east",
-					"id" : 1
+					"id" : "1"
 				}
 			],
 			"playersInRoom": [],
@@ -302,14 +302,14 @@ module.exports = {
 			"flags" : []
 		},
 		{
-			"id" : 6,
+			"id" : "6",
 			"title" : "Beneath Town Square",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
 				{
 					"cmd" : "up",
-					"id" : 1,
+					"id" : "1",
 					"door": {
 						"name": "gate",
 						"isOpen": false,
@@ -339,14 +339,14 @@ module.exports = {
 			"flags" : []
 		},
 		{
-			"id" : 8,
+			"id" : "8",
 			"title" : "Heading to the western gate",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
 				{
 					"cmd" : "east",
-					"id" : 5
+					"id" : "5"
 				}
 			],
 			"playersInRoom": [],

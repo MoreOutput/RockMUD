@@ -13,7 +13,7 @@ Roller.prototype.roll = function(dNum, dSides, mod) {
 	}
 
 	mod = Math.round(mod);
-		
+
 	for (i; i < dNum; i += 1) {
 		total = total + Math.floor((Math.random() * dSides) + 1);
 	}
@@ -23,7 +23,7 @@ Roller.prototype.roll = function(dNum, dSides, mod) {
 	return Math.round(total);
 };
 
-// return an array of numbers of length @number and between 0 - @arr.length
+// return an array of numbers of length @number and between 0 - upperBound
 Roller.prototype.randomPick = function(number, upperBound) {
 	var i = 0,
 	resultArr = [],
@@ -154,9 +154,7 @@ Roller.prototype.calExp = function(player, expOpt) {
 
 			return exp;
 		} else {
-			dice.roll(1, 2, function(total) {
-				return total * 10;
-			});
+			return dice.roll(1, 2) * 10;
 		}
 	} else {
 		return exp;

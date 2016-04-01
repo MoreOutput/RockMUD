@@ -137,7 +137,7 @@ font-weight: bold;
 color: #ff0033;
 }
 .error {
-color: yellow;
+color: #ff0033;
 }
 .table-no-border>thead>tr>th, 
 .table-no-border>tbody>tr>th, 

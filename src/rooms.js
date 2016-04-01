@@ -18,7 +18,7 @@ Room.prototype.getAdjacentExit = function(targetRoom, exitObj, player) {
 	for (i; i < targetRoom.exits.length; i += 1) {
 		if (exitObj.id === targetRoom.id && targetRoom.exits[i].door) {
 			if (targetRoom.exits[i].door.name === exitObj.door.name || targetRoom.exits[i].door.id
-				 && exitObj.door.id && targetRoom.exits[i].door.id === exitObj.door.id) {
+				&& exitObj.door.id && targetRoom.exits[i].door.id === exitObj.door.id) {
 				targetExit = targetRoom.exits[i];
 			}
 		}
@@ -93,12 +93,8 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 	displayHTML = '<div class="room"><h2 class="room-title">' + roomObj.title + '</h2>' + 
 	'<p class="room-content">' + roomObj.content + '</p>' + displayHTML + '</div>';
-	
-	return displayHTML;
-};
 
-Room.prototype.addItem = function(roomObj, item) {
-	roomObj.items.push(item);
+	return displayHTML;
 };
 
 // Get an exit from a room by direction; 
@@ -114,6 +110,7 @@ Room.prototype.getExit = function(roomObj, direction) {
 				return roomObj.exits[i];
 			}
 		}
+
 		return false
 	} else {
 		return false;
@@ -165,10 +162,10 @@ Room.prototype.getBrief = function(roomObj, options) {
 		for (i; i < monsters.length; i += 1) {
 			if (!monsters[i].short) {
 				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' + 
-				 monsters[i].position + ' there/li>';
+				monsters[i].position + ' there/li>';
 			} else {
 				displayHTML += '<li class="room-monster">' + monsters[i].short + ' is ' + 
-				 monsters[i].position + ' there</li>';
+				monsters[i].position + ' there</li>';
 			}
 		}
 
@@ -195,6 +192,22 @@ Room.prototype.getBrief = function(roomObj, options) {
 	return displayHTML;
 };
 
+Room.prototype.addItem = function(roomObj, item) {
+	roomObj.items.push(item);
+};
+
+Room.prototype.getItem = function(roomObj, command) {
+	var i = 0;
+
+	for (i; i < roomObj.items.length; i += 1) {
+		if (roomObj.items[i].name.indexOf(command.arg) !== -1) {
+			return roomObj.items[i];
+		}
+	}
+
+	return false;
+};
+
 Room.prototype.removeItem = function(roomObj, item) {
 	var i = 0,
 	newArr = [];
@@ -206,8 +219,6 @@ Room.prototype.removeItem = function(roomObj, item) {
 	}
 
 	roomObj.items = newArr;
-
-	return roomObj;
 };
 
 Room.prototype.removePlayer = function(roomObj, player) {

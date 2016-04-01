@@ -3,11 +3,11 @@ RockMUD
 
 **RockMUD (0.2.0) is a Node WebSockets MUD server**
 
-Try the latest on this Heroku hobby instance: http://rockmud.heroku.com
+Try the latest on this Heroku hobby instance: http://rockmud.heroku.com. If you connect to the demo server type 'help commands' to get a full(ish) list of the current commands.
 
 Goals:
 * A Diku-like MUD experience from within the browser.
-* Enable Development
+* Enable quick development.
 * Real-time browser OLC and world management.
 
 Notes on dependencies: 
@@ -17,13 +17,14 @@ Notes on dependencies:
 
 Some things Currently in 0.2.0:
 * No command whitelisting (add a command function, and it becomes a in-game command instantly). RockMUD does not rely on parsing commands on a tick.
-* Character creation (Races, Classes, Stats, Passwords) and saving as json files (/players).
+* Character creation (Races, Classes, stats, passwords) and saving as json files (/players).
 * Channels (chat, say, yell, tell, reply)
 * Uniform way of scripting commands -- with permission checking
 * Command aliases defined client side.
 * Various 'standard' commands (see: HELP COMMANDS)
 * Basic Combat (see: kill <mob name>)
 * Inventory
+* Containers
 * Ticks
 * Dynamic movement directions/options.
 * Message Templates
@@ -87,6 +88,9 @@ HTML templates mainly retrieved to ease complex display. For RockMUD core this m
 
 **/ai**  
 Mob specific AI scripts. This are merged into game items after they are loaded from their respective area files. AI can be written directly into the area file, but ai scripts are outlined here when they can be reused. RockMUD core aims to have 4: shopkeeper.js, wander.js, aggie.js and mayor.js.
+
+**/public**
+Public assets like client side javascript and CSS.
 
 ##Files##
 **/config.json**

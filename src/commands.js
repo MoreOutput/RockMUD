@@ -546,73 +546,90 @@ Cmd.prototype.get = function(target, command, fn) {
 	var roomObj,
 	i = 0,
 	item,
+	container,
 	itemLen;
 
 	if (target.position !== 'sleeping') {
 		if (command.msg !== '') {
-			roomObj = World.getRoomObject(target.area, target.roomid);
+			container = Character.getContainer(target, command);
 
-			if (command.msg !== 'all') {
-				item = World.search(roomObj.items, command);
+			if (!container) {
+				roomObj = World.getRoomObject(target.area, target.roomid);
 
-				if (item) {
-					Room.removeItem(roomObj, item);
-
-					Character.addToInventory(target, item);
+				if (command.msg !== 'all') {
+					item = Room.getItem(roomObj, command);
 
 					if (item) {
-						World.msgRoom(roomObj, {
-							msg: target.displayName + ' picks up a ' + item.short,
-							playerName: target.name,
-							styleClass: 'cmd-get yellow'
-						});
+						Room.removeItem(roomObj, item);
 
-						World.msgPlayer(target, {
-							msg: 'You pick up a ' + item.short,
-							styleClass: 'cmd-get blue'
-						});
+						Character.addToInventory(target, item);
+
+						if (item) {
+							World.msgRoom(roomObj, {
+								msg: target.displayName + ' picks up a ' + item.short,
+								playerName: target.name,
+								styleClass: 'cmd-get yellow'
+							});
+
+							World.msgPlayer(target, {
+								msg: 'You pick up a ' + item.short,
+								styleClass: 'cmd-get blue'
+							});
+
+							if (typeof fn === 'function') {
+								return fn(target, roomObj, item);
+							}
+						}
+					} else {
+						World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
 
 						if (typeof fn === 'function') {
-							return fn(target, roomObj, item);
+							return fn(target, roomObj, false);
 						}
 					}
 				} else {
-					World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
+					itemLen = roomObj.items.length;
 
-					if (typeof fn === 'function') {
-						return fn(target, roomObj, false);
+					for (i; i < itemLen; i += 1) {
+						if (i === 0) {
+							item = roomObj.items[i];
+						} else {
+							item = roomObj.items[i - 1];
+						}
+
+						Room.removeItem(roomObj, item);
+
+						Character.addToInventory(target, item);
+
+						if (i === itemLen - 1) {
+							World.msgRoom(roomObj, {
+								msg: target.displayName + ' picks up everything he can.',
+								playerName: target.name,
+								styleClass: 'cmd-get-all yellow'
+							});
+
+							World.msgPlayer(target, {
+								msg: 'You grab everything',
+								styleClass: 'cmd-get-all blue'
+							});
+
+							if (typeof fn === 'function') {
+								return fn(target, roomObj, item);
+							}
+						}
 					}
 				}
 			} else {
-				itemLen = roomObj.items.length;
+				item = Character.getFromContainer(container, command);
 
-				for (i; i < itemLen; i += 1) {
-					if (i === 0) {
-						item = roomObj.items[i];
-					} else {
-						item = roomObj.items[i - 1];
-					}
-
-					Room.removeItem(roomObj, item);
-
+				if (item) {
+					// for put
+					//var weight = Character.getWeightOfItem(container);
+					//if (weight <= (weight + item.weight))
+					Character.removeFromContainer(container, item);
 					Character.addToInventory(target, item);
-
-					if (i === itemLen - 1) {
-						World.msgRoom(roomObj, {
-							msg: target.displayName + ' picks up everything he can.',
-							playerName: target.name,
-							styleClass: 'cmd-get-all yellow'
-						});
-
-						World.msgPlayer(target, {
-							msg: 'You grab everything',
-							styleClass: 'cmd-get-all blue'
-						});
-
-						if (typeof fn === 'function') {
-							return fn(target, roomObj, item);
-						}
-					}
+				} else {
+					World.msgPlayer(target, {msg: 'You dont see that in there.', styleClass: 'error'});
 				}
 			}
 		} else {

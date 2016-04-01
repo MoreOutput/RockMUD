@@ -76,7 +76,7 @@ Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 		
 	for (i; i < iterations; i += 1) {
 		hash = crypto.createHmac('sha512', salt).update(hash).digest('hex');
-	} 
+	}
 			
 	return fn(hash);
 };
@@ -86,7 +86,7 @@ Character.prototype.generateSalt = function(fn) {
 		if (ex) {
 			throw ex;
 		}
-			
+
 		fn(buf.toString('hex'));
 	});
 };
@@ -121,6 +121,7 @@ Character.prototype.getPassword = function(s, fn) {
 					} else {
 						if (msg === undefined) {
 							s.emit('msg', {msg: 'Error logging in, please retry.'});
+
 							return s.disconnect();
 						} else {
 							s.emit('msg', {msg: msg, res: 'end'});
@@ -665,7 +666,7 @@ Character.prototype.getKey = function(player, keyId) {
 	key;
 
 	for (i; i < player.items.length; i += 1) {
-		if (player.items[i].isKey && player.items[i].id === keyId.toString()) {
+		if (player.items[i].isKey && player.items[i].id === keyId) {
 			return player.items[i];
 		}
 	}
@@ -688,49 +689,69 @@ Character.prototype.getStatsFromEq = function(eq, fn) {
 
 };
 
-Character.prototype.getStr = function(player, mod, fn) {
-	Character
-	.statsFromItems
-	.statsFromAffects
-};
+Character.prototype.getContainer = function(player, command) {
+	var char = this,
+	containers = char.getContainers(player),
+	i = 0;
 
-Character.prototype.getContainer = function(name, containers) {
-    var char = this,
-    i = 0;
+	for (i; i < containers.length; i += 1) {
+		if (containers[i].name.indexOf(command.input)) {
+			return containers[i];
+		}
+	}
 
-    for (i; i < containers.length; i += 1) {
-        if (containers[i].name.indexOf(name)) {
-            return containers[i];
-        }
-    }
-
-    return false;
+	return false;
 };
 
 Character.prototype.getContainers = function(player) {
-    var i = 0,
-    containers = [];
+	var i = 0,
+	containers = [];
 
-    for (i; i < player.items.length; i += 1) {
-        if (player.items[i].itemType === 'container') {
-            containers.push(player.items[i]);
-        }
-    }
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].itemType === 'container') {
+			containers.push(player.items[i]);
+		}
+	}
 
-    return containers;
+	return containers;
+};
+
+Character.prototype.getFromContainer = function(container, command) {
+	var i = 0;
+
+	for (i; i < container.items.length; i += 1) {
+		if (container.items[i].name.indexOf(command.arg) !== -1) {
+			return container.items[i];
+		}
+	}
+
+	return false;
+};
+
+Character.prototype.removeFromContainer = function(container, item) {
+	var i = 0,
+	newArr = [];
+
+	for (i; i < container.items.length; i += 1) {
+		if (container.items[i].refId !== item.refId) {
+			newArr.push(container.items[i]);
+		}
+	}
+
+	container.items = newArr;
 };
 
 // returns a skill object in player.skills
 Character.prototype.getSkill = function(player, skillName) {
-    var i = 0;
+	var i = 0;
 
-    for (i; i < player.skills.length; i += 1) {
-        if (player.skills[i].name === skillName) {
-            return player.skills[i];
-        }
-    }
+	for (i; i < player.skills.length; i += 1) {
+		if (player.skills[i].name === skillName) {
+			return player.skills[i];
+		}
+	}
 
-    return false;
+	return false;
 };
 
 Character.prototype.removeItem = function(player, item) {
