@@ -76,7 +76,7 @@ module.exports = {
 					"itemType": "mob",
 					"items": [{
 						"name": "Midgaard city key", 
-						"short": "small key",
+						"short": "a small key",
 						"long": "A thin gold key with a ruby embbeded to the end." ,
 						"area": "Midgaard",
 						"id": 10,
@@ -174,7 +174,7 @@ module.exports = {
 				"flags": []
 			}, {
 				"name": "Burlap sack",
-				"short": "worn tan burlap sack",
+				"short": "worn, tan, burlap sack",
 				"long": "A tan burlap sack with frizzed edges and various stains." ,
 				"area": "Midgaard",
 				"id": 27,
@@ -329,6 +329,7 @@ module.exports = {
 				"diceMod": 2,
 				"hp": 120,
 				"chp": 120,
+				"kingdom": "reptile",
 				"gold": 3,
 				"size": {"value": 3, "display": "medium"},
 				"behaviors": [{

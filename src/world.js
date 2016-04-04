@@ -339,6 +339,10 @@ World.prototype.rollItems = function(itemArr, roomid) {
 			} else {
 				itemArr[index] = item;
 			}
+
+			if (item.items) {
+				world.rollItems(item.items);
+			}
 		}(itemArr[i], i));
 	}
 }

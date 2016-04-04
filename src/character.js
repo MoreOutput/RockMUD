@@ -716,6 +716,10 @@ Character.prototype.getContainers = function(player) {
 	return containers;
 };
 
+Character.prototype.addToContainer = function(container, item) {
+	container.items.push(item);
+};
+
 Character.prototype.getFromContainer = function(container, command) {
 	var i = 0;
 
@@ -782,7 +786,29 @@ Character.prototype.removeEq = function(player, item, fn) {
 };
 
 Character.prototype.getItem = function(player, command) {
-	return World.search(player.eq, command).item;
+	var i = 0,
+	newArr = [];
+
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].name.indexOf(command.arg) !== -1) {
+			return player.items[i];
+		}
+	}
+
+	return false;
+};
+
+Character.prototype.getItems = function(player, command) {
+	var i = 0,
+	newArr = [];
+
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].name.indexOf(command.arg) !== -1) {
+			newArr.push(player.items[i]);
+		}
+	}
+
+	return newArr;
 };
 
 Character.prototype.wear = function(target, item, fn) {

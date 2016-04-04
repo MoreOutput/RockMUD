@@ -623,11 +623,10 @@ Cmd.prototype.get = function(target, command, fn) {
 				item = Character.getFromContainer(container, command);
 
 				if (item) {
-					// for put
-					//var weight = Character.getWeightOfItem(container);
-					//if (weight <= (weight + item.weight))
 					Character.removeFromContainer(container, item);
 					Character.addToInventory(target, item);
+
+					World.msgPlayer(target, {msg: 'You remove a <strong>' + item.short + '</strong> from a ' + container.short + '.', styleClass: 'green'});
 				} else {
 					World.msgPlayer(target, {msg: 'You dont see that in there.', styleClass: 'error'});
 				}
@@ -641,6 +640,39 @@ Cmd.prototype.get = function(target, command, fn) {
 		}
 	} else {
 		World.msgPlayer(target, {msg: 'Get something while sleeping?', styleClass: 'error'});
+	}
+};
+
+Cmd.prototype.put = function(target, command) {
+	var roomObj,
+	i = 0,
+	item,
+	container,
+	itemLen;
+
+	if (target.position !== 'sleeping') {
+		if (command.msg !== '') {
+			container = Character.getContainer(target, command);
+
+			if (container) {
+				item = Character.getItem(target, command);
+
+				if (item) {
+					Character.removeItem(target, item);
+					Character.addToContainer(container, item);
+
+					World.msgPlayer(target, {msg: 'You put a <strong>' + item.short + '</strong> into a ' + container.short + '.', styleClass: 'green'});
+				} else {
+					World.msgPlayer(target, {msg: 'You aren\'t carrying anything by that name.', styleClass: 'error'});
+				}
+			} else {
+				World.msgPlayer(target, {msg: 'Into what? You don\'t seem to have that item.', styleClass: 'error'});
+			}
+		} else {
+			World.msgPlayer(target, {msg: 'Put what? Specify a target.', styleClass: 'error'});
+		}
+	} else {
+		World.msgPlayer(target, {msg: 'You are currently sleeping.', styleClass: 'error'});
 	}
 };
 
