@@ -248,7 +248,21 @@ module.exports = {
 			],
 			"playersInRoom": [],
 			"monsters" : [],
-			"items" : [],
+			"items" : [{
+				"name": "Used waterskin", 
+				"short": "brown waterskin",
+				"long": "A brown waterskin. The hide seems worn and used." ,
+				"area": "Midgaard",
+				"id": 102,
+				"level": 1,
+				"drinks": 6,
+				"maxDrinks": 6,
+				"itemType": "bottle",
+				"material": "leather",
+				"weight": 0,
+				"value": 1,
+				"equipped": false
+			}],
 			"flags" : []
 		},
 		{
