@@ -10,39 +10,32 @@ Room = function() {
 
 };
 
-Room.prototype.checkExitCriteria = function(targetRoom, exitObj, player, fn) {
+// Given a room object and
+Room.prototype.getAdjacentExit = function(targetRoom, exitObj, player) {
 	var i = 0,
-	targetExit;
+	targetExit = false;
 
 	for (i; i < targetRoom.exits.length; i += 1) {
 		if (exitObj.id === targetRoom.id && targetRoom.exits[i].door) {
 			if (targetRoom.exits[i].door.name === exitObj.door.name || targetRoom.exits[i].door.id
-				 && exitObj.door.id && targetRoom.exits[i].door.id === exitObj.door.id) {
+				&& exitObj.door.id && targetRoom.exits[i].door.id === exitObj.door.id) {
 				targetExit = targetRoom.exits[i];
 			}
 		}
 	}
 
-	if (targetExit) {
-		if (exitObj.door.locked === false) {
-			return fn(true, targetExit);
-		} else {
-			return fn(false, targetExit);
-		}
-	} else {
-		return fn(false, false);
-	}
+	return targetExit;
 };
 
-Room.prototype.checkEntranceCriteria = function(roomObj, exitObj, player, fn) {
-	return fn(true);
+Room.prototype.checkEntranceCriteria = function(roomObj, exitObj, player) {
+	return true;
 };
 
 Room.prototype.getByPosition = function() {
 
 };
 
-Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
+Room.prototype.getDisplayHTML = function(roomObj, options) {
 	var room = this,
 	i = 0,
 	displayHTML = '',
@@ -50,11 +43,6 @@ Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 	playersInRoom = roomObj.playersInRoom,
 	monsters = roomObj.monsters,
 	items = roomObj.items;
-
-	if (arguments.length === 2) {
-		fn = options;
-		options = null;
-	}
 
 	if (exits.length > 0) {
 		displayHTML += '<ul class="room-exits list-inline"><li class="list-label">Exits: </li>';
@@ -105,52 +93,27 @@ Room.prototype.getDisplayHTML = function(roomObj, options, fn) {
 
 	displayHTML = '<div class="room"><h2 class="room-title">' + roomObj.title + '</h2>' + 
 	'<p class="room-content">' + roomObj.content + '</p>' + displayHTML + '</div>';
-	
-	if (typeof fn === 'function') {
-		return fn(displayHTML, roomObj);
-	} else {
-		return displayHTML;
-	}
+
+	return displayHTML;
 };
 
-Room.prototype.addItem = function(roomObj, item, fn) {
-	roomObj.items.push(item);
-	return fn(roomObj, item);
-};
-
-// does a string match an exit in the room
-Room.prototype.checkExit = function(roomObj, direction, fn) { 
+// Get an exit from a room by direction; 
+// empty direction results in an array of all exit objects
+Room.prototype.getExit = function(roomObj, direction) { 
 	var i = 0;
 
 	if (roomObj.exits.length > 0) {
 		for (i; i < roomObj.exits.length; i += 1) {
 			if (direction === roomObj.exits[i].cmd) {
-				return fn(roomObj.exits[i]);
+				return roomObj.exits[i];
 			} else if (roomObj.exits[i].door && roomObj.exits[i].door.name === direction) {
-				return fn(roomObj.exits[i]);
+				return roomObj.exits[i];
 			}
 		}
-		return fn(null);
-	} else {
-		return fn(null);
-	}
-};
 
-// Get an exit by direction; empty direction results in an array of all exit objects
-Room.prototype.getExit = function(roomObj, direction, fn) { 
-	var i = 0;
-
-	if (roomObj.exits.length > 0) {
-		for (i; i < roomObj.exits.length; i += 1) {
-			if (direction === roomObj.exits[i].cmd) {
-				return fn(roomObj.exits[i]);
-			} else if (roomObj.exits[i].door && roomObj.exits[i].door.name === direction) {
-				return fn(roomObj.exits[i]);
-			}
-		}
-		return fn(null);
+		return false
 	} else {
-		return fn(null);
+		return false;
 	}
 };
 
@@ -160,36 +123,33 @@ Room.prototype.getExit = function(roomObj, direction, fn) {
 		direction.roomObj.direction.roomObj <- how depth will work
 	}
 */
-Room.prototype.getAdjacent = function(roomObj, fn) {
+Room.prototype.getAdjacent = function(roomObj) {
 	var i = 0,
+	fndRoom,
 	roomArr = [];
 
 	for (i; i < roomObj.exits.length; i += 1) {
 		if (!roomObj.exits[i].door || roomObj.exits[i].door.isOpen) {
-			World.getRoomObject(roomObj.area, roomObj.exits[i].id, function(fndRoom) {
-				roomArr.push(fndRoom);
-			});
+			fndRoom = World.getRoomObject(roomObj.area, roomObj.exits[i].id);
+
+			roomArr.push(fndRoom);
 		}
 	}
 
-	return fn(roomArr);
+	return roomArr;
 };
 
-Room.prototype.getDisplay = function(areaName, roomId, fn) {
-	var room = this;
+Room.prototype.getDisplay = function(areaName, roomId) {
+	var room = this,
+	players =  World.getPlayersByRoomId(roomId),
+	roomObj = World.getRoomObject(areaName, roomId);
+	roomObj.playersInRoom = players;
 
-	World.getRoomObject(areaName, roomId, function(roomObj) {
-		World.getPlayersByRoomId(roomId, function(players) {
-			roomObj.playersInRoom = players;
-			room.getDisplayHTML(roomObj, function(displayHTML) {
-				return fn(displayHTML, roomObj);
-			});
-		});
-	});
+	return room.getDisplayHTML(roomObj);
 };
 
 // Return a brief overview of a room
-Room.prototype.getBrief = function(roomObj, options, fn) {
+Room.prototype.getBrief = function(roomObj, options) {
 	var room = this,
 	i = 0,
 	displayHTML = '',
@@ -202,10 +162,10 @@ Room.prototype.getBrief = function(roomObj, options, fn) {
 		for (i; i < monsters.length; i += 1) {
 			if (!monsters[i].short) {
 				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' + 
-				 monsters[i].position + ' there/li>';
+				monsters[i].position + ' there/li>';
 			} else {
 				displayHTML += '<li class="room-monster">' + monsters[i].short + ' is ' + 
-				 monsters[i].position + ' there</li>';
+				monsters[i].position + ' there</li>';
 			}
 		}
 
@@ -229,14 +189,26 @@ Room.prototype.getBrief = function(roomObj, options, fn) {
 		displayHTML += '<p class="room-content">' + roomObj.brief + '</p>';
 	}
 
-	if (typeof fn === 'function') {
-		return fn(displayHTML, roomObj);
-	} else {
-		return displayHTML;
-	}
+	return displayHTML;
 };
 
-Room.prototype.removeItem = function(roomObj, item, fn) {
+Room.prototype.addItem = function(roomObj, item) {
+	roomObj.items.push(item);
+};
+
+Room.prototype.getItem = function(roomObj, command) {
+	var i = 0;
+
+	for (i; i < roomObj.items.length; i += 1) {
+		if (roomObj.items[i].name.indexOf(command.arg) !== -1) {
+			return roomObj.items[i];
+		}
+	}
+
+	return false;
+};
+
+Room.prototype.removeItem = function(roomObj, item) {
 	var i = 0,
 	newArr = [];
 
@@ -247,11 +219,9 @@ Room.prototype.removeItem = function(roomObj, item, fn) {
 	}
 
 	roomObj.items = newArr;
-
-	return fn(roomObj, item);
 };
 
-Room.prototype.removePlayer = function(roomObj, player, fn) {
+Room.prototype.removePlayer = function(roomObj, player) {
 	var i = 0,
 	newArr = [];
 
@@ -263,10 +233,10 @@ Room.prototype.removePlayer = function(roomObj, player, fn) {
 
 	roomObj.playersInRoom = newArr;
 
-	return fn(roomObj, player);
+	return roomObj;
 };
 
-Room.prototype.removeMob = function(roomObj, mob, fn) {
+Room.prototype.removeMob = function(roomObj, mob) {
 	var i = 0,
 	newArr = [];
 
@@ -278,7 +248,7 @@ Room.prototype.removeMob = function(roomObj, mob, fn) {
 
 	roomObj.monsters = newArr;
 
-	return fn(roomObj, mob);
+	return roomObj;
 };
 
 Room.prototype.processEvents = function(roomObj, player, eventName, fn) {
@@ -297,21 +267,12 @@ Room.prototype.processEvents = function(roomObj, player, eventName, fn) {
 	}
 };
 
-Room.prototype.addCorpse = function(roomObj, corpse, fn) {
+Room.prototype.addCorpse = function(roomObj, corpse) {
 	var room = this;
 
-	corpse.level = 1;
-	corpse.short = 'rotting corpse of a ' + corpse.name;
-	corpse.decay = 1;
-	corpse.itemType = 'corpse';
-	corpse.corpse = true;
-	corpse.weight = corpse.weight - 1;
-	corpse.chp = 0;
-	corpse.hp = 0;
+	roomObj = room.addItem(roomObj, corpse);
 
-	room.addItem(roomObj, corpse, function(roomObj, corpse) {
-		return fn(roomObj, corpse);
-	});
+	return roomObj;
 };
 
 module.exports.room = new Room();

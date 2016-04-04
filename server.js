@@ -108,6 +108,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				return Character.login(r, s, function (name, s, fnd) {
 					if (fnd) {
 						s.join('mud'); // mud is one of two rooms, 'creation' being the other
+						
 						Character.load(name, s, function (s) {
 							Character.getPassword(s, function(s) {
 								s.on('cmd', function (r) {
@@ -158,7 +159,10 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		});
 
 		s.on('disconnect', function () {
-			var i = 0;
+			var i = 0,
+			j = 0,
+			roomObj;
+
 			if (s.player !== undefined) {
 				for (i; i < World.players.length; i += 1) {	
 					if (World.players[i].name === s.player.name) {
@@ -166,15 +170,13 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 					}
 				}
 
-				World.getRoomObject(s.player.area, s.player.roomid, function(roomObj) {
-					var j = 0;
+				roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 
-					for (j; j < roomObj.playersInRoom.length; j += 1) {
-						if (roomObj.playersInRoom[j].name === s.player.name) {
-							roomObj.playersInRoom.splice(j, 1);
-						}
+				for (j; j < roomObj.playersInRoom.length; j += 1) {
+					if (roomObj.playersInRoom[j].name === s.player.name) {
+						roomObj.playersInRoom.splice(j, 1);
 					}
-				});
+				}
 			}
 		});
 	});

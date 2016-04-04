@@ -4,32 +4,27 @@ var Roller = function() {
 };
 
 // General dice rolling
-Roller.prototype.roll = function(dNum, dSides, mod, fn) {
+Roller.prototype.roll = function(dNum, dSides, mod) {
 	var total = 0,
 	i = 0;
 
-	if (isNaN(mod)) {
-		fn = mod;
+	if (!mod) {
 		mod = 0;
-	} else {
-		mod = Math.round(mod);
 	}
-		
+
+	mod = Math.round(mod);
+
 	for (i; i < dNum; i += 1) {
 		total = total + Math.floor((Math.random() * dSides) + 1);
 	}
 
 	total = total + mod;
 
-	if (typeof fn === 'function') {
-		return fn(Math.round(total));
-	} else {
-		return Math.round(total);
-	}
+	return Math.round(total);
 };
 
-// return an array of numbers of length @number and between 0 - @arr.length
-Roller.prototype.randomPick = function(number, upperBound, fn) {
+// return an array of numbers of length @number and between 0 - upperBound
+Roller.prototype.randomPick = function(number, upperBound) {
 	var i = 0,
 	resultArr = [],
 	randomNum = 0;
@@ -40,14 +35,10 @@ Roller.prototype.randomPick = function(number, upperBound, fn) {
 		resultArr.push(randomNum);
 	}
 
-	if (typeof fn === 'function') {
-		return fn(resultArr);
-	} else {
-		return resultArr;
-	}
+	return resultArr;
 };
 
-Roller.prototype.getDexMod = function(target, mod, fn) {
+Roller.prototype.getDexMod = function(target, mod) {
 	var sizeMod = 0;
 
 	if (!mod) {
@@ -67,7 +58,7 @@ Roller.prototype.getDexMod = function(target, mod, fn) {
 	}
 };
 
-Roller.prototype.getConMod = function(target, mod, fn) {
+Roller.prototype.getConMod = function(target, mod) {
 	var sizeMod = 0;
 
 	if (!mod) {
@@ -87,7 +78,7 @@ Roller.prototype.getConMod = function(target, mod, fn) {
 	}
 };
 
-Roller.prototype.getIntMod = function(target, mod, fn) {
+Roller.prototype.getIntMod = function(target, mod) {
 	if (!mod) {
 		mod = 0;
 	}
@@ -99,7 +90,7 @@ Roller.prototype.getIntMod = function(target, mod, fn) {
 	}
 };
 
-Roller.prototype.getStrMod = function(target, mod, fn) {
+Roller.prototype.getStrMod = function(target, mod) {
 	var sizeMod = 0;
 
 	if (!mod) {
@@ -119,7 +110,7 @@ Roller.prototype.getStrMod = function(target, mod, fn) {
 	}
 };
 
-Roller.prototype.getWisMod = function(target, mod, fn) {
+Roller.prototype.getWisMod = function(target, mod) {
 	if (!mod) {
 		mod = 0;
 	}
@@ -148,8 +139,10 @@ Roller.prototype.getMods = function(player, mod) {
 	};
 };
 
-Roller.prototype.calExp = function(player, expOpt, fn) {
-	var dice = this;
+Roller.prototype.calExp = function(player, expOpt) {
+	var dice = this,
+	exp = 0,
+	total = dice.roll(1, 4);
 
 	if (!expOpt.level) {
 		expOpt.level = 1;
@@ -157,19 +150,14 @@ Roller.prototype.calExp = function(player, expOpt, fn) {
 
 	if (expOpt.level >= (player.level - 6)) {
 		if (expOpt.level >= player.level) {
-			dice.roll(1, 4, function(total) {
-				var exp;
-				exp = ((((expOpt.level - player.level)) * total) + 1) * (total * Math.abs(expOpt.level - player.level)) + dice.roll(1, 10) + 20;
-				
-				return fn(exp);
-			});
+			exp = ((((expOpt.level - player.level)) * total) + 1) * (total * Math.abs(expOpt.level - player.level)) + dice.roll(1, 10) + 20;
+
+			return exp;
 		} else {
-			dice.roll(1, 2, function(total) {
-				return fn(total * 10);
-			});
+			return dice.roll(1, 2) * 10;
 		}
 	} else {
-		return fn(0);
+		return exp;
 	}
 };
 

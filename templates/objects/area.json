@@ -1,6 +1,6 @@
 {
     "name" : "A new area",
-    "id" : 0,
+    "id" : '',
     "type" : "forest",
     "levels" : "All",
     "description" : "",

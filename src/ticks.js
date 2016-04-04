@@ -101,22 +101,18 @@ World = require('./world').world;
 									}
 								}
 
-								// if players were in the area roll a check to delay respawn
-								World.dice.roll(1, 20, function(roll) {
-									if (roll > 18) {
-										area.respawnTick -= 1;
-									}
-								});
+								if (World.dice.roll(1, 20) > 18) {
+									area.respawnTick -= 1;
+								}
 							}
 
 							if (World.areas.length - 1 === index 
 								&& roomIndex === area.rooms.length - 1) {
 								if ((area.respawnTick === area.respawnOn && area.respawnOn > 0 && refresh)) {
-									World.reloadArea(area, function(area) {
-										area.respawnTick = 0;
+									area = World.reloadArea(area);
+									area.respawnTick = 0;
 
-										World.areas[index] = area;
-									});
+									World.areas[index] = area;
 								}
 							}
 						}(area.rooms[j], index, j));
@@ -134,20 +130,21 @@ World = require('./world').world;
 	
 	// AI Ticks for monsters
 	setInterval(function() {
-		var i = 0;
+		var i = 0,
+		monsters;
+
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
-				World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
-					monsters.forEach(function(monster, i) {
-						if (monster.chp >= 1 && monster.onAlive) {
-							monster.onAlive();
-						}
-					});
+				monsters = World.getAllMonstersFromArea(World.areas[i].name);
+				
+				monsters.forEach(function(monster, i) {
+					if (monster.chp >= 1 && monster.onAlive) {
+						monster.onAlive();
+					}
 				});
 			}
 		}
-	//}, 1000); // 25 seconds
-	}, 25000); // 30 seconds
+	}, 25000);
 
 	// AI Ticks for areas 
 	setInterval(function() {
@@ -181,14 +178,12 @@ World = require('./world').world;
 			for (i; i < World.players.length; i += 1) {
 				player = World.players[i];
 
-				Character.hpRegen(player, function(player, addedHP) {
-					Character.manaRegen(player, function(player, addedMana) {
-						Character.mvRegen(player);
-					});
-				});
+				Character.hpRegen(player);
+				Character.manaRegen(player);
+				Character.mvRegen(player);
 			}
 		}
-	}, 60000);
+	}, 75000);
 
 	// Hunger and Thirst Tick 
 	setInterval(function() { 
@@ -199,9 +194,8 @@ World = require('./world').world;
 			for (i; i < World.players.length; i += 1) {
 				player = World.players[i];
 
-				Character.hunger(player, function(target) {
-					Character.thirst(target);
-				});
+				Character.hunger(player);
+				Character.thirst(player);
 			}
 		}
 	}, 240000); // 4 minutes
