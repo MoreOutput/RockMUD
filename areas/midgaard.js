@@ -249,7 +249,7 @@ module.exports = {
 			"playersInRoom": [],
 			"monsters" : [],
 			"items" : [{
-				"name": "Used waterskin", 
+				"name": "Brown waterskin", 
 				"short": "brown waterskin",
 				"long": "A brown waterskin. The hide seems worn and used." ,
 				"area": "Midgaard",

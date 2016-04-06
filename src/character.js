@@ -65,7 +65,7 @@ Character.prototype.load = function(name, s, fn) {
 
 		s.player.sid = s.id;
 		s.player.socket = s;
-		
+
 		return fn(s);
 	});
 };
@@ -743,6 +743,37 @@ Character.prototype.removeFromContainer = function(container, item) {
 	}
 
 	container.items = newArr;
+};
+
+Character.prototype.getBottle = function(player, command) {
+	var char = this,
+	containers = char.getBottles(player),
+	i = 0;
+
+	for (i; i < containers.length; i += 1) {
+		if (containers[i].name.indexOf(command.input) !== -1) {
+			return containers[i];
+		}
+	}
+
+	return false;
+};
+
+Character.prototype.getBottles = function(player) {
+	var i = 0,
+	containers = [];
+
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].itemType === 'bottle') {
+			containers.push(player.items[i]);
+		}
+	}
+
+	return containers;
+};
+
+Character.prototype.addToBottle = function(container, item) {
+	container.items.push(item);
 };
 
 // returns a skill object in player.skills

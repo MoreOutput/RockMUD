@@ -93,44 +93,57 @@ Cmd.prototype.eat = function(target, command) {
 
 Cmd.prototype.drink = function(target, command) {
 	var roomObj,
-	i = 0,
-	item,
-	itemLen;
+	bottle;
 
 	if (command.msg !== '') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
-		item = World.search(target.items, command);
+		bottle = Character.getBottle(target, command);
 
-		if (item.itemType === 'drink') {
-			Character.removeItem(target, item, function(target, item) {
-				World.dice.roll(item.diceNum, item.diceSides, function(roll) {
-					target.thirst -= roll;
+		if (bottle) {
+			bottle.drinks -= World.dice.roll(1, 2);
 
-					if (target.thirst < 0) {
-						target.thirst = 0;
-					}
+			if (bottle.drinks <= 0) {
+				bottle.drinks = 0;
+			}
 
-					World.msgRoom(roomObj, {
-						msg: target.displayName + ' drinks from a ' + item.short,
-						playerName: target.name,
-						styleClass: 'cmd-drop yellow'
-					});
+			if (bottle.drinks > 0) {
+				target.thirst -= World.dice.roll(1, 3);
 
-					World.msgPlayer(target, {
-						msg: 'You drink from a ' + item.short,
-						styleClass: 'cmd-drop blue'
-					});
+				if (target.thirst < 0) {
+					target.thirst = 0;
+				}
 
-					item = null;
+				if (typeof bottle.onDrink === 'function') {
+					bottle.onDrink(target, roomObj, bottle);
+				}
+
+				World.msgRoom(roomObj, {
+					msg: target.displayName + ' drinks from a ' + bottle.short,
+					playerName: target.name,
+					styleClass: 'cmd-drop yellow'
 				});
-			});
+
+				World.msgPlayer(target, {
+					msg: 'You drink from a ' + bottle.short,
+					styleClass: 'cmd-drop blue'
+				});
+			} else {
+				World.msgPlayer(target, {
+					msg: 'A ' + bottle.short + ' is bone dry.',
+					styleClass: 'cmd-drop red'
+				});
+			}
 		} else {
 			World.msgPlayer(target, {msg: 'You can\'t drink something you dont have.', styleClass: 'error'});
 		}
 	} else {
 		World.msgPlayer(target, {msg: 'Drink from what?', styleClass: 'error'});
 	}
+};
+
+Cmd.prototype.fill = function() {
+
 };
 
 Cmd.prototype.sleep = function(target, command) {
