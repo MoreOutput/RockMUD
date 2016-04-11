@@ -925,7 +925,7 @@ Character.prototype.wearShield = function(target, shield) {
 };
 
 Character.prototype.wearArmor = function(target, armor) {
-	var slot = Character.getSlot(target, armor.slot);
+	var slot = this.getSlot(target, armor.slot);
 
 	if (slot) {
 		armor.equipped = true;
@@ -948,7 +948,7 @@ Character.prototype.getSlot = function(target, slotName) {
 	var i = 0;
 
 	for (i; i < target.eq.length; i += 1) {
-		if (target.eq.slot === slotName) {
+		if (target.eq[i].slot === slotName) {
 			return target.eq[i];
 		}
 	}
