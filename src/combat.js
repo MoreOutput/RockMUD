@@ -1,6 +1,8 @@
 'use strict';
 var World = require('./world').world,
 Character = require('./character').character,
+Skills = require('./skills').skills,
+Spells = require('./spells').spells,
 Room = require('./rooms').room,
 Combat = function() {
 	this.adjective = [
@@ -124,7 +126,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 
 				for (j; j < numOfAttacks; j += 1) {
 					if (shield) {
-						shieldAC = Character.shieldBlock(opponent, roomObj, shield);
+						shieldAC = Skills.shieldBlock(opponent, roomObj, shield);
 
 						acCheck += shieldAC;
 					}
