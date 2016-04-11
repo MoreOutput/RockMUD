@@ -8,5 +8,5 @@
     "attackType": "punch",
     "racial" : ["darkvision"],
     "diceNum": 1,
-    "diceSides": 10
+    "diceSides": 5
 }

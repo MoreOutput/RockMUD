@@ -8,7 +8,7 @@ Try the latest on this Heroku hobby instance: http://rockmud.heroku.com. If you 
 Goals:
 * A Diku-like MUD experience from within the browser.
 * Enable quick development.
-* Real-time browser OLC and world management.
+* Real-time browser OLC and world management. This will begin post v0.5.
 
 Notes on dependencies: 
 * Socket.io 1.0 or greater is required.

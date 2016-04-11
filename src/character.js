@@ -161,10 +161,10 @@ Character.prototype.create = function(r, s, fn) {
 	socket;
 
 	s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
-	s.player.hp += 100;
-	s.player.chp += 100;
-	s.player.mana += 100;
-	s.player.cmana += 100;
+	s.player.hp += 10;
+	s.player.chp += 10;
+	s.player.mana += 5;
+	s.player.cmana += 5;
 	s.player.mv += 100;
 	s.player.cmv += 100;
 	s.player.isPlayer = true;
@@ -173,7 +173,7 @@ Character.prototype.create = function(r, s, fn) {
 	s.player.saved = null;
 	s.player.role = 'player';
 	s.player.area = 'Midgaard';
-	s.player.roomid = 1;
+	s.player.roomid = '1';
 	s.player.trains += 25;
 	s.player.deaths = 0;
 	s.player.str += 10;
@@ -630,6 +630,47 @@ Character.prototype.getSlotsWithWeapons = function(player) {
 	return weapons;
 };
 
+Character.prototype.getWeaponSlots = function(player) {
+	var i = 0,
+	slots = [];
+
+	for (i; i < player.eq.length; i += 1) {
+		if (player.eq[i].slot === 'hands') {
+			slots.push(player.eq[i]);
+			
+			return slots;
+		}
+	}
+
+	return slots;
+};
+
+Character.prototype.getEmptyWeaponSlot = function(player) {
+	var i = 0;
+
+	for (i; i < player.eq.length; i += 1) {
+		if (player.eq[i].slot === 'hands' && !player.eq[i].item) {
+			return player.eq[i];
+		}
+	}
+
+	return false;
+};
+
+Character.prototype.getSlotsWithShields = function(player) {
+	var i = 0,
+	shields = [];
+
+	for (i; i < player.eq.length; i += 1) {
+		if (player.eq[i].slot === 'hands' && player.eq[i].item 
+			&& player.eq[i].item.itemType === 'shield') {
+			shields.push(player.eq[i]);
+		}
+	}
+
+	return shields;
+};
+
 Character.prototype.getLights = function(player) {
 	var i = 0,
 	lights = [];
@@ -687,6 +728,22 @@ Character.prototype.getStatsFromAffects = function(affects, fn) {
 
 Character.prototype.getStatsFromEq = function(eq, fn) {
 
+};
+
+Character.prototype.getFist = function(player) {
+	return {
+		name: 'Fighting with your bare hands!',
+		level: player.level,
+		diceNum: player.diceNum,
+		diceSides: player.diceSides,
+		itemType: 'weapon',
+		equipped: true,
+		attackType: player.attackType,
+		material: 'flesh',
+		modifiers: {},
+		diceMod: 0,
+		slot: 'hands'
+	};
 };
 
 Character.prototype.getContainer = function(player, command) {
@@ -802,7 +859,7 @@ Character.prototype.removeItem = function(player, item) {
 	player.items = newArr;
 };
 
-Character.prototype.removeEq = function(player, item, fn) {
+Character.prototype.removeEq = function(player, item) {
 	var i = 0;
 
 	item.equipped = false;
@@ -821,7 +878,7 @@ Character.prototype.getItem = function(player, command) {
 	newArr = [];
 
 	for (i; i < player.items.length; i += 1) {
-		if (player.items[i].name.indexOf(command.arg) !== -1) {
+		if (player.items[i].name.toLowerCase().indexOf(command.arg) !== -1) {
 			return player.items[i];
 		}
 	}
@@ -834,7 +891,7 @@ Character.prototype.getItems = function(player, command) {
 	newArr = [];
 
 	for (i; i < player.items.length; i += 1) {
-		if (player.items[i].name.indexOf(command.arg) !== -1) {
+		if (player.items[i].name.toLowerCase().indexOf(command.arg) !== -1) {
 			newArr.push(player.items[i]);
 		}
 	}
@@ -842,7 +899,78 @@ Character.prototype.getItems = function(player, command) {
 	return newArr;
 };
 
-Character.prototype.wear = function(target, item, fn) {
+Character.prototype.wearWeapon = function(target, weapon) {
+	var slot = this.getEmptyWeaponSlot(target),
+	roomObj = World.getRoomObject(target.area, target.roomId);
+
+	weapon.equipped = true;
+	
+	slot.item = weapon;
+
+	World.msgPlayer(target, {
+		msg: 'You wield a ' + weapon.short + ' in your ' + slot.name + '.'
+	});
+};
+
+Character.prototype.wearShield = function(target, shield) {
+	var slot = this.getEmptyWeaponSlot(target);
+
+	shield.equipped = true;
+	
+	slot.item = shield;
+
+	World.msgPlayer(target, {
+		msg: 'You begin defending yourself with a ' + shield.short + '.'
+	});
+};
+
+Character.prototype.wearArmor = function(target, armor) {
+	var slot = Character.getSlot(target, armor.slot);
+
+	if (slot) {
+		armor.equipped = true;
+		
+		slot.item = armor;
+		
+		World.msgPlayer(target, {
+			msg: 'You wear a ' + armor.short + ' on your ' + slot.name + '.'
+		});
+	} else {
+		return false;
+	}
+};
+
+Character.prototype.wearFloating = function(target, floating) {
+		
+};
+
+Character.prototype.getSlot = function(target, slotName) {
+	var i = 0;
+
+	for (i; i < target.eq.length; i += 1) {
+		if (target.eq.slot === slotName) {
+			return target.eq[i];
+		}
+	}
+
+	return false;
+};
+
+Character.prototype.getEmptyWeaponSlot = function(target) {
+	var i = 0;
+
+	for (i; i < target.eq.length; i += 1) {
+		if (target.eq[i].slot === 'hands'
+			&& !target.eq[i].item) {
+			return target.eq[i];
+		}
+	}
+
+	return false;
+};
+
+
+Character.prototype.wear = function(target, item) {
 	var i = 0,
 	replacedItem;
 

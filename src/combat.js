@@ -35,7 +35,7 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 	if (numOfAttacks <= 0) {
 		numOfAttacks = 1;
 	}
-
+	
 	if (weapon.modifiers && weapon.modifiers.numOfAttacks) {
 		numOfAttacks += weapon.modifiers.numOfAttacks;
 	}
@@ -65,11 +65,10 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 
 Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	var combat = this,
-	weaponSlots,
+	weaponSlots, // attackers offensive weapons
+	shieldSlots, // opponents defensive weapons
 	attackerMods = World.dice.getMods(attacker),
 	opponentMods = World.dice.getMods(opponent),
-	attackerRoll,
-	opponentRoll,
 	numOfAttacks,
 	i = 0,
 	j = 0,
@@ -81,7 +80,13 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	blocked = false,
 	adjective,
 	abstractNoun,
-	weapon;
+	weapon, // attackers active weapon
+	shield, // opponents shield
+	shieldAC = 0,	
+	hitRoll = attacker.hitRoll + attackerMods.dex,
+	damRoll	= attacker.damRoll + attackerMods.str,
+	dodgeCheck = opponentMods.dex + opponent.detection + opponent.awareness/2,	
+	acCheck = opponent.ac + opponentMods.dex;
 
 	// Is a player attacking something
 	if (attacker.wait > 0) { 
@@ -89,97 +94,122 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	} else {
 		attacker.wait = 0;
 	}
-
+	
 	if (attacker.position === 'fighting') {
-		weaponSlots = Character.getSlotsWithWeapons(attacker);
+		weaponSlots = Character.getWeaponSlots(attacker);
+		
+		if (opponent.position === 'fighting') {
+			shieldSlots = Character.getSlotsWithShields(opponent);
 
-		if (!weaponSlots.length) {
-			weaponSlots = [{
-				name: 'Right Hand',
-				item: {
-					name: 'Fighting with your bare hands!',
-					level: attacker.level,
-					diceNum: attacker.diceNum,
-					diceSides: attacker.diceSides,
-					itemType: 'weapon',
-					equipped: true,
-					attackType: attacker.attackType,
-					material: 'flesh',
-					modifiers: {},
-					diceMod: 0
-				},
-				dual: false,
-				slot: 'hands'
-			}]
+			if (shieldSlots.length > 0) {
+				shield = shieldSlots[0].item;
+			}
 		}
 
 		for (i; i < weaponSlots.length; i += 1) {
-			weapon = weaponSlots[i].item;
+			if (weaponSlots.item) {
+				weapon = weaponSlots[i].item;
+			} else {
+				weapon = Character.getFist(attacker);
+			}
 
-			attackerRoll =  World.dice.roll(1, 20, (attackerMods.dex - opponent.meleeRes));
-			opponentRoll = World.dice.roll(1, 20, (opponent.ac + (opponentMods.dex - attacker.knowledge)));
 			numOfAttacks = combat.getNumberOfAttacks(attacker, weapon, attackerMods, opponentMods);
+
+			if (!weaponSlots.length) {
+				numOfAttacks -= 1;
+			}
 
 			if (numOfAttacks) {
 				j = 0;
 
 				for (j; j < numOfAttacks; j += 1) {
-					damage = (World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str + weapon.diceMod)) +
-						(damage + (attacker.damRoll/2) + (attacker.level/3) + attackerMods.str + attacker.str/3);
+					if (shield) {
+						shieldAC = Character.shieldBlock(opponent, roomObj, shield);
 
-					if (attackerMods.str >= opponentMods.con) {
-						damage += attackerMods.str/2;
+						acCheck += shieldAC;
 					}
 
-					if (attackerMods.str > 2) {
-						damage += attackerMods.str;
-					}
+					if ((World.dice.roll(1, 10 + acCheck))
+						< (hitRoll + World.dice.roll(1, 12 + hitRoll) + attacker.level) ) {
+						// attacker beat opponents ac check
+						if (World.dice.roll(2, 20, dodgeCheck)
+							< World.dice.roll(2, 20, hitRoll + 5)) {
+							// attacker beat opponent dodge check
+							damage = World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str + attacker.damRoll + weapon.diceMod);
 
-					if (attacker.damRoll > opponent.meleeRes) {
-						damage += attackerMods.str;
-					} else if (attacker.damRoll > opponent.meleeRes) {
-						damage -= opponent.meleeRes/2
-					}
+							damage += attacker.level/2;
+								
+							if (attackerMods.str >= opponentMods.con) {
+								damage += damRoll/3;
+							}
 
-					damage -= opponent.ac/3;
+							if (attackerMods.str > 2) {
+								damage += attackerMods.str;
+							}
 
-					if (numOfAttacks > 3 && j > 3) {
-						damage =damage / 2;
-					}
+							damage -= opponent.ac/3;
+							damage -= opponent.meleeRes;
 
-					if (attackerRoll === 20) {
-						damage = damage * 2;
-					}
+							if (numOfAttacks > 3 && j > 3) {
+								damage = damage/2;
+							}
 
-					if (damage < 0) {
-						damage = 0;
+							if (World.dice.roll(1, 20) === 20) {
+								damage = damage * 2;
+							}
+
+							if (damage < 0) {
+								damage = 1;
+							} else {
+								damage = Math.round(damage);
+							}
+
+							adjective = combat.getDamageAdjective(damage);
+							
+							abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
+
+							opponent.chp -= damage;
+							
+							if (attacker.isPlayer) {
+								msgForAttacker += '<div>You ' + weapon.attackType + ' a ' + opponent.displayName 
+									+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' + damage + ')</span></div>';
+							}
+
+							if (opponent.isPlayer) {
+								msgForOpponent += '<div>' + attacker.displayName + 's ' + weapon.attackType 
+									+ ' hits you with ' + adjective + ' ' + abstractNoun
+									+ ' <span class="red">(' + damage + ')</span></div>';
+							}
+						} else {
+							if (attacker.isPlayer) {
+								msgForAttacker += '<div>You swing at a ' + opponent.displayName + ' and miss!</div>';
+							}
+
+							if (opponent.isPlayer) {
+								msgForAttacker += '<div>' + attacker.displayName + ' tries to attack but you dodge at the last minute!</div>';
+							}
+						}
 					} else {
-						damage = Math.round(damage);
+						if (attacker.isPlayer) {
+							msgForAttacker += '<div>You try to attack a ' + opponent.displayName + ' and they block your attack!</div>';
+						}
+
+						if (opponent.isPlayer) {
+							msgForAttacker += '<div>' + attacker.displayName + ' swings widly and you narrowly block their attack!</div>';
+						}
 					}
 
-					adjective = combat.getDamageAdjective(damage);
 					
-					abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
-
-					opponent.chp -= damage;
-
-					if (attacker.isPlayer) {
-						msgForAttacker +=  '<div>You ' + weapon.attackType + ' a ' + opponent.displayName 
-							+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' + damage + ')</span></div>';
-					}
-
-					if (opponent.isPlayer) {
-						msgForOpponent +=  '<div>' + attacker.displayName + 's ' + weapon.attackType 
-							+ ' hits you with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' + damage + ')</span></div>';
-					}
 				}
 			} else {
 				if (attacker.isPlayer) {
-					msgForAttacker +=  '<div class="grey">Your ' + weapon.attackType + ' misses a ' + opponent.displayName + '</div>';
+					msgForAttacker +=  '<div class="grey">Your ' + weapon.attackType + ' misses a '
+						+ opponent.displayName + '</div>';
 				}
 
 				if (opponent.isPlayer) {
-					msgForOpponent +=  '<div class="grey">' + attacker.displayName + ' tries to ' + weapon.attackType + ' you and misses! </div>';
+					msgForOpponent +=  '<div class="grey">' + attacker.displayName + ' tries to '
+						+ weapon.attackType + ' you and misses! </div>';
 				}
 			}
 

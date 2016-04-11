@@ -1,10 +1,11 @@
 'use strict';
 var World = require('./world').world,
-
+Character = require('./character').character,
 Spell = function() {};
 
-Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command, fn) {
-	var intMod,
+Spell.prototype.spark = function(player, roomObj, command, fn) {
+	var skillObj = Character.getSkill(player, 'spark'),
+	intMod,
 	cost = 40 - player.level,
 	damage = 0,
 	oppIntMod;
@@ -12,26 +13,24 @@ Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command, f
 	if (command.input || player.opponent) {
 		if (cost < player.cmana) {
 			intMod = World.dice.getIntMod(player),
-			oppIntMod = World.dice.getIntMod(opponent);
+			oppIntMod = World.dice.getIntMod(player.opponent);
 
 			player.wait += 2;
 			player.cmana -= (cost - intMod);
-			// Failure check
-			// Character.castCheck(player, opponent, fn);
 
 			damage = World.dice.roll(player.level / 2 + 1, 20 + intMod + player.mana/20, intMod);
-			damage -= opponent.magicRes;
-			damage -= opponent.ac;
+			damage -= player.opponent.magicRes;
+			damage -= player.opponent.ac;
 
-			opponent.chp -= damage;
+			player.opponent.chp -= damage;
 
-			World.msgPlayer(player, {msg: 'You cast spark and burn a ' + opponent.displayName 
-				+ ' with maiming intensity! (' + damage +')'});
+			World.msgPlayer(player, {msg: 'You cast spark and burn a ' + player.opponent.displayName 
+				+ ' with maiming intensity! (' + damage + ')'});
 
-			World.msgPlayer(opponent, {msg: player.displayName + ' casts spark and burns you ' 
-				+ opponent.displayName + ' with maiming intensity! (' + damage +')'});
+			World.msgPlayer(player.opponent, {msg: player.displayName + ' casts spark and burns you ' 
+				+ player.opponent.displayName + ' with maiming intensity! (' + damage + ')'});
 
-			return fn(player, opponent, roomObj, command);
+			return fn(player, player.opponent, roomObj, command);
 		} else {
 			World.msgPlayer(player, {msg: 'You dont have enough mana to cast spark!', styleClass: 'error'});
 		}

@@ -54,7 +54,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		s.on('login', function (r) {
 			var parseCmd = function(r, s) {
 				var cmdArr = r.msg.split(' '),
-				cmdObj ={};
+				cmdObj = {};
 
 				if (cmdArr.length === 1) {
 					cmdArr[1] = '';
@@ -69,7 +69,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						number: 1 // argument target -- cast spark 2.boar
 					};
 
-					if (cmdObj.input && 	!isNaN(parseInt(cmdObj.input[0])) || (!cmdObj.input && !isNaN(parseInt(cmdObj.msg[0]))) ) {
+					if (cmdObj.input && !isNaN(parseInt(cmdObj.input[0])) || (!cmdObj.input && !isNaN(parseInt(cmdObj.msg[0]))) ) {
 
 						if (!cmdObj.input) {
 							cmdObj.number = parseInt(cmdObj.msg[0]);

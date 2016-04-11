@@ -143,7 +143,7 @@ Cmd.prototype.drink = function(target, command) {
 };
 
 Cmd.prototype.fill = function() {
-
+	
 };
 
 Cmd.prototype.sleep = function(target, command) {
@@ -813,7 +813,6 @@ Cmd.prototype.flee = function(player, command) {
 Cmd.prototype.cast = function(player, command, fn) {
 	var cmd = this,
 	mob,
-	skillObj,
 	roomObj;
 
 	if (player.position !== 'sleeping') {
@@ -821,11 +820,9 @@ Cmd.prototype.cast = function(player, command, fn) {
 			if (command.arg in Spells) {
 					if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fleeing') {
 						roomObj = World.getRoomObject(player.area, player.roomid);
-						
-						skillObj = Character.getSkill(player, command.arg);
 
 						if (!command.input && player.opponent) {
-							return Spells[command.arg](skillObj, player, player.opponent, roomObj, command, function() {
+							return Spells[command.arg](player, player.opponent, roomObj, command, function() {
 								if (!player.opponent && player.position !== 'fighting') {
 									cmd.kill(player, command, roomObj, fn);
 								}
@@ -834,7 +831,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 							mob = World.search(roomObj.monsters, command);
 
 							if (mob) {
-								return Spells[command.arg](skillObj, player, mob, roomObj, command, function() {
+								return Spells[command.arg](player, mob, roomObj, command, function() {
 									if (!player.opponent && player.position !== 'fighting') {
 										cmd.kill(player, command, roomObj, fn);
 									}
@@ -869,7 +866,8 @@ Cmd.prototype.kill = function(player, command, attackObj, fn) {
 	var roomObj,
 	opponent;
 
-	if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fighting') {
+	if (player.position !== 'sleeping' && player.position !== 'resting'
+		&& player.position !== 'fighting') {
 		roomObj = World.getRoomObject(player.area, player.roomid);
 
 		opponent = World.search(roomObj.monsters, command);
@@ -882,11 +880,17 @@ Cmd.prototype.kill = function(player, command, attackObj, fn) {
 			if (opponent && opponent.roomid === player.roomid) {
 				Combat.processFight(player, opponent, roomObj);
 			} else {
-				World.msgPlayer(player, {msg: 'There is nothing by that name here.', styleClass: 'error'});
+				World.msgPlayer(player, {
+					msg: 'There is nothing by that name here.',
+					styleClass: 'error'
+				});
 			}
 		}
 	} else {
-		World.msgPlayer(player, {msg: 'Hard to do that from this position.', styleClass: 'combat-death'});
+		World.msgPlayer(player, {
+			msg: 'Hard to do that from this position.',
+			styleClass: 'combat-death'
+		});
 	}
 };
 
@@ -1198,18 +1202,31 @@ Cmd.prototype.wear = function(target, command) {
 
 	if (target.position !== 'sleeping' && target.position !== 'resting') {
 		if (command.msg !== '') {
-			item = World.search(target.items, command);
+			item = Character.getItem(target, command);
 
 			if (item) {
-				Character.wear(target, item);
+				if (Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)]) {
+					Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)](target, item);
+				} else {
+					World.msgPlayer(target, {
+						msg: 'You cant figure out how to wear a ' + item.short,
+						styleClass: 'error'
+					});	
+				}
 			} else {
-				World.msgPlayer(target, {msg: 'You do not have that item.', styleClass: 'error'});
+				World.msgPlayer(target, {
+					msg: 'You do not have that item.',
+					styleClass: 'error'
+				});
 			}
 		} else {
 			World.msgPlayer(target, {msg: 'Wear what?', styleClass: 'error'});
 		}
 	} else {
-		World.msgPlayer(target, {msg: 'You cannot wear anything while in this position.', styleClass: 'error'});
+		World.msgPlayer(target, {
+			msg: 'You cannot wear anything while in this position.',
+			styleClass: 'error'
+		});
 	}
 };
 
@@ -1219,7 +1236,7 @@ Cmd.prototype.remove = function(target, command) {
 
 	if (target.position !== 'sleeping' && target.position !== 'resting') {
 		if (command.msg !== '') {
-			item = Character.getItem(player, command);
+			item = Character.getItem(target, command);
 
 			if (item) {
 				removed = Character.removeEq(target, item);

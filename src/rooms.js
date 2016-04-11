@@ -141,8 +141,9 @@ Room.prototype.getAdjacent = function(roomObj) {
 
 Room.prototype.getDisplay = function(areaName, roomId) {
 	var room = this,
-	players =  World.getPlayersByRoomId(roomId),
+	players = World.getPlayersByRoomId(roomId),
 	roomObj = World.getRoomObject(areaName, roomId);
+
 	roomObj.playersInRoom = players;
 
 	return room.getDisplayHTML(roomObj);
@@ -200,7 +201,7 @@ Room.prototype.getItem = function(roomObj, command) {
 	var i = 0;
 
 	for (i; i < roomObj.items.length; i += 1) {
-		if (roomObj.items[i].name.indexOf(command.arg) !== -1) {
+		if (roomObj.items[i].name.toLowerCase().indexOf(command.arg) !== -1) {
 			return roomObj.items[i];
 		}
 	}
