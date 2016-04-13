@@ -124,6 +124,8 @@ World = function() {
 										}
 									});
 
+									world.time.isDay = true;
+
 									return world;
 								});
 							});

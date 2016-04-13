@@ -601,8 +601,8 @@ Cmd.prototype.get = function(target, command, fn) {
 				} else {
 					itemLen = roomObj.items.length;
 
-					for (i; i < itemLen; i += 1) {
-						item = roomObj.items[i];
+					while (roomObj.items.length > 0) {
+						item = roomObj.items[0];
 						
 						Room.removeItem(roomObj, item);
 
@@ -616,7 +616,7 @@ Cmd.prototype.get = function(target, command, fn) {
 					});
 
 					World.msgPlayer(target, {
-						msg: 'You grab everything',
+						msg: 'You grab everything!',
 						styleClass: 'cmd-get-all blue'
 					});
 
