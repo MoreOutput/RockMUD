@@ -6,8 +6,8 @@
 'use strict';
 var fs = require('fs'),
 util = require('util'),
-World = require('./world').world,
 Character = require('./character').character,
+World = require('./world').world,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
 Skills = require('./skills').skills,
@@ -610,7 +610,7 @@ Cmd.prototype.get = function(target, command, fn) {
 					}
 					
 					World.msgRoom(roomObj, {
-						msg: target.displayName + ' picks up everything he can.',
+						msg: target.displayName + ' grabs everything they can.',
 						playerName: target.name,
 						styleClass: 'cmd-get-all yellow'
 					});
@@ -631,7 +631,9 @@ Cmd.prototype.get = function(target, command, fn) {
 					Character.removeFromContainer(container, item);
 					Character.addToInventory(target, item);
 
-					World.msgPlayer(target, {msg: 'You remove a <strong>' + item.short + '</strong> from a ' + container.short + '.', styleClass: 'green'});
+					World.msgPlayer(target, {msg: 'You remove a <strong>'
+						+ item.short + '</strong> from a '
+						+ container.short + '.', styleClass: 'green'});
 				} else {
 					World.msgPlayer(target, {msg: 'You dont see that in there.', styleClass: 'error'});
 				}
@@ -895,11 +897,12 @@ Cmd.prototype.look = function(target, command) {
 	canSee = target.sight,
 	light,
 	item; // looking at an item
-
+	
 	if (canSee) {
 		if (target.position !== 'sleeping') {
 			if ((!World.time.isDay && !roomObj.dark) || roomObj.dark === true) {
 				canSee = false;
+
 				light = Character.getLights(target)[0];
 			}
 			

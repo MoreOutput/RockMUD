@@ -113,7 +113,6 @@ World = function() {
 									world.areaTemplate = areaTemplate;
 									world.itemTemplate = itemTemplate;
 									world.mobTemplate = mobTemplate;
-									world.ticks = require('./ticks');
 									
 									world.areas.forEach(function(area) {
 										var i = 0;
@@ -125,6 +124,8 @@ World = function() {
 									});
 
 									world.time.isDay = true;
+
+									world.ticks = require('./ticks');
 
 									return world;
 								});

@@ -111,6 +111,8 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						
 						Character.load(name, s, function (s) {
 							Character.getPassword(s, function(s) {
+								Cmds.look(s.player); // we auto fire the look command on login
+								
 								s.on('cmd', function (r) {
 									parseCmd(r, s);
 								});

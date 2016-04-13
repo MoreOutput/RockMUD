@@ -107,16 +107,7 @@ Character.prototype.getPassword = function(s, fn) {
 						
 						roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 						roomObj.playersInRoom.push(s.player);
-
-						displayHTML = Room.getDisplayHTML(roomObj, {
-							hideCallingPlayer: s.player.name
-						});
-
-						World.msgPlayer(s, {
-							msg: displayHTML,
-							styleClass: 'room',
-						});
-
+						
 						fn(s);
 					} else {
 						if (msg === undefined) {
@@ -922,6 +913,24 @@ Character.prototype.wearShield = function(target, shield) {
 	World.msgPlayer(target, {
 		msg: 'You begin defending yourself with a ' + shield.short + '.'
 	});
+};
+
+Character.prototype.wearLight = function(target, light) {
+	var slot = this.getEmptyWeaponSlot(target);
+
+	light.equipped = true;
+
+	slot.item = light;
+
+	if (slot.item.decay > 0) {
+		World.msgPlayer(target, {
+			msg: 'A ' + light.short + ' shines brightly as you hold it.'
+		});
+	} else {
+		World.msgPlayer(target, {
+			msg: 'You being holding a ' + light.short + ' but it is burned out.'
+		});
+	}
 };
 
 Character.prototype.wearArmor = function(target, armor) {
