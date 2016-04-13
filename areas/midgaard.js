@@ -141,6 +141,21 @@ module.exports = {
 				}
 			],
 			"items" : [{
+				"name": "Torch", 
+				"short": "dirty soot covered torch",
+				"long": "" ,
+				"area": "Midgaard",
+				"id": "104", 
+				"level": 1,
+				"itemType": "light",
+				"material": "wood", 
+				"ac": -1, 
+				"weight": 1,
+				"slot": "hands",
+				"equipped": false,
+				"decay": 10,
+				"flags": []	
+			}, {
 				"name": "Small Buckler", 
 				"short": "small round buckler",
 				"long": "" ,
@@ -185,6 +200,9 @@ module.exports = {
 				"weight": 4,
 				"slot": "hands",
 				"equipped": false,
+				"mod": {
+					"str": 2
+				},
 				"flags": []
 			}, {
 				"name": "Burlap sack",

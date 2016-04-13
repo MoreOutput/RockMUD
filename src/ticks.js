@@ -29,7 +29,7 @@ World = require('./world').world;
 			World.time.isDay = true;
 			areaMsg = 'The sun appears over the horizon.';
 		} else if (World.time.hour <= World.time.hoursOfNight && World.time.minute === 1) {
-			// nightfall
+			// Nightfall
 			World.time.isDay = false;
 			areaMsg = 'The sun fades fully from view as night falls.';
 		}
@@ -62,8 +62,7 @@ World = require('./world').world;
 
 				if (player.position === 'sleeping' || 
 					player.position === 'resting' || 
-					player.position === 'standing') {
-					
+					player.position === 'standing') {					
 					if (player.wait > 0) {
 						player.wait -= 1;
 					} else {

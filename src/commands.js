@@ -1,6 +1,7 @@
 /*
 * All non-combat commands that one would consider 'general' to a all
 * users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
+* the actual combat loop is, of course, in combat.js
 */
 'use strict';
 var fs = require('fs'),
@@ -428,10 +429,9 @@ Cmd.prototype.move = function(target, command, fn) {
 		exitObj = Room.getExit(roomObj, direction);
 
 		if (exitObj) {
-			if (!exitObj || !exitObj.door || exitObj.door.isOpen === true ) {
+			if (!exitObj || !exitObj.door || exitObj.door.isOpen === true) {
 				targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
-				displayHTML = Room.getDisplayHTML(targetRoom);
-
+				
 				target.cmv -= Math.round(4 + moveRoll - dexMod);
 
 				if (target.cmv < 0) {
@@ -439,16 +439,13 @@ Cmd.prototype.move = function(target, command, fn) {
 				}
 
 				target.roomid = targetRoom.id;
-
+				
 				if (targetRoom.terrianMod) {
 					target.wait += targetRoom.terrianMod;
 				}
 
 				if (target.isPlayer) {
-					World.msgPlayer(target, {
-						msg: displayHTML,
-						styleClass: 'room'
-					});
+					this.look(target);
 
 					Room.removePlayer(roomObj, target);
 
@@ -465,7 +462,8 @@ Cmd.prototype.move = function(target, command, fn) {
 				});
 
 				World.msgRoom(roomObj, {
-					msg: '<span class="yellow">' + target.displayName + ' leaves the room heading <strong>' + direction + '</strong></div>',
+					msg: '<span class="yellow">' + target.displayName
+						+ ' leaves the room heading <strong>' + direction + '</strong></div>',
 					playerName: target.name
 				});
 
@@ -604,32 +602,26 @@ Cmd.prototype.get = function(target, command, fn) {
 					itemLen = roomObj.items.length;
 
 					for (i; i < itemLen; i += 1) {
-						if (i === 0) {
-							item = roomObj.items[i];
-						} else {
-							item = roomObj.items[i - 1];
-						}
-
+						item = roomObj.items[i];
+						
 						Room.removeItem(roomObj, item);
 
 						Character.addToInventory(target, item);
+					}
+					
+					World.msgRoom(roomObj, {
+						msg: target.displayName + ' picks up everything he can.',
+						playerName: target.name,
+						styleClass: 'cmd-get-all yellow'
+					});
 
-						if (i === itemLen - 1) {
-							World.msgRoom(roomObj, {
-								msg: target.displayName + ' picks up everything he can.',
-								playerName: target.name,
-								styleClass: 'cmd-get-all yellow'
-							});
+					World.msgPlayer(target, {
+						msg: 'You grab everything',
+						styleClass: 'cmd-get-all blue'
+					});
 
-							World.msgPlayer(target, {
-								msg: 'You grab everything',
-								styleClass: 'cmd-get-all blue'
-							});
-
-							if (typeof fn === 'function') {
-								return fn(target, roomObj, item);
-							}
-						}
+					if (typeof fn === 'function') {
+						return fn(target, roomObj, item);
 					}
 				}
 			} else {
@@ -895,59 +887,85 @@ Cmd.prototype.kill = function(player, command, attackObj, fn) {
 };
 
 Cmd.prototype.look = function(target, command) {
-	var roomObj,
+	var roomObj = World.getRoomObject(target.area, target.roomid),
 	displayHTML,
 	monster,
+	// boolean. when it is false it indicates we need a light source to see.
+	// the initial value of target.sight should be true inless target is blind.	
+	canSee = target.sight,
+	light,
 	item; // looking at an item
 
-	if (target.position !== 'sleeping') {
-		if (command.msg === '') {
-			// if no arguments are given we display the current room
-			roomObj = World.getRoomObject(target.area, target.roomid);
+	if (canSee) {
+		if (target.position !== 'sleeping') {
+			if ((!World.time.isDay && !roomObj.dark) || roomObj.dark === true) {
+				canSee = false;
+				light = Character.getLights(target)[0];
+			}
+			
+			if (!command || command.msg === '') {
+				// if no arguments are given we display the current room
 
-			displayHTML = Room.getDisplayHTML(roomObj, {
-				hideCallingPlayer: target.name
-			});
+				if (canSee || (!canSee && light)) {
+					roomObj = World.getRoomObject(target.area, target.roomid);
 
-			World.msgPlayer(target, {
-				msg: displayHTML,
-				styleClass: 'room'
-			});
-		} else {
-			roomObj = World.getRoomObject(target.area, target.roomid);
+					displayHTML = Room.getDisplayHTML(roomObj, {
+						hideCallingPlayer: target.name
+					});
 
-			item = World.search(roomObj.items, command);
-
-			if (item) {
-				World.msgPlayer(target, {
-					msg: item.long,
-					styleClass: 'cmd-look'
-				});
-			} else {
-				monster = World.search(roomObj.monsters, command);
-
-				if (monster) {
 					World.msgPlayer(target, {
-						msg: monster.long,
+						msg: displayHTML,
+						styleClass: 'room'
+					});
+				} else {
+					World.msgPlayer(target, {
+						msg: 'It is too dark to see anything!',
+						styleClass: 'error'
+					});
+				}
+			} else {
+				roomObj = World.getRoomObject(target.area, target.roomid);
+
+				item = World.search(roomObj.items, command);
+
+				if (item) {
+					World.msgPlayer(target, {
+						msg: item.long,
 						styleClass: 'cmd-look'
 					});
 				} else {
-					item = World.search(target.items, command);
+					monster = World.search(roomObj.monsters, command);
 
-					if (item) {
-						return World.msgPlayer(target, {
-							msg: item.long,
+					if (monster) {
+						World.msgPlayer(target, {
+							msg: monster.long,
 							styleClass: 'cmd-look'
 						});
 					} else {
-						return World.msgPlayer(target, {msg: 'You do not see that here.', styleClass: 'error'});
+						item = World.search(target.items, command);
+
+						if (item) {
+							return World.msgPlayer(target, {
+								msg: item.long,
+								styleClass: 'cmd-look'
+							});
+						} else {
+							return World.msgPlayer(target, {
+								msg: 'You do not see that here.',
+								styleClass: 'error'
+							});
+						}
 					}
 				}
 			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You cannot see anything because you are asleep.'
+			});
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You cannot see anything because you are asleep.'
+			msg: 'You cannot see anything when you\'re blind.'
 		});
 	}
 };
