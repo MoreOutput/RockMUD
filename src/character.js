@@ -152,11 +152,8 @@ Character.prototype.create = function(r, s, fn) {
 	socket;
 
 	s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
-	s.player.hp += 10;
-	s.player.chp += 10;
-	s.player.mana += 5;
+	s.player.chp += 20;
 	s.player.cmana += 5;
-	s.player.mv += 100;
 	s.player.cmv += 100;
 	s.player.isPlayer = true;
 	s.player.salt = '';
@@ -185,6 +182,15 @@ Character.prototype.create = function(r, s, fn) {
 	socket = s.player.socket;
 
 	s.player = character.rollStats(s.player);
+
+	s.player.mv = s.player.cmv;
+	s.player.mana = s.player.cmana;
+	s.player.hp = s.player.chp;
+	s.player.cStr = s.player.str;
+	s.player.cInt += s.player.int;
+	s.player.cWis += s.player.wis;
+	s.player.cCon += s.player.con;
+	s.player.cDex += s.player.dex;
 
 	character.generateSalt(function(salt) {
 		s.player.salt = salt;
@@ -288,8 +294,13 @@ Character.prototype.newCharacter = function(r, s, fn) {
 		str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
 
 		if	(races.length - 1 === i) {
-			s.emit('msg', {msg: s.player.name + ' is a new character! There are three steps until ' + s.player.name + 
-			' is saved. The <strong>first step</strong> is to select a race: <ul>' + str + '</ul><p class="tip">You can learn more about each race by typing help race name</p>', res: 'selectRace', styleClass: 'race-selection'});		
+			s.emit('msg', {
+				msg: s.player.name + ' is a new character! There are three steps until ' + s.player.name + 
+				' is saved. The <strong>first step</strong> is to select a race: <ul>' + str +
+				'</ul><p class="tip">You can learn more about each race by typing help race name</p>',
+				res: 'selectRace',
+				styleClass: 'race-selection'
+			});		
 
 			s.on('raceSelection', function (r) { 
 				var cmdArr = r.msg.split(' ');
@@ -308,7 +319,8 @@ Character.prototype.newCharacter = function(r, s, fn) {
 
 							if	(classes.length - 1 === i) {
 								s.emit('msg', {
-									msg: 'Great, <strong>two more steps to go!</strong> Now time to select a class for ' + s.player.name + '. Pick one of the following: <ul>' + 
+									msg: 'Great, <strong>two more steps to go!</strong> Now time to select a class for ' + s.player.name +
+									'. Pick one of the following: <ul>' + 
 									str + '</ul>', 
 									res: 'selectClass', 
 									styleClass: 'race-selection'
@@ -860,8 +872,10 @@ Character.prototype.removeEq = function(player, item) {
 			player.eq[i].item = null;
 		}
 	}
-
-	return true;
+	
+	World.msgPlayer(player, {
+		msg: 'You stopped using a ' + item.short + '.'
+	});
 };
 
 Character.prototype.getItem = function(player, command) {
@@ -953,6 +967,10 @@ Character.prototype.wearFloating = function(target, floating) {
 		
 };
 
+Character.prototype.removeWeapon = function() {
+
+};
+
 Character.prototype.getSlot = function(target, slotName) {
 	var i = 0;
 
@@ -976,51 +994,6 @@ Character.prototype.getEmptyWeaponSlot = function(target) {
 	}
 
 	return false;
-};
-
-
-Character.prototype.wear = function(target, item) {
-	var i = 0,
-	replacedItem;
-
-	for (i; i < target.eq.length; i += 1) {   
-		if (item.slot === target.eq[i].slot && item.equipped === false) {
-			if (item.itemType === 'weapon') {
-				item.equipped = true;
-				target.eq[i].item = item;
-
-				World.msgPlayer(target, {
-					msg:'You wield a ' + item.short + ' in your ' + target.eq[i].name 
-				});
-			} else {
-				// Wearing Armor
-				if (target.eq[i].item === null) {
-					item.equipped = true;
-					target.eq[i].item = item;
-
-					target.ac = target.ac + item.ac;
-
-					World.msgPlayer(target, {
-						msg: 'You wear a ' + item.short + ' on your ' + target.eq[i].name
-					});
-				} else {
-					item.equipped = true;
-					target.eq[i].item.equipped = false;
-
-					replacedItem = target.eq[i].item;
-					target.eq[i].item = item;
-
-					target.ac = target.ac - replacedItem.ac;
-
-					target.ac = target.ac + item.ac
-
-					World.msgPlayer(target, {
-						msg: 'You wear ' + item.short + ' on your ' +  target.eq[i].name + ' and remove ' + replacedItem.short
-					});
-				}
-			}
-		} 
-	}
 };
 
 Character.prototype.getStatusReport = function(player) {

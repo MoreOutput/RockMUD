@@ -1260,13 +1260,7 @@ Cmd.prototype.remove = function(target, command) {
 			item = Character.getItem(target, command);
 
 			if (item) {
-				removed = Character.removeEq(target, item);
-
-				if (removed) {
-					World.msgPlayer(target, {msg: 'Removed a ' + item.short, styleClass: 'cmd-wear'});
-				} else {
-					World.msgPlayer(target, {msg: 'Could not remove a ' + item.short, styleClass: 'error'});
-				}
+				Character.removeEq(target, item);
 			} else {
 				World.msgPlayer(target, {msg: 'You are not wearing that.', styleClass: 'error'});
 			}
@@ -1276,7 +1270,7 @@ Cmd.prototype.remove = function(target, command) {
 	} else {
 		World.msgPlayer(target, {msg: 'It is impossible to remove items in this position.', styleClass: 'error'});
 	}
-}
+};
 
 Cmd.prototype.inventory = function(player, command) {
 	var iStr = '',
