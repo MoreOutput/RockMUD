@@ -104,7 +104,7 @@ Roller.prototype.getStrMod = function(target, mod) {
 	}
 
 	if (target.str > 11) {
-		return Math.round( (target.str/6) + mod + sizeMod);
+		return Math.round( (target.str/4) + mod + sizeMod);
 	} else {
 		return 0;
 	}
@@ -116,7 +116,7 @@ Roller.prototype.getWisMod = function(target, mod) {
 	}
 
 	if (target.wis > 13) {
-		return Math.round( (target.wis/8) + mod);
+		return Math.round( (target.wis/4) + mod);
 	} else {
 		return 0;
 	}
