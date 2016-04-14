@@ -626,7 +626,7 @@ Cmd.prototype.get = function(target, command, fn) {
 				}
 			} else {
 				item = Character.getFromContainer(container, command);
-
+				
 				if (item) {
 					Character.removeFromContainer(container, item);
 					Character.addToInventory(target, item);
@@ -635,7 +635,7 @@ Cmd.prototype.get = function(target, command, fn) {
 						+ item.short + '</strong> from a '
 						+ container.short + '.', styleClass: 'green'});
 				} else {
-					World.msgPlayer(target, {msg: 'You dont see that in there.', styleClass: 'error'});
+					World.msgPlayer(target, {msg: 'You don\'t see that in there.', styleClass: 'error'});
 				}
 			}
 		} else {
@@ -668,7 +668,10 @@ Cmd.prototype.put = function(target, command) {
 					Character.removeItem(target, item);
 					Character.addToContainer(container, item);
 
-					World.msgPlayer(target, {msg: 'You put a <strong>' + item.short + '</strong> into a ' + container.short + '.', styleClass: 'green'});
+					World.msgPlayer(target, {
+						msg: 'You put a <strong>' + item.short + '</strong> into a ' + container.short + '.',
+						styleClass: 'green'
+					});
 				} else {
 					World.msgPlayer(target, {msg: 'You aren\'t carrying anything by that name.', styleClass: 'error'});
 				}

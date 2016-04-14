@@ -742,6 +742,7 @@ Character.prototype.getFist = function(player) {
 		itemType: 'weapon',
 		equipped: true,
 		attackType: player.attackType,
+		weaponType: 'fist',
 		material: 'flesh',
 		modifiers: {},
 		diceMod: 0,
@@ -784,7 +785,7 @@ Character.prototype.getFromContainer = function(container, command) {
 	var i = 0;
 
 	for (i; i < container.items.length; i += 1) {
-		if (container.items[i].name.indexOf(command.arg) !== -1) {
+		if (container.items[i].name.toLowerCase().indexOf(command.arg) !== -1) {
 			return container.items[i];
 		}
 	}

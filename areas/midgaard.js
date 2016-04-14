@@ -191,6 +191,7 @@ module.exports = {
 				"id": "8",
 				"level": 1,
 				"itemType": "weapon",
+				"weaponType": "sword",
 				"material": "iron", 
 				"diceNum": 1, 
 				"diceSides": 6,
