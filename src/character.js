@@ -164,11 +164,11 @@ Character.prototype.create = function(r, s, fn) {
 	s.player.roomid = '1';
 	s.player.trains += 25;
 	s.player.deaths = 0;
-	s.player.str += 10;
-	s.player.int += 10;
-	s.player.wis += 10;
-	s.player.con += 10;
-	s.player.dex += 10;
+	s.player.baseStr += 10 + s.player.str;
+	s.player.baseInt += 10 + s.player.int;
+	s.player.baseWis += 10 + s.player.wis;
+	s.player.baseCon += 10 + s.player.con;
+	s.player.baseDex += 10 + s.player.dex;
 	s.player.settings = {
 		autosac: false,
 		autoloot: true,
@@ -186,11 +186,11 @@ Character.prototype.create = function(r, s, fn) {
 	s.player.mv = s.player.cmv;
 	s.player.mana = s.player.cmana;
 	s.player.hp = s.player.chp;
-	s.player.cStr = s.player.str;
-	s.player.cInt += s.player.int;
-	s.player.cWis += s.player.wis;
-	s.player.cCon += s.player.con;
-	s.player.cDex += s.player.dex;
+	s.player.str = s.player.baseStr;
+	s.player.int += s.player.baseInt;
+	s.player.wis += s.player.baseWis;
+	s.player.con += s.player.baseCon;
+	s.player.dex += s.player.baseDex;
 
 	character.generateSalt(function(salt) {
 		s.player.salt = salt;
@@ -873,6 +873,8 @@ Character.prototype.removeEq = function(player, item) {
 		}
 	}
 	
+	this.removeStatMods(player, item);
+
 	World.msgPlayer(player, {
 		msg: 'You stopped using a ' + item.short + '.'
 	});
@@ -904,6 +906,26 @@ Character.prototype.getItems = function(player, command) {
 	return newArr;
 };
 
+Character.prototype.addStatMods = function(player, item) {
+	var prop;
+
+	for (prop in item.modifiers) {
+		if (player[prop]) {
+			player[prop] += item.modifiers[prop];
+		}
+	}
+};
+
+Character.prototype.removeStatMods = function(player, item) {
+	var prop;
+
+	for (prop in item.modifiers) {
+		if (player[prop]) {
+			player[prop] -= item.modifiers[prop];
+		}
+	}
+}
+
 Character.prototype.wearWeapon = function(target, weapon) {
 	var slot = this.getEmptyWeaponSlot(target),
 	roomObj = World.getRoomObject(target.area, target.roomId);
@@ -911,6 +933,8 @@ Character.prototype.wearWeapon = function(target, weapon) {
 	weapon.equipped = true;
 	
 	slot.item = weapon;
+
+	this.addStatMods(target, weapon);
 
 	World.msgPlayer(target, {
 		msg: 'You wield a ' + weapon.short + ' in your ' + slot.name + '.'
@@ -924,6 +948,8 @@ Character.prototype.wearShield = function(target, shield) {
 	
 	slot.item = shield;
 
+	this.addStatMods(target, shield);
+
 	World.msgPlayer(target, {
 		msg: 'You begin defending yourself with a ' + shield.short + '.'
 	});
@@ -935,6 +961,8 @@ Character.prototype.wearLight = function(target, light) {
 	light.equipped = true;
 
 	slot.item = light;
+
+	this.addStatMods(target, light);
 
 	if (slot.item.decay > 0) {
 		World.msgPlayer(target, {

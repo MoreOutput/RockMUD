@@ -156,12 +156,13 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 								damage = damage/2;
 							}
 
-							if (World.dice.roll(1, 20) === 20) {
+							// critical attacks
+							if (World.dice.roll(1 * attacker.level, 20, hitRoll + attackerMods.dex) === (20 * attacker.level + 1)) {
 								damage = damage * 2;
 							}
 
 							if (damage < 0) {
-								damage = 1;
+								damage = attackerMods.str;
 							} else {
 								damage = Math.round(damage);
 							}

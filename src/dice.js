@@ -51,8 +51,8 @@ Roller.prototype.getDexMod = function(target, mod) {
 		sizeMod = -(target.size - 2);
 	}
 
-	if (target.con > 12) {
-		return Math.round( (target.dex/6) + mod + sizeMod);
+	if (target.dex > 12) {
+		return Math.round( (target.dex/4) + mod + sizeMod);
 	} else {
 		return 0;
 	}
@@ -72,7 +72,7 @@ Roller.prototype.getConMod = function(target, mod) {
 	}
 
 	if (target.con > 12) {
-		return Math.round( (target.con/6) + mod + sizeMod);
+		return Math.round( (target.con/4) + mod + sizeMod);
 	} else {
 		return 0;
 	}
@@ -84,7 +84,7 @@ Roller.prototype.getIntMod = function(target, mod) {
 	}
 
 	if (target.int > 12) {
-		return Math.ceil( (target.int/6) + mod);
+		return Math.ceil( (target.int/4) + mod);
 	} else {
 		return 0;
 	}
@@ -103,7 +103,7 @@ Roller.prototype.getStrMod = function(target, mod) {
 		sizeMod += ( target.size );
 	}
 
-	if (target.con > 12) {
+	if (target.str > 11) {
 		return Math.round( (target.str/6) + mod + sizeMod);
 	} else {
 		return 0;

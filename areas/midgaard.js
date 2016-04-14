@@ -200,7 +200,7 @@ module.exports = {
 				"weight": 4,
 				"slot": "hands",
 				"equipped": false,
-				"mod": {
+				"modifiers": {
 					"str": 2
 				},
 				"flags": []
