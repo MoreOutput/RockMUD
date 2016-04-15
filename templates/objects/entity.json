@@ -55,6 +55,7 @@
     "reply": "",
     "following": "",
     "short": "",
+	"long" : "",
     "trains": 0,
     "hearing": true,
     "sight": true,

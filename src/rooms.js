@@ -222,6 +222,18 @@ Room.prototype.removeItem = function(roomObj, item) {
 	roomObj.items = newArr;
 };
 
+Room.prototype.getMonster = function(roomObj, command) {
+	var i = 0;
+
+	for (i; i < roomObj.monsters.length; i += 1) {
+		if (roomObj.monsters[i].name.toLowerCase().indexOf(command.arg) !== -1) {
+			return roomObj.monsters[i];
+		}
+	}
+
+	return false;
+};
+
 Room.prototype.removePlayer = function(roomObj, player) {
 	var i = 0,
 	newArr = [];

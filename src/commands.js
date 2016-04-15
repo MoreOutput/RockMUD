@@ -899,7 +899,9 @@ Cmd.prototype.look = function(target, command) {
 	// the initial value of target.sight should be true inless target is blind.	
 	canSee = target.sight,
 	light,
-	item; // looking at an item
+	itemDescription,	
+	item, // looking at an item
+	i = 0;
 	
 	if (canSee) {
 		if (target.position !== 'sleeping') {
@@ -932,23 +934,39 @@ Cmd.prototype.look = function(target, command) {
 			} else {
 				roomObj = World.getRoomObject(target.area, target.roomid);
 
-				item = World.search(roomObj.items, command);
-
+				item = Character.getItem(target, command);
+				
 				if (item) {
+					itemDescription = '<p>' + item.long + '</p>';
+					
+					if (item.items) {
+						itemDescription += '<p>Inside you can see:</p><ul class="list container-list">'
+
+						for (i; i < item.items.length; i += 1) {
+							itemDescription += '<li>' + item.items[i].displayName  + '</li>';
+						}
+					}
+					
+					itemDescription += '</ul>';
+					
 					World.msgPlayer(target, {
-						msg: item.long,
+						msg: itemDescription,
 						styleClass: 'cmd-look'
 					});
 				} else {
-					monster = World.search(roomObj.monsters, command);
+					monster = Room.getMonster(roomObj, command);
 
 					if (monster) {
+						if (!monster.long) {
+							itemDescription = monster.short;
+						}
+						
 						World.msgPlayer(target, {
-							msg: monster.long,
+							msg: itemDescription,
 							styleClass: 'cmd-look'
 						});
 					} else {
-						item = World.search(target.items, command);
+						item = Room.getItem(target, command);
 
 						if (item) {
 							return World.msgPlayer(target, {
