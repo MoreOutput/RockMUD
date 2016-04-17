@@ -152,7 +152,7 @@ Character.prototype.create = function(r, s, fn) {
 	socket;
 
 	s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
-	s.player.chp += 20;
+	s.player.chp += 30;
 	s.player.cmana += 5;
 	s.player.cmv += 100;
 	s.player.isPlayer = true;
@@ -640,8 +640,6 @@ Character.prototype.getWeaponSlots = function(player) {
 	for (i; i < player.eq.length; i += 1) {
 		if (player.eq[i].slot === 'hands') {
 			slots.push(player.eq[i]);
-			
-			return slots;
 		}
 	}
 
@@ -1044,8 +1042,6 @@ Character.prototype.createCorpse = function(player) {
 	player.weight = player.weight - 1;
 	player.chp = 0;
 	player.hp = 0;
-
-	return player;
 }
 
 Character.prototype.getLoad = function(s) {

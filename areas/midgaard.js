@@ -379,6 +379,7 @@ module.exports = {
 				"kingdom": "reptile",
 				"gold": 3,
 				"size": {"value": 3, "display": "medium"},
+				"attackOnVisit": true,
 				"behaviors": [{
 					"module": "aggie"
 				}]
@@ -388,7 +389,7 @@ module.exports = {
 		},
 		{
 			"id" : "8",
-			"title" : "Heading to the western gate",
+			"title" : "The General Store",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"exits" : [
@@ -398,7 +399,51 @@ module.exports = {
 				}
 			],
 			"playersInRoom": [],
-			"monsters" : [],
+			"monsters" : [
+				{
+					"name": "Tom",
+					"level": 15,
+					"short": "Thomas, the dwarven shopkeep",
+					"description": "",
+					"race": "dwarf",
+					"id": 9,
+					"area": "Midgaard",
+					"weight": 200,
+					"diceNum": 2, 
+					"diceSides": 8,
+					"diceMod": 5,
+					"str": 18,
+					"gold": 1000,
+					"position": "standing",
+					"attackType": "punch",
+					"damRoll": 10,
+					"hitRoll": 10,
+					"templates": [],
+					"ac": 20,
+					"merchant": true,
+					"itemType": "mob",
+					"items": [{
+						"name": "Pemmican", 
+						"short": "",
+						"long": "" ,
+						"area": "Midgaard",
+						"id": 10,
+						"level": 1,
+						"itemType": "food",
+						"material": "flesh", 
+						"weight": 0,
+						"slot": "",
+						"value": 10,
+						"equipped": false,
+						"store": true,
+						"worth": 10,
+						"supply": 0
+					}],
+					"behaviors": [{
+						"module" : "shopkeeper"
+					}]	
+				}
+			],
 			"items" : [],
 			"flags" : []
 		}

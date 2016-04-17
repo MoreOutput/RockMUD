@@ -163,10 +163,10 @@ Room.prototype.getBrief = function(roomObj, options) {
 		for (i; i < monsters.length; i += 1) {
 			if (!monsters[i].short) {
 				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' + 
-				monsters[i].position + ' there/li>';
+				monsters[i].position + ' there.</li>';
 			} else {
 				displayHTML += '<li class="room-monster">' + monsters[i].short + ' is ' + 
-				monsters[i].position + ' there</li>';
+				monsters[i].position + ' there.</li>';
 			}
 		}
 
@@ -175,7 +175,7 @@ Room.prototype.getBrief = function(roomObj, options) {
 		for (i; i < playersInRoom.length; i += 1) {
 			if (!options || !options.hideCallingPlayer || options.hideCallingPlayer !== playersInRoom[i].name ) {
 				displayHTML += '<li class="room-player">' + playersInRoom[i].name 
-					+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' there</li>';
+					+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' there.</li>';
 			}
 		}
 
@@ -191,6 +191,20 @@ Room.prototype.getBrief = function(roomObj, options) {
 	}
 
 	return displayHTML;
+};
+
+Room.prototype.getMerchants = function(roomObj, command) {
+	var i = 0,
+	merchants = [],
+	possibleMerchants = roomObj.monsters.concat(roomObj.playersInRoom); 
+	
+	for (i; i < possibleMerchants.length; i += 1) {
+		if (possibleMerchants[i].merchant === true) {
+			merchants.push(possibleMerchants[i]);
+		}
+	}
+	
+	return merchants;
 };
 
 Room.prototype.addItem = function(roomObj, item) {
@@ -245,8 +259,6 @@ Room.prototype.removePlayer = function(roomObj, player) {
 	}
 
 	roomObj.playersInRoom = newArr;
-
-	return roomObj;
 };
 
 Room.prototype.removeMob = function(roomObj, mob) {
@@ -260,8 +272,6 @@ Room.prototype.removeMob = function(roomObj, mob) {
 	}
 
 	roomObj.monsters = newArr;
-
-	return roomObj;
 };
 
 Room.prototype.processEvents = function(roomObj, player, eventName, fn) {
@@ -282,10 +292,7 @@ Room.prototype.processEvents = function(roomObj, player, eventName, fn) {
 
 Room.prototype.addCorpse = function(roomObj, corpse) {
 	var room = this;
-
-	roomObj = room.addItem(roomObj, corpse);
-
-	return roomObj;
+	room.addItem(roomObj, corpse);
 };
 
 module.exports.room = new Room();

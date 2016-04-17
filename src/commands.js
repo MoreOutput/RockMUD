@@ -18,13 +18,48 @@ areas = World.areas,
 
 Cmd = function () {};
 
-Cmd.prototype.scan = function(target, command) {
+Cmd.prototype.list = function(target, command) {
+	var i = 0,
+	items,
+	roomObj = World.getRoomObject(target.area, target.roomid),
+	storeDisplay = '',
+	merchant;
+
+	if (target.sight) {
+		if (target.position === 'standing') {
+			merchant = Room.getMerchants(roomObj)[0];
+	
+			if (merchant) {
+				for (i; i < merchant.items.length; i += 1) {
+					storeDisplay += '<li>' + merchant.items[i].name  +
+					' <span class="yellow">(' + merchant.items[i].worth + 'gp)</span></li>';
+				}
+
+				World.msgPlayer(target, {
+					msg: '<h4>' + merchant.short + ' item list</h4><ul class="list">' + storeDisplay  + '</ul>'
+				});
+			} else {
+				World.msgPlayer(target, {
+					msg: 'No one here to buy from.'
+				});
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You can\'t shop from that position.'
+			});
+		}
+	} else {
+		
+	}
+};
+
+Cmd.prototype.scan = function(target, command) { 
 	var roomObj,
 	rooms,
 	i = 0,
 	scanStr = '';
 
-	if (target.position !== 'sleeping') { 
+	if (target.position === 'standing') { 
 		roomObj = World.getRoomObject(target.area, target.roomid);
 		rooms = Room.getAdjacent(roomObj);
 
@@ -34,7 +69,7 @@ Cmd.prototype.scan = function(target, command) {
 
 		World.msgPlayer(target, {msg: scanStr});
 	} else {
-		World.msgPlayer(target, {msg: 'Scan while sleeping?', styleClass: 'error'});
+		World.msgPlayer(target, {msg: 'You must be standing to scan the surrounding area.', styleClass: 'error'});
 	}
 };
 

@@ -11,11 +11,17 @@ World = require('../src/world').world;
 module.exports = {
     onVisit: function(target, roomObj) {
         var mob = this;
-
-        if (mob.position === 'standing' && target.isPlayer && target.roomid === mob.roomid) {
+		// if we do not have this property set the mob will only attack when it finds
+		// other players in its room.
+        if (mob.attackOnVisit === true
+			&& mob.position === 'standing'
+			&& target.isPlayer
+			&& target.roomid === mob.roomid) {
             Cmd.kill(mob, {
                 arg: target.name
             });
         }
-    }
+    },
+	onAlive: function(target, roomObj) {
+	}
 };

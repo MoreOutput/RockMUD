@@ -99,7 +99,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	
 	if (attacker.position === 'fighting') {
 		weaponSlots = Character.getWeaponSlots(attacker);
-		
+
 		if (opponent.position === 'fighting') {
 			shieldSlots = Character.getSlotsWithShields(opponent);
 
@@ -107,20 +107,16 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 				shield = shieldSlots[0].item;
 			}
 		}
-
-		for (i; i < weaponSlots.length; i += 1) {
-			if (weaponSlots.item) {
+		
+		for (i; i < weaponSlots.length; i += 1) {			
+			if (weaponSlots[i].item) {
 				weapon = weaponSlots[i].item;
-			} else {
+			} else if (!weapon && !weaponSlots[i].item) {
 				weapon = Character.getFist(attacker);
 			}
-
+			
 			numOfAttacks = combat.getNumberOfAttacks(attacker, weapon, attackerMods, opponentMods);
-
-			if (!weaponSlots.length) {
-				numOfAttacks -= 1;
-			}
-
+			
 			if (numOfAttacks) {
 				j = 0;
 
@@ -131,8 +127,8 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						acCheck += shieldAC;
 					}
 
-					if ((World.dice.roll(1, 10 + acCheck))
-						< (hitRoll + World.dice.roll(1, 12 + hitRoll) + attacker.level) ) {
+					if ((World.dice.roll(1, 8 + acCheck))
+						< (World.dice.roll(1, 12 + hitRoll) + attacker.level) ) {
 						// attacker beat opponents ac check
 						if (World.dice.roll(2, 20, dodgeCheck)
 							< World.dice.roll(2, 20, hitRoll + 5)) {
@@ -215,7 +211,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						+ weapon.attackType + ' you and misses! </div>';
 				}
 			}
-
+			
 			return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent);
 		}
 	}
@@ -311,13 +307,13 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 		World.msgPlayer(player, {msg: 'At the moment player death is impossible', styleClass: 'red'});
 	}
 
-	roomObj = Room.removeMob(roomObj, opponent);
+	Room.removeMob(roomObj, opponent);
 
 	exp = World.dice.calExp(player, opponent);
 
-	corpse = Character.createCorpse(opponent);
-
-	roomObj = Room.addCorpse(roomObj, opponent);
+	Character.createCorpse(opponent);
+	
+	Room.addCorpse(roomObj, opponent);
 
 	player.position = 'standing';
 	

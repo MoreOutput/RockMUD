@@ -1,0 +1,277 @@
+{
+    "name": "Rocky",
+    "id": "",
+    "lastname": "",
+    "displayName": "Rocky",
+    "title": "",
+    "role": "player",
+    "sex": "",
+    "race": "human",
+    "charClass": "fighter",
+    "level": 1,
+    "exp": 42,
+    "expToLevel": 1000,
+    "position": "standing",
+    "alignment": "",
+    "chp": 12,
+    "hp": 20,
+    "cmana": 5,
+    "mana": 5,
+    "cmv": 100,
+    "mv": 100,
+    "str": 12,
+    "wis": 10,
+    "int": 9,
+    "dex": 10,
+    "con": 12,
+    "baseStr": 10,
+    "baseWis": 10,
+    "baseInt": 10,
+    "baseDex": 10,
+    "baseCon": 10,
+    "ac": 2,
+    "damRoll": 0,
+    "hitRoll": 0,
+    "wait": 0,
+    "magicRes": 0,
+    "meleeRes": 0,
+    "poisonRes": 0,
+    "detection": 0,
+    "knowledge": 0,
+    "weight": 0,
+    "maxWeight": 0,
+    "gold": 2,
+    "hunger": 0,
+    "thirst": 0,
+    "load": 0,
+    "visible": true,
+    "diceNum": 1,
+    "diceSides": 4,
+    "attackType": "punch",
+    "area": "Midgaard",
+    "roomid": "1",
+    "recall": "1",
+    "description": "",
+    "reply": "",
+    "following": "",
+    "short": "",
+    "long": "",
+    "trains": 30,
+    "hearing": true,
+    "sight": true,
+    "touch": true,
+    "smell": true,
+    "taste": true,
+    "size": {
+        "value": 3,
+        "display": "medium"
+    },
+    "kingdom": "mammal",
+    "killed": 0,
+    "eq": [
+        {
+            "name": "Head",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Necklace 1",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Necklace 2",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Body",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "Chest",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "About Body",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "Right Arm",
+            "item": null,
+            "slot": "arms"
+        },
+        {
+            "name": "Left Arm",
+            "item": null,
+            "slot": "arms"
+        },
+        {
+            "name": "Right Hand",
+            "item": {
+                "name": "Short Sword",
+                "short": "Short Sword",
+                "long": "A sharp looking short sword with a hilt wrapped in leather.",
+                "area": "Midgaard",
+                "id": "8",
+                "level": 2,
+                "itemType": "weapon",
+                "weaponType": "sword",
+                "material": "iron",
+                "diceNum": 1,
+                "diceSides": 6,
+                "diceMod": 0,
+                "attackType": "slice",
+                "attackElement": "",
+                "weight": 4,
+                "slot": "hands",
+                "equipped": true,
+                "modifiers": {
+                    "str": 2
+                },
+                "flags": [],
+                "refId": "item-92143970401957630123",
+                "displayName": "a Short Sword",
+                "value": 0,
+                "decay": 0,
+                "durability": 100,
+                "maxDurability": 100,
+                "condition": "excellent",
+                "isKey": false,
+                "isOpen": true,
+                "behaviors": [],
+                "roomid": "1"
+            },
+            "dual": false,
+            "slot": "hands"
+        },
+        {
+            "name": "Left Hand",
+            "item": null,
+            "dual": false,
+            "slot": "hands"
+        },
+        {
+            "name": "Ring 1",
+            "item": null,
+            "slot": "fingers"
+        },
+        {
+            "name": "Ring 2",
+            "item": null,
+            "slot": "fingers"
+        },
+        {
+            "name": "Right Leg",
+            "item": null,
+            "slot": "legs"
+        },
+        {
+            "name": "Left Leg",
+            "item": null,
+            "slot": "legs"
+        },
+        {
+            "name": "Feet",
+            "item": null,
+            "slot": "feet"
+        },
+        {
+            "name": "Floating",
+            "item": null,
+            "slot": "floating"
+        }
+    ],
+    "items": [
+        {
+            "name": "Short Sword",
+            "short": "Short Sword",
+            "long": "A sharp looking short sword with a hilt wrapped in leather.",
+            "area": "Midgaard",
+            "id": "8",
+            "level": 2,
+            "itemType": "weapon",
+            "weaponType": "sword",
+            "material": "iron",
+            "diceNum": 1,
+            "diceSides": 6,
+            "diceMod": 0,
+            "attackType": "slice",
+            "attackElement": "",
+            "weight": 4,
+            "slot": "hands",
+            "equipped": true,
+            "modifiers": {
+                "str": 2
+            },
+            "flags": [],
+            "refId": "item-92143970401957630123",
+            "displayName": "a Short Sword",
+            "value": 0,
+            "decay": 0,
+            "durability": 100,
+            "maxDurability": 100,
+            "condition": "excellent",
+            "isKey": false,
+            "isOpen": true,
+            "behaviors": [],
+            "roomid": "1"
+        }
+    ],
+    "affects": [],
+    "racial": [],
+    "skills": [
+        [
+            {
+                "name": "Bash",
+                "id": "bash",
+                "train": 65,
+                "maxTrain": 95,
+                "mod": 0,
+                "type": "melee",
+                "wait": 2
+            },
+            {
+                "name": "Shield Block",
+                "id": "shieldBlock",
+                "train": 65,
+                "maxTrain": 95,
+                "mod": 0,
+                "type": "passive",
+                "wait": 0
+            }
+        ]
+    ],
+    "skillList": "[object Object][object Object]",
+    "prevent": [],
+    "autoloot": true,
+    "autosac": false,
+    "behaviors": [],
+    "sid": "/#wbLYvgro1hxirpsrAAAB",
+    "socket": null,
+    "password": "1d016340db6cd581eda8b2708afd2c096934715aa13fdf13306339b91ac60a9a793297347457b607488b33baa297e18ebc5983b5860240452245a1e73dab88be",
+    "isPlayer": true,
+    "salt": "bb249f3d472406f4f95dc2fa8c1bec1b9851b5d6c4debf3d3b0072f25ccbd77b930a2d0338603e91619f9dee15868195f0e26ece96d540a7451ff59785e6ffba7f1a74a55b249bc6e2422f67310a2cfd0408070cdd4b959512f34202ee5d8bcfe4622ae3c91b47d87430b081724376e9645e2be130fd5914653400c9c2d0f83d",
+    "created": "2016-04-17T17:08:33.744Z",
+    "saved": "Sun Apr 17 2016 13:59:14 GMT-0400 (Eastern Daylight Time)",
+    "deaths": 0,
+    "settings": {
+        "autosac": false,
+        "autoloot": true,
+        "autocoin": true,
+        "wimpy": {
+            "enabled": false,
+            "hp": 0
+        },
+        "channels": {
+            "blocked": [
+                "flame"
+            ]
+        }
+    },
+    "carry": 20,
+    "opponent": null
+}
