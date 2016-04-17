@@ -134,8 +134,8 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							< World.dice.roll(2, 20, hitRoll + 5)) {
 							// attacker beat opponent dodge check
 							damage = World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str + attacker.damRoll + weapon.diceMod);
-
-							damage += attacker.level/2;
+							
+							damage += (attacker.level/2) + (attackerMods.str/4);
 								
 							if (attackerMods.str >= opponentMods.con) {
 								damage += damRoll/3;
@@ -153,8 +153,9 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							}
 
 							// critical attacks
-							if (World.dice.roll(1 * attacker.level, 20, hitRoll + attackerMods.dex) === (20 * attacker.level + 1)) {
-								damage = damage * 2;
+							if (World.dice.roll(1 * attacker.level, 20, hitRoll + attackerMods.dex)
+								=== (20 * attacker.level + 1)) {
+								damage = (damage * 2) + attacker.cstr;
 							}
 
 							if (damage < 0) {
@@ -171,7 +172,8 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							
 							if (attacker.isPlayer) {
 								msgForAttacker += '<div>You ' + weapon.attackType + ' a ' + opponent.displayName 
-									+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' + damage + ')</span></div>';
+									+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' +
+									damage + ')</span></div>';
 							}
 
 							if (opponent.isPlayer) {
@@ -185,16 +187,19 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							}
 
 							if (opponent.isPlayer) {
-								msgForAttacker += '<div>' + attacker.displayName + ' tries to attack but you dodge at the last minute!</div>';
+								msgForAttacker += '<div>' + attacker.displayName +
+								' tries to attack but you dodge at the last minute!</div>';
 							}
 						}
 					} else {
 						if (attacker.isPlayer) {
-							msgForAttacker += '<div>You try to attack a ' + opponent.displayName + ' and they block your attack!</div>';
+							msgForAttacker += '<div>You try to attack a ' + opponent.displayName +
+							' and they block your attack!</div>';
 						}
 
 						if (opponent.isPlayer) {
-							msgForAttacker += '<div>' + attacker.displayName + ' swings widly and you narrowly block their attack!</div>';
+							msgForAttacker += '<div>' + attacker.displayName +
+							' swings widly and you narrowly block their attack!</div>';
 						}
 					}
 
@@ -260,11 +265,13 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 		player.wait += 1;
 
 		if (player.isPlayer) {
-			msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg + ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+			msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg +
+			' (' + opponent.chp + '/' + opponent.hp +')</div>';
 		}
 
 		if (opponent.isPlayer) {
-			msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg + ' (' + player.chp + '/' + player.hp +')</div>';
+			msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg +
+			' (' + player.chp + '/' + player.hp +')</div>';
 		}
 
 		World.msgPlayer(player, {

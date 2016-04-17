@@ -18,6 +18,92 @@ areas = World.areas,
 
 Cmd = function () {};
 
+Cmd.prototype.buy = function(target, command) {
+	var i = 0,
+	roomObj = World.getRoomObject(target.area, target.roomid),
+	item,
+	merchant;
+	
+	if (target.position !== 'sleeping') {
+		merchant = Room.getMerchants(roomObj)[0];
+		
+		if (merchant) {
+			item = Character.getItem(merchant, command);
+
+			if (item) {
+				if (item.worth <= target.gold) {
+					target.gold -= item.worth;
+					merchant.gold += item.worth;
+					
+					Character.removeItem(merchant, item);
+
+					Character.addItem(target, item);
+					
+					World.msgPlayer(target, {
+						msg: 'You buy something.'
+					});
+				} else {
+					World.msgPlayer(target, {
+						msg: 'Not enough Gold.',
+						styleClass: 'yellow'
+					});
+				}
+			} else {
+				World.msgPlayer(target, {
+					msg: 'Should probably recheck the name again, this isn\'t registering with the merchant.'
+				});
+			}
+		} else {
+
+		}
+	} else {
+	
+	}
+};
+
+Cmd.prototype.sell = function(target, command) {
+	var i = 0,
+	roomObj = World.getRoomObject(target.area, target.roomid),
+	item,
+	merchant;
+	
+	if (target.position !== 'sleeping') {
+		merchant = Room.getMerchants(roomObj)[0];
+		
+		if (merchant) {
+			item = Character.getItem(target, command);
+
+			if (item) {
+				if (item.worth <= merchant.gold) {
+					merchant.gold -= item.worth - 5;
+					target.gold += item.worth - 5;
+					
+					Character.removeItem(target, item);
+
+					Character.addItem(merchant, item);
+					
+					World.msgPlayer(target, {
+						msg: 'You sell something.'
+					});
+				} else {
+					World.msgPlayer(target, {
+						msg: 'He seems to be strapped at the moment.',
+						styleClass: 'yellow'
+					});
+				}
+			} else {
+				World.msgPlayer(target, {
+					msg: 'Should probably recheck the name.'
+				});
+			}
+		} else {
+
+		}
+	} else {
+	
+	}
+};
+
 Cmd.prototype.list = function(target, command) {
 	var i = 0,
 	items,
@@ -30,14 +116,18 @@ Cmd.prototype.list = function(target, command) {
 			merchant = Room.getMerchants(roomObj)[0];
 	
 			if (merchant) {
-				for (i; i < merchant.items.length; i += 1) {
-					storeDisplay += '<li>' + merchant.items[i].name  +
-					' <span class="yellow">(' + merchant.items[i].worth + 'gp)</span></li>';
-				}
+				if (merchant.items.length > 0) {
+					for (i; i < merchant.items.length; i += 1) {
+						storeDisplay += '<li>' + merchant.items[i].name  +
+							' <span class="yellow">(' + merchant.items[i].worth + 'gp)</span></li>';
+					}
 
-				World.msgPlayer(target, {
-					msg: '<h4>' + merchant.short + ' item list</h4><ul class="list">' + storeDisplay  + '</ul>'
-				});
+					World.msgPlayer(target, {
+						msg: '<h4>' + merchant.short + ' item list</h4><ul class="list">' + storeDisplay  + '</ul>'
+					});
+				} else {
+			
+				}
 			} else {
 				World.msgPlayer(target, {
 					msg: 'No one here to buy from.'
@@ -49,7 +139,9 @@ Cmd.prototype.list = function(target, command) {
 			});
 		}
 	} else {
-		
+		World.msgPlayer(target, {
+			msg: 'You can\'t see so browsing the goods is a little difficult at the moment.'
+		});
 	}
 };
 
@@ -608,7 +700,7 @@ Cmd.prototype.get = function(target, command, fn) {
 					if (item) {
 						Room.removeItem(roomObj, item);
 
-						Character.addToInventory(target, item);
+						Character.addItem(target, item);
 
 						if (item) {
 							World.msgRoom(roomObj, {
@@ -641,7 +733,7 @@ Cmd.prototype.get = function(target, command, fn) {
 						
 						Room.removeItem(roomObj, item);
 
-						Character.addToInventory(target, item);
+						Character.addItem(target, item);
 					}
 					
 					World.msgRoom(roomObj, {
@@ -664,7 +756,7 @@ Cmd.prototype.get = function(target, command, fn) {
 				
 				if (item) {
 					Character.removeFromContainer(container, item);
-					Character.addToInventory(target, item);
+					Character.addItem(target, item);
 
 					World.msgPlayer(target, {msg: 'You remove a <strong>'
 						+ item.short + '</strong> from a '

@@ -436,12 +436,39 @@ module.exports = {
 						"value": 10,
 						"equipped": false,
 						"store": true,
-						"worth": 10,
-						"supply": 0
+						"worth": 10
+					}, {
+						"name": "Pemmican", 
+						"short": "",
+						"long": "" ,
+						"area": "Midgaard",
+						"id": 10,
+						"level": 1,
+						"itemType": "food",
+						"material": "flesh", 
+						"weight": 0,
+						"slot": "",
+						"value": 10,
+						"equipped": false,
+						"store": true,
+						"worth": 10
+					}, {
+						"name": "Pemmican", 
+						"short": "",
+						"long": "" ,
+						"area": "Midgaard",
+						"id": 10,
+						"level": 1,
+						"itemType": "food",
+						"material": "flesh", 
+						"weight": 0,
+						"slot": "",
+						"value": 10,
+						"equipped": false,
+						"store": true,
+						"worth": 10
 					}],
-					"behaviors": [{
-						"module" : "shopkeeper"
-					}]	
+					"behaviors": []	
 				}
 			],
 			"items" : [],

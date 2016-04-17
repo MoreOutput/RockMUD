@@ -23,8 +23,7 @@ Some things Currently in 0.2.0:
 * Command aliases defined client side.
 * Various 'standard' commands (see: HELP COMMANDS)
 * Basic Combat (see: kill <mob name>)
-* Inventory
-* Containers
+* Inventory, Containers, Shopkeeping
 * Ticks
 * Dynamic movement directions/options.
 * Message Templates
@@ -46,7 +45,7 @@ Used to interact with loaded areas found in World.areas[]
 All things combat.
 
 **character.js**
-Anything function related to creating or interacting with a real-world player is here.
+Any function related to creating or interacting with a real-world player is here.
 
 **dice.js**
 Core logic for dice rolls is in its own module. Is attached to world.dice. ex: world.dice.roll(1, 6).
@@ -77,17 +76,18 @@ Player files as flat json data.
 JS files representing areas.
 
 **/templates/objects**
-JSON templates used to enhance in-game items; and to ensure default values.
+JSON templates used to enhance in-game items; and to ensure default values. This is used to allevate the need of defining a large set of keys within each area file item.
 
 * entity.json is the default object attached to all 'living' objects upon initial load.
 * item.json is the default object attached to all 'non-living' objects upon initial load.
 * Properties in any passed in objects overwrite those in the template.
+* if you create a JSON file that matches an itemType the item found within the area will be extended with the template.
 
 **/templates/html**
 HTML templates mainly retrieved to ease complex display. For RockMUD core this means character creation screens.
 
 **/ai**  
-Mob specific AI scripts. This are merged into game items after they are loaded from their respective area files. AI can be written directly into the area file, but ai scripts are outlined here when they can be reused. RockMUD core aims to have 4: shopkeeper.js, wander.js, aggie.js and mayor.js.
+Mob specific AI scripts. This are merged into game items after they are loaded from their respective area files. AI can be written directly into the area file, but ai scripts are outlined here when they can be reused. RockMUD core aims to have 3: wander.js, aggie.js and mayor.js.
 
 **/public**
 Public assets like client side javascript and CSS.

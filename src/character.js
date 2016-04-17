@@ -611,7 +611,7 @@ Character.prototype.xpRot = function() {
 };
 
 // push an item into a players inventory, checks items to ensure a player can use it
-Character.prototype.addToInventory = function(player, item) {
+Character.prototype.addItem = function(player, item) {
 	player.items.push(item);
 };
 

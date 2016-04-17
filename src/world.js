@@ -383,11 +383,11 @@ World.prototype.rollMobs = function(mobArr, roomid) {
 			classObj = world.getClass(mob.charClass);
 			mob = world.extend(mob, classObj);
 
-			mob.str += world.dice.roll(4, 6) - (mob.size.value * 3) + 2;
-			mob.dex += world.dice.roll(4, 6) - (mob.size.value * 3) + 2;
-			mob.int += world.dice.roll(4, 6) - (mob.size.value * 3) + 2;
-			mob.wis += world.dice.roll(4, 6) - (mob.size.value * 3) + 2;
-			mob.con += world.dice.roll(4, 6) - (mob.size.value * 3) + 2;
+			mob.str += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
+			mob.dex += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
+			mob.int += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
+			mob.wis += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
+			mob.con += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
 			mob.isPlayer = false;
 			mob.roomid = roomid;
 
