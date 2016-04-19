@@ -95,9 +95,9 @@ module.exports = {
 					}]
 				}, {
 					"name": "Boar",
-					"displayName": "Brown boar",
+					"displayName": ["Brown boar", "A old brown boar"],
 					"level": 1,
-					"short": "A large brown boar",
+					"short": ["A large brown boar", "A large scared boar"],
 					"race": "animal",
 					"id": 6,
 					"area": "Midgaard",

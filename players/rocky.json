@@ -1,0 +1,208 @@
+{
+    "name": "rocky",
+    "id": "",
+    "lastname": "",
+    "displayName": "Rocky",
+    "title": "",
+    "role": "player",
+    "sex": "",
+    "race": "ogre",
+    "charClass": "fighter",
+    "level": 1,
+    "exp": 0,
+    "expToLevel": 1000,
+    "position": "standing",
+    "alignment": "",
+    "chp": 30,
+    "hp": 30,
+    "cmana": 5,
+    "mana": 5,
+    "cmv": 100,
+    "mv": 100,
+    "str": 10,
+    "wis": 9,
+    "int": 7,
+    "dex": 9,
+    "con": 11,
+    "baseStr": 10,
+    "baseWis": 10,
+    "baseInt": 10,
+    "baseDex": 10,
+    "baseCon": 10,
+    "ac": 2,
+    "damRoll": 2,
+    "hitRoll": 0,
+    "wait": 0,
+    "magicRes": -3,
+    "meleeRes": 1,
+    "poisonRes": 0,
+    "detection": 0,
+    "knowledge": 0,
+    "weight": 0,
+    "maxWeight": 0,
+    "gold": 0,
+    "hunger": 0,
+    "thirst": 0,
+    "load": 0,
+    "visible": true,
+    "diceNum": 1,
+    "diceSides": 8,
+    "attackType": "smash",
+    "area": "Midgaard",
+    "roomid": "1",
+    "recall": "1",
+    "description": "",
+    "reply": "",
+    "following": "",
+    "short": "",
+    "long": "",
+    "trains": 25,
+    "hearing": true,
+    "sight": true,
+    "touch": true,
+    "smell": true,
+    "taste": true,
+    "size": {
+        "value": 4,
+        "display": "large"
+    },
+    "kingdom": "mammal",
+    "killed": 0,
+    "eq": [
+        {
+            "name": "Head",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Necklace 1",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Necklace 2",
+            "item": null,
+            "slot": "head"
+        },
+        {
+            "name": "Body",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "Chest",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "About Body",
+            "item": null,
+            "slot": "body"
+        },
+        {
+            "name": "Right Arm",
+            "item": null,
+            "slot": "arms"
+        },
+        {
+            "name": "Left Arm",
+            "item": null,
+            "slot": "arms"
+        },
+        {
+            "name": "Right Hand",
+            "item": null,
+            "dual": false,
+            "slot": "hands"
+        },
+        {
+            "name": "Left Hand",
+            "item": null,
+            "dual": false,
+            "slot": "hands"
+        },
+        {
+            "name": "Ring 1",
+            "item": null,
+            "slot": "fingers"
+        },
+        {
+            "name": "Ring 2",
+            "item": null,
+            "slot": "fingers"
+        },
+        {
+            "name": "Right Leg",
+            "item": null,
+            "slot": "legs"
+        },
+        {
+            "name": "Left Leg",
+            "item": null,
+            "slot": "legs"
+        },
+        {
+            "name": "Feet",
+            "item": null,
+            "slot": "feet"
+        },
+        {
+            "name": "Floating",
+            "item": null,
+            "slot": "floating"
+        }
+    ],
+    "items": [],
+    "affects": [],
+    "racial": [],
+    "skills": [
+        [
+            {
+                "name": "Bash",
+                "id": "bash",
+                "train": 65,
+                "maxTrain": 95,
+                "mod": 0,
+                "type": "melee",
+                "wait": 2
+            },
+            {
+                "name": "Shield Block",
+                "id": "shieldBlock",
+                "train": 65,
+                "maxTrain": 95,
+                "mod": 0,
+                "type": "passive",
+                "wait": 0
+            }
+        ]
+    ],
+    "skillList": "[object Object][object Object]",
+    "prevent": [],
+    "autoloot": true,
+    "autosac": false,
+    "behaviors": [],
+    "sid": "/#r-e7PPiHC_4Aq8-iAAAA",
+    "socket": null,
+    "password": "662ee6d17e01795be0efbf4a370a46b920184f40cf6a027e068ed088ec5981a78986bbcbc610eb48eed95685e225c89995ce33b445cc4a69944bab77a63bd839",
+    "isPlayer": true,
+    "salt": "7ca4e98a1b9811a4a84efbffe338e0af438c713e67aa690a0a052f55321598e92cf14e1eca68bfc7a65705032ea16ac3047adda8a0b57d3d533133513600ecb0c5a38a1d4a49150514c4fdc1f84ea8d0823cd817c6b13890e645956bcae4d0cfd0bc88a7e382c45af80ffecac2e9a2cdd27e7d70b27f7e1bc1fc59ffaaf1c842",
+    "created": "2016-04-19T03:00:52.002Z",
+    "saved": null,
+    "deaths": 0,
+    "settings": {
+        "autosac": false,
+        "autoloot": true,
+        "autocoin": true,
+        "wimpy": {
+            "enabled": false,
+            "hp": 0
+        },
+        "channels": {
+            "blocked": [
+                "flame"
+            ]
+        }
+    },
+    "carry": 60
+}

@@ -11,7 +11,7 @@ World = require('./world').world,
 Character = function () {
 	this.statusReport = [
 		{msg: ' is bleeding all over the place and looks nearly dead!', percentage: 0},
-		{msg: ' is bleeding profusely and showing serious signs of fatigue!', percentage: 10},
+		{msg: ' is bleeding profusely.', percentage: 10},
 		{msg: ' has some major cuts and brusies.', percentage: 20},
 		{msg: ' has some large cuts and looks exhausted!', percentage: 30},
 		{msg: ' has some minor cuts and brusies.', percentage: 40},

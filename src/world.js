@@ -307,15 +307,35 @@ World.prototype.rollItems = function(itemArr, roomid) {
 			var chanceRoll = world.dice.roll(1, 20),
 			i = 0,
 			aiName,
+			itemName,
 			behavior;
 
 			item.refId = refId += index;
+			
+			item = world.extend(item, world.itemTemplate);
 
 			if (!item.displayName) {
-				item.displayName = 'a ' + item.short;
+				if (Array.isArray(item.displayName)) {
+					if (Array.isArray(item.displayName)) {
+						itemName = item.displayName[world.dice.roll(1, item.displayName.length) - 1];
+					} else {
+						itemName = item.displayName;
+					}
+				} else {	
+					if (Array.isArray(item.short)) {
+						itemName = item.short[world.dice.roll(1, item.short.length) - 1];
+					} else {
+						itemName = item.short;
+					}
+				}
+
+				item.short = itemName;
+				item.displayName = itemName;
 			}
 
-			item = world.extend(item, world.itemTemplate);
+			if (Array.isArray(item.long)) {
+				item.long = item.long[world.dice.roll(1, item.long.length) - 1];		
+			}
 
 			if (chanceRoll === 20) {
 				item.diceNum += 1;
@@ -366,14 +386,11 @@ World.prototype.rollMobs = function(mobArr, roomid) {
 			var raceObj,
 			i = 0,
 			aiName,
+			mobName,
 			behavior,
 			classObj;
 
 			mob.refId = refId += index;
-
-			if (!mob.displayName) {
-				mob.displayName = mob.name[0].toUpperCase() + mob.name.slice(1);
-			}
 
 			mob = world.extend(mob, world.mobTemplate);
 			
@@ -383,6 +400,29 @@ World.prototype.rollMobs = function(mobArr, roomid) {
 			classObj = world.getClass(mob.charClass);
 			mob = world.extend(mob, classObj);
 
+			if (!mob.displayName) {
+				if (Array.isArray(mob.name)) {
+					mobName = mob.name[world.dice.roll(1, mob.name.length) - 1];
+				} else {
+					mobName = mob.name;
+				}
+
+				mob.name = mobName;
+				mob.displayName = mobName[0].toUpperCase() + mobName.slice(1);
+			} else {
+				if (Array.isArray(mob.displayName)) {
+					mob.displayName = mob.displayName[world.dice.roll(1, mob.displayName.length) - 1];
+				}
+			}
+		
+			if (Array.isArray(mob.short)) {
+				mob.short = mob.short[world.dice.roll(1, mob.short.length) - 1];		
+			}
+
+			if (Array.isArray(mob.long)) {
+				mob.long = mob.long[world.dice.roll(1, mob.long.length) - 1];		
+			}
+			
 			mob.str += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
 			mob.dex += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
 			mob.int += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
@@ -675,7 +715,7 @@ World.prototype.search = function(searchArr, command) {
 	RockMUD extend(target, obj2, callback);
 	Target gains all properties from obj2 that arent in the current object, all numbers are added together
 */
-World.prototype.extend = function(target, obj2, fn) {
+World.prototype.extend = function(target, obj2) {
 	var prop;
 
 	if (obj2 && target) {
@@ -683,7 +723,7 @@ World.prototype.extend = function(target, obj2, fn) {
 			if (target[prop]) {
 				if (target[prop].isArray) {
 					target[prop] = obj2[prop];
-				} else if ( !isNaN(target[prop]) ) {
+				} else if (!isNaN(target[prop]) ) {
 					target[prop] += obj2[prop];
 				}
 			} else {
@@ -692,11 +732,7 @@ World.prototype.extend = function(target, obj2, fn) {
 		}
 	}
 
-	if (fn) {
-		return fn(target);
-	} else {
-		return target;
-	}
+	return target;
 };
 
 // Shuffle an array
