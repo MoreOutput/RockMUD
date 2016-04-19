@@ -1,26 +1,24 @@
 {
-    "tick": 1,
     "year": 1022,
     "title": "Year of something-or-other",
     "month": {
         "id": 1,
         "displayName": "Janurary",
-        "abbv": "Jan"
-    },
+        "abbv": "Jan",
+		"day": 1,
+		"hoursInDay": 24,
+    	"hourOfLight": 1,
+    	"hourOfNight": 12
+	},
     "day": 1,
     "hour": 0,
     "minute": 0,
-    "yearName": "",
-    "holiday": null,
-    "modified": null,
-    "hoursInDay": 24,
-    "hourOfLight": 1,
-    "hourOfNight": 12,
     "isDay": false,
     "months": [{
         "id": 1,
         "displayName": "Janurary",
         "abbv": "Jan",
-        "holiday": null
+        "day": 1,
+		"days": 30
     }]
 }

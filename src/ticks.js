@@ -9,26 +9,25 @@ World = require('./world').world;
 		var i = 0,
 		areaMsg;
 
-		if (World.time.tick === 2) {
-			World.time.tick = 1;
-			World.time.minute += 1;
-		}
+		World.time.minute += 1;
 
 		if (World.time.minute === 60) {
 			World.time.minute = 1;
 			World.time.hour += 1;
 		}
 
-		if (World.time.hour === 24) {
+		if (World.time.hour === World.time.month.hoursInDay) {
 			World.time.hour = 1;
 			World.time.day += 1;
+
+			World.time.month.day += 1;
 		}
 
-		if (World.time.hour === World.time.hourOfLight && World.time.minute === 1) {
+		if (World.time.hour === World.time.month.hourOfLight && World.time.minute === 1) {
 			// Morning
 			World.time.isDay = true;
 			areaMsg = 'The sun appears over the horizon.';
-		} else if (World.time.hour <= World.time.hoursOfNight && World.time.minute === 1) {
+		} else if (World.time.hour <= World.time.month.hourOfNight && World.time.minute === 1) {
 			// Nightfall
 			World.time.isDay = false;
 			areaMsg = 'The sun fades fully from view as night falls.';
@@ -44,12 +43,10 @@ World = require('./world').world;
 			}
 		}
 
-		if (World.time.day === 30) {
-			World.time.day = 1;
+		if (World.time.month.day > World.time.month.days) {
+			World.time.month = World.time.months[0];
 		}
-
-		World.time.tick += 1;
-	}, 500);
+	}, 1000);
 
 	// wait-state removal
 	setInterval(function() {
