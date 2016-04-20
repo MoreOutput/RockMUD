@@ -1,7 +1,7 @@
 RockMUD
 ===============================
 
-**RockMUD (0.2.0) is a Node WebSockets MUD server**
+**RockMUD (0.2.5) is a Node WebSockets MUD server**
 
 Try the latest on this Heroku hobby instance: http://rockmud.heroku.com. If you connect to the demo server type 'help commands' to get a full(ish) list of the current commands.
 
@@ -15,7 +15,7 @@ Notes on dependencies:
 * Default terminal loads Bootstrap from CDN
 * Development aims to keep up with latest node release.
 
-Some things Currently in 0.2.0:
+Some of the things in 0.2.5:
 * No command whitelisting (add a command function, and it becomes a in-game command instantly). RockMUD does not rely on parsing commands on a tick.
 * Character creation (Races, Classes, stats, passwords) and saving as json files (/players).
 * Channels (chat, say, yell, tell, reply)
@@ -25,10 +25,13 @@ Some things Currently in 0.2.0:
 * Basic Combat (see: kill <mob name>)
 * Inventory, Containers, Shopkeeping
 * Ticks
-* Dynamic movement directions/options.
+* Dynamic movement directions
+* Locking/Unlocking
+* Lights
 * Message Templates
-* Skill Example (see: bash)
+* Skill Example (see: bash, shield block)
 * Spell Example: (see: cast spark)
+* Time (Months can have varrying day totals along with day/night hours)
 * AI
 
 #10000 feet:#
@@ -93,13 +96,13 @@ Mob specific AI scripts. This are merged into game items after they are loaded f
 Public assets like client side javascript and CSS.
 
 ##Files##
-**/config.json**
+**config.json**
 Server Configuration
 
 **server.js**
 Loads the config.json file, starts http server, and outlines public resource paths.
 
-**/time.json**
+**time.json**
 Time and Weather data, saved to the file every hour of uptime.
 
 ###Installation###
