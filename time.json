@@ -3,22 +3,26 @@
     "title": "Year of something-or-other",
     "month": {
         "id": 1,
-        "displayName": "Janurary",
+        "displayName": "January",
         "abbv": "Jan",
 		"day": 1,
+		"days": 30,
 		"hoursInDay": 24,
     	"hourOfLight": 1,
     	"hourOfNight": 12
 	},
     "day": 1,
-    "hour": 0,
-    "minute": 0,
-    "isDay": false,
+    "hour": 1,
+    "minute": 1,
+    "isDay": true,
     "months": [{
         "id": 1,
-        "displayName": "Janurary",
+        "displayName": "January",
         "abbv": "Jan",
         "day": 1,
-		"days": 30
+		"days": 30,
+		"hoursInDay": 24,
+    	"hourOfLight": 1,
+    	"hourOfNight": 12
     }]
 }

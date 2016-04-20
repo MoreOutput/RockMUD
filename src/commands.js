@@ -474,7 +474,7 @@ Cmd.prototype.unlock = function(target, command) {
 				targetExit = Room.getAdjacentExit(targetRoom, exitObj, target);
 
 				key = Character.getKey(target, targetExit.door.key);
-
+				
 				if (key) {
 					exitObj.door.locked = false;
 					World.msgPlayer(target, {msg: 'You unlock the ' + exitObj.door.name + ' with a ' + key.short, styleClass: 'error'});

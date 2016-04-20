@@ -1,5 +1,5 @@
 {
-    "name": "rocky",
+    "name": "Rocky",
     "id": "",
     "lastname": "",
     "displayName": "Rocky",
@@ -182,13 +182,13 @@
     "autoloot": true,
     "autosac": false,
     "behaviors": [],
-    "sid": "/#EmQwQfBSzRUuutw5AAAC",
+    "sid": "/#rNeC0-VDz1gi06qlAAAB",
     "socket": null,
     "password": "1100ef45c756b0f9ee74d2627aed5420e25b0ccff51e08f61a8c6a4319fa3d1bdf4cb30f0b922665ddd90a6104974f5596e5b632fffeb008e904395e6e15ffb1",
     "isPlayer": true,
     "salt": "7a82eef1573d9cbbd0e9c6aef8e4ac642f49a5dcbd637411bd200bf723af0ff7b5b5d76688ce3b03c37c8a3604284d27a194bc9e4afe2646eba2d2dc65fa86577c1107320240b2f18ae168931d4e4b6e7e5b2dc34ababa669a01036cb50d493250c2a307ea2ff4316997ac806ad29a7e5c34a01ea0d5383387339321de8af18d",
     "created": "2016-04-19T23:21:23.448Z",
-    "saved": "Tue Apr 19 2016 19:21:37 GMT-0400 (Eastern Daylight Time)",
+    "saved": "Tue Apr 19 2016 21:03:43 GMT-0400 (Eastern Daylight Time)",
     "deaths": 0,
     "settings": {
         "autosac": false,
