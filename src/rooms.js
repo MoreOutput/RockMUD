@@ -295,4 +295,9 @@ Room.prototype.addCorpse = function(roomObj, corpse) {
 	room.addItem(roomObj, corpse);
 };
 
+// returns an array of valid exit commands for the room
+Room.prototype.getExitCommands = function(roomObj) {
+
+}
+
 module.exports.room = new Room();

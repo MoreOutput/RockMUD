@@ -15,13 +15,27 @@ module.exports = {
 		// other players in its room.
         if (mob.attackOnVisit === true
 			&& mob.position === 'standing'
-			&& target.isPlayer
+			&& (target.isPlayer || mob.mobAggressive)
 			&& target.roomid === mob.roomid) {
             Cmd.kill(mob, {
                 arg: target.name
             });
         }
     },
-	onAlive: function(target, roomObj) {
+	onAlive: function(roomObj) {
+		var mob = this,
+		target;
+
+		if (roomObj.playersInRoom) {
+			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
+		}
+		
+		if (target && mob.position === 'standing'
+			&& (target.isPlayer || mob.mobAggressive)
+			&& target.roomid === mob.roomid) {
+            Cmd.kill(mob, {
+                arg: target.name
+            });
+        }
 	}
 };

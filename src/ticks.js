@@ -135,7 +135,7 @@ World = require('./world').world;
 				
 				monsters.forEach(function(monster, i) {
 					if (monster.chp >= 1 && monster.onAlive) {
-						monster.onAlive();
+						monster.onAlive(World.getRoomObject(monster.area, monster.roomid));
 					}
 				});
 			}

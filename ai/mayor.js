@@ -16,7 +16,7 @@ module.exports = {
 		'Each day before sunrise I lower the bridge and open the city.'
 	],
 	moveDirections: ['gate', 'north', 'east', 'west', 'south'],
-	onAlive: function(roll) {
+	onAlive: function(roomObj) {
 		var mayor = this,
 		roll = World.dice.roll(1, 10);
 
