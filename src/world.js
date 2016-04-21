@@ -610,7 +610,17 @@ World.prototype.msgPlayer = function(target, msgObj) {
 
 	if (target.isPlayer) {
 		if (s) {
-			s.emit('msg', msgObj);
+			if (typeof msgObj.msg !== 'function') {
+				s.emit('msg', msgObj);
+			} else {
+				msgObj.msg(target, function(send, msg) {
+					msgObj.msg = msg;
+					
+					if (send) {
+						s.emit('msg', msgObj);
+					}
+				});
+			}
 
 			if (!msgObj.noPrompt) {
 				world.prompt(target);
@@ -624,10 +634,10 @@ World.prototype.msgRoom = function(roomObj, msgObj) {
 	var world = this,
 	i = 0,
 	s;
-
+	
 	for (i; i < roomObj.playersInRoom.length; i += 1) {
 		s = world.players[i].socket;
-
+		
 		if (s.player && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id) {
 			world.msgPlayer(s, msgObj);
 		}

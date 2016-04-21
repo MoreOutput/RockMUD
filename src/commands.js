@@ -1146,7 +1146,16 @@ Cmd.prototype.say = function(target, command) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 
 			World.msgRoom(roomObj, {
-				msg: '<div class="cmd-say"><span class="msg-name">' + target.displayName + ' says></span> ' + command.msg + '</div>',
+				msg: function(target, fn) {
+					var msg = '<div class="cmd-say"><span class="msg-name">' +
+					target.displayName + ' says></span> ' + command.msg + '</div>';
+
+					if (target.name === 'rocky') {
+						msg = 'test';
+					}
+
+					return fn(true, msg);
+				},
 				playerName: target.name
 			});
 		} else {
