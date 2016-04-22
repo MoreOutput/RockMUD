@@ -18,6 +18,14 @@
             "mod": 0,
             "type": "melee",
             "wait": 2
+        }, {
+            "name": "Shield Block",
+            "id": "shieldBlock",
+            "train": 65,
+            "maxTrain": 95,
+            "mod": 0,
+            "type": "passive",
+            "wait": 0
         }
     ],
     "skillList": {
@@ -26,6 +34,16 @@
             "Display": "Bash",
             "mod": 1,
             "level": 1,
+            "maxTrain": 95,
+			"train": 70,
+            "type": "melee"
+        },
+        "shieldBlock": {
+            "name": "shieldBlock",
+            "Display": "Shield Block",
+            "mod": 1,
+            "level": 1,
+			"train": 65,
             "maxTrain": 95,
             "type": "melee"
         }

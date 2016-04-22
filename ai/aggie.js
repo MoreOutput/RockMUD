@@ -11,11 +11,31 @@ World = require('../src/world').world;
 module.exports = {
     onVisit: function(target, roomObj) {
         var mob = this;
-
-        if (mob.position === 'standing' && target.isPlayer && target.roomid === mob.roomid) {
-            Cmd.fire('kill', mob, {
+		// if we do not have this property set the mob will only attack when it finds
+		// other players in its room.
+        if (mob.attackOnVisit === true
+			&& mob.position === 'standing'
+			&& (target.isPlayer || mob.mobAggressive)
+			&& target.roomid === mob.roomid) {
+            Cmd.kill(mob, {
                 arg: target.name
             });
         }
-    }
+    },
+	onAlive: function(roomObj) {
+		var mob = this,
+		target;
+
+		if (roomObj.playersInRoom) {
+			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
+		}
+		
+		if (target && mob.position === 'standing'
+			&& (target.isPlayer || mob.mobAggressive)
+			&& target.roomid === mob.roomid) {
+            Cmd.kill(mob, {
+                arg: target.name
+            });
+        }
+	}
 };

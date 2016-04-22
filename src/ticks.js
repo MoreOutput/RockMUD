@@ -9,27 +9,26 @@ World = require('./world').world;
 		var i = 0,
 		areaMsg;
 
-		if (World.time.tick === 2) {
-			World.time.tick = 1;
-			World.time.minute += 1;
-		}
+		World.time.minute += 1;
 
 		if (World.time.minute === 60) {
 			World.time.minute = 1;
 			World.time.hour += 1;
 		}
 
-		if (World.time.hour === 24) {
+		if (World.time.hour === World.time.month.hoursInDay) {
 			World.time.hour = 1;
 			World.time.day += 1;
+
+			World.time.month.day += 1;
 		}
 
-		if (World.time.hour === World.time.hourOfLight && World.time.minute === 1) {
+		if (World.time.hour === World.time.month.hourOfLight && World.time.minute === 1) {
 			// Morning
 			World.time.isDay = true;
 			areaMsg = 'The sun appears over the horizon.';
-		} else if (World.time.hour <= World.time.hoursOfNight && World.time.minute === 1) {
-			// nightfall
+		} else if (World.time.hour <= World.time.month.hourOfNight && World.time.minute === 1) {
+			// Nightfall
 			World.time.isDay = false;
 			areaMsg = 'The sun fades fully from view as night falls.';
 		}
@@ -44,12 +43,10 @@ World = require('./world').world;
 			}
 		}
 
-		if (World.time.day === 30) {
-			World.time.day = 1;
+		if (World.time.month.day > World.time.month.days) {
+			World.time.month = World.time.months[0];
 		}
-
-		World.time.tick += 1;
-	}, 500);
+	}, 1000);
 
 	// wait-state removal
 	setInterval(function() {
@@ -62,8 +59,7 @@ World = require('./world').world;
 
 				if (player.position === 'sleeping' || 
 					player.position === 'resting' || 
-					player.position === 'standing') {
-					
+					player.position === 'standing') {					
 					if (player.wait > 0) {
 						player.wait -= 1;
 					} else {
@@ -101,22 +97,18 @@ World = require('./world').world;
 									}
 								}
 
-								// if players were in the area roll a check to delay respawn
-								World.dice.roll(1, 20, function(roll) {
-									if (roll > 18) {
-										area.respawnTick -= 1;
-									}
-								});
+								if (World.dice.roll(1, 20) > 18) {
+									area.respawnTick -= 1;
+								}
 							}
 
 							if (World.areas.length - 1 === index 
 								&& roomIndex === area.rooms.length - 1) {
 								if ((area.respawnTick === area.respawnOn && area.respawnOn > 0 && refresh)) {
-									World.reloadArea(area, function(area) {
-										area.respawnTick = 0;
+									area = World.reloadArea(area);
+									area.respawnTick = 0;
 
-										World.areas[index] = area;
-									});
+									World.areas[index] = area;
 								}
 							}
 						}(area.rooms[j], index, j));
@@ -134,20 +126,21 @@ World = require('./world').world;
 	
 	// AI Ticks for monsters
 	setInterval(function() {
-		var i = 0;
+		var i = 0,
+		monsters;
+
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
-				World.getAllMonstersFromArea(World.areas[i].name, function(monsters) {
-					monsters.forEach(function(monster, i) {
-						if (monster.chp >= 1 && monster.onAlive) {
-							monster.onAlive();
-						}
-					});
+				monsters = World.getAllMonstersFromArea(World.areas[i].name);
+				
+				monsters.forEach(function(monster, i) {
+					if (monster.chp >= 1 && monster.onAlive) {
+						monster.onAlive(World.getRoomObject(monster.area, monster.roomid));
+					}
 				});
 			}
 		}
-	//}, 1000); // 25 seconds
-	}, 25000); // 30 seconds
+	}, 15000);
 
 	// AI Ticks for areas 
 	setInterval(function() {
@@ -181,14 +174,12 @@ World = require('./world').world;
 			for (i; i < World.players.length; i += 1) {
 				player = World.players[i];
 
-				Character.hpRegen(player, function(player, addedHP) {
-					Character.manaRegen(player, function(player, addedMana) {
-						Character.mvRegen(player);
-					});
-				});
+				Character.hpRegen(player);
+				Character.manaRegen(player);
+				Character.mvRegen(player);
 			}
 		}
-	}, 60000);
+	}, 75000);
 
 	// Hunger and Thirst Tick 
 	setInterval(function() { 
@@ -199,9 +190,8 @@ World = require('./world').world;
 			for (i; i < World.players.length; i += 1) {
 				player = World.players[i];
 
-				Character.hunger(player, function(target) {
-					Character.thirst(target);
-				});
+				Character.hunger(player);
+				Character.thirst(player);
 			}
 		}
 	}, 240000); // 4 minutes

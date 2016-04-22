@@ -13,37 +13,27 @@ Skill = function() {
 /*
 * Passive Skills
 */
-Skill.prototype.darkvision = function(r, s) {
-	return {
-		minLevel: 1,
-		type: 'passive',
-		maxTrain: 100,
-		onMove: function(room) {
 
-		},
-		onBlind: function() {
+// Return a mod for AC rolls when the opponent has a shield
+Skill.prototype.shieldBlock = function(player, roomObj, shield) {
+	var skillObj = Character.getSkill(player, 'shieldBlock');
+	
+	if (skillObj) {
+		return World.dice.roll(1, skillObj.train/10, shield.ac);
+	} else {
+		return shield.ac;
+	}	
+};
 
-		}
-	}
+Skill.prototype.darkvision = function(player, roomObj) {
+	var skillObj;
 };
 
 /*
 * Melee Skills
 */
-Skill.prototype.bash = function(r, s) {
-	return {
-		minLevel: 1,
-		type: 'passive',
-		maxTrain: 100,
-		position: 'fighting',
-		onUse: function() {
-			// Smash a target doing damage
+Skill.prototype.bash = function(player, roomObj, command) {
 
-		},
-		onBlocked: function() {
-			// if blocked with a shield basher has 10% of falling down
-		}
-	}
 };
 
 module.exports.skills = new Skill();

@@ -6,7 +6,8 @@
     "ac": 1,
     "playable": true,
     "attackType": "punch",
+    "size": {"value": 3, "display": "small"},
     "racial" : ["darkvision"],
     "diceNum": 1,
-    "diceSides": 10
+    "diceSides": 5
 }

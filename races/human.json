@@ -6,6 +6,6 @@
     "trains": 5,
     "attackType": "punch",
     "diceNum": 1,
-    "diceSides": 8,
+    "diceSides": 4,
     "diceMod": 1
 }

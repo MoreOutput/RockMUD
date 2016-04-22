@@ -16,21 +16,20 @@ module.exports = {
 		'Each day before sunrise I lower the bridge and open the city.'
 	],
 	moveDirections: ['gate', 'north', 'east', 'west', 'south'],
-	onAlive: function(roll) {
-		var mayor = this;
+	onAlive: function(roomObj) {
+		var mayor = this,
+		roll = World.dice.roll(1, 10);
 
-		World.dice.roll(1, 10, function(roll) {
-			if (roll > 7) {
-				// Most of the time we just proclaim something
-				Cmd.fire('say', mayor, {
-					msg: mayor.exclimations[parseInt(Math.random() * ((mayor.exclimations.length)))]
-				});
-			} else {
-				// Sometimes we move to a new room
-				Cmd.fire('move', mayor, {
-					arg:  mayor.moveDirections[parseInt(Math.random() * ((mayor.moveDirections.length)))]
-				});
-			}
-		});
+		if (roll > 4) {
+			// Most of the time we just proclaim something
+			Cmd.say(mayor, {
+				msg: mayor.exclimations[parseInt(Math.random() * ((mayor.exclimations.length)))]
+			});
+		} else {
+			// Sometimes we move to a new room
+			Cmd.move(mayor, {
+				arg: mayor.moveDirections[parseInt(Math.random() * ((mayor.moveDirections.length)))]
+			});
+		}
 	}
 };

@@ -23,6 +23,7 @@
     "condition": "excellent",
     "isKey": false,
     "equipped": false,
+    "isOpen": true,
     "value": 0,
     "behaviors": [],
     "modifiers": {}
