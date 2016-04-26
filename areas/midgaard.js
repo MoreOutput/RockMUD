@@ -1,3 +1,4 @@
+
 'use strict';
 var Cmd = require('../src/commands').cmd,
 Room = require('../src/rooms').room,
@@ -12,7 +13,8 @@ module.exports = {
     "reloads": 0,
     "created": "",
     "saved": "",
-    "author": "Rocky",
+	"dark": false,
+	"author": "Rocky",
     "messages": [
         {"msg": "A cool breeze blows through the streets of Midgaard."},
         {"msg": "The bustle of the city can be distracting. Keep an eye out for thieves."}
@@ -204,7 +206,10 @@ module.exports = {
                 "modifiers": {
                     "str": 2
                 },
-                "flags": []
+                "flags": [],
+				"onKill": function(roomObj) {
+					console.log('lol');
+				}
             }, {
                 "name": "Burlap sack",
                 "short": "worn, tan, burlap sack",

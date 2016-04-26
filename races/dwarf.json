@@ -1,5 +1,6 @@
 {
     "name": "Dwarf",
+	"raceAbbr": "Dwf",
     "con": 2,
     "int": -1,
     "hp": 10,
@@ -7,7 +8,7 @@
     "playable": true,
     "attackType": "punch",
     "size": {"value": 3, "display": "small"},
-    "racial" : ["darkvision"],
     "diceNum": 1,
-    "diceSides": 5
+    "diceSides": 5,
+	"affects": []
 }

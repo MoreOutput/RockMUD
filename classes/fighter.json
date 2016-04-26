@@ -1,51 +1,56 @@
 {
     "name": "Fighter",
     "classAbbr": "Fig",
-    "minLevel": 0,
     "playable": true,
     "hp": 10,
-    "str": 2,
-    "int": -1,
-    "wis": -1,
-    "con": 1,
     "mainStat": "str",
     "skills": [
         {
-            "name": "Bash",
-            "id": "bash",
-            "train": 65,
-            "maxTrain": 95,
-            "mod": 0,
-            "type": "melee",
-            "wait": 2
-        }, {
-            "name": "Shield Block",
             "id": "shieldBlock",
-            "train": 65,
-            "maxTrain": 95,
+			"display": "Shield Block",
+			"train": 65,
+            "mod": 1,
+            "type": "passive"
+        }, {
+            "id": "secondAttack",
+            "display": "Second Attack",
             "mod": 0,
-            "type": "passive",
-            "wait": 0
-        }
+			"train": 65,
+            "type": "passive"
+        }, {
+            "id": "bash",
+            "display": "Bash",
+            "mod": 0,
+    		"train": 70,
+            "type": "melee",
+			"wait": 1
+        } 
     ],
     "skillList": {
         "bash": {
-            "name": "bash",
-            "Display": "Bash",
-            "mod": 1,
+            "id": "bash",
+            "display": "Bash",
+            "mod": 0,
             "level": 1,
-            "maxTrain": 95,
 			"train": 70,
-            "type": "melee"
+            "type": "melee",
+			"wait": 1
         },
         "shieldBlock": {
-            "name": "shieldBlock",
-            "Display": "Shield Block",
+            "id": "shieldBlock",
+            "display": "Shield Block",
             "mod": 1,
             "level": 1,
 			"train": 65,
-            "maxTrain": 95,
-            "type": "melee"
+            "type": "passive"
+        },
+		"secondAttack": {
+            "id": "secondAttack",
+            "display": "Second Attack",
+            "mod": 0,
+            "level": 1,
+			"train": 65,
+            "type": "passive"
         }
     }
 }

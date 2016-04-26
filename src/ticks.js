@@ -59,7 +59,7 @@ World = require('./world').world;
 
 				if (player.position === 'sleeping' || 
 					player.position === 'resting' || 
-					player.position === 'standing') {					
+					player.position === 'standing') {
 					if (player.wait > 0) {
 						player.wait -= 1;
 					} else {
@@ -118,11 +118,10 @@ World = require('./world').world;
 		}
 	}, 240000); // 4 minutes
 
-	// decay timer, anything at zero rots away
+	// decay timer, affects only items in a players inventory.
 	setInterval(function() {
-		var i = 0;
-
-	}, 480000); // 8 minutes
+		
+	}, 245000); // 4.5 minutes
 	
 	// AI Ticks for monsters
 	setInterval(function() {

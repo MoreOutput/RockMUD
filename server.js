@@ -54,6 +54,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		s.on('login', function (r) {
 			var parseCmd = function(r, s) {
 				var cmdArr = r.msg.split(' '),
+				skillObj, 
 				cmdObj = {};
 
 				if (cmdArr.length === 1) {
@@ -86,7 +87,18 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							if (cmdObj.cmd in Cmds) {
 								return Cmds[cmdObj.cmd](s.player, cmdObj);
 							} else if (cmdObj.cmd in Skills) {
-								return Skills[r.cmd](s.player, cmdObj);
+								skillObj = Character.getSkill(s.player, cmdObj.cmd);
+
+								if (skillObj) {
+									return Skills[cmdObj.cmd](
+										skillObj,
+										s.player,
+										World.getRoomObject(s.player.area, s.player.roomid),
+										cmdObj
+									);
+								} else {
+									World.msgPlayer(s, {msg: 'You do not know how to ' + cmdObj.cmd + '.', styleClass: 'error'});
+								}
 							} else {
 								World.msgPlayer(s, {msg: cmdObj.cmd + ' is not a valid command.', styleClass: 'error'});
 							}

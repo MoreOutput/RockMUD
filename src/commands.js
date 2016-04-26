@@ -420,6 +420,7 @@ Cmd.prototype.close = function(target, command, fn) {
 
 			if (targetExit && !exitObj.door.locked) {
 				exitObj.door.isOpen = false;
+
 				targetExit.door.isOpen = false;
 
 				World.msgPlayer(target, {
@@ -466,6 +467,7 @@ Cmd.prototype.unlock = function(target, command) {
 			|| target.position === 'fighting') {
 			
 			roomObj = World.getRoomObject(target.area, target.roomid);
+
 			exitObj = Room.getExit(roomObj, command.arg);
 			
 			if (exitObj && exitObj.door && exitObj.door.locked === true) {
@@ -477,7 +479,11 @@ Cmd.prototype.unlock = function(target, command) {
 				
 				if (key) {
 					exitObj.door.locked = false;
-					World.msgPlayer(target, {msg: 'You unlock the ' + exitObj.door.name + ' with a ' + key.short, styleClass: 'error'});
+
+					World.msgPlayer(target, {
+						msg: 'You unlock the ' + exitObj.door.name + ' with a ' + key.short,
+						styleClass: 'error'
+					});
 				} else {
 					World.msgPlayer(target, {msg: 'You don\'t seem to have the key.', styleClass: 'error'});
 				}
@@ -521,7 +527,10 @@ Cmd.prototype.lock = function(target, command, fn) {
 
 					exitObj.door.locked = true;
 
-					World.msgPlayer(target, {msg: 'You lock the ' + exitObj.door.name + ' with a ' + key.short, styleClass: 'error'});
+					World.msgPlayer(target, {
+						msg: 'You lock the ' + exitObj.door.name + ' with a ' + key.short,
+						styleClass: 'error'
+					});
 				} else {
 					World.msgPlayer(target, {msg: 'You don\'t seem to have the key.', styleClass: 'error'});
 				}
@@ -545,6 +554,7 @@ Cmd.prototype.move = function(target, command, fn) {
 	targetRoom,
 	exitObj,
 	moveRoll = World.dice.roll(1, 4),
+	sneakAff,
 	roomObj;
 
 	if (target.position === 'standing' 
@@ -557,6 +567,8 @@ Cmd.prototype.move = function(target, command, fn) {
 
 		if (exitObj) {
 			if (!exitObj || !exitObj.door || exitObj.door.isOpen === true) {
+				sneakAff = Character.getAffect(target, 'sneak');
+				
 				targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
 				
 				target.cmv -= Math.round(4 + moveRoll - dexMod);
@@ -584,13 +596,38 @@ Cmd.prototype.move = function(target, command, fn) {
 				}
 
 				World.msgRoom(targetRoom, {
-					msg: '<strong>' + target.displayName + '</strong> enters the room from the ' + exitObj.cmd,
+					msg: function(fn) {
+						var msg = '';
+
+						if (!sneakAff) {
+							if (Character.canSee(target, roomObj)) {
+								msg = '<strong>' + target.displayName
+								+ '</strong> enters the room from the ' + exitObj.cmd + '.';
+							} else {
+								msg = '<strong>Something</strong> enters the room from the ' + exitObj.cmd + '.';
+							}
+						}
+
+						return fn(true, msg);
+					},
 					playerName: target.name
 				});
 
 				World.msgRoom(roomObj, {
-					msg: '<span class="yellow">' + target.displayName
-						+ ' leaves the room heading <strong>' + direction + '</strong></div>',
+					msg: function(fn) {
+						var msg = '';
+
+						if (!sneakAff) {
+							if (Character.canSee(target, roomObj)) {
+								msg = '<span class="yellow">' + target.displayName
+								+ ' leaves the room heading <strong>' + direction + '</strong></div>';
+							} else {
+								msg = '<span class="yellow">Something leaves the room.</div>';
+							}
+						}
+						
+						return fn(true, msg);
+					},
 					playerName: target.name
 				});
 
@@ -657,7 +694,8 @@ Cmd.prototype.who = function(target, command) {
 			'</tr>';
 		}
 
-		str = '<div class="cmd-who"><h2>Visible Players</h2><table class="table table-condensed table-no-border who-list">' +
+		str = '<div class="cmd-who"><h2>Visible Players</h2>' +
+			'<table class="table table-condensed table-no-border who-list">' +
 			'<thead>' +
 				'<tr>' +
 					'<td width="5%">Level</td>' +
@@ -906,8 +944,15 @@ Cmd.prototype.flee = function(player, command) {
 					player.position = 'standing';
 					player.opponent.position = 'standing';
 
-					World.msgPlayer(player.opponent, {msg: player.displayName + ' fled ' + command.msg +'!', styleClass: 'grey'});
-					World.msgPlayer(player, {msg: 'You fled ' + command.msg +'!', styleClass: 'red'});
+					World.msgPlayer(player.opponent, {
+						msg: player.displayName + ' fled ' + command.msg +'!',
+						styleClass: 'grey'
+					});
+
+					World.msgPlayer(player, {
+						msg: 'You fled ' + command.msg +'!',
+						styleClass: 'red'
+					});
 					
 					player.opponent.opponent = null;
 					player.opponent = null;
@@ -915,21 +960,34 @@ Cmd.prototype.flee = function(player, command) {
 				} else {
 					player.position = 'fighting';
 
-					World.msgPlayer(player.opponent, {msg: '<p>' + player.displayName + ' tries to flee ' + command.msg + '.</p>', styleClass: 'grey'});
-					World.msgPlayer(player, {msg: 'You cannot flee in that direction!', styleClass: 'red'});
+					World.msgPlayer(player.opponent, {
+						msg: '<p>' + player.displayName + ' tries to flee ' + command.msg + '.</p>',
+						styleClass: 'grey'
+					});
+					
+					World.msgPlayer(player, {
+						msg: 'You cannot flee in that direction!',
+						styleClass: 'red'
+					});
 				}
 			});
 		} else {
 			player.position = 'fighting';
 
-			World.msgPlayer(player, {msg: 'You try to flee and fail!', styleClass: 'green'});
+			World.msgPlayer(player, {
+				msg: 'You try to flee and fail!',
+				styleClass: 'green'
+			});
 		}
 
 		if (World.dice.roll(1, 10) < 6) {
 			player.wait += 1;
 		}
 	} else {
-		World.msgPlayer(player, {msg: 'Flee from what? You aren\'t fighting anything...', styleClass: 'green'});
+		World.msgPlayer(player, {
+			msg: 'Flee from what? You aren\'t fighting anything...',
+			styleClass: 'green'
+		});
 	}
 };
 
@@ -937,16 +995,20 @@ Cmd.prototype.flee = function(player, command) {
 Cmd.prototype.cast = function(player, command, fn) {
 	var cmd = this,
 	mob,
+	skillObj,
 	roomObj;
 
 	if (player.position !== 'sleeping') {
 		if (command.arg) {
 			if (command.arg in Spells) {
+				skillObj = Character.getSkill(player, command.arg);
+				
+				if (skillObj) {
 					if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fleeing') {
 						roomObj = World.getRoomObject(player.area, player.roomid);
 
 						if (!command.input && player.opponent) {
-							return Spells[command.arg](player, player.opponent, roomObj, command, function() {
+							return Spells[command.arg](skillObj, player, player.opponent, roomObj, command, function() {
 								if (!player.opponent && player.position !== 'fighting') {
 									cmd.kill(player, command, roomObj, fn);
 								}
@@ -955,7 +1017,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 							mob = World.search(roomObj.monsters, command);
 
 							if (mob) {
-								return Spells[command.arg](player, mob, roomObj, command, function() {
+								return Spells[command.arg](skillObj, player, mob, roomObj, command, function() {
 									if (!player.opponent && player.position !== 'fighting') {
 										cmd.kill(player, command, roomObj, fn);
 									}
@@ -968,6 +1030,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 							}
 						}
 					}
+				}
 			} else {
 				World.msgPlayer(player, {
 					msg: 'You do not know that spell.'
@@ -975,7 +1038,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 			}
 		} else {
 			World.msgPlayer(player, {
-				msg: 'You do not know that spell.'
+				msg: 'Cast what?'
 			});
 		}
 	} else {
@@ -1025,23 +1088,18 @@ Cmd.prototype.look = function(target, command) {
 	// boolean. when it is false it indicates we need a light source to see.
 	// the initial value of target.sight should be true inless target is blind.	
 	canSee = target.sight,
-	light,
+	light = Character.getLights(target)[0],
 	itemDescription,	
 	item, // looking at an item
 	i = 0;
 	
 	if (canSee) {
-		if (target.position !== 'sleeping') {
-			if ((!World.time.isDay && !roomObj.dark) || roomObj.dark === true) {
-				canSee = false;
+		canSee = Character.canSee(target, roomObj, light);
 
-				light = Character.getLights(target)[0];
-			}
-			
+		if (target.position !== 'sleeping') {
 			if (!command || command.msg === '') {
 				// if no arguments are given we display the current room
-
-				if (canSee || (!canSee && light)) {
+				if (canSee) {
 					roomObj = World.getRoomObject(target.area, target.roomid);
 
 					displayHTML = Room.getDisplayHTML(roomObj, {
@@ -1146,12 +1204,14 @@ Cmd.prototype.say = function(target, command) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 
 			World.msgRoom(roomObj, {
-				msg: function(target, fn) {
-					var msg = '<div class="cmd-say"><span class="msg-name">' +
-					target.displayName + ' says></span> ' + command.msg + '</div>';
-
-					if (target.name === 'rocky') {
-						msg = 'test';
+				msg: function(fn) {
+					var msg;
+					
+					if (Character.canSee(target, roomObj)) {
+						msg = '<div class="cmd-say"><span class="msg-name">' +
+						target.displayName + ' says></span> ' + command.msg + '</div>';
+					} else {
+						msg = '<div class="cmd-say"><span class="msg-name">Someone says></span> ' + command.msg + '</div>';
 					}
 
 					return fn(true, msg);
@@ -1360,18 +1420,22 @@ Cmd.prototype.equipment = function(target, command) {
 // Current skills
 Cmd.prototype.skills = function(target, command) {
 	var skills = '',
-	i = 0;
+	skillObj, // the skill object property on target.skillList
+	skillId;
 	
-	if (target.skills.length > 0) {
-		for (i; i < target.skills.length; i += 1) {
-			skills += target.skills[i].name;
+	if (target.skillList) {
+		for (skillId in target.skillList) {
+			skillObj = target.skillList[skillId];
+			
+			skills += '<li>' + skillObj.display + ' a ' +  skillObj.type
+			+ ' skill at  level ' + skillObj.level + '.</li>';
 		}
+
+		skills = '<ul class="list">' + skills + '</ul>';
 		
-		World.msgPlayer(target, {msg: 'skills', styleClass: 'eq' });
-		
+		World.msgPlayer(target, {msg: skills, styleClass: 'eq' });
 	} else {
-		World.msgPlayer(target, {msg: 'skills', styleClass: 'eq' });
-		
+		World.msgPlayer(target, {msg: 'What skills?', styleClass: 'error' });
 	}
 };
 
@@ -1385,11 +1449,11 @@ Cmd.prototype.wear = function(target, command) {
 			if (item) {
 				if (Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)]) {
 					Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)](target, item);
-				} else {
+				} else {	
 					World.msgPlayer(target, {
-						msg: 'You cant figure out how to wear a ' + item.short,
+						msg: 'You can\'t figure out how to wear a ' + item.short,
 						styleClass: 'error'
-					});	
+					});
 				}
 			} else {
 				World.msgPlayer(target, {

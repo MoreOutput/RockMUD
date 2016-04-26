@@ -58,10 +58,14 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 		}
 	}
 
+	// move this check to the main combat loop as to add varraying message on
+	// a 'chance' hit.
 	if (numOfAttacks === 1 && World.dice.roll(1, 4) === 4) {
 		numOfAttacks = 2;
 	}
 
+	numOfAttacks += Skills.secondAttack(Character.getSkill(attacker, 'secondAttack'), attacker);
+	
 	return numOfAttacks;
 };
 
@@ -155,7 +159,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							// critical attacks
 							if (World.dice.roll(1 * attacker.level, 20, hitRoll + attackerMods.dex)
 								=== (20 * attacker.level + 1)) {
-								damage = (damage * 2) + attacker.cstr;
+								damage = (damage * 2) + attacker.str;
 							}
 
 							if (damage < 0) {

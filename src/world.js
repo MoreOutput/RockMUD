@@ -408,6 +408,7 @@ World.prototype.rollMobs = function(mobArr, roomid) {
 				}
 
 				mob.name = mobName;
+
 				mob.displayName = mobName[0].toUpperCase() + mobName.slice(1);
 			} else {
 				if (Array.isArray(mob.displayName)) {
@@ -613,13 +614,13 @@ World.prototype.msgPlayer = function(target, msgObj) {
 			if (typeof msgObj.msg !== 'function') {
 				s.emit('msg', msgObj);
 			} else {
-				msgObj.msg(target, function(send, msg) {
+				msgObj.msg(function(send, msg) {
 					msgObj.msg = msg;
 					
 					if (send) {
 						s.emit('msg', msgObj);
 					}
-				});
+				}, target );
 			}
 
 			if (!msgObj.noPrompt) {
@@ -731,9 +732,9 @@ World.prototype.extend = function(target, obj2) {
 	if (obj2 && target) {
 		for (prop in obj2) {
 			if (target[prop]) {
-				if (target[prop].isArray) {
-					target[prop] = obj2[prop];
-				} else if (!isNaN(target[prop]) ) {
+				if (target[prop].isArray && ob2[prop].isArray) {
+					target[prop] = target[prop].concat(obj2[prop]);
+				} else if (!isNaN(target[prop])) {
 					target[prop] += obj2[prop];
 				}
 			} else {
@@ -741,7 +742,7 @@ World.prototype.extend = function(target, obj2) {
 			}
 		}
 	}
-
+	
 	return target;
 };
 
