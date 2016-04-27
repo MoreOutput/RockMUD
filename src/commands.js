@@ -10,7 +10,6 @@ Character = require('./character').character,
 World = require('./world').world,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
-Skills = require('./skills').skills,
 Spells = require('./spells').spells,
 players = World.players,
 time = World.time,
@@ -1049,22 +1048,46 @@ Cmd.prototype.cast = function(player, command, fn) {
 };
 
 // For attacking in-game monsters
-Cmd.prototype.kill = function(player, command, attackObj, fn) {
+Cmd.prototype.kill = function(player, command, roomObj, fn) {
 	var roomObj,
 	opponent;
 
 	if (player.position !== 'sleeping' && player.position !== 'resting'
 		&& player.position !== 'fighting') {
-		roomObj = World.getRoomObject(player.area, player.roomid);
-
+		if (!roomObj) {
+			roomObj = World.getRoomObject(player.area, player.roomid);
+		}
+		
 		opponent = World.search(roomObj.monsters, command);
 
 		if (opponent && opponent.roomid === player.roomid) {
+
+			World.msgPlayer(player, {
+				msg: 'You scream and charge at a ' + opponent.name,
+				noPrompt: true
+			});
+
+			World.msgPlayer(opponent, {
+				msg: 'A ' + player.displayName + ' screams and charges at you!',
+				noPrompt: true
+			});
+			
 			Combat.processFight(player, opponent, roomObj);
 		} else {
 			opponent = World.search(roomObj.playersInRoom, command);
 
 			if (opponent && opponent.roomid === player.roomid) {
+
+				World.msgPlayer(player, {
+					msg: 'You scream and charge at a ' + opponent.name,
+					noPrompt: true
+				});
+
+				World.msgPlayer(opponent, {
+					msg: 'A ' + player.displayName + ' screams and charges at you!',
+					noPrompt: true
+				});
+
 				Combat.processFight(player, opponent, roomObj);
 			} else {
 				World.msgPlayer(player, {

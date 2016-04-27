@@ -1,10 +1,9 @@
+
 'use strict';
 var World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
-io = require('../server').io,
-players = require('../server').players,
-areas = require('../server').areas,
+Combat = require('./combat').combat,
 
 Skill = function() {
 
@@ -21,10 +20,9 @@ Skill.prototype.shieldBlock = function(skillObj, player, roomObj, shield) {
 		return World.dice.roll(1, skillObj.train/10, shield.ac + skillObj.mod);
 	} else {
 		return shield.ac;
-	}	
+	}
 };
 
-// At 100% proficiency secondAttack should hit 100% of the time
 Skill.prototype.secondAttack = function(skillObj, player) {
 	var intMod = World.dice.getIntMod(player);
 
@@ -32,11 +30,11 @@ Skill.prototype.secondAttack = function(skillObj, player) {
 		if (World.dice.roll(1, 100, intMod) >= 95) {
 			skillObj.train += 1;
 		}
-	
+
 		if (World.dice.roll(1, 100) <= skillObj.train) {
 			return 1 + skillObj.mod;
 		} else { 
- 			return 0;
+			return 0;
 		}
 	} else {
 		return 0;
@@ -48,7 +46,7 @@ Skill.prototype.secondAttack = function(skillObj, player) {
 */
 Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 	var skillAff = Character.getAffect(player, 'sneak'),
-	affObj;	
+	affObj;
 	
 	if (skillObj) {
 		if (!skillAff) {
@@ -62,7 +60,7 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 					begunSneaking: roomObj.id
 				};
 				
-				Character.addAffect(player, affObj);	
+				Character.addAffect(player, affObj);
 
 				if (skillObj.wait) {
 					player.wait += skillObj.wait;
@@ -77,7 +75,7 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 		} else {
 			// already sneaking
 		}
-	} else {	
+	} else {
 		// doesnt have sneak skill
 	}
 };
@@ -86,7 +84,58 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 * Melee Skills, called by a game entity
 */
 Skill.prototype.bash = function(skillObj, player, roomObj, command) {
+	var opponent,
+	weaponSlots,
+	i = 0,
+	strMod = World.dice.getStrMod(player),
+	oppDexMod,
+	damage = 0,
+	rollDamage = function() {
+		var dmg = 0;
 
+		dmg = World.dice.roll(1, 10, strMod);
+
+		if (player.mainStat === 'str') {
+			dmg += World.dice.roll(1, 2 + player.level);
+		}
+
+		return dmg;
+	};
+
+	if (skillObj) {
+		if (!player.opponent && command.number === 1) {
+			opponent = Room.getMonster(roomObj, command);
+		}
+		
+		damage = rollDamage();
+
+		if (player.position === 'standing') {
+			if (World.dice.roll(1, 100) <= skillObj.train) {
+				World.msgPlayer(player, {
+					msg: 'You bash and charge at a ' + opponent.name + ' (' + damage + ')',
+					noPrompt: true
+				});
+
+				World.msgPlayer(opponent, {
+					msg: 'A ' + player.displayName + ' bashes and charges at you!',
+					noPrompt: true
+				});
+
+				Combat.processFight(player, opponent, roomObj);
+				
+				player.wait += 3;
+				opponent.wait += 3;
+			} else {
+				Combat.processFight(player, opponent, roomObj);
+
+				if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
+					player.wait += 2;
+				} else {
+					player.wait += 3;
+				}
+			}
+		}
+	}
 };
 
 Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
@@ -134,4 +183,3 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 };
 
 module.exports.skills = new Skill();
-		

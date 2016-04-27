@@ -1,8 +1,6 @@
 'use strict';
 var World = require('./world').world,
 Character = require('./character').character,
-Skills = require('./skills').skills,
-Spells = require('./spells').spells,
 Room = require('./rooms').room,
 Combat = function() {
 	this.adjective = [
@@ -64,7 +62,7 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 		numOfAttacks = 2;
 	}
 
-	numOfAttacks += Skills.secondAttack(Character.getSkill(attacker, 'secondAttack'), attacker);
+	//numOfAttacks += Character.useSkill(attacker, 'secondAttack')
 	
 	return numOfAttacks;
 };
@@ -112,7 +110,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 			}
 		}
 		
-		for (i; i < weaponSlots.length; i += 1) {			
+		for (i; i < weaponSlots.length; i += 1) {
 			if (weaponSlots[i].item) {
 				weapon = weaponSlots[i].item;
 			} else if (!weapon && !weaponSlots[i].item) {
@@ -250,16 +248,6 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 
 	opponent.opponent = player;
 	player.opponent = opponent;
-
-	World.msgPlayer(player, {
-		msg: 'You scream and charge at a ' + opponent.name,
-		noPrompt: true
-	});
-
-	World.msgPlayer(opponent, {
-		msg: 'A ' + player.displayName + ' screams and charges at you!',
-		noPrompt: true
-	});
 
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
 		var oppStatus = Character.getStatusReport(opponent),

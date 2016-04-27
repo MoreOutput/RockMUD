@@ -8,7 +8,6 @@ var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms').room,
 World = require('./world').world,
-Skills = require('./skills').skills,
 Character = function () {
 	this.statusReport = [
 		{msg: ' is bleeding all over the place and looks nearly dead!', percentage: 0},
@@ -51,7 +50,7 @@ Character.prototype.login = function(r, s, fn) {
 };
 
 Character.prototype.load = function(name, s, fn) {
-	fs.readFile('./players/'  + name + '.json', function (err, r) {
+	fs.readFile('./players/' + name + '.json', function (err, r) {
 		if (err) {
 			throw err;
 		}
@@ -78,7 +77,7 @@ Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 	for (i; i < iterations; i += 1) {
 		hash = crypto.createHmac('sha512', salt).update(hash).digest('hex');
 	}
-			
+
 	return fn(hash);
 };
 
@@ -1118,7 +1117,5 @@ Character.prototype.level = function(s, fn) {
 Character.prototype.calculateGear = function() {
 
 };
-
-
 
 module.exports.character = new Character();
