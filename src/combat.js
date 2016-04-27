@@ -1,7 +1,7 @@
 'use strict';
 var World = require('./world').world,
 Character = require('./character').character,
-Room = require('./rooms').room,
+Room = require('./rooms').room,	
 Combat = function() {
 	this.adjective = [
 		{value: 'weak', damage: 5},
@@ -15,7 +15,8 @@ Combat = function() {
 	];
 
 	this.abstractNouns = ['intensity', 'force', 'strength', 'power'];
-};
+},
+Skill;
 
 /*
 General idea behind a hit:
@@ -61,8 +62,8 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 	if (numOfAttacks === 1 && World.dice.roll(1, 4) === 4) {
 		numOfAttacks = 2;
 	}
-
-	//numOfAttacks += Character.useSkill(attacker, 'secondAttack')
+	
+	numOfAttacks += Skill.secondAttack(Character.getSkill(attacker, 'secondAttack'), attacker);
 	
 	return numOfAttacks;
 };
@@ -249,6 +250,10 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 	opponent.opponent = player;
 	player.opponent = opponent;
 
+	if (!Skill) {
+		Skill = require('./skills').skills;
+	}
+	
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
 		var oppStatus = Character.getStatusReport(opponent),
 		playerStatus = Character.getStatusReport(player),

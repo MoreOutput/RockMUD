@@ -1,3 +1,4 @@
+
 /*
 * Characters.js controls everything dealing with a 'Character' which includes in game creatures.
 * No in game commands are defiend here; Commands.js does share some function names with this module, 
@@ -7,7 +8,7 @@
 var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms').room,
-World = require('./world').world,
+World = require('./world').world,	
 Character = function () {
 	this.statusReport = [
 		{msg: ' is bleeding all over the place and looks nearly dead!', percentage: 0},
@@ -1110,6 +1111,10 @@ Character.prototype.getLoad = function(s) {
 };
 
 Character.prototype.level = function(s, fn) {
+
+};
+
+Character.prototype.useSkill = function() {
 
 };
 

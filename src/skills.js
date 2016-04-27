@@ -5,9 +5,7 @@ Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
 
-Skill = function() {
-
-};
+Skill = function() {};
 
 /*
 * Passive Skills, typically called by name within commands
