@@ -1,10 +1,8 @@
-
 'use strict';
 var World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,
 Combat = require('./combat').combat,
-
 Skill = function() {};
 
 /*

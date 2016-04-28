@@ -1,4 +1,3 @@
-
 'use strict';
 var Cmd = require('../src/commands').cmd,
 Room = require('../src/rooms').room,
@@ -97,9 +96,9 @@ module.exports = {
                     }]
                 }, {
                     "name": "Boar",
-                    "displayName": ["Brown boar", "A old brown boar"],
+                    "displayName": ["Brown boar", "An old brown boar"],
                     "level": 1,
-                    "short": ["A large brown boar", "A large scared boar"],
+                    "short": ["a large brown boar", "a large scarred boar"],
                     "race": "animal",
                     "id": "6",
                     "area": "Midgaard",

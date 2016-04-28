@@ -1,4 +1,3 @@
-
 /*
 * Characters.js controls everything dealing with a 'Character' which includes in game creatures.
 * No in game commands are defiend here; Commands.js does share some function names with this module, 
@@ -9,6 +8,7 @@ var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms').room,
 World = require('./world').world,	
+Cmds,
 Character = function () {
 	this.statusReport = [
 		{msg: ' is bleeding all over the place and looks nearly dead!', percentage: 0},
@@ -99,8 +99,7 @@ Character.prototype.getPassword = function(s, fn) {
 	s.on('password', function (r) {
 		if (r.msg.length > 7) {
 			character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
-				var roomObj,
-				displayHTML;
+				var roomObj;
 
 				if (s.player.password === hash) {
 					if (character.addPlayer(s)) {
@@ -202,7 +201,6 @@ Character.prototype.create = function(r, s, fn) {
 
 			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
 				var i = 0,
-				displayHTML,
 				roomObj;
 
 				if (err) {
@@ -218,18 +216,11 @@ Character.prototype.create = function(r, s, fn) {
 
 					World.sendMotd(s);
 
-					displayHTML = Room.getDisplay(s.player.area, s.player.roomid);
-
-					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-
-					Room.getDisplayHTML(roomObj, {
-						hideCallingPlayer: s.player.name
-					});
-
-					World.msgPlayer(s, {
-						msg: displayHTML,
-						styleClass: 'room'
-					});
+					if (!Cmds) {
+						Cmds = require('./commands').cmd;				
+					}
+					
+					Cmds.look(s.player);
 
 					fn(s);
 				} else {

@@ -6,12 +6,10 @@ Spell = function() {};
 Spell.prototype.spark = function(skillObj, player, roomObj, command, fn) {
 	var intMod,
 	cost = 10,
-	damage = 0,
-	oppIntMod;
+	damage = 0;
 	
 	if (cost < player.cmana) {
-		intMod = World.dice.getIntMod(player),
-		oppIntMod = World.dice.getIntMod(player.opponent);
+		intMod = World.dice.getIntMod(player);
 
 		if (World.dice.roll(1, 100) <= skillObj.train) {
 			player.wait += 2;

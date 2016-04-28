@@ -87,7 +87,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	abstractNoun,
 	weapon, // attackers active weapon
 	shield, // opponents shield
-	shieldAC = 0,	
+	shieldAC = 0,
 	hitRoll = attacker.hitRoll + attackerMods.dex,
 	damRoll	= attacker.damRoll + attackerMods.str,
 	dodgeCheck = opponentMods.dex + opponent.detection + opponent.awareness/2,	
@@ -172,7 +172,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
 
 							opponent.chp -= damage;
-							
+
 							if (attacker.isPlayer) {
 								msgForAttacker += '<div>You ' + weapon.attackType + ' a ' + opponent.displayName 
 									+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' +
@@ -206,7 +206,6 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						}
 					}
 
-					
 				}
 			} else {
 				if (attacker.isPlayer) {
