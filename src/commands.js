@@ -725,7 +725,7 @@ Cmd.prototype.get = function(target, command, fn) {
 	itemLen;
 
 	if (target.position !== 'sleeping') {
-		if (command.msg !== '') {
+		if (command.msg !== '' && Character.canSee(target)) {
 			container = Character.getContainer(target, command);
 
 			if (!container) {
@@ -1552,6 +1552,10 @@ Cmd.prototype.inventory = function(player, command) {
 
 Cmd.prototype.score = function(target, command) {
 	var i = 0,
+	// Generate an unordered html list of the targets current affects
+	getAffectsList = function() {
+
+	},
 	score = '<section class="row score"><div class="col-md-12"><h1>' + 
 		'<span class="score-name">' + target.displayName + '</span> ' + 
 		'<span class="score-title">' + target.title + '</span> ' + 
@@ -1566,11 +1570,11 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-levl"><label>Level:</label> ' +  target.level + '</li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
-					'<li class="stat-str first"><label>STR:</label> ' + target.str + ' (20)</li>' +
-					'<li class="stat-wis"><label>WIS:</label> ' + target.wis + ' (26) </li>' +
-					'<li class="stat-int"><label>INT:</label> ' + target.int + ' (18)</li>' +
-					'<li class="stat-dex"><label>DEX:</label> ' + target.dex + ' (14)</li>' +
-					'<li class="stat-con"><label>CON:</label> ' + target.con + ' (20)</li>' +
+					'<li class="stat-str first"><label>STR:</label> ' + target.baseStr + ' (' + target.str + ')</li>' +
+					'<li class="stat-wis"><label>WIS:</label> ' + target.baseWis + ' (' + target.wis + ') </li>' +
+					'<li class="stat-int"><label>INT:</label> ' + target.baseInt + ' (' + target.int + ')</li>' +
+					'<li class="stat-dex"><label>DEX:</label> ' + target.baseDex + ' (' + target.dex + ')</li>' +
+					'<li class="stat-con"><label>CON:</label> ' + target.baseCon + ' (' + target.con + ')</li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
@@ -1581,13 +1585,13 @@ Cmd.prototype.score = function(target, command) {
 				'</ul>' +
 				'<div class="stat-details">' +
 					'<ul class="col-md-3 score-stats list-unstyled">' +
-						'<li class="stat-hitroll"><label>Hit Bonus: </labels> 3</li>' +
-						'<li class="stat-damroll"><label>Damage Bonus: </label> 3</li>' +
-						'<li class="stat-position"><label>Magic resistance: </label> -3</li>' +
-						'<li class="stat-position"><label>Melee resistance: </label> -3</li>' +
-						'<li class="stat-position"><label>Poison resistance: </label> -3</li>' +
-						'<li class="stat-position"><label>Detection: </label> 2</li>' +
-						'<li class="stat-position"><label>Knowledge: </label> 2</li>' +
+						'<li class="stat-hitroll"><label>Hit Bonus: </labels> ' + target.hitRoll + '</li>' +
+						'<li class="stat-damroll"><label>Damage Bonus: </label> ' + target.damRoll + '</li>' +
+						'<li class="stat-position"><label>Magic resistance: </label> ' + target.magicRes + '</li>' +
+						'<li class="stat-position"><label>Melee resistance: </label> ' + target.meleeRes + '</li>' +
+						'<li class="stat-position"><label>Poison resistance: </label> ' + target.poisonRes + '</li>' +
+						'<li class="stat-position"><label>Detection: </label> ' + target.detection + '</li>' +
+						'<li class="stat-position"><label>Knowledge: </label> ' + target.knowledge + '</li>' +
 					'</ul>' +
 					'<div class="col-md-3 score-affects">' +
 						'<h6 class="sans-serif">Affected by:</h6>' +
@@ -1599,7 +1603,7 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-level">You are a level ' + target.level + ' ' + target.race + ' '+  target.charClass + ' of ' + target.size.display + ' size.</li>' +
 					'<li class="stat-carry">You are carrying ' + target.weight + '/' + target.maxWeight + ' pounds.</li>' +
 					'<li class="stat-xp">You need <strong>' + (target.expToLevel - target.exp) + '</strong> experience for your next level.</li>' +
-					'<li class="stat-killcnt last">You have slain ' + target.killed +' foes.</li>' +
+		'<li class="stat-killcnt last">You have won ' + target.killed + ' battles.</li>' +
 				'</ul>' +
 			'</div>'
 				'</div>' +
