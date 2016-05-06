@@ -19,7 +19,7 @@ module.exports = {
 		var mayor = this,
 		roll = World.dice.roll(1, 10);
 		
-		if (roll >= 5) {
+		if (roll >= 3) {
 			// Most of the time we just proclaim something
 			Cmd.say(mayor, {
 				msg: mayor.exclimations[parseInt(Math.random() * ((mayor.exclimations.length)))]

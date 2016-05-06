@@ -136,7 +136,8 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						if (World.dice.roll(2, 20, dodgeCheck)
 							< World.dice.roll(2, 20, hitRoll + 5)) {
 							// attacker beat opponent dodge check
-							damage = World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str + attacker.damRoll + weapon.diceMod);
+							damage = World.dice.roll(weapon.diceNum + attacker.damRoll/2, weapon.diceSides,
+								attackerMods.str + attacker.damRoll + weapon.diceMod);
 							
 							damage += (attacker.level/2) + (attackerMods.str/4);
 								
@@ -325,7 +326,7 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 
 		endOfCombatMsg = 'You won the fight! You learn some things, resulting in ' + exp + ' experience points.';
 	} else {
-		endOfCombatMsg ='You won but learned nothing.';
+		endOfCombatMsg = 'You won but learned nothing.';
 	}
 
 	if (opponent.gold) {
@@ -340,6 +341,8 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 		player.wait = 0;
 	}
 
+	player.killed += 1;
+
 	return World.msgPlayer(player, {msg: endOfCombatMsg, styleClass: 'victory'});
 };
 
@@ -352,14 +355,17 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 			playerStatus= Character.getStatusReport(player);
 
 			msgForPlayer += msgForPlayer2;
+			
 			msgForOpponent += msgForOpponent2;
 
 			if (player.isPlayer) {
-				msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg + ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+				msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
+				+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
 			}
 
 			if (opponent.isPlayer) {
-				msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg + ' (' + player.chp + '/' + player.hp +')</div>';
+				msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg
+				+ ' (' + player.chp + '/' + player.hp +')</div>';
 			}
 
 			World.msgPlayer(player, {
@@ -395,8 +401,15 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 					player.chp = player.hp;
 					player.opponent = null;
 
-					World.msgPlayer(player, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
-					World.msgPlayer(opponent, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
+					World.msgPlayer(player, {
+						msg: 'You should be dead, but since this is unfinished we will just reset everything.',
+						styleClass: 'victory'
+					});
+					
+					World.msgPlayer(opponent, {
+						msg: 'You should be dead, but since this is unfinished we will just reset everything.',
+						styleClass: 'victory'
+					});
 				} else {
 					World.prompt(player);
 					World.prompt(opponent);

@@ -27,10 +27,12 @@ World = require('./world').world;
 			// Morning
 			World.time.isDay = true;
 			areaMsg = 'The sun appears over the horizon.';
+			console.log('Morning', World.time);
 		} else if (World.time.hour <= World.time.month.hourOfNight && World.time.minute === 1) {
 			// Nightfall
 			World.time.isDay = false;
 			areaMsg = 'The sun fades fully from view as night falls.';
+			console.log('night', World.time);
 		}
 
 		if (World.areas.length && areaMsg) {
@@ -140,7 +142,8 @@ World = require('./world').world;
 			}
 		}
 	}, 15000);
-
+	//}, 1000);
+	
 	// AI Ticks for areas 
 	setInterval(function() {
 		var i = 0,
