@@ -12,7 +12,6 @@ module.exports = {
     "reloads": 0,
     "created": "",
     "saved": "",
-	"dark": false,
 	"author": "Rocky",
     "messages": [
         {"msg": "A cool breeze blows through the streets of Midgaard."},
@@ -24,6 +23,7 @@ module.exports = {
         {
             "id" : "1",
             "title" : "Town Square",
+			"light": true,
             "area": "Midgaard",
             "content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
             "exits" : [

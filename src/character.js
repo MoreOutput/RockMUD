@@ -1069,12 +1069,15 @@ Character.prototype.addAffect = function(player) {
 };
 
 Character.prototype.canSee = function(player, roomObj, light) {
-	var canSee = player.sight;
+	var canSee = player.sight,
+	hasDarkvision = this.getAffect(player, 'darkvision');
 		
-	if (this.getAffect(player, 'darkvision') && player.sight) {
-		canSee == true;
-	} else if ((!World.time.isDay && !roomObj.dark) || roomObj.dark === true) {
-		canSee = false;
+	if (hasDarkvision && player.sight
+		|| (player.sight && World.time.isDay && !roomObj.light)
+	   	|| (player.sight && roomObj.light === true) ) {
+		canSee = true;
+	} else {
+		canSee = false
 	}
 	
 	return canSee;
