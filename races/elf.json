@@ -1,7 +1,8 @@
+
 {
     "name": "Elf",
     "int": 3,
-    "con": -1,
+    "con": -2,
     "playable": true,
     "attackType": "punch",
     "diceNum": 1,

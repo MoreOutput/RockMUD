@@ -40,7 +40,6 @@ window.onload = function() {
 		slist: 'skills',
 		skill: 'skills',
 		desc: 'description',
-		re: 'rest',
 		r: 'recall',
 		wake: 'stand',
 		g: 'get'

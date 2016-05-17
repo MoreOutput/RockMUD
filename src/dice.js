@@ -150,7 +150,8 @@ Roller.prototype.calExp = function(player, expOpt) {
 
 	if (expOpt.level >= (player.level - 6)) {
 		if (expOpt.level >= player.level) {
-			exp = ((((expOpt.level - player.level)) * total) + 1) * (total * Math.abs(expOpt.level - player.level)) + dice.roll(1, 10) + 20;
+			exp = ((((expOpt.level - player.level)) * total) + 1) *
+			(total * Math.abs(expOpt.level - player.level)) + dice.roll(1, 10) + 20;
 
 			return exp;
 		} else {

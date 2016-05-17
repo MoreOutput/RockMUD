@@ -1,9 +1,7 @@
 'use strict';
 var World = require('./world').world,
 Character = require('./character').character,
-Skills = require('./skills').skills,
-Spells = require('./spells').spells,
-Room = require('./rooms').room,
+Room = require('./rooms').room,	
 Combat = function() {
 	this.adjective = [
 		{value: 'weak', damage: 5},
@@ -17,7 +15,8 @@ Combat = function() {
 	];
 
 	this.abstractNouns = ['intensity', 'force', 'strength', 'power'];
-};
+},
+Skill;
 
 /*
 General idea behind a hit:
@@ -58,10 +57,14 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 		}
 	}
 
+	// move this check to the main combat loop as to add varraying message on
+	// a 'chance' hit.
 	if (numOfAttacks === 1 && World.dice.roll(1, 4) === 4) {
 		numOfAttacks = 2;
 	}
-
+	
+	numOfAttacks += Skill.secondAttack(Character.getSkill(attacker, 'secondAttack'), attacker);
+	
 	return numOfAttacks;
 };
 
@@ -84,7 +87,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	abstractNoun,
 	weapon, // attackers active weapon
 	shield, // opponents shield
-	shieldAC = 0,	
+	shieldAC = 0,
 	hitRoll = attacker.hitRoll + attackerMods.dex,
 	damRoll	= attacker.damRoll + attackerMods.str,
 	dodgeCheck = opponentMods.dex + opponent.detection + opponent.awareness/2,	
@@ -108,7 +111,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 			}
 		}
 		
-		for (i; i < weaponSlots.length; i += 1) {			
+		for (i; i < weaponSlots.length; i += 1) {
 			if (weaponSlots[i].item) {
 				weapon = weaponSlots[i].item;
 			} else if (!weapon && !weaponSlots[i].item) {
@@ -133,7 +136,8 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						if (World.dice.roll(2, 20, dodgeCheck)
 							< World.dice.roll(2, 20, hitRoll + 5)) {
 							// attacker beat opponent dodge check
-							damage = World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str + attacker.damRoll + weapon.diceMod);
+							damage = World.dice.roll(weapon.diceNum + attacker.damRoll/2, weapon.diceSides,
+								attackerMods.str + attacker.damRoll + weapon.diceMod);
 							
 							damage += (attacker.level/2) + (attackerMods.str/4);
 								
@@ -155,7 +159,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							// critical attacks
 							if (World.dice.roll(1 * attacker.level, 20, hitRoll + attackerMods.dex)
 								=== (20 * attacker.level + 1)) {
-								damage = (damage * 2) + attacker.cstr;
+								damage = (damage * 2) + attacker.str;
 							}
 
 							if (damage < 0) {
@@ -169,7 +173,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
 
 							opponent.chp -= damage;
-							
+
 							if (attacker.isPlayer) {
 								msgForAttacker += '<div>You ' + weapon.attackType + ' a ' + opponent.displayName 
 									+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' +
@@ -203,7 +207,6 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						}
 					}
 
-					
 				}
 			} else {
 				if (attacker.isPlayer) {
@@ -247,16 +250,10 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 	opponent.opponent = player;
 	player.opponent = opponent;
 
-	World.msgPlayer(player, {
-		msg: 'You scream and charge at a ' + opponent.name,
-		noPrompt: true
-	});
-
-	World.msgPlayer(opponent, {
-		msg: 'A ' + player.displayName + ' screams and charges at you!',
-		noPrompt: true
-	});
-
+	if (!Skill) {
+		Skill = require('./skills').skills;
+	}
+	
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
 		var oppStatus = Character.getStatusReport(opponent),
 		playerStatus = Character.getStatusReport(player),
@@ -329,7 +326,7 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 
 		endOfCombatMsg = 'You won the fight! You learn some things, resulting in ' + exp + ' experience points.';
 	} else {
-		endOfCombatMsg ='You won but learned nothing.';
+		endOfCombatMsg = 'You won but learned nothing.';
 	}
 
 	if (opponent.gold) {
@@ -344,6 +341,8 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 		player.wait = 0;
 	}
 
+	player.killed += 1;
+
 	return World.msgPlayer(player, {msg: endOfCombatMsg, styleClass: 'victory'});
 };
 
@@ -356,14 +355,17 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 			playerStatus= Character.getStatusReport(player);
 
 			msgForPlayer += msgForPlayer2;
+			
 			msgForOpponent += msgForOpponent2;
 
 			if (player.isPlayer) {
-				msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg + ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+				msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
+				+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
 			}
 
 			if (opponent.isPlayer) {
-				msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg + ' (' + player.chp + '/' + player.hp +')</div>';
+				msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg
+				+ ' (' + player.chp + '/' + player.hp +')</div>';
 			}
 
 			World.msgPlayer(player, {
@@ -399,8 +401,15 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 					player.chp = player.hp;
 					player.opponent = null;
 
-					World.msgPlayer(player, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
-					World.msgPlayer(opponent, {msg: 'You should be dead, but since this is unfinished we will just reset everything.', styleClass: 'victory'});
+					World.msgPlayer(player, {
+						msg: 'You should be dead, but since this is unfinished we will just reset everything.',
+						styleClass: 'victory'
+					});
+					
+					World.msgPlayer(opponent, {
+						msg: 'You should be dead, but since this is unfinished we will just reset everything.',
+						styleClass: 'victory'
+					});
 				} else {
 					World.prompt(player);
 					World.prompt(opponent);

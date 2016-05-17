@@ -12,7 +12,7 @@ module.exports = {
     "reloads": 0,
     "created": "",
     "saved": "",
-    "author": "Rocky",
+	"author": "Rocky",
     "messages": [
         {"msg": "A cool breeze blows through the streets of Midgaard."},
         {"msg": "The bustle of the city can be distracting. Keep an eye out for thieves."}
@@ -23,6 +23,7 @@ module.exports = {
         {
             "id" : "1",
             "title" : "Town Square",
+			"light": true,
             "area": "Midgaard",
             "content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
             "exits" : [
@@ -95,9 +96,9 @@ module.exports = {
                     }]
                 }, {
                     "name": "Boar",
-                    "displayName": ["Brown boar", "A old brown boar"],
+                    "displayName": ["Brown boar", "An old brown boar"],
                     "level": 1,
-                    "short": ["A large brown boar", "A large scared boar"],
+                    "short": ["a large brown boar", "a large scarred boar"],
                     "race": "animal",
                     "id": "6",
                     "area": "Midgaard",
@@ -204,7 +205,10 @@ module.exports = {
                 "modifiers": {
                     "str": 2
                 },
-                "flags": []
+                "flags": [],
+				"onKill": function(roomObj) {
+					console.log('lol');
+				}
             }, {
                 "name": "Burlap sack",
                 "short": "worn, tan, burlap sack",

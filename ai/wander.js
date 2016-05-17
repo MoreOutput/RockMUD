@@ -4,6 +4,7 @@ Room = require('../src/rooms').room,
 World = require('../src/world').world;
 
 module.exports = {
+	stayInArea: true,
     moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'],
     onAlive: function(roomObj) {
         var mob = this,

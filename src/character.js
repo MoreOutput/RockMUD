@@ -7,7 +7,8 @@
 var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms').room,
-World = require('./world').world,
+World = require('./world').world,	
+Cmds,
 Character = function () {
 	this.statusReport = [
 		{msg: ' is bleeding all over the place and looks nearly dead!', percentage: 0},
@@ -50,7 +51,7 @@ Character.prototype.login = function(r, s, fn) {
 };
 
 Character.prototype.load = function(name, s, fn) {
-	fs.readFile('./players/'  + name + '.json', function (err, r) {
+	fs.readFile('./players/' + name + '.json', function (err, r) {
 		if (err) {
 			throw err;
 		}
@@ -77,7 +78,7 @@ Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 	for (i; i < iterations; i += 1) {
 		hash = crypto.createHmac('sha512', salt).update(hash).digest('hex');
 	}
-			
+
 	return fn(hash);
 };
 
@@ -98,8 +99,7 @@ Character.prototype.getPassword = function(s, fn) {
 	s.on('password', function (r) {
 		if (r.msg.length > 7) {
 			character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
-				var roomObj,
-				displayHTML;
+				var roomObj;
 
 				if (s.player.password === hash) {
 					if (character.addPlayer(s)) {
@@ -201,7 +201,6 @@ Character.prototype.create = function(r, s, fn) {
 
 			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
 				var i = 0,
-				displayHTML,
 				roomObj;
 
 				if (err) {
@@ -217,18 +216,11 @@ Character.prototype.create = function(r, s, fn) {
 
 					World.sendMotd(s);
 
-					displayHTML = Room.getDisplay(s.player.area, s.player.roomid);
-
-					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-
-					Room.getDisplayHTML(roomObj, {
-						hideCallingPlayer: s.player.name
-					});
-
-					World.msgPlayer(s, {
-						msg: displayHTML,
-						styleClass: 'room'
-					});
+					if (!Cmds) {
+						Cmds = require('./commands').cmd;				
+					}
+					
+					Cmds.look(s.player);
 
 					fn(s);
 				} else {
@@ -247,11 +239,10 @@ Character.prototype.rollStats = function(player) {
 	j = 0,
 	raceKey, // property of the race defines in raceList
 	classKey; // property of the class defines in classList
-
+	
 	for (i; i < World.races.length; i += 1) {// looking for race
 		if (World.races[i].name.toLowerCase() === player.race.toLowerCase()) { // found race
 			for (raceKey in player) {
-
 				if (raceKey in World.races[i] && raceKey !== 'name') { // found, add in stat bonus
 					if (isNaN(World.races[i][raceKey])) {
 						player[raceKey] = World.races[i][raceKey];
@@ -267,8 +258,12 @@ Character.prototype.rollStats = function(player) {
 		if (World.classes[j].name.toLowerCase() === player.charClass.toLowerCase()) { // class match found
 			for (classKey in player) {
 				if (classKey in World.classes[j] && classKey !== 'name') {
-					if (!World.classes[j][classKey].length) {
-						player[classKey] = World.classes[j][classKey] + player[classKey];
+					if (!World.classes[j][classKey].isArray) {
+						if (!isNaN(World.classes[j][classKey])) {
+							player[classKey] += World.classes[j][classKey];
+						} else {
+							player[classKey] = World.classes[j][classKey];
+						}
 					} else {
 						player[classKey].push(World.classes[j][classKey]);
 					}
@@ -279,7 +274,7 @@ Character.prototype.rollStats = function(player) {
 
 	player.carry = player.str * 10;
 	player.ac = World.dice.getDexMod(player) + 2;
-
+	
 	return player;
 };
 
@@ -836,11 +831,11 @@ Character.prototype.addToBottle = function(container, item) {
 };
 
 // returns a skill object in player.skills
-Character.prototype.getSkill = function(player, skillName) {
+Character.prototype.getSkill = function(player, skillId) {
 	var i = 0;
 
 	for (i; i < player.skills.length; i += 1) {
-		if (player.skills[i].name === skillName) {
+		if (player.skills[i].id === skillId) {
 			return player.skills[i];
 		}
 	}
@@ -1031,7 +1026,62 @@ Character.prototype.getStatusReport = function(player) {
 			return player, this.statusReport[i];
 		}
 	}
-}
+};
+
+Character.prototype.getAffect = function(player, affectName) {
+	var i = 0;
+
+	for (i; i < player.affects.length; i += 1) {
+		if (player.affects[i].id === affectName) {
+			return player.affects[i];
+		}
+	}
+
+	return false;
+};
+
+Character.prototype.removeAffect = function(player, affectName) {
+	var i = 0;
+
+	for (i; i < player.affects.length; i += 1) {
+		if (player.affects[i].id === affectName) {
+			return player.affects[i];
+		}
+	}
+
+	return false;
+};
+
+Character.prototype.addAffect = function(player) {
+	var i = 0;
+
+	for (i; i < player.affects.length; i += 1) {
+		if (player.affects[i].id === affectName) {
+			player.affects[i].decay += 1;
+
+			return false;
+		}
+	}
+
+	player.affects.push(affect);
+	
+	return true;;
+};
+
+Character.prototype.canSee = function(player, roomObj, light) {
+	var canSee = player.sight,
+	hasDarkvision = this.getAffect(player, 'darkvision');
+		
+	if (hasDarkvision && player.sight
+		|| (player.sight && World.time.isDay && !roomObj.light)
+	   	|| (player.sight && roomObj.light === true) ) {
+		canSee = true;
+	} else {
+		canSee = false
+	}
+	
+	return canSee;
+};
 
 Character.prototype.createCorpse = function(player) {
 	player.level = 1;
@@ -1042,7 +1092,11 @@ Character.prototype.createCorpse = function(player) {
 	player.weight = player.weight - 1;
 	player.chp = 0;
 	player.hp = 0;
-}
+	player.cmana = 0;
+	player.mana = 0;
+	player.cmv = 0;
+	player.mv = 0;
+};
 
 Character.prototype.getLoad = function(s) {
 	var load = Math.round((s.player.str + s.player.con / 4) * 10);
@@ -1054,11 +1108,13 @@ Character.prototype.level = function(s, fn) {
 
 };
 
+Character.prototype.useSkill = function() {
+
+};
+
 // Add in gear modifiers and return the updated object
 Character.prototype.calculateGear = function() {
 
 };
-
-
 
 module.exports.character = new Character();
