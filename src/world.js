@@ -614,13 +614,13 @@ World.prototype.msgPlayer = function(target, msgObj) {
 			if (typeof msgObj.msg !== 'function') {
 				s.emit('msg', msgObj);
 			} else {
-				msgObj.msg(function(send, msg) {
+				msgObj.msg(target, function(send, msg) {
 					msgObj.msg = msg;
 					
 					if (send) {
 						s.emit('msg', msgObj);
 					}
-				}, target );
+				}, target);
 			}
 
 			if (!msgObj.noPrompt) {

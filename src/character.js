@@ -673,8 +673,8 @@ Character.prototype.getLights = function(player) {
 
 	for (i; i < player.eq.length; i += 1) {
 		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
-			&& player.eq[i].item.itemType === 'light' && player.eq[i].item.decay >= 1) {
-			lights.push(player.eq[i]);
+			&& player.eq[i].item.itemType === 'light') {
+			lights.push(player.eq[i].item);
 		}
 	}
 
@@ -922,31 +922,44 @@ Character.prototype.removeStatMods = function(player, item) {
 
 Character.prototype.wearWeapon = function(target, weapon) {
 	var slot = this.getEmptyWeaponSlot(target),
-	roomObj = World.getRoomObject(target.area, target.roomId);
+	roomObj;
 
-	weapon.equipped = true;
+	if (slot) {
+		roomObj = World.getRoomObject(target.area, target.roomId);
+		weapon.equipped = true;
 	
-	slot.item = weapon;
+		slot.item = weapon;
 
-	this.addStatMods(target, weapon);
+		this.addStatMods(target, weapon);
 
-	World.msgPlayer(target, {
-		msg: 'You wield a ' + weapon.short + ' in your ' + slot.name + '.'
-	});
+		World.msgPlayer(target, {
+			msg: 'You wield a ' + weapon.short + ' in your ' + slot.name + '.'
+		});
+	} else {
+		World.msgPlayer(target, {
+			msg: 'Your hands are too full to wield a ' + weapon.short + '.'
+		});	
+	}
 };
 
 Character.prototype.wearShield = function(target, shield) {
 	var slot = this.getEmptyWeaponSlot(target);
 
-	shield.equipped = true;
+	if (slot) {
+		shield.equipped = true;
 	
-	slot.item = shield;
+		slot.item = shield;
 
-	this.addStatMods(target, shield);
+		this.addStatMods(target, shield);
 
-	World.msgPlayer(target, {
-		msg: 'You begin defending yourself with a ' + shield.short + '.'
-	});
+		World.msgPlayer(target, {
+			msg: 'You begin defending yourself with a ' + shield.short + '.'
+		});
+	} else {
+		World.msgPlayer(target, {
+			msg: 'You can\'t weild the shield because your hands are full.'
+		});
+	}
 };
 
 Character.prototype.wearLight = function(target, light) {
@@ -1068,7 +1081,7 @@ Character.prototype.addAffect = function(player) {
 	return true;;
 };
 
-Character.prototype.canSee = function(player, roomObj, light) {
+Character.prototype.canSee = function(player, roomObj) {
 	var canSee = player.sight,
 	hasDarkvision = this.getAffect(player, 'darkvision');
 		

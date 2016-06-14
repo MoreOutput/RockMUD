@@ -595,11 +595,11 @@ Cmd.prototype.move = function(target, command, fn) {
 				}
 
 				World.msgRoom(targetRoom, {
-					msg: function(fn) {
+					msg: function(receiver, fn) {
 						var msg = '';
 
 						if (!sneakAff) {
-							if (Character.canSee(target, roomObj)) {
+							if (Character.canSee(receiver, roomObj)) {
 								msg = '<strong>' + target.displayName
 								+ '</strong> enters the room from the ' + exitObj.cmd + '.';
 							} else {
@@ -613,11 +613,11 @@ Cmd.prototype.move = function(target, command, fn) {
 				});
 
 				World.msgRoom(roomObj, {
-					msg: function(fn) {
+					msg: function(receiver, fn) {
 						var msg = '';
-
+				
 						if (!sneakAff) {
-							if (Character.canSee(target, roomObj)) {
+							if (Character.canSee(receiver, roomObj)) {
 								msg = '<span class="yellow">' + target.displayName
 								+ ' leaves the room heading <strong>' + direction + '</strong></div>';
 							} else {
@@ -722,15 +722,16 @@ Cmd.prototype.get = function(target, command, fn) {
 	i = 0,
 	item,
 	container,
+	light = Character.getLights(target)[0],	
 	itemLen;
 
 	if (target.position !== 'sleeping') {
-		if (command.msg !== '' && Character.canSee(target)) {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+
+		if (command.msg !== '' && (Character.canSee(target, roomObj) || light.decay > 0)) {
 			container = Character.getContainer(target, command);
 
 			if (!container) {
-				roomObj = World.getRoomObject(target.area, target.roomid);
-
 				if (command.msg !== 'all') {
 					item = Room.getItem(roomObj, command);
 
@@ -864,14 +865,14 @@ Cmd.prototype.drop = function(target, command, fn) {
 			if (command.msg !== 'all') {
 				item = World.search(target.items, command);
 
-				if (item) {
+				if (item && !item.equipped) {
 					Character.removeItem(target, item);
 
 					if (item) {
 						Room.addItem(roomObj, item);
 
 						World.msgRoom(roomObj, {
-							msg: target.displayName + 'drops a ' + item.short,
+							msg: target.displayName + '  drops a ' + item.short,
 							playerName: target.name,
 							styleClass: 'cmd-drop yellow'
 						});
@@ -1117,12 +1118,12 @@ Cmd.prototype.look = function(target, command) {
 	i = 0;
 	
 	if (canSee) {
-		canSee = Character.canSee(target, roomObj, light);
+		canSee = Character.canSee(target, roomObj);
 
 		if (target.position !== 'sleeping') {
 			if (!command || command.msg === '') {
 				// if no arguments are given we display the current room
-				if (canSee) {
+				if (canSee || !canSee && light.decay > 0) {
 					roomObj = World.getRoomObject(target.area, target.roomid);
 
 					displayHTML = Room.getDisplayHTML(roomObj, {
@@ -1227,10 +1228,10 @@ Cmd.prototype.say = function(target, command) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 
 			World.msgRoom(roomObj, {
-				msg: function(fn) {
+				msg: function(receiver, fn) {
 					var msg;
 					
-					if (Character.canSee(target, roomObj)) {
+					if (Character.canSee(receiver, roomObj)) {
 						msg = '<div class="cmd-say"><span class="msg-name">' +
 						target.displayName + ' says></span> ' + command.msg + '</div>';
 					} else {
