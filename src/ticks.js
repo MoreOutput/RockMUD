@@ -27,7 +27,7 @@ World = require('./world').world;
 			// Morning
 			World.time.isDay = true;
 			areaMsg = 'The sun appears over the horizon.';
-		} else if (World.time.hour <= World.time.month.hourOfNight && World.time.minute === 1) {
+		} else if (World.time.hour === World.time.month.hourOfNight && World.time.minute === 1) {
 			// Nightfall
 			World.time.isDay = false;
 			areaMsg = 'The sun fades fully from view as night falls.';
@@ -118,9 +118,28 @@ World = require('./world').world;
 		}
 	}, 240000); // 4 minutes
 
-	// decay timer, affects only items in a players inventory.
+	// decay timer, affects all items with decay, decayLight
+	// if an item with decay (not decayLight) reaches zero it goes away
+	// if an item with decayLight reaches zero it goes out. Printing a generic message unless an onDestory event is found
+	// if onDestory is found then the programmer should return a message
+	// fires onDecay, onDecayLight, onDestory
 	setInterval(function() {
-		
+		var i = 0,
+		player;
+
+		// decay player items
+		if (World.dice.roll(1, 20) < 18) {
+			if (World.players.length > 0) {
+				for (i; i < World.players.length; i += 1) {
+					
+				}
+			}
+		}
+
+		// decay mob items
+
+		// decay room items
+
 	}, 245000); // 4.5 minutes
 	
 	// AI Ticks for monsters

@@ -1,28 +1,28 @@
 {
-    "year": 1022,
-    "title": "Year of something-or-other",
-    "month": {
-        "id": 1,
-        "displayName": "January",
-        "abbv": "Jan",
+	"year": 1022,
+	"title": "Year of something-or-other",
+	"month": {
+		"id": 1,
+		"displayName": "January",
+		"abbv": "Jan",
 		"day": 1,
 		"days": 30,
 		"hoursInDay": 24,
-    	"hourOfLight": 1,
-    	"hourOfNight": 12
+		"hourOfLight": 1,
+		"hourOfNight": 12
 	},
-    "day": 1,
-    "hour": 1,
-    "minute": 1,
-    "isDay": true,
-    "months": [{
-        "id": 1,
-        "displayName": "January",
-        "abbv": "Jan",
-        "day": 1,
+	"day": 1,
+	"hour": 1,
+	"minute": 1,
+	"isDay": true,
+	"months": [{
+		"id": 1,
+		"displayName": "January",
+		"abbv": "Jan",
+		"day": 1,
 		"days": 30,
 		"hoursInDay": 24,
-    	"hourOfLight": 1,
-    	"hourOfNight": 12
-    }]
+		"hourOfLight": 1,
+		"hourOfNight": 12
+	}]
 }

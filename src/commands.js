@@ -544,6 +544,16 @@ Cmd.prototype.lock = function(target, command, fn) {
 	}
 };
 
+// Light an object that has a light and decayLight property
+Cmd.prototype.light = function(target, command, fn) {
+
+};
+
+// Snuff out an object with the needed light properties
+Cmd.prototype.snuff = function(target, command, fn) {
+
+};
+
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
 	var direction = command.arg,
@@ -599,7 +609,7 @@ Cmd.prototype.move = function(target, command, fn) {
 						var msg = '';
 
 						if (!sneakAff) {
-							if (Character.canSee(receiver, roomObj)) {
+							if (Character.canSee(receiver, targetRoom)) {
 								msg = '<strong>' + target.displayName
 								+ '</strong> enters the room from the ' + exitObj.cmd + '.';
 							} else {
@@ -885,7 +895,11 @@ Cmd.prototype.drop = function(target, command, fn) {
 						World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
 					}
 				} else {
-					World.msgPlayer(target, {msg: 'You do not have that item.', styleClass: 'error'});
+					if (item && !item.equipped) {
+						World.msgPlayer(target, {msg: 'You do not have that item.', styleClass: 'error'});
+					} else {
+						World.msgPlayer(target, {msg: 'You must remove a ' + item.short + ' before you can drop it.', styleClass: 'error'});
+					}
 				}
 			} else {
 				itemLen = target.items.length;
@@ -1420,7 +1434,7 @@ Cmd.prototype.title = function(target, command) {
 // View equipment
 Cmd.prototype.equipment = function(target, command) {
 	var eqStr = '',
-	i = 0;	
+	i = 0;
 	
 	for (i; i < target.eq.length; i += 1) {	
 		eqStr += '<li class="eq-slot-' + target.eq[i].slot.replace(/ /g, '') + 
@@ -1429,7 +1443,15 @@ Cmd.prototype.equipment = function(target, command) {
 		if (target.eq[i].item === null || target.eq[i].item === '') {
 			eqStr += ' Nothing</li>';
 		} else {
-			eqStr += '<label class="yellow">'  + target.eq[i].item.short + '</label></li>';
+			if (!target.eq[i].item.light) {
+				eqStr += '<label class="yellow">'  + target.eq[i].item.short + '</label></li>';
+			} else {
+				if (target.eq[i].item.decay > 0) {
+					eqStr += '<label class="yellow">'  + target.eq[i].item.short + ' (<span class="red">Providing light</span>)</label></li>';
+				} else {
+					eqStr += '<label class="yellow">'  + target.eq[i].item.short + ' (<span class="red">Unlit</span>)</label></li>';
+				}
+			}
 		}
 	}
 	

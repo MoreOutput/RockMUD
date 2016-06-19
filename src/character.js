@@ -673,7 +673,7 @@ Character.prototype.getLights = function(player) {
 
 	for (i; i < player.eq.length; i += 1) {
 		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
-			&& player.eq[i].item.itemType === 'light') {
+			&& player.eq[i].item.light) {
 			lights.push(player.eq[i].item);
 		}
 	}
@@ -684,16 +684,15 @@ Character.prototype.getLights = function(player) {
 // All keys in the characters inventory
 Character.prototype.getKeys = function(player) {
 	var i = 0,
-	lights = [];
+	keys = [];
 
-	for (i; i < player.eq.length; i += 1) {
-		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
-			&& player.eq[i].item.itemType === 'light' && player.eq[i].item.decay >= 1) {
-			lights.push(player.eq[i]);
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].isKey) {
+			keys.push(player.items[i]);
 		}
 	}
 
-	return lights;
+	return keys;
 };
 
 // if a character has a specific key
@@ -957,27 +956,7 @@ Character.prototype.wearShield = function(target, shield) {
 		});
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You can\'t weild the shield because your hands are full.'
-		});
-	}
-};
-
-Character.prototype.wearLight = function(target, light) {
-	var slot = this.getEmptyWeaponSlot(target);
-
-	light.equipped = true;
-
-	slot.item = light;
-
-	this.addStatMods(target, light);
-
-	if (slot.item.decay > 0) {
-		World.msgPlayer(target, {
-			msg: 'A ' + light.short + ' shines brightly as you hold it.'
-		});
-	} else {
-		World.msgPlayer(target, {
-			msg: 'You being holding a ' + light.short + ' but it is burned out.'
+			msg: 'You can\'t use a ' + shield.short + ' because your hands are full.'
 		});
 	}
 };

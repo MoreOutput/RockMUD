@@ -321,7 +321,7 @@ World.prototype.rollItems = function(itemArr, roomid) {
 					} else {
 						itemName = item.displayName;
 					}
-				} else {	
+				} else {
 					if (Array.isArray(item.short)) {
 						itemName = item.short[world.dice.roll(1, item.short.length) - 1];
 					} else {
@@ -334,12 +334,13 @@ World.prototype.rollItems = function(itemArr, roomid) {
 			}
 
 			if (Array.isArray(item.long)) {
-				item.long = item.long[world.dice.roll(1, item.long.length) - 1];		
+				item.long = item.long[world.dice.roll(1, item.long.length) - 1];
 			}
 
 			if (chanceRoll === 20) {
 				item.diceNum += 1;
-				item.diceSides += 2;
+				item.diceSides += 1;
+				item.diceMod += 1;
 			} else if (chanceRoll > 18) {
 				item.diceNum += 1;
 			} else if (chanceRoll === 1 && item.diceNum > 1) {
