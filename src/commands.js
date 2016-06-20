@@ -570,7 +570,12 @@ Cmd.prototype.move = function(target, command, fn) {
 		|| target.position === 'fleeing' 
 		&& target.cmv > (4 - dexMod) 
 		&& target.wait === 0) {
-		roomObj = World.getRoomObject(target.area, target.roomid);
+		
+		if (!command.roomObj) {
+			roomObj = World.getRoomObject(target.area, target.roomid);
+		} else {
+			roomObj = command.roomObj;
+		}
 
 		exitObj = Room.getExit(roomObj, direction);
 

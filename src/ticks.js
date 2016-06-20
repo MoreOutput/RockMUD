@@ -219,7 +219,7 @@ World = require('./world').world;
 		var s,
 		alerts = [
 			'Commands are not case sensitive. Use HELP COMMANDS to see the current command list.',
-			'Think of this as an example newbie help tick.'
+			'Use the SCAN command to get a quick look at the rooms adjacent to you.'
 		];
 
 		if (World.players.length > 0) {

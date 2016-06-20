@@ -5,18 +5,31 @@ World = require('../src/world').world;
 
 module.exports = {
 	stayInArea: true,
-    moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'],
-    onAlive: function(roomObj) {
-        var mob = this,
-        roll = World.dice.roll(1, 10),
-        direction;
+	wanderCheck: 0,
+	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'],
+	onAlive: function(roomObj) {
+		var mob = this,
+		roll = World.dice.roll(1, 10),
+		roomObj,
+		exitObj,
+		targetRoom,
+		direction;
 
-        if (roll > 6) {
-            direction = mob.moveDirections[World.dice.roll(1, mob.moveDirections.length) - 1];
+		if (roll > mob.wanderCheck) {
+			roomObj = World.getRoomObject(mob.area, mob.roomid); 
 
-            Cmd.move(mob, {
-                arg: direction
-            });
-        }
-    }
+			direction = mob.moveDirections[World.dice.roll(1, mob.moveDirections.length) - 1];
+			
+			exitObj = Room.getExit(roomObj, direction);
+
+			targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
+
+			if (targetRoom && ((mob.stayInArea === false) || (mob.stayInArea === true && targetRoom.area === roomObj.area))) {
+				Cmd.move(mob, {
+					arg: direction,
+					roomObj: roomObj
+				});
+			}
+		}
+	}
 };
