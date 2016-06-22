@@ -78,6 +78,11 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 
 /*
 * Melee Skills, called by a game entity
+* Can only work on standing opponents
+* Chance of knocking the target down; chances increased with a shield
+* If the target is already on the ground dex check to fall
+* If the target is two sizes smaller do a dex check against missing, a 1 causes the user to trip
+* Smaller targets take more damage if the user is two sizes bigger
 */
 Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 	var opponent,
@@ -89,7 +94,7 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 	rollDamage = function() {
 		var dmg = 0;
 
-		dmg = World.dice.roll(1, 10, strMod);
+		dmg = World.dice.roll(1, 10 + player.size, strMod + player.size);
 
 		if (player.mainStat === 'str') {
 			dmg += World.dice.roll(1, 2 + player.level);
@@ -119,7 +124,12 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 
 				Combat.processFight(player, opponent, roomObj);
 				
-				player.wait += 3;
+				if (player.mainStat === 'str') {
+					player.wait += 3;
+				} else {
+					player.wait += 4;
+				}
+
 				opponent.wait += 3;
 			} else {
 				Combat.processFight(player, opponent, roomObj);

@@ -364,6 +364,7 @@ module.exports = {
             "title" : "Beneath Town Square",
             "area": "Midgaard",
             "content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
+            "size": {"value": 3, "display": "medium"},
             "exits" : [
                 {
                     "cmd" : "up",

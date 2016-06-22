@@ -1,144 +1,144 @@
 {
-    "name": "",
-    "id": "",
-    "lastname": "",
-    "displayName": "",
-    "title": "",
-    "role": "",
-    "sex": "",
-    "race": "",
-    "charClass": "", 
-    "level": 1,
-    "exp": 0,
-    "expToLevel": 1000,
-    "position": "standing",
-    "alignment": "",
-    "chp": 0,
-    "hp": 0,
-    "cmana": 0,
-    "mana": 0,
-    "cmv": 0,
-    "mv": 0,
-    "str": 0,
-    "wis": 0,
-    "int": 0,
-    "dex": 0,
-    "con": 0,
-    "baseStr": 0,
-    "baseWis": 0,
-    "baseInt": 0,
-    "baseDex": 0,
-    "baseCon": 0,
-    "ac": 0,
-    "damRoll": 0,
-    "hitRoll": 0,
-    "wait": 0,
-    "magicRes": 0,
-    "meleeRes": 0,
-    "poisonRes": 0,
-    "detection": 0,
-    "knowledge": 0,
-    "weight": 0,
-    "maxWeight": 0,
-    "gold": 0,
-    "hunger": 0,
-    "thirst": 0,
-    "load": 0,
-    "visible": true,
-    "diceNum": 0,
-    "diceSides": 0,
-    "attackType":"punch",
-    "area": "Midgaard",
-    "roomid": "1",
-    "recall": "1",
-    "description": "",
-    "reply": "",
-    "following": "",
-    "short": "",
+	"name": "",
+	"id": "",
+	"lastname": "",
+	"displayName": "",
+	"title": "",
+	"role": "",
+	"sex": "",
+	"race": "",
+	"charClass": "", 
+	"level": 1,
+	"exp": 0,
+	"expToLevel": 1000,
+	"position": "standing",
+	"alignment": "",
+	"chp": 0,
+	"hp": 0,
+	"cmana": 0,
+	"mana": 0,
+	"cmv": 0,
+	"mv": 0,
+	"str": 0,
+	"wis": 0,
+	"int": 0,
+	"dex": 0,
+	"con": 0,
+	"baseStr": 0,
+	"baseWis": 0,
+	"baseInt": 0,
+	"baseDex": 0,
+	"baseCon": 0,
+	"ac": 0,
+	"damRoll": 0,
+	"hitRoll": 0,
+	"wait": 0,
+	"magicRes": 0,
+	"meleeRes": 0,
+	"poisonRes": 0,
+	"detection": 0,
+	"knowledge": 0,
+	"weight": 0,
+	"maxWeight": 0,
+	"gold": 0,
+	"hunger": 0,
+	"thirst": 0,
+	"load": 0,
+	"visible": true,
+	"diceNum": 0,
+	"diceSides": 0,
+	"attackType":"punch",
+	"area": "Midgaard",
+	"roomid": "1",
+	"recall": "1",
+	"description": "",
+	"reply": "",
+	"following": "",
+	"short": "",
 	"long" : "",
-    "trains": 0,
-    "hearing": true,
-    "sight": true,
-    "touch": true,
-    "smell": true, 
-    "taste": true,
-    "size": {"value": 3, "display": "medium"},
-    "kingdom": "mammal",
-    "killed": 0,
-    "eq": [{
-        "name": "Head",
-        "item": null,
-        "slot": "head"
-    }, {
-        "name": "Necklace 1",
-        "item": null,
-        "slot": "head"
-    }, {
-        "name": "Necklace 2",
-        "item": null,
-        "slot": "head"
-    }, {
-        "name": "Body",
-        "item": null,
-        "slot": "body"
-    }, {
-        "name": "Chest",
-        "item": null,
-        "slot": "body"
-    }, {
-        "name": "About Body",
-        "item": null,
-        "slot": "body"
-    }, {
-        "name": "Right Arm",
-        "item": null,
-        "slot": "arms"
-    }, {
-        "name": "Left Arm",
-        "item": null,
-        "slot": "arms"
-    }, {
-        "name": "Right Hand",
-        "item": null,
-        "dual": false,
-        "slot": "hands"
-    }, {
-        "name": "Left Hand",
-        "item": null,
-        "dual": false,
-        "slot": "hands"
-    }, {
-        "name": "Ring 1",
-        "item": null,
-        "slot": "fingers"
-    }, {
-        "name": "Ring 2",
-        "item": null,
-        "slot": "fingers"
-    }, {
-        "name": "Right Leg",
-        "item": null,
-        "slot": "legs"
-    }, {
-        "name": "Left Leg",
-        "item": null,
-        "slot": "legs"
-    }, {
-        "name": "Feet",
-        "item": null,
-        "slot": "feet"
-    }, {
-        "name": "Floating",
-        "item": null,
-        "slot": "floating"
-    }],
-    "items": [],
-    "affects": [],
-    "racial": [],
-    "skills": [],
-    "skillList": {},
-    "prevent": [],
-    "autoloot": true,
-    "autosac": false,
-    "behaviors": []
+	"trains": 0,
+	"hearing": true,
+	"sight": true,
+	"touch": true,
+	"smell": true, 
+	"taste": true,
+	"size": {"value": 3, "display": "medium"},
+	"kingdom": "mammal",
+	"killed": 0,
+	"eq": [{
+		"name": "Head",
+		"item": null,
+		"slot": "head"
+	}, {
+		"name": "Necklace 1",
+		"item": null,
+		"slot": "head"
+	}, {
+		"name": "Necklace 2",
+		"item": null,
+		"slot": "head"
+	}, {
+		"name": "Body",
+		"item": null,
+		"slot": "body"
+	}, {
+		"name": "Chest",
+		"item": null,
+		"slot": "body"
+	}, {
+		"name": "About Body",
+		"item": null,
+		"slot": "body"
+	}, {
+		"name": "Right Arm",
+		"item": null,
+		"slot": "arms"
+	}, {
+		"name": "Left Arm",
+		"item": null,
+		"slot": "arms"
+	}, {
+		"name": "Right Hand",
+		"item": null,
+		"dual": false,
+		"slot": "hands"
+	}, {
+		"name": "Left Hand",
+		"item": null,
+		"dual": false,
+		"slot": "hands"
+	}, {
+		"name": "Ring 1",
+		"item": null,
+		"slot": "fingers"
+	}, {
+		"name": "Ring 2",
+		"item": null,
+		"slot": "fingers"
+	}, {
+		"name": "Right Leg",
+		"item": null,
+		"slot": "legs"
+	}, {
+		"name": "Left Leg",
+		"item": null,
+		"slot": "legs"
+	}, {
+		"name": "Feet",
+		"item": null,
+		"slot": "feet"
+	}, {
+		"name": "Floating",
+		"item": null,
+		"slot": "floating"
+	}],
+	"items": [],
+	"affects": [],
+	"racial": [],
+	"skills": [],
+	"skillList": {},
+	"prevent": [],
+	"autoloot": true,
+	"autosac": false,
+	"behaviors": []
 }

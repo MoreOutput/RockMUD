@@ -110,12 +110,12 @@ Character.prototype.getPassword = function(s, fn) {
 						
 						fn(s);
 					} else {
-						if (msg === undefined) {
+						if (r.msg === undefined) {
 							s.emit('msg', {msg: 'Error logging in, please retry.'});
 
 							return s.disconnect();
 						} else {
-							s.emit('msg', {msg: msg, res: 'end'});
+							s.emit('msg', {msg: r.msg, res: 'end'});
 						}
 					}
 				} else {
@@ -132,15 +132,14 @@ Character.prototype.getPassword = function(s, fn) {
 
 // Add a player reference object to the players array
 Character.prototype.addPlayer = function(s) {
-	var i = 0,
-	x = null;
+	var i = 0;
 
 	for (i; i < World.players.length; i += 1) {
 		if (s.player.name === World.players[i].name) {
 			return false;
 		}
 	}
-	
+
 	World.players.push(s.player);
 
 	return true;

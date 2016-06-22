@@ -585,71 +585,84 @@ Cmd.prototype.move = function(target, command, fn) {
 				
 				targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
 				
-				target.cmv -= Math.round(4 + moveRoll - dexMod);
+				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value - 1))) {
+					target.cmv -= Math.round(4 + moveRoll - dexMod);
 
-				if (target.cmv < 0) {
-					target.cmv = 0;
-				}
-
-				target.roomid = targetRoom.id;
-				
-				if (targetRoom.terrianMod) {
-					target.wait += targetRoom.terrianMod;
-				}
-
-				if (target.isPlayer) {
-					this.look(target);
-
-					Room.removePlayer(roomObj, target);
-
-					targetRoom.playersInRoom.push(target);
-				} else {
-					Room.removeMob(roomObj, target);
-
-					targetRoom.monsters.push(target);
-				}
-
-				World.msgRoom(targetRoom, {
-					msg: function(receiver, fn) {
-						var msg = '';
-
-						if (!sneakAff) {
-							if (Character.canSee(receiver, targetRoom)) {
-								msg = '<strong>' + target.displayName
-								+ '</strong> enters the room from the ' + exitObj.cmd + '.';
-							} else {
-								msg = '<strong>Something</strong> enters the room from the ' + exitObj.cmd + '.';
-							}
-						}
-
-						return fn(true, msg);
-					},
-					playerName: target.name
-				});
-
-				World.msgRoom(roomObj, {
-					msg: function(receiver, fn) {
-						var msg = '';
-				
-						if (!sneakAff) {
-							if (Character.canSee(receiver, roomObj)) {
-								msg = '<span class="yellow">' + target.displayName
-								+ ' leaves the room heading <strong>' + direction + '</strong></div>';
-							} else {
-								msg = '<span class="yellow">Something leaves the room.</div>';
-							}
-						}
-						
-						return fn(true, msg);
-					},
-					playerName: target.name
-				});
-
-				Room.processEvents(targetRoom, target, 'onVisit', function(targetRoom, target) {
-					if (typeof fn === 'function') {
-						return fn(true, roomObj, targetRoom);
+					if (target.cmv < 0) {
+						target.cmv = 0;
 					}
-				});
+
+					target.roomid = targetRoom.id;
+					
+					if (targetRoom.terrianMod) {
+						target.wait += targetRoom.terrianMod;
+					}
+
+					if (target.isPlayer) {
+						this.look(target);
+
+						Room.removePlayer(roomObj, target);
+
+						targetRoom.playersInRoom.push(target);
+					} else {
+						Room.removeMob(roomObj, target);
+
+						targetRoom.monsters.push(target);
+					}
+
+					World.msgRoom(targetRoom, {
+						msg: function(receiver, fn) {
+							var msg = '';
+
+							if (!sneakAff) {
+								if (Character.canSee(receiver, targetRoom)) {
+									msg = '<strong>' + target.displayName
+									+ '</strong> enters the room from the ' + exitObj.cmd + '.';
+								} else {
+									msg = '<strong>Something</strong> enters the room from the ' + exitObj.cmd + '.';
+								}
+							}
+
+							return fn(true, msg);
+						},
+						playerName: target.name
+					});
+
+					World.msgRoom(roomObj, {
+						msg: function(receiver, fn) {
+							var msg = '';
+					
+							if (!sneakAff) {
+								if (Character.canSee(receiver, roomObj)) {
+									msg = '<span class="yellow">' + target.displayName
+									+ ' leaves the room heading <strong>' + direction + '</strong></div>';
+								} else {
+									msg = '<span class="yellow">Something leaves the room.</div>';
+								}
+							}
+							
+							return fn(true, msg);
+						},
+						playerName: target.name
+					});
+
+					Room.processEvents(targetRoom, target, 'onVisit', function(targetRoom, target) {
+						if (typeof fn === 'function') {
+							return fn(true, roomObj, targetRoom);
+						}
+					});
+				} else {
+					if (targetRoom.size) {
+						World.msgPlayer(target, {
+							msg: 'You are too large to enter that space.' ,
+							styleClass: 'error'
+						});
+					}
+
+					if (typeof fn === 'function') {
+						return fn(false, roomObj, targetRoom);
+					}
+				}
 			} else {
 				World.msgPlayer(target, {
 					msg: 'You need to open a ' + exitObj.door.name + ' first.' ,
