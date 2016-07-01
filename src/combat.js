@@ -125,7 +125,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 
 				for (j; j < numOfAttacks; j += 1) {
 					if (shield) {
-						shieldAC = Skills.shieldBlock(opponent, roomObj, shield);
+						shieldAC = Skill.shieldBlock(Character.getSkill(attacker, 'shieldBlock'), attacker, roomObj, shield);
 
 						acCheck += shieldAC;
 					}
