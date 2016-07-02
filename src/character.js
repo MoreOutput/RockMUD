@@ -216,7 +216,7 @@ Character.prototype.create = function(r, s, fn) {
 					World.sendMotd(s);
 
 					if (!Cmds) {
-						Cmds = require('./commands').cmd;				
+						Cmds = require('./commands').cmd;
 					}
 					
 					Cmds.look(s.player);

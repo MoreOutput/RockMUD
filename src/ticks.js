@@ -72,7 +72,7 @@ World = require('./world').world;
 
 	// If the area is not empty the respawnTick property on the area object increments by one
 	// areas with players 'in' them respawn every X ticks; where X is the value of
-	// area.respawnOn (default is 3 -- 12 minutes). A respawnOn value of zero prevents respawn.
+	// area.respawnOn (default is 3 -- 12 minutes). A respawnOn value of 0 prevents respawn.
 	// areas do not update if someone is fighting
 	setInterval(function() {
 		var i = 0,

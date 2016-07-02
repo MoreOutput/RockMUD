@@ -583,10 +583,14 @@ Cmd.prototype.move = function(target, command, fn) {
 			if (!exitObj || !exitObj.door || exitObj.door.isOpen === true) {
 				sneakAff = Character.getAffect(target, 'sneak');
 				
-				targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
-				
+				targetRoom = World.getRoomObject(exitObj.area, exitObj.id);
+
 				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value - 1))) {
 					target.cmv -= Math.round(4 + moveRoll - dexMod);
+
+					if (exitObj.area !== target.area) {
+						target.area = exitObj.area;
+					}
 
 					if (target.cmv < 0) {
 						target.cmv = 0;

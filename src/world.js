@@ -36,7 +36,9 @@ World = function() {
 
 		fs.readdir(path, function(err, areaNames) {
 			areaNames.forEach(function(areaName, i) {
-				areas.push(require('.' + path + areaName.toLowerCase()));
+				var area = require('.' + path + areaName.toLowerCase().replace(/ /g, '_'));
+
+				areas.push(area);
 			});
 
 			return fn(areas);
@@ -98,8 +100,12 @@ World = function() {
 						loadTemplates('mob', function(err, mobTemplate) {
 							loadTemplates('item', function(err, itemTemplate) {
 								loadAI(function() {
+									var area,
+									i = 0,
+									j;
+
 									fs.readFile('./templates/html/motd.html', 'utf-8', function (err, html) {
-											if (err) {
+										if (err) {
 											throw err;
 										}
 									
@@ -113,15 +119,12 @@ World = function() {
 									world.areaTemplate = areaTemplate;
 									world.itemTemplate = itemTemplate;
 									world.mobTemplate = mobTemplate;
-									
-									world.areas.forEach(function(area) {
-										var i = 0;
 
-										for (i; i < area.rooms.length; i += 1) {
-											world.rollMobs(area.rooms[i].monsters, area.rooms[i].id);
-											world.rollItems(area.rooms[i].items, area.rooms[i].id);
-										}
-									});
+									for (i; i < world.areas.length; i += 1) {
+										area = world.areas[i];
+
+										world.setupArea(area);
+									}
 
 									world.time.isDay = true;
 
@@ -418,11 +421,11 @@ World.prototype.rollMobs = function(mobArr, roomid) {
 			}
 		
 			if (Array.isArray(mob.short)) {
-				mob.short = mob.short[world.dice.roll(1, mob.short.length) - 1];		
+				mob.short = mob.short[world.dice.roll(1, mob.short.length) - 1];
 			}
 
 			if (Array.isArray(mob.long)) {
-				mob.long = mob.long[world.dice.roll(1, mob.long.length) - 1];		
+				mob.long = mob.long[world.dice.roll(1, mob.long.length) - 1];
 			}
 			
 			mob.str += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
@@ -484,9 +487,21 @@ World.prototype.rollMobs = function(mobArr, roomid) {
 
 World.prototype.setupArea = function(area) {
 	var world = this,
-	i = 0;
+	exitObj,
+	i = 0,
+	j;
 
 	for (i; i < area.rooms.length; i += 1) {
+		j = 0;
+
+		for (j; j < area.rooms[i].exits.length; j += 1) {
+			exitObj = area.rooms[i].exits[j];
+
+			if (!exitObj.area) {
+				exitObj.area = area.name;
+			}
+		}
+
 		world.rollMobs(area.rooms[i].monsters, area.rooms[i].id);
 		world.rollItems(area.rooms[i].items, area.rooms[i].id);
 	}

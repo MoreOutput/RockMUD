@@ -31,10 +31,6 @@ Room.prototype.checkEntranceCriteria = function(roomObj, exitObj, player) {
 	return true;
 };
 
-Room.prototype.getByPosition = function() {
-
-};
-
 Room.prototype.getDisplayHTML = function(roomObj, options) {
 	var room = this,
 	i = 0,
@@ -117,12 +113,7 @@ Room.prototype.getExit = function(roomObj, direction) {
 	}
 };
 
-// return all the rooms connected to this one, default depth of two
-/*
-	{
-		direction.roomObj.direction.roomObj <- how depth will work
-	}
-*/
+//return an array ofall the rooms connected to the passed room
 Room.prototype.getAdjacent = function(roomObj) {
 	var i = 0,
 	fndRoom,
@@ -130,13 +121,47 @@ Room.prototype.getAdjacent = function(roomObj) {
 
 	for (i; i < roomObj.exits.length; i += 1) {
 		if (!roomObj.exits[i].door || roomObj.exits[i].door.isOpen) {
-			fndRoom = World.getRoomObject(roomObj.area, roomObj.exits[i].id);
+			fndRoom = World.getRoomObject(roomObj.exits[i].area, roomObj.exits[i].id);
 
 			roomArr.push(fndRoom);
 		}
 	}
 
 	return roomArr;
+};
+
+/*
+Get an object in the current form based off of a given room
+	{
+		directionalCommand: exitObj with .room reference attached
+	}
+
+	the attached room has a .map parameter added dictated by the depth parameter
+	set to a max of five.
+*/
+Room.prototype.getAdjacentMap = function(roomObj, depth) {
+	var i = 0,
+	fndRoom,
+	map = {};
+
+	if (!depth || depth < 1) {
+		depth = 1;
+	} else if (depth > 5) {
+		depth = 5;
+	}
+
+	for (i; i < roomObj.exits.length; i += 1) {
+		depth -= 1;
+
+		map[roomObj.exits[i].cmd] = roomObj.exits[i];
+		map[roomObj.exits[i].cmd].room = World.getRoomObject(roomObj.exits[i].area, roomObj.exits[i].id);
+
+		if (depth > 0) {
+			map[roomObj.exits[i].cmd].room.map = this.getAdjacentMap(map[roomObj.exits[i].cmd].room, depth)
+		}
+	}
+
+	return map;
 };
 
 Room.prototype.getDisplay = function(areaName, roomId) {
