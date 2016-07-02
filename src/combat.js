@@ -90,7 +90,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	shieldAC = 0,
 	hitRoll = attacker.hitRoll + attackerMods.dex,
 	damRoll	= attacker.damRoll + attackerMods.str,
-	dodgeCheck = opponentMods.dex + opponent.detection + opponent.awareness/2,	
+	dodgeCheck = opponentMods.dex + opponent.detection + opponent.awareness/2,
 	acCheck = opponent.ac + opponentMods.dex;
 
 	// Is a player attacking something
@@ -113,7 +113,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 		
 		for (i; i < weaponSlots.length; i += 1) {
 			if (weaponSlots[i].item) {
-				weapon = weaponSlots[i].item;
+				weapon = Character.getItemByRefId(attacker, weaponSlots[i].item);
 			} else if (!weapon && !weaponSlots[i].item) {
 				weapon = Character.getFist(attacker);
 			}

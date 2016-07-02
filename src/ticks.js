@@ -125,13 +125,39 @@ World = require('./world').world;
 	// fires onDecay, onDecayLight, onDestory
 	setInterval(function() {
 		var i = 0,
+		j,
+		item,
 		player;
 
 		// decay player items
 		if (World.dice.roll(1, 20) < 18) {
 			if (World.players.length > 0) {
 				for (i; i < World.players.length; i += 1) {
-					
+					player = World.players[i];
+
+					j = 0;
+
+					for (j; j < player.items.length; j += 1) {
+						item = player.items[j].item;
+
+						// Roll a dice to slow down decay for items found in player inventories
+						if (World.dice.roll(1, 20) > 15) {
+							if (item.decay && item.decay >= 1) {
+								item.decay -= 1;
+							} else if (item.decay === 0) {
+
+							}
+						}
+
+						// light decay
+						if (item.equipped && item.light) {
+							if (item.lightDecay >= 1) {
+								item.lightDecay -= 1;
+							} else if (item.lightDecay < 0) {
+								item.lightDecay = 0;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -142,7 +168,7 @@ World = require('./world').world;
 
 	}, 245000); // 4.5 minutes
 	
-	// AI Ticks for monsters
+	// AI Ticks for monsters, items
 	setInterval(function() {
 		var i = 0,
 		monsters;

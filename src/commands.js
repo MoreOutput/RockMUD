@@ -1456,27 +1456,34 @@ Cmd.prototype.title = function(target, command) {
 // View equipment
 Cmd.prototype.equipment = function(target, command) {
 	var eqStr = '',
+	item,
 	i = 0;
 	
-	for (i; i < target.eq.length; i += 1) {	
+	for (i; i < target.eq.length; i += 1) {
+		if (target.eq[i].item) {
+			item = Character.getItemByRefId(target, target.eq[i].item);
+		} else {
+			item = false;
+		}
+
 		eqStr += '<li class="eq-slot-' + target.eq[i].slot.replace(/ /g, '') + 
 			'"><label>' + target.eq[i].name + '</label>: ';
 		
-		if (target.eq[i].item === null || target.eq[i].item === '') {
+		if (!item || target.eq[i].item === '') {
 			eqStr += ' Nothing</li>';
 		} else {
-			if (!target.eq[i].item.light) {
-				eqStr += '<label class="yellow">'  + target.eq[i].item.short + '</label></li>';
+			if (!item.light) {
+				eqStr += '<label class="yellow">' + item.short + '</label></li>';
 			} else {
-				if (target.eq[i].item.decay > 0) {
-					eqStr += '<label class="yellow">'  + target.eq[i].item.short + ' (<span class="red">Providing light</span>)</label></li>';
+				if (item.decay > 0) {
+					eqStr += '<label class="yellow">' + item.short + ' (<span class="red">Providing light</span>)</label></li>';
 				} else {
-					eqStr += '<label class="yellow">'  + target.eq[i].item.short + ' (<span class="red">Unlit</span>)</label></li>';
+					eqStr += '<label class="yellow">' + item.short + ' (<span class="red">Unlit</span>)</label></li>';
 				}
 			}
 		}
 	}
-	
+
 	World.msgPlayer(target, {
 		msg: '<div class="eq-cmd"><h1>You are wearing:</h1>' +
 			'<ul class="list-unstyled equipment-list">' +
@@ -1517,7 +1524,7 @@ Cmd.prototype.wear = function(target, command) {
 			if (item) {
 				if (Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)]) {
 					Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)](target, item);
-				} else {	
+				} else {
 					World.msgPlayer(target, {
 						msg: 'You can\'t figure out how to wear a ' + item.short,
 						styleClass: 'error'

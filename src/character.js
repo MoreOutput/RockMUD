@@ -7,7 +7,7 @@
 var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms').room,
-World = require('./world').world,	
+World = require('./world').world,
 Cmds,
 Character = function () {
 	this.statusReport = [
@@ -609,18 +609,34 @@ Character.prototype.addItem = function(player, item) {
 	player.items.push(item);
 };
 
+Character.prototype.getItemByRefId = function(player, refId) {
+	var i = 0;
+
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].refId === refId) {
+			return player.items[i]
+		}
+	}
+
+	return false;
+};
+
 /*
 * Returns all items that meet the query criteria, could be optimized if your
 * slots are consistent.
 */
 Character.prototype.getSlotsWithWeapons = function(player) {
 	var i = 0,
+	weapon,
 	weapons = [];
 
 	for (i; i < player.eq.length; i += 1) {
-		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
-			&& player.eq[i].item.itemType === 'weapon') {
-			weapons.push(player.eq[i]);
+		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null) {
+			weapon = this.getItemByRefId(player, player.eq[i].item);
+
+			if (weapon.refId === player.eq[i].item) {
+				weapons.push(player.eq[i]);
+			}
 		}
 	}
 
@@ -926,7 +942,7 @@ Character.prototype.wearWeapon = function(target, weapon) {
 		roomObj = World.getRoomObject(target.area, target.roomId);
 		weapon.equipped = true;
 	
-		slot.item = weapon;
+		slot.item = weapon.refId;
 
 		this.addStatMods(target, weapon);
 
@@ -936,7 +952,7 @@ Character.prototype.wearWeapon = function(target, weapon) {
 	} else {
 		World.msgPlayer(target, {
 			msg: 'Your hands are too full to wield a ' + weapon.short + '.'
-		});	
+		});
 	}
 };
 
@@ -946,7 +962,7 @@ Character.prototype.wearShield = function(target, shield) {
 	if (slot) {
 		shield.equipped = true;
 	
-		slot.item = shield;
+		slot.item = shield.refId;
 
 		this.addStatMods(target, shield);
 
@@ -965,8 +981,8 @@ Character.prototype.wearArmor = function(target, armor) {
 
 	if (slot) {
 		armor.equipped = true;
-		
-		slot.item = armor;
+
+		slot.item = armor.refId;
 		
 		World.msgPlayer(target, {
 			msg: 'You wear a ' + armor.short + ' on your ' + slot.name + '.'
@@ -974,10 +990,6 @@ Character.prototype.wearArmor = function(target, armor) {
 	} else {
 		return false;
 	}
-};
-
-Character.prototype.wearFloating = function(target, floating) {
-		
 };
 
 Character.prototype.removeWeapon = function() {
