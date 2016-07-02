@@ -10,21 +10,15 @@ module.exports = {
 	onAlive: function(roomObj) {
 		var mob = this,
 		roll = World.dice.roll(1, 10),
-		roomObj,
 		exitObj,
-		targetRoom,
 		direction;
 
 		if (roll > mob.wanderCheck) {
-			roomObj = World.getRoomObject(mob.area, mob.roomid); 
-
 			direction = mob.moveDirections[World.dice.roll(1, mob.moveDirections.length) - 1];
-			
+
 			exitObj = Room.getExit(roomObj, direction);
 
-			targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
-
-			if (targetRoom && ((mob.stayInArea === false) || (mob.stayInArea === true && targetRoom.area === roomObj.area))) {
+			if (exitObj && ((mob.stayInArea === false) || (mob.stayInArea === true && mob.area === exitObj.area))) {
 				Cmd.move(mob, {
 					arg: direction,
 					roomObj: roomObj

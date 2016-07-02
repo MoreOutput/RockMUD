@@ -491,6 +491,14 @@ World.prototype.setupArea = function(area) {
 	i = 0,
 	j;
 
+	for (i; i < area.messages.length; i += 1) {
+		if (!area.messages[i].random && area.messages[i].random !== false) {
+			area.messages[i].random = true;
+		}
+	}
+
+	i = 0;
+
 	for (i; i < area.rooms.length; i += 1) {
 		j = 0;
 

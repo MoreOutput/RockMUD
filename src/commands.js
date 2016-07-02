@@ -585,7 +585,7 @@ Cmd.prototype.move = function(target, command, fn) {
 				
 				targetRoom = World.getRoomObject(exitObj.area, exitObj.id);
 
-				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value - 1))) {
+				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value))) {
 					target.cmv -= Math.round(4 + moveRoll - dexMod);
 
 					if (exitObj.area !== target.area) {
@@ -658,7 +658,7 @@ Cmd.prototype.move = function(target, command, fn) {
 				} else {
 					if (targetRoom.size) {
 						World.msgPlayer(target, {
-							msg: 'You are too large to enter that space.' ,
+							msg: 'You are too large to move there.' ,
 							styleClass: 'error'
 						});
 					}

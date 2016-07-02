@@ -163,6 +163,8 @@ module.exports = {
 				"equipped": false,
 				"light": true,
 				"lightDecay": 10,
+				"flickerMsg": '',
+				"extinguishMsg": '',
 				"flags": []
 			}, {
 				"name": "Small Buckler", 

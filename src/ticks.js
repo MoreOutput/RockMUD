@@ -138,7 +138,7 @@ World = require('./world').world;
 					j = 0;
 
 					for (j; j < player.items.length; j += 1) {
-						item = player.items[j].item;
+						item = Character.getItemByRefId(player, player.items[j].item);
 
 						// Roll a dice to slow down decay for items found in player inventories
 						if (World.dice.roll(1, 20) > 15) {
@@ -153,8 +153,8 @@ World = require('./world').world;
 						if (item.equipped && item.light) {
 							if (item.lightDecay >= 1) {
 								item.lightDecay -= 1;
-							} else if (item.lightDecay < 0) {
-								item.lightDecay = 0;
+							} else if (item.lightDecay === 0) {
+								item.lightDecay = -1;
 							}
 						}
 					}
@@ -195,15 +195,29 @@ World = require('./world').world;
 	}, 3600000); // 1 hour
 
 	setInterval(function() {
-		var i = 0;
+		var i = 0,
+		msgObj;
 		
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
+				if (typeof World.areas[i].messages === 'function') {
+					World.areas[i].messages = World.areas[i].messages();
+				}
+
 				if (World.areas[i].messages.length) {
-					World.msgArea(World.areas[i].name, {
-						msg: World.areas[i].messages[World.dice.roll(1, World.areas[i].messages.length) - 1].msg,
-						randomPlayer: true // this options randomizes who hears the message
-					});
+					msgObj = World.areas[i].messages[World.dice.roll(1, World.areas[i].messages.length) - 1];
+
+					if (!msgObj.hour) {
+						World.msgArea(World.areas[i].name, {
+							msg: msgObj.msg,
+							randomPlayer: msgObj.random // this options randomizes who hears the message
+						});
+					} else if (msgObj.hour === World.time.hour) {
+						World.msgArea(World.areas[i].name, {
+							msg: msgObj.msg,
+							randomPlayer: msg.random // this options randomizes who hears the message
+						});
+					}
 				}
 			}
 		}
