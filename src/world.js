@@ -542,7 +542,7 @@ World.prototype.reloadArea = function(area) {
 			newArea.rooms[i].playersInRoom = area.rooms[i].playersInRoom;
 		}
 	}
-	
+
 	require.cache[require.resolve('../areas/' + area.name.toLowerCase())] = null;
 
 	return newArea;
@@ -560,11 +560,39 @@ World.prototype.getRoomObject = function(areaName, roomId) {
 	}
 };
 
+World.prototype.getAllItemsFromArea = function(areaName) {
+	var world = this,
+	area,
+	i = 0,
+	playerItems,
+	mobItems,
+	roomItems,
+	itemArr = [];
+
+	if (areaName.name) {
+		area = areaName;
+	} else {
+		area = world.getAreaByName(areaName)
+	}
+
+	itemArr = itemArr.concat(world.getAllMobItemsFromArea(area));
+	itemArr = itemArr.concat(world.getAllPlayerItemsFromArea(area));
+	itemArr = itemArr.concat(world.getAllRoomItemsFromArea(area));
+
+	return itemArr;
+};
+
 World.prototype.getAllMonstersFromArea = function(areaName) {
 	var world = this,
-	area = world.getAreaByName(areaName),
+	area,
 	i = 0,
 	mobArr = [];
+
+	if (areaName.name) {
+		area = areaName;
+	} else {
+		area = world.getAreaByName(areaName)
+	}
 
 	for (i; i < area.rooms.length; i += 1) {
 		if (area.rooms[i].monsters.length > 0) {
@@ -575,15 +603,68 @@ World.prototype.getAllMonstersFromArea = function(areaName) {
 	return mobArr;
 };
 
-World.prototype.getAlItemsFromArea = function(areaName) {
+World.prototype.getAllRoomItemsFromArea = function(areaName) {
 	var world = this,
-	area = world.getAreaByName(areaName),
+	area,
 	i = 0,
 	itemArr = [];
+
+
+	if (areaName.name) {
+		area = areaName;
+	} else {
+		area = world.getAreaByName(areaName)
+	}
 
 	for (i; i < area.rooms.length; i += 1) {
 		if (area.rooms[i].items.length > 0) {
 			itemArr = itemArr.concat(area.rooms[i].items);
+		}
+	}
+
+	return itemArr;
+};
+
+World.prototype.getAllMobItemsFromArea = function(areaName) {
+	var world = this,
+	area,
+	i = 0,
+	monsters,
+	itemArr = [];
+
+	if (areaName.name) {
+		area = areaName;
+	} else {
+		area = world.getAreaByName(areaName)
+	}
+
+	monsters = world.getAllMonstersFromArea(area);
+
+	for (i; i < monsters.length; i += 1) {
+		if (monsters[i].items.length > 0) {
+			itemArr = itemArr.concat(monster[i].items);
+		}
+	}
+
+	return itemArr;
+};
+
+World.prototype.getAllPlayerItemsFromArea = function(areaName) {
+	var world = this,
+	area,
+	i = 0,
+	players,
+	itemArr = [];
+
+	if (areaName.name) {
+		areaName = area.name;
+	}
+
+	players = world.getPlayersByArea(areaName);
+
+	for (i; i < players.length; i += 1) {
+		if (players[i].items.length > 0) {
+			itemArr = itemArr.concat(players[i].items);
 		}
 	}
 

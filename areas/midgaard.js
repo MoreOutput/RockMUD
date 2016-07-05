@@ -4,8 +4,7 @@ Room = require('../src/rooms').room,
 World = require('../src/world').world;
 
 module.exports = {
-	"name" : "midgaard",
-	"displayName": "Midgaard",
+	"name" : "Midgaard",
 	"id" : "1",
 	"type" : "city",
 	"levels" : "All",

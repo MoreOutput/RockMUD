@@ -21,8 +21,9 @@ Skill;
 /*
 General idea behind a hit:
 Your Short Sword (proper noun) slices (verb attached to item) a 
-Red Dragon (proper noun) with barbaric (adjective) intensity (abstract noun) (14)
-You swing and miss a Red Dragon with barbaric intensity (14)
+Red Dragon (proper noun) with barbaric (adjective) intensity (abstract noun) (damage)
+
+You slice a Red Dragon with barbaric intensity (14)
 */
 
 /*

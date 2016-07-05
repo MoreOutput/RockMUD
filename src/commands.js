@@ -1475,7 +1475,7 @@ Cmd.prototype.equipment = function(target, command) {
 			if (!item.light) {
 				eqStr += '<label class="yellow">' + item.short + '</label></li>';
 			} else {
-				if (item.decay > 0) {
+				if (item.lightDecay > 0) {
 					eqStr += '<label class="yellow">' + item.short + ' (<span class="red">Providing light</span>)</label></li>';
 				} else {
 					eqStr += '<label class="yellow">' + item.short + ' (<span class="red">Unlit</span>)</label></li>';

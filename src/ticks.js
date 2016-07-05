@@ -126,47 +126,76 @@ World = require('./world').world;
 	setInterval(function() {
 		var i = 0,
 		j,
-		item,
-		player;
+		monsters,
+		processItemDecay = function(itemSet) {
+			var j = 0,
+			item;
+
+			for (j; j < itemSet.length; j += 1) {
+				item = itemSet[j];
+
+				// Roll a dice to slow down decay for items found in player inventories
+				if (World.dice.roll(1, 20) > 15) {
+					if (item.decay && item.decay >= 1) {
+						item.decay -= 1;
+					} else if (item.decay === 0) {
+
+					}
+				}
+
+				// light decay
+				if (item.equipped && item.light) {
+					if (item.lightDecay >= 1) {
+						item.lightDecay -= 1;
+					} else if (item.lightDecay === 0) {
+						item.lightDecay = -1;
+					}
+				}
+			}
+		};
 
 		// decay player items
 		if (World.dice.roll(1, 20) < 18) {
 			if (World.players.length > 0) {
 				for (i; i < World.players.length; i += 1) {
-					player = World.players[i];
+					processItemDecay(World.players[i].items);
+				}
+			}
+		}
 
-					j = 0;
+		// decay mob items
+		if (World.dice.roll(1, 20) < 18) {
+			if (World.players.length > 0) {
+				i = 0;
 
-					for (j; j < player.items.length; j += 1) {
-						item = Character.getItemByRefId(player, player.items[j].item);
+				if (World.areas.length) {
+					for (i; i < World.areas.length; i += 1) {
+						monsters = World.getAllMonstersFromArea(World.areas[i]);
 
-						// Roll a dice to slow down decay for items found in player inventories
-						if (World.dice.roll(1, 20) > 15) {
-							if (item.decay && item.decay >= 1) {
-								item.decay -= 1;
-							} else if (item.decay === 0) {
+						j = 0;
 
-							}
-						}
-
-						// light decay
-						if (item.equipped && item.light) {
-							if (item.lightDecay >= 1) {
-								item.lightDecay -= 1;
-							} else if (item.lightDecay === 0) {
-								item.lightDecay = -1;
-							}
+						for (j; j < monsters.length; j += 1) {
+							processItemDecay(monsters[j].items);
 						}
 					}
 				}
 			}
 		}
 
-		// decay mob items
-
 		// decay room items
+		if (World.dice.roll(1, 20) < 17) {
+			if (World.players.length > 0) {
+				i = 0;
 
-	}, 245000); // 4.5 minutes
+				if (World.areas.length) {
+					for (i; i < World.areas.length; i += 1) {
+						processItemDecay(World.getAllRoomItemsFromArea(World.areas[i]));
+					}
+				}
+			}
+		}
+	}, 1000); // 4.5 minutes
+	//}, 245000); // 4.5 minutes
 	
 	// AI Ticks for monsters, items
 	setInterval(function() {
@@ -175,7 +204,7 @@ World = require('./world').world;
 
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
-				monsters = World.getAllMonstersFromArea(World.areas[i].name);
+				monsters = World.getAllMonstersFromArea(World.areas[i]);
 				
 				monsters.forEach(function(monster, i) {
 					if (monster.chp >= 1 && monster.onAlive) {
