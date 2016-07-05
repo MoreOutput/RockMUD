@@ -9,8 +9,13 @@ World = require('../src/world').world;
 */
 
 module.exports = {
-	onVisit: function(target, roomObj) {
-		var mob = this;
+	onVisit: function(target, roomObj, mob) {
+		var mob;
+
+		if (!mob) {
+			mob = this;
+		}
+
 		// if we do not have this property set the mob will only attack when it finds
 		// other players in its room.
 		if (mob.attackOnVisit === true
@@ -23,9 +28,13 @@ module.exports = {
 		}
 	},
 	onAlive: function(roomObj) {
-		var mob = this,
+		var mob,
 		target;
 
+		if (!mob) {
+			mob = this;
+		}
+		
 		if (roomObj.playersInRoom) {
 			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
 		}

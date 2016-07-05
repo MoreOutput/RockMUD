@@ -1,6 +1,7 @@
 'use strict';
 var Cmd = require('../src/commands').cmd,
 Room = require('../src/rooms').room,
+WanderAI = require('../ai/wander'),
 World = require('../src/world').world;
 
 /*
@@ -15,20 +16,18 @@ module.exports = {
 		'Each day before sunrise I lower the bridge and open the city.'
 	],
 	moveDirections: ['north', 'east', 'west', 'south'],
-	onAlive: function(roomObj) {
-		var mayor = this,
-		roll = World.dice.roll(1, 10);
-		
+	stayInArea: true,
+	wanderCheck: 0,
+	onAlive: function(roomObj, mayor) {
+		var roll = World.dice.roll(1, 10);
+
 		if (roll >= 3) {
 			// Most of the time we just proclaim something
 			Cmd.say(mayor, {
 				msg: mayor.exclimations[parseInt(Math.random() * ((mayor.exclimations.length)))]
 			});
 		} else {
-			// Sometimes we move to a new room
-			Cmd.move(mayor, {
-				arg: mayor.moveDirections[parseInt(Math.random() * ((mayor.moveDirections.length)))]
-			});
+			WanderAI.onAlive(roomObj, mayor);
 		}
 	}
 };

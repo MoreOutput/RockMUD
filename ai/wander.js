@@ -7,9 +7,8 @@ module.exports = {
 	stayInArea: true,
 	wanderCheck: 0,
 	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'],
-	onAlive: function(roomObj) {
-		var mob = this,
-		roll = World.dice.roll(1, 10),
+	onAlive: function(roomObj, mob) {
+		var roll = World.dice.roll(1, 10),
 		exitObj,
 		direction;
 

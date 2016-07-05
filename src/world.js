@@ -625,7 +625,7 @@ World.prototype.getAllRoomItemsFromArea = function(areaName) {
 	return itemArr;
 };
 
-World.prototype.getAllMobItemsFromArea = function(areaName) {
+World.prototype.getAllMonsterItemsFromArea = function(areaName) {
 	var world = this,
 	area,
 	i = 0,
@@ -642,7 +642,7 @@ World.prototype.getAllMobItemsFromArea = function(areaName) {
 
 	for (i; i < monsters.length; i += 1) {
 		if (monsters[i].items.length > 0) {
-			itemArr = itemArr.concat(monster[i].items);
+			itemArr = itemArr.concat(monsters[i].items);
 		}
 	}
 

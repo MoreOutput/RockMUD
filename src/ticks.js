@@ -127,7 +127,7 @@ World = require('./world').world;
 		var i = 0,
 		j,
 		monsters,
-		processItemDecay = function(itemSet) {
+		processItemDecay = function(itemSet, player) {
 			var j = 0,
 			item;
 
@@ -147,8 +147,25 @@ World = require('./world').world;
 				if (item.equipped && item.light) {
 					if (item.lightDecay >= 1) {
 						item.lightDecay -= 1;
+
+						if (World.dice.roll(1, 4) === 1 && item.lightDecay !== 1) {
+							World.msgPlayer(player, {
+								msg: 'The light from your ' + item.displayName +' flickers',
+								className: 'yellow'
+							});
+						} else if (item.lightDecay === 1) {
+							World.msgPlayer(player, {
+								msg: 'The light from your ' + item.displayName +' begins to go out.',
+								className: 'yellow'
+							});
+						}
 					} else if (item.lightDecay === 0) {
 						item.lightDecay = -1;
+
+						World.msgPlayer(player, {
+							msg: 'The light from your ' + item.displayName +' goes out!',
+							className: 'yellow'
+						});
 					}
 				}
 			}
@@ -158,7 +175,7 @@ World = require('./world').world;
 		if (World.dice.roll(1, 20) < 18) {
 			if (World.players.length > 0) {
 				for (i; i < World.players.length; i += 1) {
-					processItemDecay(World.players[i].items);
+					processItemDecay(World.players[i].items, World.players[i]);
 				}
 			}
 		}
@@ -170,13 +187,7 @@ World = require('./world').world;
 
 				if (World.areas.length) {
 					for (i; i < World.areas.length; i += 1) {
-						monsters = World.getAllMonstersFromArea(World.areas[i]);
-
-						j = 0;
-
-						for (j; j < monsters.length; j += 1) {
-							processItemDecay(monsters[j].items);
-						}
+						processItemDecay(World.getAllMonsterItemsFromArea(World.areas[i]))
 					}
 				}
 			}
@@ -194,8 +205,7 @@ World = require('./world').world;
 				}
 			}
 		}
-	}, 1000); // 4.5 minutes
-	//}, 245000); // 4.5 minutes
+	}, 245000); // 4.5 minutes
 	
 	// AI Ticks for monsters, items
 	setInterval(function() {
@@ -208,7 +218,7 @@ World = require('./world').world;
 				
 				monsters.forEach(function(monster, i) {
 					if (monster.chp >= 1 && monster.onAlive) {
-						monster.onAlive(World.getRoomObject(monster.area, monster.roomid));
+						monster.onAlive(World.getRoomObject(monster.area, monster.roomid),  monster);
 					}
 				});
 			}
