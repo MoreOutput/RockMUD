@@ -47,33 +47,35 @@ window.onload = function() {
 	isScrolledToBottom = false,
 	movement = ['north', 'east', 'south', 'west', 'down', 'up'],
 	playerIsLogged = null,
-	display = function(r) {
+	display = function(r, hideRes) {
 		var i = 0;
 
-		if (!r.styleClass) {
-			r.styleClass = '';
-		}
-
-		if (r.element === undefined) {
-			terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><div class="col-md-12 ' + r.styleClass + '">' + r.msg + '</div></div>';
-		} else {
-			terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><' + r.element + ' class="col-md-12 ' + r.styleClass + '">' + r.msg + '</' + r.element + '></div>';
-		}
-
-		rowCnt += 1;
-
-		if (rowCnt > 150) {
-			for (i; i < 100; i += 1) {
-				terminal.removeChild(document.getElementById( (i + 1) ));
+		if (!hideRes) {
+			if (!r.styleClass) {
+				r.styleClass = '';
 			}
 
-			rowCnt = 0;
-		}
+			if (r.element === undefined) {
+				terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><div class="col-md-12 ' + r.styleClass + '">' + r.msg + '</div></div>';
+			} else {
+				terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><' + r.element + ' class="col-md-12 ' + r.styleClass + '">' + r.msg + '</' + r.element + '></div>';
+			}
 
-		isScrolledToBottom = terminal.scrollHeight - terminal.clientHeight <= terminal.scrollTop + 1;
+			rowCnt += 1;
 
-		if (!isScrolledToBottom) {
-			terminal.scrollTop = terminal.scrollHeight - terminal.clientHeight;
+			if (rowCnt > 150) {
+				for (i; i < 100; i += 1) {
+					terminal.removeChild(document.getElementById( (i + 1) ));
+				}
+
+				rowCnt = 0;
+			}
+
+			isScrolledToBottom = terminal.scrollHeight - terminal.clientHeight <= terminal.scrollTop + 1;
+
+			if (!isScrolledToBottom) {
+				terminal.scrollTop = terminal.scrollHeight - terminal.clientHeight;
+			}
 		}
 
 		return parseCmd(r);
@@ -120,9 +122,8 @@ window.onload = function() {
 
 	document.getElementById('console').onsubmit = function (e) {
 		var messageNodes = [],
-		msg = node.value.toLowerCase().trim();
-
-		display({
+		msg = node.value.toLowerCase().trim(),
+		msgObj = {
 			msg : checkAlias(msg, function(cmd) {
 				 return checkMovement(cmd, function(wasMov, cmd) {
 					return cmd;
@@ -148,7 +149,13 @@ window.onload = function() {
 				}
 			}()),
 			styleClass: 'cmd'
-		});
+		};
+
+		if (node.type !== 'password') {
+			display(msgObj, false);
+		} else {
+			display(msgObj, true);
+		}
 			
 		node.value = '';
 		node.focus();

@@ -7,7 +7,7 @@ html, body {
 background-color: #000;
 color: #fff;
 font-size: .9em;
-padding-top: .5em;
+padding: .5em;
 height: 100%;
 }
 html, body a {
