@@ -33,7 +33,7 @@ World = require('./world').world;
 			areaMsg = 'The sun fades fully from view as night falls.';
 		}
 
-		if (World.areas.length && areaMsg) {
+		if (areaMsg) {
 			for (i; i < World.areas.length; i += 1) {
 				if (World.areas[i].messages.length) {
 					World.msgArea(World.areas[i].name, {
@@ -79,42 +79,40 @@ World = require('./world').world;
 		j = 0,
 		k = 0,
 		refresh = true;
-		
-		if (World.areas.length) {
-			for (i; i < World.areas.length; i += 1) {
-				(function(area, index) {
-					if (area.respawnOn > 0) {
-						area.respawnTick += 1;
-					}
+	
+		for (i; i < World.areas.length; i += 1) {
+			(function(area, index) {
+				if (area.respawnOn > 0) {
+					area.respawnTick += 1;
+				}
 
-					for (j; j < area.rooms.length; j += 1) {
-						(function(room, index, roomIndex) {
-							if (room.playersInRoom) {
-								for (k; k < room.playersInRoom.length; k += 1) {
-									if (room.playersInRoom[k].position === 'fighting') {
-										refresh = false;
-										area.respawnTick -= 1;
-									}
-								}
-
-								if (World.dice.roll(1, 20) > 18) {
+				for (j; j < area.rooms.length; j += 1) {
+					(function(room, index, roomIndex) {
+						if (room.playersInRoom) {
+							for (k; k < room.playersInRoom.length; k += 1) {
+								if (room.playersInRoom[k].position === 'fighting') {
+									refresh = false;
 									area.respawnTick -= 1;
 								}
 							}
 
-							if (World.areas.length - 1 === index 
-								&& roomIndex === area.rooms.length - 1) {
-								if ((area.respawnTick === area.respawnOn && area.respawnOn > 0 && refresh)) {
-									area = World.reloadArea(area);
-									area.respawnTick = 0;
-
-									World.areas[index] = area;
-								}
+							if (World.dice.roll(1, 20) > 18) {
+								area.respawnTick -= 1;
 							}
-						}(area.rooms[j], index, j));
-					}
-				}(World.areas[i], i))
-			}
+						}
+
+						if (World.areas.length - 1 === index 
+							&& roomIndex === area.rooms.length - 1) {
+							if ((area.respawnTick === area.respawnOn && area.respawnOn > 0 && refresh)) {
+								area = World.reloadArea(area);
+								area.respawnTick = 0;
+
+								World.areas[index] = area;
+							}
+						}
+					}(area.rooms[j], index, j));
+				}
+			}(World.areas[i], i))
 		}
 	}, 240000); // 4 minutes
 
@@ -185,10 +183,8 @@ World = require('./world').world;
 			if (World.players.length > 0) {
 				i = 0;
 
-				if (World.areas.length) {
-					for (i; i < World.areas.length; i += 1) {
-						processItemDecay(World.getAllMonsterItemsFromArea(World.areas[i]))
-					}
+				for (i; i < World.areas.length; i += 1) {
+					processItemDecay(World.getAllMonsterItemsFromArea(World.areas[i]))
 				}
 			}
 		}
@@ -196,12 +192,8 @@ World = require('./world').world;
 		// decay room items
 		if (World.dice.roll(1, 20) < 17) {
 			if (World.players.length > 0) {
-				i = 0;
-
-				if (World.areas.length) {
-					for (i; i < World.areas.length; i += 1) {
-						processItemDecay(World.getAllRoomItemsFromArea(World.areas[i]));
-					}
+				for (i; i < World.areas.length; i += 1) {
+					processItemDecay(World.getAllRoomItemsFromArea(World.areas[i]));
 				}
 			}
 		}
@@ -237,26 +229,24 @@ World = require('./world').world;
 		var i = 0,
 		msgObj;
 		
-		if (World.areas.length) {
-			for (i; i < World.areas.length; i += 1) {
-				if (typeof World.areas[i].messages === 'function') {
-					World.areas[i].messages = World.areas[i].messages();
-				}
+		for (i; i < World.areas.length; i += 1) {
+			if (typeof World.areas[i].messages === 'function') {
+				World.areas[i].messages = World.areas[i].messages();
+			}
 
-				if (World.areas[i].messages.length) {
-					msgObj = World.areas[i].messages[World.dice.roll(1, World.areas[i].messages.length) - 1];
+			if (World.areas[i].messages.length) {
+				msgObj = World.areas[i].messages[World.dice.roll(1, World.areas[i].messages.length) - 1];
 
-					if (!msgObj.hour) {
-						World.msgArea(World.areas[i].name, {
-							msg: msgObj.msg,
-							randomPlayer: msgObj.random // this options randomizes who hears the message
-						});
-					} else if (msgObj.hour === World.time.hour) {
-						World.msgArea(World.areas[i].name, {
-							msg: msgObj.msg,
-							randomPlayer: msg.random // this options randomizes who hears the message
-						});
-					}
+				if (!msgObj.hour) {
+					World.msgArea(World.areas[i].name, {
+						msg: msgObj.msg,
+						randomPlayer: msgObj.random // this options randomizes who hears the message
+					});
+				} else if (msgObj.hour === World.time.hour) {
+					World.msgArea(World.areas[i].name, {
+						msg: msgObj.msg,
+						randomPlayer: msg.random // this options randomizes who hears the message
+					});
 				}
 			}
 		}

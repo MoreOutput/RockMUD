@@ -12,7 +12,19 @@ module.exports = {
 		exitObj,
 		direction;
 
+		if (!mob.wanderCheck) {
+			mob.wanderCheck = this.wanderCheck;
+		}
+
 		if (roll > mob.wanderCheck) {
+			if (!mob.moveDirections) {
+				mob.moveDirections = this.moveDirections;
+			}
+
+			if (!mob.stayInArea) {
+				mob.stayInArea = this.stayInArea;
+			}
+
 			direction = mob.moveDirections[World.dice.roll(1, mob.moveDirections.length) - 1];
 
 			exitObj = Room.getExit(roomObj, direction);

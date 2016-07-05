@@ -1,6 +1,6 @@
 {
     "name": "Dwarf",
-	"raceAbbr": "Dwf",
+    "raceAbbr": "Dwf",
     "con": 2,
     "int": -1,
     "hp": 10,
@@ -10,5 +10,5 @@
     "size": {"value": 3, "display": "small"},
     "diceNum": 1,
     "diceSides": 5,
-	"affects": []
+    "affects": []
 }

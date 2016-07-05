@@ -6,5 +6,6 @@
     "playable": true,
     "attackType": "punch",
     "diceNum": 1,
-    "diceSides": 4
+    "diceSides": 4,
+    "affects": []
 }
