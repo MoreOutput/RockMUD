@@ -151,7 +151,6 @@ module.exports = {
 				"itemType": "weapon",
 				"material": "wood",
 				"weaponType": "club",
-				"material": "iron", 
 				"diceNum": 1, 
 				"diceSides": 2,
 				"diceMod": -1,
