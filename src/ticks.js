@@ -121,47 +121,71 @@ World = require('./world').world;
 	// if an item with decayLight reaches zero it goes out. Printing a generic message unless an onDestory event is found
 	// if onDestory is found then the programmer should return a message
 	// fires onDecay, onDecayLight, onDestory
+	// simple msg override in the form of decayMsg, decayLightMsg and lightFlickerMsg
 	setInterval(function() {
 		var i = 0,
 		j,
-		monsters,
-		processItemDecay = function(itemSet, player) {
+		mobs,
+		rooms,
+		processItemDecay = function(obj) {
 			var j = 0,
+			itemSet = obj.items,
+			decayMsg,
+			lightFlickerMsg,
+			lightDecayMsg,
 			item;
 
 			for (j; j < itemSet.length; j += 1) {
 				item = itemSet[j];
 
 				// Roll a dice to slow down decay for items found in player inventories
-				if (World.dice.roll(1, 20) > 15) {
+				if (item.decay >= 0 && World.dice.roll(1, 20) > 15) {
 					if (item.decay && item.decay >= 1) {
 						item.decay -= 1;
 					} else if (item.decay === 0) {
+						obj.items.splice(j, 1);
 
+						if (!obj.race) {
+							if (!item.decayMsg) {
+								decayMsg = item.short + ' rots into nothing.';
+							} else {
+								decayMsg = item.short + ' ' + item.decayMsg;
+							}
+
+							World.msgRoom(obj, {
+								msg: decayMsg,
+								className: 'blue'
+							});
+						}
 					}
 				}
 
 				// light decay
-				if (item.equipped && item.light) {
+				if (item.equipped && item.light && item.decayLight !== -1) {
 					if (item.lightDecay >= 1) {
 						item.lightDecay -= 1;
 
-						if (World.dice.roll(1, 4) === 1 && item.lightDecay !== 1) {
+						if (World.dice.roll(1, 4) >= 2 && item.lightDecay !== 1) {
+							if (!item.lightFlickerMsg) {
+								lightFlickerMsg = 'The light from your ' + item.displayName +' flickers';
+							} else {
+								lightFlickerMsg = item.displayName + ' ' + item.lightFlickerMsg;
+							}
+
 							World.msgPlayer(player, {
-								msg: 'The light from your ' + item.displayName +' flickers',
-								className: 'yellow'
-							});
-						} else if (item.lightDecay === 1) {
-							World.msgPlayer(player, {
-								msg: 'The light from your ' + item.displayName +' begins to go out.',
+								msg: lightFlickerMsg,
 								className: 'yellow'
 							});
 						}
 					} else if (item.lightDecay === 0) {
-						item.lightDecay = -1;
+						if (!item.lightDecayMsg) {
+							lightDecayMsg = 'The light from your ' + item.displayName +' goes out!';
+						} else {
+							lightDecayMsg = item.displayName + ' ' + item.lightDecayMsg;
+						}
 
 						World.msgPlayer(player, {
-							msg: 'The light from your ' + item.displayName +' goes out!',
+							msg: lightDecayMsg,
 							className: 'yellow'
 						});
 					}
@@ -170,30 +194,56 @@ World = require('./world').world;
 		};
 
 		// decay player items
-		if (World.dice.roll(1, 20) < 18) {
+		if (World.dice.roll(1, 20) < 15) {
 			if (World.players.length > 0) {
 				for (i; i < World.players.length; i += 1) {
-					processItemDecay(World.players[i].items, World.players[i]);
+					if (World.players[i].items) {
+						processItemDecay(World.players[i]);
+					}
 				}
 			}
 		}
 
+		/*
 		// decay mob items
+		if (World.dice.roll(1, 20) < 10) {
+			if (World.players.length > 0) {
+				i = 0;
+
+				for (i; i < World.areas.length; i += 1) {
+					mobs = World.getAllMonstersFromArea(World.areas[i]);
+
+					if (mobs) {
+						j = 0;
+
+						for (j; j < mobs.length; j += 1) {
+							if (!mobs[j].preventItemDecay && mobs[j].items) {
+								processItemDecay(mobs[j]);
+							}
+						}
+					}
+				}
+			}
+		}
+		*/
+
+		// decay room items
 		if (World.dice.roll(1, 20) < 18) {
 			if (World.players.length > 0) {
 				i = 0;
 
 				for (i; i < World.areas.length; i += 1) {
-					processItemDecay(World.getAllMonsterItemsFromArea(World.areas[i]))
-				}
-			}
-		}
+					rooms = World.areas[i].rooms;
 
-		// decay room items
-		if (World.dice.roll(1, 20) < 17) {
-			if (World.players.length > 0) {
-				for (i; i < World.areas.length; i += 1) {
-					processItemDecay(World.getAllRoomItemsFromArea(World.areas[i]));
+					if (rooms) {
+						j = 0;
+
+						for (j; j < rooms.length; j += 1) {
+							if (rooms[j].items) {
+								processItemDecay(rooms[j]);
+							}
+						}
+					}
 				}
 			}
 		}

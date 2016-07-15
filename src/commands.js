@@ -760,7 +760,7 @@ Cmd.prototype.get = function(target, command, fn) {
 	if (target.position !== 'sleeping') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
-		if (command.msg !== '' && (Character.canSee(target, roomObj) || light.decay > 0)) {
+		if (command.msg !== '' && (Character.canSee(target, roomObj) || light.lightDecay > 0)) {
 			container = Character.getContainer(target, command);
 
 			if (!container) {
@@ -1159,7 +1159,7 @@ Cmd.prototype.look = function(target, command) {
 		if (target.position !== 'sleeping') {
 			if (!command || command.msg === '') {
 				// if no arguments are given we display the current room
-				if (canSee || !canSee && light.decay > 0) {
+				if (canSee || !canSee && light.lightDecay > 0) {
 					roomObj = World.getRoomObject(target.area, target.roomid);
 
 					displayHTML = Room.getDisplayHTML(roomObj, {

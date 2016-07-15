@@ -17,7 +17,7 @@ module.exports = {
 		{"msg": "A cool breeze blows through the streets of Midgaard."},
 		{"msg": "The bustle of the city can be distracting. Keep an eye out for thieves."}
 	],
-	"respawnOn": 3,
+	"respawnOn": 8,
 	"respawnTick": 0,
 	"rooms" : [
 		{
@@ -143,7 +143,7 @@ module.exports = {
 			],
 			"items" : [{
 				"name": "Torch", 
-				"short": "wooden torch",
+				"short": "a wooden torch",
 				"long": "" ,
 				"area": "Midgaard",
 				"id": "104", 
@@ -151,7 +151,6 @@ module.exports = {
 				"itemType": "weapon",
 				"material": "wood",
 				"weaponType": "club",
-				"material": "iron", 
 				"diceNum": 1, 
 				"diceSides": 2,
 				"diceMod": -1,
@@ -167,7 +166,7 @@ module.exports = {
 				"flags": []
 			}, {
 				"name": "Small Buckler", 
-				"short": "small round buckler",
+				"short": "a small round buckler",
 				"long": "" ,
 				"area": "Midgaard",
 				"id": "103", 
@@ -181,7 +180,7 @@ module.exports = {
 				"flags": []
 			}, {
 				"name": "Loaf of Bread",
-				"short": "brown loaf of bread",
+				"short": "a brown loaf of bread",
 				"long": "A rather stale looking loaf of bread." ,
 				"area": "Midgaard",
 				"id": "7",
@@ -195,8 +194,8 @@ module.exports = {
 				"flags": []
 			}, {
 				"name": "Short Sword", 
-				"short": "short sword",
-				"long": "A sharp looking short sword with a hilt wrapped in leather straps." ,
+				"short": "a common looking short sword",
+				"long": "A sharp, common quality, short sword with a hilt wrapped in leather straps." ,
 				"area": "Midgaard",
 				"id": "8",
 				"level": 1,
@@ -206,13 +205,13 @@ module.exports = {
 				"diceNum": 1, 
 				"diceSides": 6,
 				"diceMod": 0,
-				"attackType": "slice", 
+				"attackType": "slash", 
 				"attackElement": "",
 				"weight": 4,
 				"slot": "hands",
 				"equipped": false,
 				"modifiers": {
-					"str": 2
+					"str": 1
 				},
 				"flags": []
 			}, {
@@ -438,6 +437,7 @@ module.exports = {
 					"ac": 20,
 					"merchant": true,
 					"itemType": "mob",
+					"preventItemDecay": true,
 					"items": [{
 						"name": "Pemmican", 
 						"short": "",

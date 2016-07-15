@@ -131,6 +131,11 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						acCheck += shieldAC;
 					}
 
+					// if opponent is weak to this weapons attackType  add to hitRoll and damage
+					if (opponent.race === 'animal' && weapon.attackType === 'slash') {
+						damage += World.dice.roll(1, 2 + weapon.level);
+					}
+
 					if ((World.dice.roll(1, 8 + acCheck))
 						< (World.dice.roll(1, 12 + hitRoll) + attacker.level) ) {
 						// attacker beat opponents ac check

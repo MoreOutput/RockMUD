@@ -65,6 +65,7 @@
 	"size": {"value": 3, "display": "medium"},
 	"kingdom": "mammal",
 	"killed": 0,
+	"preventItemDecay": false,
 	"eq": [{
 		"name": "Head",
 		"item": null,
