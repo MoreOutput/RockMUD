@@ -30,7 +30,6 @@ You slice a Red Dragon with barbaric intensity (14)
 * Starting combat, begin() much return true and the target node for a fight to continue
 * otherwise both parties are left in the state prior. Beginning combat does not add Wait.
 */
-
 Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, opponentMods) {
 	var numOfAttacks = Math.round((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4);
 

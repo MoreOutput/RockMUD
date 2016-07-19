@@ -58,7 +58,8 @@ module.exports = {
 				{
 					"name": "Rufus",
 					"level": 15,
-					"short": "Rufus, the mayor of Midgaard",
+					"short": "Mayor Rufus",
+					"long": "Rufus, current mayor of Midgaard, ",
 					"description": "",
 					"race": "human",
 					"id": 9,
@@ -77,8 +78,8 @@ module.exports = {
 					"itemType": "mob",
 					"items": [{
 						"name": "Midgaard city key", 
-						"short": "a small key",
-						"long": "A thin gold key with a ruby embbeded to the end." ,
+						"short": "a thin gold key",
+						"long": "A thin gold key with a ruby embbeded to the end lies here." ,
 						"area": "Midgaard",
 						"id": "10",
 						"level": 1,
@@ -96,9 +97,10 @@ module.exports = {
 					}]
 				}, {
 					"name": "Boar",
-					"displayName": ["Brown boar", "An old brown boar"],
+					"displayName": ["Brown boar", "Light brown boar"],
 					"level": 1,
 					"short": ["a large brown boar", "a large scarred boar"],
+					"long": ["A dirty brown boar pacing around the area", "A large boar that is sniffing at the ground"],
 					"race": "animal",
 					"id": "6",
 					"area": "Midgaard",
@@ -118,7 +120,9 @@ module.exports = {
 					}]
 				}, {
 					"name": "Shackleton",
-					"displayName": "The mayors dog",
+					"displayName": "Shackleton, the mayors dog",
+					"short": "a spotted hunting dog",
+					"long": "A large, lean, spotted hunting dog",
 					"level": 15,
 					"short": "Shackleton, the Mayors famous canine",
 					"description": "",
@@ -144,7 +148,7 @@ module.exports = {
 			"items" : [{
 				"name": "Torch", 
 				"short": "a wooden torch",
-				"long": "" ,
+				"long": "A wooden torch rests on the ground" ,
 				"area": "Midgaard",
 				"id": "104", 
 				"level": 1,
@@ -167,7 +171,7 @@ module.exports = {
 			}, {
 				"name": "Small Buckler", 
 				"short": "a small round buckler",
-				"long": "" ,
+				"long": "A small basic looking round buckler lies here" ,
 				"area": "Midgaard",
 				"id": "103", 
 				"level": 1,
@@ -181,7 +185,7 @@ module.exports = {
 			}, {
 				"name": "Loaf of Bread",
 				"short": "a brown loaf of bread",
-				"long": "A rather stale looking loaf of bread." ,
+				"long": "A rather stale looking loaf of bread is lying on the ground" ,
 				"area": "Midgaard",
 				"id": "7",
 				"level": 1,
@@ -193,9 +197,10 @@ module.exports = {
 				"decay": 7,
 				"flags": []
 			}, {
-				"name": "Short Sword", 
+				"name": "Short Sword",
+				"displayName": "Short Sword",
 				"short": "a common looking short sword",
-				"long": "A sharp, common quality, short sword with a hilt wrapped in leather straps." ,
+				"long": "A short sword with a hilt wrapped in leather straps was left on the ground" ,
 				"area": "Midgaard",
 				"id": "8",
 				"level": 1,
@@ -216,8 +221,8 @@ module.exports = {
 				"flags": []
 			}, {
 				"name": "Burlap sack",
-				"short": "worn, tan, burlap sack",
-				"long": "A tan burlap sack with frizzed edges and various stains." ,
+				"short": "a worn, tan, burlap sack",
+				"long": "A tan burlap sack with frizzed edges and various stains lies here",
 				"area": "Midgaard",
 				"id": "27",
 				"level": 1,
@@ -243,7 +248,12 @@ module.exports = {
 				"flags": []
 			}],
 			"flags" : [],
-			"onEnter": ""
+			"beforeEnter": function(target, fromRoom) {
+				return true;
+			},
+			"onEnter": function(target, fromRoom) {
+				
+			}
 		},
 		{
 			"id" : "2",
@@ -265,8 +275,8 @@ module.exports = {
 			"monsters" : [],
 			"items" : [{
 				"name": "Tattered Buckler", 
-				"short": "Tattered Buckler",
-				"long": "A round buckler that looks like its seen heavy use." ,
+				"short": "a tattered buckler",
+				"long": "A round buckler that looks like its seen heavy use is lying here" ,
 				"area": "Midgaard",
 				"id": "2", 
 				"level": 1,
@@ -297,8 +307,8 @@ module.exports = {
 			"monsters" : [],
 			"items" : [{
 				"name": "Brown waterskin", 
-				"short": "brown waterskin",
-				"long": "A brown waterskin. The hide seems worn and used." ,
+				"short": "a light brown waterskin",
+				"long": "A brown waterskin, the hide seems worn and used, was left here." ,
 				"area": "Midgaard",
 				"id": "102",
 				"level": 1,
@@ -347,8 +357,8 @@ module.exports = {
 			"monsters" : [],
 			"items" : [{
 				"name": "Leather Helmet", 
-				"short": "Leather Helmet",
-				"long": "" ,
+				"short": "a leather helmet",
+				"long": "A simple leather helmet was left here" ,
 				"area": "Midgaard",
 				"id": "3", 
 				"level": 1,
@@ -382,10 +392,11 @@ module.exports = {
 			],
 			"playersInRoom": [],
 			"monsters" : [{
-				"name": "Large alligator",
+				"name": "Large Alligator",
 				"level": 3,
 				"race": "animal",
-				"short": "A large mean looking alligator",
+				"short": "a mean looking Alligator",
+				"long": "A large mean looking Alligator",
 				"diceNum": 2,
 				"diceSides": 2,
 				"diceMod": 2,
@@ -419,6 +430,7 @@ module.exports = {
 					"name": "Tom",
 					"level": 15,
 					"short": "Thomas, the dwarven shopkeep",
+					"long": "Thomas a dwarven shopkeeper",
 					"description": "",
 					"race": "dwarf",
 					"id": "9",
@@ -440,8 +452,8 @@ module.exports = {
 					"preventItemDecay": true,
 					"items": [{
 						"name": "Pemmican", 
-						"short": "",
-						"long": "" ,
+						"short": "a piece of Pemmican",
+						"long": "A small bit of Pemmican was left here." ,
 						"area": "Midgaard",
 						"id": "110",
 						"level": 1,
@@ -484,7 +496,19 @@ module.exports = {
 						"store": true,
 						"worth": 10
 					}],
-					"behaviors": [] 
+					"behaviors": [],
+					"beforeSell": function(buyer, roomObj) {
+						if (buyer.race === 'ogre') {
+							Cmd.say(this, {
+								msg: 'Sell to an Ogre? Are you insane?',
+								roomObj: roomObj
+							});
+					
+							return false;
+						} else {
+							return true;
+						}
+					}
 				}
 			],
 			"items" : [],

@@ -21,12 +21,17 @@ Cmd.prototype.buy = function(target, command) {
 	var i = 0,
 	roomObj = World.getRoomObject(target.area, target.roomid),
 	item,
+	canBuy = true,
 	merchant;
 	
 	if (target.position !== 'sleeping') {
 		merchant = Room.getMerchants(roomObj)[0];
 		
 		if (merchant) {
+			if (merchant.beforeSell) {
+				canBuy = merchant.beforeSell(target, roomObj);
+			}
+
 			item = Character.getItem(merchant, command);
 
 			if (item) {
@@ -563,14 +568,17 @@ Cmd.prototype.move = function(target, command, fn) {
 	targetRoom,
 	exitObj,
 	moveRoll = World.dice.roll(1, 4),
-	sneakAff,
-	roomObj;
+	sneakAff,	
+	roomObj,
+	canEnter = true, // event result, must be true to move into targetRoom
+	canLeave = true, // event result, must be true to leave roomObj	
+	i = 0;
 
 	if (target.position === 'standing' 
 		|| target.position === 'fleeing' 
 		&& target.cmv > (4 - dexMod) 
 		&& target.wait === 0) {
-		
+
 		if (!command.roomObj) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 		} else {
@@ -586,6 +594,14 @@ Cmd.prototype.move = function(target, command, fn) {
 				targetRoom = World.getRoomObject(exitObj.area, exitObj.id);
 
 				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value))) {
+					if (targetRoom.beforeEnter) {
+						canEnter = targetRoom.beforeEnter(target, roomObj);
+					}
+
+					if (target.beforeMove) {
+						canEnter = target.beforeMove(target, roomObj);
+					}
+					
 					target.cmv -= Math.round(4 + moveRoll - dexMod);
 
 					if (exitObj.area !== target.area) {
@@ -650,11 +666,13 @@ Cmd.prototype.move = function(target, command, fn) {
 						playerName: target.name
 					});
 
-					Room.processEvents(targetRoom, target, 'onVisit', function(targetRoom, target) {
-						if (typeof fn === 'function') {
-							return fn(true, roomObj, targetRoom);
-						}
-					});
+					if (targetRoom.onEnter) {
+						targetRoom.onEnter(target, roomObj);
+					}
+
+					if (target.onMove) {
+						target.onMove(target, roomObj);
+					}
 				} else {
 					if (targetRoom.size) {
 						World.msgPlayer(target, {
@@ -774,13 +792,13 @@ Cmd.prototype.get = function(target, command, fn) {
 
 						if (item) {
 							World.msgRoom(roomObj, {
-								msg: target.displayName + ' picks up a ' + item.short,
+								msg: target.displayName + ' picks up ' + item.short,
 								playerName: target.name,
 								styleClass: 'cmd-get yellow'
 							});
 
 							World.msgPlayer(target, {
-								msg: 'You pick up a ' + item.short,
+								msg: 'You pick up ' + item.short,
 								styleClass: 'cmd-get blue'
 							});
 
@@ -829,8 +847,8 @@ Cmd.prototype.get = function(target, command, fn) {
 					Character.addItem(target, item);
 
 					World.msgPlayer(target, {msg: 'You remove a <strong>'
-						+ item.short + '</strong> from a '
-						+ container.short + '.', styleClass: 'green'});
+						+ item.displayName + '</strong> from a '
+						+ container.displayName + '.', styleClass: 'green'});
 				} else {
 					World.msgPlayer(target, {msg: 'You don\'t see that in there.', styleClass: 'error'});
 				}
@@ -866,7 +884,7 @@ Cmd.prototype.put = function(target, command) {
 					Character.addToContainer(container, item);
 
 					World.msgPlayer(target, {
-						msg: 'You put a <strong>' + item.short + '</strong> into a ' + container.short + '.',
+						msg: 'You put a <strong>' + item.displayName + '</strong> into ' + container.short + '.',
 						styleClass: 'green'
 					});
 				} else {
@@ -904,7 +922,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 						Room.addItem(roomObj, item);
 
 						World.msgRoom(roomObj, {
-							msg: target.displayName + '  drops a ' + item.short,
+							msg: target.displayName + '  drops ' + item.short,
 							playerName: target.name,
 							styleClass: 'cmd-drop yellow'
 						});
@@ -914,13 +932,13 @@ Cmd.prototype.drop = function(target, command, fn) {
 							styleClass: 'cmd-drop blue'
 						});
 					} else {
-						World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
+						World.msgPlayer(target, {msg: 'Could not drop ' + item.short, styleClass: 'error'});
 					}
 				} else {
 					if (item && !item.equipped) {
 						World.msgPlayer(target, {msg: 'You do not have that item.', styleClass: 'error'});
 					} else {
-						World.msgPlayer(target, {msg: 'You must remove a ' + item.short + ' before you can drop it.', styleClass: 'error'});
+						World.msgPlayer(target, {msg: 'You must remove ' + item.short + ' before you can drop it.', styleClass: 'error'});
 					}
 				}
 			} else {
@@ -948,7 +966,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 							});
 						}
 					} else {
-						World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
+						World.msgPlayer(target, {msg: 'Could not drop ' + item.short, styleClass: 'error'});
 					}
 				}
 			}
@@ -1159,7 +1177,7 @@ Cmd.prototype.look = function(target, command) {
 		if (target.position !== 'sleeping') {
 			if (!command || command.msg === '') {
 				// if no arguments are given we display the current room
-				if (canSee || !canSee && light.lightDecay > 0) {
+				if (canSee || !canSee && (light && light.lightDecay > 0)) {
 					roomObj = World.getRoomObject(target.area, target.roomid);
 
 					displayHTML = Room.getDisplayHTML(roomObj, {
@@ -1260,8 +1278,12 @@ Cmd.prototype.say = function(target, command) {
 			World.msgPlayer(target, {
 				msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>'
 			});
-
-			roomObj = World.getRoomObject(target.area, target.roomid);
+			
+			if (!command.roomObj) {
+				roomObj = World.getRoomObject(target.area, target.roomid);
+			} else {
+				roomObj = command.roomObj
+			}
 
 			World.msgRoom(roomObj, {
 				msg: function(receiver, fn) {
@@ -1278,6 +1300,14 @@ Cmd.prototype.say = function(target, command) {
 				},
 				playerName: target.name
 			});
+
+			if (target.onSay) {
+				target.onSay(target, roomObj);
+			}
+
+			if (roomObj.onSay) {
+				roomObj.onSay(target, roomObj);
+			}
 		} else {
 			World.msgPlayer(target, {
 				msg: 'You have nothing to say.',
@@ -1473,7 +1503,7 @@ Cmd.prototype.equipment = function(target, command) {
 			eqStr += ' Nothing</li>';
 		} else {
 			if (!item.light) {
-				eqStr += '<label class="yellow">' + item.short + '</label></li>';
+				eqStr += '<label class="yellow">' + item.displayName + '</label></li>';
 			} else {
 				if (item.lightDecay > 0) {
 					eqStr += '<label class="yellow">' + item.short + ' (<span class="red">Providing light</span>)</label></li>';

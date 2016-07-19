@@ -21,7 +21,7 @@ module.exports = {
 
 		if (roll === 5) {
 			Cmd.emote(mayor, {
-				msg: 'Rufus checks his time piece and stares skyward in thought.'
+				msg: 'stares skyward in thought.'
 			});
 		}
 

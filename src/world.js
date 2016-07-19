@@ -868,23 +868,4 @@ World.prototype.shuffle = function (arr) {
 	return arr;
 }
 
-World.prototype.processEvents = function(itemToProcess, player, roomObj, eventName, fn) {
-	var isArr = Array.isArray(itemToProcess),
-	i = 0;
-
-	if (isArr) {
-		for (i; i < itemToProcess.length; i += 1) {
-			if (itemToProcess[i][eventName]) {
-				itemToProcess[i][eventName](player, roomObj);
-			}
-		}
-	} else {
-		if (itemToProcess && itemToProcess[eventName]) {
-			itemToProcess[eventName](player, roomObj);
-		}
-	}
-
-	return fn(player, roomObj);
-};
-
 module.exports.world = new World();

@@ -58,7 +58,11 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 	if (items.length > 0) {
 		for (i; i < items.length; i += 1) {
-			displayHTML += '<li class="room-item">A ' + items[i].short + '</li>';
+			if (items[i].long) {
+				displayHTML += '<li class="room-item">' + items[i].long + '</li>';
+			} else {
+				displayHTML += '<li class="room-item">A ' + items[i].name + '</li>';
+			}
 		}
 	}
 
@@ -66,11 +70,11 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 	if (monsters.length > 0 || playersInRoom.length > 0) {
 		for (i; i < monsters.length; i += 1) {
-			if (!monsters[i].short) {
-				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' + 
+			if (monsters[i].long) {
+				displayHTML += '<li class="room-monster">' + monsters[i].long + ' is ' + 
 				 monsters[i].position + ' here</li>';
 			} else {
-				displayHTML += '<li class="room-monster">' + monsters[i].short + ' is ' + 
+				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' + 
 				 monsters[i].position + ' here</li>';
 			}
 		}
@@ -297,22 +301,6 @@ Room.prototype.removeMob = function(roomObj, mob) {
 	}
 
 	roomObj.monsters = newArr;
-};
-
-Room.prototype.processEvents = function(roomObj, player, eventName, fn) {
-	var room = this;
-
-	if (eventName) {
-		World.processEvents(roomObj, player, roomObj, eventName, function() {
-			World.processEvents(roomObj.monsters, player, roomObj, eventName, function() {
-				World.processEvents(roomObj.items, player, roomObj, eventName, function() {
-					return fn(roomObj, player);
-				});
-			});
-		});
-	} else {
-		return fn(roomObj, player);
-	}
 };
 
 Room.prototype.addCorpse = function(roomObj, corpse) {

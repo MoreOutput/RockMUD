@@ -876,7 +876,7 @@ Character.prototype.removeEq = function(player, item) {
 	item.equipped = false;
 
 	for (i; i < player.eq.length; i += 1) {
-		if (player.eq[i].item && player.eq[i].item.refId === item.refId) {
+		if (player.eq[i].item === item.refId) {
 			player.eq[i].item = null;
 		}
 	}
@@ -884,7 +884,7 @@ Character.prototype.removeEq = function(player, item) {
 	this.removeStatMods(player, item);
 
 	World.msgPlayer(player, {
-		msg: 'You stopped using a ' + item.short + '.'
+		msg: 'You stopped using ' + item.short + '.'
 	});
 };
 
@@ -947,7 +947,7 @@ Character.prototype.wearWeapon = function(target, weapon) {
 		this.addStatMods(target, weapon);
 
 		World.msgPlayer(target, {
-			msg: 'You wield a ' + weapon.short + ' in your ' + slot.name + '.'
+			msg: 'You wield a ' + weapon.displayName + ' in your ' + slot.name.toLowerCase() + '.'
 		});
 	} else {
 		World.msgPlayer(target, {
@@ -967,7 +967,7 @@ Character.prototype.wearShield = function(target, shield) {
 		this.addStatMods(target, shield);
 
 		World.msgPlayer(target, {
-			msg: 'You begin defending yourself with a ' + shield.short + '.'
+			msg: 'You begin defending yourself with a ' + shield.displayName + '.'
 		});
 	} else {
 		World.msgPlayer(target, {
@@ -985,7 +985,7 @@ Character.prototype.wearArmor = function(target, armor) {
 		slot.item = armor.refId;
 		
 		World.msgPlayer(target, {
-			msg: 'You wear a ' + armor.short + ' on your ' + slot.name + '.'
+			msg: 'You wear a ' + armor.short + ' on your ' + slot.name.toLowerCase() + '.'
 		});
 	} else {
 		return false;
