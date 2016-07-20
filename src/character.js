@@ -218,8 +218,15 @@ Character.prototype.create = function(r, s, fn) {
 					if (!Cmds) {
 						Cmds = require('./commands').cmd;
 					}
+
+					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+
+					roomObj.playersInRoom.push(s.player);
 					
-					Cmds.look(s.player);
+					Cmds.look(s.player, {
+						roomObj: roomObj,
+						msg: ''
+					});
 
 					fn(s);
 				} else {
@@ -313,8 +320,8 @@ Character.prototype.newCharacter = function(r, s, fn) {
 
 							if	(classes.length - 1 === i) {
 								s.emit('msg', {
-									msg: 'Great, <strong>two more steps to go!</strong> Now time to select a class for ' + s.player.name +
-									'. Pick one of the following: <ul>' + 
+									msg: 'Great, <strong>two more steps to go!</strong> Now time to select a class for '
+									+ s.player.name + '. Pick one of the following: <ul>' + 
 									str + '</ul>', 
 									res: 'selectClass', 
 									styleClass: 'race-selection'
@@ -328,8 +335,9 @@ Character.prototype.newCharacter = function(r, s, fn) {
 											s.player.charClass = r.msg;
 											
 											s.emit('msg', {
-												msg: s.player.name + ' is a ' + s.player.charClass + '! <strong>One more step before ' + s.player.name + 
-												' is saved</strong>. Please define a password (8 or more characters):', 
+												msg: s.player.name + ' is a ' + s.player.charClass
+												+ '! <strong>One more step before ' + s.player.name
+												+ ' is saved</strong>. Please define a password (8 or more characters):', 
 												res: 'createPassword', 
 												styleClass: 'race-selection'
 											});
@@ -343,7 +351,10 @@ Character.prototype.newCharacter = function(r, s, fn) {
 												}
 											});
 										} else {
-											s.emit('msg', {msg: 'That class is not on the list, please try again', styleClass: 'error' });
+											s.emit('msg', {
+												msg: 'That class is not on the list, please try again',
+												styleClass: 'error'
+											});
 										}
 									}); 
 								});

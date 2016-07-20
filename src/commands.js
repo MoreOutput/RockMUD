@@ -1180,7 +1180,7 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 };
 
 Cmd.prototype.look = function(target, command) {
-	var roomObj = World.getRoomObject(target.area, target.roomid),
+	var roomObj,
 	displayHTML,
 	monster,
 	// boolean. when it is false it indicates we need a light source to see.
@@ -1190,6 +1190,12 @@ Cmd.prototype.look = function(target, command) {
 	itemDescription,	
 	item, // looking at an item
 	i = 0;
+
+	if (!command || !command.roomObj) {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	} else {
+		roomObj = command.roomObj;
+	}
 	
 	if (canSee) {
 		canSee = Character.canSee(target, roomObj);
