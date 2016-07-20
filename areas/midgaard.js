@@ -61,6 +61,7 @@ module.exports = {
 					"short": "Mayor Rufus",
 					"long": "Rufus, current mayor of Midgaard, ",
 					"description": "",
+					"inName": "Mayor Rufus",
 					"race": "human",
 					"id": 9,
 					"area": "Midgaard",
@@ -99,8 +100,9 @@ module.exports = {
 					"name": "Boar",
 					"displayName": ["Brown boar", "Light brown boar"],
 					"level": 1,
-					"short": ["a large brown boar", "a large scarred boar"],
-					"long": ["A dirty brown boar pacing around the area", "A large boar that is sniffing at the ground"],
+					"short": ["a large brown boar", "a large scarred boar", "a young tan boar"],
+					"long": ["A boar", "A large brown boar", "A timid boar"],
+					"inName": "A boar",
 					"race": "animal",
 					"id": "6",
 					"area": "Midgaard",
@@ -114,7 +116,7 @@ module.exports = {
 					"gold": 1,
 					"size": {"value": 2, "display": "small"},
 					"itemType": "mob",
-					"spawn": "2",
+					"spawn": "3",
 					"behaviors": [{  
 						"module" : "wander"
 					}]
@@ -122,7 +124,7 @@ module.exports = {
 					"name": "Shackleton",
 					"displayName": "Shackleton, the mayors dog",
 					"short": "a spotted hunting dog",
-					"long": "A large, lean, spotted hunting dog",
+					"long": "The mayors dog Shackleton a large, lean, spotted hunting dog",
 					"level": 15,
 					"short": "Shackleton, the Mayors famous canine",
 					"description": "",
