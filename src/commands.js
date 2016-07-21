@@ -32,36 +32,46 @@ Cmd.prototype.buy = function(target, command) {
 				canBuy = merchant.beforeSell(target, roomObj);
 			}
 
-			item = Character.getItem(merchant, command);
-
-			if (item) {
-				if (item.worth <= target.gold) {
-					target.gold -= item.worth;
-					merchant.gold += item.worth;
+			if (canBuy) {
+				item = Character.getItem(merchant, command);
+				
+				if (item) {
+					if (item.worth <= target.gold) {
+						target.gold -= item.worth;
+						merchant.gold += item.worth;
 					
-					Character.removeItem(merchant, item);
+						Character.removeItem(merchant, item);
 
-					Character.addItem(target, item);
+						Character.addItem(target, item);
 					
-					World.msgPlayer(target, {
-						msg: 'You buy something.'
-					});
+						World.msgPlayer(target, {
+							msg: 'You buy ' + item.short
+						});
+
+						if (merchant.onSell) {
+							merchant.onSell(target, roomObj);
+						}
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You do not enough gold.',
+							styleClass: 'yellow'
+						});
+					}
 				} else {
 					World.msgPlayer(target, {
-						msg: 'Not enough Gold.',
-						styleClass: 'yellow'
+						msg: 'Should probably recheck the name again, this isn\'t registering with the merchant.'
 					});
 				}
-			} else {
-				World.msgPlayer(target, {
-					msg: 'Should probably recheck the name again, this isn\'t registering with the merchant.'
-				});
 			}
 		} else {
-
+			World.msgPlayer(target, {
+				msg: 'There doesn\'t seem to be anyone selling anything here.'
+			});
 		}
 	} else {
-	
+		World.msgPlayer(target, {
+			msg: 'Wake up first.'
+		});
 	}
 };
 
@@ -926,19 +936,30 @@ Cmd.prototype.drop = function(target, command, fn) {
 	i = 0,
 	itemLen,
 	itemArr,
+	canDrop = true,
 	item;
 
 	if (target.position !== 'sleeping') {
 		if (command.msg !== '' && target.items.length !== 0) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
-
+		
 			if (command.msg !== 'all') {
 				item = World.search(target.items, command);
 
 				if (item && !item.equipped) {
-					Character.removeItem(target, item);
+					if (item.beforeDrop) {
+						canDrop = item.beforeDrop(target, roomObj);
+					}
 
-					if (item) {
+					if (canDrop) {
+						if (roomObj.beforeDrop) {
+							canDrop = roomObj.beforeDrop(target, item);
+						}
+					}
+						
+					if (canDrop) {
+						Character.removeItem(target, item);
+
 						Room.addItem(roomObj, item);
 
 						World.msgRoom(roomObj, {
@@ -948,17 +969,29 @@ Cmd.prototype.drop = function(target, command, fn) {
 						});
 
 						World.msgPlayer(target, {
-							msg: 'You drop a ' + item.short,
+							msg: 'You drop ' + item.short,
 							styleClass: 'cmd-drop blue'
 						});
-					} else {
-						World.msgPlayer(target, {msg: 'Could not drop ' + item.short, styleClass: 'error'});
+
+						if (item.onDrop) {
+							item.onDrop(target, roomObj);
+						}
+
+						if (roomObj.onDrop) {
+							roomObj.onDrop(target, item);
+						}
 					}
 				} else {
-					if (item && !item.equipped) {
-						World.msgPlayer(target, {msg: 'You do not have that item.', styleClass: 'error'});
+					if (!item) {
+						World.msgPlayer(target, {
+							msg: 'You do not have that item.',
+							styleClass: 'error'
+						});
 					} else {
-						World.msgPlayer(target, {msg: 'You must remove ' + item.short + ' before you can drop it.', styleClass: 'error'});
+						World.msgPlayer(target, {
+							msg: 'You must remove ' + item.short + ' before you can drop it.',
+							styleClass: 'error'
+						});
 					}
 				}
 			} else {
@@ -991,7 +1024,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 				}
 			}
 		} else {
-			World.msgPlayer(target, {msg: 'Drop nothing? How do you drop nothing?', styleClass: 'error'});
+			World.msgPlayer(target, {msg: 'You aren\'t carrying anything.', styleClass: 'error'});
 		}
 	} else {
 		World.msgPlayer(target, {msg: 'You are sleeping at the moment.', styleClass: 'error'});

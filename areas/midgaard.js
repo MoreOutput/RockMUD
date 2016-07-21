@@ -169,7 +169,10 @@ module.exports = {
 				"lightDecay": 10,
 				"flickerMsg": '',
 				"extinguishMsg": '',
-				"flags": []
+				"flags": [],
+				"beforeDrop": function(item, roomObj) {
+					return true;
+				}
 			}, {
 				"name": "Small Buckler", 
 				"short": "a small round buckler",
