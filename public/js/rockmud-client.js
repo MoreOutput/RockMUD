@@ -56,9 +56,11 @@ window.onload = function() {
 			}
 
 			if (r.element === undefined) {
-				terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><div class="col-md-12 ' + r.styleClass + '">' + r.msg + '</div></div>';
+				terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><div class="col-md-12 '
+				+ r.styleClass + '">' + r.msg + '</div></div>';
 			} else {
-				terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><' + r.element + ' class="col-md-12 ' + r.styleClass + '">' + r.msg + '</' + r.element + '></div>';
+				terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><' + r.element + ' class="col-md-12 '
+				+ r.styleClass + '">' + r.msg + '</' + r.element + '></div>';
 			}
 
 			rowCnt += 1;
@@ -150,14 +152,10 @@ window.onload = function() {
 	ws.on('msg', function(r) {
 		display(r);
 
-		if (r.res && r.res.toLowerCase().indexOf('password') !== -1) {
+		if (r.res && r.evt === 'reqPassword') {
 			node.type = 'password';
 		} else {
 			node.type = 'text';
-		}
-
-		if (r.res === 'end') {
-			window.location.reload();
 		}
 
 		if (r.res) {

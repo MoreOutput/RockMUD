@@ -121,6 +121,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						
 							s.player = World.mobTemplate;
 							s.player.name = r.msg;
+							s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
 							s.player.sid = s.id;
 							s.player.socket = s;
 							s.player.creationStep = 1;

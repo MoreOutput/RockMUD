@@ -182,8 +182,7 @@ Character.prototype.addPlayer = function(s) {
 Character.prototype.create = function(s) { 
 	var character = this,
 	socket;
-
-	s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
+	
 	s.player.chp += 30;
 	s.player.cmana += 5;
 	s.player.cmv += 100;
@@ -323,8 +322,9 @@ Character.prototype.newCharacter = function(s, command) {
 	
 	if (s.player.creationStep === 1) {
 		World.msgPlayer(s, {
-			msg: '<p>' + s.player.name + ' is a new character! There are three steps until '
-			+ s.player.name + ' is saved. The <strong>first step</strong> is to select a Race.',
+			msg: '<p>' + s.player.displayName + ' is a new character! There are three steps until '
+				+ s.player.displayName + ' is saved. The <strong>first step</strong> is to '
+				+ '<strong class="red">select a race from the list below by typing in the full name</strong>.',
 			noPrompt: true
 		});
 
@@ -347,6 +347,13 @@ Character.prototype.newCharacter = function(s, command) {
 					s.player.race = command.cmd;
 				
 					// Display class list
+					World.msgPlayer(s, {
+						msg: 'Well done ' + s.player.displayName + ' is a ' + s.player.race + '. Now for the '
+							+ '<strong>second step</strong>, '
+							+ '<strong class="red">select a class from the list below by entering the full name</strong>.',
+						noPrompt: true
+					});
+
 					Cmds.help(s.player, {
 						msg: 'classes',
 						noPrompt: true
@@ -354,8 +361,8 @@ Character.prototype.newCharacter = function(s, command) {
 				} else {
 					if (command.cmd !== 'help') {
 						World.msgPlayer(s, {
-							msg: 'Not a valid race. Type <span class="green large">help races</span> to see the full list. '
-							+ 'You can also access any help file by typing <span class="yellow">help [subject]</span>',
+							msg: 'Not a valid class. Type <span class="green">help classes</span> to see the full list. '
+								+ 'You can also access any help file by typing <span class="yellow">help [subject]</span>',
 							noPrompt: true
 						});
 					} else {
@@ -375,9 +382,9 @@ Character.prototype.newCharacter = function(s, command) {
 				
 				// Now for a password
 				World.msgPlayer(s, {
-					msg: s.player.name + ' is a ' + s.player.charClass
-					+ '! <strong>One more step before ' + s.player.name
-					+ ' is saved</strong>. Please define a password (8 or more characters):', 
+					msg: s.player.displayName + ' is a ' + s.player.charClass
+						+ '! <strong>One more step before ' + s.player.displayName
+						+ ' is saved</strong>. Please define a password (8 or more characters):', 
 					evt: 'reqPassword',
 					noPrompt: true,
 					styleClass: 'password-request'
@@ -385,8 +392,8 @@ Character.prototype.newCharacter = function(s, command) {
 			} else {
 				if (command.cmd !== 'help') {
 					World.msgPlayer(s, {
-						msg: 'Not a valid class. Type <span class="red large">help classes</span> '
-						+ 'to see the full list of playable classes.',
+						msg: 'Not a valid class. Type <span class="red">help classes</span> '
+							+ 'to see the full list of playable classes.',
 						noPrompt: true
 					});
 				} else {

@@ -1,7 +1,9 @@
 /*
 * All non-combat commands that one would consider 'general' to a all
 * users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
-* the actual combat loop is, of course, in combat.js
+* the actual combat loop is, of course, in combat.js.
+* 
+* Events fired on particular commands are also fired here; for example onEnter, onLeave
 */
 'use strict';
 var fs = require('fs'),
@@ -1563,7 +1565,7 @@ Cmd.prototype.quit = function(target, command) {
 			});
 		} else {
 			World.msgPlayer(target, {
-				msg: 'You are fighting! Finish up before quitting',
+				msg: 'You are fighting! Finish up before quitting.',
 				emit: 'disconnect',
 				styleClass: 'logout-msg'
 			});

@@ -38,8 +38,18 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 	exits = roomObj.exits,
 	playersInRoom = roomObj.playersInRoom,
 	monsters = roomObj.monsters,
+	titleStyleClass = 'room-title',
+	titleHtmlTag = 'h2',		
 	items = roomObj.items;
 
+	if (roomObj.titleHtmlTag) {
+		titleHtmlTag = roomObj.titleHtmlTag;
+	}
+
+	if (roomObj.titleStyleClass) {
+		titleStyleClass = roomObj.titleStyleClass;
+	}
+	
 	if (exits.length > 0) {
 		displayHTML += '<ul class="room-exits list-inline"><li class="list-label">Exits: </li>';
 
@@ -91,8 +101,9 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 	displayHTML += '</ul>';
 
-	displayHTML = '<div class="room"><h2 class="room-title">' + roomObj.title + '</h2>' + 
-	'<p class="room-content">' + roomObj.content + '</p>' + displayHTML + '</div>';
+	displayHTML = '<div class="room"><' + titleHtmlTag + ' class="' + titleStyleClass
+		+  '">' + roomObj.title + '</' + titleHtmlTag  + '>' 
+		+ '<p class="room-content">' + roomObj.content + '</p>' + displayHTML + '</div>';
 
 	return displayHTML;
 };
