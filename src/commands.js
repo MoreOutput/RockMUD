@@ -1270,8 +1270,6 @@ Cmd.prototype.look = function(target, command) {
 			if (!command || command.msg === '') {
 				// if no arguments are given we display the current room
 				if (canSee || !canSee && (light && light.lightDecay > 0)) {
-					roomObj = World.getRoomObject(target.area, target.roomid);
-
 					displayHTML = Room.getDisplayHTML(roomObj, {
 						hideCallingPlayer: target.name
 					});
@@ -1287,8 +1285,6 @@ Cmd.prototype.look = function(target, command) {
 					});
 				}
 			} else {
-				roomObj = World.getRoomObject(target.area, target.roomid);
-
 				item = Character.getItem(target, command);
 				
 				if (item) {

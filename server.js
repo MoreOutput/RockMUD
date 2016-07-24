@@ -112,7 +112,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							s.join('mud'); // mud is one of two rooms, 'creation' being the other		
 
 							World.msgPlayer(s, {
-								msg: 'What is your password: ',
+								msg: 'Password: ',
 								evt: 'reqPassword',
 								noPrompt: true
 							});
@@ -153,7 +153,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			var i = 0,
 			j = 0,
 			roomObj;
-
+			
 			if (s.player !== undefined) {
 				for (i; i < World.players.length; i += 1) {	
 					if (World.players[i].name === s.player.name) {

@@ -45,6 +45,8 @@ Character.prototype.login = function(r, s, fn) {
 					s.player.socket = s;
 		
 					s.player.logged = false;
+					s.player.verifiedPassword = false;
+					s.player.verifiedName = false;
 					
 					return fn(s, true);
 				} else {
@@ -81,7 +83,9 @@ Character.prototype.load = function(name, s, fn) {
 		s.player.socket = s;
 
 		s.player.logged = false;
-		
+		s.player.verifiedPassword = false;
+		s.player.verifiedName = false;
+				
 		return fn(s);
 	});
 };
@@ -109,7 +113,7 @@ Character.prototype.generateSalt = function(fn) {
 
 Character.prototype.getPassword = function(s, command, fn) {
 	var character = this;
-		
+
 	if (command.cmd.length > 7) {
 		character.hashPassword(s.player.salt, command.cmd, 1000, function(hash) {
 			var roomObj;
@@ -131,7 +135,10 @@ Character.prototype.getPassword = function(s, command, fn) {
 
 						return s.disconnect();
 					} else {
-						World.msgPlayer(s, {msg: command.cmd, res: 'end'});
+						World.msgPlayer(s, {
+							msg: command.cmd,
+							noPrompt: true
+						});
 					}
 				}
 			} else {
@@ -698,10 +705,9 @@ Character.prototype.getLights = function(player) {
 	var i = 0,
 	lights = [];
 
-	for (i; i < player.eq.length; i += 1) {
-		if (player.eq[i].slot === 'hands' && player.eq[i].item !== null 
-			&& player.eq[i].item.light) {
-			lights.push(player.eq[i].item);
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].equipped === true && player.items[i].lightDecay > 0) {
+			lights.push(player.items[i]);
 		}
 	}
 
@@ -1083,16 +1089,19 @@ Character.prototype.addAffect = function(player) {
 	return true;;
 };
 
+// Can the character see, checks sight property
+// if the room is dark, if the player has needed vision skills
+// and if its currently dark outside
 Character.prototype.canSee = function(player, roomObj) {
 	var canSee = player.sight,
-	hasDarkvision = this.getAffect(player, 'darkvision');
-		
-	if (hasDarkvision && player.sight
-		|| (player.sight && World.time.isDay && !roomObj.light)
-	   	|| (player.sight && roomObj.light === true) ) {
-		canSee = true;
-	} else {
-		canSee = false
+	hasDarkvision;
+
+	if (!roomObj.light && !World.time.isDay) {
+		hasDarkvision = this.getAffect(player, 'darkvision');
+
+		if (!hasDarkvision) {
+			canSee = false;
+		}
 	}
 	
 	return canSee;
