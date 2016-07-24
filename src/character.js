@@ -31,11 +31,24 @@ Character.prototype.login = function(r, s, fn) {
 	
 	if (r.msg.length > 2) {
 		if  (/^[a-z]+$/g.test(r.msg) === true && /[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
-			fs.stat('./players/' + name + '.json', function (err, stat) {
+			fs.readFile('./players/' + name + '.json', function (err, r) {
 				if (err === null) {
-					return fn(name, s, true);
+					s.player = JSON.parse(r);
+					
+					s.player.name = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
+	
+					if (s.player.lastname !== '') {
+						s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
+					}
+
+					s.player.sid = s.id;
+					s.player.socket = s;
+		
+					s.player.logged = false;
+					
+					return fn(s, true);
 				} else {
-					return fn(name, s, false);
+					return fn(s, false);
 				}
 			});
 		} else {
@@ -67,6 +80,8 @@ Character.prototype.load = function(name, s, fn) {
 		s.player.sid = s.id;
 		s.player.socket = s;
 
+		s.player.logged = false;
+		
 		return fn(s);
 	});
 };
@@ -92,42 +107,53 @@ Character.prototype.generateSalt = function(fn) {
 	});
 };
 
-Character.prototype.getPassword = function(s, fn) {
+Character.prototype.getPassword = function(s, command, fn) {
 	var character = this;
-	s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
+		
+	if (command.cmd.length > 7) {
+		character.hashPassword(s.player.salt, command.cmd, 1000, function(hash) {
+			var roomObj;
 
-	s.on('password', function (r) {
-		if (r.msg.length > 7) {
-			character.hashPassword(s.player.salt, r.msg, 1000, function(hash) {
-				var roomObj;
+			if (s.player.password === hash) {
+				if (character.addPlayer(s)) {
+					World.sendMotd(s);
 
-				if (s.player.password === hash) {
-					if (character.addPlayer(s)) {
-						World.sendMotd(s);
-						
-						roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-						roomObj.playersInRoom.push(s.player);
-						
-						fn(s);
-					} else {
-						if (r.msg === undefined) {
-							s.emit('msg', {msg: 'Error logging in, please retry.'});
+					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+					roomObj.playersInRoom.push(s.player);
 
-							return s.disconnect();
-						} else {
-							s.emit('msg', {msg: r.msg, res: 'end'});
-						}
-					}
+					fn(s);
 				} else {
-					s.emit('msg', {msg: 'Wrong! You are flagged after 5 incorrect responses.', res: 'enterPassword'});
-					return s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
+					if (r.msg === undefined) {
+						World.msgPlayer(s, {
+							msg: 'Error logging in, please retry.',
+							noPrompt: true
+						});
+
+						return s.disconnect();
+					} else {
+						World.msgPlayer(s, {msg: command.cmd, res: 'end'});
+					}
 				}
-			});
-		} else {
-			s.emit('msg', {msg: 'Password has to be over eight characters.', res: 'enterPassword'});
-			return s.emit('msg', {msg: 'What is your password: ', res: 'enterPassword'});
-		}
-	});
+			} else {
+				World.msgPlayer(s, {
+					msg: 'Wrong! You are flagged after 5 incorrect responses.',
+					noPrompt: true
+				});
+
+				return World.msgPlayer(s, {
+					msg: 'What is your password: ',
+					evt: 'reqPassword',
+					noPrompt: true
+				});
+			}
+		});
+	} else {
+		return World.msgPlayer(s, {
+			msg: 'What is your password: ',
+			evt: 'reqPassword',
+			noPrompt: true
+		});
+	}
 };
 
 // Add a player reference object to the players array
@@ -146,7 +172,7 @@ Character.prototype.addPlayer = function(s) {
 };
 
 // A New Character is saved
-Character.prototype.create = function(r, s, fn) { 
+Character.prototype.create = function(s) { 
 	var character = this,
 	socket;
 
@@ -197,7 +223,7 @@ Character.prototype.create = function(r, s, fn) {
 		character.hashPassword(salt, s.player.password, 1000, function(hash) {
 			s.player.password = hash;
 			s.player.socket = null;
-
+			
 			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
 				var i = 0,
 				roomObj;
@@ -212,12 +238,8 @@ Character.prototype.create = function(r, s, fn) {
 				if (character.addPlayer(s)) {
 					s.leave('creation'); // No longer creating the character so leave the channel and join the game
 					s.join('mud');
-
+					
 					World.sendMotd(s);
-
-					if (!Cmds) {
-						Cmds = require('./commands').cmd;
-					}
 
 					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 
@@ -227,11 +249,9 @@ Character.prototype.create = function(r, s, fn) {
 						roomObj: roomObj,
 						msg: ''
 					});
-
-					fn(s);
 				} else {
-					s.emit('msg', {msg: 'Error logging in, please retry.'});
-
+					World.msgPlayer(s, {msg: 'Error logging in, please retry.'});
+					
 					s.disconnect();
 				}
 			});
@@ -239,7 +259,8 @@ Character.prototype.create = function(r, s, fn) {
 	});
 };
 
-// Rolling stats for a new character
+// At this point the character has the string values of race and class
+// we now merge those core class defintions into the base player object
 Character.prototype.rollStats = function(player) {
 	var i = 0,
 	j = 0,
@@ -284,130 +305,110 @@ Character.prototype.rollStats = function(player) {
 	return player;
 };
 
-Character.prototype.newCharacter = function(r, s, fn) {
+// recursive function fired in server.js, checked when a new character is being made
+Character.prototype.newCharacter = function(s, command) {
 	var character = this,
-	i = 0,
-	str = '',
-	races = World.getPlayableRaces(),
-	classes = World.getPlayableClasses();
-
-	for (i; i < races.length; i += 1) {
-		str += '<li class="race-list-'+ races[i].name + '">' + races[i].name + '</li>';
-
-		if	(races.length - 1 === i) {
-			s.emit('msg', {
-				msg: s.player.name + ' is a new character! There are three steps until ' + s.player.name + 
-				' is saved. The <strong>first step</strong> is to select a race: <ul>' + str +
-				'</ul><p class="tip">You can learn more about each race by typing help race name</p>',
-				res: 'selectRace',
-				styleClass: 'race-selection'
-			});		
-
-			s.on('raceSelection', function (r) { 
-				var cmdArr = r.msg.split(' ');
-
-				r.cmd = cmdArr[0].toLowerCase();
-				r.msg = cmdArr.slice(1).join(' ');
+	i = 0;
 	
-				character.raceSelection(r, s, function(r, s, fnd) {
-					if (fnd) {
-						i = 0;
-						str = '';
-						s.player.race = r.cmd;
-
-						for (i; i < classes.length; i += 1) {
-							str += '<li>' + classes[i].name + '</li>';
-
-							if	(classes.length - 1 === i) {
-								s.emit('msg', {
-									msg: 'Great, <strong>two more steps to go!</strong> Now time to select a class for '
-									+ s.player.name + '. Pick one of the following: <ul>' + 
-									str + '</ul>', 
-									res: 'selectClass', 
-									styleClass: 'race-selection'
-								});
-								
-								s.on('classSelection', function(r) {
-									r.msg = r.msg.toLowerCase();
-
-									character.classSelection(r, function(fnd) {
-										if (fnd) {
-											s.player.charClass = r.msg;
-											
-											s.emit('msg', {
-												msg: s.player.name + ' is a ' + s.player.charClass
-												+ '! <strong>One more step before ' + s.player.name
-												+ ' is saved</strong>. Please define a password (8 or more characters):', 
-												res: 'createPassword', 
-												styleClass: 'race-selection'
-											});
-								
-											s.on('setPassword', function(r) {
-												if (r.msg.length > 7) {
-													s.player.password = r.msg;
-													character.create(r, s, fn);
-												} else {
-													s.emit('msg', {msg: 'Password should be longer', styleClass: 'error' });
-												}
-											});
-										} else {
-											s.emit('msg', {
-												msg: 'That class is not on the list, please try again',
-												styleClass: 'error'
-											});
-										}
-									}); 
-								});
-							}
-						}
-					} else if (!fnd && r.cmd !== 'help') {
-						s.emit('msg', {msg: 'That race is not on the list, please try again', styleClass: 'error' });
-					}
-				});
-			});
-		}
+	if (!Cmds) {
+		Cmds = require('./commands').cmd;
 	}
-};
-
-Character.prototype.raceSelection = function(r, s, fn) {
-	var i = 0,
-	races = World.getPlayableRaces(),
-	helpTxt;
-
-	if (r.cmd !== 'help') {
-		for (i; i < races.length; i += 1) {
-			if (r.cmd === races[i].name.toLowerCase()) {
-				return fn(r, s, true);
-			}
-		}
-
-		return fn(r, s, false);
-	} else {
-		fs.readFile('./help/' + r.msg + '.html', 'utf-8', function (err, data) {
-			if (!err) {
-				s.emit('msg', {msg: data, styleClass: 'cmd-help' });
-
-				return fn(r, s, false);
-			} else {
-				s.emit('msg', {msg: 'No help file found for this race.', styleClass: 'error' });
-
-				return fn(r, s, false);
-			}
+	
+	if (s.player.creationStep === 1) {
+		World.msgPlayer(s, {
+			msg: '<p>' + s.player.name + ' is a new character! There are three steps until '
+			+ s.player.name + ' is saved. The <strong>first step</strong> is to select a Race.',
+			noPrompt: true
 		});
+
+		// Display race list (help races)
+		Cmds.help(s.player, {
+			msg: 'races',
+			noPrompt: true
+		});
+		
+		s.player.creationStep = 2;
+
+		command.firstCall = true;
 	}
-};
 
-Character.prototype.classSelection = function(r, fn) {
-	var i = 0,
-	classes = World.getPlayableClasses();
+	switch (s.player.creationStep) {
+		case 2:
+			if (!command.firstCall) {
+				if (World.isPlayableRace(command.cmd)) {
+					s.player.creationStep = 3;
+					s.player.race = command.cmd;
+				
+					// Display class list
+					Cmds.help(s.player, {
+						msg: 'classes',
+						noPrompt: true
+					});
+				} else {
+					if (command.cmd !== 'help') {
+						World.msgPlayer(s, {
+							msg: 'Not a valid race. Type <span class="green large">help races</span> to see the full list. '
+							+ 'You can also access any help file by typing <span class="yellow">help [subject]</span>',
+							noPrompt: true
+						});
+					} else {
+						Cmds.help(s, {
+							msg: command.msg,
+							noPrompt: true
+						});
+					}
+				}
+			}
+		
+			break;
+		case 3:
+			if (World.isPlayableClass(command.cmd)) {
+				s.player.creationStep = 4;
+				s.player.charClass = command.cmd;
+				
+				// Now for a password
+				World.msgPlayer(s, {
+					msg: s.player.name + ' is a ' + s.player.charClass
+					+ '! <strong>One more step before ' + s.player.name
+					+ ' is saved</strong>. Please define a password (8 or more characters):', 
+					evt: 'reqPassword',
+					noPrompt: true,
+					styleClass: 'password-request'
+				});
+			} else {
+				if (command.cmd !== 'help') {
+					World.msgPlayer(s, {
+						msg: 'Not a valid class. Type <span class="red large">help classes</span> '
+						+ 'to see the full list of playable classes.',
+						noPrompt: true
+					});
+				} else {
+					Cmds.help(s, {
+						msg: command.msg,
+						noPrompt: true
+					});
+				}
+			}
 
-	for (i; i < classes.length; i += 1) {
-		if (r.msg === classes[i].name.toLowerCase()) {
-			return fn(true)
-		}
-	}
+			break;
+		case 4:
+			if (command.cmd.length > 7) {
+				s.player.password = command.cmd;
+				s.player.creationStep = 0;
 
-	return fn(false);
+				character.create(s);
+			} else {
+				World.msgPlayer(s, {
+					msg: 'Password should be longer',
+					styleClass: 'error',
+					noPrompt: true
+				});
+			}
+		
+			break;
+		default:
+			break;
+	};
 };
 
 Character.prototype.save = function(player, fn) {
@@ -417,7 +418,7 @@ Character.prototype.save = function(player, fn) {
 	player.saved = new Date().toString();
 
 	if (player.opponent) {
-		player.opponent = null;;
+		player.opponent = null;
 	};
 
 	player.socket = null;

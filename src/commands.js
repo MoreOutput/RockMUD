@@ -17,6 +17,39 @@ areas = World.areas,
 
 Cmd = function () {};
 
+Cmd.prototype.createCommandObject = function(resFromClient) {
+	var cmdArr = resFromClient.msg.split(' '),
+	cmdObj = {};
+
+	if (cmdArr.length === 1) {
+		cmdArr[1] = '';
+	}
+
+	if (/[`~@#$%^&*()-+={}[]|<>]+$/g.test(resFromClient.msg) === false) {
+		cmdObj = {
+			cmd: cmdArr[0].toLowerCase(), // {cast} spark boar
+			msg: cmdArr.slice(1).join(' '), // cast {spark boar}
+			arg: cmdArr[1].toLowerCase(), // cast {spark} boar
+			input: cmdArr.slice(2).join(' '), // cast spark {boar ...}
+			number: 1 // argument target -- cast spark 2.boar
+		};
+
+		if (cmdObj.input && !isNaN(parseInt(cmdObj.input[0]))
+			|| (!cmdObj.input && !isNaN(parseInt(cmdObj.msg[0]))) ) {
+
+			if (!cmdObj.input) {
+				cmdObj.number = parseInt(cmdObj.msg[0]);
+				cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
+			} else {
+				cmdObj.number = parseInt(cmdObj.input[0]);
+				cmdObj.input = cmdObj.input.replace(/^[0-9][.]/, '');
+			}
+		}
+	}
+
+	return cmdObj;
+};
+
 Cmd.prototype.buy = function(target, command) {
 	var i = 0,
 	roomObj = World.getRoomObject(target.area, target.roomid),
@@ -1514,17 +1547,47 @@ Cmd.prototype.time = function(target, command) {
 	});
 };
 
+Cmd.prototype.quit = function(target, command) {
+	if (target.isPlayer) {
+		if (target.position !== 'fighting') {
+			target.logged = false;
+			target.verifiedName = false;
+			target.verifiedPassword = false;
+			
+			Character.save(target, function() {
+				World.msgPlayer(target, {
+					msg: 'Add a little to a little and there will be a big pile.',
+					emit: 'disconnect',
+					styleClass: 'logout-msg',
+					noPrompt: true
+				});
+
+				target.socket.leave('mud');
+				target.socket.disconnect();
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You are fighting! Finish up before quitting',
+				emit: 'disconnect',
+				styleClass: 'logout-msg'
+			});
+		}
+	}
+};
+
 /** Related to Saving and character adjustment/interaction **/
 
 Cmd.prototype.save = function(target, command) {
-	if (target.position === 'standing' && target.wait === 0) {
-		Character.save(target, function() {
-			World.msgPlayer(target, {msg: target.displayName + ' was saved. Whew!', styleClass: 'save'});
-		});
-	} else if (target.position !== 'standing') {
-		World.msgPlayer(target, {msg: 'You can\'t save while ' + target.position + '.', styleClass: 'save'});
-	} else {
-		World.msgPlayer(target, {msg: 'You can\'t save just yet!', styleClass: 'error'});
+	if (target.isPlayer) {
+		if (target.position === 'standing' && target.wait === 0) {
+			Character.save(target, function() {
+				World.msgPlayer(target, {msg: target.displayName + ' was saved. Whew!', styleClass: 'save'});
+			});
+		} else if (target.position !== 'standing') {
+			World.msgPlayer(target, {msg: 'You can\'t save while ' + target.position + '.', styleClass: 'save'});
+		} else {
+			World.msgPlayer(target, {msg: 'You can\'t save just yet!', styleClass: 'error'});
+		}
 	}
 };
 
@@ -1758,11 +1821,11 @@ Cmd.prototype.help = function(target, command) {
 		command.msg = 'help';
 	}
 
-	fs.readFile('./help/' + command.msg + '.html', 'utf8', function (err, data) {
+	fs.readFile('./help/' + command.msg.replace(/ /g, '_') + '.html', 'utf8', function (err, data) {
 		if (!err) {
-			World.msgPlayer(target, {msg: data, styleClass: 'cmd-help' });
+			World.msgPlayer(target, {msg: data, noPrompt: command.noPrompt, styleClass: 'cmd-help' });
 		} else {
-			World.msgPlayer(target, {msg: 'No help file found.', styleClass: 'error' });
+			World.msgPlayer(target, {msg: 'No help file found.', noPrompt: command.noPrompt, styleClass: 'error' });
 		}
 	});
 };

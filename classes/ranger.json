@@ -1,0 +1,29 @@
+{
+	"name": "Ranger",
+	"classAbbr": "Ran",
+	"playable": true,
+	"hp": 10,
+	"mainStat": "con",
+	"skills": [
+		{
+			"id": "spikeTrap",
+			"display": "Spike Trap",
+			"mod": 0,
+			"level": 1,
+			"train": 65,
+			"type": "skill",
+			"wait": 4
+		}
+	],
+	"skillList" : {
+		"spark": {
+			"id": "spikeTrap",
+			"display": "Spike Tra[",
+			"mod": 0,
+			"level": 1,
+			"train": 65,
+			"type": "spell",
+			"wait": 4
+		}
+	}
+}

@@ -1,21 +1,20 @@
 RockMUD
 ===============================
 
-**RockMUD (0.2.5) is a Node WebSockets MUD server**
+**RockMUD (0.3.0) is a Node WebSockets MUD server**
 
 Try the latest on this Heroku hobby instance: http://rockmud.heroku.com. If you connect to the demo server type 'help commands' to get a full(ish) list of the current commands.
 
 Goals:
 * A Diku-like MUD experience from within the browser.
 * Enable quick development.
-* Real-time browser OLC and world management. This will begin post v0.5.
 
 Notes on dependencies: 
-* Socket.io 1.0 or greater is required.
+* Socket.io 1.0 or greater is required and is the only dependency.
 * Default terminal loads Bootstrap from CDN
 * Development aims to keep up with latest node release.
 
-Some of the things in 0.2.5:
+Some of the things in 0.3.0:
 * No command whitelisting (add a command function, and it becomes a in-game command instantly). RockMUD does not rely on parsing commands on a tick.
 * Character creation (Races, Classes, stats, passwords) and saving as json files (/players).
 * Channels (chat, say, yell, tell, reply)
@@ -90,7 +89,7 @@ JSON templates used to enhance in-game items; and to ensure default values. This
 HTML templates mainly retrieved to ease complex display. For RockMUD core this means character creation screens.
 
 **/ai**  
-Mob specific AI scripts. This are merged into game items after they are loaded from their respective area files. AI can be written directly into the area file, but ai scripts are outlined here when they can be reused. RockMUD core aims to have 3: wander.js, aggie.js and mayor.js.
+Mob specific AI scripts. This are merged into game items after they are loaded from their respective area files. AI can be written directly into the area file, but ai scripts are outlined here when they can be reused.
 
 **/public**
 Public assets like client side javascript and CSS.

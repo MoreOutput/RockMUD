@@ -49,126 +49,102 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 	server.listen(process.env.PORT || cfg.port);
 
 	io.on('connection', function (s) {
-		s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
+		var parseCmd = function(r, s) {
+			var skillObj,
+			cmdObj = Cmds.createCommandObject(r);
+				
+			if (!s.player.creationStep) {
+				if (cmdObj.msg === '' || cmdObj.msg.length >= 2 && s.player.wait === 0) {
+					if (cmdObj.cmd) {
+						if (cmdObj.cmd in Cmds) {
+							return Cmds[cmdObj.cmd](s.player, cmdObj);
+						} else if (cmdObj.cmd in Skills) {
+							skillObj = Character.getSkill(s.player, cmdObj.cmd);
 
-		s.on('login', function (r) {
-			var parseCmd = function(r, s) {
-				var cmdArr = r.msg.split(' '),
-				skillObj, 
-				cmdObj = {};
-
-				if (cmdArr.length === 1) {
-					cmdArr[1] = '';
-				}
-
-				if (/[`~@#$%^&*()-+={}[]|<>]+$/g.test(r.msg) === false) {
-					cmdObj = {
-						cmd: cmdArr[0].toLowerCase(), // {cast} spark boar
-						msg: cmdArr.slice(1).join(' '), // cast {spark boar}
-						arg: cmdArr[1].toLowerCase(), // cast {spark} boar
-						input: cmdArr.slice(2).join(' '), // cast spark {boar ...}
-						number: 1 // argument target -- cast spark 2.boar
-					};
-
-					if (cmdObj.input && !isNaN(parseInt(cmdObj.input[0]))
-						|| (!cmdObj.input && !isNaN(parseInt(cmdObj.msg[0]))) ) {
-
-						if (!cmdObj.input) {
-							cmdObj.number = parseInt(cmdObj.msg[0]);
-							cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
-						} else {
-							cmdObj.number = parseInt(cmdObj.input[0]);
-							cmdObj.input = cmdObj.input.replace(/^[0-9][.]/, '');
-						}
-					}
-
-					if (cmdObj.msg === '' || cmdObj.msg.length >= 2 && s.player.wait === 0) {
-						if (cmdObj.cmd) {
-							if (cmdObj.cmd in Cmds) {
-								return Cmds[cmdObj.cmd](s.player, cmdObj);
-							} else if (cmdObj.cmd in Skills) {
-								skillObj = Character.getSkill(s.player, cmdObj.cmd);
-
-								if (skillObj) {
-									return Skills[cmdObj.cmd](
-										skillObj,
-										s.player,
-										World.getRoomObject(s.player.area, s.player.roomid),
-										cmdObj
-									);
-								} else {
-									World.msgPlayer(s, {msg: 'You do not know how to ' + cmdObj.cmd + '.', styleClass: 'error'});
-								}
+							if (skillObj) {
+								return Skills[cmdObj.cmd](
+									skillObj,
+									s.player,
+									World.getRoomObject(s.player.area, s.player.roomid),
+									cmdObj
+								);
 							} else {
-								World.msgPlayer(s, {msg: cmdObj.cmd + ' is not a valid command.', styleClass: 'error'});
+								World.msgPlayer(s, {
+									msg: 'You do not know how to ' + cmdObj.cmd + '.',
+									styleClass: 'error'
+								});
 							}
 						} else {
-							return World.prompt(s);
+							World.msgPlayer(s, {
+								msg: cmdObj.cmd + ' is not a valid command.',
+								styleClass: 'error'
+							});
 						}
 					} else {
-						if (s.player.wait > 0) {
-							World.msgPlayer(s, {msg: 'You cant do that just yet!', styleClass: 'error'});
-						} else {
-							World.msgPlayer(s, {msg: 'You have to be more specific with your command.', styleClass: 'error'});
-						}
+						return World.prompt(s);
 					}
 				} else {
-					World.msgPlayer(s, {msg: 'Invalid characters in command!', styleClass: 'error'});
-				}
-			};
-
-			if (r.msg !== '') {
-				return Character.login(r, s, function (name, s, fnd) {
-					if (fnd) {
-						s.join('mud'); // mud is one of two rooms, 'creation' being the other
-						
-						Character.load(name, s, function (s) {
-							Character.getPassword(s, function(s) {
-								Cmds.look(s.player); // we auto fire the look command on login
-								
-								s.on('cmd', function (r) {
-									parseCmd(r, s);
-								});
-							});
+					if (s.player.wait > 0) {
+						World.msgPlayer(s, {
+							msg: 'You cant do that just yet!',
+							styleClass: 'error'
 						});
 					} else {
-						s.join('creation'); // creation is one of two rooms, 'mud' being the other
-						
-						s.player = World.mobTemplate;
-						s.player.name = name;
-						s.player.sid = s.id;
-						s.player.socket = s;
-
-						Character.newCharacter(r, s, function(s) {
-							s.on('cmd', function (r) {
-								parseCmd(r, s);
-							});
+						World.msgPlayer(s, {
+							msg: 'You have to be more specific with your command.',
+							styleClass: 'error'
 						});
 					}
-				});
+				}
 			} else {
-				return s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
+				Character.newCharacter(s, cmdObj);
 			}
-		});
+		};
+		
+		s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
 
-		s.on('quit', function () {
-			if (s.player.position !== 'fighting') {
-				Character.save(s.player, function() {
-					World.msgPlayer(s, {
-						msg: 'Add a little to a little and there will be a big pile.',
-						emit: 'disconnect',
-						styleClass: 'logout-msg',
-						noPrompt: true
+		s.on('cmd', function (r) {
+			if (r.msg !== '' && !s.player || !s.player.logged) {
+				if (!s.player || !s.player.verifiedName) {
+					Character.login(r, s, function (s) {
+						if (s.player) {
+							s.player.verifiedName = true;
+							s.join('mud'); // mud is one of two rooms, 'creation' being the other		
+
+							World.msgPlayer(s, {
+								msg: 'What is your password: ',
+								evt: 'reqPassword',
+								noPrompt: true
+							});
+						} else {
+							s.join('creation'); // creation is one of two rooms, 'mud' being the other
+						
+							s.player = World.mobTemplate;
+							s.player.name = r.msg;
+							s.player.sid = s.id;
+							s.player.socket = s;
+							s.player.creationStep = 1;
+							s.player.isPlayer = true;
+							s.player.logged = true;
+						
+							parseCmd(r, s);
+						}
+					})			
+				} else if (s.player && !s.player.verifiedPassword) {
+					Character.getPassword(s, Cmds.createCommandObject(r), function(s) {
+						s.player.verifiedPassword = true;
+						s.player.logged = true;
+
+						Cmds.look(s.player); // we auto fire the look command on login
 					});
-
-					s.leave('mud');
-					s.disconnect();
-				});
+				}
+			} else if (s.player && s.player.logged === true) {
+				parseCmd(r, s);
 			} else {
 				World.msgPlayer(s, {
-					msg: 'You are fighting! Finish up before quitting',
-					emit: 'disconnect',
-					styleClass: 'logout-msg'
+					msg : 'Enter your name:',
+					evt: 'reqLogin',
+					styleClass: 'enter-name'
 				});
 			}
 		});
@@ -193,6 +169,9 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 					}
 				}
 			}
+
+			s.leave('mud');
+			s.disconnect();
 		});
 	});
 });

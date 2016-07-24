@@ -1,13 +1,13 @@
 {
-	"name": "Mage",
-	"classAbbr": "Mag",
+	"name": "Cleric",
+	"classAbbr": "Cle",
 	"playable": true,
-	"mana": 30,
-	"mainStat": "int",
+	"mana": 20,
+	"mainStat": "wis",
 	"skills": [
 		{
-			"id": "spark",
-			"display": "Spark",
+			"id": "cureLight",
+			"display": "Cure Light",
 			"mod": 0,
 			"level": 1,
 			"train": 70,
@@ -17,8 +17,8 @@
 	],
 	"skillList" : {
 		"spark": {
-			"id": "spark",
-			"display": "Spark",
+			"id": "cureLight",
+			"display": "Cure Light",
 			"mod": 0,
 			"level": 1,
 			"train": 70,

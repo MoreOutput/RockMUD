@@ -1,0 +1,14 @@
+{
+	"name": "Halfling",
+	"raceAbbr": "Hlf",
+	"con": -1,
+	"dex": 2,
+	"hp": -10,
+	"mv": 20,
+	"playable": true,
+	"attackType": "punch",
+	"size": {"value": 2, "display": "very small"},
+	"diceNum": 1,
+	"diceSides": 3,
+	"affects": []
+}

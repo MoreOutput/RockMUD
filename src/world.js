@@ -46,7 +46,7 @@ World = function() {
 	},
 	loadTime = function (fn) {
 		fs.readFile('./time.json', function (err, r) {
-			return  fn(err, JSON.parse(r));
+			return fn(err, JSON.parse(r));
 		});
 	},
 	loadRaces = function (fn) {
@@ -55,23 +55,15 @@ World = function() {
 	loadClasses = function (fn) {
 		loadFileSet('./classes/', fn);
 	},
-	/*
-	Two Types of Templates Message and Object:
-		Message - String conversion via World.i18n()
-		Object - Auto combined with any object with the same 'itemType', addional templates defined in an objects template property
-	*/
-	loadTemplates = function (tempType, fn) {
-		var tmpArr = [];
-
-		if (tempType === 'mob') {
-			fs.readFile('./templates/objects/entity.json', function (err, r) {
-				return  fn(err, JSON.parse(r));
-			});
-		} else {
-			fs.readFile('./templates/objects/item.json', function (err, r) {
-				return  fn(err, JSON.parse(r));
-			});
-		}
+	loadItemTemplate = function (fn) {
+		fs.readFile('./templates/objects/item.json', function (err, r) {
+			return fn(err, JSON.parse(r));
+		});
+	},
+	loadMobTemplate = function (fn) {
+		fs.readFile('./templates/objects/entity.json', function (err, r) {
+			return fn(err, JSON.parse(r));
+		});
 	},
 	loadAI = function(fn) {
 		loadFileSet('./ai/', function(err) {
@@ -86,52 +78,48 @@ World = function() {
 	world.players = []; // Loaded players
 	world.time = null; // Current Time data
 	world.itemTemplate = {};
-	world.areaTemplate = {};
 	world.mobTemplate = {};
 	world.ai = {};
 	world.motd = '';
 
-	// embrace callback hell!
+	// Initial game loading, embrace callback hell!
 	loadAreas(function(areas) {
 		loadTime(function(err, time) {
 			loadRaces(function(err, races) {
 				loadClasses(function(err, classes) {
-					loadTemplates('area', function(err, areaTemplate) {
-						loadTemplates('mob', function(err, mobTemplate) {
-							loadTemplates('item', function(err, itemTemplate) {
-								loadAI(function() {
-									var area,
-									i = 0,
-									j;
+					loadMobTemplate(function(err, mobTemplate) {
+						loadItemTemplate(function(err, itemTemplate) {
+							loadAI(function() {
+								var area,
+								i = 0,
+								j;
 
-									fs.readFile('./templates/html/motd.html', 'utf-8', function (err, html) {
-										if (err) {
-											throw err;
-										}
-									
-										world.motd = '<div class="motd">' + html + '</div>';
-									});
-
-									world.areas = areas;
-									world.time = time;
-									world.races = races;
-									world.classes = classes;
-									world.areaTemplate = areaTemplate;
-									world.itemTemplate = itemTemplate;
-									world.mobTemplate = mobTemplate;
-
-									for (i; i < world.areas.length; i += 1) {
-										area = world.areas[i];
-
-										world.setupArea(area);
+								fs.readFile('./templates/html/motd.html', 'utf-8', function (err, html) {
+									if (err) {
+										throw err;
 									}
-
-									world.time.isDay = true;
-
-									world.ticks = require('./ticks');
-
-									return world;
+								
+									world.motd = '<div class="motd">' + html + '</div>';
 								});
+
+								world.areas = areas;
+								world.time = time;
+								world.races = races;
+								world.classes = classes;
+								world.itemTemplate = itemTemplate;
+								world.mobTemplate = mobTemplate;
+
+								for (i; i < world.areas.length; i += 1) {
+									area = world.areas[i];
+
+									world.setupArea(area);
+								}
+
+								world.time.isDay = true;
+
+								world.ticks = require('./ticks');
+
+								return world;
 							});
 						});
 					});
@@ -180,6 +168,34 @@ World.prototype.getPlayableClasses = function() {
 	}
 
 	return playableClasses;
+};
+
+World.prototype.isPlayableRace = function(raceName) {
+	var world = this,
+	playableRaces = this.getPlayableRaces(),
+	i = 0;
+
+	for (i; i < playableRaces.length; i += 1) {
+		if (playableRaces[i].name.toLowerCase() === raceName.toLowerCase()) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
+World.prototype.isPlayableClass = function(className) {
+	var world = this,
+	playableClasses = this.getPlayableClasses(),
+	i = 0;
+
+	for (i; i < playableClasses.length; i += 1) {
+		if (playableClasses[i].name.toLowerCase() === className.toLowerCase()) {
+			return true;
+		}
+	}
+
+	return false;
 };
 
 World.prototype.getAI = function(aiObj) {

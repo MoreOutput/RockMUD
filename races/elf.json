@@ -1,11 +1,11 @@
 
 {
-    "name": "Elf",
-    "int": 3,
-    "con": -2,
-    "playable": true,
-    "attackType": "punch",
-    "diceNum": 1,
-    "diceSides": 4,
-    "affects": []
+	"name": "Elf",
+	"int": 3,
+	"con": -2,
+	"playable": true,
+	"attackType": "punch",
+	"diceNum": 1,
+	"diceSides": 4,
+	"affects": []
 }

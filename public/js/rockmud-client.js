@@ -124,30 +124,12 @@ window.onload = function() {
 		var messageNodes = [],
 		msg = node.value.toLowerCase().trim(),
 		msgObj = {
-			msg : checkAlias(msg, function(cmd) {
+			msg: checkAlias(msg, function(cmd) {
 				 return checkMovement(cmd, function(wasMov, cmd) {
 					return cmd;
 				});
 			}),
-			emit : (function () {
-				var res = node.dataset.mudState;
-
-				if (res === 'login') {
-					return 'login';
-				} else if (msg === 'quit' || msg === 'disconnect') {
-					return 'quit';
-				} else if (res === 'selectRace') {
-					return 'raceSelection';
-				} else if (res === 'selectClass') {
-					return 'classSelection';
-				} else if (res === 'createPassword') {
-					return 'setPassword';
-				} else if (res === 'enterPassword') {
-					return 'password';
-				} else {
-					return 'cmd';
-				}
-			}()),
+			emit: 'cmd',
 			styleClass: 'cmd'
 		};
 

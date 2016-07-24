@@ -1,14 +1,14 @@
 {
-    "name": "Dwarf",
-    "raceAbbr": "Dwf",
-    "con": 2,
-    "int": -1,
-    "hp": 10,
-    "ac": 1,
-    "playable": true,
-    "attackType": "punch",
-    "size": {"value": 3, "display": "small"},
-    "diceNum": 1,
-    "diceSides": 5,
-    "affects": []
+	"name": "Dwarf",
+	"raceAbbr": "Dwf",
+	"con": 2,
+	"int": -1,
+	"hp": 10,
+	"ac": 1,
+	"playable": true,
+	"attackType": "punch",
+	"size": {"value": 3, "display": "small"},
+	"diceNum": 1,
+	"diceSides": 5,
+	"affects": []
 }
