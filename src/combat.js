@@ -91,7 +91,9 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	hitRoll = attacker.hitRoll + attackerMods.dex,
 	damRoll	= attacker.damRoll + attackerMods.str,
 	dodgeCheck = opponentMods.dex + opponent.detection + opponent.awareness/2,
-	acCheck = opponent.ac + opponentMods.dex;
+	acCheck = opponent.ac + opponentMods.dex + opponent.level,
+	criticalAttackXP,
+	criticalAttack = false;	
 
 	// Is a player attacking something
 	if (attacker.wait > 0) { 
@@ -134,9 +136,9 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 					if (opponent.race === 'animal' && weapon.attackType === 'slash') {
 						damage += World.dice.roll(1, 2 + weapon.level);
 					}
-
-					if ((World.dice.roll(1, 8 + acCheck))
-						< (World.dice.roll(1, 12 + hitRoll) + attacker.level) ) {
+					
+					if (World.dice.roll(opponent.level, 8, acCheck)
+						< World.dice.roll(attacker.level, 8, hitRoll + attacker.level)) {
 						// attacker beat opponents ac check
 						if (World.dice.roll(2, 20, dodgeCheck)
 							< World.dice.roll(2, 20, hitRoll + 5)) {
@@ -162,9 +164,14 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							}
 
 							// critical attacks
-							if (World.dice.roll(1 * attacker.level, 20, hitRoll + attackerMods.dex)
-								=== (20 * attacker.level + 1)) {
-								damage = (damage * 2) + attacker.str;
+							if (World.dice.roll(1, 20, hitRoll + attackerMods.dex)
+								>= 20 && World.dice.roll(1, 20) >= 19) {
+								criticalAttack = true;
+								criticalAttackXP = World.dice.roll(1 + attacker.level, 20);
+
+								attacker.exp += criticalAttackXP;
+								
+								damage = (damage * 3) + attacker.str;
 							}
 
 							if (damage < 0) {
@@ -180,35 +187,70 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							opponent.chp -= damage;
 
 							if (attacker.isPlayer) {
-								msgForAttacker += '<div>You ' + weapon.attackType + ' a ' + opponent.displayName 
-									+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' +
-									damage + ')</span></div>';
+								if (!criticalAttack) {
+									msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short 
+										+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' +
+										damage + ')</span></div>';
+								} else {
+									msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short 
+										+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red large">(' +
+										damage + ')</span></div>'
+										+ '<div class="green">You landed a critical hit and gain '
+										+ criticalAttackXP + ' experience.</div>';
+
+									if (attacker.onExp) {
+										attacker.onExp(criticalAttackXP);
+									}
+								}
 							}
 
 							if (opponent.isPlayer) {
-								msgForOpponent += '<div>' + attacker.displayName + 's ' + weapon.attackType 
-									+ ' hits you with ' + adjective + ' ' + abstractNoun
-									+ ' <span class="red">(' + damage + ')</span></div>';
+								if (!criticalAttack) {
+									msgForOpponent += '<div class="grey">' + attacker.displayName + 's ' + weapon.attackType 
+										+ ' hits you with ' + adjective + ' ' + abstractNoun
+										+ ' <span class="red">(' + damage + ')</span></div>';
+								} else {
+									msgForOpponent += '<div class="grey">' + attacker.displayName + 's ' + weapon.attackType 
+										+ ' hits you with ' + adjective + ' ' + abstractNoun
+										+ ' <span class="red large">(' + damage + ')</span></div>';
+								}
 							}
 						} else {
 							if (attacker.isPlayer) {
-								msgForAttacker += '<div>You swing at a ' + opponent.displayName + ' and miss!</div>';
+								if (World.dice.roll(1, 2) === 1) {
+									msgForAttacker += '<div class="red">You lunge at '
+										+ opponent.short + ' and miss!</div>';
+								} else {
+									msgForAttacker += '<div class="red">You swing at '
+										+ opponent.short + ' with <strong>' + weapon.short + '</strong> and miss!</div>';	
+								}
 							}
 
 							if (opponent.isPlayer) {
-								msgForAttacker += '<div>' + attacker.displayName +
-								' tries to attack but you dodge at the last minute!</div>';
+								if (World.dice.roll(1, 2) === 1) {
+									msgForAttacker += '<div class="green">' + attacker.long
+										+ ' tries to attack but you dodge at the last minute!</div>';
+								} else {
+									msgForAttacker += '<div class="green">A ' + attacker.long
+										+ ' lunges and you with ' + weapon.short +  ' and misses!</div>';
+								}
 							}
 						}
 					} else {
 						if (attacker.isPlayer) {
-							msgForAttacker += '<div>You try to attack a ' + opponent.displayName +
-							' and they block your attack!</div>';
+							if (!shield) {
+								msgForAttacker += '<div class="red">You try to attack ' + opponent.short
+									+ ' and they block your attack!</div>';
+							} else {
+
+							}
 						}
 
 						if (opponent.isPlayer) {
-							msgForAttacker += '<div>' + attacker.displayName +
-							' swings widly and you narrowly block their attack!</div>';
+							if (!shield) {
+								msgForOpponent += '<div class="green">' + attacker.displayName +
+								' swings widly and you narrowly block their attack!</div>';
+							}
 						}
 					}
 
@@ -267,13 +309,11 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 		player.wait += 1;
 
 		if (player.isPlayer) {
-			msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg +
-			' (' + opponent.chp + '/' + opponent.hp +')</div>';
+			msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg + '</div>';
 		}
 
 		if (opponent.isPlayer) {
-			msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg +
-			' (' + player.chp + '/' + player.hp +')</div>';
+			msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg + '</div>';
 		}
 
 		World.msgPlayer(player, {
@@ -313,7 +353,10 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 		opponent.position = 'standing';
 		opponent.chp = opponent.hp;
 
-		World.msgPlayer(player, {msg: 'At the moment player death is impossible', styleClass: 'red'});
+		World.msgPlayer(player, {
+			msg: 'At the moment player death is impossible',
+			styleClass: 'red'
+		});
 	}
 
 	Room.removeMob(roomObj, opponent);
@@ -329,9 +372,14 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 	if (exp > 0) {
 		player.exp += exp;
 
-		endOfCombatMsg = 'You won the fight! You learn some things, resulting in ' + exp + ' experience points.';
+		endOfCombatMsg = 'You won the fight! You learn some things, resulting in <strong>'
+			+ exp + ' experience points</strong>.';
 	} else {
-		endOfCombatMsg = 'You won but learned nothing.';
+		if (World.dice.roll(1, 2) === 1) {
+			endOfCombatMsg = 'You won but learned nothing.';
+		} else {
+			endOfCombatMsg = 'You did not learn anything from the battle.';
+		}
 	}
 
 	if (opponent.gold) {
@@ -364,13 +412,23 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 			msgForOpponent += msgForOpponent2;
 
 			if (player.isPlayer) {
-				msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
-				+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+				if (!player.canViewHp) {
+					msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
+					+ '</div>';
+				} else {
+					msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
+						+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+				}
 			}
 
 			if (opponent.isPlayer) {
-				msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg
-				+ ' (' + player.chp + '/' + player.hp +')</div>';
+				if (!opponent.canViewHp) {
+					msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg
+						+ '</div>';
+				} else {
+					msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg
+						+ ' (' + player.chp + '/' + player.hp +')</div>';
+				}
 			}
 
 			World.msgPlayer(player, {

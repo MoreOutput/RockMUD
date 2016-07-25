@@ -6,7 +6,6 @@
 	"detection": 2,
 	"gold": 100,
 	"mainStat": "dex",
-	"banRace": ["ogre"],
 	"skills": [
 		{
 			"id": "backstab",

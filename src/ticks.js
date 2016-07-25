@@ -172,7 +172,7 @@ World = require('./world').world;
 								lightFlickerMsg = item.displayName + ' ' + item.lightFlickerMsg;
 							}
 
-							World.msgPlayer(player, {
+							World.msgPlayer(obj, {
 								msg: lightFlickerMsg,
 								className: 'yellow'
 							});
@@ -184,7 +184,7 @@ World = require('./world').world;
 							lightDecayMsg = item.displayName + ' ' + item.lightDecayMsg;
 						}
 
-						World.msgPlayer(player, {
+						World.msgPlayer(obj, {
 							msg: lightDecayMsg,
 							className: 'yellow'
 						});

@@ -1206,7 +1206,7 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 		if (opponent && opponent.roomid === player.roomid) {
 
 			World.msgPlayer(player, {
-				msg: 'You scream and charge at a ' + opponent.name,
+				msg: '<strong class="grey large">You scream and charge at a ' + opponent.name + '!</strong>',
 				noPrompt: true
 			});
 

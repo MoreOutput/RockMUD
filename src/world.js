@@ -701,9 +701,9 @@ World.prototype.prompt = function(target) {
 		player = target;
 	}
 
-	prompt = '<' + player.chp + '/'  + player.hp + '<span class="red">hp</span>><' +
+	prompt = '<strong><' + player.chp + '/'  + player.hp + '<span class="red">hp</span>><' +
 		player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' + 
-		player.cmv + '/'  + player.mv +'<span class="yellow">mv</span>>';
+		player.cmv + '/'  + player.mv +'<span class="yellow">mv</span>></strong>';
 
 	if (player.role === 'admin') {
 		prompt += '<' + player.wait + 'w>';

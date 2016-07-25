@@ -11,18 +11,18 @@ World = require('./world').world,
 Cmds,
 Character = function () {
 	this.statusReport = [
-		{msg: ' is bleeding all over the place and looks nearly dead!', percentage: 0},
-		{msg: ' is bleeding profusely.', percentage: 10},
+		{msg: ' is <span class="red">bleeding all over the place</span> and looks nearly dead!', percentage: 0},
+		{msg: ' is <span class="red">bleeding</span> profusely.', percentage: 10},
 		{msg: ' has some major cuts and brusies.', percentage: 20},
 		{msg: ' has some large cuts and looks exhausted!', percentage: 30},
 		{msg: ' has some minor cuts and brusies.', percentage: 40},
 		{msg: ' is tired and bruised.', percentage: 50},
-		{msg: ' is hurt and showing signs of fatigue.', percentage: 60},
+		{msg: ' is hurt and showing <span class="grey">signs of fatigue</span>.', percentage: 60},
 		{msg: ' is looking tired and wounded.', percentage: 70},
 		{msg: ' is barely wounded.', percentage: 80},
 		{msg: ' is in great shape.', percentage: 90},
 		{msg: ' still seems in perfect health!', percentage: 95},
-		{msg: ' is in perfect health!', percentage: 100}
+		{msg: ' is in <span class="green">perfect health</span>!', percentage: 100}
 	];
 };
 
@@ -121,7 +121,7 @@ Character.prototype.getPassword = function(s, command, fn) {
 			if (s.player.password === hash) {
 				if (character.addPlayer(s)) {
 					World.sendMotd(s);
-
+					
 					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 					roomObj.playersInRoom.push(s.player);
 
