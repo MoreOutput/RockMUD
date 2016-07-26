@@ -126,7 +126,6 @@ module.exports = {
 					"short": "a spotted hunting dog",
 					"long": "The mayors dog Shackleton a large, lean, spotted hunting dog",
 					"level": 15,
-					"short": "Shackleton, the Mayors famous canine",
 					"description": "",
 					"race": "human",
 					"id": "100",
