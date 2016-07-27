@@ -612,7 +612,7 @@ Cmd.prototype.move = function(target, command, fn) {
 	displayHTML,
 	targetRoom,
 	exitObj,
-	moveRoll = World.dice.roll(1, 4),
+	moveRoll = World.dice.roll(1, 6),
 	sneakAff,	
 	roomObj,
 	canEnter = true, // event result, must be true to move into targetRoom
@@ -1626,10 +1626,10 @@ Cmd.prototype.equipment = function(target, command) {
 				eqStr += '<label class="yellow">' + item.displayName + '</label></li>';
 			} else {
 				if (item.lightDecay > 0) {
-					eqStr += '<label class="yellow">' + item.short
+					eqStr += '<label class="yellow">' + item.displayName
 						+ ' (<span class="red">Providing light</span>)</label></li>';
 				} else {
-					eqStr += '<label class="yellow">' + item.short
+					eqStr += '<label class="yellow">' + item.displayName
 						+ ' (<span class="red">Not providing light</span>)</label></li>';
 				}
 			}

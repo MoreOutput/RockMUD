@@ -5,5 +5,7 @@
 	"attackType": "claw",
 	"size": {"value": 2, "display": "small"},
 	"diceNum": 1,
-	"diceSides": 2
+	"diceSides": 2,
+	"hitRoll": -2,
+	"ac": 0
 }

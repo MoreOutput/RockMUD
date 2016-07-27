@@ -26,6 +26,7 @@ module.exports = {
 			"light": true,
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
+			"outdoors": true,
 			"exits" : [
 				{
 					"cmd" : "north",
@@ -39,6 +40,11 @@ module.exports = {
 				}, {
 					"cmd" : "west",
 					"id" : "5"
+				},
+				{
+					"cmd" : "up",
+					"id": "1",
+					"area": "Midgaard Academy"
 				},
 				{
 					"cmd" : "down",
@@ -264,6 +270,7 @@ module.exports = {
 			"title" : "North of Town Square",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
+			"outdoors": true,
 			"exits" : [
 				{
 					"cmd" : "south",
@@ -301,6 +308,7 @@ module.exports = {
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"terrian" : "stone-road",
 			"terrianMod": 0,
+			"outdoors": true,
 			"exits" : [
 				{
 					"cmd" : "west",
@@ -331,6 +339,7 @@ module.exports = {
 			"title" : "South of Town Square",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
+			"outdoors": true,
 			"exits" : [
 				{
 					"cmd" : "north",
@@ -382,6 +391,7 @@ module.exports = {
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
 			"size": {"value": 3, "display": "medium"},
+			"outdoors": false,
 			"exits" : [
 				{
 					"cmd" : "up",
@@ -422,6 +432,7 @@ module.exports = {
 			"title" : "The General Store",
 			"area": "Midgaard",
 			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
+			"outdoors": false,
 			"exits" : [
 				{
 					"cmd" : "east",

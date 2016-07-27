@@ -88,12 +88,21 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	weapon, // attackers active weapon
 	shield, // opponents shield
 	shieldAC = 0,
-	hitRoll = attacker.hitRoll + attackerMods.dex,
-	damRoll	= attacker.damRoll + attackerMods.str,
-	dodgeCheck = opponentMods.dex + opponent.detection + opponent.awareness/2,
-	acCheck = opponent.ac + opponentMods.dex + opponent.level,
-	criticalAttackXP,
-	criticalAttack = false;	
+	hitRoll = World.dice.roll(attacker.diceNum, attacker.diceSides, attacker.hitRoll + attackerMods.dex + World.dice.roll(1, 10)),
+	damRoll	= World.dice.roll(attacker.diceNum, attacker.diceSides, attacker.damRoll + attackerMods.str + attacker.level),
+	criticalAttackXP, // XP gained when landing critical attack
+	criticalAttack = false,
+	// the following two variables are used as defensive values for the opponent
+	dodgeCheck = World.dice.roll(opponent.diceNum, opponent.diceSides, opponentMods.dex + opponent.detection + opponent.awareness/2 + (attacker.size.value - opponent.size.value)),
+	acCheck = World.dice.roll(opponent.diceNum, opponent.diceSides, opponent.ac + opponentMods.dex + opponent.level) + World.dice.roll(1, 10);
+
+	if (hitRoll < 0) {
+		hitRoll = attacker.level;
+	}
+
+	if (damRoll < 0) {
+		damRoll = attacker.level;
+	}
 
 	// Is a player attacking something
 	if (attacker.wait > 0) { 
@@ -137,11 +146,9 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						damage += World.dice.roll(1, 2 + weapon.level);
 					}
 					
-					if (World.dice.roll(opponent.level, 8, acCheck)
-						< World.dice.roll(attacker.level, 8, hitRoll + attacker.level)) {
+					if (acCheck < hitRoll) {
 						// attacker beat opponents ac check
-						if (World.dice.roll(2, 20, dodgeCheck)
-							< World.dice.roll(2, 20, hitRoll + 5)) {
+						if (dodgeCheck < hitRoll) {
 							// attacker beat opponent dodge check
 							damage = World.dice.roll(weapon.diceNum + attacker.damRoll/2, weapon.diceSides,
 								attackerMods.str + attacker.damRoll + weapon.diceMod);
@@ -164,8 +171,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							}
 
 							// critical attacks
-							if (World.dice.roll(1, 20, hitRoll + attackerMods.dex)
-								>= 20 && World.dice.roll(1, 20) >= 19) {
+							if (World.dice.roll(1, 40) === 40) {
 								criticalAttack = true;
 								criticalAttackXP = World.dice.roll(1 + attacker.level, 20);
 
@@ -239,16 +245,27 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 					} else {
 						if (attacker.isPlayer) {
 							if (!shield) {
-								msgForAttacker += '<div class="red">You try to attack ' + opponent.short
-									+ ' and they block your attack!</div>';
+								if (World.dice.roll(1, 2) === 1) {
+									msgForAttacker += '<div class="red">You try to attack ' + opponent.short
+										+ ' and they block your attack!</div>';
+								} else {
+									msgForAttacker += '<div class="red">You try to attack ' + opponent.short
+									+ ' with ' + weapon.short + ' but they narrowly avoid the attack!</div>';
+								}
 							} else {
-
+								if (World.dice.roll(1, 2) === 1) {
+									msgForAttacker += '<div class="red">You try to attack ' + opponent.short
+										+ ' and they block the incoming attack with ' + shield.short + '!</div>';
+								} else {
+									msgForAttacker += '<div class="red">You swing at ' + opponent.short
+										+ ' but they use their ' + shield.dislayName + ' to defend against the attack!</div>';
+								}
 							}
 						}
 
 						if (opponent.isPlayer) {
 							if (!shield) {
-								msgForOpponent += '<div class="green">' + attacker.displayName +
+								msgForOpponent += '<div class="green">' + attacker.long +
 								' swings widly and you narrowly block their attack!</div>';
 							}
 						}
@@ -292,9 +309,9 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 	msgForOpponent;
 
 	opponent.position = 'fighting';
-	player.position = 'fighting';
-
 	opponent.opponent = player;
+
+	player.position = 'fighting';
 	player.opponent = opponent;
 
 	if (!Skill) {
@@ -308,12 +325,16 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 
 		player.wait += 1;
 
-		if (player.isPlayer) {
-			msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg + '</div>';
+		if (!player.isPlayer) {
+			msgForPlayer += '<div class="rnd-status">' + opponent.long + ' ' + oppStatus.msg + '</div>';
+		} else {
+			msgForPlayer += '<div class="rnd-status">' + opponent.displayName + ' ' + oppStatus.msg + '</div>';
 		}
 
-		if (opponent.isPlayer) {
-			msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg + '</div>';
+		if (!opponent.isPlayer) {
+			msgForOpponent += '<div class="rnd-status">' + player.long + ' ' + playerStatus.msg + '</div>';
+		} else {
+			msgForOpponent += '<div class="rnd-status">' + player.displayName + ' ' + playerStatus.msg + '</div>';
 		}
 
 		World.msgPlayer(player, {
@@ -330,6 +351,8 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 			combatInterval = setInterval(function() {
 				combat.round(combatInterval, player, opponent, roomObj);
 			}, 1900);
+		} else {
+			this.processEndOfMobCombat(null, player, opponent, roomObj);
 		}
 	});
 };
@@ -339,8 +362,10 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 	corpse,
 	endOfCombatMsg = '';
 
-	clearInterval(combatInterval);
-
+	if (combatInterval) {
+		clearInterval(combatInterval);
+	}
+	
 	opponent.position = 'dead';
 	opponent.opponent = null;
 	opponent.killedBy = player.name;
