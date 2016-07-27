@@ -233,6 +233,19 @@ Room.prototype.getBrief = function(roomObj, options) {
 	return displayHTML;
 };
 
+Room.prototype.getTrainers = function(roomObj, command) {
+	var i = 0,
+	trainers = [];
+	
+	for (i; i < roomObj.monsters.length; i += 1) {
+		if (roomObj.monsters[i].trainer) {
+			trainers.push(roomObj.monsters[i]);
+		}
+	}
+
+	return trainers;
+};
+
 Room.prototype.getMerchants = function(roomObj, command) {
 	var i = 0,
 	merchants = [],

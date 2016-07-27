@@ -1575,6 +1575,23 @@ Cmd.prototype.quit = function(target, command) {
 
 /** Related to Saving and character adjustment/interaction **/
 
+Cmd.prototype.train = function(target, command) {
+	var roomObj,
+	trainers;
+
+	if (command.msg) {
+		// specific training target given so we actually 'train' and bump up a stat
+		roomObj = World.getRoomObject(target.area, target.roomid),
+		trainers = Room.getTrainers(roomObj, command);
+	} else {
+		// nothing specific outlined so we list what the player can train here
+	}
+};
+
+Cmd.prototype.practice = function(target, command) {
+
+};
+
 Cmd.prototype.save = function(target, command) {
 	if (target.isPlayer) {
 		if (target.position === 'standing' && target.wait === 0) {
@@ -1599,7 +1616,7 @@ Cmd.prototype.title = function(target, command) {
 
 		World.msgPlayer(target, {msg: 'Your title was changed!', styleClass: 'save'});
 	} else {
-		World.msgPlayer(target, {msg: 'Title is too long, try another.', styleClass: 'save'});
+		World.msgPlayer(target, {msg: 'Title is too long. There is a 40 character limit.', styleClass: 'save'});
 	}
 };
 

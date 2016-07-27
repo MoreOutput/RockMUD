@@ -249,7 +249,7 @@ World = require('./world').world;
 		}
 	}, 245000); // 4.5 minutes
 	
-	// AI Ticks for monsters, items
+	// AI Ticks for monsters and room items
 	setInterval(function() {
 		var i = 0,
 		monsters;
@@ -266,7 +266,24 @@ World = require('./world').world;
 			}
 		}
 	}, 15000);
-	//}, 1000);
+	
+	// ai behaviors for players and player items
+	setInterval(function() {
+		var i = 0,
+		players;
+
+		if (World.areas.length) {
+			for (i; i < World.areas.length; i += 1) {
+				players = World.getAllPlayersFromArea(World.areas[i]);
+
+				players.forEach(function(player, i) {
+					if (player.chp >= 1 && player.onAlive) {
+						player.onAlive(World.getRoomObject(player.area, player.roomid),  player);
+					}
+				});
+			}
+		}
+	}, 18000);
 	
 	// AI Ticks for areas 
 	setInterval(function() {

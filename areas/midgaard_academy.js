@@ -4,34 +4,62 @@ Room = require('../src/rooms').room,
 World = require('../src/world').world;
 
 module.exports = {
-	"name" : "Midgaard Academy",
-	"id" : "2",
-	"type" : "building",
-	"levels" : "All",
-	"description" : "Famous for preparing new adventuers for the world of RockMUD.",
-	"reloads": 0,
-	"author": "Rocky",
-	"messages": [
+	name: 'Midgaard Academy',
+	id: '3',
+	type: "building",
+	levels: "All",
+	description: "Famous for preparing new adventuers for the world of RockMUD.",
+	reloads: 0,
+	author: "Rocky",
+	messages: [
 		{"msg": "The sounds of sparring apprentices can be heard throughout the halls."}
 	],
-	"rooms" : [
+	rooms: [
 		{
-			"id" : "1",
-			"title" : "Academy Enterance",
-			"area": "Midgaard Academy",
-			"content" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
-			"outdoors": false,
-			"exits" : [
+			id: "1",
+			title: "Academy Entrance",
+			area: "Midgaard Academy",
+			content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ",
+			outdoors: false,
+			exits: [
 				{
-					"cmd" : "down",
-					"id" : "1",
-					"area": "Midgaard"
+					cmd: "down",
+					id: "1",
+					area: "Midgaard"
 				}
 			],
-			"playersInRoom": [],
-			"monsters" : [],
-			"items" : [],
-			"flags" : []
+			playersInRoom: [],
+			monsters: [{
+				name: "Radghar",
+				level: 35,
+				short: "Lord Radghar",
+				long: "Radghar, a retired Midgaardian guard captain",
+				description: "",
+				inName: "Lord Radghar",
+				race: "human",
+				id: 2,
+				area: "Midgaard Academy",
+				weight: 195,
+				diceNum: 3,
+				diceSides: 10,
+				diceMod: 5,
+				str: 20,
+				dex: 18,
+				position: "standing",
+				attackType: "punch",
+				damRoll: 20,
+				hitRoll: 15,
+				ac: 20,
+				itemType: "mob",
+				items: [],
+				behaviors: [{
+					module: "trainer"
+				}, {
+					module: "radghar"
+				}]
+			}],
+			items : [],
+			flags : []
 		}
 	]
 };

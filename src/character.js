@@ -120,6 +120,8 @@ Character.prototype.getPassword = function(s, command, fn) {
 
 			if (s.player.password === hash) {
 				if (character.addPlayer(s)) {
+					s.player = World.setupBehaviors(s.player);
+					
 					World.sendMotd(s);
 					
 					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
@@ -436,9 +438,13 @@ Character.prototype.save = function(player, fn) {
 	};
 
 	player.socket = null;
+	
+	player = World.sanitizeBehaviors(player);
 
 	fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null, 4), function (err) {
 		player.socket = socket;
+
+		player = World.setupBehaviors(player);
 		
 		if (err) {
 			return World.msgPlayer(player, {msg: 'Error saving character.'});

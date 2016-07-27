@@ -619,6 +619,28 @@ World.prototype.getAllMonstersFromArea = function(areaName) {
 	return mobArr;
 };
 
+
+World.prototype.getAllPlayersFromArea = function(areaName) {
+	var world = this,
+	area,
+	i = 0,
+	playerArr = [];
+
+	if (areaName.name) {
+		area = areaName;
+	} else {
+		area = world.getAreaByName(areaName)
+	}
+
+	for (i; i < area.rooms.length; i += 1) {
+		if (area.rooms[i].playersInRoom.length > 0) {
+			playerArr = playerArr.concat(area.rooms[i].playersInRoom);
+		}
+	}
+
+	return playerArr;
+};
+
 World.prototype.getAllRoomItemsFromArea = function(areaName) {
 	var world = this,
 	area,
@@ -688,7 +710,10 @@ World.prototype.getAllPlayerItemsFromArea = function(areaName) {
 };
 
 World.prototype.sendMotd = function(s) {
-	s.emit('msg', {msg : this.motd, res: 'logged'});
+	this.msgPlayer(s, {
+		msg : this.motd,
+		evt: 'onLogged'
+	});
 };
 
 World.prototype.prompt = function(target) {
@@ -732,7 +757,7 @@ World.prototype.msgPlayer = function(target, msgObj) {
 
 	if (target.isPlayer) {
 		if (s) {
-			if (typeof msgObj.msg !== 'function') {
+			if (typeof msgObj.msg !== 'function' && msgObj.msg) {
 				s.emit('msg', msgObj);
 			} else {
 				msgObj.msg(target, function(send, msg) {
@@ -843,28 +868,102 @@ World.prototype.search = function(searchArr, command) {
 	return results;
 };
 
-/*
-	RockMUD extend(target, obj2, callback);
-	Target gains all properties from obj2 that arent in the current object, all numbers are added together
-*/
-World.prototype.extend = function(target, obj2) {
+World.prototype.setupBehaviors = function(gameEntity) {
+	var prop,
+	behavior,
+	i = 0,
+	j = 0;
+
+	if (gameEntity.behaviors) {		
+		for (i; i < gameEntity.behaviors.length; i += 1) {
+			behavior = this.getAI(gameEntity.behaviors[i]);
+
+			if (behavior) {
+				gameEntity = this.extend(gameEntity, behavior);
+			}
+		}
+	}
+
+	i = 0;
+
+	if (gameEntity.items) {
+		for (j; j < gameEntity.items; j =+ 1) {
+			if (gameEntitiy.items[j].behaviors) {
+				for (i; i < gameEnitity.items[j].behaviors.length; i += 1) {
+					behavior = this.getAI(gameEntity.items[j].behaviors[i]);
+	
+					if (behavior) {
+						gameEntity.items[j] = this.extend(gameEntity.items[j], behavior);
+					}
+				}
+			}	
+		}
+	}
+
+	return gameEntity;
+};
+
+World.prototype.sanitizeBehaviors = function(gameEntity) {
+	var prop,
+	behavior,
+	i = 0,
+	j = 0;
+
+	if (gameEntity.behaviors) {
+		for (i; i < gameEntity.behaviors.length; i += 1) {
+			behavior = this.getAI(gameEntity.behaviors[i]);
+
+			if (behavior) {
+				for (prop in behavior) {
+					if (gameEntity[prop]) {
+						delete gameEntity[prop];
+					}
+				}
+			}
+		}
+	}
+
+	i = 0;
+
+	if (gameEntity.items) {
+		for (j; j < gameEntity.items; j =+ 1) {
+			if (gameEntity.items[j].behaviors) {
+				for (i; i < gameEntity.items[j].behaviors.length; i += 1) {
+					behavior = this.getAI(gameEntity.items[j].behaviors[i]);
+	
+					if (behavior) {
+						for (prop in behavior) {
+							if (gameEntity.items[j][prop]) {
+								delete gameEntity.items[j][prop];
+							}
+						}
+					}
+				}
+			}	
+		}
+	}
+
+	return gameEntity;
+};
+
+World.prototype.extend = function(extendObj, readObj) {
 	var prop;
 
-	if (obj2 && target) {
-		for (prop in obj2) {
-			if (target[prop]) {
-				if (target[prop].isArray && ob2[prop].isArray) {
-					target[prop] = target[prop].concat(obj2[prop]);
-				} else if (!isNaN(target[prop])) {
-					target[prop] += obj2[prop];
+	if (arguments.length === 2) {
+		for (prop in readObj) {
+			if (extendObj[prop]) {
+				if (extendObj[prop].isArray && readObj[prop].isArray) {
+					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
+				} else if (!isNaN(extendObj[prop]) && !isNaN(readObj[prop])) {
+					extendObj[prop] += readObj[prop];
 				}
 			} else {
-				target[prop] = obj2[prop];
+				extendObj[prop] = readObj[prop];
 			}
 		}
 	}
 	
-	return target;
+	return extendObj;
 };
 
 // Shuffle an array
