@@ -361,7 +361,7 @@ Character.prototype.newCharacter = function(s, command) {
 				} else {
 					if (command.cmd !== 'help') {
 						World.msgPlayer(s, {
-							msg: 'Not a valid class. Type <span class="green">help classes</span> to see the full list. '
+							msg: 'Not a valid race. Type <span class="green">help races</span> to see the full list. '
 								+ 'You can also access any help file by typing <span class="yellow">help [subject]</span>',
 							noPrompt: true
 						});
