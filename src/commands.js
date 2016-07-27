@@ -843,7 +843,7 @@ Cmd.prototype.get = function(target, command, fn) {
 	if (target.position !== 'sleeping') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
-		if (command.msg !== '' && (Character.canSee(target, roomObj) || light.lightDecay > 0)) {
+		if (command.msg !== '' && (Character.canSee(target, roomObj) || light && light.lightDecay > 0)) {
 			container = Character.getContainer(target, command);
 
 			if (!container) {
@@ -1626,9 +1626,11 @@ Cmd.prototype.equipment = function(target, command) {
 				eqStr += '<label class="yellow">' + item.displayName + '</label></li>';
 			} else {
 				if (item.lightDecay > 0) {
-					eqStr += '<label class="yellow">' + item.short + ' (<span class="red">Providing light</span>)</label></li>';
+					eqStr += '<label class="yellow">' + item.short
+						+ ' (<span class="red">Providing light</span>)</label></li>';
 				} else {
-					eqStr += '<label class="yellow">' + item.short + ' (<span class="red">Unlit</span>)</label></li>';
+					eqStr += '<label class="yellow">' + item.short
+						+ ' (<span class="red">Not providing light</span>)</label></li>';
 				}
 			}
 		}
