@@ -69,6 +69,7 @@
 	"kingdom": "mammal",
 	"killed": 0,
 	"preventItemDecay": false,
+	"preventOnAlive": false,
 	"eq": [{
 		"name": "Head",
 		"item": null,

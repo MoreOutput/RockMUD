@@ -265,13 +265,13 @@ World = require('./world').world;
 				monsters.forEach(function(monster, i) {
 					var roomObj = World.getRoomObject(monster.area, monster.roomid);
 
-					if (monster.chp >= 1 && monster.onAlive) {
+					if (monster.chp >= 1 && monster.onAlive && !monster.preventOnAlive) {
 						monster.onAlive(roomObj, monster);
 					}
 					
 					if (monster.items) {
 						monster.items.forEach(function(monsterItem, i) {
-							if (monsterItem.onAlive) {
+							if (monsterItem.onAlive && !monsterItem.preventOnAlive) {
 								monsterItem.onAlive(roomObj, monsterItem);
 							}
 						});
@@ -291,13 +291,13 @@ World = require('./world').world;
 				players = World.getAllPlayersFromArea(World.areas[i]);
 
 				players.forEach(function(player, i) {
-					if (player.chp >= 1 && player.onAlive) {
+					if (player.chp >= 1 && player.onAlive && !player.preventOnAlive) {
 						player.onAlive(World.getRoomObject(player.area, player.roomid),  player);
 					}
 					
 					if (player.items) {
 						player.items.forEach(function(item, i) {
-							if (item.onAlive) {
+							if (item.onAlive && !item.preventOnAlive) {
 								item.onAlive(roomObj, item);
 							}
 						});

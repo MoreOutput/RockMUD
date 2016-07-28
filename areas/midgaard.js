@@ -120,6 +120,7 @@ module.exports = {
 					size: {value: 2, display: 'very small'},
 					itemType: 'mob',
 					spawn: '3',
+					wanderCheck: 2,
 					behaviors: [{  
 						module: 'wander'
 					}]
@@ -513,7 +514,7 @@ module.exports = {
 								msg: 'Sell to an Ogre? Are you insane?',
 								roomObj: roomObj
 							});
-					
+
 							return false;
 						} else {
 							return true;

@@ -5,19 +5,26 @@ World = require('../src/world').world;
 
 /*
 	Aggie behavior, mob will attack whatever creature enters the room,
-	can specifiy min/max target level in behavior definition
+	can specifiy min/max target level in behavior definition.
+
+	If mob.attackOnVisit is false then the mob will only look for a target during
+	the onAlive tick. If mob.preventOnAlive is toggled to true then the mob will
+	only attack if something enters the room from an adjacent room (entering the room
+	via portal or the like would then not trigger the aggressive behavior).
+
+	Setting mob.mobAffgressive to true will empower the mob to attack other mobs.
 */
 
 module.exports = {
+	attackOnVisit: true,
+	mobAggressive: false,
 	onVisit: function(target, roomObj, mob) {
 		var mob;
 
 		if (!mob) {
 			mob = this;
 		}
-
-		// if we do not have this property set the mob will only attack when it finds
-		// other players in its room.
+	
 		if (mob.attackOnVisit === true
 			&& mob.position === 'standing'
 			&& (target.isPlayer || mob.mobAggressive)

@@ -3,6 +3,15 @@ var Cmd = require('../src/commands').cmd,
 Room = require('../src/rooms').room,
 World = require('../src/world').world;
 
+/*
+	Wander behavior. Mob will walk about selecting a random move direction from
+	mob.moveDirections. 
+
+	If the mob.stayinArea property is set to false the mob can wander outside of its starting area. 
+
+	Adding a mob.wanderCheck value provides a check against 1d10; movement only occurs if the roll 
+	beats the given wanderCheck value.
+*/
 module.exports = {
 	stayInArea: true,
 	wanderCheck: 0,
