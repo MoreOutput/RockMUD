@@ -1144,7 +1144,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 		if (command.arg) {
 			if (command.arg in Spells) {
 				skillObj = Character.getSkill(player, command.arg);
-				
+
 				if (skillObj) {
 					if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fleeing') {
 						roomObj = World.getRoomObject(player.area, player.roomid);
@@ -1172,10 +1172,16 @@ Cmd.prototype.cast = function(player, command, fn) {
 							}
 						}
 					}
+				} else {
+					World.msgPlayer(player, {
+						msg: 'You do not know that spell.',
+						styleClass: 'blue'
+					});				
 				}
 			} else {
 				World.msgPlayer(player, {
-					msg: 'You do not know that spell.'
+					msg: 'That is not a known spell.',
+					styleClass: 'error'
 				});
 			}
 		} else {
