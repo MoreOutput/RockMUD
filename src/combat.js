@@ -352,7 +352,7 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 				combat.round(combatInterval, player, opponent, roomObj);
 			}, 1900);
 		} else {
-			this.processEndOfMobCombat(null, player, opponent, roomObj);
+			combat.processEndOfMobCombat(null, player, opponent, roomObj);
 		}
 	});
 };

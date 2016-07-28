@@ -293,7 +293,7 @@ Character.prototype.rollStats = function(player) {
 		if (World.classes[j].name.toLowerCase() === player.charClass.toLowerCase()) { // class match found
 			for (classKey in player) {
 				if (classKey in World.classes[j] && classKey !== 'name') {
-					if (!World.classes[j][classKey].isArray) {
+					if (!Array.isArray(World.classes[j][classKey])) {
 						if (!isNaN(World.classes[j][classKey])) {
 							player[classKey] += World.classes[j][classKey];
 						} else {

@@ -323,33 +323,24 @@ World.prototype.rollItems = function(itemArr, roomid) {
 
 	for (i; i < itemArr.length; i += 1) {
 		(function(item, index) {
-			var chanceRoll = world.dice.roll(1, 20),
-			i = 0,
-			aiName,
-			itemName,
-			behavior;
-
+			var chanceRoll = world.dice.roll(1, 20);
+	
 			item.refId = refId += index;
 			
 			item = world.extend(item, world.itemTemplate);
 
+			if (Array.isArray(item.name)) {
+				item.name = item.name[world.dice.roll(1, item.name.length) - 1];
+			}	
+			
 			if (!item.displayName) {
-				if (Array.isArray(item.displayName)) {
-					if (Array.isArray(item.displayName)) {
-						itemName = item.displayName[world.dice.roll(1, item.displayName.length) - 1];
-					} else {
-						itemName = item.displayName;
-					}
-				} else {
-					if (Array.isArray(item.short)) {
-						itemName = item.short[world.dice.roll(1, item.short.length) - 1];
-					} else {
-						itemName = item.short;
-					}
-				}
+				item.displayName = item.name[0].toUpperCase() + item.name.slice(1);
+			} else if (Array.isArray(item.displayName)) {
+				item.displayName = item.displayName[world.dice.roll(1, item.displayName.length) - 1];
+			}
 
-				item.short = itemName;
-				item.displayName = itemName;
+			if (Array.isArray(item.short)) {
+				item.short = item.short[world.dice.roll(1, item.short.length) - 1];
 			}
 
 			if (Array.isArray(item.long)) {
@@ -370,21 +361,19 @@ World.prototype.rollItems = function(itemArr, roomid) {
 			item.roomid = roomid;
 
 			if (item.behaviors.length > 0) {
-				for (i; i < item.behaviors.length; i += 1) {
-					aiName = item.behaviors[i];
+				item = world.setupBehaviors(item);
 
-					behavior = world.getAI(aiName);
-
-					item = world.extend(item, behavior);
-
-					itemArr[index] = item;
-				}
+				itemArr[index] = item;
 			} else {
 				itemArr[index] = item;
 			}
 
 			if (item.items) {
 				world.rollItems(item.items);
+			}
+
+			if (item.onRolled) {
+				item.onRolled();
 			}
 		}(itemArr[i], i));
 	}
@@ -404,42 +393,32 @@ World.prototype.rollMobs = function(mobArr, roomid) {
 
 		(function(mob, index) {
 			var raceObj,
-			i = 0,
-			aiName,
-			mobName,
-			behavior,
 			classObj;
 
 			mob.refId = refId += index;
-
-			mob = world.extend(mob, world.mobTemplate);
-			
+		
 			raceObj = world.getRace(mob.race);
-			mob = world.extend(mob, raceObj);
 
 			classObj = world.getClass(mob.charClass);
+
+			mob = world.extend(mob, world.mobTemplate);		
+			mob = world.extend(mob, raceObj);
 			mob = world.extend(mob, classObj);
 
+			if (Array.isArray(mob.name)) {
+				mob.name = mob.name[world.dice.roll(1, mob.name.length) - 1];
+			}
+
 			if (!mob.displayName) {
-				if (Array.isArray(mob.name)) {
-					mobName = mob.name[world.dice.roll(1, mob.name.length) - 1];
-				} else {
-					mobName = mob.name;
-				}
-
-				mob.name = mobName;
-
-				mob.displayName = mobName[0].toUpperCase() + mobName.slice(1);
-			} else {
-				if (Array.isArray(mob.displayName)) {
-					mob.displayName = mob.displayName[world.dice.roll(1, mob.displayName.length) - 1];
-				}
+				mob.displayName = mob.name[0].toUpperCase() + mob.name.slice(1);
+			} else if (Array.isArray(mob.displayName)) {
+				mob.displayName = mob.displayName[world.dice.roll(1, mob.displayName.length) - 1];
 			}
 		
 			if (Array.isArray(mob.short)) {
 				mob.short = mob.short[world.dice.roll(1, mob.short.length) - 1];
 			}
-
+		
 			if (Array.isArray(mob.long)) {
 				mob.long = mob.long[world.dice.roll(1, mob.long.length) - 1];
 			}
@@ -486,16 +465,15 @@ World.prototype.rollMobs = function(mobArr, roomid) {
 			}
 
 			if (mob.behaviors.length > 0) {
-				for (i; i < mob.behaviors.length; i += 1) {
-					aiName = mob.behaviors[i];
+				mob = world.setupBehaviors(mob);
 
-					behavior = world.getAI(aiName)
-					
-					mob = world.extend(mob, behavior);
-					mobArr[index] = mob;
-				}
+				mobArr[index] = mob;
 			} else {
 				mobArr[index] = mob;
+			}
+
+			if (mob.onRolled) {
+				mob.onRolled();
 			}
 		}(mobArr[i], i));
 	}
@@ -952,7 +930,7 @@ World.prototype.extend = function(extendObj, readObj) {
 	if (arguments.length === 2) {
 		for (prop in readObj) {
 			if (extendObj[prop]) {
-				if (extendObj[prop].isArray && readObj[prop].isArray) {
+				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
 				} else if (!isNaN(extendObj[prop]) && !isNaN(readObj[prop])) {
 					extendObj[prop] += readObj[prop];

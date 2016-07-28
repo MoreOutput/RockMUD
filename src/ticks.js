@@ -108,6 +108,10 @@ World = require('./world').world;
 								area.respawnTick = 0;
 
 								World.areas[index] = area;
+
+								if (area.onReload) {
+									area.onReload();
+								}
 							}
 						}
 					}(area.rooms[j], index, j));
@@ -249,7 +253,7 @@ World = require('./world').world;
 		}
 	}, 245000); // 4.5 minutes
 	
-	// AI Ticks for monsters and room items
+	// AI Ticks for monsters
 	setInterval(function() {
 		var i = 0,
 		monsters;
@@ -259,8 +263,18 @@ World = require('./world').world;
 				monsters = World.getAllMonstersFromArea(World.areas[i]);
 				
 				monsters.forEach(function(monster, i) {
+					var roomObj = World.getRoomObject(monster.area, monster.roomid);
+
 					if (monster.chp >= 1 && monster.onAlive) {
-						monster.onAlive(World.getRoomObject(monster.area, monster.roomid),  monster);
+						monster.onAlive(roomObj, monster);
+					}
+					
+					if (monster.items) {
+						monster.items.forEach(function(monsterItem, i) {
+							if (monsterItem.onAlive) {
+								monsterItem.onAlive(roomObj, monsterItem);
+							}
+						});
 					}
 				});
 			}
@@ -279,6 +293,14 @@ World = require('./world').world;
 				players.forEach(function(player, i) {
 					if (player.chp >= 1 && player.onAlive) {
 						player.onAlive(World.getRoomObject(player.area, player.roomid),  player);
+					}
+					
+					if (player.items) {
+						player.items.forEach(function(item, i) {
+							if (item.onAlive) {
+								item.onAlive(roomObj, item);
+							}
+						});
 					}
 				});
 			}

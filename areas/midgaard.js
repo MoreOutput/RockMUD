@@ -54,7 +54,6 @@ module.exports = {
 						"locked": true,
 						"key": "101",
 						"openMsg": "A foul smell flows in from below.",
-						"unlockMsg": "You hear something moving under the gate.",
 						"name": "gate"
 					}
 				}
