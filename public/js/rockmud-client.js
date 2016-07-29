@@ -48,19 +48,20 @@ window.onload = function() {
 	movement = ['north', 'east', 'south', 'west', 'down', 'up'],
 	playerIsLogged = null,
 	display = function(r, hideRes) {
-		var i = 0;
+		var i = 0,
+		styleClass;
+
+		if (r.styleClass) {
+			styleClass = r.styleClass;
+		}
 
 		if (!hideRes) {
-			if (!r.styleClass) {
-				r.styleClass = '';
-			}
-
 			if (r.element === undefined) {
 				terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><div class="col-md-12 '
-				+ r.styleClass + '">' + r.msg + '</div></div>';
+				+ styleClass + '">' + r.msg + '</div></div>';
 			} else {
 				terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><' + r.element + ' class="col-md-12 '
-				+ r.styleClass + '">' + r.msg + '</' + r.element + '></div>';
+				+ styleClass + '">' + r.msg + '</' + r.element + '></div>';
 			}
 
 			rowCnt += 1;
@@ -131,8 +132,7 @@ window.onload = function() {
 					return cmd;
 				});
 			}),
-			emit: 'cmd',
-			styleClass: 'cmd'
+			emit: 'cmd'
 		};
 
 		if (node.type !== 'password') {

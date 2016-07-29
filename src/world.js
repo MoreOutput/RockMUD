@@ -731,9 +731,11 @@ World.prototype.msgPlayer = function(target, msgObj) {
 		target = target.player;
 	} else if (target.isPlayer) {
 		s = target.socket;
+	} else if (!target.area) {
+		s = target;
 	}
 
-	if (target.isPlayer) {
+	if (target) {
 		if (s) {
 			if (typeof msgObj.msg !== 'function' && msgObj.msg) {
 				s.emit('msg', msgObj);
@@ -751,6 +753,8 @@ World.prototype.msgPlayer = function(target, msgObj) {
 				world.prompt(target);
 			}
 		}
+	} else {
+		s.emit('msg', msgObj);
 	}
 }
 

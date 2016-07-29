@@ -101,10 +101,15 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			}
 		};
 		
-		s.emit('msg', {msg : 'Enter your name:', res: 'login', styleClass: 'enter-name'});
+		World.msgPlayer(s, {
+			msg : 'Enter your name:', 
+			evt: 'reqInitialLogin', 
+			styleClass: 'enter-name',
+			noPrompt: true
+		});
 
 		s.on('cmd', function (r) {
-			if (r.msg !== '' && !s.player || !s.player.logged) {
+			if (r.msg !== '' && !s.player || s.player && !s.player.logged) {
 				if (!s.player || !s.player.verifiedName) {
 					Character.login(r, s, function (s) {
 						if (s.player) {
@@ -112,7 +117,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							s.join('mud'); // mud is one of two rooms, 'creation' being the other		
 
 							World.msgPlayer(s, {
-								msg: 'Password: ',
+								msg: 'Password for ' + s.player.displayName  + ': ',
 								evt: 'reqPassword',
 								noPrompt: true
 							});
@@ -131,19 +136,26 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							parseCmd(r, s);
 						}
 					})			
-				} else if (s.player && !s.player.verifiedPassword) {
+				} else if (r.msg && s.player && !s.player.verifiedPassword) {
 					Character.getPassword(s, Cmds.createCommandObject(r), function(s) {
 						s.player.verifiedPassword = true;
 						s.player.logged = true;
 
 						Cmds.look(s.player); // we auto fire the look command on login
 					});
+				} else {
+					World.msgPlayer(s, {
+						msg : 'Enter your name:',
+						evt: 'reqLogin',
+						noPrompt: 'true',
+						styleClass: 'enter-name'
+					});
 				}
 			} else if (s.player && s.player.logged === true) {
 				parseCmd(r, s);
 			} else {
 				World.msgPlayer(s, {
-					msg : 'Enter your name:',
+					msg : 'Please enter a character name:',
 					evt: 'reqLogin',
 					styleClass: 'enter-name'
 				});
