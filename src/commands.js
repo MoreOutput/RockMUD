@@ -682,8 +682,13 @@ Cmd.prototype.move = function(target, command, fn) {
 							if (!sneakAff) {
 								if (Character.canSee(receiver, targetRoom)) {
 									if (!target.inName) {
-										msg = '<strong>' + target.long
-										+ '</strong> walks in from the ' + exitObj.cmd + '.';
+										if (target.long) {
+											msg = '<strong>' + target.long
+											+ '</strong> walks in from the ' + exitObj.cmd + '.';
+										} else {
+											msg = '<strong>' + target.displayName
+											+ '</strong> walks in from the ' + exitObj.cmd + '.';
+										}	
 									} else if (target.inName && !target.inMessage) {
 										msg = '<strong>' + target.inName
 										+ '</strong> enters from the ' + exitObj.cmd + '.';
@@ -691,9 +696,9 @@ Cmd.prototype.move = function(target, command, fn) {
 										msg = '<strong>' + target.inName
 										+ '</strong> ' + target.inMessage  + ' ' + exitObj.cmd + '.';
 									}
-								} else {
+								} else if (receiver.hearing) {
 									if (World.dice.roll(1, 2) === 1) {
-										msg = '<strong>Something</strong> enters the room from the ' + exitObj.cmd + '.';
+										msg = '<strong>Something</strong> enters from the ' + exitObj.cmd + '.';
 									} else {
 										msg = '<strong>Something</strong> comes in from the ' + exitObj.cmd + '.';
 									}
@@ -712,17 +717,22 @@ Cmd.prototype.move = function(target, command, fn) {
 							if (!sneakAff) {
 								if (Character.canSee(receiver, roomObj)) {
 									if (!target.outName) {
-										msg = '<span class="yellow">' + target.long
-										+ ' leaves the room heading <strong>' + direction + '</strong></div>';
+										if (target.long) {
+											msg = '<span class="yellow">' + target.long
+											+ ' leaves heading <strong>' + direction + '</strong></div>';
+										} else {
+											msg = '<span class="yellow">' + target.displayName
+											+ ' leaves heading <strong>' + direction + '</strong></div>';
+										}
 									} else if (target.outName && !target.outMessage) {
 										msg = '<span class="yellow">' + target.outName
-										+ ' leaves the room heading <strong>' + direction + '</strong></div>';
+										+ ' leaves heading <strong>' + direction + '</strong></div>';
 									} else {
 										msg = '<span class="yellow">' + target.outName + target.outMessage
 										+ ' <strong>' + direction + '</strong></div>';
 									}
-								} else {
-									msg = '<span class="yellow">Something leaves the room.</div>';
+								} else if (receiver.hearing) {
+									msg = '<span class="yellow">You can sense some movement in the area.</div>';
 								}
 							}
 							

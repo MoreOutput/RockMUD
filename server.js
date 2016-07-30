@@ -52,9 +52,9 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		var parseCmd = function(r, s) {
 			var skillObj,
 			cmdObj = Cmds.createCommandObject(r);
-				
+	
 			if (!s.player.creationStep) {
-				if (cmdObj.msg === '' || cmdObj.msg.length >= 2 && s.player.wait === 0) {
+				if (cmdObj && s.player.wait === 0) {
 					if (cmdObj.cmd) {
 						if (cmdObj.cmd in Cmds) {
 							return Cmds[cmdObj.cmd](s.player, cmdObj);
@@ -151,7 +151,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						styleClass: 'enter-name'
 					});
 				}
-			} else if (s.player && s.player.logged === true) {
+			} else if (s.player && s.player.logged === true) {				
 				parseCmd(r, s);
 			} else {
 				World.msgPlayer(s, {
