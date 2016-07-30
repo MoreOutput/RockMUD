@@ -27,10 +27,22 @@ World = require('./world').world;
 			// Morning
 			World.time.isDay = true;
 			areaMsg = 'The sun appears over the horizon.';
+
+			// onDay events
 		} else if (World.time.hour === World.time.month.hourOfNight && World.time.minute === 1) {
 			// Nightfall
 			World.time.isDay = false;
 			areaMsg = 'The sun fades fully from view as night falls.';
+
+			// area onNight
+			
+			// inventory items onNight
+
+			// room onNight
+
+			// mob onNight
+
+			// player onNight
 		}
 
 		if (areaMsg) {
@@ -340,7 +352,6 @@ World = require('./world').world;
 			}
 		}
 	}, 720000); // 12 minutes
-
 
 	// Player Regen
 	setInterval(function() { 

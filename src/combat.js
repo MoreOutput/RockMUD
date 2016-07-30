@@ -421,6 +421,18 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 
 	player.killed += 1;
 
+	if (roomObj.onDeath) {
+		roomObj.onDeath(opponent, player);
+	}
+	
+	if (opponent.onDeath) {
+		opponent.onDeath(player, roomObj);
+	}
+
+	if (player.onVictory) {
+		player.onVictory(opponent, roomObj);
+	}
+
 	return World.msgPlayer(player, {msg: endOfCombatMsg, styleClass: 'victory'});
 };
 

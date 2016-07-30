@@ -1119,7 +1119,7 @@ Character.prototype.canSee = function(player, roomObj) {
 	}
 	
 	if (!canSee && player.sight) {
- 		light = Character.getLights(player)[0];
+ 		light = this.getLights(player)[0];
 		
 		if (light) {
 			canSee = true;
