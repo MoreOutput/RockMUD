@@ -1107,9 +1107,10 @@ Character.prototype.addAffect = function(player) {
 // and if its currently dark outside
 Character.prototype.canSee = function(player, roomObj) {
 	var canSee = player.sight,
+	light,
 	hasDarkvision;
 
-	if (!roomObj.light && !World.time.isDay) {
+	if (canSee && !roomObj.light && !World.time.isDay) {
 		hasDarkvision = this.getAffect(player, 'darkvision');
 
 		if (!hasDarkvision) {
@@ -1117,6 +1118,14 @@ Character.prototype.canSee = function(player, roomObj) {
 		}
 	}
 	
+	if (!canSee && player.sight) {
+ 		light = Character.getLights(player)[0];
+		
+		if (light) {
+			canSee = true;
+		}
+	}
+
 	return canSee;
 };
 

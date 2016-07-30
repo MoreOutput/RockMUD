@@ -120,6 +120,10 @@ window.onload = function() {
 		return fn(cmd + ' ' + msg);
 	};
 
+	document.onclick = function() {
+		node.focus();
+	};
+
 	document.addEventListener('reqPassword', function(e) {
 		e.preventDefault();
 		
@@ -161,10 +165,14 @@ window.onload = function() {
 	ws.on('msg', function(r) {
 		display(r);
 
-		if (r.evt) {
+		if (r.evt && !r.evt.data) {
 			r.evt = new CustomEvent(r.evt);
 			
-			document.dispatchEvent(r.evt);
-		}	
+			if (!r.data) {
+				document.dispatchEvent(r.evt);
+			} else {
+				document.dispatchEvent(r.evt, r.data);
+			}
+		}
 	});
 };

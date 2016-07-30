@@ -189,7 +189,7 @@ Cmd.prototype.list = function(target, command) {
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You can\'t see so browsing the goods is a little difficult at the moment.'
+			msg: 'You can\'t see so browsing goods is a little difficult at the moment.'
 		});
 	}
 };
@@ -640,11 +640,11 @@ Cmd.prototype.move = function(target, command, fn) {
 
 				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value))) {
 					if (targetRoom.beforeEnter) {
-						canEnter = targetRoom.beforeEnter(target, roomObj);
+						canEnter = targetRoom.beforeEnter(target, roomObj, command);
 					}
 
 					if (target.beforeMove) {
-						canEnter = target.beforeMove(target, roomObj);
+						canEnter = target.beforeMove(target, roomObj, command);
 					}
 					
 					target.cmv -= Math.round(4 + moveRoll - dexMod);
@@ -658,7 +658,25 @@ Cmd.prototype.move = function(target, command, fn) {
 					}
 
 					target.roomid = targetRoom.id;
-					
+
+					if (roomObj.onExit) {
+						roomObj.onExit(target, roomObj, command);
+					}
+
+					for (i; i < roomObj.monsters.length; i += 1) {
+						if (roomObj.monsters[i].onLeave) {
+							roomObj.monsters[i].onLeave(target, roomObj, command);
+						}
+					}
+
+					i = 0;
+
+					for (i; i < roomObj.playersInRoom.length; i += 1) {
+						if (roomObj.playersInRoom[i].onLeave) {
+							roomObj.playersInRoom[i].onLeave(target, roomObj, command);
+						}
+					}
+
 					if (targetRoom.terrianMod) {
 						target.wait += targetRoom.terrianMod;
 					}
@@ -742,11 +760,27 @@ Cmd.prototype.move = function(target, command, fn) {
 					});
 
 					if (targetRoom.onEnter) {
-						targetRoom.onEnter(target, roomObj);
+						targetRoom.onEnter(target, roomObj, command);
 					}
 
 					if (target.onMove) {
-						target.onMove(target, roomObj);
+						target.onMove(target, roomObj, command);
+					}
+
+					i = 0;
+					
+					for (i; i < targetRoom.monsters.length; i += 1) {
+						if (targetRoom.monsters[i].onVisit) {
+							targetRoom.monsters[i].onVisit(target, targetRoom, command);
+						}
+					}
+
+					i = 0;
+
+					for (i; i < targetRoom.playersInRoom.length; i += 1) {
+						if (targetRoom.playersInRoom[i].onVisit) {
+							targetRoom.playersInRoom[i].onVisit(target, targetRoom, command);
+						}
 					}
 				} else {
 					if (targetRoom.size) {
@@ -847,13 +881,12 @@ Cmd.prototype.get = function(target, command, fn) {
 	i = 0,
 	item,
 	container,
-	light = Character.getLights(target)[0],	
 	itemLen;
 
 	if (target.position !== 'sleeping') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
-		if (command.msg !== '' && (Character.canSee(target, roomObj) || light && light.lightDecay > 0)) {
+		if (command.msg !== '' && Character.canSee(target, roomObj)) {
 			container = Character.getContainer(target, command);
 
 			if (!container) {
@@ -1269,7 +1302,6 @@ Cmd.prototype.look = function(target, command) {
 	monster,
 	// boolean. when it is false it indicates we need a light source to see.
 	// the initial value of target.sight should be true inless target is blind.	
-	canSee = target.sight,
 	light = Character.getLights(target)[0],
 	itemDescription,	
 	item, // looking at an item
@@ -1281,13 +1313,11 @@ Cmd.prototype.look = function(target, command) {
 		roomObj = command.roomObj;
 	}
 	
-	if (canSee) {
-		canSee = Character.canSee(target, roomObj);
-
+	if (target.sight) {
 		if (target.position !== 'sleeping') {
 			if (!command || command.msg === '') {
 				// if no arguments are given we display the current room
-				if (canSee || !canSee && (light && light.lightDecay > 0)) {
+				if (Character.canSee(target, roomObj)) {
 					displayHTML = Room.getDisplayHTML(roomObj, {
 						hideCallingPlayer: target.name
 					});
@@ -1377,7 +1407,8 @@ Cmd.prototype.where = function(target, command) {
 
 /** Communication Channels **/
 Cmd.prototype.say = function(target, command) {
-	var roomObj;
+	var roomObj,
+	i = 0;
 
 	if (target.position !== 'sleeping') {
 		if (command.msg !== '') {
@@ -1390,7 +1421,7 @@ Cmd.prototype.say = function(target, command) {
 			} else {
 				roomObj = command.roomObj
 			}
-
+			
 			World.msgRoom(roomObj, {
 				msg: function(receiver, fn) {
 					var msg;
@@ -1408,11 +1439,17 @@ Cmd.prototype.say = function(target, command) {
 			});
 
 			if (target.onSay) {
-				target.onSay(target, roomObj);
+				target.onSay(target, roomObj, command);
 			}
 
 			if (roomObj.onSay) {
-				roomObj.onSay(target, roomObj);
+				roomObj.onSay(target, roomObj, command);
+			}
+
+			for (i; i < roomObj.monsters.length; i += 1) {
+				if (roomObj.monsters[i].onSay) {
+					roomObj.monsters[i].onSay(target, roomObj, command);
+				}
 			}
 		} else {
 			World.msgPlayer(target, {
@@ -1563,7 +1600,7 @@ Cmd.prototype.time = function(target, command) {
 
 Cmd.prototype.quit = function(target, command) {
 	if (target.isPlayer) {
-		if (target.position !== 'fighting') {
+		if (target.position !== 'fighting' && target.wait === 0) {
 			target.logged = false;
 			target.verifiedName = false;
 			target.verifiedPassword = false;
@@ -1571,7 +1608,7 @@ Cmd.prototype.quit = function(target, command) {
 			Character.save(target, function() {
 				World.msgPlayer(target, {
 					msg: 'Add a little to a little and there will be a big pile.',
-					emit: 'disconnect',
+					evt: 'onDisconnect',
 					styleClass: 'logout-msg',
 					noPrompt: true
 				});
@@ -1580,11 +1617,17 @@ Cmd.prototype.quit = function(target, command) {
 				target.socket.disconnect();
 			});
 		} else {
-			World.msgPlayer(target, {
-				msg: 'You are fighting! Finish up before quitting.',
-				emit: 'disconnect',
-				styleClass: 'logout-msg'
-			});
+			if (target.position === 'fighting') {
+				World.msgPlayer(target, {
+					msg: 'You are fighting! Finish up before quitting.',
+					styleClass: 'logout-msg'
+				});
+			} else {
+				World.msgPlayer(target, {
+					msg: 'You can\'t quit just yet!',
+					styleClass: 'error'
+				});
+			}
 		}
 	}
 };
@@ -1592,15 +1635,44 @@ Cmd.prototype.quit = function(target, command) {
 /** Related to Saving and character adjustment/interaction **/
 
 Cmd.prototype.train = function(target, command) {
-	var roomObj,
-	trainers;
-
-	if (command.msg) {
-		// specific training target given so we actually 'train' and bump up a stat
-		roomObj = World.getRoomObject(target.area, target.roomid),
-		trainers = Room.getTrainers(roomObj, command);
+	var roomObj = World.getRoomObject(target.area, target.roomid),
+	trainers = Room.getTrainers(roomObj, command),
+	canSee = Character.canSee(target, roomObj);
+	
+	if (target.position !== 'sleeping') {
+		if (canSee) {
+			if (trainers.length) {
+				if (command.msg) {
+					// specific training target given so we actually 'train' and bump up a stat
+					
+				} else {
+					// nothing specific outlined so we list what the player can train here
+					
+				}
+			} else {
+				if (roomObj.monsters || roomObj.playersInRoom) {
+					World.msgPlayer(target, {
+						msg: 'No one here is offering training.',
+						styleClass: 'error'
+					});
+				} else {
+					World.msgPlayer(target, {
+						msg: 'There is no one here to train with.',
+						styleClass: 'error'
+					});
+				}
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You can\'t see anyone to train with!',
+				styleClass: 'error'
+			});
+		}
 	} else {
-		// nothing specific outlined so we list what the player can train here
+		World.msgPlayer(target, {
+			msg: 'You can\'t train while sleeping!',
+			styleClass: 'error'
+		});
 	}
 };
 

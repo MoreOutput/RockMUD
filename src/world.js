@@ -379,7 +379,7 @@ World.prototype.rollItems = function(itemArr, roomid) {
 	}
 }
 // Rolls values for Mobs, including their equipment
-World.prototype.rollMobs = function(mobArr, roomid) {
+World.prototype.rollMobs = function(mobArr, roomid, area) {
 	var world = this,
 	diceMod, // Added to all generated totals 
 	refId = Math.random().toString().replace('0.', 'mob-'),
@@ -400,10 +400,18 @@ World.prototype.rollMobs = function(mobArr, roomid) {
 			raceObj = world.getRace(mob.race);
 
 			classObj = world.getClass(mob.charClass);
-
+			
 			mob = world.extend(mob, world.mobTemplate);		
 			mob = world.extend(mob, raceObj);
 			mob = world.extend(mob, classObj);
+			
+			if (!mob.area) {
+				mob.area = area.name;
+			}
+
+			if (!mob.id) {
+				mob.id = refId;
+			}
 
 			if (Array.isArray(mob.name)) {
 				mob.name = mob.name[world.dice.roll(1, mob.name.length) - 1];
@@ -493,9 +501,15 @@ World.prototype.setupArea = function(area) {
 
 	i = 0;
 
+	if (area.beforeLoad) {
+		area.breforeLoad();
+	}
+
 	for (i; i < area.rooms.length; i += 1) {
 		j = 0;
 
+		area.rooms[i].playersInRoom = [];
+		
 		for (j; j < area.rooms[i].exits.length; j += 1) {
 			exitObj = area.rooms[i].exits[j];
 
@@ -504,8 +518,12 @@ World.prototype.setupArea = function(area) {
 			}
 		}
 
-		world.rollMobs(area.rooms[i].monsters, area.rooms[i].id);
-		world.rollItems(area.rooms[i].items, area.rooms[i].id);
+		world.rollMobs(area.rooms[i].monsters, area.rooms[i].id, area);
+		world.rollItems(area.rooms[i].items, area.rooms[i].id, area);
+	}
+
+	if (area.afterLoad) {
+		area.afterLoad();
 	}
 
 	return area;
@@ -765,7 +783,7 @@ World.prototype.msgRoom = function(roomObj, msgObj) {
 	s;
 	
 	for (i; i < roomObj.playersInRoom.length; i += 1) {
-		s = world.players[i].socket;
+		s = roomObj.playersInRoom[i].socket;
 		
 		if (s.player && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id) {
 			world.msgPlayer(s, msgObj);
@@ -929,7 +947,8 @@ World.prototype.sanitizeBehaviors = function(gameEntity) {
 };
 
 World.prototype.extend = function(extendObj, readObj) {
-	var prop;
+	var prop,
+	prop2;
 
 	if (arguments.length === 2) {
 		for (prop in readObj) {
@@ -938,6 +957,10 @@ World.prototype.extend = function(extendObj, readObj) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
 				} else if (!isNaN(extendObj[prop]) && !isNaN(readObj[prop])) {
 					extendObj[prop] += readObj[prop];
+				} else {
+					for (prop2 in readObj[prop]) {
+						extendObj[prop][prop2] = readObj[prop][prop2];
+					}
 				}
 			} else {
 				extendObj[prop] = readObj[prop];

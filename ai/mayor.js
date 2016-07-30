@@ -16,22 +16,22 @@ module.exports = {
 		'Each day before sunrise I lower the bridge and open the city.'
 	],
 	moveDirections: ['north', 'east', 'west', 'south'],
-	onAlive: function(roomObj, mayor) {
+	onAlive: function(roomObj) {
 		var roll = World.dice.roll(1, 10);
 
 		if (roll === 5) {
-			Cmd.emote(mayor, {
-				msg: 'stares skyward in thought.'
+			Cmd.emote(this, {
+				msg: 'stares <span class="blue">skyward</span> in thought.'
 			});
 		}
 
 		if (roll <= 3) {
 			// Most of the time we just proclaim something
-			Cmd.say(mayor, {
-				msg: mayor.exclimations[parseInt(Math.random() * ((mayor.exclimations.length)))]
+			Cmd.say(this, {
+				msg: this.exclimations[parseInt(Math.random() * ((this.exclimations.length)))]
 			});
 		} else {
-			WanderAI.onAlive(roomObj, mayor);
+			WanderAI.onAlive(roomObj, this);
 		}
 	}
 };

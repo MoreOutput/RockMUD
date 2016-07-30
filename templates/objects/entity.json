@@ -68,6 +68,7 @@
 	"size": {"value": 3, "display": "medium"},
 	"kingdom": "mammal",
 	"killed": 0,
+	"itemType": "mob",
 	"preventItemDecay": false,
 	"preventOnAlive": false,
 	"eq": [{

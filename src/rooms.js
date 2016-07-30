@@ -90,7 +90,7 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 		}
 
 		i = 0;
-
+	
 		for (i; i < playersInRoom.length; i += 1) {
 			if (!options || !options.hideCallingPlayer || options.hideCallingPlayer !== playersInRoom[i].name ) {
 				displayHTML += '<li class="room-player">' + playersInRoom[i].name 

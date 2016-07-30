@@ -12,7 +12,7 @@ World = require('../src/world').world;
 	only attack if something enters the room from an adjacent room (entering the room
 	via portal or the like would then not trigger the aggressive behavior).
 
-	Setting mob.mobAffgressive to true will empower the mob to attack other mobs.
+	Setting mob.mobAggressive to true will empower the mob to attack other mobs.
 */
 
 module.exports = {

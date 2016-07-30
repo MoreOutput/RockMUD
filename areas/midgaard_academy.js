@@ -11,11 +11,9 @@ module.exports = {
 	description: 'Famous for preparing new adventuers for the world of RockMUD.',
 	reloads: 0,
 	author: 'Rocky',
-	messages: [
-		{
-			msg: '<span class=\'grey\'>The sounds of sparring apprentices can be heard throughout the halls.</span>'
-		}
-	],
+	messages: [{
+		msg: '<span class=\'grey\'>The sounds of sparring apprentices can be heard throughout the halls.</span>'
+	}],
 	rooms: [
 		{
 			id: '1',
@@ -30,12 +28,13 @@ module.exports = {
 					area: 'Midgaard'
 				}
 			],
-			playersInRoom: [],
 			monsters: [{
 				name: 'Radghar',
+				displayName: 'Radghar',
+				charClass: 'fighter',
 				level: 35,
 				short: 'Lord Radghar',
-				long: 'Radghar, a retired Midgaardian guard captain',
+				long: '<span class="yellow">Radghar</span>, a retired Midgaardian guard captain',
 				description: '',
 				inName: 'Lord Radghar',
 				race: 'human',
@@ -52,16 +51,13 @@ module.exports = {
 				damRoll: 20,
 				hitRoll: 15,
 				ac: 20,
-				itemType: 'mob',
 				items: [],
+				trainer: true,
 				behaviors: [{
-					module: 'trainer'
-				}, {
 					module: 'radghar'
 				}]
 			}],
-			items : [],
-			flags : []
+			items : []
 		}
 	]
 };

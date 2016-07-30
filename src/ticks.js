@@ -171,7 +171,7 @@ World = require('./world').world;
 
 						if (World.dice.roll(1, 4) >= 2 && item.lightDecay !== 1) {
 							if (!item.lightFlickerMsg) {
-								lightFlickerMsg = 'The light from your ' + item.displayName +' flickers';
+								lightFlickerMsg = 'The light from ' + item.short +' flickers';
 							} else {
 								lightFlickerMsg = item.displayName + ' ' + item.lightFlickerMsg;
 							}
@@ -183,7 +183,7 @@ World = require('./world').world;
 						}
 					} else if (item.lightDecay === 0) {
 						if (!item.lightDecayMsg) {
-							lightDecayMsg = 'The light from your ' + item.displayName +' goes out!';
+							lightDecayMsg = 'The light from ' + item.short +' goes out!';
 						} else {
 							lightDecayMsg = item.displayName + ' ' + item.lightDecayMsg;
 						}
