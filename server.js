@@ -146,7 +146,6 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				} else {
 					World.msgPlayer(s, {
 						msg : 'Enter your name:',
-						evt: 'reqLogin',
 						noPrompt: true,
 						styleClass: 'enter-name'
 					});
@@ -156,7 +155,6 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			} else {
 				World.msgPlayer(s, {
 					msg : 'Please enter a character name:',
-					evt: 'reqLogin',
 					noPrompt: true,
 					styleClass: 'enter-name'
 				});

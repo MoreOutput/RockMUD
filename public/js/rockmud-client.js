@@ -89,9 +89,6 @@ window.onload = function() {
 			ws.emit(r.emit, r);
 		}
 	},
-	changeMudState = function(state) {
-		document.getElementById('cmd').dataset.mudState = state;
-	},
 	checkMovement = function(cmdStr, fn) {
 		if (movement.toString().indexOf(cmdStr) !== -1) {
 			return fn(true, 'move ' + cmdStr);
@@ -123,6 +120,18 @@ window.onload = function() {
 		return fn(cmd + ' ' + msg);
 	};
 
+	document.addEventListener('reqPassword', function(e) {
+		e.preventDefault();
+		
+		node.type = 'password';
+	}, false);
+
+	document.addEventListener('onLogged', function(e) {
+		e.preventDefault();
+		
+		node.type = 'text';
+	}, false);
+
 	document.getElementById('console').onsubmit = function (e) {
 		var messageNodes = [],
 		msg = node.value.toLowerCase().trim(),
@@ -147,19 +156,15 @@ window.onload = function() {
 		return false;
 	};
 
-	document.getElementById('cmd').focus();
+	node.focus();
 
 	ws.on('msg', function(r) {
 		display(r);
 
-		if (r.res && r.evt === 'reqPassword') {
-			node.type = 'password';
-		} else {
-			node.type = 'text';
-		}
-
-		if (r.res) {
-			changeMudState(r.res);
-		}
+		if (r.evt) {
+			r.evt = new CustomEvent(r.evt);
+			
+			document.dispatchEvent(r.evt);
+		}	
 	});
 };
