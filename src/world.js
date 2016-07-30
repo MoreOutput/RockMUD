@@ -957,7 +957,7 @@ World.prototype.extend = function(extendObj, readObj) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
 				} else if (!isNaN(extendObj[prop]) && !isNaN(readObj[prop])) {
 					extendObj[prop] += readObj[prop];
-				} else {
+				} else if (typeof extendObj[prop] === 'object' && typeof readObj[prop] === 'object')  {
 					for (prop2 in readObj[prop]) {
 						extendObj[prop][prop2] = readObj[prop][prop2];
 					}
