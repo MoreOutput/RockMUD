@@ -183,7 +183,16 @@ Character.prototype.addPlayer = function(s) {
 // A New Character is saved
 Character.prototype.create = function(s) { 
 	var character = this,
+	raceObj,
+	classObj,
 	socket;
+	
+	raceObj = World.getRace(s.player.race);
+
+	classObj = World.getClass(s.player.charClass);
+
+	s.player = World.extend(s.player, raceObj);
+	s.player = World.extend(s.player, classObj);
 	
 	s.player.chp += 30;
 	s.player.cmana += 5;
@@ -197,16 +206,16 @@ Character.prototype.create = function(s) {
 	s.player.roomid = '1';
 	s.player.trains += 25;
 	s.player.deaths = 0;
-	s.player.baseStr += 10 + s.player.str;
-	s.player.baseInt += 10 + s.player.int;
-	s.player.baseWis += 10 + s.player.wis;
-	s.player.baseCon += 10 + s.player.con;
-	s.player.baseDex += 10 + s.player.dex;
+	s.player.baseStr += 12 + s.player.str;
+	s.player.baseInt += 12 + s.player.int;
+	s.player.baseWis += 12 + s.player.wis;
+	s.player.baseCon += 12 + s.player.con;
+	s.player.baseDex += 12 + s.player.dex;
 	s.player.settings = {
 		autosac: false,
 		autoloot: true,
 		autocoin: true,
-		wimpy: {enabled: false, hp: 0},
+		wimpy: 0,
 		channels: {
 			blocked: ['flame']
 		}
@@ -214,16 +223,14 @@ Character.prototype.create = function(s) {
 
 	socket = s.player.socket;
 
-	s.player = character.rollStats(s.player);
-
 	s.player.mv = s.player.cmv;
 	s.player.mana = s.player.cmana;
 	s.player.hp = s.player.chp;
 	s.player.str = s.player.baseStr;
-	s.player.int += s.player.baseInt;
-	s.player.wis += s.player.baseWis;
-	s.player.con += s.player.baseCon;
-	s.player.dex += s.player.baseDex;
+	s.player.int = s.player.baseInt;
+	s.player.wis = s.player.baseWis;
+	s.player.con = s.player.baseCon;
+	s.player.dex = s.player.baseDex;
 
 	character.generateSalt(function(salt) {
 		s.player.salt = salt;
@@ -232,7 +239,7 @@ Character.prototype.create = function(s) {
 			s.player.password = hash;
 			s.player.socket = null;
 			
-			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null, 4), function (err) {
+			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null), function (err) {
 				var i = 0,
 				roomObj;
 
@@ -265,52 +272,6 @@ Character.prototype.create = function(s) {
 			});
 		});
 	});
-};
-
-// At this point the character has the string values of race and class
-// we now merge those core class defintions into the base player object
-Character.prototype.rollStats = function(player) {
-	var i = 0,
-	j = 0,
-	raceKey, // property of the race defines in raceList
-	classKey; // property of the class defines in classList
-	
-	for (i; i < World.races.length; i += 1) {// looking for race
-		if (World.races[i].name.toLowerCase() === player.race.toLowerCase()) { // found race
-			for (raceKey in player) {
-				if (raceKey in World.races[i] && raceKey !== 'name') { // found, add in stat bonus
-					if (isNaN(World.races[i][raceKey])) {
-						player[raceKey] = World.races[i][raceKey];
-					} else {
-						player[raceKey] += World.races[i][raceKey];
-					}
-				}
-			}
-		}
-	}
-
-	for (j; j < World.classes.length; j += 1) { // looking through classes
-		if (World.classes[j].name.toLowerCase() === player.charClass.toLowerCase()) { // class match found
-			for (classKey in player) {
-				if (classKey in World.classes[j] && classKey !== 'name') {
-					if (!Array.isArray(World.classes[j][classKey])) {
-						if (!isNaN(World.classes[j][classKey])) {
-							player[classKey] += World.classes[j][classKey];
-						} else {
-							player[classKey] = World.classes[j][classKey];
-						}
-					} else {
-						player[classKey].push(World.classes[j][classKey]);
-					}
-				} 
-			}
-		}
-	}
-
-	player.carry = player.str * 10;
-	player.ac = World.dice.getDexMod(player) + 2;
-	
-	return player;
 };
 
 // recursive function fired in server.js, checked when a new character is being made
@@ -442,7 +403,7 @@ Character.prototype.save = function(player, fn) {
 	
 	player = World.sanitizeBehaviors(player);
 
-	fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null, 4), function (err) {
+	fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null), function (err) {
 		player.socket = socket;
 
 		player = World.setupBehaviors(player);
