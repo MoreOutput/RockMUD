@@ -4,6 +4,7 @@ window.onload = function() {
 	terminal = document.getElementById('terminal'),
 	node = document.getElementById('cmd'),
 	rowCnt = 0,
+	canSend = true,	
 	aliases = {	
 		n: 'north',
 		e: 'east',
@@ -49,7 +50,7 @@ window.onload = function() {
 	playerIsLogged = null,
 	display = function(r, hideRes) {
 		var i = 0,
-		styleClass;
+		styleClass = '';
 
 		if (r.styleClass) {
 			styleClass = r.styleClass;
@@ -67,11 +68,7 @@ window.onload = function() {
 			rowCnt += 1;
 
 			if (rowCnt > 150) {
-				for (i; i < 100; i += 1) {
-					terminal.removeChild(document.getElementById( (i + 1) ));
-				}
-
-				rowCnt = 0;
+				terminal.removeChild(document.getElementById(i + 1));
 			}
 
 			isScrolledToBottom = terminal.scrollHeight - terminal.clientHeight <= terminal.scrollTop + 1;
@@ -86,6 +83,7 @@ window.onload = function() {
 	parseCmd = function(r) {
 		if (r.msg !== undefined) {
 			r.msg = r.msg.replace(/ /g, ' ').trim();
+
 			ws.emit(r.emit, r);
 		}
 	},
@@ -105,6 +103,7 @@ window.onload = function() {
 		cmdArr = cmdStr.split(' ');
 
 		cmd = cmdArr[0].toLowerCase();
+
 		msg = cmdArr.slice(1).join(' ');
 
 		for (i; i < keyLength; i += 1) {
@@ -135,7 +134,7 @@ window.onload = function() {
 		
 		node.type = 'text';
 	}, false);
-
+	
 	document.getElementById('console').onsubmit = function (e) {
 		var messageNodes = [],
 		msg = node.value.toLowerCase().trim(),
@@ -148,20 +147,28 @@ window.onload = function() {
 			emit: 'cmd'
 		};
 
-		if (node.type !== 'password') {
-			display(msgObj, false);
-		} else {
-			display(msgObj, true);
-		}
-			
-		node.value = '';
-		node.focus();
+		e.preventDefault();
 
-		return false;
+		if (canSend) {
+			if (node.type !== 'password') {
+				display(msgObj, false);
+			} else {
+				display(msgObj, true);
+			}
+			
+			node.value = '';
+			node.focus();
+
+			canSend = false;
+			
+			return false;
+		} else {
+			return false;
+		}
 	};
 
 	node.focus();
-
+	
 	ws.on('msg', function(r) {
 		display(r);
 
@@ -175,4 +182,8 @@ window.onload = function() {
 			}
 		}
 	});
+
+	setInterval(function() {
+		canSend = true;
+	}, 175);
 };

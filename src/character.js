@@ -417,6 +417,7 @@ Character.prototype.newCharacter = function(s, command) {
 				World.msgPlayer(s, {
 					msg: 'Password should be longer',
 					styleClass: 'error',
+					evt: 'reqPassword',
 					noPrompt: true
 				});
 			}
