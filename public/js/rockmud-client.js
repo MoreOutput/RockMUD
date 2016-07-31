@@ -69,6 +69,8 @@ window.onload = function() {
 
 			if (rowCnt > 150) {
 				terminal.removeChild(document.getElementById(i + 1));
+
+				rowCnt = 0;
 			}
 
 			isScrolledToBottom = terminal.scrollHeight - terminal.clientHeight <= terminal.scrollTop + 1;
