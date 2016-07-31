@@ -16,26 +16,30 @@ module.exports = {
 	stayInArea: true,
 	wanderCheck: 1,
 	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'],
-	onAlive: function(roomObj) {
+	onAlive: function(roomObj, mob) {
 		var roll = World.dice.roll(1, 10),
 		exitObj,
 		direction;
+
+		if (!mob) {
+			mob = this;
+		}
 		
-		if (this.wanderCheck && roll > this.wanderCheck) {
-			if (!this.moveDirections) {
-				this.moveDirections = this.moveDirections;
+		if (mob.wanderCheck && roll > mob.wanderCheck) {
+			if (!mob.moveDirections) {
+				mob.moveDirections = this.moveDirections;
 			}
 
-			if (!this.stayInArea) {
-				this.stayInArea = this.stayInArea;
+			if (!mob.stayInArea) {
+				mob.stayInArea = this.stayInArea;
 			}
 
-			direction = this.moveDirections[World.dice.roll(1, this.moveDirections.length) - 1];
+			direction = mob.moveDirections[World.dice.roll(1, mob.moveDirections.length) - 1];
 
 			exitObj = Room.getExit(roomObj, direction);
-
-			if (exitObj && ((this.stayInArea === false) || (this.stayInArea === true && this.area === exitObj.area))) {
-				Cmd.move(this, {
+			
+			if (exitObj && ((mob.stayInArea === false) || (mob.stayInArea === true && mob.area === exitObj.area))) {
+				Cmd.move(mob, {
 					arg: direction,
 					roomObj: roomObj
 				});
