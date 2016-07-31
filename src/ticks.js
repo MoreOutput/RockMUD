@@ -399,3 +399,4 @@ World = require('./world').world;
 		}
 	}, 240000);
 }());
+

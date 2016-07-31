@@ -57,8 +57,6 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 		}
 	}
 
-	// move this check to the main combat loop as to add varraying message on
-	// a 'chance' hit.
 	if (numOfAttacks === 1 && World.dice.roll(1, 4) === 4) {
 		numOfAttacks = 2;
 	}
@@ -70,8 +68,8 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 
 Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	var combat = this,
-	weaponSlots, // attackers offensive weapons
-	shieldSlots, // opponents defensive weapons
+	weaponSlots,
+	shieldSlots,
 	attackerMods = World.dice.getMods(attacker),
 	opponentMods = World.dice.getMods(opponent),
 	numOfAttacks,
@@ -85,14 +83,13 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	blocked = false,
 	adjective,
 	abstractNoun,
-	weapon, // attackers active weapon
-	shield, // opponents shield
+	weapon,
+	shield,
 	shieldAC = 0,
 	hitRoll = World.dice.roll(attacker.diceNum, attacker.diceSides, attacker.hitRoll + attackerMods.dex + World.dice.roll(1, 10)),
 	damRoll	= World.dice.roll(attacker.diceNum, attacker.diceSides, attacker.damRoll + attackerMods.str + attacker.level),
-	criticalAttackXP, // XP gained when landing critical attack
+	criticalAttackXP,
 	criticalAttack = false,
-	// the following two variables are used as defensive values for the opponent
 	dodgeCheck = World.dice.roll(opponent.diceNum, opponent.diceSides, opponentMods.dex + opponent.detection + opponent.awareness/2 + (attacker.size.value - opponent.size.value)),
 	acCheck = World.dice.roll(opponent.diceNum, opponent.diceSides, opponent.ac + opponentMods.dex + opponent.level) + World.dice.roll(1, 10);
 
@@ -104,7 +101,6 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 		damRoll = attacker.level;
 	}
 
-	// Is a player attacking something
 	if (attacker.wait > 0) { 
 		attacker.wait -= 1;
 	} else {
@@ -141,15 +137,12 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						acCheck += shieldAC;
 					}
 
-					// if opponent is weak to this weapons attackType  add to hitRoll and damage
 					if (opponent.race === 'animal' && weapon.attackType === 'slash') {
 						damage += World.dice.roll(1, 2 + weapon.level);
 					}
 					
 					if (acCheck < hitRoll) {
-						// attacker beat opponents ac check
 						if (dodgeCheck < hitRoll) {
-							// attacker beat opponent dodge check
 							damage = World.dice.roll(weapon.diceNum + attacker.damRoll/2, weapon.diceSides,
 								attackerMods.str + attacker.damRoll + weapon.diceMod);
 							
@@ -170,7 +163,6 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 								damage = damage/2;
 							}
 
-							// critical attacks
 							if (World.dice.roll(1, 40) === 40) {
 								criticalAttack = true;
 								criticalAttackXP = World.dice.roll(1 + attacker.level, 20);
@@ -373,7 +365,6 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 	player.opponent = null;
 	player.position = 'standing';
 
-	// Until dead is in if a player dies we reset
 	if (opponent.position === 'dead' && opponent.isPlayer) {
 		opponent.position = 'standing';
 		opponent.chp = opponent.hp;
@@ -492,7 +483,7 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 					combat.processEndOfMobCombat(combatInterval, opponent, player, roomObj);
 				} else if (player.isPlayer && player.chp <= 0 || opponent.isPlayer && opponent.chp <= 0) {
 					clearInterval(combatInterval);
-					// Player Death
+					
 					opponent.position = 'standing';
 					opponent.chp = opponent.hp;
 					opponent.opponent = null;
@@ -520,3 +511,4 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 }
 
 module.exports.combat = new Combat();
+

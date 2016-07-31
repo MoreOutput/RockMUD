@@ -251,7 +251,7 @@ Character.prototype.create = function(s) {
 				s.player.saved = new Date();
 			
 				if (character.addPlayer(s)) {
-					s.leave('creation'); // No longer creating the character so leave the channel and join the game
+					s.leave('creation');
 					s.join('mud');
 					
 					World.sendMotd(s);
@@ -261,11 +261,12 @@ Character.prototype.create = function(s) {
 					roomObj.playersInRoom.push(s.player);
 					
 					Cmds.look(s.player, {
-						roomObj: roomObj,
-						msg: ''
+						roomObj: roomObj
 					});
 				} else {
-					World.msgPlayer(s, {msg: 'Error logging in, please retry.'});
+					World.msgPlayer(s, {
+						msg: 'Error logging in, please retry.'
+					});
 					
 					s.disconnect();
 				}
@@ -290,8 +291,7 @@ Character.prototype.newCharacter = function(s, command) {
 				+ '<strong class="red">select a race from the list below by typing in the full name</strong>.',
 			noPrompt: true
 		});
-
-		// Display race list (help races)
+		
 		Cmds.help(s.player, {
 			msg: 'races',
 			noPrompt: true
@@ -309,7 +309,6 @@ Character.prototype.newCharacter = function(s, command) {
 					s.player.creationStep = 3;
 					s.player.race = command.cmd;
 				
-					// Display class list
 					World.msgPlayer(s, {
 						msg: 'Well done ' + s.player.displayName + ' is a ' + s.player.race + '. Now for the '
 							+ '<strong>second step</strong>, '
@@ -343,7 +342,6 @@ Character.prototype.newCharacter = function(s, command) {
 				s.player.creationStep = 4;
 				s.player.charClass = command.cmd;
 				
-				// Now for a password
 				World.msgPlayer(s, {
 					msg: s.player.displayName + ' is a ' + s.player.charClass
 						+ '! <strong>One more step before ' + s.player.displayName
@@ -420,9 +418,6 @@ Character.prototype.hpRegen = function(target) {
 	var conMod = World.dice.getConMod(target),
 	total;
 
-	// unless the charcter is a fighter they have 
-	// a 10% chance of skipping hp regen
-
 	if (target.chp < target.hp && target.thirst < 5 && target.hunger < 6) {
 		total = World.dice.roll(conMod, 4);
 
@@ -454,10 +449,7 @@ Character.prototype.manaRegen = function(target) {
 	total;
 
 	if (target.cmana < target.mana && target.thirst < 5 && target.hunger < 6) {
-		total = World.dice.roll(intMod, 8);
-		// unless the charcter is a mage they have 
-		// a 10% chance of skipping mana regen
-		if (target.charClass === 'mage' || (target.charClass !== 'mage' && chanceMod > 1)) {
+		if (target.mainStat === 'int' || chanceMod > 2) {
 			if (target.position === 'sleeping') {
 				intMod += 2;
 			}
@@ -469,13 +461,13 @@ Character.prototype.manaRegen = function(target) {
 			if (!intMod) {
 				intMod = World.dice.roll(1, 2) - 1;
 			}
-
-			total = total + target.level;
+			
+			total = World.dice.roll(intMod, 8, target.level/3);
 
 			target.cmana += total;
 
-			if (target.cmana  > target.mana ) {
-				target.cmana  = target.mana ;
+			if (target.cmana > target.mana ) {
+				target.cmana = target.mana ;
 			}
 		}
 	}
@@ -484,10 +476,7 @@ Character.prototype.manaRegen = function(target) {
 Character.prototype.mvRegen = function(target) {
 	var dexMod = World.dice.getDexMod(target),
 	total;
-
-	// unless the charcter is a thief they have 
-	// a 10% chance of skipping move regen
-
+	
 	if (target.cmv < target.mv && target.thirst < 5 && target.hunger < 6) {
 		total = World.dice.roll(dexMod, 8);
 
@@ -1126,3 +1115,4 @@ Character.prototype.calculateGear = function() {
 };
 
 module.exports.character = new Character();
+

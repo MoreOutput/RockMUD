@@ -46,3 +46,4 @@ Spell.prototype.spark = function(skillObj, player, roomObj, command, fn) {
 };
 
 module.exports.spells = new Spell();
+

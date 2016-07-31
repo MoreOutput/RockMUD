@@ -338,3 +338,4 @@ Room.prototype.getExitCommands = function(roomObj) {
 }
 
 module.exports.room = new Room();
+

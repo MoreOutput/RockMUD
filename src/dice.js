@@ -163,3 +163,4 @@ Roller.prototype.calExp = function(player, expOpt) {
 };
 
 module.exports.roller = new Roller();
+

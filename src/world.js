@@ -377,11 +377,12 @@ World.prototype.rollItems = function(itemArr, roomid) {
 			}
 		}(itemArr[i], i));
 	}
-}
+};
+
 // Rolls values for Mobs, including their equipment
 World.prototype.rollMobs = function(mobArr, roomid, area) {
 	var world = this,
-	diceMod, // Added to all generated totals 
+	diceMod,
 	refId = Math.random().toString().replace('0.', 'mob-'),
 	i = 0;
 
@@ -774,7 +775,7 @@ World.prototype.msgPlayer = function(target, msgObj) {
 	} else {
 		s.emit('msg', msgObj);
 	}
-}
+};
 
 // Emit a message to all a given rooms players
 World.prototype.msgRoom = function(roomObj, msgObj) {
@@ -986,6 +987,7 @@ World.prototype.shuffle = function (arr) {
 	}
 
 	return arr;
-}
+};
 
 module.exports.world = new World();
+
