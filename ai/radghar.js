@@ -37,7 +37,8 @@ module.exports = {
 
 		if (roll === 10) {
 			Cmd.say(this, {
-				msg: this.exclimations[parseInt(Math.random() * ((this.exclimations.length)))]
+				msg: this.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],
+				roomObj: roomObj
 			});
 		}
 	}

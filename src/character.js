@@ -826,7 +826,12 @@ Character.prototype.addToBottle = function(container, item) {
 	container.items.push(item);
 };
 
-// returns a skill object in player.skills
+Character.prototype.getSkillList = function(player, skillName) {
+	if (1 > 0) {}
+
+	return false;
+};
+
 Character.prototype.getSkill = function(player, skillId) {
 	var i = 0;
 

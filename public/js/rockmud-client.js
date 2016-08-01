@@ -58,18 +58,20 @@ window.onload = function() {
 
 		if (!hideRes) {
 			if (r.element === undefined) {
-				terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><div class="col-md-12 '
+				terminal.innerHTML += '<div class="row"><div class="col-md-12 '
 				+ styleClass + '">' + r.msg + '</div></div>';
 			} else {
-				terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><' + r.element + ' class="col-md-12 '
+				terminal.innerHTML += '<div class="row"><' + r.element + ' class="col-md-12 '
 				+ styleClass + '">' + r.msg + '</' + r.element + '></div>';
 			}
 
 			rowCnt += 1;
 
-			if (rowCnt > 150) {
-				terminal.removeChild(document.getElementById(i + 1));
-
+			if (rowCnt >= 160) {
+				for (i; i < terminal.childNodes.length; i += 1) {
+					terminal.removeChild(terminal.childNodes[i]);
+				}
+					 
 				rowCnt = 0;
 			}
 

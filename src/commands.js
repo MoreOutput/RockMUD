@@ -1698,18 +1698,29 @@ Cmd.prototype.quit = function(target, command) {
 
 /** Related to Saving and character adjustment/interaction **/
 Cmd.prototype.train = function(target, command) {
+
+};
+
+Cmd.prototype.practice = function(target, command) {
 	var roomObj = World.getRoomObject(target.area, target.roomid),
 	trainers = Room.getTrainers(roomObj, command),
+	trainer,
+	trainerHasSkill,	
 	canSee = Character.canSee(target, roomObj);
 	
 	if (target.position !== 'sleeping') {
 		if (canSee) {
 			if (trainers.length) {
+				trainer = trainers[0];
+
+				trainerHasSkill = Character.getSkillList(target, command.msg);
+				
 				if (command.msg) {
 					// specific training target given so we actually 'train' and bump up a stat
 					
 				} else {
 					// nothing specific outlined so we list what the player can train here
+					
 					
 				}
 			} else {
@@ -1737,10 +1748,6 @@ Cmd.prototype.train = function(target, command) {
 			styleClass: 'error'
 		});
 	}
-};
-
-Cmd.prototype.practice = function(target, command) {
-
 };
 
 Cmd.prototype.save = function(target, command) {
