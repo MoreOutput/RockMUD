@@ -827,9 +827,21 @@ Character.prototype.addToBottle = function(container, item) {
 };
 
 Character.prototype.getSkillList = function(player, skillName) {
-	if (1 > 0) {}
+	var prop;
 
-	return false;
+	if (skillName.arg) {
+		skillName = skillName.arg;
+	}
+	
+	if (!skillName) {
+		for (prop in player.skillList) {
+			if (player.skillList[prop].name.toLowerCase().indexOf(skillName) !== -1) {
+				return player.skillList[prop];
+			}
+		}
+	} else {
+		return player.skillList[skillName];
+	}
 };
 
 Character.prototype.getSkill = function(player, skillId) {

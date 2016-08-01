@@ -1705,23 +1705,32 @@ Cmd.prototype.practice = function(target, command) {
 	var roomObj = World.getRoomObject(target.area, target.roomid),
 	trainers = Room.getTrainers(roomObj, command),
 	trainer,
-	trainerHasSkill,	
+	trainerHasSkill,
+	practiceDisplay = '',
+	practiceCheck,	
+	practiceRoll,
+	prop,
 	canSee = Character.canSee(target, roomObj);
 	
 	if (target.position !== 'sleeping') {
 		if (canSee) {
 			if (trainers.length) {
 				trainer = trainers[0];
-
-				trainerHasSkill = Character.getSkillList(target, command.msg);
-				
-				if (command.msg) {
-					// specific training target given so we actually 'train' and bump up a stat
+		
+				if (command.arg) {
+					trainerHasSkill = Character.getSkillList(target, command.msg);			
 					
+					if (trainerHasSkill && canTrain) {
+		
+					}
 				} else {
-					// nothing specific outlined so we list what the player can train here
+					for (prop in trainer.skillList) {
+						practiceDisplay += trainer.skillList[prop].name
+					}
 					
-					
+					World.msgPlayer(s, {
+						msg: practiceDisplay
+					});
 				}
 			} else {
 				if (roomObj.monsters || roomObj.playersInRoom) {
