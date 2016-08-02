@@ -828,23 +828,27 @@ Character.prototype.addToBottle = function(container, item) {
 
 Character.prototype.getSkillList = function(player, skillName) {
 	var prop;
-
-	if (skillName.arg) {
-		skillName = skillName.arg;
-	}
 	
-	if (!skillName) {
-		for (prop in player.skillList) {
-			if (player.skillList[prop].name.toLowerCase().indexOf(skillName) !== -1) {
-				return player.skillList[prop];
-			}
+	for (prop in player.skillList) {
+		if (player.skillList[prop].id.toLowerCase().indexOf(skillName) !== -1) {
+			return player.skillList[prop];
 		}
-	} else {
-		return player.skillList[skillName];
-	}
+	}	
 };
 
-Character.prototype.getSkill = function(player, skillId) {
+Character.prototype.getSkill = function(player, skillName) {
+	var i = 0;
+
+	for (i; i < player.skills.length; i += 1) {
+		if (player.skills[i].id.toLowerCase().indexOf(skillName) !== -1) {
+			return player.skills[i];
+		}
+	}
+
+	return false;
+};
+
+Character.prototype.getSkillById = function(player, skillId) {
 	var i = 0;
 
 	for (i; i < player.skills.length; i += 1) {
@@ -854,6 +858,10 @@ Character.prototype.getSkill = function(player, skillId) {
 	}
 
 	return false;
+};
+
+Character.prototype.addSkill = function(player, skillObj) {
+	player.skills.push(skillObj);
 };
 
 Character.prototype.removeItem = function(player, item) {

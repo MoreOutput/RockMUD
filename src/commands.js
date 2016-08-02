@@ -1255,7 +1255,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 	if (player.position !== 'sleeping') {
 		if (command.arg) {
 			if (command.arg in Spells) {
-				skillObj = Character.getSkill(player, command.arg);
+				skillObj = Character.getSkillById(player, command.arg);
 
 				if (skillObj) {
 					if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fleeing') {
@@ -1705,12 +1705,79 @@ Cmd.prototype.practice = function(target, command) {
 	var roomObj = World.getRoomObject(target.area, target.roomid),
 	trainers = Room.getTrainers(roomObj, command),
 	trainer,
-	trainerHasSkill,
+	trainerSkillObj,
 	practiceDisplay = '',
 	practiceCheck,	
 	practiceRoll,
 	prop,
-	canSee = Character.canSee(target, roomObj);
+	cost = 5,
+	skillObj = Character.getSkill(target, command.arg),
+	canSee = Character.canSee(target, roomObj),
+	intMod = World.dice.getIntMod(target),	
+	pracSkill = function() {
+		if (skillObj.train < 100) {
+			if (skillObj.mainStat === target.mainStat) {
+				cost -= 1;
+			}
+
+			if (target.trains >= cost) {
+				skillObj.train += World.dice.roll(1, 3, intMod);
+				
+				if (skillObj.train > 100) {
+					skillObj.train = 100;
+
+					if (target.onSkillMastery) {
+						target.onSkillMastery(skillObj, trainer);
+					}
+
+					if (trainer.onTrainMastery) {
+						trainer.onTrainMastery(skillObj, trainer);	
+					}
+				}
+
+				if (trainer.onTrain) {
+					trainer.onTrain(target, skillObj);
+				}
+
+				if (!trainer.trainMsg) {
+					if (trainer.long) {
+						World.msgPlayer(target, {
+							msg: trainer.long + ' trains you in the art of ' +
+								skillObj.display + '.',
+							styleClass: 'green'
+						});
+					} else {
+						World.msgPlayer(target, {
+							msg: trainer.displayName + ' trains you in the art of '
+								+ skillObj.display + '.',
+							styleClass: 'green'
+						});
+					}
+				} else {
+					World.msgPlayer(target, {
+						msg: trainer.trainMsg,
+						styleClass: 'green'
+					});
+				}
+
+				World.msgRoom(roomObj, {
+					msg: trainer.long + ' trains ' + target.displayName  + ' in the art of ' +
+						skillObj.display + '.',
+					styleClass: 'green',
+					playerName: target.name
+				});
+			}
+		} else {
+			if (!trainer.onSkillMaster) {
+				World.msgPlayer(target, {
+					msg: 'You are already a master of ' + skillObj.display + '.',
+					styleClass: 'error'
+				});
+			} else {
+				trainer.onSkillMaster(target, skillObj, trainerSkillObj);
+			}
+		}
+	};	
 	
 	if (target.position !== 'sleeping') {
 		if (canSee) {
@@ -1718,18 +1785,43 @@ Cmd.prototype.practice = function(target, command) {
 				trainer = trainers[0];
 		
 				if (command.arg) {
-					trainerHasSkill = Character.getSkillList(target, command.msg);			
+					trainerSkillObj = Character.getSkillList(trainer, command.arg);				
 					
-					if (trainerHasSkill && canTrain) {
-		
+					if (trainerSkillObj && skillObj) {
+						pracSkill();
+					} else {
+						skillObj = Character.getSkillList(target, command.arg);
+						
+						if (skillObj) {
+							Character.addSkill(target, skillObj);							
+
+							skillObj = Character.getSkill(target, skillObj.id);
+							
+							pracSkill();
+						} else {
+							World.msgPlayer(target, {
+								msg: 'You don\'t know how to ' + command.arg + '.',
+								styleClass: 'error'
+							});
+						}
 					}
 				} else {
-					for (prop in trainer.skillList) {
-						practiceDisplay += trainer.skillList[prop].name
-					}
+					practiceDisplay = '<p>The table below showcases the <strong>skills currently known by '
+						+ trainer.displayName + '</strong></p><table class="table table-condensed prac-table">'
+						+ '<thead><tr><td class="prac-name-header yellow"><strong>Skill Name</strong></td>'
+						+ '<td class="prac-max-header yellow"><strong>Max Trainable</strong></td>'
+						+ '</tr></thead><tbody>';
 					
-					World.msgPlayer(s, {
-						msg: practiceDisplay
+					for (prop in trainer.skillList) {
+						if (trainer.skillList[prop].level <= trainer.level) {
+							practiceDisplay += '<tr><td class="prac-skill">'
+								+ trainer.skillList[prop].display + '</td>'
+								+ '<td>' + trainer.skillList[prop].train + '</td></</tr>';
+						}
+					}
+							
+					World.msgPlayer(target, {
+						msg: practiceDisplay + '</tbody></table>'
 					});
 				}
 			} else {
@@ -1753,7 +1845,7 @@ Cmd.prototype.practice = function(target, command) {
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You can\'t train while sleeping!',
+			msg: '<strong>You can\'t train while sleeping!</strong>',
 			styleClass: 'error'
 		});
 	}
@@ -1763,12 +1855,21 @@ Cmd.prototype.save = function(target, command) {
 	if (target.isPlayer) {
 		if (target.position === 'standing' && target.wait === 0) {
 			Character.save(target, function() {
-				World.msgPlayer(target, {msg: target.displayName + ' was saved. Whew!', styleClass: 'save'});
+				World.msgPlayer(target, {
+					msg: target.displayName + ' was saved. Whew!',
+					styleClass: 'save green'
+				});
 			});
 		} else if (target.position !== 'standing') {
-			World.msgPlayer(target, {msg: 'You can\'t save while ' + target.position + '.', styleClass: 'save'});
+			World.msgPlayer(target, {
+				msg: 'You can\'t save while ' + target.position + '.',
+				styleClass: 'save'
+			});
 		} else {
-			World.msgPlayer(target, {msg: 'You can\'t save just yet!', styleClass: 'error'});
+			World.msgPlayer(target, {
+				msg: 'You can\'t save just yet!',
+				styleClass: 'error'
+			});
 		}
 	}
 };
@@ -1781,9 +1882,15 @@ Cmd.prototype.title = function(target, command) {
 			target.title = ' a level ' + target.level + ' ' + target.race + ' ' + target.charClass;
 		}
 
-		World.msgPlayer(target, {msg: 'Your title was changed!', styleClass: 'save'});
+		World.msgPlayer(target, {
+			msg: 'Your title was changed!',
+			styleClass: 'save'
+		});
 	} else {
-		World.msgPlayer(target, {msg: 'Title is too long. There is a 40 character limit.', styleClass: 'save'});
+		World.msgPlayer(target, {
+			msg: 'Title is too long. There is a 40 character limit.',
+			styleClass: 'save'
+		});
 	}
 };
 

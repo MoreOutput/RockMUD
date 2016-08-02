@@ -61,7 +61,7 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 		numOfAttacks = 2;
 	}
 	
-	numOfAttacks += Skill.secondAttack(Character.getSkill(attacker, 'secondAttack'), attacker);
+	numOfAttacks += Skill.secondAttack(Character.getSkillById(attacker, 'secondAttack'), attacker);
 	
 	return numOfAttacks;
 };
@@ -132,7 +132,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 
 				for (j; j < numOfAttacks; j += 1) {
 					if (shield) {
-						shieldAC = Skill.shieldBlock(Character.getSkill(attacker, 'shieldBlock'), attacker, roomObj, shield);
+						shieldAC = Skill.shieldBlock(Character.getSkillById(attacker, 'shieldBlock'), attacker, roomObj, shield);
 
 						acCheck += shieldAC;
 					}

@@ -34,7 +34,11 @@
 			"level": 1,
 			"train": 70,
 			"type": "melee",
-			"wait": 1
+			"wait": 1,
+			"prerequisites": [{
+				"skill": {"id": "bash", "prop": "train", "value": "70"},
+				"baseStr": 16
+			}]
 		},
 		"shieldBlock": {
 			"id": "shieldBlock",

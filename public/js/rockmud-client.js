@@ -43,7 +43,9 @@ window.onload = function() {
 		desc: 'description',
 		r: 'recall',
 		wake: 'stand',
-		g: 'get'
+		g: 'get',
+		tr: 'train',
+		prac: 'practice'
 	},
 	isScrolledToBottom = false,
 	movement = ['north', 'east', 'south', 'west', 'down', 'up'],

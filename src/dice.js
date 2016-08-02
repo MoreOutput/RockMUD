@@ -45,6 +45,10 @@ Roller.prototype.getDexMod = function(target, mod) {
 		mod = 0;
 	}
 
+	if (target.mainStat === 'dex') {
+		mod += 1;
+	}
+
 	if (target.size < 3) {
 		sizeMod += target.size;
 	} else if (target.size > 3) {
@@ -65,12 +69,16 @@ Roller.prototype.getConMod = function(target, mod) {
 		mod = 0;
 	}
 
+	if (target.mainStat === 'con') {
+		mod += 1;
+	}
+	
 	if (target.size < 3) {
 		sizeMod = -(target.size - 2);
 	} else if (target.size > 3) {
 		sizeMod += ( target.size );
 	}
-
+	
 	if (target.con > 12) {
 		return Math.round( (target.con/4) + mod + sizeMod);
 	} else {
@@ -81,6 +89,10 @@ Roller.prototype.getConMod = function(target, mod) {
 Roller.prototype.getIntMod = function(target, mod) {
 	if (!mod) {
 		mod = 0;
+	}
+
+	if (target.mainStat === 'int') {
+		mod += 1;
 	}
 
 	if (target.int > 12) {
@@ -97,6 +109,10 @@ Roller.prototype.getStrMod = function(target, mod) {
 		mod = 0;
 	}
 
+	if (target.mainStat === 'str') {
+		mod += 1;
+	}
+	
 	if (target.size < 3) {
 		sizeMod = -(target.size - 2);
 	} else if (target.size > 3) {
@@ -113,6 +129,10 @@ Roller.prototype.getStrMod = function(target, mod) {
 Roller.prototype.getWisMod = function(target, mod) {
 	if (!mod) {
 		mod = 0;
+	}
+
+	if (target.mainStat === 'wis') {
+		mod += 1;
 	}
 
 	if (target.wis > 13) {
