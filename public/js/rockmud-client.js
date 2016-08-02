@@ -45,7 +45,9 @@ window.onload = function() {
 		wake: 'stand',
 		g: 'get',
 		tr: 'train',
-		prac: 'practice'
+		prac: 'practice',
+		nod: 'emote nods solemly.',
+		laugh: 'emote laughs heartily.'
 	},
 	isScrolledToBottom = false,
 	movement = ['north', 'east', 'south', 'west', 'down', 'up'],

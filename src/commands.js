@@ -233,7 +233,7 @@ Cmd.prototype.emote = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
 		World.msgRoom(roomObj, {
-			msg: '<div class="cmd-emote">' + target.displayName + ' ' + command.msg + '</div>'
+			msg: '<div class="cmd-emote yellow">' + target.displayName + ' ' + command.msg + '</div>'
 		});
 	} else {
 		World.msgPlayer(target, {msg: 'You can\'t emote right now.', styleClass: 'error'});
@@ -2034,23 +2034,29 @@ Cmd.prototype.inventory = function(player, command) {
 				iStr += '<td class="i-equipped">Yes</td>';
 			}
 
-			iStr += '<td class="i-type">' + player.items[i].itemType + '</td>';
-
-			iStr += '<td class="i-weight">' + player.items[i].weight + '</td></tr>';
+			iStr += '<td class="i-type">' + player.items[i].itemType + '</td>'
+				+ '<td class="i-weight">' + player.items[i].weight + '</td></tr>';
 		}
 
-		World.msgPlayer(player, {msg: '<h1>Your Inventory</h1>' + iStr + '</tbody></table>'});
+		if (player.level <= 2) {
+			iStr = '<p><strong class="red">NEWBIE TIP:</strong> You can see the items below on your person. '
+				+ 'Type <strong>eq</strong> or <strong>equipment</strong> to see worn equipment and empty slots.</p>'
+				+ iStr;
+		}
+
+		World.msgPlayer(player, {
+			msg: '<h1>Your Inventory</h1>'
+				+ iStr + '</tbody></table>'
+		});
 	} else {
-		World.msgPlayer(player, {msg: 'No items in your inventory, can carry ' + player.carry + ' pounds of items and treasure.'});
+		World.msgPlayer(player, {
+			msg: 'No items in your inventory, can carry ' + player.carry + ' pounds of items and treasure.'
+		});
 	}
 };
 
 Cmd.prototype.score = function(target, command) {
-	var i = 0,
-	getAffectsList = function() {
-
-	},
-	score = '<section class="row score"><div class="col-md-12"><h1>' + 
+	var score = '<section class="row score"><div class="col-md-12"><h1>' + 
 		'<span class="score-name">' + target.displayName + '</span> ' + 
 		'<span class="score-title">' + target.title + '</span> ' + 
 		'<span class="score-level"> (' + target.level + ')</span></h1></div>' +
@@ -2081,11 +2087,11 @@ Cmd.prototype.score = function(target, command) {
 					'<ul class="col-md-3 score-stats list-unstyled">' +
 						'<li class="stat-hitroll"><label>Hit Bonus: </labels> ' + target.hitRoll + '</li>' +
 						'<li class="stat-damroll"><label>Damage Bonus: </label> ' + target.damRoll + '</li>' +
-						'<li class="stat-position"><label>Magic resistance: </label> ' + target.magicRes + '</li>' +
-						'<li class="stat-position"><label>Melee resistance: </label> ' + target.meleeRes + '</li>' +
-						'<li class="stat-position"><label>Poison resistance: </label> ' + target.poisonRes + '</li>' +
-						'<li class="stat-position"><label>Detection: </label> ' + target.detection + '</li>' +
-						'<li class="stat-position"><label>Knowledge: </label> ' + target.knowledge + '</li>' +
+						'<li class="stat-magicRes"><label>Magic resistance: </label> ' + target.magicRes + '</li>' +
+						'<li class="stat-meleeRes"><label>Melee resistance: </label> ' + target.meleeRes + '</li>' +
+						'<li class="stat-poisonRes"><label>Poison resistance: </label> ' + target.poisonRes + '</li>' +
+						'<li class="stat-detection"><label>Detection: </label> ' + target.detection + '</li>' +
+						'<li class="stat-knowlege"><label>Knowledge: </label> ' + target.knowledge + '</li>' +
 					'</ul>' +
 					'<div class="col-md-3 score-affects">' +
 						'<h6 class="sans-serif">Affected by:</h6>' +
@@ -2094,14 +2100,16 @@ Cmd.prototype.score = function(target, command) {
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
 					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span></li>' +
-					'<li class="stat-level">You are a level ' + target.level + ' ' + target.race + ' '+  target.charClass + ' of ' + target.size.display + ' size.</li>' +
+					'<li class="stat-level">You are a level ' + target.level + ' ' + target.race + ' '
+						+  target.charClass + ' of ' + target.size.display + ' size.</li>' +
 					'<li class="stat-carry">You are carrying ' + target.weight + '/' + target.maxWeight + ' pounds.</li>' +
-					'<li class="stat-xp">You need <strong>' + (target.expToLevel - target.exp) + '</strong> experience for your next level.</li>' +
-		'<li class="stat-killcnt last">You have won ' + target.killed + ' battles.</li>' +
+					'<li class="stat-xp">You need <strong>' + (target.expToLevel - target.exp)
+						+ '</strong> experience for your next level.</li>' +
+					'<li class="stat-killcnt last">You have won ' + target.killed + ' battles.</li>' +
 				'</ul>' +
 			'</div>'
-				'</div>' +
-		'</div></section>';
+		'</div>' +
+	'</div></section>';
 
 	World.msgPlayer(target, {
 		msg: score

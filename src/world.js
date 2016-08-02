@@ -743,7 +743,8 @@ World.prototype.prompt = function(target) {
 World.prototype.msgPlayer = function(target, msgObj) {
 	var world = this,
 	newMsg = {},
-	s;
+	s,
+	prompt;
 
 	if (target.player) {
 		s = target;
@@ -754,22 +755,30 @@ World.prototype.msgPlayer = function(target, msgObj) {
 		s = target;
 	}
 
+	prompt = '<div class="cprompt"><strong><' + target.chp + '/'  + target.hp + '<span class="red">hp</span>><' +
+		target.cmana + '/'  + target.mana + '<span class="blue">m</span>><' + 
+		target.cmv + '/'  + target.mv +'<span class="yellow">mv</span>></strong></div>';
+
+	if (target.role === 'admin') {
+		prompt += '<' + player.wait + 'w>';
+	}
+
 	if (target) {
 		if (s) {
 			if (typeof msgObj.msg !== 'function' && msgObj.msg) {
 				s.emit('msg', msgObj);
 			} else {
 				msgObj.msg(target, function(send, msg) {
+					if (!msgObj.noPrompt) {
+						msg += prompt;
+					}
+
 					msgObj.msg = msg;
-					
+
 					if (send) {
 						s.emit('msg', msgObj);
 					}
 				}, target);
-			}
-
-			if (!msgObj.noPrompt) {
-				world.prompt(target);
 			}
 		}
 	} else {
