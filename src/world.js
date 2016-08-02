@@ -766,6 +766,10 @@ World.prototype.msgPlayer = function(target, msgObj) {
 	if (target) {
 		if (s) {
 			if (typeof msgObj.msg !== 'function' && msgObj.msg) {
+				if (!msgObj.noPrompt) {
+					msgObj.msg += prompt;
+				}
+					
 				s.emit('msg', msgObj);
 			} else {
 				msgObj.msg(target, function(send, msg) {
