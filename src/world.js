@@ -755,7 +755,7 @@ World.prototype.msgPlayer = function(target, msgObj) {
 		prompt = this.prompt(target);
 	}
 
-	if (!msgObj.styleCl8ass) {
+	if (!msgObj.styleClass) {
 		msgObj.styleClass = '';
 	}
 

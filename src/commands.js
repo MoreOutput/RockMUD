@@ -1940,15 +1940,25 @@ Cmd.prototype.equipment = function(target, command) {
 // Current skills
 Cmd.prototype.skills = function(target, command) {
 	var skills = '',
+	skillListObj,
 	skillObj,
 	skillId;
 	
 	if (target.skillList) {
 		for (skillId in target.skillList) {
-			skillObj = target.skillList[skillId];
+			skillListObj = target.skillList[skillId];
 			
-			skills += '<li>' + skillObj.display + ' a ' +  skillObj.type
-			+ ' skill at  level ' + skillObj.level + '.</li>';
+			if (skillListObj.level <= target.level) {
+				skillObj = Character.getSkill(target, skillListObj.id);
+			}
+			
+			if (!skillObj) {
+				skills += '<li><strong>' + skillListObj.display + '</strong> a ' +  skillListObj.type
+					+ ' skill at  level ' + skillListObj.level + '.</li>';
+			} else {
+				skills += '<li><strong>' + skillObj.display + '</strong> a ' +  skillObj.type
+					+ ' skill which you have trained to <strong class="yellow">' + skillObj.train + '%</strong>.</li>';
+			}
 		}
 
 		skills = '<ul class="list">' + skills + '</ul>';
