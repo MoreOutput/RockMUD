@@ -723,27 +723,22 @@ World.prototype.prompt = function(target) {
 		player = target;
 	}
 
-	prompt = '<strong><' + player.chp + '/'  + player.hp + '<span class="red">hp</span>><' +
-		player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' + 
-		player.cmv + '/'  + player.mv +'<span class="yellow">mv</span>></strong>';
+	prompt = '<div class="col-md-12"><div class="cprompt"><strong><' 
+		+ player.chp + '/'  + player.hp + '<span class="red">hp</span>><' 
+		+ player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' 
+		+ player.cmv + '/'  + player.mv +'<span class="yellow">mv</span>></strong></div>';
 
 	if (player.role === 'admin') {
 		prompt += '<' + player.wait + 'w>';
 	}
 
-	if (player) {
-		return this.msgPlayer(target, {
-			msg: prompt,
-			styleClass: 'cprompt',
-			noPrompt: true
-		});
-	}
+	prompt += '</div>';
+	
+	return prompt;
 };
 
 World.prototype.msgPlayer = function(target, msgObj) {
-	var world = this,
-	newMsg = {},
-	s,
+	var s,
 	prompt;
 
 	if (target.player) {
@@ -756,16 +751,7 @@ World.prototype.msgPlayer = function(target, msgObj) {
 	}
 	
 	if (!msgObj.noPrompt) {
-		prompt = '<div class="col-md-12"><div class="cprompt"><strong><' 
-			+ target.chp + '/'  + target.hp + '<span class="red">hp</span>><'
-			+ target.cmana + '/'  + target.mana + '<span class="blue">m</span>><' 
-			+ target.cmv + '/'  + target.mv +'<span class="yellow">mv</span>></strong></div>';
-
-		if (target.role === 'admin') {
-			prompt += '<' + player.wait + 'w>';
-		}
-
-		prompt += '</div>';
+		prompt = this.prompt(target);
 	}
 
 	if (!msgObj.styleClass) {
@@ -774,7 +760,7 @@ World.prototype.msgPlayer = function(target, msgObj) {
 
 	if (target) {
 		if (s) {
-			if (typeof msgObj.msg !== 'function' && msgObj.msg) {
+			if (!msgObj.onlyPrompt && typeof msgObj.msg !== 'function' && msgObj.msg) {
 				msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msgObj.msg + '</div>';
 
 				if (prompt) {
@@ -782,7 +768,7 @@ World.prototype.msgPlayer = function(target, msgObj) {
 				}
 					
 				s.emit('msg', msgObj);
-			} else {
+			} else if (!msgObj.onlyPrompt) {
 				msgObj.msg(target, function(send, msg) {
 					msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msg + '</div>';
 
@@ -794,6 +780,10 @@ World.prototype.msgPlayer = function(target, msgObj) {
 						s.emit('msg', msgObj);
 					}
 				}, target);
+			} else {
+				s.emit('msg', {
+					msg: prompt
+				});
 			}
 		}
 	} else {

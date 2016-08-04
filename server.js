@@ -81,7 +81,9 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							});
 						}
 					} else {
-						return World.prompt(s);
+						return World.msgPlayer(s, {
+							onlyPrompt: true
+						});
 					}
 				} else {
 					if (s.player.wait > 0) {

@@ -797,20 +797,20 @@ Cmd.prototype.move = function(target, command, fn) {
 									if (!target.outName) {
 										if (target.long) {
 											msg = '<span class="yellow">' + target.long
-											+ ' leaves heading <strong>' + direction + '</strong></div>';
+											+ ' leaves heading <strong>' + direction + '</strong></span>';
 										} else {
 											msg = '<span class="yellow">' + target.displayName
-											+ ' leaves heading <strong>' + direction + '</strong></div>';
+											+ ' leaves heading <strong>' + direction + '</strong></span>';
 										}
 									} else if (target.outName && !target.outMessage) {
 										msg = '<span class="yellow">' + target.outName
-										+ ' leaves heading <strong>' + direction + '</strong></div>';
+										+ ' leaves heading <strong>' + direction + '</strong></span>';
 									} else {
 										msg = '<span class="yellow">' + target.outName + target.outMessage
 										+ ' <strong>' + direction + '</strong></div>';
 									}
 								} else if (receiver.hearing) {
-									msg = '<span class="yellow">You can sense some movement in the area.</div>';
+									msg = '<span class="yellow">You can sense some movement in the area.</span>';
 								}
 							}
 							
