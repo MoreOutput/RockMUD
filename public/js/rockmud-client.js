@@ -124,12 +124,14 @@ window.onload = function() {
 		e.preventDefault();
 		
 		node.type = 'password';
+		node.placeholder = 'Login password';
 	}, false);
 
 	document.addEventListener('onLogged', function(e) {
 		e.preventDefault();
 		
 		node.type = 'text';
+		node.placeholder = 'Enter a Command -- type \'help commands\' for a list of basic commands';
 	}, false);
 	
 	document.getElementById('console').onsubmit = function (e) {
