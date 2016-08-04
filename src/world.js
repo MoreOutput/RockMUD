@@ -739,7 +739,8 @@ World.prototype.prompt = function(target) {
 
 World.prototype.msgPlayer = function(target, msgObj) {
 	var s,
-	prompt;
+	prompt,
+	baseMsg;
 
 	if (target.player) {
 		s = target;
@@ -754,24 +755,30 @@ World.prototype.msgPlayer = function(target, msgObj) {
 		prompt = this.prompt(target);
 	}
 
-	if (!msgObj.styleClass) {
+	if (!msgObj.styleCl8ass) {
 		msgObj.styleClass = '';
 	}
 
 	if (target) {
 		if (s) {
 			if (!msgObj.onlyPrompt && typeof msgObj.msg !== 'function' && msgObj.msg) {
-				msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msgObj.msg + '</div>';
+				baseMsg = msgObj.msg;
 
+				msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msgObj.msg + '</div>';
+				
 				if (prompt) {
 					msgObj.msg += prompt;
 				}
 					
 				s.emit('msg', msgObj);
+				
+				msgObj.msg = baseMsg;
 			} else if (!msgObj.onlyPrompt) {
 				msgObj.msg(target, function(send, msg) {
-					msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msg + '</div>';
+					baseMsg = msgObj.msg;
 
+					msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msg + '</div>';
+					
 					if (prompt) {
 						msgObj.msg += prompt;
 					}
@@ -779,6 +786,8 @@ World.prototype.msgPlayer = function(target, msgObj) {
 					if (send) {
 						s.emit('msg', msgObj);
 					}
+					
+					msgObj.msg = baseMsg;
 				}, target);
 			} else {
 				s.emit('msg', {
@@ -800,7 +809,7 @@ World.prototype.msgRoom = function(roomObj, msgObj) {
 	for (i; i < roomObj.playersInRoom.length; i += 1) {
 		s = roomObj.playersInRoom[i].socket;
 		
-		if (s.player && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id) {
+		if (s && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id) {
 			world.msgPlayer(s, msgObj);
 		}
 	}

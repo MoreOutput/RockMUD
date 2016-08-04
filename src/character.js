@@ -82,9 +82,9 @@ Character.prototype.load = function(name, s, fn) {
 		s.player.sid = s.id;
 		s.player.socket = s;
 
-		s.player.logged = false;
-		s.player.verifiedPassword = false;
-		s.player.verifiedName = false;
+		s.player.logged = true;
+		s.player.verifiedPassword = true;
+		s.player.verifiedName = true;
 				
 		return fn(s);
 	});
@@ -125,6 +125,7 @@ Character.prototype.getPassword = function(s, command, fn) {
 					World.sendMotd(s);
 					
 					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+
 					roomObj.playersInRoom.push(s.player);
 
 					fn(s);
@@ -240,6 +241,7 @@ Character.prototype.create = function(s) {
 			s.player.socket = null;
 			
 			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null), function (err) {
+				character.load(s.player.name, s, function(s) {
 				var i = 0,
 				roomObj;
 
@@ -247,9 +249,6 @@ Character.prototype.create = function(s) {
 					throw err;
 				}
 
-				s.player.socket = socket;
-				s.player.saved = new Date();
-			
 				if (character.addPlayer(s)) {
 					s.leave('creation');
 					s.join('mud');
@@ -270,6 +269,7 @@ Character.prototype.create = function(s) {
 					
 					s.disconnect();
 				}
+				});
 			});
 		});
 	});

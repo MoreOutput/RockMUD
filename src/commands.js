@@ -800,14 +800,14 @@ Cmd.prototype.move = function(target, command, fn) {
 											+ ' leaves heading <strong>' + direction + '</strong></span>';
 										} else {
 											msg = '<span class="yellow">' + target.displayName
-											+ ' leaves heading <strong>' + direction + '</strong></span>';
+											+ ' leaves going <strong>' + direction + '</strong></span>';
 										}
 									} else if (target.outName && !target.outMessage) {
 										msg = '<span class="yellow">' + target.outName
 										+ ' leaves heading <strong>' + direction + '</strong></span>';
 									} else {
 										msg = '<span class="yellow">' + target.outName + target.outMessage
-										+ ' <strong>' + direction + '</strong></div>';
+										+ ' <strong>' + direction + '</strong></span>';
 									}
 								} else if (receiver.hearing) {
 									msg = '<span class="yellow">You can sense some movement in the area.</span>';
@@ -894,7 +894,7 @@ Cmd.prototype.who = function(target, command) {
 	
 	if (World.players.length > 0) {
 		for (i; i < World.players.length; i += 1) {
-			player = World.players[i]; // A visible player in players[]
+			player = World.players[i];
 
 			displayName = player.displayName;
 
@@ -922,16 +922,16 @@ Cmd.prototype.who = function(target, command) {
 					'<td width="85%">Name</td>' +
 				'</tr>' +
 			'</thead><tbody>' + str + '</tbody>' +
-		'</table></div>'
+		'</table></div>';
 		
 		World.msgPlayer(target, {
 			msg: str, 
-			styleClass: 'who-cmd'
+			styleClass: 'cmd-who'
 		});
 	} else {
 		World.msgPlayer(target, {
-			msg: '<div class="cmd-who"><h2>No Visible Players</h2></div>',
-			styleClass: 'who-cmd'
+			msg: '<h2>No Visible Players</h2>',
+			styleClass: 'cmd-who'
 		});
 	}
 };
@@ -1489,7 +1489,7 @@ Cmd.prototype.say = function(target, command) {
 			World.msgRoom(roomObj, {
 				msg: function(receiver, fn) {
 					var msg;
-					
+	
 					if (Character.canSee(receiver, roomObj)) {
 						msg = '<div class="cmd-say"><span class="msg-name">' +
 						target.displayName + ' says></span> ' + command.msg + '</div>';
@@ -1551,7 +1551,8 @@ Cmd.prototype.yell = function(target, command) {
 Cmd.prototype.chat = function(target, command) {
 	if (command.msg !== '') {
 		World.msgPlayer(target, {
-			msg: '<div class="cmd-chat"><span class="msg-name">You chat></span> ' + command.msg + '</div>'
+			msg: '<span class="msg-name">You chat></span> ' + command.msg,
+			styleClsss: 'cmd-chat'
 		});
 
 		World.msgWorld(target, {
@@ -1560,7 +1561,8 @@ Cmd.prototype.chat = function(target, command) {
 		});
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You cannot chat nothing, no one can.',
+			msg: 'To send a message to everyone on the game use <strong>chat [message]</strong>. ' 
+				+ 'To learn more about communication try <strong>help communication</strong>',
 			styleClass: 'error'
 		});
 	}
