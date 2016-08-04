@@ -52,22 +52,11 @@ window.onload = function() {
 	isScrolledToBottom = false,
 	movement = ['north', 'east', 'south', 'west', 'down', 'up'],
 	playerIsLogged = null,
-	display = function(r, hideRes) {
-		var i = 0,
-		styleClass = '';
-
-		if (r.styleClass) {
-			styleClass = r.styleClass;
-		}
-
-		if (!hideRes) {
-			if (r.element === undefined) {
-				terminal.innerHTML += '<div class="row"><div class="col-md-12 '
-				+ styleClass + '">' + r.msg + '</div></div>';
-			} else {
-				terminal.innerHTML += '<div class="row"><' + r.element + ' class="col-md-12 '
-				+ styleClass + '">' + r.msg + '</' + r.element + '></div>';
-			}
+	display = function(r, addToDom) {
+		var i = 0;
+	
+		if (addToDom) {
+			terminal.innerHTML += '<div class="row">' + r.msg + '</div>';
 
 			rowCnt += 1;
 
@@ -75,7 +64,7 @@ window.onload = function() {
 				for (i; i < terminal.childNodes.length; i += 1) {
 					terminal.removeChild(terminal.childNodes[i]);
 				}
-					 
+
 				rowCnt = 0;
 			}
 
@@ -158,11 +147,7 @@ window.onload = function() {
 		e.preventDefault();
 
 		if (canSend) {
-			if (node.type !== 'password') {
-				display(msgObj, false);
-			} else {
-				display(msgObj, true);
-			}
+			display(msgObj);
 			
 			node.value = '';
 			node.focus();
@@ -178,7 +163,7 @@ window.onload = function() {
 	node.focus();
 	
 	ws.on('msg', function(r) {
-		display(r);
+		display(r, true);
 
 		if (r.evt && !r.evt.data) {
 			r.evt = new CustomEvent(r.evt);

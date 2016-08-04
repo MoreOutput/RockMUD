@@ -754,30 +754,41 @@ World.prototype.msgPlayer = function(target, msgObj) {
 	} else if (!target.area) {
 		s = target;
 	}
+	
+	if (!msgObj.noPrompt) {
+		prompt = '<div class="col-md-12"><div class="cprompt"><strong><' 
+			+ target.chp + '/'  + target.hp + '<span class="red">hp</span>><'
+			+ target.cmana + '/'  + target.mana + '<span class="blue">m</span>><' 
+			+ target.cmv + '/'  + target.mv +'<span class="yellow">mv</span>></strong></div>';
 
-	prompt = '<div class="cprompt"><strong><' + target.chp + '/'  + target.hp + '<span class="red">hp</span>><' +
-		target.cmana + '/'  + target.mana + '<span class="blue">m</span>><' + 
-		target.cmv + '/'  + target.mv +'<span class="yellow">mv</span>></strong></div>';
+		if (target.role === 'admin') {
+			prompt += '<' + player.wait + 'w>';
+		}
 
-	if (target.role === 'admin') {
-		prompt += '<' + player.wait + 'w>';
+		prompt += '</div>';
+	}
+
+	if (!msgObj.styleClass) {
+		msgObj.styleClass = '';
 	}
 
 	if (target) {
 		if (s) {
 			if (typeof msgObj.msg !== 'function' && msgObj.msg) {
-				if (!msgObj.noPrompt) {
+				msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msgObj.msg + '</div>';
+
+				if (prompt) {
 					msgObj.msg += prompt;
 				}
 					
 				s.emit('msg', msgObj);
 			} else {
 				msgObj.msg(target, function(send, msg) {
-					if (!msgObj.noPrompt) {
-						msg += prompt;
-					}
+					msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msg + '</div>';
 
-					msgObj.msg = msg;
+					if (prompt) {
+						msgObj.msg += prompt;
+					}
 
 					if (send) {
 						s.emit('msg', msgObj);

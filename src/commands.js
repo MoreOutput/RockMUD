@@ -2056,7 +2056,7 @@ Cmd.prototype.inventory = function(player, command) {
 };
 
 Cmd.prototype.score = function(target, command) {
-	var score = '<section class="row score"><div class="col-md-12"><h1>' + 
+	var score = '<div class="row score"><div class="col-md-12"><h1>' + 
 		'<span class="score-name">' + target.displayName + '</span> ' + 
 		'<span class="score-title">' + target.title + '</span> ' + 
 		'<span class="score-level"> (' + target.level + ')</span></h1></div>' +
@@ -2108,9 +2108,8 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-killcnt last">You have won ' + target.killed + ' battles.</li>' +
 				'</ul>' +
 			'</div>'
-		'</div>' +
-	'</div></section>';
-
+		'</div></div>';
+	
 	World.msgPlayer(target, {
 		msg: score
 	});
