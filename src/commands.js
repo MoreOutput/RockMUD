@@ -1704,19 +1704,11 @@ Cmd.prototype.train = function(target, command) {
 };
 
 Cmd.prototype.practice = function(target, command) {
-	var roomObj = World.getRoomObject(target.area, target.roomid),
-	trainers = Room.getTrainers(roomObj, command),
-	trainer,
-	trainerSkillObj,
-	practiceDisplay = '',
-	practiceCheck,	
-	practiceRoll,
-	prop,
-	cost = 5,
-	skillObj = Character.getSkill(target, command.arg),
-	canSee = Character.canSee(target, roomObj),
-	intMod = World.dice.getIntMod(target),	
-	pracSkill = function() {
+	var	pracSkill = function() {
+		if (!skillObj.learned) {
+			skillObj.learned = true;
+		}		
+
 		if (skillObj.train < 100) {
 			if (skillObj.mainStat === target.mainStat) {
 				cost -= 1;
@@ -1779,7 +1771,18 @@ Cmd.prototype.practice = function(target, command) {
 				trainer.onSkillMaster(target, skillObj, trainerSkillObj);
 			}
 		}
-	};	
+	},
+ 	roomObj = World.getRoomObject(target.area, target.roomid),
+	trainers = Room.getTrainers(roomObj, command),
+	trainer,
+	trainerSkillObj,
+	practiceDisplay = '',
+	i = 0,
+	cost = 5,
+	skillObj,
+	canTrain = true,
+	canSee = Character.canSee(target, roomObj),
+	intMod = World.dice.getIntMod(target);
 	
 	if (target.position !== 'sleeping') {
 		if (canSee) {
@@ -1787,38 +1790,56 @@ Cmd.prototype.practice = function(target, command) {
 				trainer = trainers[0];
 		
 				if (command.arg) {
-					trainerSkillObj = Character.getSkillList(trainer, command.arg);				
+					trainerSkillObj = Character.getSkill(trainer, command.arg);				
+					skillObj = Character.getSkill(target, command.arg);
 					
-					if (trainerSkillObj && skillObj) {
-						pracSkill();
-					} else {
-						skillObj = Character.getSkillList(target, command.arg);
-						
-						if (skillObj) {
-							Character.addSkill(target, skillObj);							
-
-							skillObj = Character.getSkill(target, skillObj.id);
-							
+					if (trainer.beforeTrain) {
+						canTrain = trainer.beforeTrain(target, trainerSkillObj, skillObj);
+					}	
+					
+					if (canTrain) {
+						if (trainerSkillObj && skillObj && skillObj.learned) {
 							pracSkill();
 						} else {
-							World.msgPlayer(target, {
-								msg: 'You don\'t know how to ' + command.arg + '.',
-								styleClass: 'error'
-							});
+							if (skillObj) {
+								pracSkill();
+							} else {
+								World.msgPlayer(target, {
+									msg: 'You don\'t know how to ' + command.arg + '.',
+									styleClass: 'error'
+								});
+							}
 						}
 					}
 				} else {
 					practiceDisplay = '<p>The table below showcases the <strong>skills currently known by '
 						+ trainer.displayName + '</strong></p><table class="table table-condensed prac-table">'
 						+ '<thead><tr><td class="prac-name-header yellow"><strong>Skill Name</strong></td>'
-						+ '<td class="prac-max-header yellow"><strong>Max Trainable</strong></td>'
+						+ '<td class="prac-max-header yellow"><strong>Status</strong></td>'
 						+ '</tr></thead><tbody>';
-					
-					for (prop in trainer.skillList) {
-						if (trainer.skillList[prop].level <= trainer.level) {
+
+					for (i; i < trainer.skills.length; i += 1) {
+						if (trainer.skills[i].prerequisites.level <= trainer.level) {
+							skillObj = Character.getSkillById(target, trainer.skills[i].id);
+
 							practiceDisplay += '<tr><td class="prac-skill">'
-								+ trainer.skillList[prop].display + '</td>'
-								+ '<td>' + trainer.skillList[prop].train + '</td></</tr>';
+								+ trainer.skills[i].display + '</td>';
+
+							if (!skillObj) {
+								practiceDisplay += '<td class="prac-known blue">Unknown skill</td>';
+							} else {
+								if (!Character.meetsSkillPrepreqs(target, skillObj)) {
+									practiceDisplay += '<td class="prac-known red">Unmet prerequisites</td>';
+								} else {
+									if (trainer.skills[i].train >= skillObj.train || trainer.maxTrain) {
+										practiceDisplay += '<td class="prac-known green">Trainable</td>';
+									} else {
+										practiceDisplay += '<td class="prac-known">Already have superior knowledge</td>';
+									}
+								}
+							}
+
+							practiceDisplay += '</tr>';
 						}
 					}
 							
@@ -1850,7 +1871,7 @@ Cmd.prototype.practice = function(target, command) {
 			msg: '<strong>You can\'t train while sleeping!</strong>',
 			styleClass: 'error'
 		});
-	}
+	} 
 };
 
 Cmd.prototype.save = function(target, command) {
@@ -1940,24 +1961,33 @@ Cmd.prototype.equipment = function(target, command) {
 // Current skills
 Cmd.prototype.skills = function(target, command) {
 	var skills = '',
-	skillListObj,
 	skillObj,
+	learnedStatus,
+	i = 0,
+	skillLevel = 1,
+	trainedLevel,
 	skillId;
 	
-	if (target.skillList) {
-		for (skillId in target.skillList) {
-			skillListObj = target.skillList[skillId];
+	if (target.skills) {
+		for (i; i < target.skills.length; i += 1) {
+			skillObj = target.skills[i];
 			
-			if (skillListObj.level <= target.level) {
-				skillObj = Character.getSkill(target, skillListObj.id);
-			}
-			
-			if (!skillObj) {
-				skills += '<li><strong>' + skillListObj.display + '</strong> a ' +  skillListObj.type
-					+ ' skill at  level ' + skillListObj.level + '.</li>';
+			if (skillObj.learned) {
+				learnedStatus = 'a <strong>learned</strong>';
+				trainedLevel = '<strong class="yellow">(' + skillObj.train + '%)</strong>';
 			} else {
-				skills += '<li><strong>' + skillObj.display + '</strong> a ' +  skillObj.type
-					+ ' skill which you have trained to <strong class="yellow">' + skillObj.train + '%</strong>.</li>';
+				learnedStatus = 'an unpracticed';
+			}
+
+			if (skillObj.prerequisites.level) {
+				skillLevel = skillObj.prerequisites.level; 
+			}
+
+			skills += '<li><strong>' + skillObj.display + '</strong> ' + learnedStatus  + ' ' +  skillObj.type
+				+ ' skill at  level ' + skillLevel + '.';
+				
+			if (trainedLevel) {
+				skills += trainedLevel;
 			}
 		}
 

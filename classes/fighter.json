@@ -4,57 +4,38 @@
 	"playable": true,
 	"hp": 10,
 	"mainStat": "str",
-	"skills": [
-		{
-			"id": "shieldBlock",
-			"display": "Shield Block",
-			"train": 65,
-			"mod": 1,
-			"type": "passive"
-		}, {
-			"id": "secondAttack",
-			"display": "Second Attack",
-			"mod": 0,
-			"train": 65,
-			"type": "passive"
-		}, {
-			"id": "bash",
-			"display": "Bash",
-			"mod": 0,
-			"train": 70,
-			"type": "melee",
-			"wait": 1
-		} 
-	],
-	"skillList": {
-		"bash": {
-			"id": "bash",
-			"display": "Bash",
-			"mod": 0,
-			"level": 1,
-			"train": 70,
-			"type": "melee",
-			"wait": 1,
-			"prerequisites": [{
-				"skill": {"id": "bash", "prop": "train", "value": "70"},
-				"baseStr": 16
-			}]
-		},
-		"shieldBlock": {
-			"id": "shieldBlock",
-			"display": "Shield Block",
-			"mod": 1,
-			"level": 1,
-			"train": 65,
-			"type": "passive"
-		},
-		"secondAttack": {
-			"id": "secondAttack",
-			"display": "Second Attack",
-			"mod": 0,
-			"level": 1,
-			"train": 65,
-			"type": "passive"
+	"skills": [{
+		"id": "bash",
+		"display": "Bash",
+		"mod": 0,
+		"train": 70,
+		"type": "melee",
+		"wait": 1,
+		"learned": false,
+		"prerequisites": {
+			"skill": {"id": "bash", "prop": "train", "value": "70"},
+			"baseStr": 16,
+			"level": 1
 		}
-	}
+	}, {
+		"id": "shieldBlock",
+		"display": "Shield Block",
+		"mod": 1,
+		"train": 65,
+		"type": "passive",
+		"learned": false,
+		"prerequisites": {
+			"level": 1
+		}
+	}, {
+		"id": "secondAttack",
+		"display": "Second Attack",
+		"mod": 0,
+		"train": 65,
+		"learned": false,
+		"type": "passive",
+		"prerequisites": {
+			"level": 2
+		}
+	}]
 }

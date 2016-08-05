@@ -6,18 +6,18 @@ window.onload = function() {
 	rowCnt = 0,
 	canSend = true,	
 	aliases = {	
-		n: 'north',
-		e: 'east',
-		w: 'west',
-		s: 'south',
-		u: 'up',
-		d: 'down',
-		north: 'north',
-		east: 'east',
-		west: 'west',
-		south: 'south',
-		up: 'up',
-		down: 'down',
+		n: 'move north',
+		e: 'move east',
+		w: 'move west',
+		s: 'move south',
+		u: 'move up',
+		d: 'move down',
+		north: 'move north',
+		east: 'move east',
+		west: 'move west',
+		south: 'move south',
+		up: 'move up',
+		down: 'move down',
 		f: 'flee',
 		l: 'look',
 		sca: 'scan',
@@ -50,7 +50,6 @@ window.onload = function() {
 		laugh: 'emote laughs heartily.'
 	},
 	isScrolledToBottom = false,
-	movement = ['north', 'east', 'south', 'west', 'down', 'up'],
 	playerIsLogged = null,
 	display = function(r, addToDom) {
 		var i = 0;
@@ -82,13 +81,6 @@ window.onload = function() {
 			r.msg = r.msg.replace(/ /g, ' ').trim();
 
 			ws.emit(r.emit, r);
-		}
-	},
-	checkMovement = function(cmdStr, fn) {
-		if (movement.toString().indexOf(cmdStr) !== -1) {
-			return fn(true, 'move ' + cmdStr);
-		} else {
-			return fn(false, cmdStr);
 		}
 	},
 	checkAlias = function(cmdStr, fn) { 
@@ -139,9 +131,7 @@ window.onload = function() {
 		msg = node.value.toLowerCase().trim(),
 		msgObj = {
 			msg: checkAlias(msg, function(cmd) {
-				 return checkMovement(cmd, function(wasMov, cmd) {
-					return cmd;
-				});
+				return cmd;
 			}),
 			emit: 'cmd'
 		};

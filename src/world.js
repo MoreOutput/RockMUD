@@ -37,6 +37,8 @@ World = function() {
 		fs.readdir(path, function(err, areaNames) {
 			areaNames.forEach(function(areaName, i) {
 				var area = require('.' + path + areaName.toLowerCase().replace(/ /g, '_'));
+			
+				area.itemType = 'area';		
 
 				areas.push(area);
 			});
@@ -508,7 +510,8 @@ World.prototype.setupArea = function(area) {
 
 	for (i; i < area.rooms.length; i += 1) {
 		j = 0;
-
+		
+		area.rooms[i].itemType = 'room';		
 		area.rooms[i].playersInRoom = [];
 		
 		for (j; j < area.rooms[i].exits.length; j += 1) {
