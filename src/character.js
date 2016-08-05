@@ -345,7 +345,7 @@ Character.prototype.newCharacter = function(s, command) {
 				World.msgPlayer(s, {
 					msg: s.player.displayName + ' is a ' + s.player.charClass
 						+ '! <strong>Two more steps before ' + s.player.displayName
-						+ ' is saved</strong>. Is ' + s.player.displayName + ' <strong>(m)ale</strong> or <strong>(f)male</strong>?',
+						+ ' is saved</strong>. Is ' + s.player.displayName + ' <strong class="red">(m)ale</strong> or <strong class="red">(f)emale</strong>?',
 					noPrompt: true,
 					styleClass: 'password-request'
 				});
