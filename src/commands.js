@@ -1814,8 +1814,8 @@ Cmd.prototype.practice = function(target, command) {
 				} else {
 					practiceDisplay = '<p>The table below showcases the <strong>skills currently known by '
 						+ trainer.displayName + '</strong></p><table class="table table-condensed prac-table">'
-						+ '<thead><tr><td class="prac-name-header yellow"><strong>Skill Name</strong></td>'
-						+ '<td class="prac-max-header yellow"><strong>Status</strong></td>'
+						+ '<thead><tr><td class="prac-name-header yellow"><strong>' + trainer.displayName +  ' Skills</strong></td>'
+						+ '<td class="prac-max-header yellow"><strong>Practice Status</strong></td>'
 						+ '</tr></thead><tbody>';
 
 					for (i; i < trainer.skills.length; i += 1) {

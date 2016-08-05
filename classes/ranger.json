@@ -9,21 +9,13 @@
 			"id": "spikeTrap",
 			"display": "Spike Trap",
 			"mod": 0,
-			"level": 1,
 			"train": 65,
 			"type": "skill",
-			"wait": 4
+			"wait": 4,
+			"learned": false,
+			"prerequisites": {
+				"level": 1
+			}
 		}
-	],
-	"skillList" : {
-		"spark": {
-			"id": "spikeTrap",
-			"display": "Spike Trap",
-			"mod": 0,
-			"level": 1,
-			"train": 65,
-			"type": "skill",
-			"wait": 4
-		}
-	}
+	]
 }

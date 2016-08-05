@@ -13,8 +13,8 @@
 		"wait": 1,
 		"learned": false,
 		"prerequisites": {
-			"skill": {"id": "bash", "prop": "train", "value": "70"},
-			"baseStr": 16,
+			"skill": {"id": "shieldBlock", "prop": "train", "value": "70"},
+			"baseStr": 15,
 			"level": 1
 		}
 	}, {
@@ -35,7 +35,7 @@
 		"learned": false,
 		"type": "passive",
 		"prerequisites": {
-			"level": 2
+			"level": 1
 		}
 	}]
 }

@@ -854,20 +854,22 @@ Character.prototype.meetsSkillPrepreqs = function(player, skillObj) {
 	var prop,
 	requiredSkillObj;
 	
-	if (!skillObj.prerequisites) {
+	if (skillObj.prerequisites) {
 		for (prop in skillObj.prerequisites) {
 			if (prop !== 'skill') {
-				if (!player[prop] || player[prop] > skillObj.prerequisites[prop]) {
+				if (!player[prop]) {
+					return false;
+				} else if (skillObj.prerequisites[prop].toString().indexOf(player[prop]) === -1) {
 					return false;
 				}
 			} else {
-				requiredSkillObj = Character.getSkillById(player, skillObj.prerequisites[prop].id);
+				requiredSkillObj = this.getSkillById(player, skillObj.prerequisites.skill.id);
 				
 				if (!requiredSkillObj) {
 					return false
 				} else {
-					if (skillObj.prerequisites.prop) {
-						if (requiredSkillObj[skillObj.prerequisites.prop] < skillObj.prerequisites.prop.value) {
+					if (skillObj.prerequisites.skill.prop) {
+						if (requiredSkillObj[skillObj.prerequisites.skill.prop] >= skillObj.prerequisites.skill.value) {
 							return false;
 						}
 					}

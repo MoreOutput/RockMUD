@@ -9,21 +9,13 @@
 			"id": "cureLight",
 			"display": "Cure Light",
 			"mod": 0,
-			"level": 1,
-			"train": 70,
+			"train": 65,
 			"type": "spell",
-			"wait": 2
+			"wait": 2,
+			"learned": false,
+			"prerequisites": {
+				"level": 1
+			}
 		}
-	],
-	"skillList" : {
-		"spark": {
-			"id": "cureLight",
-			"display": "Cure Light",
-			"mod": 0,
-			"level": 1,
-			"train": 70,
-			"type": "spell",
-			"wait": 2
-		}
-	}
+	]
 }
