@@ -18,7 +18,7 @@ window.onload = function() {
 		south: 'move south',
 		up: 'move up',
 		down: 'move down',
-		f: 'flee',
+		fl: 'flee',
 		l: 'look',
 		sca: 'scan',
 		i: 'inventory',

@@ -344,9 +344,8 @@ Character.prototype.newCharacter = function(s, command) {
 				
 				World.msgPlayer(s, {
 					msg: s.player.displayName + ' is a ' + s.player.charClass
-						+ '! <strong>One more step before ' + s.player.displayName
-						+ ' is saved</strong>. Please define a password (8 or more characters):', 
-					evt: 'reqPassword',
+						+ '! <strong>Two more steps before ' + s.player.displayName
+						+ ' is saved</strong>. Is ' + s.player.displayName + ' <strong>(m)ale</strong> or <strong>(f)male</strong>?',
 					noPrompt: true,
 					styleClass: 'password-request'
 				});
@@ -367,6 +366,39 @@ Character.prototype.newCharacter = function(s, command) {
 
 			break;
 		case 4:
+			if (command.cmd === 'm' || command.cmd === 'f' || command.cmd === 'male' || command.cmd === 'female') {
+				s.player.creationStep = 5;
+
+				if (command.cmd[0] === 'm') {
+					s.player.sex = 'male';
+				} else {
+					s.player.sex = 'female';
+				}
+				
+				World.msgPlayer(s, {
+					msg: s.player.displayName + ' is a ' + s.player.sex
+						+ '! <strong>One more step before ' + s.player.displayName
+						+ ' is saved</strong>. Please define a password (8 or more characters):', 
+					evt: 'reqPassword',
+					noPrompt: true,
+					styleClass: 'password-request'
+				});
+			} else {
+				if (command.cmd !== 'help') {
+					World.msgPlayer(s, {
+						msg: 'Not a valid sex. Enter male or female to define a sex for ' + s.player.displayName  + '.',
+						noPrompt: true
+					});
+				} else {
+					Cmds.help(s, {
+						msg: command.msg,
+						noPrompt: true
+					});
+				}
+			}
+
+			break;
+		case 5:
 			if (command.cmd.length > 7) {
 				s.player.password = command.cmd;
 				s.player.creationStep = 0;
