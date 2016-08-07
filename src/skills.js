@@ -12,7 +12,7 @@ Skill = function() {};
 // Return a mod for AC rolls when the opponent has a shield"melee",
 
 Skill.prototype.shieldBlock = function(skillObj, player, roomObj, shield) {
-	if (skillObj && World.dice.roll(1, 100) <= skillObj.train) {
+	if (World.dice.roll(1, 100) <= skillObj.train) {
 		return World.dice.roll(1, skillObj.train/10, shield.ac + skillObj.mod);
 	} else {
 		return shield.ac;
@@ -22,17 +22,19 @@ Skill.prototype.shieldBlock = function(skillObj, player, roomObj, shield) {
 Skill.prototype.secondAttack = function(skillObj, player) {
 	var intMod = World.dice.getIntMod(player);
 
-	if (skillObj) {
-		if (World.dice.roll(1, 100, intMod) >= 95) {
-			skillObj.train += 1;
-		}
+	if (skillObj.train >= 80 && World.dice.roll(1, 100, intMod) > 95) {
+		skillObj.train += 1;
+	
+		World.msgPlayer(player, {
+			msg: '<strong>You skills with second attack improve!</strong>',
+			styleClass: 'green',
+			noPrompt: true
+		});
+	}
 
-		if (World.dice.roll(1, 100) <= skillObj.train) {
-			return 1 + skillObj.mod;
-		} else { 
-			return 0;
-		}
-	} else {
+	if (World.dice.roll(1, 100) <= skillObj.train) {
+		return 1 + skillObj.mod;
+	} else { 
 		return 0;
 	}
 };
@@ -43,36 +45,32 @@ Skill.prototype.secondAttack = function(skillObj, player) {
 Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 	var skillAff = Character.getAffect(player, 'sneak'),
 	affObj;
-	
-	if (skillObj) {
-		if (!skillAff) {
-			// run a check; chance of auto failure
-			if (skillObj.train > 0 && World.dice.roll(1, 6) < 6) {
-				affObj = {
-					id: skillObj.id,
-					display: skillObj.name,
-					decay: World.dice.roll(1 + player.level/2, 20, (player.detection + player.knowledge/2)),
-					modifiers: null,
-					begunSneaking: roomObj.id
-				};
-				
-				Character.addAffect(player, affObj);
 
-				if (skillObj.wait) {
-					player.wait += skillObj.wait;
-				} else {
-					player.wait += 1;
-				}
+	if (!skillAff) {
+		// run a check; chance of auto failure
+		if (skillObj.train > 0 && World.dice.roll(1, 6) < 6) {
+			affObj = {
+				id: skillObj.id,
+				display: skillObj.name,
+				decay: World.dice.roll(1 + player.level/2, 20, (player.detection + player.knowledge/2)),
+				modifiers: null,
+				begunSneaking: roomObj.id
+			};
 
-				if (player.onSneak) {
-					player.onSneak(roomObj);
-				}
+			Character.addAffect(player, affObj);
+
+			if (skillObj.wait) {
+				player.wait += skillObj.wait;
+			} else {
+				player.wait += 1;
 			}
-		} else {
-			// already sneaking
+
+			if (player.onSneak) {
+				player.onSneak(roomObj);
+			}
 		}
 	} else {
-		// doesnt have sneak skill
+		// already sneaking
 	}
 };
 
@@ -96,88 +94,169 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 	rollDamage = function(shield) {
 		var dmg = 0;
 
-		dmg = World.dice.roll(1, 10 + player.size.value, strMod + player.size.value);
+		dmg = World.dice.roll(player.diceNum, player.diceSides + player.size.value, strMod + player.size.value) 
+			* Math.round(player.level/2) + 1;
 
 		if (player.mainStat === 'str') {
 			dmg += World.dice.roll(1, 2 + player.level, strMod);
 		}
 
 		if (shield) {
-			dmg += World.dice.roll(1, 2 + player.level);
+			if (!shield.diceNum) {
+				dmg += World.dice.roll(1, 1 + player.level);
+			} else {
+				dmg += World.dice.roll(shield.diceNum, shield.diceSides, strMod);
+			}
 		}
 
 		return dmg;
 	};
 
-	if (skillObj) {
-		if (!player.opponent && command.arg && player.position === 'standing') {
-			opponent = Room.getMonster(roomObj, command);
-		} else if (player.opponent && player.position === 'fighting') {
-			opponent = player.opponent;
+	if (!player.opponent && command.arg && player.position === 'standing') {
+		opponent = Room.getMonster(roomObj, command);
+	} else if (player.opponent && player.position === 'fighting') {
+		opponent = player.opponent;
+	}
+
+	if (opponent) {
+		shieldArr = Character.getSlotsWithShields(player);
+
+		if (shieldArr.length) {
+			shield = shieldArr[0].item;
 		}
 
-		if (opponent) {
-			shieldArr = Character.getSlotsWithShields(player);
+		if (player.position === 'standing' || player.position === 'fighting') {
+			if (World.dice.roll(1, 100) <= skillObj.train) {
+				damage = rollDamage(shield);
 
-			if (shieldArr.length) {
-				shield = shieldArr[0].item;
-			}
-
-			if (player.position === 'standing' || player.position === 'fighting') {
-				if (World.dice.roll(1, 100) <= skillObj.train) {
-					damage = rollDamage(shield);
-
-					if (!shield) {
-						World.msgPlayer(player, {
-							msg: 'You bash and charge at a ' + opponent.name + ' (' + damage + ')',
-							noPrompt: true
-						});
-
-						World.msgPlayer(opponent, {
-							msg: 'A ' + player.displayName + ' bashes and charges at you!',
-							noPrompt: true
-						});
-					} else {
-						World.msgPlayer(player, {
-							msg: 'You use a ' + shield.displayName + ' to bash and charge at a ' + opponent.name + ' (' + damage + ')',
-							noPrompt: true
-						});
-
-						World.msgPlayer(opponent, {
-							msg: 'A ' + player.displayName + ' bashes and charges at you with a ' + shield.displayName + '!' + ' (' + damage + ')',
-							noPrompt: true
-						});
-					}
-
-					Combat.processFight(player, opponent, roomObj);
-					
-					if (player.mainStat === 'str') {
-						player.wait += 3;
-					} else {
-						player.wait += 4;
-					}
-
-					opponent.wait += 3;
-				} else {
+				if (!shield) {
 					World.msgPlayer(player, {
-						msg: 'You lunge forward and mistime your bash but manage to keep your footing!',
+						msg: 'You bash and charge at a ' + opponent.name + ' (' + damage + ')',
 						noPrompt: true
 					});
 
-					Combat.processFight(player, opponent, roomObj);
+					World.msgPlayer(opponent, {
+						msg: 'A ' + player.displayName + ' bashes and charges at you!',
+						noPrompt: true
+					});
+				} else {
+					World.msgPlayer(player, {
+						msg: 'You use a ' + shield.displayName + ' to bash and charge at a ' 
+							+ opponent.name + ' (' + damage + ')',
+						noPrompt: true
+					});
 
-					if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
-						player.wait += 2;
-					} else {
-						player.wait += 3;
-					}
+					World.msgPlayer(opponent, {
+						msg: 'A ' + player.displayName + ' bashes and charges at you with a ' 
+							+ shield.displayName + '!' + ' (' + damage + ')',
+						noPrompt: true
+					});
+				}
+
+				Combat.processFight(player, opponent, roomObj);
+
+				if (player.mainStat === 'str') {
+					player.wait += 3;
+				} else {
+					player.wait += 4;
+				}
+
+				opponent.wait += 3;
+			} else {
+				World.msgPlayer(player, {
+					msg: 'You lunge forward and mistime your bash but manage to keep your footing!',
+					noPrompt: true
+				});
+
+				Combat.processFight(player, opponent, roomObj);
+
+				if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
+					player.wait += 2;
+				} else {
+					player.wait += 3;
 				}
 			}
-		} else {
-			World.msgPlayer(player, {
-				msg: 'Bash what?'
-			});
 		}
+	} else {
+		World.msgPlayer(player, {
+			msg: 'Bash what?'
+		});
+	}
+};
+
+Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
+	var weaponSlots,
+	i = 0,
+	strMod = World.dice.getStrMod(player),
+	oppDexMod,
+	damage = 0,
+	shieldArr,
+	shield,
+	rollDamage = function(opponent) {
+		var oppAc;
+	
+		dmg = World.dice.roll(player.diceNum + World.dice.roll(1,4), player.diceSides + player.size.value, strMod + player.size.value) 
+			* Math.round(player.level/2) + 1;
+	};
+
+	if (roomObj.monsters.length) {
+		if (player.position === 'standing' || player.position === 'fighting') {
+			if (World.dice.roll(1, 100) <= skillObj.train) {
+				damage = rollDamage(shield);
+
+				if (!shield) {
+					World.msgPlayer(player, {
+						msg: 'You bash and charge at a ' + opponent.name + ' (' + damage + ')',
+						noPrompt: true
+					});
+
+					World.msgPlayer(opponent, {
+						msg: 'A ' + player.displayName + ' bashes and charges at you!',
+						noPrompt: true
+					});
+				} else {
+					World.msgPlayer(player, {
+						msg: 'You use a ' + shield.displayName + ' to bash and charge at a ' 
+							+ opponent.name + ' (' + damage + ')',
+						noPrompt: true
+					});
+
+					World.msgPlayer(opponent, {
+						msg: 'A ' + player.displayName + ' bashes and charges at you with a ' 
+							+ shield.displayName + '!' + ' (' + damage + ')',
+						noPrompt: true
+					});
+				}
+
+				Combat.processFight(player, opponent, roomObj);
+
+				if (player.mainStat === 'str') {
+					player.wait += 3;
+				} else {
+					player.wait += 4;
+				}
+
+				opponent.wait += 3;
+			} else {
+				World.msgPlayer(player, {
+					msg: 'You lunge forward and mistime your bash but manage to keep your footing!',
+					noPrompt: true
+				});
+
+				Combat.processFight(player, opponent, roomObj);
+
+				if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
+					player.wait += 2;
+				} else {
+					player.wait += 3;
+				}
+			}
+		}
+	} else {
+		World.msgPlayer(player, {
+			msg: 'No one in the room!',
+			styleClass: 'error'
+		});
 	}
 };
 
@@ -188,39 +267,37 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 	dexMod = World.dice.getDexMod(player), 
 	damage;
 
-	if (skillObj) {
-		if (player.position === 'standing'
-			&& (opponent.position !== 'fighting')) {
-			if (World.dice.roll(1, 100) <= skillObj.train) {
-				// backstab!
-				damage = World.dice.roll(1, 20, dexMod);
+	if (player.position === 'standing'
+		&& (opponent.position !== 'fighting')) {
+		if (World.dice.roll(1, 100) <= skillObj.train) {
+			// backstab!
+			damage = World.dice.roll(1, 20, dexMod);
 
-				if (World.dice.roll(1, 20 + player.level, dexMod) > (17 + player.level + 1) ) {
-					if (!player.sneaking) {
-						damage = damage * 1.5;
-					} else {
-						damage = (damage * 2) + dexMod;
-					}
-				}
-
-				if (player.mainStat === 'dex') {
-					damage += World.dice.roll(1, 20 + player.level);
-				}
-				
-				player.wait += 3;
-				opponent.wait += 3;
-
-				console.log('backstab hit!');
-			} else {
-				// missed
-				if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
-					player.wait += 3;
+			if (World.dice.roll(1, 20 + player.level, dexMod) > (17 + player.level + 1) ) {
+				if (!player.sneaking) {
+					damage = damage * 1.5;
 				} else {
-					player.wait += 6;
+					damage = (damage * 2) + dexMod;
 				}
-				
-				console.log('backstab missed!');
 			}
+
+			if (player.mainStat === 'dex') {
+				damage += World.dice.roll(1, 20 + player.level);
+			}
+
+			player.wait += 3;
+			opponent.wait += 3;
+
+			console.log('backstab hit!');
+		} else {
+			// missed
+			if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
+				player.wait += 3;
+			} else {
+				player.wait += 6;
+			}
+
+			console.log('backstab missed!');
 		}
 	}
 };

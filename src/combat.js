@@ -31,7 +31,8 @@ You slice a Red Dragon with barbaric intensity (14)
 * otherwise both parties are left in the state prior. Beginning combat does not add Wait.
 */
 Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, opponentMods) {
-	var numOfAttacks = Math.round((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4);
+	var numOfAttacks = Math.round((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4),
+	secondAttackSkill = Character.getSkillById(attacker, 'secondAttack');
 
 	if (numOfAttacks <= 0) {
 		numOfAttacks = 1;
@@ -61,8 +62,10 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 		numOfAttacks = 2;
 	}
 	
-	numOfAttacks += Skill.secondAttack(Character.getSkillById(attacker, 'secondAttack'), attacker);
-	
+	if (secondAttackSkill) {
+		numOfAttacks += Skill.secondAttack(secondAttackSkill, attacker);
+	}
+
 	return numOfAttacks;
 };
 
@@ -313,6 +316,7 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
 		var oppStatus = Character.getStatusReport(opponent),
 		playerStatus = Character.getStatusReport(player),
+		preventPrompt = false,
 		combatInterval;
 
 		player.wait += 1;
@@ -329,13 +333,19 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 			msgForOpponent += '<div class="rnd-status">' + player.displayName + ' ' + playerStatus.msg + '</div>';
 		}
 
+		if (player.chp <= 0 || opponent.chp <= 0) {
+			preventPrompt = true;
+		}
+
 		World.msgPlayer(player, {
 			msg: msgForPlayer,
+			noPrompt: preventPrompt,
 			styleClass: 'player-hit yellow'
 		});
 
 		World.msgPlayer(opponent, {
 			msg: msgForOpponent,
+			noPrompt: preventPrompt,
 			styleClass: 'player-hit yellow'
 		});
 
@@ -433,7 +443,8 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
 		combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2) {
 			var oppStatus = Character.getStatusReport(opponent),
-			playerStatus= Character.getStatusReport(player);
+			playerStatus= Character.getStatusReport(player),
+			preventPrompt = false;
 
 			msgForPlayer += msgForPlayer2;
 			
@@ -459,22 +470,23 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 				}
 			}
 
+			if (opponent.chp <= 0 || player.chp <= 0) {
+				preventPrompt = true;
+			}
+
 			World.msgPlayer(player, {
 				msg: msgForPlayer,
-				noPrompt: true,
+				noPrompt: preventPrompt,
 				styleClass: 'player-hit yellow'
 			});
 
 			World.msgPlayer(opponent, {
 				msg: msgForOpponent,
-				noPrompt: true,
+				noPrompt: preventPrompt,
 				styleClass: 'player-hit yellow'
 			});
 
 			if (player.position !== 'fighting' || opponent.position !== 'fighting') {
-				World.prompt(player);
-				World.prompt(opponent);
-
 				clearInterval(combatInterval);
 			} else {
 				if (opponent.chp <= 0 && !opponent.isPlayer) {

@@ -34,13 +34,8 @@ module.exports = {
 			});
 		}
 	},
-	onAlive: function(roomObj) {
-		var mob,
-		target;
-
-		if (!mob) {
-			mob = this;
-		}
+	onAlive: function(mob, roomObj) {
+		var target;
 		
 		if (roomObj.playersInRoom) {
 			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];

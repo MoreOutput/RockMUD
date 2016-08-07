@@ -32,7 +32,7 @@ module.exports = {
 			});
 		}
 	},
-	onAlive: function(roomObj) {
+	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 10);
 
 		if (roll === 10) {

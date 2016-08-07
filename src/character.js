@@ -172,7 +172,7 @@ Character.prototype.addPlayer = function(s) {
 
 	for (i; i < World.players.length; i += 1) {
 		if (s.player.name === World.players[i].name) {
-			return false;
+			World.players.splice(i, 1);
 		}
 	}
 
@@ -378,7 +378,7 @@ Character.prototype.newCharacter = function(s, command) {
 				World.msgPlayer(s, {
 					msg: s.player.displayName + ' is a ' + s.player.sex
 						+ '! <strong>One more step before ' + s.player.displayName
-						+ ' is saved</strong>. Please define a password (8 or more characters):', 
+						+ ' is saved</strong>. Please define a password (<strong class="yellow">8 or more characters</strong>):', 
 					evt: 'reqPassword',
 					noPrompt: true,
 					styleClass: 'password-request'

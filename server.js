@@ -1,4 +1,4 @@
- 'use strict';
+'use strict';
 var http = require('http'),
 fs = require('fs'),
 cfg = require('./config').server.game,
@@ -169,7 +169,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			roomObj;
 			
 			if (s.player !== undefined) {
-				for (i; i < World.players.length; i += 1) {	
+				for (i; i < World.players.length; i += 1) {
 					if (World.players[i].name === s.player.name) {
 						World.players.splice(i, 1);
 					}

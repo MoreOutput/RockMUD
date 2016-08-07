@@ -17,7 +17,7 @@ module.exports = {
 	],
 	moveDirections: ['north', 'east', 'west', 'south'],
 	wanderCheck: 3,
-	onAlive: function(roomObj) {
+	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 20);
 
 		if (roll === 5) {
@@ -32,7 +32,7 @@ module.exports = {
 				msg: this.exclimations[parseInt(Math.random() * ((this.exclimations.length)))]
 			});
 		} else {
-			WanderAI.onAlive(roomObj, this);
+			WanderAI.onAlive(this, roomObj);
 		}
 	}
 };

@@ -324,6 +324,11 @@ World.prototype.rollItems = function(itemArr, roomid) {
 	i = 0;
 
 	for (i; i < itemArr.length; i += 1) {
+		if (itemArr[i].spawn && itemArr[i].spawn > 1 ) {
+			itemArr[i].spawn -= 1;
+			itemArr.push(JSON.parse(JSON.stringify(itemArr[i])));
+		}
+
 		(function(item, index) {
 			var chanceRoll = world.dice.roll(1, 20);
 	
@@ -396,6 +401,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 
 		(function(mob, index) {
 			var raceObj,
+			j = 0,
 			classObj;
 
 			mob.refId = refId += index;
@@ -473,6 +479,10 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 
 			if (mob.gold > 0) {
 				mob.gold += world.dice.roll(1, 8);
+			}
+
+			if (mob.items.length) {
+				world.rollItems(mob.items, roomid);	
 			}
 
 			if (mob.behaviors.length > 0) {
@@ -971,6 +981,17 @@ World.prototype.sanitizeBehaviors = function(gameEntity) {
 	}
 
 	return gameEntity;
+};
+
+// Return an array of objects representing possible stat properties on the player object
+World.prototype.getGameStatArr = function() {
+	return [
+		{id: 'str', display: 'Strength'},
+		{id: 'wis', display: 'Wisdom'},
+		{id: 'int', display: 'Intelligence'},
+		{id: 'con', display: 'Constitution'},
+		{id: 'dex', display: 'Dexterity'}
+	];
 };
 
 World.prototype.extend = function(extendObj, readObj) {

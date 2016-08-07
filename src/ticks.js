@@ -278,13 +278,13 @@ World = require('./world').world;
 					var roomObj = World.getRoomObject(monster.area, monster.roomid);
 
 					if (monster.chp >= 1 && monster.onAlive && !monster.preventOnAlive) {
-						monster.onAlive(roomObj, monster);
+						monster.onAlive(monster, roomObj);
 					}
 					
 					if (monster.items) {
 						monster.items.forEach(function(monsterItem, i) {
 							if (monsterItem.onAlive && !monsterItem.preventOnAlive) {
-								monsterItem.onAlive(roomObj, monsterItem);
+								monsterItem.onAlive(monsterItem, roomObj);
 							}
 						});
 					}
@@ -304,27 +304,27 @@ World = require('./world').world;
 
 				players.forEach(function(player, i) {
 					if (player.chp >= 1 && player.onAlive && !player.preventOnAlive) {
-						player.onAlive(World.getRoomObject(player.area, player.roomid),  player);
+						player.onAlive(player, World.getRoomObject(player.area, player.roomid));
 					}
 					
 					if (player.items) {
 						player.items.forEach(function(item, i) {
 							if (item.onAlive && !item.preventOnAlive) {
-								item.onAlive(roomObj, item);
+								item.onAlive(item, roomObj);
 							}
 						});
 					}
 				});
 			}
 		}
-	}, 18000);
+	}, 20000);
 	
-	// AI Ticks for areas 
+	// Area onAlive check happens once per hour 
 	setInterval(function() {
 		var i = 0,
 		s;
 
-	}, 3600000); // 1 hour
+	}, 30000); // 30 seconds
 
 	setInterval(function() {
 		var i = 0,

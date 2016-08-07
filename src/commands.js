@@ -1700,7 +1700,87 @@ Cmd.prototype.quit = function(target, command) {
 
 /** Related to Saving and character adjustment/interaction **/
 Cmd.prototype.train = function(target, command) {
+ 	var roomObj = World.getRoomObject(target.area, target.roomid),
+	trainDisplay = '',
+	i = 0,
+	cost = 5,
+	canTrain = true,
+	trainers = Room.getTrainers(roomObj, command),
+	trainer,
+	stats = World.getGameStatArr(),
+	canSee = Character.canSee(target, roomObj);
+	
+	if (target.position !== 'sleeping') {
+		if (canSee) {
+			if (trainers.length) {
+				trainer = trainers[0];
+		
+				if (command.arg) {
+					if (trainer.beforeTrain) {
+						canTrain = trainer.beforeTrain(target);
+					}	
+					
+					if (canTrain) {
+						if (trainer.level > target.level) {
+							if (trainer.onTrain) {
+								trainer.onTrain(target);
+							}
+					
+							target[stat] += 1;
+						} else {
+							World.msgPlayer(target, {
+								msg: 'You already know much more than ' + trainer.displayName 
+									+ '. You should find someone stronger to train with.',
+								styleClass: 'error'
+							});
+						}
+					}
+				} else {
+					trainDisplay = '<p>You can train the follow stats with ' + trainer.displayName 
+						+ '. <strong>You currently have ' + target.trains 
+						+ ' Trains to spend</strong>.</p><table class="table table-condensed train-table">'
+						+ '<thead><tr><td class="train-name-header yellow"><strong>Stat</strong></td>'
+						+ '<td class="train-cost-header yellow"><strong>Current Value</strong></td>'
+						+ '<td class="train-cost-header yellow"><strong>Cost</strong></td>'
+						+ '</tr></thead><tbody>';
 
+					for (i; i < stats.length; i += 1) {
+						trainDisplay += '<tr>';
+						trainDisplay += '<td>' + stats[i].display + '</td>';
+						trainDisplay += '<td>' + target[stats[i].id] + '</td>';
+						trainDisplay += '<td>6</td>';
+						trainDisplay += '</tr>';
+					}
+							
+					World.msgPlayer(target, {
+						msg: trainDisplay + '</tbody></table><p class="red"></p>'
+					});
+				}
+			} else {
+				if (roomObj.monsters || roomObj.playersInRoom) {
+					World.msgPlayer(target, {
+						msg: 'No one here is offering training.',
+						styleClass: 'error'
+					});
+				} else {
+					World.msgPlayer(target, {
+						msg: 'There is no one here to train with.',
+						styleClass: 'error'
+					});
+				}
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You can\'t see anyone to train with!',
+				styleClass: 'error'
+			});
+		}
+	} else {
+		World.msgPlayer(target, {
+			msg: '<strong>You can\'t train while sleeping!</strong>',
+			styleClass: 'error'
+		});
+	}
 };
 
 Cmd.prototype.practice = function(target, command) {
@@ -1714,23 +1794,29 @@ Cmd.prototype.practice = function(target, command) {
 				cost -= 1;
 			}
 
+			if (skillObj.prerequisites.charClass && skillObj.prerequisites.charClass === target.charClass) {
+				cost -= 1;
+			}
+
 			if (target.trains >= cost) {
-				skillObj.train += World.dice.roll(1, 3, intMod);
+				skillObj.train += World.dice.roll(1, 4, intMod);
 				
+				target.trains -= cost;
+
 				if (skillObj.train > 100) {
 					skillObj.train = 100;
 
-					if (target.onSkillMastery) {
-						target.onSkillMastery(skillObj, trainer);
+					if (skillObj.train >= trainerSkillObj.train && target.onSkillMastery) {
+						target.onSkillMastery(trainer, roomObj, skillObj, trainerSkillObj);
 					}
 
-					if (trainer.onTrainMastery) {
-						trainer.onTrainMastery(skillObj, trainer);	
+					if (skillObj.train >= trainerSkillObj.train && trainer.onTrainMastery) {
+						trainer.onTrainMastery(target, roomObj, trainerSkillObj, skillObj);	
 					}
 				}
 
-				if (trainer.onTrain) {
-					trainer.onTrain(target, skillObj);
+				if (trainer.onPractice) {
+					trainer.onPractice(target, skillObj, trainerSkillObj);
 				}
 
 				if (!trainer.trainMsg) {
@@ -1778,9 +1864,9 @@ Cmd.prototype.practice = function(target, command) {
 	trainerSkillObj,
 	practiceDisplay = '',
 	i = 0,
-	cost = 5,
+	cost = 6,
 	skillObj,
-	canTrain = true,
+	canPrac = true,
 	canSee = Character.canSee(target, roomObj),
 	intMod = World.dice.getIntMod(target);
 	
@@ -1791,13 +1877,14 @@ Cmd.prototype.practice = function(target, command) {
 		
 				if (command.arg) {
 					trainerSkillObj = Character.getSkill(trainer, command.arg);				
+					
 					skillObj = Character.getSkill(target, command.arg);
 					
-					if (trainer.beforeTrain) {
-						canTrain = trainer.beforeTrain(target, trainerSkillObj, skillObj);
+					if (trainer.beforePractice) {
+						canPrac = trainer.beforePractice(target, skillObj, trainerSkillObj);
 					}	
 					
-					if (canTrain) {
+					if (canPrac) {
 						if (trainerSkillObj && skillObj && skillObj.learned) {
 							pracSkill();
 						} else {
@@ -1814,19 +1901,19 @@ Cmd.prototype.practice = function(target, command) {
 				} else {
 					practiceDisplay = '<p>The table below showcases the <strong>skills currently known by '
 						+ trainer.displayName + '</strong></p><table class="table table-condensed prac-table">'
-						+ '<thead><tr><td class="prac-name-header yellow"><strong>' + trainer.displayName +  ' Skills</strong></td>'
-						+ '<td class="prac-max-header yellow"><strong>Practice Status</strong></td>'
+						+ '<thead><tr><td class="prac-name-header yellow"><strong>' 
+						+ trainer.displayName +  ' Skills</strong></td>'
+						+ '<td class="prac-max-header yellow"><strong>Status</strong></td>'
 						+ '</tr></thead><tbody>';
 
 					for (i; i < trainer.skills.length; i += 1) {
 						if (trainer.skills[i].prerequisites.level <= trainer.level) {
 							skillObj = Character.getSkillById(target, trainer.skills[i].id);
 
-							practiceDisplay += '<tr><td class="prac-skill">'
-								+ trainer.skills[i].display + '</td>';
+							practiceDisplay += '<tr><td class="prac-skill">' + trainer.skills[i].display + '</td>';
 
 							if (!skillObj) {
-								practiceDisplay += '<td class="prac-known blue">Unknown skill</td>';
+								practiceDisplay += '<td class="prac-known blue">Unknown</td>';
 							} else {
 								if (!Character.meetsSkillPrepreqs(target, skillObj)) {
 									practiceDisplay += '<td class="prac-known red">Unmet prerequisites</td>';
@@ -1844,7 +1931,10 @@ Cmd.prototype.practice = function(target, command) {
 					}
 							
 					World.msgPlayer(target, {
-						msg: practiceDisplay + '</tbody></table>'
+						msg: practiceDisplay + '</tbody></table><p class="red"><strong>' 
+							+ 'To practice a skill you must have it on your' 
+							+ ' skill list and any required prerequisites. Review help skills ' 
+							+ 'for general skill system information.</strong></p>'
 					});
 				}
 			} else {
@@ -1855,7 +1945,7 @@ Cmd.prototype.practice = function(target, command) {
 					});
 				} else {
 					World.msgPlayer(target, {
-						msg: 'There is no one here to train with.',
+						msg: 'There is no one here to practice with.',
 						styleClass: 'error'
 					});
 				}

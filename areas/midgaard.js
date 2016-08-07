@@ -119,34 +119,11 @@ module.exports = {
 					gold: 1,
 					size: {value: 2, display: 'very small'},
 					itemType: 'mob',
-					spawn: '3',
+					spawn: 3,
 					wanderCheck: 2,
 					behaviors: [{  
 						module: 'wander'
 					}]
-				}, {
-					name: 'Shackleton',
-					displayName: 'Shackleton, the mayors dog',
-					short: 'a spotted hunting dog',
-					long: 'The mayors dog Shackleton a large, lean, spotted hunting dog',
-					level: 15,
-					description: '',
-					race: 'human',
-					id: '100',
-					area: 'Midgaard',
-					weight: 115,
-					diceNum: 2, 
-					diceSides: 8,
-					diceMod: 5,
-					str: 13,
-					position: 'resting',
-					attackType: 'maw',
-					damRoll: 10,
-					hitRoll: 10,
-					ac: 10,
-					itemType: 'mob',
-					items: [],
-					behaviors: []
 				}
 			],
 			items: [{
@@ -475,37 +452,8 @@ module.exports = {
 						value: 10,
 						equipped: false,
 						store: true,
-						worth: 10
-					}, {
-						name: 'Pemmican', 
-						short: '',
-						long: '' ,
-						area: 'Midgaard',
-						id: '110',
-						level: 1,
-						itemType: 'food',
-						material: 'flesh', 
-						weight: 0,
-						slot: '',
-						value: 10,
-						equipped: false,
-						store: true,
-						worth: 10
-					}, {
-						name: 'Pemmican', 
-						short: '',
-						long: '' ,
-						area: 'Midgaard',
-						id: '110',
-						level: 1,
-						itemType: 'food',
-						material: 'flesh', 
-						weight: 0,
-						slot: '',
-						value: 10,
-						equipped: false,
-						store: true,
-						worth: 10
+						worth: 10,
+						spawn: 3
 					}],
 					behaviors: [],
 					beforeSell: function(buyer, roomObj) {
