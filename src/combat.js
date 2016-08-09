@@ -321,11 +321,22 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 
 		player.wait += 1;
 
-		if (!player.isPlayer) {
-			msgForPlayer += '<div class="rnd-status">' + opponent.long + ' ' + oppStatus.msg + '</div>';
+		if (opponent.chp > 0) {
+			if (!opponent.isPlayer) {	
+				msgForPlayer += '<div class="rnd-status">' + opponent.long + ' ' + oppStatus.msg + '</div>';
+			} else {
+				msgForPlayer += '<div class="rnd-status">' + opponent.displayName + ' ' + oppStatus.msg + '</div>';
+			}
 		} else {
-			msgForPlayer += '<div class="rnd-status">' + opponent.displayName + ' ' + oppStatus.msg + '</div>';
+			if (!opponent.isPlayer) {	
+				msgForPlayer += '<div class="rnd-status">You <strong class="red">decapitate ' 
+					+ opponent.short + '</strong>.</div>';
+			} else {
+				msgForPlayer += '<div class="rnd-status">You run <strong>' 
+					+ opponent.displayName + ' through, killing them</strong>.</div>';
+			}
 		}
+
 
 		if (!opponent.isPlayer) {
 			msgForOpponent += '<div class="rnd-status">' + player.long + ' ' + playerStatus.msg + '</div>';
@@ -451,12 +462,17 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 			msgForOpponent += msgForOpponent2;
 
 			if (player.isPlayer) {
-				if (!player.canViewHp) {
-					msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
-					+ '</div>';
+				if (opponent.chp > 0) {
+					if (!player.canViewHp) {
+						msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
+						+ '</div>';
+					} else {
+						msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
+							+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+					}
 				} else {
-					msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
-						+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+					msgForPlayer += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to ' 
+						+ opponent.short + '</strong>!</div>';
 				}
 			}
 

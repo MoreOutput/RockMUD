@@ -1706,6 +1706,7 @@ Cmd.prototype.quit = function(target, command) {
 Cmd.prototype.train = function(target, command) {
  	var roomObj = World.getRoomObject(target.area, target.roomid),
 	trainDisplay = '',
+	stat,
 	i = 0,
 	cost = 5,
 	costDisplay = cost,
@@ -1732,14 +1733,50 @@ Cmd.prototype.train = function(target, command) {
 					if (trainer.beforeTrain) {
 						canTrain = trainer.beforeTrain(target);
 					}	
-					
+		
+					if (command.arg.indexOf('str') !== -1) {
+						stat = 'str';
+					} else if (command.arg.indexOf('int') !== -1) {
+						stat = 'int';
+					} else if (command.arg.indexOf('dex') !== -1) {
+						stat = 'dex';
+					} else if (command.arg.indexOf('wis') !== -1) {
+						stat = 'wis';
+					} else {
+						stat = 'con';
+					}	
+			
 					if (canTrain) {
-						if (trainer.level > target.level) {
-							if (trainer.onTrain) {
-								trainer.onTrain(target);
+						if (target['base' + World.capitalizeFirstLetter(stats[i].id)] < 12) {
+							cost += 3;
+						}
+
+						for (i; i < stats.length; i += 1) {
+							if (stats[i].id === target.mainStat) {
+								cost -= 1;
 							}
+						}
+
+						if (trainer.level > target.level) {
+							if (cost <= target.trains) {
+								if (trainer.onTrain) {
+									trainer.onTrain(target);
+								}
 					
-							target[stat] += 1;
+								target['base' + World.capitalizeFirstLetter(stat)] += 1;
+												
+								World.msgPlayer(target, {
+									msg: 'You train with ' + trainer.displayName 
+										+ '. <strong>(' + stat + ' +1)</strong>',
+									styleClass: 'green'
+								});
+							} else {
+								World.msgPlayer(target, {
+									msg: 'You don\'t have enough trains to work with ' 
+										+ trainer.displayName + '.',
+									styleClass: 'error'
+								});
+							}
 						} else {
 							World.msgPlayer(target, {
 								msg: 'You already know much more than ' + trainer.displayName 
