@@ -265,12 +265,13 @@ World = require('./world').world;
 		}
 	}, 245000); // 4.5 minutes
 	
-	// AI Ticks for monsters
+	// AI Ticks
 	setInterval(function() {
 		var i = 0,
+		players,
 		monsters;
 
-		if (World.areas.length) {
+		if (World.areas.length && World.dice.roll(1, 10) > 6) {
 			for (i; i < World.areas.length; i += 1) {
 				monsters = World.getAllMonstersFromArea(World.areas[i]);
 				
@@ -289,37 +290,31 @@ World = require('./world').world;
 						});
 					}
 				});
-			}
-		}
-	}, 15000);
-	
-	// ai behaviors for players and player items
-	setInterval(function() {
-		var i = 0,
-		players;
 
-		if (World.areas.length) {
-			for (i; i < World.areas.length; i += 1) {
-				players = World.getAllPlayersFromArea(World.areas[i]);
+				if (World.dice.roll(1, 10) > 5) {
+					players = World.getAllPlayersFromArea(World.areas[i]);
 
-				players.forEach(function(player, i) {
-					if (player.chp >= 1 && player.onAlive && !player.preventOnAlive) {
-						player.onAlive(player, World.getRoomObject(player.area, player.roomid));
-					}
+					players.forEach(function(player, i) {
+						var roomObj = World.getRoomObject(player.area, player.roomid);
+
+						if (player.chp >= 1 && player.onAlive && !player.preventOnAlive) {
+							player.onAlive(player, World.getRoomObject(player.area, roomObj));
+						}
 					
-					if (player.items) {
-						player.items.forEach(function(item, i) {
-							if (item.onAlive && !item.preventOnAlive) {
-								item.onAlive(item, roomObj);
-							}
-						});
-					}
-				});
+						if (player.items) {
+							player.items.forEach(function(item, i) {
+								if (item.onAlive && !item.preventOnAlive) {
+									item.onAlive(item, roomObj);
+								}
+							});
+						}
+					});
+				}
 			}
 		}
-	}, 20000);
+	}, 500);
 	
-	// Area onAlive check happens once per hour 
+	// Area onAlive check happens once per 30 seconds 
 	setInterval(function() {
 		var i = 0,
 		s;

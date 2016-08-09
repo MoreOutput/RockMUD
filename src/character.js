@@ -32,9 +32,27 @@ Character.prototype.login = function(r, s, fn) {
 	if (r.msg.length > 2) {
 		if  (/^[a-z]+$/g.test(r.msg) === true && /[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
 			fs.readFile('./players/' + name + '.json', function (err, r) {
+				var i = 0;
+
 				if (err === null) {
-					s.player = JSON.parse(r);
+					for (i; i < World.players.length; i += 1) {
+						if (World.players[i].name.toLowerCase() === name) {
+							World.msgPlayer(World.players[i], {
+								msg: 'Relogging....',
+								styleClass: 'error',
+								noPrompt: true
+							});
+							
+							World.players[i].socket.disconnect();
+
+							s.player = World.players[i];
+						}				
+					}
 					
+					if (!s.player) {
+						s.player = JSON.parse(r);
+					}
+
 					s.player.name = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
 	
 					if (s.player.lastname !== '') {
@@ -54,13 +72,17 @@ Character.prototype.login = function(r, s, fn) {
 				}
 			});
 		} else {
-			return s.emit('msg', {msg : '<b>Invalid Entry</b>. Enter your name:', res: 'login', styleClass: 'enter-name'});
+			return World.msgPlayer(s, {
+				msg : '<b>Invalid Entry</b>. Enter your name:', 
+				styleClass: 'enter-name',
+				noPrompt: true
+			});
 		}
 	} else {
-		s.emit('msg', {
+		World.msgPlayer(s, {
 			msg: 'Invalid name choice, must be more than two characters.',
-			res: 'login',
-			styleClass: 'error'
+			styleClass: 'error',
+			noPrompt: true
 		});
 	}
 };

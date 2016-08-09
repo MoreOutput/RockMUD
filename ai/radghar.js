@@ -24,7 +24,7 @@ module.exports = {
 		}
 	},
 	onVisit: function(player, roomObj, command) {
-		if (player.level === 1) {
+		if (player.level <= 2) {
 			Cmd.say(this, {
 				msg: 'Greetings ' + player.displayName + ' are you here to train at the '
 					+ '<strong class="red">Midgaardian Academy</strong>?',
@@ -33,7 +33,7 @@ module.exports = {
 		}
 	},
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 10);
+		var roll = World.dice.roll(1, 20);
 
 		if (roll === 10) {
 			Cmd.say(this, {

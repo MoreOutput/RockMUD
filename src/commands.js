@@ -230,7 +230,11 @@ Cmd.prototype.emote = function(target, command) {
 	var roomObj;
 	
 	if (target.position !== 'sleeping') {
-		roomObj = World.getRoomObject(target.area, target.roomid);
+		if (!command.roomObj) {
+			roomObj = World.getRoomObject(target.area, target.roomid);
+		} else {
+			roomObj = command.roomObj;
+		}
 
 		World.msgRoom(roomObj, {
 			msg: '<div class="cmd-emote yellow">' + target.displayName + ' ' + command.msg + '</div>'
@@ -1704,6 +1708,7 @@ Cmd.prototype.train = function(target, command) {
 	trainDisplay = '',
 	i = 0,
 	cost = 5,
+	costDisplay = cost,
 	canTrain = true,
 	trainers = Room.getTrainers(roomObj, command),
 	trainer,
@@ -1715,6 +1720,14 @@ Cmd.prototype.train = function(target, command) {
 			if (trainers.length) {
 				trainer = trainers[0];
 		
+				if (target.level > 30) {
+					cost += 3;
+				}
+
+				if (target.trainMod) {
+					cost += target.trainMod;
+				}
+
 				if (command.arg) {
 					if (trainer.beforeTrain) {
 						canTrain = trainer.beforeTrain(target);
@@ -1745,11 +1758,21 @@ Cmd.prototype.train = function(target, command) {
 						+ '</tr></thead><tbody>';
 
 					for (i; i < stats.length; i += 1) {
+						if (target['base' + World.capitalizeFirstLetter(stats[i].id)] < 12) {
+							costDisplay += 3;
+						}
+
+						if (stats[i].id === target.mainStat) {
+							costDisplay -= 1;
+						}
+						
 						trainDisplay += '<tr>';
 						trainDisplay += '<td>' + stats[i].display + '</td>';
-						trainDisplay += '<td>' + target[stats[i].id] + '</td>';
-						trainDisplay += '<td>6</td>';
+						trainDisplay += '<td>' + target['base' + World.capitalizeFirstLetter(stats[i].id)] + '</td>';
+						trainDisplay += '<td>' + costDisplay  + '</td>';
 						trainDisplay += '</tr>';
+
+						costDisplay = cost;
 					}
 							
 					World.msgPlayer(target, {
@@ -2202,11 +2225,11 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-levl"><label>Level:</label> ' +  target.level + '</li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
-					'<li class="stat-str first"><label>STR:</label> ' + target.baseStr + ' (' + target.str + ')</li>' +
-					'<li class="stat-wis"><label>WIS:</label> ' + target.baseWis + ' (' + target.wis + ') </li>' +
-					'<li class="stat-int"><label>INT:</label> ' + target.baseInt + ' (' + target.int + ')</li>' +
-					'<li class="stat-dex"><label>DEX:</label> ' + target.baseDex + ' (' + target.dex + ')</li>' +
-					'<li class="stat-con"><label>CON:</label> ' + target.baseCon + ' (' + target.con + ')</li>' +
+					'<li class="stat-str first"><label>STR:</label> ' + target.baseStr + ' <strong>(' + target.str + ')</strong></li>' +
+					'<li class="stat-wis"><label>WIS:</label> ' + target.baseWis + ' <strong>(' + target.wis + ')</strong></li>' +
+					'<li class="stat-int"><label>INT:</label> ' + target.baseInt + ' <strong>(' + target.int + ')</strong></li>' +
+					'<li class="stat-dex"><label>DEX:</label> ' + target.baseDex + ' <strong>(' + target.dex + ')</strong></li>' +
+					'<li class="stat-con"><label>CON:</label> ' + target.baseCon + ' <strong>(' + target.con + ')</strong></li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
@@ -2232,8 +2255,8 @@ Cmd.prototype.score = function(target, command) {
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
 					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span></li>' +
-					'<li class="stat-level">You are a level ' + target.level + ' ' + target.race + ' '
-						+  target.charClass + ' of ' + target.size.display + ' size.</li>' +
+					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' '
+						+ target.charClass + ' of ' + target.size.display + ' size.</li>' +
 					'<li class="stat-carry">You are carrying ' + target.weight + '/' + target.maxWeight + ' pounds.</li>' +
 					'<li class="stat-xp">You need <strong>' + (target.expToLevel - target.exp)
 						+ '</strong> experience for your next level.</li>' +

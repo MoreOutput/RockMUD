@@ -994,6 +994,10 @@ World.prototype.getGameStatArr = function() {
 	];
 };
 
+World.prototype.capitalizeFirstLetter = function(str) {
+	return str[0].toUpperCase() + str.slice(1);
+};
+
 World.prototype.extend = function(extendObj, readObj) {
 	var prop,
 	prop2;

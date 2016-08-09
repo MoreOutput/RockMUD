@@ -17,11 +17,15 @@ module.exports = {
 	wanderCheck: 1,
 	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'],
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 10),
+		var roll = World.dice.roll(1, 20),
 		exitObj,
 		direction;
+	
+		if (!mob) {
+			mob = this;
+		}
 		
-		if (mob.wanderCheck && roll > mob.wanderCheck) {
+		if (mob.wanderCheck && roll < mob.wanderCheck && mob.position === 'standing') {
 			if (!mob.moveDirections) {
 				mob.moveDirections = this.moveDirections;
 			}

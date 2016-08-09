@@ -49,6 +49,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 	server.listen(process.env.PORT || cfg.port);
 
 	io.on('connection', function (s) {
+
 		var parseCmd = function(r, s) {
 			var skillObj,
 			cmdObj = Cmds.createCommandObject(r);

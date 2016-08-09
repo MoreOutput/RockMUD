@@ -17,6 +17,7 @@ World = require('../src/world').world;
 
 module.exports = {
 	attackOnVisit: true,
+	attackOnAlive: true,
 	mobAggressive: false,
 	onVisit: function(target, roomObj, mob) {
 		var mob;
@@ -37,13 +38,17 @@ module.exports = {
 	onAlive: function(mob, roomObj) {
 		var target;
 		
+		if (!mob) {
+			mob = this;
+		}
+
 		if (roomObj.playersInRoom) {
 			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
 		}
 		
 		if (target && mob.position === 'standing'
 			&& (target.isPlayer || mob.mobAggressive)
-			&& target.roomid === mob.roomid) {
+			&& target.roomid === mob.roomid && mob.attackOnAlive) {
 			Cmd.kill(mob, {
 				arg: target.name
 			});

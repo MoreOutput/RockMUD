@@ -20,19 +20,21 @@ module.exports = {
 	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 20);
 
-		if (roll === 5) {
-			Cmd.emote(this, {
-				msg: 'stares <span class="blue">skyward</span> in thought.'
-			});
-		}
-
-		if (roll <= 6 && roomObj.playersInRoom.length) {
-			// Most of the time we just proclaim something
-			Cmd.say(this, {
-				msg: this.exclimations[parseInt(Math.random() * ((this.exclimations.length)))]
-			});
-		} else {
-			WanderAI.onAlive(this, roomObj);
+		if (mob.position === 'standing') {
+			if (roll === 5) {
+				Cmd.emote(this, {
+					msg: 'stares <span class="blue">skyward</span> in thought.',
+					roomObj: roomObj
+				});
+			} else if (roll === 1 && roomObj.playersInRoom.length) {
+				// Most of the time we just proclaim something
+				Cmd.say(this, {
+					msg: this.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],
+					roomObj: roomObj
+				});
+			} else if (roll === 6) {
+				WanderAI.onAlive(this, roomObj);
+			}
 		}
 	}
 };
