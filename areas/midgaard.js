@@ -200,7 +200,7 @@ module.exports = {
 				slot: 'hands',
 				equipped: false,
 				modifiers: {
-					str: 1
+					damRoll: 1
 				},
 				flags: []
 			}, {
@@ -215,7 +215,7 @@ module.exports = {
 				items: [{
 					name: 'Sewer key', 
 					short: 'small rusty key',
-					long: 'A small rusty key made of low quality iron.' ,
+					long: 'A small rusty key made iron was left here',
 					area: 'Midgaard',
 					id: '101',
 					level: 1,

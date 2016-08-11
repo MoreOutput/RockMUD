@@ -31,6 +31,7 @@ window.onload = function() {
 		q: 'quaff',
 		c: 'cast',
 		k: 'kill',
+		adv: 'kill',
 		re: 'rest',
 		sl: 'sleep',
 		h: 'help',

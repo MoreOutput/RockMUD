@@ -10,7 +10,7 @@ module.exports = {
 	exclimations: [
 		'The Midgaardian Academy isn\'t much but its better than venturing out with no experience.',
 		'I am the acting Fighter Guildmaster. You can find other Guildmasters in town.',
-		'You can <strong>practice</strong> and learn new skills from Guildmasters along with <strong>training</strong> stats.',
+		'You can <strong>practice</strong> and learn new skills from Guildmasters along with <strong>training</strong> stats.'
 	],
 	currentlyEnrolled: [],
 	onSay: function(player, roomObj, command) {
@@ -33,7 +33,7 @@ module.exports = {
 		}
 	},
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 20);
+		var roll = World.dice.roll(1, 40);
 
 		if (roll === 10) {
 			Cmd.say(this, {

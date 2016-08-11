@@ -18,12 +18,12 @@ module.exports = {
 	moveDirections: ['north', 'east', 'west', 'south'],
 	wanderCheck: 3,
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 20);
+		var roll = World.dice.roll(1, 40);
 
 		if (mob.position === 'standing') {
 			if (roll === 5) {
 				Cmd.emote(this, {
-					msg: 'stares <span class="blue">skyward</span> in thought.',
+					msg: 'stares <span class="grey">skyward</span> in thought.',
 					roomObj: roomObj
 				});
 			} else if (roll === 1 && roomObj.playersInRoom.length) {

@@ -31,7 +31,7 @@ You slice a Red Dragon with barbaric intensity (14)
 * otherwise both parties are left in the state prior. Beginning combat does not add Wait.
 */
 Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, opponentMods) {
-	var numOfAttacks = Math.round((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4),
+	var numOfAttacks = Math.round(((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4) - 1),
 	secondAttackSkill = Character.getSkillById(attacker, 'secondAttack');
 
 	if (numOfAttacks <= 0) {
@@ -57,13 +57,11 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 			numOfAttacks += 1;
 		}
 	}
-
-	if (numOfAttacks === 1 && World.dice.roll(1, 4) === 4) {
-		numOfAttacks = 2;
-	}
 	
 	if (secondAttackSkill) {
 		numOfAttacks += Skill.secondAttack(secondAttackSkill, attacker);
+	} else if (numOfAttacks === 1 && World.dice.roll(1, 6) === 4) {
+		numOfAttacks = 2;
 	}
 
 	return numOfAttacks;
@@ -146,27 +144,22 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 					
 					if (acCheck < hitRoll) {
 						if (dodgeCheck < hitRoll) {
-							damage = World.dice.roll(weapon.diceNum + attacker.damRoll/2, weapon.diceSides,
-								attackerMods.str + attacker.damRoll + weapon.diceMod);
+							damage = World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str/2 + attacker.damRoll + weapon.diceMod);
 							
 							damage += (attacker.level/2) + (attackerMods.str/4);
-								
+
 							if (attackerMods.str >= opponentMods.con) {
 								damage += damRoll/3;
 							}
 
-							if (attackerMods.str > 2) {
-								damage += attackerMods.str;
-							}
-
 							damage -= opponent.ac/3;
 							damage -= opponent.meleeRes;
-
+			
 							if (numOfAttacks > 3 && j > 3) {
 								damage = damage/2;
 							}
 
-							if (World.dice.roll(1, 40) === 40) {
+							if (World.dice.roll(1, 50) >= (50 - attacker.detection )) {
 								criticalAttack = true;
 								criticalAttackXP = World.dice.roll(1 + attacker.level, 20);
 
@@ -401,7 +394,7 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 	exp = World.dice.calExp(player, opponent);
 
 	Character.createCorpse(opponent);
-	
+
 	Room.addCorpse(roomObj, opponent);
 
 	player.position = 'standing';
@@ -422,7 +415,8 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 	if (opponent.gold) {
 		player.gold += opponent.gold;
 
-		endOfCombatMsg += ' <span class="yellow">You find ' + opponent.gold + ' coins on the corpse.</span>';
+		endOfCombatMsg += ' <span class="yellow">You find ' + opponent.gold 
+			+ ' coins on the corpse.</span>';
 	}
 	
 	if (player.wait > 0) {

@@ -7,5 +7,6 @@
 	"diceNum": 1,
 	"diceSides": 2,
 	"hitRoll": -2,
-	"ac": 0
+	"ac": 0,
+	"meleeRes": 8
 }

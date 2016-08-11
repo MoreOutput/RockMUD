@@ -141,7 +141,8 @@ Cmd.prototype.sell = function(target, command) {
 					Character.addItem(merchant, item);
 					
 					World.msgPlayer(target, {
-						msg: 'You sell something.'
+						msg: 'You sell something.',
+						styleClass: 'green'
 					});
 				} else {
 					World.msgPlayer(target, {
@@ -151,7 +152,8 @@ Cmd.prototype.sell = function(target, command) {
 				}
 			} else {
 				World.msgPlayer(target, {
-					msg: 'Should probably recheck the name.'
+					msg: marchant.displayName + 'doesn\'t seem to recognize the name.',
+					styleClass: 'error'
 				});
 			}
 		} else {
@@ -718,7 +720,7 @@ Cmd.prototype.move = function(target, command, fn) {
 					target.roomid = targetRoom.id;
 
 					if (roomObj.onExit) {
-						roomObj.onExit(target, roomObj, command);
+						roomObj.onExit(target, roomObj, canEnter, command);
 					}
 
 					for (i; i < roomObj.monsters.length; i += 1) {
@@ -1742,45 +1744,54 @@ Cmd.prototype.train = function(target, command) {
 						stat = 'dex';
 					} else if (command.arg.indexOf('wis') !== -1) {
 						stat = 'wis';
-					} else {
+					} else if (command.arg.indexOf('con') !== -1) {
 						stat = 'con';
 					}	
 			
 					if (canTrain) {
-						if (target['base' + World.capitalizeFirstLetter(stats[i].id)] < 12) {
-							cost += 3;
-						}
+						if (stat) {
+							if (target['base' + World.capitalizeFirstLetter(stat)] < 12) {
+								cost += 3;
+							}
 
-						for (i; i < stats.length; i += 1) {
-							if (stats[i].id === target.mainStat) {
+						
+							if (stat === target.mainStat) {
 								cost -= 1;
 							}
-						}
 
-						if (trainer.level > target.level) {
-							if (cost <= target.trains) {
-								if (trainer.onTrain) {
-									trainer.onTrain(target);
+							if (trainer.level > target.level) {
+								if (cost <= target.trains) {
+									if (trainer.onTrain) {
+										trainer.onTrain(target);
+									}
+
+									target.trains -= cost;
+									target[stat] += 1;
+									target['base' + World.capitalizeFirstLetter(stat)] += 1;
+
+									World.msgPlayer(target, {
+										msg: 'You train with ' + trainer.displayName 
+											+ '. (<strong>' + World.capitalizeFirstLetter(stat) 
+											+ ' +1 for ' + cost +  ' trains</strong>)',
+										styleClass: 'green'
+									});
+								} else {
+									World.msgPlayer(target, {
+										msg: 'You don\'t have enough trains to work with ' 
+											+ trainer.displayName + '.',
+										styleClass: 'error'
+									});
 								}
-					
-								target['base' + World.capitalizeFirstLetter(stat)] += 1;
-												
-								World.msgPlayer(target, {
-									msg: 'You train with ' + trainer.displayName 
-										+ '. <strong>(' + stat + ' +1)</strong>',
-									styleClass: 'green'
-								});
 							} else {
 								World.msgPlayer(target, {
-									msg: 'You don\'t have enough trains to work with ' 
-										+ trainer.displayName + '.',
+									msg: 'You already know much more than ' + trainer.displayName 
+										+ '. You should find someone stronger to train with.',
 									styleClass: 'error'
 								});
 							}
 						} else {
 							World.msgPlayer(target, {
-								msg: 'You already know much more than ' + trainer.displayName 
-									+ '. You should find someone stronger to train with.',
+								msg: 'You can\'t train <strong class="grey">' + command.arg + '</strong>.',
 								styleClass: 'error'
 							});
 						}
@@ -1817,7 +1828,7 @@ Cmd.prototype.train = function(target, command) {
 					});
 				}
 			} else {
-				if (roomObj.monsters || roomObj.playersInRoom) {
+				if (roomObj.monsters.length || roomObj.playersInRoom.length) {
 					World.msgPlayer(target, {
 						msg: 'No one here is offering training.',
 						styleClass: 'error'
@@ -1949,7 +1960,14 @@ Cmd.prototype.practice = function(target, command) {
 							pracSkill();
 						} else {
 							if (skillObj) {
-								pracSkill();
+								if (Character.meetsSkillPrepreqs(target, skillObj)) {
+									pracSkill();
+								} else {
+									this.say(trainer, {
+										msg: 'You are not ready to learn ' + skillObj.display + '.',
+										styleClass: 'error'
+									});
+								}
 							} else {
 								World.msgPlayer(target, {
 									msg: 'You don\'t know how to ' + command.arg + '.',
