@@ -271,7 +271,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						+ weapon.attackType + ' you and misses! </div>';
 				}
 			}
-			
+
 			return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent);
 		}
 	}
@@ -297,10 +297,16 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 	msgForOpponent;
 
 	opponent.position = 'fighting';
-	opponent.opponent = player;
+
+	if (!opponent.opponent) {
+		opponent.opponent = player;
+	}
 
 	player.position = 'fighting';
-	player.opponent = opponent;
+	
+	if (!player.opponent) {
+		player.opponent = opponent;
+	}
 
 	if (!Skill) {
 		Skill = require('./skills').skills;
@@ -444,6 +450,18 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 
 Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn) {
 	var combat = this;
+	
+	opponent.position = 'fighting';
+	
+	if (!opponent.opponent) {
+		opponent.opponent = player;
+	}
+
+	player.position = 'fighting';
+	
+	if (!player.opponent) {
+		player.opponent = opponent;
+	}
 
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
 		combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2) {

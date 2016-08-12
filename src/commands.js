@@ -1319,7 +1319,7 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 	var roomObj,
 	opponent;
 
-	if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fighting') {
+	if (player.position !== 'sleeping' && player.position !== 'resting') {
 		if (!roomObj) {
 			roomObj = World.getRoomObject(player.area, player.roomid);
 		}
@@ -1327,14 +1327,15 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 		opponent = World.search(roomObj.monsters, command);
 
 		if (opponent && opponent.roomid === player.roomid) {
-
 			World.msgPlayer(player, {
-				msg: '<strong class="grey large">You scream and charge at a ' + opponent.name + '!</strong>',
+				msg: '<strong class="grey">You scream and charge at a ' 
+					+ opponent.name + '!</strong>',
 				noPrompt: true
 			});
 
 			World.msgPlayer(opponent, {
-				msg: 'A ' + player.displayName + ' screams and charges at you!',
+				msg: '<strong class="red">A ' + player.displayName 
+					+ ' screams and charges at you!</strong>',
 				noPrompt: true
 			});
 			
@@ -1350,7 +1351,8 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 				});
 
 				World.msgPlayer(opponent, {
-					msg: 'A ' + player.displayName + ' screams and charges at you!',
+					msg: '<strong class="red">A ' + player.displayName 
+						+ ' screams and charges at you!</strong>',
 					noPrompt: true
 				});
 
@@ -1965,7 +1967,8 @@ Cmd.prototype.practice = function(target, command) {
 								} else {
 									this.say(trainer, {
 										msg: 'You are not ready to learn ' + skillObj.display + '.',
-										styleClass: 'error'
+										styleClass: 'error',
+										roomObj: roomObj
 									});
 								}
 							} else {
