@@ -1,7 +1,6 @@
 'use strict';
 var Cmd = require('../src/commands').cmd,
 Room = require('../src/rooms').room,
-WanderAI = require('../ai/wander'),
 World = require('../src/world').world;
 
 /*

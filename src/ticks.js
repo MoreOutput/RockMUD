@@ -57,7 +57,7 @@ setInterval(function() {
 	if (World.time.month.day > World.time.month.days) {
 		World.time.month = World.time.months[0];
 	}
-}, 1000);
+}, 1200);
 
 // wait-state removal
 setInterval(function() {
@@ -279,16 +279,9 @@ setInterval(function() {
 			monsters.forEach(function(monster, i) {
 				var roomObj = World.getRoomObject(monster.area, monster.roomid);
 
-				if (monster.chp >= 1 && !monster.preventOnAlive) {
+				if (monster.chp >= 1) {
 					World.processEvents('onAlive', monster, roomObj);
-				}
-
-				if (monster.items) {
-					monster.items.forEach(function(monsterItem, i) {
-						if (!monsterItem.preventOnAlive) {
-							World.processEvents('onAlive', monsterItem, roomObj);
-						}
-					});
+					World.processEvents('onAlive', monster.items, roomObj);
 				}
 			});
 
@@ -298,22 +291,15 @@ setInterval(function() {
 				players.forEach(function(player, i) {
 					var roomObj = World.getRoomObject(player.area, player.roomid);
 
-					if (player.chp >= 1 && player.behaviors.length && !player.preventOnAlive) {
+					if (player.chp >= 1) {
 						World.processEvents('onAlive', player, roomObj);
-					}
-
-					if (player.items) {
-						player.items.forEach(function(item, i) {
-							if (!item.preventOnAlive) {
-								World.processEvents('onAlive', item, roomObj);
-							}
-						});
+						World.processEvents('onAlive', player.items, roomObj);
 					}
 				});
 			}
 		}
 	}
-}, 500);
+}, 700);
 
 // Area onAlive check happens once per 30 seconds 
 setInterval(function() {

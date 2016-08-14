@@ -125,10 +125,16 @@ Cmd.prototype.buy = function(target, command) {
 
 Cmd.prototype.sell = function(target, command) {
 	var i = 0,
-	roomObj = World.getRoomObject(target.area, target.roomid),
+	roomObj,
 	item,
 	merchant;
 	
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
+
 	if (target.position !== 'sleeping') {
 		merchant = Room.getMerchants(roomObj)[0];
 		
@@ -2414,7 +2420,7 @@ Cmd.prototype.json = function(target, command) {
 
 /*
 * An in game reboot. 
-* Stops all combat, reloads all active areas, saves players, and clears all corpses / items with a decay flag
+* Stops all combat, reloads all active areas, saves players
 */
 Cmd.prototype.reboot = function(target, command) {
 	if (target.role === 'admin') {

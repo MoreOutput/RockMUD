@@ -1185,17 +1185,19 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, data) {
 
 		for (i; i < gameEntities.length; i += 1) {
 			gameEntity = gameEntities[i];	
+			
+			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)]) {
+				 if (gameEntity[evtName] && typeof gameEntity[evtName] === 'function') {
+					 allTrue = gameEntity[evtName](gameEntity, roomObj, data);
+				 }
 
-			if (gameEntity[evtName] && typeof gameEntity[evtName] === 'function') {
-				allTrue = gameEntity[evtName](gameEntity, roomObj, data);
-			}
-
-			if (gameEntity.behaviors.length) {
-				for (j; j < gameEntity.behaviors.length; j += 1) {
-					if (this.ai[gameEntity.behaviors[j].module][evtName]) {
-						allTrue = this.ai[gameEntity.behaviors[j].module][evtName](gameEntity, roomObj, data);
-					}
-				}
+				 if (gameEntity.behaviors.length) {
+					 for (j; j < gameEntity.behaviors.length; j += 1) {
+						 if (this.ai[gameEntity.behaviors[j].module][evtName]) {
+							 allTrue = this.ai[gameEntity.behaviors[j].module][evtName](gameEntity, roomObj, data);
+						 }
+					 }
+				 }
 			}
 
 			if (allTrue !== false) {
