@@ -16,8 +16,12 @@ Notes on dependencies:
 * Default terminal loads Bootstrap from CDN.
 * Development keeps up with latest node release.
 
-#10000 feet:#
+##10000 feet:##
 All design/data elements of RockMUD must be either valid JSON or .js files. Please look at the current code and make an effort to match the style if you plan to submit a pull request. The OOTB experience is fairly diku-like as thats what I played most.
+
+###RockMUD development chat through gitter:###
+
+https://gitter.im/rockmud/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link
 
 ###Installation###
 * Install Node, npm, and Git
