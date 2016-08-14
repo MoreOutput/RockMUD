@@ -1,6 +1,6 @@
 {
 	"name" : "A new area",
-	"displayName": "",
+	"displayName": "Unamed Area",
 	"id" : "",
 	"type" : "forest",
 	"levels" : "All",
@@ -18,5 +18,9 @@
 	"behaviors": [],
 	"checksWithoutPlayers": 0,
 	"respawnOn": 3,
-	"respawnTick": 0
+	"respawnTick": 0,
+	"wasExtended": false,
+	"itemType": "area",
+	"hasEvents": false
 }
+

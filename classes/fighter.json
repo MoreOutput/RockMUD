@@ -8,7 +8,7 @@
 		"id": "bash",
 		"display": "Bash",
 		"mod": 0,
-		"train": 70,
+		"train": 45,
 		"type": "melee",
 		"wait": 1,
 		"learned": false,
@@ -21,7 +21,7 @@
 		"id": "shieldBlock",
 		"display": "Shield Block",
 		"mod": 1,
-		"train": 65,
+		"train": 45,
 		"type": "passive",
 		"learned": false,
 		"prerequisites": {
@@ -31,9 +31,19 @@
 		"id": "secondAttack",
 		"display": "Second Attack",
 		"mod": 0,
-		"train": 65,
+		"train": 45,
 		"learned": false,
 		"type": "passive",
+		"prerequisites": {
+			"level": 1
+		}
+	}, {
+		"id": "whirlwind",
+		"display": "Whirlwind",
+		"mod": 0,
+		"train": 100,
+		"learned": true,
+		"type": "area melee",
 		"prerequisites": {
 			"level": 1
 		}

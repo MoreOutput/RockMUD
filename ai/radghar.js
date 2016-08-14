@@ -13,19 +13,19 @@ module.exports = {
 		'You can <strong>practice</strong> and learn new skills from Guildmasters along with <strong>training</strong> stats.'
 	],
 	currentlyEnrolled: [],
-	onSay: function(player, roomObj, command) {
+	onSay: function(mob, roomObj, player, command) {
 		if (player.isPlayer) {
 			if (command.msg.toLowerCase().indexOf('yes') !== -1) {
-				Cmd.say(this, {
+				Cmd.say(mob, {
 					msg: 'Great! Let me get you signed up. Just a second...',
 					roomObj: roomObj
 				});				
 			}
 		}
 	},
-	onVisit: function(player, roomObj, command) {
+	onVisit: function(mob, roomObj, player, command) {
 		if (player.level <= 2) {
-			Cmd.say(this, {
+			Cmd.say(mob, {
 				msg: 'Greetings ' + player.displayName + ' are you here to train at the '
 					+ '<strong class="red">Midgaardian Academy</strong>?',
 				roomObj: roomObj
@@ -36,8 +36,8 @@ module.exports = {
 		var roll = World.dice.roll(1, 40);
 
 		if (roll === 10) {
-			Cmd.say(this, {
-				msg: this.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],
+			Cmd.say(mob, {
+				msg: mob.exclimations[parseInt(Math.random() * ((mob.exclimations.length)))],
 				roomObj: roomObj
 			});
 		}

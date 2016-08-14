@@ -19,14 +19,8 @@ module.exports = {
 	attackOnVisit: true,
 	attackOnAlive: true,
 	mobAggressive: false,
-	onVisit: function(target, roomObj, mob) {
-		var mob;
-
-		if (!mob) {
-			mob = this;
-		}
-	
-		if (mob.attackOnVisit === true
+	onVisit: function(mob, roomObj, target, command) {	
+		if (mob && mob.attackOnVisit === true
 			&& mob.position === 'standing'
 			&& (target.isPlayer || mob.mobAggressive)
 			&& target.roomid === mob.roomid) {
@@ -38,10 +32,6 @@ module.exports = {
 	onAlive: function(mob, roomObj) {
 		var target;
 		
-		if (!mob) {
-			mob = this;
-		}
-
 		if (roomObj.playersInRoom) {
 			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
 		}

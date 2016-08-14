@@ -22,18 +22,16 @@ module.exports = {
 
 		if (mob.position === 'standing') {
 			if (roll === 5) {
-				Cmd.emote(this, {
+				Cmd.emote(mob, {
 					msg: 'stares <span class="grey">skyward</span> in thought.',
 					roomObj: roomObj
 				});
 			} else if (roll === 1 && roomObj.playersInRoom.length) {
 				// Most of the time we just proclaim something
-				Cmd.say(this, {
-					msg: this.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],
+				Cmd.say(mob, {
+					msg: mob.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],
 					roomObj: roomObj
 				});
-			} else if (roll === 6) {
-				WanderAI.onAlive(this, roomObj);
 			}
 		}
 	}

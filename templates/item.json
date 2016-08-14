@@ -8,7 +8,7 @@
 	"id": "",
 	"refId": "",
 	"level": 1,
-	"itemType": "",
+	"itemType": "item",
 	"material": "", 
 	"diceNum": 0,
 	"diceSides": 0,
@@ -27,5 +27,7 @@
 	"isOpen": true,
 	"value": 0,
 	"behaviors": [],
-	"modifiers": {}
+	"modifiers": {},
+	"hasEvents": false
 }
+

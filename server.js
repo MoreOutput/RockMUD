@@ -49,31 +49,46 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 	server.listen(process.env.PORT || cfg.port);
 
 	io.on('connection', function (s) {
-
 		var parseCmd = function(r, s) {
 			var skillObj,
 			cmdObj = Cmds.createCommandObject(r);
 	
 			if (!s.player.creationStep) {
-				if (cmdObj && s.player.wait === 0) {
+				if (cmdObj) {
 					if (cmdObj.cmd) {
+						cmdObj.roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+						
 						if (cmdObj.cmd in Cmds) {
-							return Cmds[cmdObj.cmd](s.player, cmdObj);
+							Cmds[cmdObj.cmd](s.player, cmdObj);
+							
+							World.processEvents('onCommand', s.player, cmdObj.roomObj, cmdObj);
+							World.processEvents('onCommand', s.player.items, cmdObj.roomObj, cmdObj);
 						} else if (cmdObj.cmd in Skills) {
 							skillObj = Character.getSkill(s.player, cmdObj.cmd);
 
-							if (skillObj) {
+							if (skillObj && s.player.wait === 0) {
 								return Skills[cmdObj.cmd](
 									skillObj,
 									s.player,
-									World.getRoomObject(s.player.area, s.player.roomid),
+									cmdObj.roomObj,
 									cmdObj
 								);
+							
+								World.processEvents('onSkill', s.player, cmdObj.roomObj, skillObj);
+								World.processEvents('onSkill', s.player.items, cmdObj.roomObj, skillObj);
+								World.processEvents('onSkill', cmdObj.roomObj, s.player, skillObj);
 							} else {
-								World.msgPlayer(s, {
-									msg: 'You do not know how to ' + cmdObj.cmd + '.',
-									styleClass: 'error'
-								});
+								if (!skillObj) {
+									World.msgPlayer(s, {
+										msg: 'You do not know how to ' + cmdObj.cmd + '.',
+										styleClass: 'error'
+									});
+								} else {
+									World.msgPlayer(s, {
+										msg: '<strong>You can\'t do that yet!.</strong>',
+										styleClass: 'error'
+									});
+								}
 							}
 						} else {
 							World.msgPlayer(s, {
@@ -87,17 +102,10 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						});
 					}
 				} else {
-					if (s.player.wait > 0) {
-						World.msgPlayer(s, {
-							msg: 'You cant do that just yet!',
-							styleClass: 'error'
-						});
-					} else {
-						World.msgPlayer(s, {
-							msg: 'You have to be more specific with your command.',
-							styleClass: 'error'
-						});
-					}
+					World.msgPlayer(s, {
+						msg: 'You have to be more specific with your command.',
+						styleClass: 'error'
+					});
 				}
 			} else {
 				Character.newCharacter(s, cmdObj);

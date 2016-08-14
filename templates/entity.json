@@ -68,7 +68,7 @@
 	"size": {"value": 3, "display": "medium"},
 	"kingdom": "mammal",
 	"killed": 0,
-	"itemType": "mob",
+	"itemType": "entity",
 	"preventItemDecay": false,
 	"preventOnAlive": false,
 	"eq": [{
@@ -145,5 +145,7 @@
 	"prevent": [],
 	"autoloot": true,
 	"autosac": false,
-	"behaviors": []
+	"behaviors": [],
+	"hasEvents": false
 }
+

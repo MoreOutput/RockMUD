@@ -80,6 +80,7 @@ module.exports = {
 					damRoll: 10,
 					hitRoll: 10,
 					ac: 20,
+					wanderCheck: 38,
 					itemType: 'mob',
 					items: [{
 						name: 'Midgaard city key',
@@ -98,7 +99,9 @@ module.exports = {
 						flags: []
 					}],
 					behaviors: [{
-						module : 'mayor'
+						module: 'mayor'
+					}, {
+						module: 'wander'
 					}]
 				}, {
 					name: 'Boar',
@@ -120,7 +123,6 @@ module.exports = {
 					size: {value: 2, display: 'very small'},
 					itemType: 'mob',
 					spawn: 3,
-					wanderCheck: 2,
 					behaviors: [{  
 						module: 'wander'
 					}]
@@ -232,10 +234,10 @@ module.exports = {
 				flags: []
 			}],
 			flags: [],
-			beforeEnter: function(target, fromRoom) {
+			beforeEnter: function(roomObj, fromRoom, target) {
 				return true;
 			},
-			onEnter: function(target, fromRoom) {
+			onEnter: function(roomObj, target) {
 				
 			}
 		},
@@ -456,9 +458,9 @@ module.exports = {
 						spawn: 3
 					}],
 					behaviors: [],
-					beforeSell: function(buyer, roomObj) {
+					beforeSell: function(merchant, roomObj, buyer) {
 						if (buyer.race === 'ogre') {
-							Cmd.say(this, {
+							Cmd.say(merchant, {
 								msg: 'Sell to an Ogre? Are you insane?',
 								roomObj: roomObj
 							});

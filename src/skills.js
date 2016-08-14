@@ -40,7 +40,7 @@ Skill.prototype.secondAttack = function(skillObj, player) {
 };
 
 /*
-* Non combat skills, typically called by a game entity
+* Non combat skills, typically checked by a game entity
 */
 Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 	var skillAff = Character.getAffect(player, 'sneak'),
@@ -52,9 +52,9 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 			affObj = {
 				id: skillObj.id,
 				display: skillObj.name,
-				decay: World.dice.roll(1 + player.level/2, 20, (player.detection + player.knowledge/2)),
+				decay: World.dice.roll(1 + player.level/2, 10, (player.detection + player.knowledge/2) + skillObj.train/5),
 				modifiers: null,
-				begunSneaking: roomObj.id
+				begunSneaking: {area: roomObj.area, roomid: roomObj.id}
 			};
 
 			Character.addAffect(player, affObj);
@@ -63,10 +63,6 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 				player.wait += skillObj.wait;
 			} else {
 				player.wait += 1;
-			}
-
-			if (player.onSneak) {
-				player.onSneak(roomObj);
 			}
 		}
 	} else {
@@ -152,8 +148,10 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 						noPrompt: true
 					});
 				}
-
-				Combat.processFight(player, opponent, roomObj);
+			
+				if (!player.opponent || player.opponent.refId !== opponent.refId) {
+					Combat.processFight(player, opponent, roomObj);
+				}
 
 				if (player.mainStat === 'str') {
 					player.wait += 3;
@@ -188,67 +186,71 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 	var weaponSlots,
 	i = 0,
 	strMod = World.dice.getStrMod(player),
-	oppDexMod,
 	damage = 0,
 	shieldArr,
 	shield,
+	opponent,
 	rollDamage = function(opponent) {
-		var oppAc;
+		var oppDexMod = World.dice.getDexMod(opponent);
 	
-		dmg = World.dice.roll(player.diceNum + World.dice.roll(1,4), player.diceSides + player.size.value, strMod + player.size.value) 
-			* Math.round(player.level/2) + 1;
+		if (opponent.mainStat && opponent.mainStat === 'dex' || World.dice.roll(1, 20) <= 2) {
+			return World.dice.roll(player.diceNum + 1, player.diceSides + player.size.value, strMod + player.size.value) 
+				* (Math.round(player.level/2) + 1) - opponent.ac;
+		} else {
+			return World.dice.roll(player.diceNum + 1, player.diceSides + player.size.value, strMod + player.size.value) 
+				* (Math.round(player.level/2) + 1) - (opponent.ac + oppDexMod);
+		}
 	};
 
 	if (roomObj.monsters.length) {
 		if (player.position === 'standing' || player.position === 'fighting') {
 			if (World.dice.roll(1, 100) <= skillObj.train) {
-				damage = rollDamage(shield);
+				World.msgPlayer(player, {
+					msg: 'You spin around the room slashing at everyone!',
+					styleClass: 'green',
+					noPrompt: true
+				});
 
-				if (!shield) {
-					World.msgPlayer(player, {
-						msg: 'You bash and charge at a ' + opponent.name + ' (' + damage + ')',
-						noPrompt: true
-					});
+				World.msgRoom(roomObj, {
+					msg: player.displayName + ' spins around the room slashing at everyone!',
+					styleClass: 'red',
+					playerName: player.name
+				});
 
-					World.msgPlayer(opponent, {
-						msg: 'A ' + player.displayName + ' bashes and charges at you!',
-						noPrompt: true
-					});
-				} else {
-					World.msgPlayer(player, {
-						msg: 'You use a ' + shield.displayName + ' to bash and charge at a ' 
-							+ opponent.name + ' (' + damage + ')',
-						noPrompt: true
-					});
+				player.cmv -= World.dice.roll(1, 12);
 
-					World.msgPlayer(opponent, {
-						msg: 'A ' + player.displayName + ' bashes and charges at you with a ' 
-							+ shield.displayName + '!' + ' (' + damage + ')',
-						noPrompt: true
-					});
+				for (i; i < roomObj.monsters.length; i += 1) {
+					opponent = roomObj.monsters[i];
+
+					damage = rollDamage(opponent);
+			
+					opponent.chp -= damage;					
+					
+					if (!player.opponent || opponent.refId !== player.opponent.refId) {
+						Combat.processFight(player, opponent, roomObj);
+					}
 				}
-
-				Combat.processFight(player, opponent, roomObj);
 
 				if (player.mainStat === 'str') {
 					player.wait += 3;
 				} else {
 					player.wait += 4;
 				}
-
-				opponent.wait += 3;
 			} else {
 				World.msgPlayer(player, {
-					msg: 'You lunge forward and mistime your bash but manage to keep your footing!',
+					msg: 'You begin to turn and stumble. Your whirlwind attempt fails!',
+					styleClass: 'error',
 					noPrompt: true
 				});
 
-				Combat.processFight(player, opponent, roomObj);
+				if (!player.opponent || opponent.refId !== player.opponent.refId) {
+					Combat.processFight(player, opponent, roomObj);
+				}
 
-				if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
-					player.wait += 2;
-				} else {
+				if (playerMods.dexMod > 18 || skillObj.train === 100) {
 					player.wait += 3;
+				} else {
+					player.wait += 4;
 				}
 			}
 		}

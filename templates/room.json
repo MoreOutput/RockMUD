@@ -1,0 +1,16 @@
+{
+	"id": "",
+	"title": "",
+	"area": "",
+	"light": false,
+	"content": "",
+	"outdoors": true,
+	"exits": [],
+	"playersInRoom": [],
+	"monsters": [],
+	"items": [],
+	"flags": [],
+	"itemType": "room",
+	"hasEvents": false,
+	"behaviors": []
+}

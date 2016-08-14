@@ -268,6 +268,7 @@ setInterval(function() {
 // AI Ticks
 setInterval(function() {
 	var i = 0,
+	j = 0,
 	players,
 	monsters;
 
@@ -278,14 +279,14 @@ setInterval(function() {
 			monsters.forEach(function(monster, i) {
 				var roomObj = World.getRoomObject(monster.area, monster.roomid);
 
-				if (monster.chp >= 1 && monster.onAlive && !monster.preventOnAlive) {
-					monster.onAlive(monster, roomObj);
+				if (monster.chp >= 1 && !monster.preventOnAlive) {
+					World.processEvents('onAlive', monster, roomObj);
 				}
 
 				if (monster.items) {
 					monster.items.forEach(function(monsterItem, i) {
-						if (monsterItem.onAlive && !monsterItem.preventOnAlive) {
-							monsterItem.onAlive(monsterItem, roomObj);
+						if (!monsterItem.preventOnAlive) {
+							World.processEvents('onAlive', monsterItem, roomObj);
 						}
 					});
 				}
@@ -297,14 +298,14 @@ setInterval(function() {
 				players.forEach(function(player, i) {
 					var roomObj = World.getRoomObject(player.area, player.roomid);
 
-					if (player.chp >= 1 && player.onAlive && !player.preventOnAlive) {
-						player.onAlive(player, World.getRoomObject(player.area, roomObj));
+					if (player.chp >= 1 && player.behaviors.length && !player.preventOnAlive) {
+						World.processEvents('onAlive', player, roomObj);
 					}
 
 					if (player.items) {
 						player.items.forEach(function(item, i) {
-							if (item.onAlive && !item.preventOnAlive) {
-								item.onAlive(item, roomObj);
+							if (!item.preventOnAlive) {
+								World.processEvents('onAlive', item, roomObj);
 							}
 						});
 					}

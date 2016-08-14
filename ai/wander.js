@@ -14,24 +14,20 @@ World = require('../src/world').world;
 */
 module.exports = {
 	stayInArea: true,
-	wanderCheck: 1,
+	wanderCheck: 35,
 	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'],
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 20),
+		var roll = World.dice.roll(1, 40),
 		exitObj,
 		direction;
-	
-		if (!mob) {
-			mob = this;
-		}
-		
-		if (mob.wanderCheck && roll < mob.wanderCheck && mob.position === 'standing') {
+
+		if (mob && mob.wanderCheck && roll > mob.wanderCheck && mob.position === 'standing') {
 			if (!mob.moveDirections) {
-				mob.moveDirections = this.moveDirections;
+				mob.moveDirections = mob.moveDirections;
 			}
 
 			if (!mob.stayInArea) {
-				mob.stayInArea = this.stayInArea;
+				mob.stayInArea = mob.stayInArea;
 			}
 
 			direction = mob.moveDirections[World.dice.roll(1, mob.moveDirections.length) - 1];

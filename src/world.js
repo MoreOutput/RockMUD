@@ -6,29 +6,6 @@
 var fs = require('fs'),
 World = function() {
 	var world = this,
-	loadFileSet = function(path, fn) {
-		var tmpArr = [];
-
-		fs.readdir(path, function(err, fileNames) {
-			fileNames.forEach(function(fileName, i) {
-				if (path.indexOf('/ai') === -1) {
-					fs.readFile(path + fileName, function (err, messageTmp) {
-						tmpArr.push(JSON.parse(messageTmp));
-
-						if (i === fileNames.length - 1) {
-							return fn(err, tmpArr);
-						}
-					});
-				} else {
-					world.ai[fileName.replace('.js', '')] = require('.' + path + fileName);
-
-					if (i === fileNames.length - 1) {
-						return fn(err);
-					}
-				}
-			});
-		});
-	},
 	loadAreas = function(fn) {
 		var i = 0,
 		path = './areas/',
@@ -52,24 +29,68 @@ World = function() {
 		});
 	},
 	loadRaces = function (fn) {
-		loadFileSet('./races/', fn);
-	},
-	loadClasses = function (fn) {
-		loadFileSet('./classes/', fn);
-	},
-	loadItemTemplate = function (fn) {
-		fs.readFile('./templates/objects/item.json', function (err, r) {
-			return fn(err, JSON.parse(r));
+		var tmpArr = [],
+		path = './races/';
+	
+		fs.readdir(path, function(err, fileNames) {
+			fileNames.forEach(function(fileName, i) {
+				fs.readFile(path + fileName, function (err, messageTmp) {
+					tmpArr.push(JSON.parse(messageTmp));
+
+					if (i === fileNames.length - 1) {
+						return fn(err, tmpArr);
+					}
+				});
+			});
 		});
 	},
-	loadMobTemplate = function (fn) {
-		fs.readFile('./templates/objects/entity.json', function (err, r) {
-			return fn(err, JSON.parse(r));
+	loadClasses = function (fn) {
+		var tmpArr = [],
+		path = './classes/';
+	
+		fs.readdir(path, function(err, fileNames) {
+			fileNames.forEach(function(fileName, i) {
+				fs.readFile(path + fileName, function (err, messageTmp) {
+					tmpArr.push(JSON.parse(messageTmp));
+
+					if (i === fileNames.length - 1) {
+						return fn(err, tmpArr);
+					}
+				});
+			});
+		});
+	},
+	loadTemplates = function (fn) {
+		var tmpArr = [],
+		path = './templates/';
+	
+		fs.readdir(path, function(err, fileNames) {
+			fileNames.forEach(function(fileName, i) {
+				fs.readFile(path + fileName, function (err, tmp) {
+					var tmp = JSON.parse(tmp);
+
+					tmp.fileName = fileName.replace(/.json/g, '');
+
+					tmpArr.push(tmp);
+
+					if (i === fileNames.length - 1) {
+						return fn(err, tmpArr);
+					}
+				});
+			});
 		});
 	},
 	loadAI = function(fn) {
-		loadFileSet('./ai/', function(err) {
-			return fn();
+		var path = './ai/';
+
+		fs.readdir(path, function(err, fileNames) {
+			fileNames.forEach(function(fileName, i) {
+				world.ai[fileName.replace('.js', '')] = require('.' + path + fileName);
+
+				if (i === fileNames.length - 1) {
+					return fn(err);
+				}
+			});
 		});
 	};
 
@@ -89,50 +110,55 @@ World = function() {
 		loadTime(function(err, time) {
 			loadRaces(function(err, races) {
 				loadClasses(function(err, classes) {
-					loadMobTemplate(function(err, mobTemplate) {
-						loadItemTemplate(function(err, itemTemplate) {
-							loadAI(function() {
-								var area,
-								i = 0,
-								j;
+					loadTemplates(function(err, templates) {
+						loadAI(function() {
+							var area,
+							i = 0,
+							j;
 
-								fs.readFile('./templates/html/motd.html', 'utf-8', function (err, html) {
-									if (err) {
-										throw err;
-									}
-								
-									world.motd = '<div class="motd">' + html + '</div>';
-								});
-
-								world.areas = areas;
-								world.time = time;
-								world.races = races;
-								world.classes = classes;
-								world.itemTemplate = itemTemplate;
-								world.mobTemplate = mobTemplate;
-
-								for (i; i < world.areas.length; i += 1) {
-									area = world.areas[i];
-
-									world.setupArea(area);
+							fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
+								if (err) {
+									throw err;
 								}
 
-								world.time.isDay = true;
-
-								world.ticks = require('./ticks');
-
-								return world;
+								world.motd = '<div class="motd">' + html + '</div>';
 							});
+
+							world.areas = areas;
+							world.time = time;
+							world.races = races;
+							world.classes = classes;
+							world.templates = templates;							
+
+							world.areaTemplate = world.getTemplate('area');
+							world.itemTemplate = world.getTemplate('item');
+							world.mobTemplate = world.getTemplate('entity');
+							world.roomTemplate = world.getTemplate('room');
+
+							for (i; i < world.areas.length; i += 1) {
+								area = world.areas[i];
+
+								world.setupArea(area);
+							}
+							
+							world.ticks = require('./ticks');
+
+							return world;
 						});
 					});
 				});
 			});
 		});
 	});
-};
+},
+Character,
+Cmds,
+Skills,
+Spells,
+Room;
 
 World.prototype.setup = function(socketIO, cfg, fn) {
-	var Character = require('./character').character,
+	Character = require('./character').character,
 	Cmds = require('./commands').cmd,
 	Skills = require('./skills').skills,
 	Spells = require('./spells').spells,
@@ -142,6 +168,19 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	this.dice = require('./dice').roller;
 
 	return fn(Character, Cmds, Skills);
+};
+
+World.prototype.getTemplate = function(fileName) {
+	var i = 0,
+	j;
+
+	for (i; i < this.templates.length; i += 1) {
+		if (this.templates[i].fileName === fileName) {
+			return this.templates[i];
+		}
+	}
+
+	return false;
 };
 
 World.prototype.getPlayableRaces = function() {
@@ -202,6 +241,10 @@ World.prototype.isPlayableClass = function(className) {
 
 World.prototype.getAI = function(aiObj) {
 	var world = this;
+
+	if (!aiObj.module) {
+		aiObj = {module: aiObj};
+	}
 	
 	if (world.ai[aiObj.module]) {
 		return world.ai[aiObj.module];
@@ -234,14 +277,6 @@ World.prototype.getClass = function(className) {
 	}
 
 	return null;
-};
-
-World.prototype.getObjectTemplate = function(tempName, fn) {
-	var world = this;
-};
-
-World.prototype.getMessageTemplate = function(tempName, fn) {
-	var world = this;
 };
 
 // This needs to look like getItems() for returning a player obj based on room
@@ -330,7 +365,8 @@ World.prototype.rollItems = function(itemArr, roomid) {
 		}
 
 		(function(item, index) {
-			var chanceRoll = world.dice.roll(1, 20);
+			var chanceRoll = world.dice.roll(1, 20),
+			prop;
 	
 			item.refId = refId += index;
 			
@@ -378,9 +414,15 @@ World.prototype.rollItems = function(itemArr, roomid) {
 			if (item.items) {
 				world.rollItems(item.items);
 			}
+			
+			for (prop in item) {
+				if (item[prop] === 'function' && !item.hasEvents) {
+					item.hasEvents = true;
+				}
+			}
 
 			if (item.onRolled) {
-				item.onRolled();
+				item.onRolled(item);
 			}
 		}(itemArr[i], i));
 	}
@@ -402,6 +444,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 		(function(mob, index) {
 			var raceObj,
 			j = 0,
+			prop,
 			classObj;
 
 			mob.refId = refId += index;
@@ -492,9 +535,15 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			} else {
 				mobArr[index] = mob;
 			}
+		
+			for (prop in mob) {
+				if (mob[prop] === 'function' && !mob.hasEvents) {
+					mob.hasEvents = true;
+				}
+			}
 
 			if (mob.onRolled) {
-				mob.onRolled();
+				mob.onRolled(mob);
 			}
 		}(mobArr[i], i));
 	}
@@ -505,6 +554,10 @@ World.prototype.setupArea = function(area) {
 	exitObj,
 	i = 0,
 	j;
+	
+	if (!area.wasExtended) {
+		area = world.extend(area, world.areaTemplate);	
+	}
 
 	for (i; i < area.messages.length; i += 1) {
 		if (!area.messages[i].random && area.messages[i].random !== false) {
@@ -520,9 +573,10 @@ World.prototype.setupArea = function(area) {
 
 	for (i; i < area.rooms.length; i += 1) {
 		j = 0;
-		
-		area.rooms[i].itemType = 'room';		
-		area.rooms[i].playersInRoom = [];
+	
+		if (!area.wasExtended) {
+			area.rooms[i] = world.extend(area.rooms[i], world.roomTemplate);
+		}
 		
 		for (j; j < area.rooms[i].exits.length; j += 1) {
 			exitObj = area.rooms[i].exits[j];
@@ -539,6 +593,8 @@ World.prototype.setupArea = function(area) {
 	if (area.afterLoad) {
 		area.afterLoad();
 	}
+
+	area.wasExtended = true;
 
 	return area;
 };
@@ -561,7 +617,7 @@ World.prototype.reloadArea = function(area) {
 	newArea,
 	i = 0;
 
-	newArea = world.setupArea(require('../areas/' + area.name.toLowerCase()));
+	newArea = world.setupArea(require('../areas/' + area.name.toLowerCase()), false);
 
 	for (i; i < area.rooms.length; i +=1) {
 		if (area.rooms[i].playersInRoom) {
@@ -750,10 +806,18 @@ World.prototype.prompt = function(target) {
 	return prompt;
 };
 
-World.prototype.msgPlayer = function(target, msgObj) {
+World.prototype.msgPlayer = function(target, msgObj, canSee) {
 	var s,
 	prompt,
+	prependName = false,
+	appendName = false,
+	name = '',
+	darkMsg = false,
 	baseMsg;
+
+	if (canSee !== false) {
+		canSee = true;
+	}
 
 	if (target.player) {
 		s = target;
@@ -772,10 +836,36 @@ World.prototype.msgPlayer = function(target, msgObj) {
 		msgObj.styleClass = '';
 	}
 
+	if (msgObj.appendName) {
+		appendName = true;
+	}
+
+	if (msgObj.prependName) {
+		prependName = true;
+	}
+
+	if (!msgObj.name) {
+		name = target.displayName;
+	} else {
+		name = msgObj.name;
+	}
+
 	if (target) {
 		if (s) {
 			if (!msgObj.onlyPrompt && typeof msgObj.msg !== 'function' && msgObj.msg) {
-				baseMsg = msgObj.msg;
+				baseMsg = msgObj.msg;	
+
+				if (!canSee && msgObj.darkMsg) {
+					msgObj.msg = msgObj.darkMsg
+				} else {
+					if (prependName) {
+						msgObj.msg = name + ' ' + msgObj.msg;
+					}
+
+					if (appendName) {
+						msgObj.msg += ' ' + name;
+					}
+				}
 
 				msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msgObj.msg + '</div>';
 				
@@ -785,10 +875,22 @@ World.prototype.msgPlayer = function(target, msgObj) {
 					
 				s.emit('msg', msgObj);
 				
-				msgObj.msg = baseMsg;
+				msgObj.msg = baseMsg; 
 			} else if (!msgObj.onlyPrompt) {
 				msgObj.msg(target, function(send, msg) {
 					baseMsg = msgObj.msg;
+
+					if (!canSee && msgObj.darkMsg) {
+						msgObj.msg = msgObj.darkMsg;
+					}
+
+					if (prependName) {
+						msgObj.msg = name + ' ' + msgObj.msg;
+					}
+
+					if (prependName) {
+						msgObj.msg += ' ' + name;
+					}
 
 					msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msg + '</div>';
 					
@@ -817,13 +919,18 @@ World.prototype.msgPlayer = function(target, msgObj) {
 World.prototype.msgRoom = function(roomObj, msgObj) {
 	var world = this,
 	i = 0,
+	canSee = true,
 	s;
 	
 	for (i; i < roomObj.playersInRoom.length; i += 1) {
 		s = roomObj.playersInRoom[i].socket;
 		
+		if (msgObj.checkSight) {
+			canSee = Character.canSee(s.player, roomObj);
+		}
+
 		if (s && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id) {
-			world.msgPlayer(s, msgObj);
+			world.msgPlayer(s, msgObj, canSee);
 		}
 	}
 };
@@ -835,8 +942,8 @@ World.prototype.msgArea = function(areaName, msgObj) {
 	s;
 
 	for (i; i < world.players.length; i += 1) {
-		if ( (!msgObj.randomPlayer || msgObj.randomPlayer === false)
-			|| (msgObj.randomPlayer === true && world.dice.roll(1,10) > 6) ) {
+		if ((!msgObj.randomPlayer || msgObj.randomPlayer === false)
+			|| (msgObj.randomPlayer === true && world.dice.roll(1,10) > 6)) {
 
 			s = world.players[i].socket;
 
@@ -908,15 +1015,23 @@ World.prototype.search = function(searchArr, command) {
 World.prototype.setupBehaviors = function(gameEntity) {
 	var prop,
 	behavior,
+	behaviorObj,
 	i = 0,
 	j = 0;
 
 	if (gameEntity.behaviors) {		
 		for (i; i < gameEntity.behaviors.length; i += 1) {
-			behavior = this.getAI(gameEntity.behaviors[i]);
+			behavior = this.getAI(gameEntity.behaviors[i]),
+			behaviorObj = {};
 
-			if (behavior) {
-				gameEntity = this.extend(gameEntity, behavior);
+			for (prop in behavior) {
+				if (typeof behavior[prop] !== 'function' && !gameEntity[prop]) {
+					 behaviorObj[prop] = behavior[prop]; 
+				}
+			}
+
+			if (behaviorObj) {
+				gameEntity = this.extend(gameEntity, behaviorObj);
 			}
 		}
 	}
@@ -928,9 +1043,16 @@ World.prototype.setupBehaviors = function(gameEntity) {
 			if (gameEntitiy.items[j].behaviors) {
 				for (i; i < gameEnitity.items[j].behaviors.length; i += 1) {
 					behavior = this.getAI(gameEntity.items[j].behaviors[i]);
-	
-					if (behavior) {
-						gameEntity.items[j] = this.extend(gameEntity.items[j], behavior);
+					behaviorObj = {};
+
+					for (prop in behavior) {
+						if (typeof behavior[prop] !== 'function' && !gameEntity.items[j][prop]) {
+							 behaviorObj[prop] = behavior[prop]; 
+						}
+					}
+
+					if (behaviorObj) {
+						gameEntity.items[j] = this.extend(gameEntity.items[j], behaviorObj);
 					}
 				}
 			}	
@@ -1038,6 +1160,51 @@ World.prototype.shuffle = function (arr) {
 	}
 
 	return arr;
+};
+
+World.prototype.processEvents = function(evtName, gameEntity, roomObj, data) {
+	var i = 0,
+	j = 0,
+	allTrue,
+	gameEntities = [];
+	
+	if (gameEntity !== false || gameEntity.hasEvents === true) {
+		if (!Array.isArray(gameEntity)) {
+			gameEntities = [gameEntity];
+		} else {
+			gameEntities = gameEntity;
+		}
+
+		if (!roomObj) {
+			roomObj = false;
+		}
+
+		if (!data) {
+			data = false;
+		}
+
+		for (i; i < gameEntities.length; i += 1) {
+			gameEntity = gameEntities[i];	
+
+			if (gameEntity[evtName] && typeof gameEntity[evtName] === 'function') {
+				allTrue = gameEntity[evtName](gameEntity, roomObj, data);
+			}
+
+			if (gameEntity.behaviors.length) {
+				for (j; j < gameEntity.behaviors.length; j += 1) {
+					if (this.ai[gameEntity.behaviors[j].module][evtName]) {
+						allTrue = this.ai[gameEntity.behaviors[j].module][evtName](gameEntity, roomObj, data);
+					}
+				}
+			}
+
+			if (allTrue !== false) {
+				allTrue = true;
+			}
+		}
+	}
+
+	return allTrue;
 };
 
 module.exports.world = new World();
