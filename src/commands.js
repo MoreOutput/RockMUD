@@ -1487,15 +1487,26 @@ Cmd.prototype.look = function(target, command) {
 };
 
 Cmd.prototype.where = function(target, command) {
-	command.msg = '<ul>' + 
-	'<li>Your Name: ' + Character[s.id].name + '</li>' +
-	'<li>Current Area: ' + Character[s.id].area + '</li>' +
-	'<li>Room Number: ' + Character[s.id].id + '</li>' +
-	'</ul>';
+	var msgObj = {
+		msg: '<ul>'
+	},
+	players = World.getPlayersByArea(target.area),
+	i = 0;
 
-	r.styleClass = 'playerinfo where';
-
-	return World.msgPlayer(target, r);
+	msgObj.styleClass = 'playerinfo where';
+	
+	if (players.length <= 1) {
+		msgObj.msg += '<li>You don\'t see anyone else around.</li>';
+	} else {
+		for (i; i < players.length; i += 1) {
+			msgObj.msg += '<li>Name: ' + target.displayName + '</li>'
+				+ '<li>Current Area: ' + target.area + '</li>';	
+		}
+	}
+	
+	msgObj.msg += '</ul>';
+	
+	return World.msgPlayer(target, msgObj);
 };
 
 /** Communication Channels **/
