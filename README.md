@@ -8,8 +8,8 @@ Try the latest on this Heroku hobby instance: http://rockmud.heroku.com. If you 
 Goals:
 * Full featured MUD experience from within the browser.
 * Enable quick development.
-* Empower client side scripting for GUI
-* 'REST' API for persistence as to stay DB agnostic.
+* Empower client side scripting for GUI.
+* DB agnostic -- GET/POST to your defined service.
 
 Notes on dependencies: 
 * Socket.io 1.0 or greater is required.

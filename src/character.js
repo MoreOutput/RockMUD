@@ -264,33 +264,32 @@ Character.prototype.create = function(s) {
 			
 			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null), function (err) {
 				character.load(s.player.name, s, function(s) {
-				var i = 0,
-				roomObj;
+					var roomObj;
 
-				if (err) {
-					throw err;
-				}
+					if (err) {
+						throw err;
+					}
 
-				if (character.addPlayer(s)) {
-					s.leave('creation');
-					s.join('mud');
-					
-					World.sendMotd(s);
+					if (character.addPlayer(s)) {
+						s.leave('creation');
+						s.join('mud');
 
-					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+						World.sendMotd(s);
 
-					roomObj.playersInRoom.push(s.player);
-					
-					Cmds.look(s.player, {
-						roomObj: roomObj
-					});
-				} else {
-					World.msgPlayer(s, {
-						msg: 'Error logging in, please retry.'
-					});
-					
-					s.disconnect();
-				}
+						roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+
+						roomObj.playersInRoom.push(s.player);
+
+						Cmds.look(s.player, {
+							roomObj: roomObj
+						});
+					} else {
+						World.msgPlayer(s, {
+							msg: 'Error logging in. Reconnect and retry.'
+						});
+
+						s.disconnect();
+					}
 				});
 			});
 		});

@@ -18,30 +18,17 @@ setInterval(function() {
 	if (World.time.hour === World.time.month.hoursInDay) {
 		World.time.hour = 1;
 		World.time.day += 1;
-
 		World.time.month.day += 1;
 	}
 
 	if (World.time.hour === World.time.month.hourOfLight && World.time.minute === 1) {
-		// Morning
 		World.time.isDay = true;
+
 		areaMsg = 'The sun appears over the horizon.';
-
-		// onDay events
 	} else if (World.time.hour === World.time.month.hourOfNight && World.time.minute === 1) {
-		// Nightfall
 		World.time.isDay = false;
+
 		areaMsg = 'The sun fades fully from view as night falls.';
-
-		// area onNight
-
-		// inventory items onNight
-
-		// room onNight
-
-		// mob onNight
-
-		// player onNight
 	}
 
 	if (areaMsg) {
@@ -171,7 +158,7 @@ setInterval(function() {
 
 					World.msgRoom(obj, {
 						msg: decayMsg,
-						className: 'blue'
+						styleClass: 'blue'
 					});
 				}
 			}
@@ -190,7 +177,7 @@ setInterval(function() {
 
 						World.msgPlayer(obj, {
 							msg: lightFlickerMsg,
-							className: 'yellow'
+							styleClass: 'yellow'
 						});
 					}
 				} else if (item.lightDecay === 0) {
@@ -245,19 +232,17 @@ setInterval(function() {
 
 	// decay room items
 	if (World.dice.roll(1, 20) < 18) {
-		if (World.players.length > 0) {
-			i = 0;
+		i = 0;
 
-			for (i; i < World.areas.length; i += 1) {
-				rooms = World.areas[i].rooms;
+		for (i; i < World.areas.length; i += 1) {
+			rooms = World.areas[i].rooms;
 
-				if (rooms) {
-					j = 0;
+			if (rooms) {
+				j = 0;
 
-					for (j; j < rooms.length; j += 1) {
-						if (rooms[j].items) {
-							processItemDecay(rooms[j]);
-						}
+				for (j; j < rooms.length; j += 1) {
+					if (rooms[j].items) {
+						processItemDecay(rooms[j]);
 					}
 				}
 			}
