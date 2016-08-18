@@ -12,7 +12,7 @@
 			"train": 70,
 			"type": "spell",
 			"wait": 2,
-			"learned": false,
+			"learned": true,
 			"prerequisites": {
 				"level": 1
 			}

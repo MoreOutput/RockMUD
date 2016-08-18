@@ -1315,7 +1315,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 				}
 			} else {
 				World.msgPlayer(player, {
-					msg: 'That is not a known spell.',
+					msg: 'Cast what?',
 					styleClass: 'error'
 				});
 			}
