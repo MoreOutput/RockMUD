@@ -2331,7 +2331,6 @@ Cmd.prototype.score = function(target, command) {
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
-					'<li class="stat-gold"><label>Gold:</label> ' + target.gold + '</li>' +
 					'<li class="stat-hunger"><label>Hunger:</label> ' + target.hunger +'</li>' +
 					'<li class="stat-thirst"><label>Thirst:</label> ' + target.thirst +'</li>' +
 					'<li class="stat-trains last"><label>Trains:</label> ' + target.trains + '</li>' +
@@ -2354,7 +2353,8 @@ Cmd.prototype.score = function(target, command) {
 				'<ul class="col-md-12 list-unstyled">' +
 					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span></li>' +
 					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' '
-						+ target.charClass + ' of ' + target.size.display + ' size.</li>' +
+						+ target.charClass + ' of ' + target.size.display + ' size with ' 
+						+ '<span class="yellow">' + target.gold + ' ' + World.config.coinage  + '</span>.</li>' +
 					'<li class="stat-carry">You are carrying ' + target.weight + '/' + target.maxWeight + ' pounds.</li>' +
 					'<li class="stat-xp">You need <strong>' + (target.expToLevel - target.exp)
 						+ '</strong> experience for your next level.</li>' +

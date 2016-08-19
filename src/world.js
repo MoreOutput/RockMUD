@@ -166,6 +166,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 	this.io = socketIO;
 	this.dice = require('./dice').roller;
+	this.config = cfg;
 
 	return fn(Character, Cmds, Skills);
 };

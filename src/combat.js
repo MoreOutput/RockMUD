@@ -422,7 +422,7 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 		player.gold += opponent.gold;
 
 		endOfCombatMsg += ' <span class="yellow">You find ' + opponent.gold 
-			+ ' coins on the corpse.</span>';
+			+ ' ' + World.config.coinage  + ' on the corpse.</span>';
 	}
 	
 	if (player.wait > 0) {
