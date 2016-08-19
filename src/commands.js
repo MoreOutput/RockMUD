@@ -1436,8 +1436,12 @@ Cmd.prototype.look = function(target, command) {
 				item = Character.getItem(target, command);
 				
 				if (item) {
-					itemDescription = '<p>' + item.long + '</p>';
-					
+					if (item.description) {
+						itemDescription = item.description;
+					} else {
+						itemDescription = item.short;
+					}
+
 					if (item.items) {
 						itemDescription += '<p>Inside you can see:</p><ul class="list container-list">'
 
@@ -1460,8 +1464,6 @@ Cmd.prototype.look = function(target, command) {
 							itemDescription = monster.description;
 						} else if (monster.long) {
 							itemDescription = monster.long + ' is ' + monster.position + ' ' + ' here.';
-						} else {
-							itemDescription = monster.short;
 						}
 						
 						World.msgPlayer(target, {
@@ -1469,19 +1471,10 @@ Cmd.prototype.look = function(target, command) {
 							styleClass: 'cmd-look'
 						});
 					} else {
-						item = Room.getItem(target, command);
-
-						if (item) {
-							return World.msgPlayer(target, {
-								msg: item.long,
-								styleClass: 'cmd-look'
-							});
-						} else {
-							return World.msgPlayer(target, {
-								msg: 'You do not see that here.',
-								styleClass: 'error'
-							});
-						}
+						World.msgPlayer(target, {
+							msg: 'You do not see that here.',
+							styleClass: 'error'
+						});
 					}
 				}
 			}
