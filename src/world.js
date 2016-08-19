@@ -877,7 +877,7 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 				s.emit('msg', msgObj);
 				
 				msgObj.msg = baseMsg; 
-			} else if (!msgObj.onlyPrompt) {
+			} else if (typeof msgObj.msg === 'function') {
 				msgObj.msg(target, function(send, msg) {
 					baseMsg = msgObj.msg;
 

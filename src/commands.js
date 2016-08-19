@@ -1456,7 +1456,11 @@ Cmd.prototype.look = function(target, command) {
 					monster = Room.getMonster(roomObj, command);
 
 					if (monster) {
-						if (!monster.long) {
+						if (monster.description) {
+							itemDescription = monster.description;
+						} else if (monster.long) {
+							itemDescription = monster.long + ' is ' + monster.position + ' ' + ' here.';
+						} else {
 							itemDescription = monster.short;
 						}
 						
@@ -2001,7 +2005,7 @@ Cmd.prototype.practice = function(target, command) {
 							pracSkill();
 						} else {
 							if (skillObj) {
-								if (Character.meetsSkillPrepreqs(target, skillObj)) {
+								if (trainerSkillObj && Character.meetsSkillPrepreqs(target, skillObj)) {
 									pracSkill();
 								} else {
 									this.say(trainer, {

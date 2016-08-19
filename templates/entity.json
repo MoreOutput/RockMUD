@@ -146,6 +146,7 @@
 	"autoloot": true,
 	"autosac": false,
 	"behaviors": [],
-	"hasEvents": false
+	"hasEvents": false,
+	"trainer": false
 }
 
