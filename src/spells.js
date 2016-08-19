@@ -23,25 +23,28 @@ Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command, f
 
 			World.msgPlayer(player, {
 				msg: 'You cast spark and a series of crackling '
-				+ '<span class="blue">bright blue sparks</span> burn ' + opponent.displayName 
-				+ ' with maiming intensity! (' + damage + ')'
+					+ '<span class="blue">bright blue sparks</span> burn ' + opponent.displayName 
+					+ ' with maiming intensity! (' + damage + ')'
 			});
 
 			World.msgPlayer(opponent, {
-				msg: player.displayName + ' casts spark and burns you ' 
+				msg: player.displayName + ' casts  spark and burns you ' 
 				+ opponent.displayName + ' with maiming intensity! (' + damage + ')'
 			});
 		} else {
 			// spell failed
 			World.msgPlayer(player, {
 				msg: 'You try to channel the spell but only get '
-				+ '<span class="blue">sparks and a series of crackling sounds!</span>',
+					+ '<span class="blue">sparks and a series of crackling sounds!</span>',
 			});
 		}
 
 		return fn(player, opponent, roomObj, command);
 	} else {
-		World.msgPlayer(player, {msg: 'You dont have enough mana to cast spark!', styleClass: 'error'});
+		World.msgPlayer(player, {
+			msg: 'You dont have enough mana to cast spark!',
+			styleClass: 'error'
+		});
 	}
 };
 

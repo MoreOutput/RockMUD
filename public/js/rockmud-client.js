@@ -48,7 +48,8 @@ window.onload = function() {
 		tr: 'train',
 		prac: 'practice',
 		nod: 'emote nods solemly.',
-		laugh: 'emote laughs heartily.'
+		laugh: 'emote laughs heartily.',
+		wo: 'worth'
 	},
 	isScrolledToBottom = false,
 	playerIsLogged = null,

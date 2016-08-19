@@ -101,7 +101,7 @@ Cmd.prototype.buy = function(target, command) {
 						World.processEvents('onSell', merchant, roomObj, target);
 					} else {
 						World.msgPlayer(target, {
-							msg: 'You do not enough gold.',
+							msg: 'You can\'t afford that.',
 							styleClass: 'yellow'
 						});
 					}
@@ -156,7 +156,7 @@ Cmd.prototype.sell = function(target, command) {
 					});
 				} else {
 					World.msgPlayer(target, {
-						msg: 'He seems to be strapped at the moment.',
+						msg: 'They can\'t afford to buy ' + item.short,
 						styleClass: 'yellow'
 					});
 				}
@@ -1387,6 +1387,13 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 			styleClass: 'combat-death'
 		});
 	}
+};
+
+Cmd.prototype.worth = function(target, command) {
+	World.msgPlayer(target, {
+		msg: 'You have ' + target.gold + ' gold.',
+		styleClass: 'green'
+	});
 };
 
 Cmd.prototype.look = function(target, command) {
