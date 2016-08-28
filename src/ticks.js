@@ -322,19 +322,18 @@ setInterval(function() {
 
 // Player Regen
 setInterval(function() { 
-	var i = 0,
-	player; 
+	var i = 0; 
 
-	if (World.players.length > 0) {
-		for (i; i < World.players.length; i += 1) {
-			player = World.players[i];
-
-			Character.hpRegen(player);
-			Character.manaRegen(player);
-			Character.mvRegen(player);
+	if (World.players.length) {
+		if (World.dice.roll(1, 2) === 1) {
+			for (i; i < World.players.length; i += 1) {
+				Character.hpRegen(World.players[i]);
+				Character.manaRegen(World.players[i]);
+				Character.mvRegen(World.players[i]);
+			}
 		}
 	}
-}, 75000);
+}, 30000);
 
 // Hunger and Thirst Tick 
 setInterval(function() { 

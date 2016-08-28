@@ -92,7 +92,9 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	criticalAttackXP,
 	criticalAttack = false,
 	dodgeCheck = World.dice.roll(opponent.diceNum, opponent.diceSides, opponentMods.dex + opponent.detection + opponent.awareness/2 + (attacker.size.value - opponent.size.value)),
-	acCheck = World.dice.roll(opponent.diceNum, opponent.diceSides, opponent.ac + opponentMods.dex + opponent.level) + World.dice.roll(1, 10);
+	acCheck = World.dice.roll(opponent.diceNum, opponent.diceSides, opponent.ac + opponentMods.dex + opponent.level) + World.dice.roll(1, 10),
+	attackerCanSee = Character.canSee(attacker, roomObj),
+	opponentCanSee = Character.canSee(opponent, roomObj);
 
 	if (hitRoll < 0) {
 		hitRoll = attacker.level;
@@ -182,15 +184,29 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 
 							if (attacker.isPlayer) {
 								if (!criticalAttack) {
-									msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short 
-										+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red">(' +
-										damage + ')</span></div>';
+									if (attackerCanSee) {
+										msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short 
+											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
+											+ damage + ')</strong></div>';
+									} else {
+										msgForAttacker += '<div>You ' + weapon.attackType + ' <strong>something</strong> '  
+											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
+											+ damage + ')</strong></div>';
+									}
 								} else {
-									msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short 
-										+ ' with ' + adjective + ' ' + abstractNoun + ' <span class="red large">(' +
-										damage + ')</span></div>'
-										+ '<div class="green">You landed a critical hit and gain '
-										+ criticalAttackXP + ' experience.</div>';
+									if (attackerCanSee) {
+										msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short 
+											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red large">('
+											+ damage + ')</strong></div>'
+											+ '<div class="green">You landed a critical hit and gain '
+											+ criticalAttackXP + ' experience.</div>';
+									} else {
+										msgForAttacker += '<div>You ' + weapon.attackType
+											+ ' someone with ' + adjective + ' ' + abstractNoun + ' <strong class="red large">('
+											+ damage + ')</strong></div>'
+											+ '<div class="green">You landed a critical hit and gain '
+											+ criticalAttackXP + ' experience.</div>';
+									}
 
 									if (attacker.onExp) {
 										attacker.onExp(criticalAttackXP);
@@ -200,13 +216,25 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 
 							if (opponent.isPlayer) {
 								if (!criticalAttack) {
-									msgForOpponent += '<div class="grey">' + attacker.displayName + 's ' + weapon.attackType 
-										+ ' hits you with ' + adjective + ' ' + abstractNoun
-										+ ' <span class="red">(' + damage + ')</span></div>';
+									if (attackerCanSee) {
+										msgForOpponent += '<div class="grey">' + attacker.displayName + 's ' 
+											+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
+											+ ' <span class="red">(' + damage + ')</span></div>';
+									} else {
+										msgForOpponent += '<div class="grey">Someones ' + weapon.attackType 
+											+ ' hits you with ' + adjective + ' ' + abstractNoun
+											+ ' <span class="red">(' + damage + ')</span></div>';
+									}
 								} else {
-									msgForOpponent += '<div class="grey">' + attacker.displayName + 's ' + weapon.attackType 
-										+ ' hits you with ' + adjective + ' ' + abstractNoun
-										+ ' <span class="red large">(' + damage + ')</span></div>';
+									if (attackerCanSee) {
+										msgForOpponent += '<div class="grey"><strong>' + attacker.displayName + 's ' 
+											+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
+											+ '</strong> <span class="red">(' + damage + ')</span></div>';
+									} else {
+										msgForOpponent += '<div class="grey"><strong>Someones ' + weapon.attackType 
+											+ ' hits you with ' + adjective + ' ' + abstractNoun
+											+ '</strong> <span class="red">(' + damage + ')</span></div>';
+									}
 								}
 							}
 						} else {
@@ -238,7 +266,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 										+ ' and they block your attack!</div>';
 								} else {
 									msgForAttacker += '<div class="red">You try to attack ' + opponent.short
-									+ ' with ' + weapon.short + ' but they narrowly avoid the attack!</div>';
+										+ ' with ' + weapon.short + ' but they narrowly avoid the attack!</div>';
 								}
 							} else {
 								if (World.dice.roll(1, 2) === 1) {
@@ -258,7 +286,6 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							}
 						}
 					}
-
 				}
 			} else {
 				if (attacker.isPlayer) {
@@ -272,7 +299,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 				}
 			}
 
-			return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent);
+			return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent, attackerCanSee);
 		}
 	}
 };
@@ -312,7 +339,7 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 		Skill = require('./skills').skills;
 	}
 	
-	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
+	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent, attackerCanSee) {
 		var oppStatus = Character.getStatusReport(opponent),
 		playerStatus = Character.getStatusReport(player),
 		preventPrompt = false,
@@ -463,8 +490,8 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 		player.opponent = opponent;
 	}
 
-	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent) {
-		combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2) {
+	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent, playerCanSee) {
+		combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2, oppCanSee) {
 			var oppStatus = Character.getStatusReport(opponent),
 			playerStatus= Character.getStatusReport(player),
 			preventPrompt = false;

@@ -468,12 +468,10 @@ Character.prototype.save = function(player, fn) {
 };
 
 Character.prototype.hpRegen = function(target) {
-	var conMod = World.dice.getConMod(target),
+	var conMod = World.dice.getConMod(target) + 1,
 	total;
 
-	if (target.chp < target.hp && target.thirst < 5 && target.hunger < 6) {
-		total = World.dice.roll(conMod, 4);
-
+	if (target.chp < target.hp && target.thirst < 8 && target.hunger < 9) {
 		if (target.position === 'sleeping') {
 			conMod += 3;
 		}
@@ -486,7 +484,7 @@ Character.prototype.hpRegen = function(target) {
 			conMod = 1;
 		}
 
-		total = total + target.level;
+		total = World.dice.roll(conMod, 4) + target.level;
 
 		target.chp += total;
 
@@ -497,11 +495,11 @@ Character.prototype.hpRegen = function(target) {
 };
 
 Character.prototype.manaRegen = function(target) {
-	var intMod = World.dice.getIntMod(target),
+	var intMod = World.dice.getIntMod(target) + 1,
 	chanceMod = World.dice.roll(1, 10),
 	total;
 
-	if (target.cmana < target.mana && target.thirst < 5 && target.hunger < 6) {
+	if (target.cmana < target.mana && target.thirst < 8 && target.hunger < 9) {
 		if (target.mainStat === 'int' || chanceMod > 2) {
 			if (target.position === 'sleeping') {
 				intMod += 2;
@@ -527,12 +525,10 @@ Character.prototype.manaRegen = function(target) {
 };
 
 Character.prototype.mvRegen = function(target) {
-	var dexMod = World.dice.getDexMod(target),
+	var dexMod = World.dice.getDexMod(target) + 1,
 	total;
 	
-	if (target.cmv < target.mv && target.thirst < 5 && target.hunger < 6) {
-		total = World.dice.roll(dexMod, 8);
-
+	if (target.cmv < target.mv && target.thirst < 7 && target.hunger < 8) {
 		if (target.position === 'sleeping') {
 			dexMod += 3;
 		} else {
@@ -546,6 +542,8 @@ Character.prototype.mvRegen = function(target) {
 		if (!dexMod) {
 			dexMod = 1;
 		}
+
+		total = World.dice.roll(dexMod, 7) - target.size.value;
 
 		target.cmv += total;
 
@@ -788,22 +786,13 @@ Character.prototype.getFist = function(player) {
 		material: 'flesh',
 		modifiers: {},
 		diceMod: 0,
-		slot: 'hands'
+		slot: 'hands',
+		short: 'your ' + player.handsNoun + 's'
 	};
 };
 
 Character.prototype.getContainer = function(player, command) {
-	var char = this,
-	containers = char.getContainers(player),
-	i = 0;
-
-	for (i; i < containers.length; i += 1) {
-		if (containers[i].name.indexOf(command.input)) {
-			return containers[i];
-		}
-	}
-
-	return false;
+	return World.search(player.items, 'container', {arg: command.input});
 };
 
 Character.prototype.getContainers = function(player) {
@@ -968,16 +957,7 @@ Character.prototype.removeEq = function(player, item) {
 };
 
 Character.prototype.getItem = function(player, command) {
-	var i = 0,
-	newArr = [];
-
-	for (i; i < player.items.length; i += 1) {
-		if (player.items[i].name.toLowerCase().indexOf(command.arg) !== -1) {
-			return player.items[i];
-		}
-	}
-
-	return false;
+	return World.search(player.items, command);
 };
 
 Character.prototype.getItems = function(player, command) {
@@ -1184,7 +1164,6 @@ Character.prototype.createCorpse = function(player) {
 	player.decay = 1;
 	player.itemType = 'corpse';
 	player.corpse = true;
-	player.weight = player.weight - 1;
 	player.chp = 0;
 	player.hp = 0;
 	player.cmana = 0;
@@ -1193,19 +1172,18 @@ Character.prototype.createCorpse = function(player) {
 	player.mv = 0;
 };
 
-Character.prototype.getLoad = function(s) {
-	var load = Math.round((s.player.str + s.player.con / 4) * 10);
-	
-	return load;
+Character.prototype.getMaxCarry = function(player) {
+	if (player.mainStat && player.mainStat === 'con') {
+		return Math.round((player.str + player.con / 2) * 10 + player.size.value);
+	} else  {
+		return Math.round((player.str + player.con / 3) * 10 + player.size.value);
+	}
 };
 
 Character.prototype.level = function(s, fn) {
 
 };
 
-Character.prototype.useSkill = function() {
-
-};
 
 // Add in gear modifiers and return the updated object
 Character.prototype.calculateGear = function() {

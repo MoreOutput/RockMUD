@@ -4,7 +4,14 @@
 */
 'use strict';
 var fs = require('fs'),
-World = function() {
+World = function() {},
+Character,
+Cmds,
+Skills,
+Spells,
+Room;
+
+World.prototype.setup = function(socketIO, cfg, fn) {
 	var world = this,
 	loadAreas = function(fn) {
 		var i = 0,
@@ -24,7 +31,7 @@ World = function() {
 		});
 	},
 	loadTime = function (fn) {
-		fs.readFile('./time.json', function (err, r) {
+		fs.readFile('./templates/time.json', function (err, r) {
 			return fn(err, JSON.parse(r));
 		});
 	},
@@ -69,10 +76,11 @@ World = function() {
 				fs.readFile(path + fileName, function (err, tmp) {
 					var tmp = JSON.parse(tmp);
 
+
 					tmp.fileName = fileName.replace(/.json/g, '');
 
 					tmpArr.push(tmp);
-
+	
 					if (i === fileNames.length - 1) {
 						return fn(err, tmpArr);
 					}
@@ -94,6 +102,7 @@ World = function() {
 		});
 	};
 
+	world.dice = require('./dice').roller;
 	world.io = null; // Websocket object, Socket.io
 	world.races = []; // Race JSON definition is in memory
 	world.classes = []; // Class JSON definition is in memory
@@ -135,40 +144,30 @@ World = function() {
 							world.mobTemplate = world.getTemplate('entity');
 							world.roomTemplate = world.getTemplate('room');
 
+							Character = require('./character').character;
+							Cmds = require('./commands').cmd;
+							Skills = require('./skills').skills;
+							Spells = require('./spells').spells;
+							Room = require('./rooms').room;
+
+							world.io = socketIO;
+							world.config = cfg;
+							
 							for (i; i < world.areas.length; i += 1) {
 								area = world.areas[i];
 
 								world.setupArea(area);
 							}
-							
-							world.ticks = require('./ticks');
 
-							return world;
+							world.ticks = require('./ticks');
+							
+							return fn(Character, Cmds, Skills);
 						});
 					});
 				});
 			});
 		});
 	});
-},
-Character,
-Cmds,
-Skills,
-Spells,
-Room;
-
-World.prototype.setup = function(socketIO, cfg, fn) {
-	Character = require('./character').character,
-	Cmds = require('./commands').cmd,
-	Skills = require('./skills').skills,
-	Spells = require('./spells').spells,
-	Room = require('./rooms').room;
-
-	this.io = socketIO;
-	this.dice = require('./dice').roller;
-	this.config = cfg;
-
-	return fn(Character, Cmds, Skills);
 };
 
 World.prototype.getTemplate = function(fileName) {
@@ -353,7 +352,7 @@ World.prototype.getPlayersByArea = function(areaName) {
 * Area and item setup on boot
 */
 
-World.prototype.rollItems = function(itemArr, roomid) {
+World.prototype.rollItems = function(itemArr, roomid, area) {
 	var world = this,
 	diceMod,
 	refId = Math.random().toString().replace('0.', 'item-'),
@@ -401,7 +400,8 @@ World.prototype.rollItems = function(itemArr, roomid) {
 				item.diceNum -= 1
 				item.weight += 2;
 			}
-
+			
+			item.area = area.name;
 			item.roomid = roomid;
 
 			if (item.behaviors.length > 0) {
@@ -413,7 +413,7 @@ World.prototype.rollItems = function(itemArr, roomid) {
 			}
 
 			if (item.items) {
-				world.rollItems(item.items);
+				world.rollItems(item.items, roomid, area);
 			}
 			
 			for (prop in item) {
@@ -457,10 +457,6 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			mob = world.extend(mob, world.mobTemplate);		
 			mob = world.extend(mob, raceObj);
 			mob = world.extend(mob, classObj);
-			
-			if (!mob.area) {
-				mob.area = area.name;
-			}
 
 			if (!mob.id) {
 				mob.id = refId;
@@ -491,6 +487,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			mob.con += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
 			mob.isPlayer = false;
 			mob.roomid = roomid;
+			mob.area = area.name;
 
 			if (!mob.hp) {
 				if (mob.level > 5) {
@@ -526,7 +523,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			}
 
 			if (mob.items.length) {
-				world.rollItems(mob.items, roomid);	
+				world.rollItems(mob.items, roomid, area);	
 			}
 
 			if (mob.behaviors.length > 0) {
@@ -970,47 +967,48 @@ World.prototype.msgWorld = function(target, msgObj) {
 	}
 };
 
-// target arrayName itemToMatch fn -> updates and returns target and items
-// array itemToMatch fn -> returns found items
-World.prototype.search = function(searchArr, command) {
-	var msgPatt,
-	matches = [],
-	results,
-	item,
+// convenience function for searching a given array and return an item based 
+// on on a given command object. Matches against objects name property
+World.prototype.search = function(arr, itemType, command) {
+	var canSearch = true,
+	matchedIndexes = [],
+	result = false,
 	i = 0;
 
-	if (!command.input) {
-		msgPatt = new RegExp(command.arg.toLowerCase());
-	} else {
-		msgPatt = new RegExp(command.input.toLowerCase());
+	if (!command) {
+		command = itemType;
+		itemType = false;
+	}
+	
+	if (!itemType) {
+		for (i; i < arr.length; i += 1) {
+			if (arr[i].name.toLowerCase().indexOf(command.arg) !== -1) {
+				matchedIndexes.push(i);
+			}
+		}
+	} else {		
+		for (i; i < arr.length; i += 1) {
+			if (arr[i].itemType === itemType && arr[i].name.toLowerCase().indexOf(command.arg) !== -1) {
+				matchedIndexes.push(i);
+			}
+		}
 	}
 
-	for (i; i < searchArr.length; i += 1) {
-		if (searchArr[i].item) {
-			item = searchArr[i].item;
-		} else {
-			item = searchArr[i];
-		}
-
-		if (item && msgPatt.test(item.name.toLowerCase()) ) {
-			matches.push(searchArr[i]);
-		}
-	}
-
-	if (matches) {
-		if (matches.length > 1 && command.number > 1) {
+	if (matchedIndexes) {
+		if (matchedIndexes.length > 1 && command.number > 1) {
 			i = 0;
-			for (i; i < matches.length; i += 1) {
-				if (command.number - 1 === i) {
-					results = matches[i];
+			
+			for (i; i < matchedIndexes.length; i += 1) {
+				if ((i + 1) === command.number) {
+					result = arr[matchedIndexes[i]];
 				}
 			}
 		} else {
-			results = matches[0];
+			result = arr[matchedIndexes[0]];
 		}
 	}
-
-	return results;
+	
+	return result;
 };
 
 World.prototype.setupBehaviors = function(gameEntity) {
@@ -1134,7 +1132,7 @@ World.prototype.extend = function(extendObj, readObj) {
 					extendObj[prop] += readObj[prop];
 				} else if (typeof extendObj[prop] === 'object' && typeof readObj[prop] === 'object')  {
 					for (prop2 in readObj[prop]) {
-						extendObj[prop][prop2] = readObj[prop][prop2];
+						this.extend(extendObj[prop][prop2], readObj[prop][prop2]);
 					}
 				}
 			} else {
@@ -1163,13 +1161,13 @@ World.prototype.shuffle = function (arr) {
 	return arr;
 };
 
-World.prototype.processEvents = function(evtName, gameEntity, roomObj, data) {
+World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, param2) {
 	var i = 0,
 	j = 0,
 	allTrue,
 	gameEntities = [];
 	
-	if (gameEntity !== false || gameEntity.hasEvents === true) {
+	if (gameEntity !== false || gameEntity.hasEvents === true && gameEntity[evtName] || gameEntity.behaviors.length) {
 		if (!Array.isArray(gameEntity)) {
 			gameEntities = [gameEntity];
 		} else {
@@ -1180,25 +1178,19 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, data) {
 			roomObj = false;
 		}
 
-		if (!data) {
-			data = false;
-		}
-
 		for (i; i < gameEntities.length; i += 1) {
 			gameEntity = gameEntities[i];	
 			
 			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)]) {
-				 if (gameEntity[evtName] && typeof gameEntity[evtName] === 'function') {
-					 allTrue = gameEntity[evtName](gameEntity, roomObj, data);
+				 if (gameEntity[evtName]) {
+					 allTrue = gameEntity[evtName](gameEntity, roomObj, param, param2);
 				 }
 
-				 if (gameEntity.behaviors.length) {
-					 for (j; j < gameEntity.behaviors.length; j += 1) {
-						 if (this.ai[gameEntity.behaviors[j].module][evtName]) {
-							 allTrue = this.ai[gameEntity.behaviors[j].module][evtName](gameEntity, roomObj, data);
-						 }
-					 }
-				 }
+				for (j; j < gameEntity.behaviors.length; j += 1) {
+					if (this.ai[gameEntity.behaviors[j].module][evtName]) {
+						allTrue = this.ai[gameEntity.behaviors[j].module][evtName](gameEntity, roomObj, param, param2);
+					}
+				}
 			}
 
 			if (allTrue !== false) {

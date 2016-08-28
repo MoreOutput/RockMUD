@@ -10,14 +10,14 @@ module.exports = {
 	exclimations: [
 		'The Midgaardian Academy isn\'t much but its better than venturing out with no experience.',
 		'I am the acting Fighter Guildmaster. You can find other Guildmasters in town.',
-		'You can <strong>practice</strong> and learn new skills from Guildmasters along with <strong>training</strong> stats.'
+		'You can <strong>practice</strong> and learn new skills from Guildmasters along with <strong>train</strong>ing stats.'
 	],
 	currentlyEnrolled: [],
 	onSay: function(mob, roomObj, player, command) {
-		if (player.isPlayer) {
+		if (player.isPlayer && command) {
 			if (command.msg.toLowerCase().indexOf('yes') !== -1) {
 				Cmd.say(mob, {
-					msg: 'Great! Let me get you signed up. Just a second...',
+					msg: 'Thats great to hear ' + player.displayName  +  '! Let me get you signed up. Just a second...',
 					roomObj: roomObj
 				});				
 			}

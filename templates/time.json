@@ -1,5 +1,5 @@
 {
-	"year": 1022,
+	"year": 1000,
 	"title": "Year of something-or-other",
 	"month": {
 		"id": 1,
@@ -14,7 +14,7 @@
 	"day": 1,
 	"hour": 1,
 	"minute": 1,
-	"isDay": true,
+	"isDay": false,
 	"months": [{
 		"id": 1,
 		"displayName": "January",
@@ -26,3 +26,4 @@
 		"hourOfNight": 12
 	}]
 }
+

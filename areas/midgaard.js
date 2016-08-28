@@ -129,6 +129,29 @@ module.exports = {
 				}
 			],
 			items: [{
+				name: 'Fountain',
+				short: 'a large stone fountain',
+				long: 'A large stone fountain is erected here full of sparkling water.',
+				area: 'Midgaard',
+				id: '112',
+				waterSource: true,
+				weight: 10000,
+				itemType: 'ornament'
+			}, {
+				name: 'Leather Armor',
+				short: 'a leather chestplate',
+				long: 'Some leather armor was left here',
+				area: 'Midgaard',
+				id: '111',
+				level: 1,
+				itemType: 'armor',
+				material: 'leather',
+				ac: 3,
+				weight: 1,
+				slot: 'body',
+				equipped: false,
+				value: 5
+			}, {
 				name: 'Torch', 
 				short: 'a wooden torch',
 				long: 'A wooden torch rests on the ground' ,
@@ -140,10 +163,10 @@ module.exports = {
 				weaponType: 'club',
 				diceNum: 1, 
 				diceSides: 2,
-				diceMod: -1,
+				diceMod: -5,
 				attackType: 'smash', 
 				ac: -1,
-				weight: 1,
+				weight: 2,
 				slot: 'hands',
 				equipped: false,
 				light: true,
@@ -418,7 +441,7 @@ module.exports = {
 			playersInRoom: [],
 			monsters: [
 				{
-					name: 'Tom',
+					name: 'Thomas',
 					level: 15,
 					short: 'Thomas, the dwarven shopkeep',
 					long: 'Thomas a dwarven shopkeeper',
@@ -427,7 +450,7 @@ module.exports = {
 					id: '9',
 					area: 'Midgaard',
 					weight: 200,
-					diceNum: 2, 
+					diceNum: 2,
 					diceSides: 8,
 					diceMod: 5,
 					str: 18,
@@ -441,7 +464,7 @@ module.exports = {
 					itemType: 'mob',
 					preventItemDecay: true,
 					items: [{
-						name: 'Pemmican', 
+						name: 'Pemmican',
 						short: 'a piece of Pemmican',
 						long: 'A small bit of Pemmican was left here.' ,
 						area: 'Midgaard',
@@ -453,8 +476,6 @@ module.exports = {
 						slot: '',
 						value: 10,
 						equipped: false,
-						store: true,
-						worth: 10,
 						spawn: 3
 					}],
 					behaviors: [],
@@ -477,3 +498,4 @@ module.exports = {
 		}
 	]
 };
+

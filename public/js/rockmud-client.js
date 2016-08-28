@@ -49,7 +49,8 @@ window.onload = function() {
 		prac: 'practice',
 		nod: 'emote nods solemly.',
 		laugh: 'emote laughs heartily.',
-		wo: 'worth'
+		wo: 'worth',
+		re: 'recall'
 	},
 	isScrolledToBottom = false,
 	playerIsLogged = null,

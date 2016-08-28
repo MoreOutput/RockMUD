@@ -48,11 +48,12 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 		if (cmdObj.input && !isNaN(parseInt(cmdObj.input[0]))
 			|| (!cmdObj.input && !isNaN(parseInt(cmdObj.msg[0]))) ) {
 
+			cmdObj.arg = cmdObj.arg.replace(/.*[.]/g, '');
+			cmdObj.number = parseInt(cmdObj.msg[0]);
+
 			if (!cmdObj.input) {
-				cmdObj.number = parseInt(cmdObj.msg[0]);
 				cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
 			} else {
-				cmdObj.number = parseInt(cmdObj.input[0]);
 				cmdObj.input = cmdObj.input.replace(/^[0-9][.]/, '');
 			}
 		}
@@ -69,11 +70,11 @@ Cmd.prototype.buy = function(target, command) {
 	merchant;
 
 	if (command.roomObj) {
-		 roomObj = command.roomObj;
+		roomObj = command.roomObj;
 	} else {
-		 roomObj = World.getRoomObject(target.area, target.roomid);
+		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
-	
+
 	if (target.position !== 'sleeping') {
 		merchant = Room.getMerchants(roomObj)[0];
 		
@@ -86,9 +87,9 @@ Cmd.prototype.buy = function(target, command) {
 				item = Character.getItem(merchant, command);
 				
 				if (item) {
-					if (item.worth <= target.gold) {
-						target.gold -= item.worth;
-						merchant.gold += item.worth;
+					if (item.value <= target.gold) {
+						target.gold -= item.value;
+						merchant.gold += item.value;
 					
 						Character.removeItem(merchant, item);
 
@@ -142,9 +143,9 @@ Cmd.prototype.sell = function(target, command) {
 			item = Character.getItem(target, command);
 
 			if (item) {
-				if (item.worth <= merchant.gold) {
-					merchant.gold -= item.worth - 5;
-					target.gold += item.worth - 5;
+				if (item.value <= merchant.gold) {
+					merchant.gold -= item.value - 5;
+					target.gold += item.value - 5;
 					
 					Character.removeItem(target, item);
 
@@ -189,7 +190,7 @@ Cmd.prototype.list = function(target, command) {
 				if (merchant.items.length > 0) {
 					for (i; i < merchant.items.length; i += 1) {
 						storeDisplay += '<li>' + merchant.items[i].name  +
-							' <span class="yellow">(' + merchant.items[i].worth + 'gp)</span></li>';
+							' <span class="yellow">(' + merchant.items[i].value + 'gp)</span></li>';
 					}
 
 					World.msgPlayer(target, {
@@ -219,12 +220,19 @@ Cmd.prototype.scan = function(target, command) {
 	var roomObj,
 	rooms,
 	i = 0,
+	canSee = true,
 	scanStr = '';
 
-	if (target.position === 'standing') {
-		roomObj = World.getRoomObject(target.area, target.roomid);
+	if (target.position === 'standing') {	
+		if (command.roomObj) {
+			roomObj = command.roomObj;
+		} else {
+			roomObj = World.getRoomObject(target.area, target.roomid);
+		}
 
-		if (Character.canSee(target, roomObj)) {
+		canSee = Character.canSee(target, roomObj);	
+
+		if (canSee) {
 			rooms = Room.getAdjacent(roomObj);
 
 			for (i; i < rooms.length; i += 1) {
@@ -390,7 +398,7 @@ Cmd.prototype.drink = function(target, command) {
 };
 
 Cmd.prototype.fill = function() {
-	
+			
 };
 
 Cmd.prototype.sleep = function(target, command) {
@@ -688,6 +696,10 @@ Cmd.prototype.snuff = function(target, command, fn) {
 
 };
 
+Cmd.prototype.recall = function(target, command) {
+	
+};
+
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
 	var direction = command.arg,
@@ -696,12 +708,12 @@ Cmd.prototype.move = function(target, command, fn) {
 	displayHTML,
 	targetRoom,
 	exitObj,
-	moveRoll = World.dice.roll(1, 6),
 	sneakAff,
 	roomObj,
 	canEnter = true, // event result, must be true to move into targetRoom
 	canLeave = true, // event result, must be true to leave roomObj	
 	i = 0,
+	cost = 3,
 	parseMovementMsg = function(exitObj) {
 		if (!exitObj.cmdMsg) {
 			if (exitObj.cmd === 'up') {
@@ -716,10 +728,14 @@ Cmd.prototype.move = function(target, command, fn) {
 		}
 	};
 
-	if (target.position === 'standing' 
-		|| target.position === 'fleeing' 
-		&& target.cmv > (4 - dexMod) 
-		&& target.wait === 0) {
+	if (target.size.value > 3) {
+		cost += 2;
+	}
+	
+	cost = Math.round(cost - dexMod);
+
+	if ((target.position === 'standing' || target.position === 'fleeing') 
+		&& (target.cmv > cost && target.wait === 0)) {
 
 		if (!command.roomObj) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
@@ -740,7 +756,7 @@ Cmd.prototype.move = function(target, command, fn) {
 					canEnter = World.processEvents('beforeMove', roomObj, target, command);
 					canEnter = World.processEvents('beforeMove', roomObj, target.items, command);
 
-					target.cmv -= Math.round(4 + moveRoll - dexMod);
+					target.cmv -= cost;
 
 					if (exitObj.area !== target.area) {
 						target.area = exitObj.area;
@@ -881,10 +897,17 @@ Cmd.prototype.move = function(target, command, fn) {
 			}
 		}
 	} else {
-		World.msgPlayer(target, {
-			msg: 'You cannot do that now.', 
-			styleClass: 'error'
-		});
+		if (target.cmv > cost) {
+			World.msgPlayer(target, {
+				msg: 'You cannot do that now.', 
+				styleClass: 'error'
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You are too tired to move.', 
+				styleClass: 'error'
+			});
+		}
 
 		if (typeof fn === 'function') {
 			return fn(false);
@@ -947,41 +970,70 @@ Cmd.prototype.get = function(target, command, fn) {
 	i = 0,
 	item,
 	container,
-	itemLen;
+	canGet = true,
+	itemLen,
+	maxCarry = Character.getMaxCarry(target);
 
 	if (target.position !== 'sleeping') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
 		if (command.msg !== '' && Character.canSee(target, roomObj)) {
-			container = Character.getContainer(target, command);
+			if (command.input) {
+				container = Character.getContainer(target, command);
+			}
 
 			if (!container) {
 				if (command.msg !== 'all') {
 					item = Room.getItem(roomObj, command);
 
 					if (item) {
-						Room.removeItem(roomObj, item);
+						if (item.beforeGet) {
+							canGet = item.beforeGet(item, roomObj, target);
+						}
+	
+						if (roomObj.beforeGet) {
+							canGet = roomObj.beforeGet(roomObj, item, target);
+						}
 
-						Character.addItem(target, item);
+						if (canGet) {
+							if (item.weight <= maxCarry) {
+								Room.removeItem(roomObj, item);
 
-						if (item) {
-							World.msgRoom(roomObj, {
-								msg: target.displayName + ' picks up ' + item.short,
-								playerName: target.name,
-								styleClass: 'yellow'
-							});
+								Character.addItem(target, item);
 
-							World.msgPlayer(target, {
-								msg: 'You pick up ' + item.short,
-								styleClass: 'blue'
-							});
+								if (item && item.weight < Character.getMaxCarry(target)) {
+									World.msgRoom(roomObj, {
+										msg: target.displayName + ' picks up ' + item.short,
+										playerName: target.name,
+										styleClass: 'yellow'
+									});
 
-							if (typeof fn === 'function') {
-								return fn(target, roomObj, item);
+									World.msgPlayer(target, {
+										msg: 'You pick up ' + item.short,
+										styleClass: 'blue'
+									});						
+								} else {
+
+								}
+
+								if (typeof fn === 'function') {
+									return fn(target, roomObj, item);
+								}
+							} else {
+								World.msgPlayer(target, {
+									msg: 'You try to pick up ' + item.short + ' but <strong>it is too heavy</strong>.',
+									styleClass: 'error'
+								});
 							}
+							
+							World.processEvents('onGet', roomObj, target, item);
+							World.processEvents('onGet', item, roomObj, target);
+							World.processEvents('onGet', target, roomObj, item, container);						
 						}
 					} else {
-						World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
+						if (!item) {
+							World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
+						}
 
 						if (typeof fn === 'function') {
 							return fn(target, roomObj, false);
@@ -1009,6 +1061,9 @@ Cmd.prototype.get = function(target, command, fn) {
 						styleClass: 'blue'
 					});
 
+					World.processEvents('onGet', room.items, roomObj, item, target);
+					World.processEvents('onGet', target, roomObj, item, container);
+
 					if (typeof fn === 'function') {
 						return fn(target, roomObj, item);
 					}
@@ -1018,11 +1073,17 @@ Cmd.prototype.get = function(target, command, fn) {
 				
 				if (item) {
 					Character.removeFromContainer(container, item);
+				
 					Character.addItem(target, item);
 
-					World.msgPlayer(target, {msg: 'You remove a <strong>'
-						+ item.displayName + '</strong> from a '
-						+ container.displayName + '.', styleClass: 'green'});
+					World.msgPlayer(target, {
+						msg: 'You remove a <strong>' + item.displayName + '</strong> from a '
+							+ container.displayName + '.', 
+						styleClass: 'green'
+					});
+
+					World.processEvents('onGet', container, roomObj, item, target);
+					World.processEvents('onGet', target, roomObj, item, container);
 				} else {
 					World.msgPlayer(target, {
 						msg: 'You don\'t see that in there.',
@@ -1062,16 +1123,29 @@ Cmd.prototype.put = function(target, command) {
 			if (container) {
 				item = Character.getItem(target, command);
 
-				if (item) {
+				if (item && item.refId !== container.refId && item.id !== container.id) {
 					Character.removeItem(target, item);
+
 					Character.addToContainer(container, item);
 
 					World.msgPlayer(target, {
 						msg: 'You put a <strong>' + item.displayName + '</strong> into ' + container.short + '.',
 						styleClass: 'green'
 					});
+
+					World.processEvents('onPut', container, roomObj, item);
 				} else {
-					World.msgPlayer(target, {msg: 'You aren\'t carrying anything by that name.', styleClass: 'error'});
+					if (item && item.refId !== container.refId) {
+						World.msgPlayer(target, {
+							msg: 'You aren\'t carrying anything by that name.',
+							styleClass: 'error'
+						});
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You cannot put this item into itself.',
+							styleClass: 'error'
+						});
+					}
 				}
 			} else {
 				World.msgPlayer(target, {msg: 'Into what? You don\'t seem to have that item.', styleClass: 'error'});
@@ -1100,16 +1174,8 @@ Cmd.prototype.drop = function(target, command, fn) {
 				item = World.search(target.items, command);
 
 				if (item && !item.equipped) {
-					if (item.beforeDrop) {
-						canDrop = item.beforeDrop(target, roomObj);
-					}
-
-					if (canDrop) {
-						if (roomObj.beforeDrop) {
-							canDrop = roomObj.beforeDrop(target, item);
-						}
-					}
-						
+					canDrop = World.processEvents('beforeDrop', item, roomObj, target);
+					
 					if (canDrop) {
 						Character.removeItem(target, item);
 
@@ -1126,13 +1192,10 @@ Cmd.prototype.drop = function(target, command, fn) {
 							styleClass: 'blue'
 						});
 
-						if (item.onDrop) {
-							item.onDrop(target, roomObj);
-						}
 
-						if (roomObj.onDrop) {
-							roomObj.onDrop(target, item);
-						}
+						World.processEvents('onDrop', target, roomObj, item);
+						World.processEvents('onDrop', roomObj, target, item);
+						World.processEvents('onDrop', item, roomObj, target);
 					}
 				} else {
 					if (!item) {
@@ -1535,8 +1598,8 @@ Cmd.prototype.say = function(target, command) {
 					var msg;
 	
 					if (Character.canSee(receiver, roomObj)) {
-						msg = '<div class="cmd-say"><span class="msg-name">' +
-						target.displayName + ' says></span> ' + command.msg + '</div>';
+						msg = '<div class="cmd-say"><span class="msg-name">'
+							+ target.displayName + ' says></span> ' + command.msg + '</div>';
 					} else {
 						msg = '<div class="cmd-say"><span class="msg-name">Someone says></span> ' + command.msg + '</div>';
 					}
@@ -1553,12 +1616,8 @@ Cmd.prototype.say = function(target, command) {
 			if (roomObj.onSay) {
 				roomObj.onSay(target, roomObj, command);
 			}
-
-			for (i; i < roomObj.monsters.length; i += 1) {
-				if (roomObj.monsters[i].onSay) {
-					roomObj.monsters[i].onSay(target, roomObj, command);
-				}
-			}
+			
+			World.processEvents('onSay', roomObj.monsters, roomObj, target, command);
 		} else {
 			World.msgPlayer(target, {
 				msg: 'You have nothing to say.',
@@ -1576,11 +1635,13 @@ Cmd.prototype.say = function(target, command) {
 Cmd.prototype.yell = function(target, command) {
 	if (command.msg !== '') {
 		World.msgPlayer(target, {
-			msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' + command.msg + '</div>'
+			msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' 
+				+ command.msg + '</div>'
 		});
 		
 		World.msgArea(target.area, {
-			msg: '<div class="cmd-yell"><span class="msg-name">' + target.displayName + ' yells></span> ' + command.msg + '</div>',
+			msg: '<div class="cmd-yell"><span class="msg-name">' + target.displayName 
+				+ ' yells></span> ' + command.msg + '</div>',
 			playerName: target.name
 		});
 	} else {
@@ -1590,7 +1651,6 @@ Cmd.prototype.yell = function(target, command) {
 		});
 	}
 };
-
 
 Cmd.prototype.chat = function(target, command) {
 	if (command.msg !== '') {
@@ -1616,17 +1676,17 @@ Cmd.prototype.tell = function(target, command) {
 	var player;
 
 	if (command.msg) {
-		player = World.getPlayerByName(command.msg);
+		player = World.getPlayerByName(command.arg);
 
 		if (player) {
 			World.msgPlayer(player, {
-				msg: '<strong>' + player.displayName + ' tells you></strong> ' + command.msg,
+				msg: '<strong>' + target.displayName + ' tells you></strong> ' + command.input,
 				styleClass: 'red'
 			});
 
-			target.reply = player.name;
+			player.reply = target.name;
 
-			World.msgPlayer(target, {msg: 'You tell ' + target.displayName + '> ' + command.msg, styleClass: 'cmd-say red'});
+			World.msgPlayer(target, {msg: 'You tell ' + player.displayName + '> ' + command.input, styleClass: 'cmd-say red'});
 		} else {
 			World.msgPlayer(target, {msg: 'You do not see that person.', styleClass: 'error'});
 		}
@@ -1637,19 +1697,22 @@ Cmd.prototype.tell = function(target, command) {
 
 Cmd.prototype.reply = function(target, command) {
 	var player;
-
+	
 	if (command.msg && target.reply) {
 		player = World.getPlayerByName(target.reply);
 
 		if (player) {
 			World.msgPlayer(player, {
-				msg: '<strong>' + player.displayName + ' replies></strong> ' + command.msg,
-				styleClass: 'red'
+				msg: '<strong>' + target.displayName + ' replies></strong> ' + command.msg,
+				styleClass: 'green'
 			});
 
 			target.reply = player.name;
 
-			World.msgPlayer(target, {msg: 'You reply ' + target.displayName + '> ' + command.msg, styleClass: 'cmd-say red'});
+			World.msgPlayer(target, {
+				msg: 'You reply to ' + player.displayName + '> ' + command.msg, 
+				styleClass: 'cmd-say yellow'
+			});
 		} else {
 			World.msgPlayer(target, {msg: 'They arent there anymore.', styleClass: 'error'});
 		}
@@ -1756,7 +1819,7 @@ Cmd.prototype.train = function(target, command) {
 	stats = World.getGameStatArr(),
 	canSee = Character.canSee(target, roomObj);
 	
-	if (target.position !== 'sleeping') {
+	if (target.position !== 'sleeping' && target.position !== 'fighting') {
 		if (canSee) {
 			if (trainers.length) {
 				trainer = trainers[0];
@@ -1791,7 +1854,6 @@ Cmd.prototype.train = function(target, command) {
 							if (target['base' + World.capitalizeFirstLetter(stat)] < 12) {
 								cost += 3;
 							}
-
 						
 							if (stat === target.mainStat) {
 								cost -= 1;
@@ -1931,8 +1993,8 @@ Cmd.prototype.practice = function(target, command) {
 				if (!trainer.trainMsg) {
 					if (trainer.long) {
 						World.msgPlayer(target, {
-							msg: trainer.long + ' trains you in the art of ' +
-								skillObj.display + '.',
+							msg: trainer.long + ' trains you in the art of ' 
+								+ skillObj.display + '.',
 							styleClass: 'green'
 						});
 					} else {
@@ -1950,8 +2012,8 @@ Cmd.prototype.practice = function(target, command) {
 				}
 
 				World.msgRoom(roomObj, {
-					msg: trainer.long + ' trains ' + target.displayName  + ' in the art of ' +
-						skillObj.display + '.',
+					msg: trainer.long + ' trains ' + target.displayName
+						+ ' in the art of ' + skillObj.display + '.',
 					styleClass: 'green',
 					playerName: target.name
 				});
@@ -1979,7 +2041,7 @@ Cmd.prototype.practice = function(target, command) {
 	canSee = Character.canSee(target, roomObj),
 	intMod = World.dice.getIntMod(target);
 	
-	if (target.position !== 'sleeping') {
+	if (target.position !== 'sleeping' && target.position !== 'fighting') {
 		if (canSee) {
 			if (trainers.length) {
 				trainer = trainers[0];
@@ -2002,7 +2064,8 @@ Cmd.prototype.practice = function(target, command) {
 									pracSkill();
 								} else {
 									this.say(trainer, {
-										msg: 'You are not ready to learn ' + skillObj.display + '.',
+										msg: 'You are not ready to learn ' + skillObj.display 
+											+ ', you have unmet prerequisites.',
 										styleClass: 'error',
 										roomObj: roomObj
 									});
@@ -2182,7 +2245,7 @@ Cmd.prototype.skills = function(target, command) {
 			
 			if (skillObj.learned) {
 				learnedStatus = 'a <strong>learned</strong>';
-				trainedLevel = '<strong class="yellow">(' + skillObj.train + '%)</strong>';
+				trainedLevel = ' <strong class="green"> (' + skillObj.train + '%)</strong>';
 			} else {
 				learnedStatus = 'an unpracticed';
 			}
@@ -2267,6 +2330,7 @@ Cmd.prototype.inventory = function(player, command) {
 
 	iStr += '<table class="table table-condensed table-no-border i-table"><thead><tr>' +
 		'<td class="i-name-header">Item Name</td>' +
+		'<td class="i-equipped-header grey">Level</td>' +
 		'<td class="i-equipped-header green">Equipped</td>' +
 		'<td class="i-type-header">Type</td>' +
 		'<td class="i-weight-header">Weight</td>' +
@@ -2277,6 +2341,7 @@ Cmd.prototype.inventory = function(player, command) {
 
 		for (i; i < player.items.length; i += 1) {
 			iStr += '<td class="i-name">' + player.items[i].name + '</td>';
+			iStr += '<td class="i-level">' + player.items[i].level + '</td>';
 
 			if (!player.items[i].equipped) {
 				iStr += '<td class="i-equipped">No</td>';
@@ -2348,11 +2413,12 @@ Cmd.prototype.score = function(target, command) {
 					'</div>' +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
-					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span></li>' +
+					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span>.</li>' +
 					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' '
 						+ target.charClass + ' of ' + target.size.display + ' size with ' 
 						+ '<span class="yellow">' + target.gold + ' ' + World.config.coinage  + '</span>.</li>' +
-					'<li class="stat-carry">You are carrying ' + target.weight + '/' + target.maxWeight + ' pounds.</li>' +
+					'<li class="stat-carry">You are carrying ' 
+						+ target.weight + '/' + Character.getMaxCarry(target) + ' pounds.</li>' +
 					'<li class="stat-xp">You need <strong>' + (target.expToLevel - target.exp)
 						+ '</strong> experience for your next level.</li>' +
 					'<li class="stat-killcnt last">You have won ' + target.killed + ' battles.</li>' +
@@ -2435,11 +2501,19 @@ Cmd.prototype.json = function(target, command) {
 
 /*
 * An in game reboot. 
-* Stops all combat, reloads all active areas, saves players
+* Stops all combat and reloads all core game modules.
+* does not force area respawn.
 */
 Cmd.prototype.reboot = function(target, command) {
 	if (target.role === 'admin') {
+		require.cache[require.resolve('../src/rooms')] = null;
+		require.cache[require.resolve('../src/ticks')] = null;
+		require.cache[require.resolve('../src/dice')] = null;
+		
+		World.ticks = require('./ticks');
+		World.dice = require('./dice').roller;
 
+		Room = require('./rooms').room;
 	} else {
 		World.msgPlayer(target, {msg: 'No.', styleClass: 'error' });
 	}
@@ -2450,12 +2524,14 @@ Cmd.prototype.restore = function(admin, command) {
 	var i = 0,
 	player;
 
-	if (admin.role === 'admin') {
+	if (admin.role === 'player') {
 		for (i; i < World.players.length; i += 1) {
 			player = World.players[i];
 			player.chp = player.hp;
 			player.cmana = player.mana;
 			player.cmv = player.mv;
+			player.hunger = 0;
+			player.thirst = 0;
 		}
 
 		World.msgWorld(admin, {msg: 'You feel refreshed!'});

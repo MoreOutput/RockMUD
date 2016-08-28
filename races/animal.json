@@ -8,5 +8,7 @@
 	"diceSides": 2,
 	"hitRoll": -2,
 	"ac": 0,
-	"meleeRes": 8
+	"meleeRes": 8,
+	"handsNoun": "claw"
 }
+

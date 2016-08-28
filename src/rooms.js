@@ -51,10 +51,16 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 	}
 	
 	if (exits.length > 0) {
-		displayHTML += '<ul class="room-exits list-inline"><li class="list-label">Exits: </li>';
+		displayHTML += '<ul class="room-exits list-inline"><li class="list-label">Visible Exits: </li>';
 
 		for (i; i < exits.length; i += 1) {
-			displayHTML += '<li>' + exits[i].cmd + '</li>';
+			if (!exits[i].door) {
+				displayHTML += '<li>' + exits[i].cmd + '</li>';
+			} else if (exits[i].door && !exits[i].door.isOpen) {
+				displayHTML += '<li class="grey">' + exits[i].cmd + '</li>';
+			} else {
+				displayHTML += '<li class="yellow">' + exits[i].cmd + '</li>';
+			}
 		}
 
 		displayHTML += '</ul>';
@@ -230,6 +236,8 @@ Room.prototype.getBrief = function(roomObj, options) {
 		displayHTML += '<p class="room-content">' + roomObj.brief + '</p>';
 	}
 
+	displayHTML += '</div>';
+
 	return displayHTML;
 };
 
@@ -265,15 +273,7 @@ Room.prototype.addItem = function(roomObj, item) {
 };
 
 Room.prototype.getItem = function(roomObj, command) {
-	var i = 0;
-
-	for (i; i < roomObj.items.length; i += 1) {
-		if (roomObj.items[i].name.toLowerCase().indexOf(command.arg) !== -1) {
-			return roomObj.items[i];
-		}
-	}
-
-	return false;
+	return World.search(roomObj.items, command);
 };
 
 Room.prototype.removeItem = function(roomObj, item) {
@@ -290,15 +290,7 @@ Room.prototype.removeItem = function(roomObj, item) {
 };
 
 Room.prototype.getMonster = function(roomObj, command) {
-	var i = 0;
-
-	for (i; i < roomObj.monsters.length; i += 1) {
-		if (roomObj.monsters[i].name.toLowerCase().indexOf(command.arg) !== -1) {
-			return roomObj.monsters[i];
-		}
-	}
-
-	return false;
+	return World.search(roomObj.monsters, command);
 };
 
 Room.prototype.removePlayer = function(roomObj, player) {
