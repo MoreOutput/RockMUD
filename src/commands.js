@@ -1609,14 +1609,8 @@ Cmd.prototype.say = function(target, command) {
 				playerName: target.name
 			});
 
-			if (target.onSay) {
-				target.onSay(target, roomObj, command);
-			}
-
-			if (roomObj.onSay) {
-				roomObj.onSay(target, roomObj, command);
-			}
-			
+			World.processEvents('onSay', target, roomObj, command);
+			World.processEvents('onSay', roomObj, target, command);
 			World.processEvents('onSay', roomObj.monsters, roomObj, target, command);
 		} else {
 			World.msgPlayer(target, {
@@ -1807,7 +1801,7 @@ Cmd.prototype.quit = function(target, command) {
 
 /** Related to Saving and character adjustment/interaction **/
 Cmd.prototype.train = function(target, command) {
- 	var roomObj = World.getRoomObject(target.area, target.roomid),
+	var roomObj = World.getRoomObject(target.area, target.roomid),
 	trainDisplay = '',
 	stat,
 	i = 0,
@@ -2029,7 +2023,7 @@ Cmd.prototype.practice = function(target, command) {
 			}
 		}
 	},
- 	roomObj = World.getRoomObject(target.area, target.roomid),
+	roomObj = World.getRoomObject(target.area, target.roomid),
 	trainers = Room.getTrainers(roomObj, command),
 	trainer,
 	trainerSkillObj,

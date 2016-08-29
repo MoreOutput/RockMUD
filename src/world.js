@@ -21,8 +21,8 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 		fs.readdir(path, function(err, areaNames) {
 			areaNames.forEach(function(areaName, i) {
 				var area = require('.' + path + areaName.toLowerCase().replace(/ /g, '_'));
-			
-				area.itemType = 'area';		
+
+				area.itemType = 'area';
 
 				areas.push(area);
 			});
@@ -38,7 +38,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	loadRaces = function (fn) {
 		var tmpArr = [],
 		path = './races/';
-	
+
 		fs.readdir(path, function(err, fileNames) {
 			fileNames.forEach(function(fileName, i) {
 				fs.readFile(path + fileName, function (err, messageTmp) {
@@ -479,7 +479,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			if (Array.isArray(mob.long)) {
 				mob.long = mob.long[world.dice.roll(1, mob.long.length) - 1];
 			}
-			
+
 			mob.str += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
 			mob.dex += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
 			mob.int += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
