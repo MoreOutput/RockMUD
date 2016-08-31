@@ -39,6 +39,8 @@ window.onload = function() {
 		af: 'affects',
 		aff: 'affects',
 		ooc: 'chat',
+		shout: 'chat',
+		sh: 'chat',
 		slist: 'skills',
 		skill: 'skills',
 		desc: 'description',
@@ -50,7 +52,8 @@ window.onload = function() {
 		nod: 'emote nods solemly.',
 		laugh: 'emote laughs heartily.',
 		wo: 'worth',
-		re: 'recall'
+		re: 'recall',
+		gi: 'give'
 	},
 	isScrolledToBottom = false,
 	playerIsLogged = null,

@@ -98,8 +98,12 @@ Cmd.prototype.buy = function(target, command) {
 						World.msgPlayer(target, {
 							msg: 'You buy ' + item.short
 						});
-
+				
 						World.processEvents('onSell', merchant, roomObj, target);
+						World.processEvents('onBuy', target, roomObj, merchant);
+
+						Character.save(target);
+						Character.save(merchant);
 					} else {
 						World.msgPlayer(target, {
 							msg: 'You can\'t afford that.',
@@ -152,9 +156,15 @@ Cmd.prototype.sell = function(target, command) {
 					Character.addItem(merchant, item);
 					
 					World.msgPlayer(target, {
-						msg: 'You sell something.',
+						msg: 'You sell ' + item.short,
 						styleClass: 'green'
 					});
+
+					World.processEvents('onSell', target, roomObj, merchant);
+					World.processEvents('onBuy', merchant, roomObj, target);
+
+					Character.save(target);
+					Character.save(merchant);
 				} else {
 					World.msgPlayer(target, {
 						msg: 'They can\'t afford to buy ' + item.short,
@@ -213,6 +223,86 @@ Cmd.prototype.list = function(target, command) {
 		World.msgPlayer(target, {
 			msg: 'You can\'t see so browsing goods is a little difficult at the moment.'
 		});
+	}
+};
+
+Cmd.prototype.give = function(target, command) {
+	var i = 0,
+	roomObj,
+	item,
+	canSee = true,
+	receiver;
+	
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
+
+	if (target.position !== 'sleeping') {
+		if (command.msg && command.msg.indexOf(' ' + World.config.coinage) === -1) {
+			if (canSee) {
+				receiver = Room.getEntity(roomObj, {
+					arg: command.input,
+					input: command.arg
+				});
+
+				if (receiver) {
+					item = Character.getItem(target, command);
+
+					if (item) {
+						if (item) {
+							Character.removeItem(target, item);
+
+							Character.addItem(receiver, item);
+
+							World.msgPlayer(target, {
+								msg: 'You give ' + item.short + ' to ' + receiver.displayName + '.',
+								styleClass: 'green'
+							});
+
+							if (receiver.isPlayer) {
+								World.msgPlayer(receiver, {
+									msg: target.displayName + ' gives you ' + item.short + '.',
+									styleClass: 'green'
+								});
+
+								Character.save(receiver);
+							}
+
+							World.msgRoom(roomObj, {
+								msg: 'roomMsg',
+								styleClass: 'grey',
+								playerName: [receiver.name, target.name]
+							});
+
+							Character.save(target);
+						} else {
+
+						}
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You don\'t have an item by that name.',
+							styleClass: 'error'
+						});
+					}
+				} else {
+					World.msgPlayer(target, {
+						msg: 'You don\'t see anyone by that name.',
+						styleClass: 'error'
+					});
+				}
+			}
+		} else if (command.msg && command.msg.indexOf(' ')) {
+		
+		} else {
+			World.msgPlayer(target, {
+				msg: 'Give what? Example: <strong>give sword elf</strong>',
+				styleClass: 'error'
+			});
+		}
+	} else {
+	
 	}
 };
 
@@ -846,7 +936,7 @@ Cmd.prototype.move = function(target, command, fn) {
 										}
 									} else if (target.outName && !target.outMessage) {
 										msg = '<span class="yellow">' + target.outName
-										+ ' leaves heading <strong class="grey">' + direction + '</strong></span>';
+										+ ' leaves traveling <strong class="grey">' + direction + '</strong></span>';
 									} else {
 										msg = '<span class="yellow">' + target.outName + target.outMessage
 										+ ' <strong class="grey">' + direction + '</strong></span>';
@@ -1011,7 +1101,11 @@ Cmd.prototype.get = function(target, command, fn) {
 									World.msgPlayer(target, {
 										msg: 'You pick up ' + item.short,
 										styleClass: 'blue'
-									});						
+									});	
+
+									if (!target.isPlayer) {
+										Character.save(target);
+									}			
 								} else {
 
 								}
@@ -1028,7 +1122,7 @@ Cmd.prototype.get = function(target, command, fn) {
 							
 							World.processEvents('onGet', roomObj, target, item);
 							World.processEvents('onGet', item, roomObj, target);
-							World.processEvents('onGet', target, roomObj, item, container);						
+							World.processEvents('onGet', target, roomObj, item);						
 						}
 					} else {
 						if (!item) {
@@ -1169,7 +1263,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 	if (target.position !== 'sleeping') {
 		if (command.msg !== '' && target.items.length !== 0) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
-		
+
 			if (command.msg !== 'all') {
 				item = World.search(target.items, command);
 
@@ -1196,6 +1290,8 @@ Cmd.prototype.drop = function(target, command, fn) {
 						World.processEvents('onDrop', target, roomObj, item);
 						World.processEvents('onDrop', roomObj, target, item);
 						World.processEvents('onDrop', item, roomObj, target);
+
+						Character.save(target);
 					}
 				} else {
 					if (!item) {
@@ -1216,7 +1312,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 
 				for (i; i < itemLen; i += 1) {
 					item = itemArr[i];
-					
+
 					Character.removeItem(target, item);
 
 					if (item) {
@@ -1233,6 +1329,8 @@ Cmd.prototype.drop = function(target, command, fn) {
 								msg: 'You drop everything',
 								styleClass: 'blue'
 							});
+
+							Character.save(target);
 						}
 					} else {
 						World.msgPlayer(target, {
@@ -1418,7 +1516,7 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 					+ ' screams and charges at you!</strong>',
 				noPrompt: true
 			});
-			
+
 			Combat.processFight(player, opponent, roomObj);
 		} else {
 			opponent = World.search(roomObj.playersInRoom, command);
@@ -1570,7 +1668,7 @@ Cmd.prototype.where = function(target, command) {
 				+ '<li>Current Area: ' + target.area + '</li>';	
 		}
 	}
-	
+
 	msgObj.msg += '</ul>';
 	
 	return World.msgPlayer(target, msgObj);
@@ -1596,7 +1694,7 @@ Cmd.prototype.say = function(target, command) {
 			World.msgRoom(roomObj, {
 				msg: function(receiver, fn) {
 					var msg;
-	
+
 					if (Character.canSee(receiver, roomObj)) {
 						msg = '<div class="cmd-say"><span class="msg-name">'
 							+ target.displayName + ' says></span> ' + command.msg + '</div>';
@@ -1771,7 +1869,8 @@ Cmd.prototype.quit = function(target, command) {
 			target.logged = false;
 			target.verifiedName = false;
 			target.verifiedPassword = false;
-			
+			target.following = "";
+
 			Character.save(target, function() {
 				World.msgPlayer(target, {
 					msg: 'Add a little to a little and there will be a big pile.',

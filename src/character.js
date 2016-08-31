@@ -444,27 +444,33 @@ Character.prototype.save = function(player, fn) {
 	var character = this,
 	socket = player.socket;
 
-	player.saved = new Date().toString();
+	if (player.isPlayer) {
+		player.saved = new Date().toString();
 
-	if (player.opponent) {
-		player.opponent = null;
-	};
+ 		if (player.opponent) {
+			player.opponent = null;
+		};
 
-	player.socket = null;
-	
-	player = World.sanitizeBehaviors(player);
+		player.socket = null;
 
-	fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null), function (err) {
-		player.socket = socket;
+		player = World.sanitizeBehaviors(player);
 
-		player = World.setupBehaviors(player);
-		
-		if (err) {
-			return World.msgPlayer(player, {msg: 'Error saving character.'});
-		} else {
-			return fn(player);
-		}
-	});
+		fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null), function (err) {
+			player.socket = socket;
+
+			player = World.setupBehaviors(player);
+
+			if (err) {
+				return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
+			} else {
+				if (fn) {
+					return fn(player);
+				}
+			}
+		});
+	} else if (player.persist && World.config.persistence) {
+		// saving a world item, which means saving the area it is in
+	}
 };
 
 Character.prototype.hpRegen = function(target) {

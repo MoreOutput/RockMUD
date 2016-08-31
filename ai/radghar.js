@@ -13,6 +13,7 @@ module.exports = {
 		'You can <strong>practice</strong> and learn new skills from Guildmasters along with <strong>train</strong>ing stats.'
 	],
 	currentlyEnrolled: [],
+	lightingTorches: false,
 	onSay: function(mob, roomObj, player, command) {
 		if (player.isPlayer && command) {
 			if (command.msg.toLowerCase().indexOf('yes') !== -1) {
@@ -33,13 +34,22 @@ module.exports = {
 		}
 	},
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 40);
+		var roll = World.dice.roll(1, 60);
 
 		if (roll === 10) {
 			Cmd.say(mob, {
 				msg: mob.exclimations[parseInt(Math.random() * ((mob.exclimations.length)))],
 				roomObj: roomObj
 			});
+		}
+		
+		if (World.time.isDay === false && !roomObj.light && !mob.lightingTorches) {		
+			mob.lightingTorches = true;
+
+			setTimeout(function() {
+				roomObj.light = true;
+				mob.lightingTorches = false;
+			}, 2000);
 		}
 	}
 };

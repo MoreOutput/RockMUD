@@ -185,16 +185,6 @@ Room.prototype.getAdjacentMap = function(roomObj, depth) {
 	return map;
 };
 
-Room.prototype.getDisplay = function(areaName, roomId) {
-	var room = this,
-	players = World.getPlayersByRoomId(roomId),
-	roomObj = World.getRoomObject(areaName, roomId);
-
-	roomObj.playersInRoom = players;
-
-	return room.getDisplayHTML(roomObj);
-};
-
 // Return a brief overview of a room
 Room.prototype.getBrief = function(roomObj, options) {
 	var room = this,
@@ -291,6 +281,20 @@ Room.prototype.removeItem = function(roomObj, item) {
 
 Room.prototype.getMonster = function(roomObj, command) {
 	return World.search(roomObj.monsters, command);
+};
+
+Room.prototype.getPlayer = function(roomObj, command) {
+	return World.search(roomObj.playersInRoom, command);
+};
+
+Room.prototype.getEntity = function(roomObj, command) {
+	var result = this.getMonster(roomObj, command);
+
+	if (!result) {
+		result = this.getPlayer(roomObj, command);
+	}
+
+	return result;
 };
 
 Room.prototype.removePlayer = function(roomObj, player) {

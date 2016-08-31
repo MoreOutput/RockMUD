@@ -279,24 +279,6 @@ World.prototype.getClass = function(className) {
 	return null;
 };
 
-// This needs to look like getItems() for returning a player obj based on room
-World.prototype.getPlayersByRoomId = function(roomId) {
-	var world = this,
-	arr = [],
-	player,
-	i = 0;
-
-	for (i; i < world.players.length; i += 1) {
-		player = world.players[i];
-
-		if (player.roomid === roomId) {
-			arr.push(player);
-		}
-	}
-
-	return arr;
-};
-
 World.prototype.getPlayerBySocket = function(socketId) {
 	var world = this,
 	arr = [],
@@ -478,6 +460,22 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 		
 			if (Array.isArray(mob.long)) {
 				mob.long = mob.long[world.dice.roll(1, mob.long.length) - 1];
+			}
+
+			if (!mob.prefixStatusMsg) {
+				if (mob.long) {
+					mob.prefixStatusMsg = mob.long;
+				} else {
+					mob.prefixStatusMsg = world.capitalizeFirstLetter(mob.short);
+				}
+			}
+
+			if (!mob.ownershipMsg) {
+				if (mob.displayName[mob.displayName.length - 1].toLowerCase() === 's') {
+					mob.ownershipMsg = mob.displayName + '\'';
+				} else {
+					mob.ownershipMsg = mob.displayName + 's';
+				}
 			}
 
 			mob.str += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
@@ -917,18 +915,47 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 World.prototype.msgRoom = function(roomObj, msgObj) {
 	var world = this,
 	i = 0,
+	j = 0,
 	canSee = true,
+	omitMatch = false,
 	s;
-	
-	for (i; i < roomObj.playersInRoom.length; i += 1) {
-		s = roomObj.playersInRoom[i].socket;
-		
-		if (msgObj.checkSight) {
-			canSee = Character.canSee(s.player, roomObj);
-		}
 
-		if (s && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id) {
-			world.msgPlayer(s, msgObj, canSee);
+	if (!Array.isArray(msgObj.playerName)) {
+		for (i; i < roomObj.playersInRoom.length; i += 1) {
+			s = roomObj.playersInRoom[i].socket;
+
+			if (msgObj.checkSight) {
+				canSee = Character.canSee(s.player, roomObj);
+			}
+
+			if (s && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id 
+				&& s.player.area === roomObj.area) {
+				
+				world.msgPlayer(s, msgObj, canSee);
+			}
+		}
+	} else {
+		for (i; i < roomObj.playersInRoom.length; i += 1) {
+			s = roomObj.playersInRoom[i].socket;
+
+			if (msgObj.checkSight) {
+				canSee = Character.canSee(s.player, roomObj);
+			}
+
+			if (s && s.player.roomid === roomObj.id && s.player.area === roomObj.area) {
+				j = 0;
+				omitMatch = false;
+			
+				for (j; j < msgObj.playerName.length; j += 1) {
+					if (msgObj.playerName[j] === s.player.name) {
+						omitMatch = true;
+					}
+				}
+				
+				if (omitMatch === false) {
+					world.msgPlayer(s, msgObj, canSee);
+				}
+			}
 		}
 	}
 };
@@ -980,34 +1007,35 @@ World.prototype.search = function(arr, itemType, command) {
 		itemType = false;
 	}
 	
-	if (!itemType) {
-		for (i; i < arr.length; i += 1) {
-			if (arr[i].name.toLowerCase().indexOf(command.arg) !== -1) {
-				matchedIndexes.push(i);
-			}
-		}
-	} else {		
-		for (i; i < arr.length; i += 1) {
-			if (arr[i].itemType === itemType && arr[i].name.toLowerCase().indexOf(command.arg) !== -1) {
-				matchedIndexes.push(i);
-			}
-		}
-	}
-
-	if (matchedIndexes) {
-		if (matchedIndexes.length > 1 && command.number > 1) {
-			i = 0;
-			
-			for (i; i < matchedIndexes.length; i += 1) {
-				if ((i + 1) === command.number) {
-					result = arr[matchedIndexes[i]];
+	if (command.arg) {
+		if (!itemType) {
+			for (i; i < arr.length; i += 1) {
+				if (arr[i].name.toLowerCase().indexOf(command.arg) !== -1) {
+					matchedIndexes.push(i);
 				}
 			}
-		} else {
-			result = arr[matchedIndexes[0]];
+		} else {		
+			for (i; i < arr.length; i += 1) {
+				if (arr[i].itemType === itemType && arr[i].name.toLowerCase().indexOf(command.arg) !== -1) {
+					matchedIndexes.push(i);
+				}
+			}
+		}
+
+		if (matchedIndexes) {
+			if (matchedIndexes.length > 1 && command.number > 1) {
+				i = 0;
+
+				for (i; i < matchedIndexes.length; i += 1) {
+					if ((i + 1) === command.number) {
+						result = arr[matchedIndexes[i]];
+					}
+				}
+			} else {
+				result = arr[matchedIndexes[0]];
+			}
 		}
 	}
-	
 	return result;
 };
 

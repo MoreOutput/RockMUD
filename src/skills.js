@@ -206,7 +206,7 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 		if (player.position === 'standing' || player.position === 'fighting') {
 			if (World.dice.roll(1, 100) <= skillObj.train) {
 				World.msgPlayer(player, {
-					msg: 'You spin around the room slashing at everyone!',
+					msg: 'You spin around the room slashing at everything!',
 					styleClass: 'green',
 					noPrompt: true
 				});

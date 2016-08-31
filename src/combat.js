@@ -146,22 +146,22 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 					
 					if (acCheck < hitRoll) {
 						if (dodgeCheck < hitRoll) {
-							damage = World.dice.roll(weapon.diceNum, weapon.diceSides, attackerMods.str/2 + attacker.damRoll + weapon.diceMod);
+							damage = World.dice.roll(weapon.diceNum, weapon.diceSides, attacker.damRoll + weapon.diceMod + attackerMods.str);
 							
 							damage += (attacker.level/2) + (attackerMods.str/4);
 
 							if (attackerMods.str >= opponentMods.con) {
 								damage += damRoll/3;
 							}
-
-							damage -= opponent.ac/3;
+	
+							damage -= opponent.ac/2;
 							damage -= opponent.meleeRes;
 			
 							if (numOfAttacks > 3 && j > 3) {
 								damage = damage/2;
 							}
 
-							if (World.dice.roll(1, 50) >= (50 - attacker.detection )) {
+							if (World.dice.roll(1, 200) >= (200 - attacker.detection)) {
 								criticalAttack = true;
 								criticalAttackXP = World.dice.roll(1 + attacker.level, 20);
 
@@ -196,13 +196,13 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 								} else {
 									if (attackerCanSee) {
 										msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short 
-											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red large">('
+											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
 											+ damage + ')</strong></div>'
 											+ '<div class="green">You landed a critical hit and gain '
 											+ criticalAttackXP + ' experience.</div>';
 									} else {
 										msgForAttacker += '<div>You ' + weapon.attackType
-											+ ' someone with ' + adjective + ' ' + abstractNoun + ' <strong class="red large">('
+											+ ' someone with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
 											+ damage + ')</strong></div>'
 											+ '<div class="green">You landed a critical hit and gain '
 											+ criticalAttackXP + ' experience.</div>';
@@ -217,7 +217,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							if (opponent.isPlayer) {
 								if (!criticalAttack) {
 									if (attackerCanSee) {
-										msgForOpponent += '<div class="grey">' + attacker.displayName + 's ' 
+										msgForOpponent += '<div class="grey">' + attacker.ownershipMsg + ' ' 
 											+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
 											+ ' <span class="red">(' + damage + ')</span></div>';
 									} else {
@@ -227,7 +227,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 									}
 								} else {
 									if (attackerCanSee) {
-										msgForOpponent += '<div class="grey"><strong>' + attacker.displayName + 's ' 
+										msgForOpponent += '<div class="grey"><strong>' + attacker.ownershipMsg + ' ' 
 											+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
 											+ '</strong> <span class="red">(' + damage + ')</span></div>';
 									} else {
@@ -354,15 +354,18 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 				msgForPlayer += '<div class="rnd-status">' + opponent.displayName + ' ' + oppStatus.msg + '</div>';
 			}
 		} else {
-			if (!opponent.isPlayer) {	
-				msgForPlayer += '<div class="rnd-status">You <strong class="red">decapitate ' 
-					+ opponent.short + '</strong>.</div>';
+			if (!opponent.isPlayer) {
+				if (attackerCanSee) {	
+					msgForPlayer += '<div class="rnd-status">You <strong class="red">decapitate ' 
+						+ opponent.short + '</strong>.</div>';
+				}
 			} else {
-				msgForPlayer += '<div class="rnd-status">You run <strong>' 
-					+ opponent.displayName + ' through, killing them</strong>.</div>';
+				if (attackerCanSee) {
+					msgForPlayer += '<div class="rnd-status">You run <strong>' 
+						+ opponent.displayName + ' through, killing them</strong>.</div>';
+				}
 			}
 		}
-
 
 		if (!opponent.isPlayer) {
 			msgForOpponent += '<div class="rnd-status">' + player.long + ' ' + playerStatus.msg + '</div>';
@@ -503,10 +506,10 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 			if (player.isPlayer) {
 				if (opponent.chp > 0) {
 					if (!player.canViewHp) {
-						msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
+						msgForPlayer += '<div class="rnd-status">' + opponent.prefixStatusMsg + oppStatus.msg
 						+ '</div>';
 					} else {
-						msgForPlayer += '<div class="rnd-status">A ' + opponent.name + oppStatus.msg
+						msgForPlayer += '<div class="rnd-status">' + opponent.prefixStatusMsg + oppStatus.msg
 							+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
 					}
 				} else {
@@ -517,10 +520,10 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 
 			if (opponent.isPlayer) {
 				if (!opponent.canViewHp) {
-					msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg
+					msgForOpponent += '<div class="rnd-status">' + opponent.prefixStatusMsg + playerStatus.msg
 						+ '</div>';
 				} else {
-					msgForOpponent += '<div class="rnd-status">A ' + player.name + playerStatus.msg
+					msgForOpponent += '<div class="rnd-status">' + player.prefixStatusMsg + playerStatus.msg
 						+ ' (' + player.chp + '/' + player.hp +')</div>';
 				}
 			}
