@@ -101,9 +101,6 @@ Cmd.prototype.buy = function(target, command) {
 				
 						World.processEvents('onSell', merchant, roomObj, target);
 						World.processEvents('onBuy', target, roomObj, merchant);
-
-						Character.save(target);
-						Character.save(merchant);
 					} else {
 						World.msgPlayer(target, {
 							msg: 'You can\'t afford that.',
@@ -162,9 +159,6 @@ Cmd.prototype.sell = function(target, command) {
 
 					World.processEvents('onSell', target, roomObj, merchant);
 					World.processEvents('onBuy', merchant, roomObj, target);
-
-					Character.save(target);
-					Character.save(merchant);
 				} else {
 					World.msgPlayer(target, {
 						msg: 'They can\'t afford to buy ' + item.short,
@@ -266,8 +260,6 @@ Cmd.prototype.give = function(target, command) {
 									msg: target.displayName + ' gives you ' + item.short + '.',
 									styleClass: 'green'
 								});
-
-								Character.save(receiver);
 							}
 
 							World.msgRoom(roomObj, {
@@ -275,8 +267,6 @@ Cmd.prototype.give = function(target, command) {
 								styleClass: 'grey',
 								playerName: [receiver.name, target.name]
 							});
-
-							Character.save(target);
 						} else {
 
 						}
@@ -929,17 +919,17 @@ Cmd.prototype.move = function(target, command, fn) {
 									if (!target.outName) {
 										if (target.long) {
 											msg = '<span class="yellow">' + target.long
-											+ ' leaves heading <strong class="grey">' + direction + '</strong></span>';
+											+ ' leaves heading <strong class="grey">' + direction + '</strong>.</span>';
 										} else {
 											msg = '<span class="yellow">' + target.displayName
-											+ ' leaves going <strong class="grey">' + direction + '</strong></span>';
+											+ ' leaves going <strong class="grey">' + direction + '</strong>.</span>';
 										}
 									} else if (target.outName && !target.outMessage) {
 										msg = '<span class="yellow">' + target.outName
-										+ ' leaves traveling <strong class="grey">' + direction + '</strong></span>';
+										+ ' leaves traveling <strong class="grey">' + direction + '</strong>.</span>';
 									} else {
 										msg = '<span class="yellow">' + target.outName + target.outMessage
-										+ ' <strong class="grey">' + direction + '</strong></span>';
+										+ ' <strong class="grey">' + direction + '</strong>.</span>';
 									}
 								} else if (receiver.hearing) {
 									msg = '<span class="yellow">You can sense some movement in the area.</span>';
@@ -1102,10 +1092,6 @@ Cmd.prototype.get = function(target, command, fn) {
 										msg: 'You pick up ' + item.short,
 										styleClass: 'blue'
 									});	
-
-									if (!target.isPlayer) {
-										Character.save(target);
-									}			
 								} else {
 
 								}
@@ -1290,8 +1276,6 @@ Cmd.prototype.drop = function(target, command, fn) {
 						World.processEvents('onDrop', target, roomObj, item);
 						World.processEvents('onDrop', roomObj, target, item);
 						World.processEvents('onDrop', item, roomObj, target);
-
-						Character.save(target);
 					}
 				} else {
 					if (!item) {
@@ -1329,8 +1313,6 @@ Cmd.prototype.drop = function(target, command, fn) {
 								msg: 'You drop everything',
 								styleClass: 'blue'
 							});
-
-							Character.save(target);
 						}
 					} else {
 						World.msgPlayer(target, {

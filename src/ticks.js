@@ -286,20 +286,13 @@ setInterval(function() {
 	}
 }, 700);
 
-// Area onAlive check happens once per 30 seconds 
-setInterval(function() {
-	var i = 0,
-	s;
-
-}, 30000); // 30 seconds
-
 setInterval(function() {
 	var i = 0,
 	msgObj;
 
 	for (i; i < World.areas.length; i += 1) {
 		if (typeof World.areas[i].messages === 'function') {
-			World.areas[i].messages = World.areas[i].messages();
+			World.areas[i].messages = World.areas[i].messages(World.areas[i]);
 		}
 
 		if (World.areas[i].messages.length) {
@@ -325,7 +318,7 @@ setInterval(function() {
 	var i = 0; 
 
 	if (World.players.length) {
-		if (World.dice.roll(1, 2) === 1) {
+		if (World.dice.roll(1, 3) <= 2) {
 			for (i; i < World.players.length; i += 1) {
 				Character.hpRegen(World.players[i]);
 				Character.manaRegen(World.players[i]);
@@ -350,6 +343,20 @@ setInterval(function() {
 	}
 }, 240000); // 4 minutes
 
+
+// Saving
+setInterval(function() { 
+	var i = 0,
+	player; 
+
+	if (World.players.length > 0) {
+		for (i; i < World.players.length; i += 1) {
+			Character.save(World.players[i]);
+		}
+	}
+}, 245000); // 4.5 minutes
+
+// Random mud-wide messages
 setInterval(function() {
 	var s,
 	alerts = [
@@ -363,5 +370,5 @@ setInterval(function() {
 				+ alerts[World.dice.roll(1, alerts.length) - 1] + '</span></span>'
 		});
 	}
-}, 240000);
+}, 200000);
 
