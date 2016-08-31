@@ -354,7 +354,7 @@ setInterval(function() {
 			Character.save(World.players[i]);
 		}
 	}
-}, 245000); // 4.5 minutes
+}, World.config.persistenceTick); // 4.5 minutes
 
 // Random mud-wide messages
 setInterval(function() {

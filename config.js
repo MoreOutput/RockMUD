@@ -5,7 +5,8 @@ exports.server = {
 		version: '0.3.0',
 		website: 'https://github.com/MoreOutput/RockMUD',
 		description: 'Websockets MUD Engine Demo',
-		coinage: 'gold'
+		coinage: 'gold',
+		persistenceTick: 245000
 	},
 	admins: []
 };
