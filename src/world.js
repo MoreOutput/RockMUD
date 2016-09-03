@@ -76,7 +76,6 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 				fs.readFile(path + fileName, function (err, tmp) {
 					var tmp = JSON.parse(tmp);
 
-
 					tmp.fileName = fileName.replace(/.json/g, '');
 
 					tmpArr.push(tmp);
@@ -476,13 +475,22 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 				} else {
 					mob.ownershipMsg = mob.displayName + 's';
 				}
-			}
+			}	
 
-			mob.str += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
-			mob.dex += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
-			mob.int += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
-			mob.wis += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
-			mob.con += world.dice.roll(3, 6) - (mob.size.value * 3) + 2;
+			if (mob.rollStats) {
+				mob.baseStr += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.str;
+				mob.baseDex += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.dex;
+				mob.baseInt += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.int;
+				mob.baseWis += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.wis;
+				mob.baseCon += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.con;
+				
+				mob.str = mob.baseStr;
+				mob.dex = mob.baseDex;
+				mob.int = mob.baseInt;
+				mob.wis = mob.baseWis;
+				mob.con = mob.baseCon;
+			}
+	
 			mob.isPlayer = false;
 			mob.roomid = roomid;
 			mob.area = area.name;

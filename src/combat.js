@@ -140,8 +140,12 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						acCheck += shieldAC;
 					}
 
-					if (opponent.race === 'animal' && weapon.attackType === 'slash') {
-						damage += World.dice.roll(1, 2 + weapon.level);
+					if (opponent.vulnerableTo && opponent.vulnerableTo.toString().indexOf(weapon.attackType) !== -1) {
+						damage += World.dice.roll(1, 4 + weapon.level);
+					}
+
+					if (opponent.resistantTo && opponent.resistantTo.toString().indexOf(weapon.attackType) !== -1) {
+						damage -= World.dice.roll(1, 4 + weapon.level);
 					}
 					
 					if (acCheck < hitRoll) {
@@ -274,7 +278,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 										+ ' and they block the incoming attack with ' + shield.short + '!</div>';
 								} else {
 									msgForAttacker += '<div class="red">You swing at ' + opponent.short
-										+ ' but they use their ' + shield.dislayName + ' to defend against the attack!</div>';
+										+ ' but they use their ' + shield.displayName + ' to defend against the attack!</div>';
 								}
 							}
 						}
@@ -475,7 +479,20 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 		player.onVictory(opponent, roomObj);
 	}
 
-	return World.msgPlayer(player, {msg: endOfCombatMsg, styleClass: 'victory'});
+	if (player.exp >= player.expToLevel) {
+		World.msgPlayer(player, {
+			msg: endOfCombatMsg,
+			noPrompt: true,
+			styleClass: 'victory'
+		});
+	
+		Character.level(player);			
+	} else {
+		World.msgPlayer(player, {
+			msg: endOfCombatMsg,
+			styleClass: 'victory'
+		});
+	}
 };
 
 Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn) {

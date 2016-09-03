@@ -1186,10 +1186,56 @@ Character.prototype.getMaxCarry = function(player) {
 	}
 };
 
-Character.prototype.level = function(s, fn) {
+Character.prototype.level = function(player) {
+	var mods = World.dice.getMods(player, 0),
+	hpBonus = World.dice.roll(1, 6, mods.con),
+	mvBonus = World.dice.roll(1, 4, mods.dex),
+	manaBonus = World.dice.roll(1, 4, mods.int),
+	newTrains = 4;
 
+	if (player.mainStat === 'wis') {
+		newTrains += 1;
+	}
+
+	if (player.wisMod > 3) {
+		newTrains += 1;
+	}
+
+	if (player.intMod > 4) {
+		newTrains += 1;
+	}
+ 
+	if (player.mainStat === 'con' || player.mainStat === 'str') {
+		hpBonus += World.dice.roll(1, 4);
+		manaBonus = 0;
+	}
+
+	if (player.mainStat === 'wis' || player.mainStat === 'int') {
+		hpBonus -= 5;
+		manaBonus += World.dice.roll(1, 4);
+	}
+
+	if (player.mainStat === 'dex') {
+		hpBonus -= 3;
+		mvBonus += World.dice.roll(1, 6);	
+	}
+
+	player.level += 1;
+	player.hp += hpBonus;
+	player.mana += manaBonus;
+	player.mv += mvBonus;
+	player.trains += newTrains;
+	player.expToLevel = 1000 * player.level;
+	player.exp = 0;
+
+	World.msgPlayer(player, {
+		msg: 'You have reached level ' + player.level + '. Your efforts result in ' 
+			+ hpBonus + ' hp, ' + manaBonus + ' mana, ' + mvBonus + ' movement and '
+			+ newTrains + ' new trains.'
+	});
+
+	this.save(player);
 };
-
 
 // Add in gear modifiers and return the updated object
 Character.prototype.calculateGear = function() {

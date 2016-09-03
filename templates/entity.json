@@ -56,6 +56,7 @@
 	"description": "",
 	"reply": "",
 	"following": "",
+	"group": false,
 	"prefixStatusMsg": "",
 	"ownershipMsg": "",
 	"inName": "",
@@ -77,6 +78,9 @@
 	"itemType": "entity",
 	"preventItemDecay": false,
 	"preventOnAlive": false,
+	"rollStats": true,
+	"vulnerableTo": [],
+	"resistantTo": [],
 	"eq": [{
 		"name": "Head",
 		"item": null,
