@@ -53,7 +53,8 @@ window.onload = function() {
 		laugh: 'emote laughs heartily.',
 		wo: 'worth',
 		re: 'recall',
-		gi: 'give'
+		gi: 'give',
+		wield: 'wear'
 	},
 	isScrolledToBottom = false,
 	playerIsLogged = null,

@@ -220,11 +220,13 @@ Cmd.prototype.list = function(target, command) {
 	}
 };
 
+// Genric command for giving items or gold
 Cmd.prototype.give = function(target, command) {
 	var i = 0,
 	roomObj,
 	item,
 	canSee = true,
+	goldToTransfer = 0,
 	receiver;
 	
 	if (command.roomObj) {
@@ -268,7 +270,7 @@ Cmd.prototype.give = function(target, command) {
 								playerName: [receiver.name, target.name]
 							});
 						} else {
-
+					
 						}
 					} else {
 						World.msgPlayer(target, {
@@ -283,8 +285,51 @@ Cmd.prototype.give = function(target, command) {
 					});
 				}
 			}
-		} else if (command.msg && command.msg.indexOf(' ')) {
+		} else if (command.msg && command.input.indexOf(World.config.coinage) !== -1) {
+			if (command.arg !== 'all') {
+				goldToTransfer = parseInt(command.arg);
+			} else {
+				goldToTransfer = target.gold;
+			}
+
+			if (goldToTransfer) {
+				if (goldToTransfer >= target.gold) {
+					if (command.input.indexOf('to') === -1) {
+						command.input = command.input.replace(World.config.coinage, '').replace(/ /g, '');
+					} else {
+						command.input = command.input.replace(World.config.coinage + ' to', '').replace(/ /g, '');
+					}
+
+					receiver = Room.getEntity(roomObj, {
+						arg: command.input
+					});
+
+					if (receiver) {
+						target.gold -= goldToTransfer;
+						receiver.gold += goldToTransfer;
+			
+						World.msgPlayer(target,  {
+							msg: 'You give ' + receiver.displayName + ' some ' + World.config.coinage + '.',
+							styleClass: 'yellow'
+						});
 		
+						World.msgPlayer(receiver,  {
+							msg: target.displayName + ' gives you ' + goldToTransfer + ' ' + World.config.coinage + 's.',
+							styleClass: 'green'
+						});
+					}
+				} else {
+					World.msgPlayer(target,  {
+						msg: 'That\'s more ' + World.config.coinage + ' than you have.',
+						styleClass: 'error'
+					});
+				}
+			} else {
+				World.msgPlayer(target,  {
+					msg: 'Not a valid number of ' + World.config.coinage  + '.',
+					styleClass: 'error'
+				});
+			}
 		} else {
 			World.msgPlayer(target, {
 				msg: 'Give what? Example: <strong>give sword elf</strong>',

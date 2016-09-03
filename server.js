@@ -134,8 +134,8 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							});
 						} else {
 							s.join('creation'); // creation is one of two rooms, 'mud' being the other
-						
-							s.player = World.mobTemplate;
+
+							s.player = JSON.parse(JSON.stringify(World.mobTemplate));
 							s.player.name = r.msg;
 							s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
 							s.player.sid = s.id;

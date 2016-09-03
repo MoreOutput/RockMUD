@@ -216,7 +216,7 @@ Character.prototype.create = function(s) {
 
 	s.player = World.extend(s.player, raceObj);
 	s.player = World.extend(s.player, classObj);
-	
+
 	s.player.chp += 30;
 	s.player.cmana += 5;
 	s.player.cmv += 100;

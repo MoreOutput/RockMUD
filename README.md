@@ -9,15 +9,15 @@ Goals:
 * Full featured MUD experience from within the browser.
 * Enable quick development.
 * Empower client side scripting for GUI.
-* DB agnostic -- GET/POST to your defined service.
+* DB agnostic -- GET/POST JSON to your defined service or save as a flat file.
 
 Notes on dependencies: 
 * Socket.io 1.0 or greater is required.
-* Default terminal loads Bootstrap from CDN.
 * Development keeps up with latest node release.
+* Default terminal loads Bootstrap from CDN.
 
 ##10000 feet:##
-All design/data elements of RockMUD must be either valid JSON or .js files. Please look at the current code and make an effort to match the style if you plan to submit a pull request. The OOTB experience is fairly diku-like as thats what I played most.
+All design/data elements of RockMUD must be either valid JSON or .js files. Please look at the current code and make an effort to match the current style if you plan to submit a pull request.
 
 ###RockMUD development chat through gitter:###
 
