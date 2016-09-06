@@ -6,7 +6,9 @@ World = require('./world').world;
 // time, saved to time.json every 12 hours
 setInterval(function() {
 	var i = 0,
-	areaMsg;
+	areaMsg,
+	players,
+	monsters;
 
 	World.time.minute += 1;
 
@@ -25,11 +27,65 @@ setInterval(function() {
 		World.time.isDay = true;
 
 		areaMsg = 'The sun appears over the horizon.';
+
+		if (World.areas.length) {
+			for (i; i < World.areas.length; i += 1) {
+				monsters = World.getAllMonstersFromArea(World.areas[i]);
+
+				monsters.forEach(function(monster, i) {
+					var roomObj = World.getRoomObject(monster.area, monster.roomid);
+
+					if (monster.chp >= 1) {
+						World.processEvents('onDay', monster, roomObj);
+						World.processEvents('onDay', monster.items, roomObj);
+					}
+				});
+
+				players = World.getAllPlayersFromArea(World.areas[i]);
+
+				players.forEach(function(player, i) {
+					var roomObj = World.getRoomObject(player.area, player.roomid);
+
+					if (player.chp >= 1) {
+						World.processEvents('onDay', player, roomObj);
+						World.processEvents('onDay', player.items, roomObj);
+					}
+				});
+			}	
+		}
 	} else if (World.time.hour === World.time.month.hourOfNight && World.time.minute === 1) {
 		World.time.isDay = false;
 
 		areaMsg = 'The sun fades fully from view as night falls.';
+	
+		if (World.areas.length) {
+			for (i; i < World.areas.length; i += 1) {
+				monsters = World.getAllMonstersFromArea(World.areas[i]);
+
+				monsters.forEach(function(monster, i) {
+					var roomObj = World.getRoomObject(monster.area, monster.roomid);
+
+					if (monster.chp >= 1) {
+						World.processEvents('onNight', monster, roomObj);
+						World.processEvents('onNight', monster.items, roomObj);
+					}
+				});
+
+				players = World.getAllPlayersFromArea(World.areas[i]);
+
+				players.forEach(function(player, i) {
+					var roomObj = World.getRoomObject(player.area, player.roomid);
+
+					if (player.chp >= 1) {
+						World.processEvents('onNight', player, roomObj);
+						World.processEvents('onNight', player.items, roomObj);
+					}
+				});
+			}	
+		}
 	}
+
+	i = 0;
 
 	if (areaMsg) {
 		for (i; i < World.areas.length; i += 1) {
@@ -155,11 +211,18 @@ setInterval(function() {
 					} else {
 						decayMsg = item.short + ' ' + item.decayMsg;
 					}
-
-					World.msgRoom(obj, {
-						msg: decayMsg,
-						styleClass: 'blue'
-					});
+				
+					if (obj.playersInRoom) {
+						World.msgRoom(obj, {
+							msg: decayMsg,
+							styleClass: 'blue'
+						});
+					} else if (obj.isPlayer) {
+						World.msgPlayer(obj, {
+							msg: decayMsg,
+							styleClass: 'blue'
+						});
+					}
 				}
 			}
 
@@ -245,12 +308,12 @@ setInterval(function() {
 						processItemDecay(rooms[j]);
 					}
 				}
-			}
+			} 
 		}
 	}
 }, 245000); // 4.5 minutes
 
-// AI Ticks
+// AI Ticks and random player save
 setInterval(function() {
 	var i = 0,
 	j = 0,
@@ -279,6 +342,10 @@ setInterval(function() {
 					if (player.chp >= 1) {
 						World.processEvents('onAlive', player, roomObj);
 						World.processEvents('onAlive', player.items, roomObj);
+					}
+					
+					if (player.position !== 'fighting' && World.dice.roll(1, 100) === 100) {
+						Character.save(player);
 					}
 				});
 			}

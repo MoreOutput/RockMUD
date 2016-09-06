@@ -811,18 +811,56 @@ Cmd.prototype.lock = function(target, command, fn) {
 	}
 };
 
-// Light an object that has a light and decayLight property
-Cmd.prototype.light = function(target, command, fn) {
-
-};
-
-// Snuff out an object with the needed light properties
-Cmd.prototype.snuff = function(target, command, fn) {
-
-};
-
 Cmd.prototype.recall = function(target, command) {
+	var targetRoom,
+	roomObj;
 	
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
+
+	if (!command.msg && target.recall.roomid && target.recall.area) {
+		if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
+			targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
+		
+			if (targetRoom) {
+				target.area = target.recall.area;
+				target.roomid = target.recall.roomid;
+	
+				if (target.isPlayer) {
+					Room.removePlayer(roomObj, target);
+					
+					targetRoom.playersInRoom.push(target);
+
+					this.look(target, {roomObj: targetRoom});
+				} else {
+					Room.removeMob(roomObj, target);
+	
+					targetRoom.monsters.push(target);
+				}
+	
+				World.msgPlayer(target, {
+					msg: 'You have recalled back to ' + target.recall.area  + '!',
+					styleClass: 'green'
+				});
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: '<strong>You are already standing in your recall room!</strong>',
+				styleClass: 'error'
+			});
+		}
+	} else if (command.msg && command.arg === 'set' && !targetRoom.preventRecall) {
+		target.recall.area = roomObj.area;
+		target.recall.roomid = roomObj.id;
+	
+		World.msgPlayer(target, {
+			msg: 'You will now recall to the current room!',
+			styleClass: 'green'
+		});
+	}
 };
 
 // Puts any target object into a defined room after verifying criteria
@@ -891,6 +929,7 @@ Cmd.prototype.move = function(target, command, fn) {
 						target.cmv = 0;
 					}
 
+					target.area = targetRoom.area;
 					target.roomid = targetRoom.id;
 
 					if (canEnter) {
@@ -963,11 +1002,18 @@ Cmd.prototype.move = function(target, command, fn) {
 								if (Character.canSee(receiver, roomObj)) {
 									if (!target.outName) {
 										if (target.long) {
-											msg = '<span class="yellow">' + target.long
-											+ ' leaves heading <strong class="grey">' + direction + '</strong>.</span>';
+											if (World.dice.roll(1, 2) === 1) {
+												msg = '<span class="yellow">' + target.long
+													+ ' leaves heading <strong class="grey">' 
+													+ direction + '</strong>.</span>';	
+											} else {
+												msg = '<span class="yellow">' + target.long
+													+ ' leaves traveling <strong class="grey">' 
+													+ direction + '</strong>.</span>';
+											}
 										} else {
 											msg = '<span class="yellow">' + target.displayName
-											+ ' leaves going <strong class="grey">' + direction + '</strong>.</span>';
+												+ ' leaves going <strong class="grey">' + direction + '</strong>.</span>';
 										}
 									} else if (target.outName && !target.outMessage) {
 										msg = '<span class="yellow">' + target.outName
@@ -1112,13 +1158,8 @@ Cmd.prototype.get = function(target, command, fn) {
 					item = Room.getItem(roomObj, command);
 
 					if (item) {
-						if (item.beforeGet) {
-							canGet = item.beforeGet(item, roomObj, target);
-						}
-	
-						if (roomObj.beforeGet) {
-							canGet = roomObj.beforeGet(roomObj, item, target);
-						}
+						canGet = World.processEvents('beforeGet', item, roomObj, target);
+						canGet = World.processEvents('beforeGet', roomObj, target, item);
 
 						if (canGet) {
 							if (item.weight <= maxCarry) {
@@ -1186,7 +1227,7 @@ Cmd.prototype.get = function(target, command, fn) {
 						styleClass: 'blue'
 					});
 
-					World.processEvents('onGet', room.items, roomObj, item, target);
+					World.processEvents('onGet', roomObj.items, roomObj, item, target);
 					World.processEvents('onGet', target, roomObj, item, container);
 
 					if (typeof fn === 'function') {

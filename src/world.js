@@ -110,6 +110,8 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.time = null; // Current Time data
 	world.itemTemplate = {};
 	world.mobTemplate = {};
+	world.roomTemplate = {};
+	world.areaTemplate = {};
 	world.ai = {};
 	world.motd = '';
 
@@ -158,8 +160,18 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 								world.setupArea(area);
 							}
 
+							i = 0;
+
+							for (i; i < world.areas.length; i += 1) {
+								area = world.areas[i];
+
+								if (area.afterLoad) {
+									area.afterLoad();
+								}
+							}
+
 							world.ticks = require('./ticks');
-							
+
 							return fn(Character, Cmds, Skills);
 						});
 					});
@@ -399,7 +411,7 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 			
 			for (prop in item) {
 				if (item[prop] === 'function' && !item.hasEvents) {
-					item.hasEvents = true;
+					//item.hasEvents = true;
 				}
 			}
 
@@ -542,7 +554,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 		
 			for (prop in mob) {
 				if (mob[prop] === 'function' && !mob.hasEvents) {
-					mob.hasEvents = true;
+					//mob.hasEvents = true;
 				}
 			}
 
@@ -572,7 +584,7 @@ World.prototype.setupArea = function(area) {
 	i = 0;
 
 	if (area.beforeLoad) {
-		area.breforeLoad();
+		area.beforeLoad();
 	}
 
 	for (i; i < area.rooms.length; i += 1) {
@@ -580,6 +592,10 @@ World.prototype.setupArea = function(area) {
 	
 		if (!area.wasExtended) {
 			area.rooms[i] = world.extend(area.rooms[i], world.roomTemplate);
+			
+			if (!area.rooms[i].area) {
+				area.rooms[i].area = area.name;
+			}
 		}
 		
 		for (j; j < area.rooms[i].exits.length; j += 1) {
@@ -592,10 +608,10 @@ World.prototype.setupArea = function(area) {
 
 		world.rollMobs(area.rooms[i].monsters, area.rooms[i].id, area);
 		world.rollItems(area.rooms[i].items, area.rooms[i].id, area);
-	}
-
-	if (area.afterLoad) {
-		area.afterLoad();
+		
+		if (area.rooms[i].monsters) {
+			area.monsters = world.shuffle(area.rooms[i].monsters);
+		}
 	}
 
 	area.wasExtended = true;
@@ -604,12 +620,11 @@ World.prototype.setupArea = function(area) {
 };
 
 World.prototype.getAreaByName = function(areaName) {
-	var world = this,
-	i = 0;
+	var i = 0;
 
-	for (i; i < world.areas.length; i += 1) {
-		if (world.areas[i].name.toLowerCase() === areaName.toLowerCase()) {
-			return world.areas[i];
+	for (i; i < this.areas.length; i += 1) {
+		if (this.areas[i].name.toLowerCase() === areaName.toLowerCase()) {
+			return this.areas[i];
 		}
 	}
 
@@ -638,12 +653,16 @@ World.prototype.getRoomObject = function(areaName, roomId) {
 	var world = this,
 	area = world.getAreaByName(areaName),
 	i = 0;
-
-	for (i; i < area.rooms.length; i += 1) {
-		if (roomId === area.rooms[i].id) {
-			return area.rooms[i];
+	
+	if (area) {
+		for (i; i < area.rooms.length; i += 1) {
+			if (roomId === area.rooms[i].id) {
+				return area.rooms[i];
+			}
 		}
 	}
+
+	return false;
 };
 
 World.prototype.getAllItemsFromArea = function(areaName) {
@@ -691,15 +710,14 @@ World.prototype.getAllMonstersFromArea = function(areaName) {
 
 
 World.prototype.getAllPlayersFromArea = function(areaName) {
-	var world = this,
-	area,
+	var area,
 	i = 0,
 	playerArr = [];
 
 	if (areaName.name) {
 		area = areaName;
 	} else {
-		area = world.getAreaByName(areaName)
+		area = this.getAreaByName(areaName);
 	}
 
 	for (i; i < area.rooms.length; i += 1) {
@@ -979,7 +997,7 @@ World.prototype.msgArea = function(areaName, msgObj) {
 			|| (msgObj.randomPlayer === true && world.dice.roll(1,10) > 6)) {
 
 			s = world.players[i].socket;
-
+			
 			if (s.player.name !== msgObj.playerName && s.player.area === areaName) {
 				world.msgPlayer(s, msgObj);
 			}
@@ -996,7 +1014,7 @@ World.prototype.msgWorld = function(target, msgObj) {
 	for (i; i < world.players.length; i += 1) {
 		s = world.players[i].socket;
 
-		if (s.player && s.player.name !== msgObj.playerName) {
+		if (world.players[i].name !== msgObj.playerName) {
 			world.msgPlayer(s, msgObj);
 		}
 	}
@@ -1137,6 +1155,12 @@ World.prototype.sanitizeBehaviors = function(gameEntity) {
 		}
 	}
 
+	for (prop in gameEntity) {
+		if (typeof gameEntity[prop] === 'function') {
+			delete gameEntity[prop];	
+		}
+	}
+
 	return gameEntity;
 };
 
@@ -1155,6 +1179,33 @@ World.prototype.capitalizeFirstLetter = function(str) {
 	return str[0].toUpperCase() + str.slice(1);
 };
 
+// Creates json representation of area
+World.prototype.saveArea = function(areaName) {
+	var area,
+	j = 0,
+	i = 0;
+
+	if (areaName.name) {
+		area = areaName;
+	} else {
+		area = this.getAreaByName(areaName);
+	}
+
+	area = JSON.parse(JSON.stringify(area));
+
+	for (i; i < area.rooms.length; i += 1) {
+		area.rooms[i] = this.sanitizeBehaviors(area.rooms[i]);
+		
+		j = 0;
+		
+		for (j; j < area.rooms[i].monsters.length; j += 1) {
+			area.rooms[i].monsters[j] = this.sanitizeBehaviors(area.rooms[i].monsters[j]);
+		}
+	}
+
+	
+};
+
 World.prototype.extend = function(extendObj, readObj) {
 	var prop,
 	prop2;
@@ -1164,12 +1215,14 @@ World.prototype.extend = function(extendObj, readObj) {
 			if (extendObj[prop]) {
 				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
-				} else if (!isNaN(extendObj[prop]) && !isNaN(readObj[prop])) {
+				} else if (typeof extendObj[prop] !== 'string' && !isNaN(extendObj[prop]) && !isNaN(readObj[prop])) {
 					extendObj[prop] += readObj[prop];
 				} else if (typeof extendObj[prop] === 'object' && typeof readObj[prop] === 'object')  {
 					for (prop2 in readObj[prop]) {
 						this.extend(extendObj[prop][prop2], readObj[prop][prop2]);
 					}
+				} else {
+
 				}
 			} else {
 				extendObj[prop] = readObj[prop];
@@ -1203,7 +1256,7 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 	allTrue,
 	gameEntities = [];
 	
-	if (gameEntity !== false || gameEntity.hasEvents === true && gameEntity[evtName] || gameEntity.behaviors.length) {
+	if (gameEntity) {
 		if (!Array.isArray(gameEntity)) {
 			gameEntities = [gameEntity];
 		} else {
@@ -1234,7 +1287,7 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 			}
 		}
 	}
-
+	
 	return allTrue;
 };
 

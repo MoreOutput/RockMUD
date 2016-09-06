@@ -48,7 +48,7 @@ Character.prototype.login = function(r, s, fn) {
 							s.player = World.players[i];
 						}				
 					}
-					
+
 					if (!s.player) {
 						s.player = JSON.parse(r);
 					}

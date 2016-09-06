@@ -19,6 +19,8 @@ module.exports = {
 	attackOnVisit: true,
 	attackOnAlive: true,
 	mobAggressive: false,
+	onlyAttackLarger: false,
+	onlyAttackSmaller: false,
 	onVisit: function(mob, roomObj, target, command) {	
 		if (mob && mob.attackOnVisit === true
 			&& mob.position === 'standing'

@@ -87,10 +87,10 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 	if (monsters.length > 0 || playersInRoom.length > 0) {
 		for (i; i < monsters.length; i += 1) {
 			if (monsters[i].long) {
-				displayHTML += '<li class="room-monster">' + monsters[i].long + ' is ' + 
+				displayHTML += '<li class="room-monster grey">' + monsters[i].long + ' is ' + 
 				 monsters[i].position + ' here</li>';
 			} else {
-				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' + 
+				displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is ' + 
 				 monsters[i].position + ' here</li>';
 			}
 		}
@@ -198,11 +198,11 @@ Room.prototype.getBrief = function(roomObj, options) {
 		
 		for (i; i < monsters.length; i += 1) {
 			if (!monsters[i].short) {
-				displayHTML += '<li class="room-monster yellow">' + monsters[i].displayName + ' is ' + 
-				monsters[i].position + ' there.</li>';
+				displayHTML += '<li class="room-monster yellow">' + monsters[i].displayName + ' is ' 
+					+ monsters[i].position + ' there.</li>';
 			} else {
-				displayHTML += '<li class="room-monster yellow">' + monsters[i].short + ' is ' + 
-				monsters[i].position + ' there.</li>';
+				displayHTML += '<li class="room-monster yellow">' + monsters[i].short + ' is ' 
+				 + monsters[i].position + ' there.</li>';
 			}
 		}
 

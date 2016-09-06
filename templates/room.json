@@ -12,5 +12,6 @@
 	"flags": [],
 	"itemType": "room",
 	"hasEvents": false,
+	"preventRecall": false,
 	"behaviors": []
 }

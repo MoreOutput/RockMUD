@@ -52,7 +52,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		var parseCmd = function(r, s) {
 			var skillObj,
 			cmdObj = Cmds.createCommandObject(r);
-	
+			console.log(cmdObj);
 			if (!s.player.creationStep) {
 				if (cmdObj) {
 					if (cmdObj.cmd) {
@@ -161,7 +161,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						styleClass: 'enter-name'
 					});
 				}
-			} else if (s.player && s.player.logged === true) {				
+			} else if (s.player && s.player.logged === true) {
 				parseCmd(r, s);
 			} else {
 				World.msgPlayer(s, {
@@ -185,10 +185,12 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				}
 
 				roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-
-				for (j; j < roomObj.playersInRoom.length; j += 1) {
-					if (roomObj.playersInRoom[j].name === s.player.name) {
-						roomObj.playersInRoom.splice(j, 1);
+				
+				if (roomObj) {
+					for (j; j < roomObj.playersInRoom.length; j += 1) {
+						if (roomObj.playersInRoom[j].name === s.player.name) {
+							roomObj.playersInRoom.splice(j, 1);
+						}
 					}
 				}
 			}

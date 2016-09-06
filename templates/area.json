@@ -4,6 +4,7 @@
 	"id" : "",
 	"type" : "forest",
 	"levels" : "All",
+	"defaultRoom": "1",
 	"description" : "",
 	"reloads": 0,
 	"created": "",

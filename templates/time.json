@@ -14,7 +14,7 @@
 	"day": 1,
 	"hour": 1,
 	"minute": 1,
-	"isDay": false,
+	"isDay": true,
 	"months": [{
 		"id": 1,
 		"displayName": "January",
