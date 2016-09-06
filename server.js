@@ -52,7 +52,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		var parseCmd = function(r, s) {
 			var skillObj,
 			cmdObj = Cmds.createCommandObject(r);
-			console.log(cmdObj);
+			
 			if (!s.player.creationStep) {
 				if (cmdObj) {
 					if (cmdObj.cmd) {
