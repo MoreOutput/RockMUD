@@ -2,13 +2,15 @@
 red: #ff0033;
 green: #60f066;
 blue: #0066ff;
+yellow: #ffcc00;
 */
 html, body {
 background-color: #000;
 color: #fff;
 font-size: .9em;
-padding-top: .5em;
+padding: .5em;
 height: 100%;
+letter-spacing: 0.0650em;
 }
 html, body a {
 color: #60f066;
@@ -16,7 +18,14 @@ color: #60f066;
 .sans-serif {
 font-family: sans-serif;
 }
-h1, h2, h3, h4, h5, h6, .title {
+h1 {
+font-family: serif;
+padding-top: 0;
+margin-top: 0;
+font-size: 155%;
+color: #ffcc00;
+}
+h2, h3, h4, h5, h6, .title {
 color: #ddd;
 font-family: serif;
 padding-top: 0;
@@ -57,7 +66,6 @@ text-shadow: 2px 2px #ff0033;
 color: #fff;
 }
 .score {
-border-bottom: 1px dashed #eee;
 margin-bottom: .25em;
 }
 .score h1, h4 {
@@ -74,7 +82,7 @@ color: #ff0033;
 list-style-type: square;
 }
 .score .stat-gold {
-color: yellow;
+color: #ffcc00;
 }
 #score .stat-hp {
 color: #ff0033;
@@ -96,7 +104,7 @@ color: #60f066;
 color: #fff;
 }
 .cmd-chat .msg-name {
-color: yellow;
+color: #ffcc00;
 font-weight: bold;
 }
 .cmd-say {
@@ -114,15 +122,15 @@ font-weight: bold;
 color: purple;
 }
 .motd {
-border-top: 1px dashed yellow;
-border-bottom: 1px dashed yellow;
+border-top: 1px dashed #ffcc00;
+border-bottom: 1px dashed #ffcc00;
 color: #ff0033;
 padding: .8em 0 0 0;
 margin: .5em 0 1em 0;
 font-weight: bold;
 }
 .room .room-title {
-color: #ddd;
+color: #ffcc00;
 }
 .room .room-exits {
 color: #ff0033;
@@ -158,8 +166,12 @@ color: #60f066;
 color: #0066ff;
 }
 .yellow {
-color: yellow;
+color: #ffcc00;
 }
 .grey {
-color: #eee;
+color: #ddd;
+}
+.large {
+font-size: 1.5em;
+letter-spacing: 0em;
 }

@@ -4,23 +4,23 @@ window.onload = function() {
 	terminal = document.getElementById('terminal'),
 	node = document.getElementById('cmd'),
 	rowCnt = 0,
+	canSend = true,	
 	aliases = {	
-		n: 'north',
-		e: 'east',
-		w: 'west',
-		s: 'south',
-		u: 'up',
-		d: 'down',
-		north: 'north',
-		east: 'east',
-		west: 'west',
-		south: 'south',
-		up: 'up',
-		down: 'down',
-		f: 'flee',
+		n: 'move north',
+		e: 'move east',
+		w: 'move west',
+		s: 'move south',
+		u: 'move up',
+		d: 'move down',
+		north: 'move north',
+		east: 'move east',
+		west: 'move west',
+		south: 'move south',
+		up: 'move up',
+		down: 'move down',
+		fl: 'flee',
 		l: 'look',
-		ls: 'look',
-		dir: 'look',
+		sca: 'scan',
 		i: 'inventory',
 		sc: 'score',
 		o: 'open',
@@ -31,49 +31,54 @@ window.onload = function() {
 		q: 'quaff',
 		c: 'cast',
 		k: 'kill',
+		adv: 'kill',
 		re: 'rest',
 		sl: 'sleep',
 		h: 'help',
 		wh: 'where',
+		af: 'affects',
 		aff: 'affects',
 		ooc: 'chat',
+		shout: 'chat',
+		sh: 'chat',
 		slist: 'skills',
 		skill: 'skills',
 		desc: 'description',
 		r: 'recall',
 		wake: 'stand',
-		g: 'get'
+		g: 'get',
+		tr: 'train',
+		prac: 'practice',
+		nod: 'emote nods solemly.',
+		laugh: 'emote laughs heartily.',
+		wo: 'worth',
+		re: 'recall',
+		gi: 'give',
+		wield: 'wear'
 	},
 	isScrolledToBottom = false,
-	movement = ['north', 'east', 'south', 'west', 'down', 'up'],
 	playerIsLogged = null,
-	display = function(r) {
+	display = function(r, addToDom) {
 		var i = 0;
+	
+		if (addToDom) {
+			terminal.innerHTML += '<div class="row">' + r.msg + '</div>';
 
-		if (!r.styleClass) {
-			r.styleClass = '';
-		}
+			rowCnt += 1;
 
-		if (r.element === undefined) {
-			terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><div class="col-md-12 ' + r.styleClass + '">' + r.msg + '</div></div>';
-		} else {
-			terminal.innerHTML += '<div id="' + rowCnt +'" class="row"><' + r.element + ' class="col-md-12 ' + r.styleClass + '">' + r.msg + '</' + r.element + '></div>';
-		}
+			if (rowCnt >= 160) {
+				for (i; i < terminal.childNodes.length; i += 1) {
+					terminal.removeChild(terminal.childNodes[i]);
+				}
 
-		rowCnt += 1;
-
-		if (rowCnt > 150) {
-			for (i; i < 100; i += 1) {
-				terminal.removeChild(document.getElementById( (i + 1) ));
+				rowCnt = 0;
 			}
 
-			rowCnt = 0;
-		}
+			isScrolledToBottom = terminal.scrollHeight - terminal.clientHeight <= terminal.scrollTop + 1;
 
-		isScrolledToBottom = terminal.scrollHeight - terminal.clientHeight <= terminal.scrollTop + 1;
-
-		if (!isScrolledToBottom) {
-			terminal.scrollTop = terminal.scrollHeight - terminal.clientHeight;
+			if (!isScrolledToBottom) {
+				terminal.scrollTop = terminal.scrollHeight - terminal.clientHeight;
+			}
 		}
 
 		return parseCmd(r);
@@ -81,17 +86,8 @@ window.onload = function() {
 	parseCmd = function(r) {
 		if (r.msg !== undefined) {
 			r.msg = r.msg.replace(/ /g, ' ').trim();
+
 			ws.emit(r.emit, r);
-		}
-	},
-	changeMudState = function(state) {
-		document.getElementById('cmd').dataset.mudState = state;
-	},
-	checkMovement = function(cmdStr, fn) {
-		if (movement.toString().indexOf(cmdStr) !== -1) {
-			return fn(true, 'move ' + cmdStr);
-		} else {
-			return fn(false, cmdStr);
 		}
 	},
 	checkAlias = function(cmdStr, fn) { 
@@ -103,6 +99,7 @@ window.onload = function() {
 		cmdArr = cmdStr.split(' ');
 
 		cmd = cmdArr[0].toLowerCase();
+
 		msg = cmdArr.slice(1).join(' ');
 
 		for (i; i < keyLength; i += 1) {
@@ -118,61 +115,67 @@ window.onload = function() {
 		return fn(cmd + ' ' + msg);
 	};
 
-	document.getElementById('console').onsubmit = function (e) {
-		var messageNodes = [],
-		msg = node.value.toLowerCase().trim();
-
-		display({
-			msg : checkAlias(msg, function(cmd) {
-				 return checkMovement(cmd, function(wasMov, cmd) {
-					return cmd;
-				});
-			}),
-			emit : (function () {
-				var res = node.dataset.mudState;
-
-				if (res === 'login') {
-					return 'login';
-				} else if (msg === 'quit' || msg === 'disconnect') {
-					return 'quit';
-				} else if (res === 'selectRace') {
-					return 'raceSelection';
-				} else if (res === 'selectClass') {
-					return 'classSelection';
-				} else if (res === 'createPassword') {
-					return 'setPassword';
-				} else if (res === 'enterPassword') {
-					return 'password';
-				} else {
-					return 'cmd';
-				}
-			}()),
-			styleClass: 'cmd'
-		});
-			
-		node.value = '';
+	document.onclick = function() {
 		node.focus();
-
-		return false;
 	};
 
-	document.getElementById('cmd').focus();
+	document.addEventListener('reqPassword', function(e) {
+		e.preventDefault();
+		
+		node.type = 'password';
+		node.placeholder = 'Login password';
+	}, false);
 
-	ws.on('msg', function(r) {
-		display(r);
+	document.addEventListener('onLogged', function(e) {
+		e.preventDefault();
+		
+		node.type = 'text';
+		node.placeholder = 'Enter a Command -- type \'help commands\' for a list of basic commands';
+	}, false);
+	
+	document.getElementById('console').onsubmit = function (e) {
+		var messageNodes = [],
+		msg = node.value.toLowerCase().trim(),
+		msgObj = {
+			msg: checkAlias(msg, function(cmd) {
+				return cmd;
+			}),
+			emit: 'cmd'
+		};
 
-		if (r.res && r.res.toLowerCase().indexOf('password') !== -1) {
-			node.type = 'password';
+		e.preventDefault();
+
+		if (canSend) {
+			display(msgObj);
+			
+			node.value = '';
+			node.focus();
+
+			canSend = false;
+			
+			return false;
 		} else {
-			node.type = 'text';
+			return false;
 		}
+	};
 
-		if (r.res === 'end') {
-			window.location.reload();
-		}
+	node.focus();
+	
+	ws.on('msg', function(r) {
+		display(r, true);
 
-		if (r.res) {
-			changeMudState(r.res);
+		if (r.evt && !r.evt.data) {
+			r.evt = new CustomEvent(r.evt);
+			
+			if (!r.data) {
+				document.dispatchEvent(r.evt);
+			} else {
+				document.dispatchEvent(r.evt, r.data);
+			}
 		}
 	});
+
+	setInterval(function() {
+		canSend = true;
+	}, 175);
 };

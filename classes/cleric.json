@@ -1,0 +1,21 @@
+{
+	"name": "Cleric",
+	"classAbbr": "Cle",
+	"playable": true,
+	"mana": 20,
+	"mainStat": "wis",
+	"skills": [
+		{
+			"id": "cureLight",
+			"display": "Cure Light",
+			"mod": 0,
+			"train": 65,
+			"type": "spell",
+			"wait": 2,
+			"learned": false,
+			"prerequisites": {
+				"level": 1
+			}
+		}
+	]
+}

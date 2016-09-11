@@ -31,10 +31,6 @@ Room.prototype.checkEntranceCriteria = function(roomObj, exitObj, player) {
 	return true;
 };
 
-Room.prototype.getByPosition = function() {
-
-};
-
 Room.prototype.getDisplayHTML = function(roomObj, options) {
 	var room = this,
 	i = 0,
@@ -42,13 +38,29 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 	exits = roomObj.exits,
 	playersInRoom = roomObj.playersInRoom,
 	monsters = roomObj.monsters,
+	titleStyleClass = 'room-title',
+	titleHtmlTag = 'h2',		
 	items = roomObj.items;
 
+	if (roomObj.titleHtmlTag) {
+		titleHtmlTag = roomObj.titleHtmlTag;
+	}
+
+	if (roomObj.titleStyleClass) {
+		titleStyleClass = roomObj.titleStyleClass;
+	}
+	
 	if (exits.length > 0) {
-		displayHTML += '<ul class="room-exits list-inline"><li class="list-label">Exits: </li>';
+		displayHTML += '<ul class="room-exits list-inline"><li class="list-label">Visible Exits: </li>';
 
 		for (i; i < exits.length; i += 1) {
-			displayHTML += '<li>' + exits[i].cmd + '</li>';
+			if (!exits[i].door) {
+				displayHTML += '<li>' + exits[i].cmd + '</li>';
+			} else if (exits[i].door && !exits[i].door.isOpen) {
+				displayHTML += '<li class="grey">' + exits[i].cmd + '</li>';
+			} else {
+				displayHTML += '<li class="yellow">' + exits[i].cmd + '</li>';
+			}
 		}
 
 		displayHTML += '</ul>';
@@ -62,7 +74,11 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 	if (items.length > 0) {
 		for (i; i < items.length; i += 1) {
-			displayHTML += '<li class="room-item">A ' + items[i].short + '</li>';
+			if (items[i].long) {
+				displayHTML += '<li class="room-item">' + items[i].long + '</li>';
+			} else {
+				displayHTML += '<li class="room-item">A ' + items[i].name + '</li>';
+			}
 		}
 	}
 
@@ -70,17 +86,17 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 	if (monsters.length > 0 || playersInRoom.length > 0) {
 		for (i; i < monsters.length; i += 1) {
-			if (!monsters[i].short) {
-				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' + 
+			if (monsters[i].long) {
+				displayHTML += '<li class="room-monster grey">' + monsters[i].long + ' is ' + 
 				 monsters[i].position + ' here</li>';
 			} else {
-				displayHTML += '<li class="room-monster">' + monsters[i].short + ' is ' + 
+				displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is ' + 
 				 monsters[i].position + ' here</li>';
 			}
 		}
 
 		i = 0;
-
+	
 		for (i; i < playersInRoom.length; i += 1) {
 			if (!options || !options.hideCallingPlayer || options.hideCallingPlayer !== playersInRoom[i].name ) {
 				displayHTML += '<li class="room-player">' + playersInRoom[i].name 
@@ -91,8 +107,9 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 	displayHTML += '</ul>';
 
-	displayHTML = '<div class="room"><h2 class="room-title">' + roomObj.title + '</h2>' + 
-	'<p class="room-content">' + roomObj.content + '</p>' + displayHTML + '</div>';
+	displayHTML = '<div class="room"><' + titleHtmlTag + ' class="' + titleStyleClass
+		+  '">' + roomObj.title + '</' + titleHtmlTag  + '>' 
+		+ '<p class="room-content">' + roomObj.content + '</p>' + displayHTML + '</div>';
 
 	return displayHTML;
 };
@@ -117,12 +134,7 @@ Room.prototype.getExit = function(roomObj, direction) {
 	}
 };
 
-// return all the rooms connected to this one, default depth of two
-/*
-	{
-		direction.roomObj.direction.roomObj <- how depth will work
-	}
-*/
+//return an array ofall the rooms connected to the passed room
 Room.prototype.getAdjacent = function(roomObj) {
 	var i = 0,
 	fndRoom,
@@ -130,7 +142,7 @@ Room.prototype.getAdjacent = function(roomObj) {
 
 	for (i; i < roomObj.exits.length; i += 1) {
 		if (!roomObj.exits[i].door || roomObj.exits[i].door.isOpen) {
-			fndRoom = World.getRoomObject(roomObj.area, roomObj.exits[i].id);
+			fndRoom = World.getRoomObject(roomObj.exits[i].area, roomObj.exits[i].id);
 
 			roomArr.push(fndRoom);
 		}
@@ -139,14 +151,38 @@ Room.prototype.getAdjacent = function(roomObj) {
 	return roomArr;
 };
 
-Room.prototype.getDisplay = function(areaName, roomId) {
-	var room = this,
-	players = World.getPlayersByRoomId(roomId),
-	roomObj = World.getRoomObject(areaName, roomId);
+/*
+Get an object in the current form based off of a given room
+	{
+		directionalCommand: exitObj with .room reference attached
+	}
 
-	roomObj.playersInRoom = players;
+	the attached room has a .map parameter added dictated by the depth parameter
+	set to a max of five.
+*/
+Room.prototype.getAdjacentMap = function(roomObj, depth) {
+	var i = 0,
+	fndRoom,
+	map = {};
 
-	return room.getDisplayHTML(roomObj);
+	if (!depth || depth < 1) {
+		depth = 1;
+	} else if (depth > 5) {
+		depth = 5;
+	}
+
+	for (i; i < roomObj.exits.length; i += 1) {
+		depth -= 1;
+
+		map[roomObj.exits[i].cmd] = roomObj.exits[i];
+		map[roomObj.exits[i].cmd].room = World.getRoomObject(roomObj.exits[i].area, roomObj.exits[i].id);
+
+		if (depth > 0) {
+			map[roomObj.exits[i].cmd].room.map = this.getAdjacentMap(map[roomObj.exits[i].cmd].room, depth)
+		}
+	}
+
+	return map;
 };
 
 // Return a brief overview of a room
@@ -162,11 +198,11 @@ Room.prototype.getBrief = function(roomObj, options) {
 		
 		for (i; i < monsters.length; i += 1) {
 			if (!monsters[i].short) {
-				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' + 
-				monsters[i].position + ' there.</li>';
+				displayHTML += '<li class="room-monster yellow">' + monsters[i].displayName + ' is ' 
+					+ monsters[i].position + ' there.</li>';
 			} else {
-				displayHTML += '<li class="room-monster">' + monsters[i].short + ' is ' + 
-				monsters[i].position + ' there.</li>';
+				displayHTML += '<li class="room-monster yellow">' + monsters[i].short + ' is ' 
+				 + monsters[i].position + ' there.</li>';
 			}
 		}
 
@@ -190,7 +226,22 @@ Room.prototype.getBrief = function(roomObj, options) {
 		displayHTML += '<p class="room-content">' + roomObj.brief + '</p>';
 	}
 
+	displayHTML += '</div>';
+
 	return displayHTML;
+};
+
+Room.prototype.getTrainers = function(roomObj, command) {
+	var i = 0,
+	trainers = [];
+	
+	for (i; i < roomObj.monsters.length; i += 1) {
+		if (roomObj.monsters[i].trainer) {
+			trainers.push(roomObj.monsters[i]);
+		}
+	}
+
+	return trainers;
 };
 
 Room.prototype.getMerchants = function(roomObj, command) {
@@ -212,15 +263,7 @@ Room.prototype.addItem = function(roomObj, item) {
 };
 
 Room.prototype.getItem = function(roomObj, command) {
-	var i = 0;
-
-	for (i; i < roomObj.items.length; i += 1) {
-		if (roomObj.items[i].name.toLowerCase().indexOf(command.arg) !== -1) {
-			return roomObj.items[i];
-		}
-	}
-
-	return false;
+	return World.search(roomObj.items, command);
 };
 
 Room.prototype.removeItem = function(roomObj, item) {
@@ -237,15 +280,21 @@ Room.prototype.removeItem = function(roomObj, item) {
 };
 
 Room.prototype.getMonster = function(roomObj, command) {
-	var i = 0;
+	return World.search(roomObj.monsters, command);
+};
 
-	for (i; i < roomObj.monsters.length; i += 1) {
-		if (roomObj.monsters[i].name.toLowerCase().indexOf(command.arg) !== -1) {
-			return roomObj.monsters[i];
-		}
+Room.prototype.getPlayer = function(roomObj, command) {
+	return World.search(roomObj.playersInRoom, command);
+};
+
+Room.prototype.getEntity = function(roomObj, command) {
+	var result = this.getMonster(roomObj, command);
+
+	if (!result) {
+		result = this.getPlayer(roomObj, command);
 	}
 
-	return false;
+	return result;
 };
 
 Room.prototype.removePlayer = function(roomObj, player) {
@@ -274,22 +323,6 @@ Room.prototype.removeMob = function(roomObj, mob) {
 	roomObj.monsters = newArr;
 };
 
-Room.prototype.processEvents = function(roomObj, player, eventName, fn) {
-	var room = this;
-
-	if (eventName) {
-		World.processEvents(roomObj, player, roomObj, eventName, function() {
-			World.processEvents(roomObj.monsters, player, roomObj, eventName, function() {
-				World.processEvents(roomObj.items, player, roomObj, eventName, function() {
-					return fn(roomObj, player);
-				});
-			});
-		});
-	} else {
-		return fn(roomObj, player);
-	}
-};
-
 Room.prototype.addCorpse = function(roomObj, corpse) {
 	var room = this;
 	room.addItem(roomObj, corpse);
@@ -301,3 +334,4 @@ Room.prototype.getExitCommands = function(roomObj) {
 }
 
 module.exports.room = new Room();
+

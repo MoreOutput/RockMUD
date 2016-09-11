@@ -1,12 +1,12 @@
 {
   "name": "RockMUD",
-  "subdomain": "moreoutput.rockmud",
+  "subdomain": "rockmud.heroku",
   "dependencies": {
-    "socket.io": ">= 1.0.0"
+    "socket.io": ">= 1.4.8"
   },
-  "version": "0.2.0",
+  "version": "0.3.0",
   "engines": {
-    "node": ">= 4.0.0"
+    "node": ">= 6.4.0"
   },
   "description": "JavaScript mud server with websockets",
   "main": "server.js",

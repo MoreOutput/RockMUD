@@ -1,7 +1,9 @@
 /*
 * All non-combat commands that one would consider 'general' to a all
 * users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
-* the actual combat loop is, of course, in combat.js
+* the actual combat loop is, of course, in combat.js.
+* 
+* Events fired on particular commands are also fired here; for example onEnter, onLeave
 */
 'use strict';
 var fs = require('fs'),
@@ -17,55 +19,124 @@ areas = World.areas,
 
 Cmd = function () {};
 
+/*
+	command object = {
+		cmd: cmdArr[0].toLowerCase(), // {cast} spark boar
+		msg: cmdArr.slice(1).join(' '), // cast {spark boar}
+		arg: cmdArr[1].toLowerCase(), // cast {spark} boar
+		input: cmdArr.slice(2).join(' '), // cast spark {boar ...}
+		number: 1 // argument target -- cast spark 2.boar
+	};
+*/
+Cmd.prototype.createCommandObject = function(resFromClient) {
+	var cmdArr = resFromClient.msg.split(' '),
+	cmdObj = {};
+
+	if (cmdArr.length === 1) {
+		cmdArr[1] = '';
+	}
+
+	if (/[`~@#$%^&*()-+={}[]|<>]+$/g.test(resFromClient.msg) === false) {
+		cmdObj = {
+			cmd: cmdArr[0].toLowerCase(),
+			msg: cmdArr.slice(1).join(' '),
+			arg: cmdArr[1].toLowerCase(),
+			input: cmdArr.slice(2).join(' '),
+			number: 1
+		};
+
+		if (cmdObj.input && !isNaN(parseInt(cmdObj.input[0]))
+			|| (!cmdObj.input && !isNaN(parseInt(cmdObj.msg[0]))) ) {
+
+			cmdObj.arg = cmdObj.arg.replace(/.*[.]/g, '');
+			cmdObj.number = parseInt(cmdObj.msg[0]);
+
+			if (!cmdObj.input) {
+				cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
+			} else {
+				cmdObj.input = cmdObj.input.replace(/^[0-9][.]/, '');
+			}
+		}
+	}
+
+	return cmdObj;
+};
+
 Cmd.prototype.buy = function(target, command) {
 	var i = 0,
-	roomObj = World.getRoomObject(target.area, target.roomid),
+	roomObj,
 	item,
+	canBuy = true,
 	merchant;
-	
+
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
+
 	if (target.position !== 'sleeping') {
 		merchant = Room.getMerchants(roomObj)[0];
 		
 		if (merchant) {
-			item = Character.getItem(merchant, command);
+			if (merchant.beforeSell) {
+				canBuy = World.processEvents('beforeSell', merchant, roomObj, target);
+			}
 
-			if (item) {
-				if (item.worth <= target.gold) {
-					target.gold -= item.worth;
-					merchant.gold += item.worth;
+			if (canBuy) {
+				item = Character.getItem(merchant, command);
+				
+				if (item) {
+					if (item.value <= target.gold) {
+						target.gold -= item.value;
+						merchant.gold += item.value;
 					
-					Character.removeItem(merchant, item);
+						Character.removeItem(merchant, item);
 
-					Character.addItem(target, item);
+						Character.addItem(target, item);
 					
-					World.msgPlayer(target, {
-						msg: 'You buy something.'
-					});
+						World.msgPlayer(target, {
+							msg: 'You buy ' + item.short
+						});
+				
+						World.processEvents('onSell', merchant, roomObj, target);
+						World.processEvents('onBuy', target, roomObj, merchant);
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You can\'t afford that.',
+							styleClass: 'yellow'
+						});
+					}
 				} else {
 					World.msgPlayer(target, {
-						msg: 'Not enough Gold.',
-						styleClass: 'yellow'
+						msg: 'Should probably recheck the name again, this isn\'t registering with the merchant.'
 					});
 				}
-			} else {
-				World.msgPlayer(target, {
-					msg: 'Should probably recheck the name again, this isn\'t registering with the merchant.'
-				});
 			}
 		} else {
-
+			World.msgPlayer(target, {
+				msg: 'There doesn\'t seem to be anyone selling anything here.'
+			});
 		}
 	} else {
-	
+		World.msgPlayer(target, {
+			msg: 'Wake up first.'
+		});
 	}
 };
 
 Cmd.prototype.sell = function(target, command) {
 	var i = 0,
-	roomObj = World.getRoomObject(target.area, target.roomid),
+	roomObj,
 	item,
 	merchant;
 	
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
+
 	if (target.position !== 'sleeping') {
 		merchant = Room.getMerchants(roomObj)[0];
 		
@@ -73,26 +144,31 @@ Cmd.prototype.sell = function(target, command) {
 			item = Character.getItem(target, command);
 
 			if (item) {
-				if (item.worth <= merchant.gold) {
-					merchant.gold -= item.worth - 5;
-					target.gold += item.worth - 5;
+				if (item.value <= merchant.gold) {
+					merchant.gold -= item.value - 5;
+					target.gold += item.value - 5;
 					
 					Character.removeItem(target, item);
 
 					Character.addItem(merchant, item);
 					
 					World.msgPlayer(target, {
-						msg: 'You sell something.'
+						msg: 'You sell ' + item.short,
+						styleClass: 'green'
 					});
+
+					World.processEvents('onSell', target, roomObj, merchant);
+					World.processEvents('onBuy', merchant, roomObj, target);
 				} else {
 					World.msgPlayer(target, {
-						msg: 'He seems to be strapped at the moment.',
+						msg: 'They can\'t afford to buy ' + item.short,
 						styleClass: 'yellow'
 					});
 				}
 			} else {
 				World.msgPlayer(target, {
-					msg: 'Should probably recheck the name.'
+					msg: marchant.displayName + 'doesn\'t seem to recognize the name.',
+					styleClass: 'error'
 				});
 			}
 		} else {
@@ -118,7 +194,7 @@ Cmd.prototype.list = function(target, command) {
 				if (merchant.items.length > 0) {
 					for (i; i < merchant.items.length; i += 1) {
 						storeDisplay += '<li>' + merchant.items[i].name  +
-							' <span class="yellow">(' + merchant.items[i].worth + 'gp)</span></li>';
+							' <span class="yellow">(' + merchant.items[i].value + 'gp)</span></li>';
 					}
 
 					World.msgPlayer(target, {
@@ -139,8 +215,129 @@ Cmd.prototype.list = function(target, command) {
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You can\'t see so browsing the goods is a little difficult at the moment.'
+			msg: 'You can\'t see so browsing goods is a little difficult at the moment.'
 		});
+	}
+};
+
+// Genric command for giving items or gold
+Cmd.prototype.give = function(target, command) {
+	var i = 0,
+	roomObj,
+	item,
+	canSee = true,
+	goldToTransfer = 0,
+	receiver;
+	
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
+
+	if (target.position !== 'sleeping') {
+		if (command.msg && command.msg.indexOf(' ' + World.config.coinage) === -1) {
+			if (canSee) {
+				receiver = Room.getEntity(roomObj, {
+					arg: command.input,
+					input: command.arg
+				});
+
+				if (receiver) {
+					item = Character.getItem(target, command);
+
+					if (item) {
+						if (item) {
+							Character.removeItem(target, item);
+
+							Character.addItem(receiver, item);
+
+							World.msgPlayer(target, {
+								msg: 'You give ' + item.short + ' to ' + receiver.displayName + '.',
+								styleClass: 'green'
+							});
+
+							if (receiver.isPlayer) {
+								World.msgPlayer(receiver, {
+									msg: target.displayName + ' gives you ' + item.short + '.',
+									styleClass: 'green'
+								});
+							}
+
+							World.msgRoom(roomObj, {
+								msg: 'roomMsg',
+								styleClass: 'grey',
+								playerName: [receiver.name, target.name]
+							});
+						} else {
+					
+						}
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You don\'t have an item by that name.',
+							styleClass: 'error'
+						});
+					}
+				} else {
+					World.msgPlayer(target, {
+						msg: 'You don\'t see anyone by that name.',
+						styleClass: 'error'
+					});
+				}
+			}
+		} else if (command.msg && command.input.indexOf(World.config.coinage) !== -1) {
+			if (command.arg !== 'all') {
+				goldToTransfer = parseInt(command.arg);
+			} else {
+				goldToTransfer = target.gold;
+			}
+
+			if (goldToTransfer) {
+				if (goldToTransfer >= target.gold) {
+					if (command.input.indexOf('to') === -1) {
+						command.input = command.input.replace(World.config.coinage, '').replace(/ /g, '');
+					} else {
+						command.input = command.input.replace(World.config.coinage + ' to', '').replace(/ /g, '');
+					}
+
+					receiver = Room.getEntity(roomObj, {
+						arg: command.input
+					});
+
+					if (receiver) {
+						target.gold -= goldToTransfer;
+						receiver.gold += goldToTransfer;
+			
+						World.msgPlayer(target,  {
+							msg: 'You give ' + receiver.displayName + ' some ' + World.config.coinage + '.',
+							styleClass: 'yellow'
+						});
+		
+						World.msgPlayer(receiver,  {
+							msg: target.displayName + ' gives you ' + goldToTransfer + ' ' + World.config.coinage + 's.',
+							styleClass: 'green'
+						});
+					}
+				} else {
+					World.msgPlayer(target,  {
+						msg: 'That\'s more ' + World.config.coinage + ' than you have.',
+						styleClass: 'error'
+					});
+				}
+			} else {
+				World.msgPlayer(target,  {
+					msg: 'Not a valid number of ' + World.config.coinage  + '.',
+					styleClass: 'error'
+				});
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'Give what? Example: <strong>give sword elf</strong>',
+				styleClass: 'error'
+			});
+		}
+	} else {
+	
 	}
 };
 
@@ -148,19 +345,53 @@ Cmd.prototype.scan = function(target, command) {
 	var roomObj,
 	rooms,
 	i = 0,
+	canSee = true,
 	scanStr = '';
 
-	if (target.position === 'standing') { 
-		roomObj = World.getRoomObject(target.area, target.roomid);
-		rooms = Room.getAdjacent(roomObj);
-
-		for (i; i < rooms.length; i += 1) {
-			scanStr += Room.getBrief(rooms[i]);
+	if (target.position === 'standing') {	
+		if (command.roomObj) {
+			roomObj = command.roomObj;
+		} else {
+			roomObj = World.getRoomObject(target.area, target.roomid);
 		}
 
-		World.msgPlayer(target, {msg: scanStr});
+		canSee = Character.canSee(target, roomObj);	
+
+		if (canSee) {
+			rooms = Room.getAdjacent(roomObj);
+
+			for (i; i < rooms.length; i += 1) {
+				scanStr += Room.getBrief(rooms[i]);
+			}
+
+			World.msgPlayer(target, {
+				msg: scanStr
+			});
+
+			if (World.dice.roll(1, 10) < 4) {
+				World.msgRoom(roomObj, {
+					msg: target.displayName + ' scans the area.',
+					playerName: target.name
+				});
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You can\'t see anything!',
+				styleClass: 'error'
+			});
+		}
 	} else {
-		World.msgPlayer(target, {msg: 'You must be standing to scan the surrounding area.', styleClass: 'error'});
+		if (target.position !== 'fighting') {
+			World.msgPlayer(target, {
+				msg: 'You must be standing to scan the surrounding area.',
+				styleClass: 'error'
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You cannot scan while in combat!.',
+				styleClass: 'error'
+			});
+		}
 	}
 };
 
@@ -168,10 +399,17 @@ Cmd.prototype.emote = function(target, command) {
 	var roomObj;
 	
 	if (target.position !== 'sleeping') {
-		roomObj = World.getRoomObject(target.area, target.roomid);
+		if (!command.roomObj) {
+			roomObj = World.getRoomObject(target.area, target.roomid);
+		} else {
+			roomObj = command.roomObj;
+		}
 
 		World.msgRoom(roomObj, {
-			msg: '<div class="cmd-emote">' + target.displayName + ' ' + command.msg + '</div>'
+			msg: target.displayName + ' ' + command.msg,
+			darkMsg:  'You can feel movement in the area.',
+			styleClass: 'cmd-emote yellow',
+			checkSight: true
 		});
 	} else {
 		World.msgPlayer(target, {msg: 'You can\'t emote right now.', styleClass: 'error'});
@@ -208,13 +446,22 @@ Cmd.prototype.eat = function(target, command) {
 					styleClass: 'cmd-drop blue'
 				});
 			} else {
-				World.msgPlayer(target, {msg: 'You can\'t eat something you dont have.', styleClass: 'error'});
+				World.msgPlayer(target, {
+					msg: 'You can\'t eat something you dont have.',
+					styleClass: 'error'
+				});
 			}
 		} else {
-			World.msgPlayer(target, {msg: 'Eat what?', styleClass: 'error'});
+			World.msgPlayer(target, {
+				msg: 'Eat what?',
+				styleClass: 'error'
+			});
 		}
 	} else {
-		World.msgPlayer(target, {msg: 'You can\'t eat while sleeping.', styleClass: 'error'});
+		World.msgPlayer(target, {
+			msg: 'You can\'t eat while sleeping.',
+			styleClass: 'error'
+		});
 	}
 };
 
@@ -262,15 +509,21 @@ Cmd.prototype.drink = function(target, command) {
 				});
 			}
 		} else {
-			World.msgPlayer(target, {msg: 'You can\'t drink something you dont have.', styleClass: 'error'});
+			World.msgPlayer(target, {
+				msg: 'You can\'t drink something you dont have.',
+				styleClass: 'error'
+			});
 		}
 	} else {
-		World.msgPlayer(target, {msg: 'Drink from what?', styleClass: 'error'});
+		World.msgPlayer(target, {
+			msg: 'Drink from what?',
+			styleClass: 'error'
+		});
 	}
 };
 
 Cmd.prototype.fill = function() {
-	
+			
 };
 
 Cmd.prototype.sleep = function(target, command) {
@@ -280,7 +533,10 @@ Cmd.prototype.sleep = function(target, command) {
 		if (target.position === 'standing' || target.position === 'resting') {
 			target.position = 'sleeping';
 
-			World.msgPlayer(target, {msg: 'You lie down and go to sleep.', styleClass: 'cmd-sleep'});
+			World.msgPlayer(target, {
+				msg: 'You lie down and go to sleep.',
+				styleClass: 'cmd-sleep'
+			});
 
 			roomObj = World.getRoomObject(target.area, target.roomid);
 
@@ -290,10 +546,14 @@ Cmd.prototype.sleep = function(target, command) {
 				styleClass: 'cmd-sleep'
 			});
 		} else {
-			World.msgPlayer(target, {msg: 'You can\'t go to sleep in this position.'});
+			World.msgPlayer(target, {
+				msg: 'You can\'t go to sleep in this position.'
+			});
 		}
 	} else {
-		World.msgPlayer(target, {msg: 'You are already asleep...'});
+		World.msgPlayer(target, {
+			msg: 'You are already asleep...'
+		});
 	}
 };
 
@@ -304,7 +564,10 @@ Cmd.prototype.rest = function(target, command) {
 		if (target.position === 'standing' || target.position === 'sleeping') {
 			target.position = 'sleeping';
 
-			World.msgPlayer(target, {msg: 'You begin resting.', styleClass: 'cmd-rest'});
+			World.msgPlayer(target, {
+				msg: 'You begin resting.',
+				styleClass: 'cmd-rest'
+			});
 
 			roomObj = World.getRoomObject(target.area, target.roomid);
 
@@ -314,10 +577,14 @@ Cmd.prototype.rest = function(target, command) {
 				styleClass: 'cmd-sleep'
 			});
 		} else {
-			World.msgPlayer(target, {msg: 'You can\'t rest right now.'});
+			World.msgPlayer(target, {
+				msg: 'You can\'t rest right now.'
+			});
 		}
 	} else {
-		World.msgPlayer(target, {msg: 'You are resting now...do you expect to rest harder?'});
+		World.msgPlayer(target, {
+			msg: 'You are resting now...do you expect to rest harder?'
+		});
 	}
 };
 
@@ -380,7 +647,7 @@ Cmd.prototype.open = function(target, command, fn) {
 				});
 
 				if (exitObj.door.openMsg) {
-					World.msgPlayer(target, {msg: exitObj.door.openMsg, styleClass: 'yellow'});
+					World.msgPlayer(roomObj, {msg: exitObj.door.openMsg, styleClass: 'yellow'});
 				}
 
 				World.msgRoom(targetRoom, {
@@ -544,6 +811,58 @@ Cmd.prototype.lock = function(target, command, fn) {
 	}
 };
 
+Cmd.prototype.recall = function(target, command) {
+	var targetRoom,
+	roomObj;
+	
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
+
+	if (!command.msg && target.recall.roomid && target.recall.area) {
+		if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
+			targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
+		
+			if (targetRoom) {
+				target.area = target.recall.area;
+				target.roomid = target.recall.roomid;
+	
+				if (target.isPlayer) {
+					Room.removePlayer(roomObj, target);
+					
+					targetRoom.playersInRoom.push(target);
+
+					this.look(target, {roomObj: targetRoom});
+				} else {
+					Room.removeMob(roomObj, target);
+	
+					targetRoom.monsters.push(target);
+				}
+	
+				World.msgPlayer(target, {
+					msg: 'You have recalled back to ' + target.recall.area  + '!',
+					styleClass: 'green'
+				});
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: '<strong>You are already standing in your recall room!</strong>',
+				styleClass: 'error'
+			});
+		}
+	} else if (command.msg && command.arg === 'set' && !targetRoom.preventRecall) {
+		target.recall.area = roomObj.area;
+		target.recall.roomid = roomObj.id;
+	
+		World.msgPlayer(target, {
+			msg: 'You will now recall to the current room!',
+			styleClass: 'green'
+		});
+	}
+};
+
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
 	var direction = command.arg,
@@ -552,15 +871,40 @@ Cmd.prototype.move = function(target, command, fn) {
 	displayHTML,
 	targetRoom,
 	exitObj,
-	moveRoll = World.dice.roll(1, 4),
 	sneakAff,
-	roomObj;
+	roomObj,
+	canEnter = true, // event result, must be true to move into targetRoom
+	canLeave = true, // event result, must be true to leave roomObj	
+	i = 0,
+	cost = 3,
+	parseMovementMsg = function(exitObj) {
+		if (!exitObj.cmdMsg) {
+			if (exitObj.cmd === 'up') {
+				return 'below';
+			} else if (exitObj.cmd === 'down') {
+				return 'above';
+			} else {
+				return ' the ' + exitObj.cmd;
+			}
+		} else {
+			return exitObj.cmdMsg;
+		}
+	};
 
-	if (target.position === 'standing' 
-		|| target.position === 'fleeing' 
-		&& target.cmv > (4 - dexMod) 
-		&& target.wait === 0) {
-		roomObj = World.getRoomObject(target.area, target.roomid);
+	if (target.size.value > 3) {
+		cost += 2;
+	}
+	
+	cost = Math.round(cost - dexMod);
+
+	if ((target.position === 'standing' || target.position === 'fleeing') 
+		&& (target.cmv > cost && target.wait === 0)) {
+
+		if (!command.roomObj) {
+			roomObj = World.getRoomObject(target.area, target.roomid);
+		} else {
+			roomObj = command.roomObj;
+		}
 
 		exitObj = Room.getExit(roomObj, direction);
 
@@ -568,73 +912,141 @@ Cmd.prototype.move = function(target, command, fn) {
 			if (!exitObj || !exitObj.door || exitObj.door.isOpen === true) {
 				sneakAff = Character.getAffect(target, 'sneak');
 				
-				targetRoom = World.getRoomObject(roomObj.area, exitObj.id);
-				
-				target.cmv -= Math.round(4 + moveRoll - dexMod);
+				targetRoom = World.getRoomObject(exitObj.area, exitObj.id);
 
-				if (target.cmv < 0) {
-					target.cmv = 0;
-				}
+				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value))) {
+					canEnter = World.processEvents('beforeEnter', targetRoom, roomObj, target);
+					canEnter = World.processEvents('beforeMove', roomObj, target, command);
+					canEnter = World.processEvents('beforeMove', roomObj, target.items, command);
 
-				target.roomid = targetRoom.id;
-				
-				if (targetRoom.terrianMod) {
-					target.wait += targetRoom.terrianMod;
-				}
+					target.cmv -= cost;
 
-				if (target.isPlayer) {
-					this.look(target);
-
-					Room.removePlayer(roomObj, target);
-
-					targetRoom.playersInRoom.push(target);
-				} else {
-					Room.removeMob(roomObj, target);
-
-					targetRoom.monsters.push(target);
-				}
-
-				World.msgRoom(targetRoom, {
-					msg: function(fn) {
-						var msg = '';
-
-						if (!sneakAff) {
-							if (Character.canSee(target, roomObj)) {
-								msg = '<strong>' + target.displayName
-								+ '</strong> enters the room from the ' + exitObj.cmd + '.';
-							} else {
-								msg = '<strong>Something</strong> enters the room from the ' + exitObj.cmd + '.';
-							}
-						}
-
-						return fn(true, msg);
-					},
-					playerName: target.name
-				});
-
-				World.msgRoom(roomObj, {
-					msg: function(fn) {
-						var msg = '';
-
-						if (!sneakAff) {
-							if (Character.canSee(target, roomObj)) {
-								msg = '<span class="yellow">' + target.displayName
-								+ ' leaves the room heading <strong>' + direction + '</strong></div>';
-							} else {
-								msg = '<span class="yellow">Something leaves the room.</div>';
-							}
-						}
-						
-						return fn(true, msg);
-					},
-					playerName: target.name
-				});
-
-				Room.processEvents(targetRoom, target, 'onVisit', function(targetRoom, target) {
-					if (typeof fn === 'function') {
-						return fn(true, roomObj, targetRoom);
+					if (exitObj.area !== target.area) {
+						target.area = exitObj.area;
 					}
-				});
+
+					if (target.cmv < 0) {
+						target.cmv = 0;
+					}
+
+					target.area = targetRoom.area;
+					target.roomid = targetRoom.id;
+
+					if (canEnter) {
+						World.processEvents('onExit', roomObj, target, targetRoom, command);
+						World.processEvents('onMove', roomObj, target, targetRoom, command);
+					}
+
+					if (targetRoom.terrianMod) {
+						target.wait += targetRoom.terrianMod;
+					}
+
+					if (target.isPlayer) {
+						this.look(target);
+
+						Room.removePlayer(roomObj, target);
+
+						targetRoom.playersInRoom.push(target);
+					} else {
+						Room.removeMob(roomObj, target);
+
+						targetRoom.monsters.push(target);
+					}
+					
+					World.msgRoom(targetRoom, {
+						msg: function(receiver, fn) {
+							var msg = '';
+
+							if (!sneakAff) {
+								if (Character.canSee(receiver, targetRoom)) {
+									if (!target.inName) {
+										if (target.long) {
+											msg = '<strong>' + target.long
+												+ '</strong> walks in from '
+												+ parseMovementMsg(exitObj) + '.';
+										} else {
+											msg = '<strong>' + target.displayName
+												+ '</strong> walks in from '
+												+ parseMovementMsg(exitObj) + '.';
+										}	
+									} else if (target.inName && !target.inMessage) {
+										msg = '<strong>' + target.inName
+											+ '</strong> enters from '
+											+ parseMovementMsg(exitObj) + '.';
+									} else {
+										msg = '<strong>' + target.inName
+											+ '</strong> ' + target.inMessage  + ' '
+											+ parseMovementMsg(exitObj) + '.';
+									}
+								} else if (receiver.hearing) {
+									if (World.dice.roll(1, 2) === 1) {
+										msg = '<strong>Something</strong> enters from '
+											+ parseMovementMsg(exitObj) + '.';
+									} else {
+										msg = '<strong>Something</strong> comes in from '
+											+ parseMovementMsg(exitObj) + '.';
+									}
+								}
+							}
+
+							return fn(true, msg);
+						},
+						playerName: target.name
+					});
+
+					World.msgRoom(roomObj, {
+						msg: function(receiver, fn) {
+							var msg = '';
+					
+							if (!sneakAff) {
+								if (Character.canSee(receiver, roomObj)) {
+									if (!target.outName) {
+										if (target.long) {
+											if (World.dice.roll(1, 2) === 1) {
+												msg = '<span class="yellow">' + target.long
+													+ ' leaves heading <strong class="grey">' 
+													+ direction + '</strong>.</span>';	
+											} else {
+												msg = '<span class="yellow">' + target.long
+													+ ' leaves traveling <strong class="grey">' 
+													+ direction + '</strong>.</span>';
+											}
+										} else {
+											msg = '<span class="yellow">' + target.displayName
+												+ ' leaves going <strong class="grey">' + direction + '</strong>.</span>';
+										}
+									} else if (target.outName && !target.outMessage) {
+										msg = '<span class="yellow">' + target.outName
+										+ ' leaves traveling <strong class="grey">' + direction + '</strong>.</span>';
+									} else {
+										msg = '<span class="yellow">' + target.outName + target.outMessage
+										+ ' <strong class="grey">' + direction + '</strong>.</span>';
+									}
+								} else if (receiver.hearing) {
+									msg = '<span class="yellow">You can sense some movement in the area.</span>';
+								}
+							}
+							
+							return fn(true, msg);
+						},
+						playerName: target.name
+					});
+
+					World.processEvents('onMove', target, targetRoom, roomObj, command);
+					World.processEvents('onEnter', targetRoom, roomObj, target, command);
+					World.processEvents('onVisit', targetRoom.monsters, targetRoom, target, command);
+				} else {
+					if (targetRoom.size) {
+						World.msgPlayer(target, {
+							msg: 'You are too large to move there.' ,
+							styleClass: 'error'
+						});
+					}
+
+					if (typeof fn === 'function') {
+						return fn(false, roomObj, targetRoom);
+					}
+				}
 			} else {
 				World.msgPlayer(target, {
 					msg: 'You need to open a ' + exitObj.door.name + ' first.' ,
@@ -656,10 +1068,17 @@ Cmd.prototype.move = function(target, command, fn) {
 			}
 		}
 	} else {
-		World.msgPlayer(target, {
-			msg: 'You cannot do that now.', 
-			styleClass: 'error'
-		});
+		if (target.cmv > cost) {
+			World.msgPlayer(target, {
+				msg: 'You cannot do that now.', 
+				styleClass: 'error'
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You are too tired to move.', 
+				styleClass: 'error'
+			});
+		}
 
 		if (typeof fn === 'function') {
 			return fn(false);
@@ -675,7 +1094,7 @@ Cmd.prototype.who = function(target, command) {
 	
 	if (World.players.length > 0) {
 		for (i; i < World.players.length; i += 1) {
-			player = World.players[i]; // A visible player in players[]
+			player = World.players[i];
 
 			displayName = player.displayName;
 
@@ -703,16 +1122,16 @@ Cmd.prototype.who = function(target, command) {
 					'<td width="85%">Name</td>' +
 				'</tr>' +
 			'</thead><tbody>' + str + '</tbody>' +
-		'</table></div>'
+		'</table></div>';
 		
 		World.msgPlayer(target, {
 			msg: str, 
-			styleClass: 'who-cmd'
+			styleClass: 'cmd-who'
 		});
 	} else {
 		World.msgPlayer(target, {
-			msg: '<div class="cmd-who"><h2>No Visible Players</h2></div>',
-			styleClass: 'who-cmd'
+			msg: '<h2>No Visible Players</h2>',
+			styleClass: 'cmd-who'
 		});
 	}
 };
@@ -722,41 +1141,65 @@ Cmd.prototype.get = function(target, command, fn) {
 	i = 0,
 	item,
 	container,
-	itemLen;
+	canGet = true,
+	itemLen,
+	maxCarry = Character.getMaxCarry(target);
 
 	if (target.position !== 'sleeping') {
-		if (command.msg !== '' && Character.canSee(target)) {
-			container = Character.getContainer(target, command);
+		roomObj = World.getRoomObject(target.area, target.roomid);
+
+		if (command.msg !== '' && Character.canSee(target, roomObj)) {
+			if (command.input) {
+				container = Character.getContainer(target, command);
+			}
 
 			if (!container) {
-				roomObj = World.getRoomObject(target.area, target.roomid);
-
 				if (command.msg !== 'all') {
 					item = Room.getItem(roomObj, command);
 
 					if (item) {
-						Room.removeItem(roomObj, item);
+						canGet = World.processEvents('beforeGet', item, roomObj, target);
+						canGet = World.processEvents('beforeGet', roomObj, target, item);
 
-						Character.addItem(target, item);
+						if (canGet) {
+							if (item.weight <= maxCarry) {
+								Room.removeItem(roomObj, item);
 
-						if (item) {
-							World.msgRoom(roomObj, {
-								msg: target.displayName + ' picks up a ' + item.short,
-								playerName: target.name,
-								styleClass: 'cmd-get yellow'
-							});
+								Character.addItem(target, item);
 
-							World.msgPlayer(target, {
-								msg: 'You pick up a ' + item.short,
-								styleClass: 'cmd-get blue'
-							});
+								if (item && item.weight < Character.getMaxCarry(target)) {
+									World.msgRoom(roomObj, {
+										msg: target.displayName + ' picks up ' + item.short,
+										playerName: target.name,
+										styleClass: 'yellow'
+									});
 
-							if (typeof fn === 'function') {
-								return fn(target, roomObj, item);
+									World.msgPlayer(target, {
+										msg: 'You pick up ' + item.short,
+										styleClass: 'blue'
+									});	
+								} else {
+
+								}
+
+								if (typeof fn === 'function') {
+									return fn(target, roomObj, item);
+								}
+							} else {
+								World.msgPlayer(target, {
+									msg: 'You try to pick up ' + item.short + ' but <strong>it is too heavy</strong>.',
+									styleClass: 'error'
+								});
 							}
+							
+							World.processEvents('onGet', roomObj, target, item);
+							World.processEvents('onGet', item, roomObj, target);
+							World.processEvents('onGet', target, roomObj, item);						
 						}
 					} else {
-						World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
+						if (!item) {
+							World.msgPlayer(target, {msg: 'That item is not here.', styleClass: 'error'});
+						}
 
 						if (typeof fn === 'function') {
 							return fn(target, roomObj, false);
@@ -776,13 +1219,16 @@ Cmd.prototype.get = function(target, command, fn) {
 					World.msgRoom(roomObj, {
 						msg: target.displayName + ' grabs everything they can.',
 						playerName: target.name,
-						styleClass: 'cmd-get-all yellow'
+						styleClass: 'yellow'
 					});
 
 					World.msgPlayer(target, {
 						msg: 'You grab everything!',
-						styleClass: 'cmd-get-all blue'
+						styleClass: 'blue'
 					});
+
+					World.processEvents('onGet', roomObj.items, roomObj, item, target);
+					World.processEvents('onGet', target, roomObj, item, container);
 
 					if (typeof fn === 'function') {
 						return fn(target, roomObj, item);
@@ -793,24 +1239,39 @@ Cmd.prototype.get = function(target, command, fn) {
 				
 				if (item) {
 					Character.removeFromContainer(container, item);
+				
 					Character.addItem(target, item);
 
-					World.msgPlayer(target, {msg: 'You remove a <strong>'
-						+ item.short + '</strong> from a '
-						+ container.short + '.', styleClass: 'green'});
+					World.msgPlayer(target, {
+						msg: 'You remove a <strong>' + item.displayName + '</strong> from a '
+							+ container.displayName + '.', 
+						styleClass: 'green'
+					});
+
+					World.processEvents('onGet', container, roomObj, item, target);
+					World.processEvents('onGet', target, roomObj, item, container);
 				} else {
-					World.msgPlayer(target, {msg: 'You don\'t see that in there.', styleClass: 'error'});
+					World.msgPlayer(target, {
+						msg: 'You don\'t see that in there.',
+						styleClass: 'error'
+					});
 				}
 			}
 		} else {
-			World.msgPlayer(target, {msg: 'Get what? Specify a target or try get all.', styleClass: 'error'});
+			World.msgPlayer(target, {
+				msg: 'Get what? Specify a target or try get all.',
+				styleClass: 'error'
+			});
 
 			if (typeof fn === 'function') {
 				return fn(target, roomObj, item);
 			}
 		}
 	} else {
-		World.msgPlayer(target, {msg: 'Get something while sleeping?', styleClass: 'error'});
+		World.msgPlayer(target, {
+			msg: 'Get something while sleeping?',
+			styleClass: 'error'
+		});
 	}
 };
 
@@ -828,16 +1289,29 @@ Cmd.prototype.put = function(target, command) {
 			if (container) {
 				item = Character.getItem(target, command);
 
-				if (item) {
+				if (item && item.refId !== container.refId && item.id !== container.id) {
 					Character.removeItem(target, item);
+
 					Character.addToContainer(container, item);
 
 					World.msgPlayer(target, {
-						msg: 'You put a <strong>' + item.short + '</strong> into a ' + container.short + '.',
+						msg: 'You put a <strong>' + item.displayName + '</strong> into ' + container.short + '.',
 						styleClass: 'green'
 					});
+
+					World.processEvents('onPut', container, roomObj, item);
 				} else {
-					World.msgPlayer(target, {msg: 'You aren\'t carrying anything by that name.', styleClass: 'error'});
+					if (item && item.refId !== container.refId) {
+						World.msgPlayer(target, {
+							msg: 'You aren\'t carrying anything by that name.',
+							styleClass: 'error'
+						});
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You cannot put this item into itself.',
+							styleClass: 'error'
+						});
+					}
 				}
 			} else {
 				World.msgPlayer(target, {msg: 'Into what? You don\'t seem to have that item.', styleClass: 'error'});
@@ -855,6 +1329,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 	i = 0,
 	itemLen,
 	itemArr,
+	canDrop = true,
 	item;
 
 	if (target.position !== 'sleeping') {
@@ -864,27 +1339,42 @@ Cmd.prototype.drop = function(target, command, fn) {
 			if (command.msg !== 'all') {
 				item = World.search(target.items, command);
 
-				if (item) {
-					Character.removeItem(target, item);
+				if (item && !item.equipped) {
+					canDrop = World.processEvents('beforeDrop', item, roomObj, target);
+					
+					if (canDrop) {
+						Character.removeItem(target, item);
 
-					if (item) {
 						Room.addItem(roomObj, item);
 
 						World.msgRoom(roomObj, {
-							msg: target.displayName + 'drops a ' + item.short,
+							msg: target.displayName + '  drops ' + item.short,
 							playerName: target.name,
-							styleClass: 'cmd-drop yellow'
+							styleClass: 'yellow'
 						});
 
 						World.msgPlayer(target, {
-							msg: 'You drop a ' + item.short,
-							styleClass: 'cmd-drop blue'
+							msg: 'You drop ' + item.short,
+							styleClass: 'blue'
 						});
-					} else {
-						World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
+
+
+						World.processEvents('onDrop', target, roomObj, item);
+						World.processEvents('onDrop', roomObj, target, item);
+						World.processEvents('onDrop', item, roomObj, target);
 					}
 				} else {
-					World.msgPlayer(target, {msg: 'You do not have that item.', styleClass: 'error'});
+					if (!item) {
+						World.msgPlayer(target, {
+							msg: 'You do not have that item.',
+							styleClass: 'error'
+						});
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You must remove ' + item.short + ' before you can drop it.',
+							styleClass: 'error'
+						});
+					}
 				}
 			} else {
 				itemLen = target.items.length;
@@ -892,7 +1382,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 
 				for (i; i < itemLen; i += 1) {
 					item = itemArr[i];
-					
+
 					Character.removeItem(target, item);
 
 					if (item) {
@@ -902,24 +1392,33 @@ Cmd.prototype.drop = function(target, command, fn) {
 							World.msgRoom(roomObj, {
 								msg: target.displayName + ' drops everything they are carrying',
 								playerName: target.name,
-								styleClass: 'cmd-drop-all yellow'
+								styleClass: 'yellow'
 							});
 
 							World.msgPlayer(target, {
 								msg: 'You drop everything',
-								styleClass: 'cmd-drop-all blue'
+								styleClass: 'blue'
 							});
 						}
 					} else {
-						World.msgPlayer(target, {msg: 'Could not drop a ' + item.short, styleClass: 'error'});
+						World.msgPlayer(target, {
+							msg: 'Could not drop ' + item.short,
+							styleClass: 'error'
+						});
 					}
 				}
 			}
 		} else {
-			World.msgPlayer(target, {msg: 'Drop nothing? How do you drop nothing?', styleClass: 'error'});
+			World.msgPlayer(target, {
+				msg: 'You aren\'t carrying anything.',
+				styleClass: 'error'
+			});
 		}
 	} else {
-		World.msgPlayer(target, {msg: 'You are sleeping at the moment.', styleClass: 'error'});
+		World.msgPlayer(target, {
+			msg: 'You are sleeping at the moment.',
+			styleClass: 'error'
+		});
 	}
 };
 
@@ -1000,8 +1499,8 @@ Cmd.prototype.cast = function(player, command, fn) {
 	if (player.position !== 'sleeping') {
 		if (command.arg) {
 			if (command.arg in Spells) {
-				skillObj = Character.getSkill(player, command.arg);
-				
+				skillObj = Character.getSkillById(player, command.arg);
+
 				if (skillObj) {
 					if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fleeing') {
 						roomObj = World.getRoomObject(player.area, player.roomid);
@@ -1011,6 +1510,10 @@ Cmd.prototype.cast = function(player, command, fn) {
 								if (!player.opponent && player.position !== 'fighting') {
 									cmd.kill(player, command, roomObj, fn);
 								}
+							
+								World.processEvents('onSpell', player, roomObj, skillObj);
+								World.processEvents('onSpell', player.items, roomObj, skillObj);
+								World.processEvents('onSpell', roomObj, player, skillObj);
 							});
 						} else {
 							mob = World.search(roomObj.monsters, command);
@@ -1020,6 +1523,10 @@ Cmd.prototype.cast = function(player, command, fn) {
 									if (!player.opponent && player.position !== 'fighting') {
 										cmd.kill(player, command, roomObj, fn);
 									}
+									
+									World.processEvents('onSpell', player, roomObj, skillObj);
+									World.processEvents('onSpell', player.items, roomObj, skillObj);
+									World.processEvents('onSpell', roomObj, player, skillObj);
 								});
 							} else {
 								World.msgPlayer(player, {
@@ -1029,10 +1536,16 @@ Cmd.prototype.cast = function(player, command, fn) {
 							}
 						}
 					}
+				} else {
+					World.msgPlayer(player, {
+						msg: 'You do not know that spell.',
+						styleClass: 'blue'
+					});				
 				}
 			} else {
 				World.msgPlayer(player, {
-					msg: 'You do not know that spell.'
+					msg: 'Cast what?',
+					styleClass: 'error'
 				});
 			}
 		} else {
@@ -1052,8 +1565,7 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 	var roomObj,
 	opponent;
 
-	if (player.position !== 'sleeping' && player.position !== 'resting'
-		&& player.position !== 'fighting') {
+	if (player.position !== 'sleeping' && player.position !== 'resting') {
 		if (!roomObj) {
 			roomObj = World.getRoomObject(player.area, player.roomid);
 		}
@@ -1061,17 +1573,18 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 		opponent = World.search(roomObj.monsters, command);
 
 		if (opponent && opponent.roomid === player.roomid) {
-
 			World.msgPlayer(player, {
-				msg: 'You scream and charge at a ' + opponent.name,
+				msg: '<strong class="grey">You scream and charge at a ' 
+					+ opponent.name + '!</strong>',
 				noPrompt: true
 			});
 
 			World.msgPlayer(opponent, {
-				msg: 'A ' + player.displayName + ' screams and charges at you!',
+				msg: '<strong class="red">A ' + player.displayName 
+					+ ' screams and charges at you!</strong>',
 				noPrompt: true
 			});
-			
+
 			Combat.processFight(player, opponent, roomObj);
 		} else {
 			opponent = World.search(roomObj.playersInRoom, command);
@@ -1084,7 +1597,8 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 				});
 
 				World.msgPlayer(opponent, {
-					msg: 'A ' + player.displayName + ' screams and charges at you!',
+					msg: '<strong class="red">A ' + player.displayName 
+						+ ' screams and charges at you!</strong>',
 					noPrompt: true
 				});
 
@@ -1104,27 +1618,35 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 	}
 };
 
+Cmd.prototype.worth = function(target, command) {
+	World.msgPlayer(target, {
+		msg: 'You have ' + target.gold + ' gold.',
+		styleClass: 'green'
+	});
+};
+
 Cmd.prototype.look = function(target, command) {
-	var roomObj = World.getRoomObject(target.area, target.roomid),
+	var roomObj,
 	displayHTML,
 	monster,
-	// boolean. when it is false it indicates we need a light source to see.
-	// the initial value of target.sight should be true inless target is blind.	
-	canSee = target.sight,
-	light = Character.getLights(target)[0],
 	itemDescription,	
-	item, // looking at an item
+	item,
 	i = 0;
 	
-	if (canSee) {
-		canSee = Character.canSee(target, roomObj, light);
-
+	if (!command) {
+		command = {msg: ''};
+	}
+	
+	if (!command.roomObj) {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	} else {
+		roomObj = command.roomObj;
+	}
+	
+	if (target.sight) {
 		if (target.position !== 'sleeping') {
-			if (!command || command.msg === '') {
-				// if no arguments are given we display the current room
-				if (canSee) {
-					roomObj = World.getRoomObject(target.area, target.roomid);
-
+			if (!command.msg) {
+				if (Character.canSee(target, roomObj)) {
 					displayHTML = Room.getDisplayHTML(roomObj, {
 						hideCallingPlayer: target.name
 					});
@@ -1140,13 +1662,15 @@ Cmd.prototype.look = function(target, command) {
 					});
 				}
 			} else {
-				roomObj = World.getRoomObject(target.area, target.roomid);
-
 				item = Character.getItem(target, command);
 				
 				if (item) {
-					itemDescription = '<p>' + item.long + '</p>';
-					
+					if (item.description) {
+						itemDescription = item.description;
+					} else {
+						itemDescription = item.short;
+					}
+
 					if (item.items) {
 						itemDescription += '<p>Inside you can see:</p><ul class="list container-list">'
 
@@ -1165,8 +1689,10 @@ Cmd.prototype.look = function(target, command) {
 					monster = Room.getMonster(roomObj, command);
 
 					if (monster) {
-						if (!monster.long) {
-							itemDescription = monster.short;
+						if (monster.description) {
+							itemDescription = monster.description;
+						} else if (monster.long) {
+							itemDescription = monster.long + ' is ' + monster.position + ' ' + ' here.';
 						}
 						
 						World.msgPlayer(target, {
@@ -1174,19 +1700,10 @@ Cmd.prototype.look = function(target, command) {
 							styleClass: 'cmd-look'
 						});
 					} else {
-						item = Room.getItem(target, command);
-
-						if (item) {
-							return World.msgPlayer(target, {
-								msg: item.long,
-								styleClass: 'cmd-look'
-							});
-						} else {
-							return World.msgPlayer(target, {
-								msg: 'You do not see that here.',
-								styleClass: 'error'
-							});
-						}
+						World.msgPlayer(target, {
+							msg: 'You do not see that here.',
+							styleClass: 'error'
+						});
 					}
 				}
 			}
@@ -1203,36 +1720,52 @@ Cmd.prototype.look = function(target, command) {
 };
 
 Cmd.prototype.where = function(target, command) {
-	command.msg = '<ul>' + 
-	'<li>Your Name: ' + Character[s.id].name + '</li>' +
-	'<li>Current Area: ' + Character[s.id].area + '</li>' +
-	'<li>Room Number: ' + Character[s.id].id + '</li>' +
-	'</ul>';
+	var msgObj = {
+		msg: '<ul>'
+	},
+	players = World.getPlayersByArea(target.area),
+	i = 0;
 
-	r.styleClass = 'playerinfo where';
+	msgObj.styleClass = 'playerinfo where';
+	
+	if (players.length <= 1) {
+		msgObj.msg += '<li>You don\'t see anyone else around.</li>';
+	} else {
+		for (i; i < players.length; i += 1) {
+			msgObj.msg += '<li>Name: ' + target.displayName + '</li>'
+				+ '<li>Current Area: ' + target.area + '</li>';	
+		}
+	}
 
-	return World.msgPlayer(target, r);
+	msgObj.msg += '</ul>';
+	
+	return World.msgPlayer(target, msgObj);
 };
 
 /** Communication Channels **/
 Cmd.prototype.say = function(target, command) {
-	var roomObj;
+	var roomObj,
+	i = 0;
 
 	if (target.position !== 'sleeping') {
 		if (command.msg !== '') {
 			World.msgPlayer(target, {
 				msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>'
 			});
-
-			roomObj = World.getRoomObject(target.area, target.roomid);
-
+			
+			if (!command.roomObj) {
+				roomObj = World.getRoomObject(target.area, target.roomid);
+			} else {
+				roomObj = command.roomObj
+			}
+			
 			World.msgRoom(roomObj, {
-				msg: function(fn) {
+				msg: function(receiver, fn) {
 					var msg;
-					
-					if (Character.canSee(target, roomObj)) {
-						msg = '<div class="cmd-say"><span class="msg-name">' +
-						target.displayName + ' says></span> ' + command.msg + '</div>';
+
+					if (Character.canSee(receiver, roomObj)) {
+						msg = '<div class="cmd-say"><span class="msg-name">'
+							+ target.displayName + ' says></span> ' + command.msg + '</div>';
 					} else {
 						msg = '<div class="cmd-say"><span class="msg-name">Someone says></span> ' + command.msg + '</div>';
 					}
@@ -1241,6 +1774,10 @@ Cmd.prototype.say = function(target, command) {
 				},
 				playerName: target.name
 			});
+
+			World.processEvents('onSay', target, roomObj, command);
+			World.processEvents('onSay', roomObj, target, command);
+			World.processEvents('onSay', roomObj.monsters, roomObj, target, command);
 		} else {
 			World.msgPlayer(target, {
 				msg: 'You have nothing to say.',
@@ -1258,11 +1795,13 @@ Cmd.prototype.say = function(target, command) {
 Cmd.prototype.yell = function(target, command) {
 	if (command.msg !== '') {
 		World.msgPlayer(target, {
-			msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' + command.msg + '</div>'
+			msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' 
+				+ command.msg + '</div>'
 		});
 		
 		World.msgArea(target.area, {
-			msg: '<div class="cmd-yell"><span class="msg-name">' + target.displayName + ' yells></span> ' + command.msg + '</div>',
+			msg: '<div class="cmd-yell"><span class="msg-name">' + target.displayName 
+				+ ' yells></span> ' + command.msg + '</div>',
 			playerName: target.name
 		});
 	} else {
@@ -1273,11 +1812,11 @@ Cmd.prototype.yell = function(target, command) {
 	}
 };
 
-
 Cmd.prototype.chat = function(target, command) {
 	if (command.msg !== '') {
 		World.msgPlayer(target, {
-			msg: '<div class="cmd-chat"><span class="msg-name">You chat></span> ' + command.msg + '</div>'
+			msg: '<span class="msg-name">You chat></span> ' + command.msg,
+			styleClsss: 'cmd-chat'
 		});
 
 		World.msgWorld(target, {
@@ -1286,7 +1825,8 @@ Cmd.prototype.chat = function(target, command) {
 		});
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You cannot chat nothing, no one can.',
+			msg: 'To send a message to everyone on the game use <strong>chat [message]</strong>. ' 
+				+ 'To learn more about communication try <strong>help communication</strong>',
 			styleClass: 'error'
 		});
 	}
@@ -1296,17 +1836,17 @@ Cmd.prototype.tell = function(target, command) {
 	var player;
 
 	if (command.msg) {
-		player = World.getPlayerByName(command.msg);
+		player = World.getPlayerByName(command.arg);
 
 		if (player) {
 			World.msgPlayer(player, {
-				msg: '<strong>' + player.displayName + ' tells you></strong> ' + command.msg,
+				msg: '<strong>' + target.displayName + ' tells you></strong> ' + command.input,
 				styleClass: 'red'
 			});
 
-			target.reply = player.name;
+			player.reply = target.name;
 
-			World.msgPlayer(target, {msg: 'You tell ' + target.displayName + '> ' + command.msg, styleClass: 'cmd-say red'});
+			World.msgPlayer(target, {msg: 'You tell ' + player.displayName + '> ' + command.input, styleClass: 'cmd-say red'});
 		} else {
 			World.msgPlayer(target, {msg: 'You do not see that person.', styleClass: 'error'});
 		}
@@ -1317,19 +1857,22 @@ Cmd.prototype.tell = function(target, command) {
 
 Cmd.prototype.reply = function(target, command) {
 	var player;
-
+	
 	if (command.msg && target.reply) {
 		player = World.getPlayerByName(target.reply);
 
 		if (player) {
 			World.msgPlayer(player, {
-				msg: '<strong>' + player.displayName + ' replies></strong> ' + command.msg,
-				styleClass: 'red'
+				msg: '<strong>' + target.displayName + ' replies></strong> ' + command.msg,
+				styleClass: 'green'
 			});
 
 			target.reply = player.name;
 
-			World.msgPlayer(target, {msg: 'You reply ' + target.displayName + '> ' + command.msg, styleClass: 'cmd-say red'});
+			World.msgPlayer(target, {
+				msg: 'You reply to ' + player.displayName + '> ' + command.msg, 
+				styleClass: 'cmd-say yellow'
+			});
 		} else {
 			World.msgPlayer(target, {msg: 'They arent there anymore.', styleClass: 'error'});
 		}
@@ -1388,17 +1931,401 @@ Cmd.prototype.time = function(target, command) {
 	});
 };
 
+Cmd.prototype.quit = function(target, command) {
+	if (target.isPlayer) {
+		if (target.position !== 'fighting' && target.wait === 0) {
+			target.logged = false;
+			target.verifiedName = false;
+			target.verifiedPassword = false;
+			target.following = "";
+
+			Character.save(target, function() {
+				World.msgPlayer(target, {
+					msg: 'Add a little to a little and there will be a big pile.',
+					evt: 'onDisconnect',
+					styleClass: 'logout-msg',
+					noPrompt: true
+				});
+
+				target.socket.leave('mud');
+				target.socket.disconnect();
+			});
+		} else {
+			if (target.position === 'fighting') {
+				World.msgPlayer(target, {
+					msg: 'You are fighting! Finish up before quitting.',
+					styleClass: 'logout-msg'
+				});
+			} else {
+				World.msgPlayer(target, {
+					msg: 'You can\'t quit just yet!',
+					styleClass: 'error'
+				});
+			}
+		}
+	}
+};
+
 /** Related to Saving and character adjustment/interaction **/
+Cmd.prototype.train = function(target, command) {
+	var roomObj = World.getRoomObject(target.area, target.roomid),
+	trainDisplay = '',
+	stat,
+	i = 0,
+	cost = 5,
+	costDisplay = cost,
+	canTrain = true,
+	trainers = Room.getTrainers(roomObj, command),
+	trainer,
+	stats = World.getGameStatArr(),
+	canSee = Character.canSee(target, roomObj);
+	
+	if (target.position !== 'sleeping' && target.position !== 'fighting') {
+		if (canSee) {
+			if (trainers.length) {
+				trainer = trainers[0];
+		
+				if (target.level > 30) {
+					cost += 3;
+				}
+
+				if (target.trainMod) {
+					cost += target.trainMod;
+				}
+
+				if (command.arg) {
+					if (trainer.beforeTrain) {
+						canTrain = trainer.beforeTrain(target);
+					}	
+		
+					if (command.arg.indexOf('str') !== -1) {
+						stat = 'str';
+					} else if (command.arg.indexOf('int') !== -1) {
+						stat = 'int';
+					} else if (command.arg.indexOf('dex') !== -1) {
+						stat = 'dex';
+					} else if (command.arg.indexOf('wis') !== -1) {
+						stat = 'wis';
+					} else if (command.arg.indexOf('con') !== -1) {
+						stat = 'con';
+					}	
+			
+					if (canTrain) {
+						if (stat) {
+							if (target['base' + World.capitalizeFirstLetter(stat)] < 12) {
+								cost += 3;
+							}
+						
+							if (stat === target.mainStat) {
+								cost -= 1;
+							}
+
+							if (trainer.level > target.level) {
+								if (cost <= target.trains) {
+									if (trainer.onTrain) {
+										trainer.onTrain(target);
+									}
+
+									target.trains -= cost;
+									target[stat] += 1;
+									target['base' + World.capitalizeFirstLetter(stat)] += 1;
+
+									World.msgPlayer(target, {
+										msg: 'You train with ' + trainer.displayName 
+											+ '. (<strong>' + World.capitalizeFirstLetter(stat) 
+											+ ' +1 for ' + cost +  ' trains</strong>)',
+										styleClass: 'green'
+									});
+								} else {
+									World.msgPlayer(target, {
+										msg: 'You don\'t have enough trains to work with ' 
+											+ trainer.displayName + '.',
+										styleClass: 'error'
+									});
+								}
+							} else {
+								World.msgPlayer(target, {
+									msg: 'You already know much more than ' + trainer.displayName 
+										+ '. You should find someone stronger to train with.',
+									styleClass: 'error'
+								});
+							}
+						} else {
+							World.msgPlayer(target, {
+								msg: 'You can\'t train <strong class="grey">' + command.arg + '</strong>.',
+								styleClass: 'error'
+							});
+						}
+					}
+				} else {
+					trainDisplay = '<p>You can train the follow stats with ' + trainer.displayName 
+						+ '. <strong>You currently have ' + target.trains 
+						+ ' Trains to spend</strong>.</p><table class="table table-condensed train-table">'
+						+ '<thead><tr><td class="train-name-header yellow"><strong>Stat</strong></td>'
+						+ '<td class="train-cost-header yellow"><strong>Current Value</strong></td>'
+						+ '<td class="train-cost-header yellow"><strong>Cost</strong></td>'
+						+ '</tr></thead><tbody>';
+
+					for (i; i < stats.length; i += 1) {
+						if (target['base' + World.capitalizeFirstLetter(stats[i].id)] < 12) {
+							costDisplay += 3;
+						}
+
+						if (stats[i].id === target.mainStat) {
+							costDisplay -= 1;
+						}
+						
+						trainDisplay += '<tr>';
+						trainDisplay += '<td>' + stats[i].display + '</td>';
+						trainDisplay += '<td>' + target['base' + World.capitalizeFirstLetter(stats[i].id)] + '</td>';
+						trainDisplay += '<td>' + costDisplay  + '</td>';
+						trainDisplay += '</tr>';
+
+						costDisplay = cost;
+					}
+							
+					World.msgPlayer(target, {
+						msg: trainDisplay + '</tbody></table><p class="red"></p>'
+					});
+				}
+			} else {
+				if (roomObj.monsters.length || roomObj.playersInRoom.length) {
+					World.msgPlayer(target, {
+						msg: 'No one here is offering training.',
+						styleClass: 'error'
+					});
+				} else {
+					World.msgPlayer(target, {
+						msg: 'There is no one here to train with.',
+						styleClass: 'error'
+					});
+				}
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You can\'t see anyone to train with!',
+				styleClass: 'error'
+			});
+		}
+	} else {
+		World.msgPlayer(target, {
+			msg: '<strong>You can\'t train while sleeping!</strong>',
+			styleClass: 'error'
+		});
+	}
+};
+
+Cmd.prototype.practice = function(target, command) {
+	var	pracSkill = function() {
+		if (!skillObj.learned) {
+			skillObj.learned = true;
+		}		
+
+		if (skillObj.train < 100) {
+			if (skillObj.mainStat === target.mainStat) {
+				cost -= 1;
+			}
+
+			if (skillObj.prerequisites.charClass && skillObj.prerequisites.charClass === target.charClass) {
+				cost -= 1;
+			}
+
+			if (target.trains >= cost) {
+				skillObj.train += World.dice.roll(1, 4, intMod);
+				
+				target.trains -= cost;
+
+				if (skillObj.train > 100) {
+					skillObj.train = 100;
+
+					if (skillObj.train >= trainerSkillObj.train && target.onSkillMastery) {
+						target.onSkillMastery(trainer, roomObj, skillObj, trainerSkillObj);
+					}
+
+					if (skillObj.train >= trainerSkillObj.train && trainer.onTrainMastery) {
+						trainer.onTrainMastery(target, roomObj, trainerSkillObj, skillObj);	
+					}
+				}
+
+				if (trainer.onPractice) {
+					trainer.onPractice(target, skillObj, trainerSkillObj);
+				}
+
+				if (!trainer.trainMsg) {
+					if (trainer.long) {
+						World.msgPlayer(target, {
+							msg: trainer.long + ' trains you in the art of ' 
+								+ skillObj.display + '.',
+							styleClass: 'green'
+						});
+					} else {
+						World.msgPlayer(target, {
+							msg: trainer.displayName + ' trains you in the art of '
+								+ skillObj.display + '.',
+							styleClass: 'green'
+						});
+					}
+				} else {
+					World.msgPlayer(target, {
+						msg: trainer.trainMsg,
+						styleClass: 'green'
+					});
+				}
+
+				World.msgRoom(roomObj, {
+					msg: trainer.long + ' trains ' + target.displayName
+						+ ' in the art of ' + skillObj.display + '.',
+					styleClass: 'green',
+					playerName: target.name
+				});
+			}
+		} else {
+			if (!trainer.onSkillMaster) {
+				World.msgPlayer(target, {
+					msg: 'You are already a master of ' + skillObj.display + '.',
+					styleClass: 'error'
+				});
+			} else {
+				trainer.onSkillMaster(target, skillObj, trainerSkillObj);
+			}
+		}
+	},
+	roomObj = World.getRoomObject(target.area, target.roomid),
+	trainers = Room.getTrainers(roomObj, command),
+	trainer,
+	trainerSkillObj,
+	practiceDisplay = '',
+	i = 0,
+	cost = 6,
+	skillObj,
+	canPrac = true,
+	canSee = Character.canSee(target, roomObj),
+	intMod = World.dice.getIntMod(target);
+	
+	if (target.position !== 'sleeping' && target.position !== 'fighting') {
+		if (canSee) {
+			if (trainers.length) {
+				trainer = trainers[0];
+		
+				if (command.arg) {
+					trainerSkillObj = Character.getSkill(trainer, command.arg);				
+					
+					skillObj = Character.getSkill(target, command.arg);
+					
+					if (trainer.beforePractice) {
+						canPrac = trainer.beforePractice(target, skillObj, trainerSkillObj);
+					}	
+					
+					if (canPrac) {
+						if (trainerSkillObj && skillObj && skillObj.learned) {
+							pracSkill();
+						} else {
+							if (skillObj) {
+								if (trainerSkillObj && Character.meetsSkillPrepreqs(target, skillObj)) {
+									pracSkill();
+								} else {
+									this.say(trainer, {
+										msg: 'You are not ready to learn ' + skillObj.display 
+											+ ', you have unmet prerequisites.',
+										styleClass: 'error',
+										roomObj: roomObj
+									});
+								}
+							} else {
+								World.msgPlayer(target, {
+									msg: 'You don\'t know how to ' + command.arg 
+										+ '. If you want to increase a stat use the train command.',
+									styleClass: 'error'
+								});
+							}
+						}
+					}
+				} else {
+					practiceDisplay = '<p>The table below showcases the <strong>skills currently known by '
+						+ trainer.displayName + '</strong></p><table class="table table-condensed prac-table">'
+						+ '<thead><tr><td class="prac-name-header yellow"><strong>' 
+						+ trainer.displayName +  ' Skills</strong></td>'
+						+ '<td class="prac-max-header yellow"><strong>Status</strong></td>'
+						+ '</tr></thead><tbody>';
+
+					for (i; i < trainer.skills.length; i += 1) {
+						if (trainer.skills[i].prerequisites.level <= trainer.level) {
+							skillObj = Character.getSkillById(target, trainer.skills[i].id);
+
+							practiceDisplay += '<tr><td class="prac-skill">' + trainer.skills[i].display + '</td>';
+
+							if (!skillObj) {
+								practiceDisplay += '<td class="prac-known blue">Unknown</td>';
+							} else {
+								if (!Character.meetsSkillPrepreqs(target, skillObj)) {
+									practiceDisplay += '<td class="prac-known red">Unmet prerequisites</td>';
+								} else {
+									if (trainer.skills[i].train >= skillObj.train || trainer.maxTrain) {
+										practiceDisplay += '<td class="prac-known green">Trainable</td>';
+									} else {
+										practiceDisplay += '<td class="prac-known">Already have superior knowledge</td>';
+									}
+								}
+							}
+
+							practiceDisplay += '</tr>';
+						}
+					}
+							
+					World.msgPlayer(target, {
+						msg: practiceDisplay + '</tbody></table><p class="red"><strong>' 
+							+ 'To practice a skill you must have it on your' 
+							+ ' skill list and any required prerequisites. Review help skills ' 
+							+ 'for general skill system information.</strong></p>'
+					});
+				}
+			} else {
+				if (roomObj.monsters || roomObj.playersInRoom) {
+					World.msgPlayer(target, {
+						msg: 'No one here is offering training.',
+						styleClass: 'error'
+					});
+				} else {
+					World.msgPlayer(target, {
+						msg: 'There is no one here to practice with.',
+						styleClass: 'error'
+					});
+				}
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You can\'t see anyone to train with!',
+				styleClass: 'error'
+			});
+		}
+	} else {
+		World.msgPlayer(target, {
+			msg: '<strong>You can\'t train while sleeping!</strong>',
+			styleClass: 'error'
+		});
+	} 
+};
 
 Cmd.prototype.save = function(target, command) {
-	if (target.position === 'standing' && target.wait === 0) {
-		Character.save(target, function() {
-			World.msgPlayer(target, {msg: target.displayName + ' was saved. Whew!', styleClass: 'save'});
-		});
-	} else if (target.position !== 'standing') {
-		World.msgPlayer(target, {msg: 'You can\'t save while ' + target.position + '.', styleClass: 'save'});
-	} else {
-		World.msgPlayer(target, {msg: 'You can\'t save just yet!', styleClass: 'error'});
+	if (target.isPlayer) {
+		if (target.position === 'standing' && target.wait === 0) {
+			Character.save(target, function() {
+				World.msgPlayer(target, {
+					msg: target.displayName + ' was saved. Whew!',
+					styleClass: 'save green'
+				});
+			});
+		} else if (target.position !== 'standing') {
+			World.msgPlayer(target, {
+				msg: 'You can\'t save while ' + target.position + '.',
+				styleClass: 'save'
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You can\'t save just yet!',
+				styleClass: 'error'
+			});
+		}
 	}
 };
 
@@ -1410,28 +2337,51 @@ Cmd.prototype.title = function(target, command) {
 			target.title = ' a level ' + target.level + ' ' + target.race + ' ' + target.charClass;
 		}
 
-		World.msgPlayer(target, {msg: 'Your title was changed!', styleClass: 'save'});
+		World.msgPlayer(target, {
+			msg: 'Your title was changed!',
+			styleClass: 'save'
+		});
 	} else {
-		World.msgPlayer(target, {msg: 'Title is too long, try another.', styleClass: 'save'});
+		World.msgPlayer(target, {
+			msg: 'Title is too long. There is a 40 character limit.',
+			styleClass: 'save'
+		});
 	}
 };
 
 // View equipment
 Cmd.prototype.equipment = function(target, command) {
 	var eqStr = '',
-	i = 0;	
+	item,
+	i = 0;
 	
-	for (i; i < target.eq.length; i += 1) {	
+	for (i; i < target.eq.length; i += 1) {
+		if (target.eq[i].item) {
+			item = Character.getItemByRefId(target, target.eq[i].item);
+		} else {
+			item = false;
+		}
+
 		eqStr += '<li class="eq-slot-' + target.eq[i].slot.replace(/ /g, '') + 
 			'"><label>' + target.eq[i].name + '</label>: ';
 		
-		if (target.eq[i].item === null || target.eq[i].item === '') {
+		if (!item || target.eq[i].item === '') {
 			eqStr += ' Nothing</li>';
 		} else {
-			eqStr += '<label class="yellow">'  + target.eq[i].item.short + '</label></li>';
+			if (!item.light) {
+				eqStr += '<label class="yellow">' + item.displayName + '</label></li>';
+			} else {
+				if (item.lightDecay > 0) {
+					eqStr += '<label class="yellow">' + item.displayName
+						+ ' (<span class="red">Providing light</span>)</label></li>';
+				} else {
+					eqStr += '<label class="yellow">' + item.displayName
+						+ ' (<span class="red">Not providing light</span>)</label></li>';
+				}
+			}
 		}
 	}
-	
+
 	World.msgPlayer(target, {
 		msg: '<div class="eq-cmd"><h1>You are wearing:</h1>' +
 			'<ul class="list-unstyled equipment-list">' +
@@ -1443,15 +2393,34 @@ Cmd.prototype.equipment = function(target, command) {
 // Current skills
 Cmd.prototype.skills = function(target, command) {
 	var skills = '',
-	skillObj, // the skill object property on target.skillList
+	skillObj,
+	learnedStatus,
+	i = 0,
+	skillLevel = 1,
+	trainedLevel,
 	skillId;
 	
-	if (target.skillList) {
-		for (skillId in target.skillList) {
-			skillObj = target.skillList[skillId];
+	if (target.skills) {
+		for (i; i < target.skills.length; i += 1) {
+			skillObj = target.skills[i];
 			
-			skills += '<li>' + skillObj.display + ' a ' +  skillObj.type
-			+ ' skill at  level ' + skillObj.level + '.</li>';
+			if (skillObj.learned) {
+				learnedStatus = 'a <strong>learned</strong>';
+				trainedLevel = ' <strong class="green"> (' + skillObj.train + '%)</strong>';
+			} else {
+				learnedStatus = 'an unpracticed';
+			}
+
+			if (skillObj.prerequisites.level) {
+				skillLevel = skillObj.prerequisites.level; 
+			}
+
+			skills += '<li><strong>' + skillObj.display + '</strong> ' + learnedStatus  + ' ' +  skillObj.type
+				+ ' skill at  level ' + skillLevel + '.';
+				
+			if (trainedLevel) {
+				skills += trainedLevel;
+			}
 		}
 
 		skills = '<ul class="list">' + skills + '</ul>';
@@ -1472,7 +2441,7 @@ Cmd.prototype.wear = function(target, command) {
 			if (item) {
 				if (Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)]) {
 					Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)](target, item);
-				} else {	
+				} else {
 					World.msgPlayer(target, {
 						msg: 'You can\'t figure out how to wear a ' + item.short,
 						styleClass: 'error'
@@ -1522,6 +2491,7 @@ Cmd.prototype.inventory = function(player, command) {
 
 	iStr += '<table class="table table-condensed table-no-border i-table"><thead><tr>' +
 		'<td class="i-name-header">Item Name</td>' +
+		'<td class="i-equipped-header grey">Level</td>' +
 		'<td class="i-equipped-header green">Equipped</td>' +
 		'<td class="i-type-header">Type</td>' +
 		'<td class="i-weight-header">Weight</td>' +
@@ -1532,6 +2502,7 @@ Cmd.prototype.inventory = function(player, command) {
 
 		for (i; i < player.items.length; i += 1) {
 			iStr += '<td class="i-name">' + player.items[i].name + '</td>';
+			iStr += '<td class="i-level">' + player.items[i].level + '</td>';
 
 			if (!player.items[i].equipped) {
 				iStr += '<td class="i-equipped">No</td>';
@@ -1539,24 +2510,29 @@ Cmd.prototype.inventory = function(player, command) {
 				iStr += '<td class="i-equipped">Yes</td>';
 			}
 
-			iStr += '<td class="i-type">' + player.items[i].itemType + '</td>';
-
-			iStr += '<td class="i-weight">' + player.items[i].weight + '</td></tr>';
+			iStr += '<td class="i-type">' + player.items[i].itemType + '</td>'
+				+ '<td class="i-weight">' + player.items[i].weight + '</td></tr>';
 		}
 
-		World.msgPlayer(player, {msg: '<h1>Your Inventory</h1>' + iStr + '</tbody></table>'});
+		if (player.level <= 2) {
+			iStr = '<p><strong class="red">NEWBIE TIP:</strong> You can see the items below on your person. '
+				+ 'Type <strong>eq</strong> or <strong>equipment</strong> to see worn equipment and empty slots.</p>'
+				+ iStr;
+		}
+
+		World.msgPlayer(player, {
+			msg: '<h1>Your Inventory</h1>'
+				+ iStr + '</tbody></table>'
+		});
 	} else {
-		World.msgPlayer(player, {msg: 'No items in your inventory, can carry ' + player.carry + ' pounds of items and treasure.'});
+		World.msgPlayer(player, {
+			msg: 'No items in your inventory, can carry ' + player.carry + ' pounds of items and treasure.'
+		});
 	}
 };
 
 Cmd.prototype.score = function(target, command) {
-	var i = 0,
-	// Generate an unordered html list of the targets current affects
-	getAffectsList = function() {
-
-	},
-	score = '<section class="row score"><div class="col-md-12"><h1>' + 
+	var score = '<div class="row score"><div class="col-md-12"><h1>' + 
 		'<span class="score-name">' + target.displayName + '</span> ' + 
 		'<span class="score-title">' + target.title + '</span> ' + 
 		'<span class="score-level"> (' + target.level + ')</span></h1></div>' +
@@ -1570,15 +2546,14 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-levl"><label>Level:</label> ' +  target.level + '</li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
-					'<li class="stat-str first"><label>STR:</label> ' + target.baseStr + ' (' + target.str + ')</li>' +
-					'<li class="stat-wis"><label>WIS:</label> ' + target.baseWis + ' (' + target.wis + ') </li>' +
-					'<li class="stat-int"><label>INT:</label> ' + target.baseInt + ' (' + target.int + ')</li>' +
-					'<li class="stat-dex"><label>DEX:</label> ' + target.baseDex + ' (' + target.dex + ')</li>' +
-					'<li class="stat-con"><label>CON:</label> ' + target.baseCon + ' (' + target.con + ')</li>' +
+					'<li class="stat-str first"><label>STR:</label> ' + target.baseStr + ' <strong>(' + target.str + ')</strong></li>' +
+					'<li class="stat-wis"><label>WIS:</label> ' + target.baseWis + ' <strong>(' + target.wis + ')</strong></li>' +
+					'<li class="stat-int"><label>INT:</label> ' + target.baseInt + ' <strong>(' + target.int + ')</strong></li>' +
+					'<li class="stat-dex"><label>DEX:</label> ' + target.baseDex + ' <strong>(' + target.dex + ')</strong></li>' +
+					'<li class="stat-con"><label>CON:</label> ' + target.baseCon + ' <strong>(' + target.con + ')</strong></li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
-					'<li class="stat-gold"><label>Gold:</label> ' + target.gold + '</li>' +
 					'<li class="stat-hunger"><label>Hunger:</label> ' + target.hunger +'</li>' +
 					'<li class="stat-thirst"><label>Thirst:</label> ' + target.thirst +'</li>' +
 					'<li class="stat-trains last"><label>Trains:</label> ' + target.trains + '</li>' +
@@ -1587,11 +2562,11 @@ Cmd.prototype.score = function(target, command) {
 					'<ul class="col-md-3 score-stats list-unstyled">' +
 						'<li class="stat-hitroll"><label>Hit Bonus: </labels> ' + target.hitRoll + '</li>' +
 						'<li class="stat-damroll"><label>Damage Bonus: </label> ' + target.damRoll + '</li>' +
-						'<li class="stat-position"><label>Magic resistance: </label> ' + target.magicRes + '</li>' +
-						'<li class="stat-position"><label>Melee resistance: </label> ' + target.meleeRes + '</li>' +
-						'<li class="stat-position"><label>Poison resistance: </label> ' + target.poisonRes + '</li>' +
-						'<li class="stat-position"><label>Detection: </label> ' + target.detection + '</li>' +
-						'<li class="stat-position"><label>Knowledge: </label> ' + target.knowledge + '</li>' +
+						'<li class="stat-magicRes"><label>Magic resistance: </label> ' + target.magicRes + '</li>' +
+						'<li class="stat-meleeRes"><label>Melee resistance: </label> ' + target.meleeRes + '</li>' +
+						'<li class="stat-poisonRes"><label>Poison resistance: </label> ' + target.poisonRes + '</li>' +
+						'<li class="stat-detection"><label>Detection: </label> ' + target.detection + '</li>' +
+						'<li class="stat-knowlege"><label>Knowledge: </label> ' + target.knowledge + '</li>' +
 					'</ul>' +
 					'<div class="col-md-3 score-affects">' +
 						'<h6 class="sans-serif">Affected by:</h6>' +
@@ -1599,17 +2574,22 @@ Cmd.prototype.score = function(target, command) {
 					'</div>' +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
-					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span></li>' +
-					'<li class="stat-level">You are a level ' + target.level + ' ' + target.race + ' '+  target.charClass + ' of ' + target.size.display + ' size.</li>' +
-					'<li class="stat-carry">You are carrying ' + target.weight + '/' + target.maxWeight + ' pounds.</li>' +
-					'<li class="stat-xp">You need <strong>' + (target.expToLevel - target.exp) + '</strong> experience for your next level.</li>' +
-		'<li class="stat-killcnt last">You have won ' + target.killed + ' battles.</li>' +
+					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span>.</li>' +
+					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' '
+						+ target.charClass + ' of ' + target.size.display + ' size with ' 
+						+ '<span class="yellow">' + target.gold + ' ' + World.config.coinage  + '</span>.</li>' +
+					'<li class="stat-carry">You are carrying ' 
+						+ target.weight + '/' + Character.getMaxCarry(target) + ' pounds.</li>' +
+					'<li class="stat-xp">You need <strong>' + (target.expToLevel - target.exp)
+						+ '</strong> experience for your next level.</li>' +
+					'<li class="stat-killcnt last">You have won ' + target.killed + ' battles.</li>' +
 				'</ul>' +
 			'</div>'
-				'</div>' +
-		'</div></section>';
-
-	World.msgPlayer(target, { msg: score });
+		'</div></div>';
+	
+	World.msgPlayer(target, {
+		msg: score
+	});
 };
 
 Cmd.prototype.help = function(target, command) {
@@ -1617,11 +2597,11 @@ Cmd.prototype.help = function(target, command) {
 		command.msg = 'help';
 	}
 
-	fs.readFile('./help/' + command.msg + '.html', 'utf8', function (err, data) {
+	fs.readFile('./help/' + command.msg.replace(/ /g, '_') + '.html', 'utf8', function (err, data) {
 		if (!err) {
-			World.msgPlayer(target, {msg: data, styleClass: 'cmd-help' });
+			World.msgPlayer(target, {msg: data, noPrompt: command.noPrompt, styleClass: 'cmd-help' });
 		} else {
-			World.msgPlayer(target, {msg: 'No help file found.', styleClass: 'error' });
+			World.msgPlayer(target, {msg: 'No help file found.', noPrompt: command.noPrompt, styleClass: 'error' });
 		}
 	});
 };
@@ -1654,7 +2634,6 @@ Cmd.prototype.xyzzy = function(target, command) {
 * typing 'json' alone will give the json object for the entire current room. 
 */
 Cmd.prototype.json = function(target, command) {
-	// try to use JSON.stringify(cmdObj, null, 4) so we can remove util module
 	if (target.role === 'admin' && command.msg) {
 		Character.checkInventory(r,s,function(fnd,item) {
 			if (fnd) {
@@ -1683,11 +2662,19 @@ Cmd.prototype.json = function(target, command) {
 
 /*
 * An in game reboot. 
-* Stops all combat, reloads all active areas, saves players, and clears all corpses / items with a decay flag
+* Stops all combat and reloads all core game modules.
+* does not force area respawn.
 */
 Cmd.prototype.reboot = function(target, command) {
 	if (target.role === 'admin') {
+		require.cache[require.resolve('../src/rooms')] = null;
+		require.cache[require.resolve('../src/ticks')] = null;
+		require.cache[require.resolve('../src/dice')] = null;
+		
+		World.ticks = require('./ticks');
+		World.dice = require('./dice').roller;
 
+		Room = require('./rooms').room;
 	} else {
 		World.msgPlayer(target, {msg: 'No.', styleClass: 'error' });
 	}
@@ -1698,12 +2685,14 @@ Cmd.prototype.restore = function(admin, command) {
 	var i = 0,
 	player;
 
-	if (admin.role === 'admin') {
+	if (admin.role === 'player') {
 		for (i; i < World.players.length; i += 1) {
 			player = World.players[i];
 			player.chp = player.hp;
 			player.cmana = player.mana;
 			player.cmv = player.mv;
+			player.hunger = 0;
+			player.thirst = 0;
 		}
 
 		World.msgWorld(admin, {msg: 'You feel refreshed!'});
@@ -1722,3 +2711,4 @@ Cmd.prototype.peace = function(target, command) {
 };
 
 module.exports.cmd = new Cmd();
+

@@ -1,29 +1,21 @@
 {
-    "name": "Mage",
-    "classAbbr": "Mag",
-    "playable": true,
-    "mana": 30,
-    "mainStat": "int",
-    "skills": [
-        {
-            "id": "spark",
-            "display": "Spark",
-            "mod": 0,
-            "level": 1,
+	"name": "Mage",
+	"classAbbr": "Mag",
+	"playable": true,
+	"mana": 30,
+	"mainStat": "int",
+	"skills": [
+		{
+			"id": "spark",
+			"display": "Spark",
+			"mod": 0,
 			"train": 70,
-            "type": "spell",
-			"wait": 2
-        }
-    ],
-    "skillList" : {
-        "spark": {
-            "id": "spark",
-            "display": "Spark",
-            "mod": 0,
-            "level": 1,
-			"train": 70,
-            "type": "spell",
-			"wait": 2
-        }
-    }
+			"type": "spell",
+			"wait": 2,
+			"learned": true,
+			"prerequisites": {
+				"level": 1
+			}
+		}
+	]
 }
