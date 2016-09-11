@@ -23,54 +23,153 @@ module.exports = {
 		roomObj,
 		generateNorthOf = World.getRoomObject(this.name, this.defaultRoom),
 		i = 0,
+		enteranceRoomId = '4-0',
 		j = 0;
 
-		for (i; i < y; i += 1) {
+		for (i; i < x; i += 1) {
 			j = 0;
 				
-			for (j; j < x; j += 1) {
+			for (j; j < y; j += 1) {
 				roomObj = World.extend({}, World.roomTemplate);
 			
 				roomObj.id = i + '-' + j;			
 				roomObj.area = this.name;
 				roomObj.content = 'A room';
-				roomObj.title = 'Empty room';
+				roomObj.title = 'Empty room ' +  i + '-' + j;
 				roomObj.playersInRoom = [];
 				roomObj.exits = [];
-				
-				// top-left corner
-				if (i === y - 1 && j === x - 1) {
-					roomObj.exits = [{
+
+				if (i === 0 && j === 0) {
+					roomObj.exits.push({
 						cmd: 'north',
-						id: y + '-' + (j + 1),
+						id: i + '-' + (j + 1),
 						area: this.name
 					}, {
 						cmd: 'east',
-						id: y + '-' + (j + 1),
+						id: (i + 1) + '-' + j,
 						area: this.name
-					}];
-				// bottom left corner
-				} else if (i === 0 && j === 0) {
-					roomObj.exits = [{
+					});
+				} else if (i === 0 && j === y - 1) {
+					roomObj.exits.push({
 						cmd: 'south',
 						area: this.name,
-						id: this.defaultRoom
+						id: i + (y - 1)
 					}, {
 						cmd: 'east',
-						id: y + '-' + (j + 1),
+						id: (i + 1) + '-' + j,
 						area: this.name
-					}];
+					});
+				} else if (i === 0 && j < y - 1) {
+					roomObj.exits.push({
+						cmd: 'north',
+						area: this.name,
+						id: i + '-' + (j + 1)
+					}, {
+						cmd: 'east',
+						id: (i + 1) + '-' + (j + 1),
+						area: this.name
+					}, {
+						cmd: 'south',
+						id: (i) + '-' + (j - 1),
+						area: this.name
+					});
+				} else if (i === x - 1 && j === 0) {
+					roomObj.exits.push({
+						cmd: 'north',
+						area: this.name,
+						id: i + '-' + (j + 1)
+					}, {
+						cmd: 'west',
+						area: this.name,
+						id: (i - 1) + '-' + j
+					});
+				} else if (i < x -1  && j === 0) {
+					roomObj.exits.push({
+						cmd: 'north',
+						area: this.name,
+						id: i + '-' + (j + 1)
+					}, {
+						cmd: 'west',
+						area: this.name,
+						id: (i - 1) + '-' + j
+					}, {
+						cmd: 'east',
+						id: (i + 1) + '-' + j,
+						area: this.name
+					});
+				} else if (i < x - 1 && j === y - 1) {
+					roomObj.exits.push({
+						cmd: 'south',
+						area: this.name,
+						id: i + '-' + (j - 1)
+					}, {
+						cmd: 'west',
+						area: this.name,
+						id: (i - 1) + '-' + j
+					}, {
+						cmd: 'east',
+						id: (i + 1) + '-' + j,
+						area: this.name
+					});
+				} else if (i === x - 1 && j === y - 1) {
+					roomObj.exits.push({
+						cmd: 'south',
+						area: this.name,
+						id: i + '-' + (j - 1)
+					}, {
+						cmd: 'west',
+						area: this.name,
+						id: (i - 1) + '-' + j
+					});
+				} else if (i === x - 1 && j < y - 1) {
+					roomObj.exits.push({
+						cmd: 'north',
+						area: this.name,
+						id: i + '-' + (j + 1)
+					}, {
+						cmd: 'west',
+						area: this.name,
+						id: (i - 1) + '-' + j
+					}, {
+						cmd: 'south',
+						id: (i) + '-' + (j - 1),
+						area: this.name
+					});
+				} else {
+					roomObj.exits.push({
+						cmd: 'south',
+						area: this.name,
+						id: i + '-' + (j - 1)
+					}, {
+						cmd: 'west',
+						area: this.name,
+						id: (i - 1) + '-' + j
+					}, {
+						cmd: 'east',
+						id: (i + 1) + '-' + j,
+						area: this.name
+					}, {
+						cmd: 'north',
+						id: (i) + '-' + j + 1,
+						area: this.name
+					});
 				}
-			
+
 				this.rooms.push(roomObj);
 			}
 		}
 
-		i = 0;
+		roomObj = World.getRoomObject(this.name, enteranceRoomId);
+
+		roomObj.exits.push({
+			cmd: 'south',
+			id: this.defaultRoom,
+			area: this.name
+		});
 
 		generateNorthOf.exits.push({
 			cmd: 'north',
-			id: '0-0',
+			id: enteranceRoomId,
 			area: this.name
 		});
 	},
