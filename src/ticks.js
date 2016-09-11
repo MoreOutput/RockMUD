@@ -30,6 +30,8 @@ setInterval(function() {
 
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
+				World.processEvents('onDay', World.areas[i]);
+
 				monsters = World.getAllMonstersFromArea(World.areas[i]);
 
 				monsters.forEach(function(monster, i) {
@@ -60,6 +62,8 @@ setInterval(function() {
 	
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
+				World.processEvents('onDay', World.areas[i]);
+
 				monsters = World.getAllMonstersFromArea(World.areas[i]);
 
 				monsters.forEach(function(monster, i) {

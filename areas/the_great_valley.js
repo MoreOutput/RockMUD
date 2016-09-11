@@ -51,13 +51,13 @@ module.exports = {
 					});
 				} else if (i === 0 && j === y - 1) {
 					roomObj.exits.push({
-						cmd: 'south',
-						area: this.name,
-						id: i + (y - 1)
-					}, {
 						cmd: 'east',
 						id: (i + 1) + '-' + j,
 						area: this.name
+					}, {
+						cmd: 'south',
+						area: this.name,
+						id: i + (y - 1)
 					});
 				} else if (i === 0 && j < y - 1) {
 					roomObj.exits.push({
@@ -89,16 +89,20 @@ module.exports = {
 						area: this.name,
 						id: i + '-' + (j + 1)
 					}, {
-						cmd: 'west',
-						area: this.name,
-						id: (i - 1) + '-' + j
-					}, {
 						cmd: 'east',
 						id: (i + 1) + '-' + j,
 						area: this.name
+					}, {
+						cmd: 'west',
+						area: this.name,
+						id: (i - 1) + '-' + j
 					});
 				} else if (i < x - 1 && j === y - 1) {
 					roomObj.exits.push({
+						cmd: 'east',
+						id: (i + 1) + '-' + j,
+						area: this.name
+					}, {
 						cmd: 'south',
 						area: this.name,
 						id: i + '-' + (j - 1)
@@ -106,10 +110,6 @@ module.exports = {
 						cmd: 'west',
 						area: this.name,
 						id: (i - 1) + '-' + j
-					}, {
-						cmd: 'east',
-						id: (i + 1) + '-' + j,
-						area: this.name
 					});
 				} else if (i === x - 1 && j === y - 1) {
 					roomObj.exits.push({
@@ -127,30 +127,30 @@ module.exports = {
 						area: this.name,
 						id: i + '-' + (j + 1)
 					}, {
-						cmd: 'west',
-						area: this.name,
-						id: (i - 1) + '-' + j
-					}, {
 						cmd: 'south',
 						id: (i) + '-' + (j - 1),
 						area: this.name
-					});
-				} else {
-					roomObj.exits.push({
-						cmd: 'south',
-						area: this.name,
-						id: i + '-' + (j - 1)
 					}, {
 						cmd: 'west',
 						area: this.name,
 						id: (i - 1) + '-' + j
+					});
+				} else {
+					roomObj.exits.push({
+						cmd: 'north',
+						area: this.name,
+						id: i + '-' + (j + 1)
 					}, {
 						cmd: 'east',
-						id: (i + 1) + '-' + j,
+						area: this.name,
+						id: (i + 1) + '-' + j
+					}, {
+						cmd: 'south',
+						id: i + '-' + (j - 1),
 						area: this.name
 					}, {
-						cmd: 'north',
-						id: (i) + '-' + j + 1,
+						cmd: 'west',
+						id: (i - 1) + '-' + j,
 						area: this.name
 					});
 				}
