@@ -403,39 +403,45 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 	});
 };
 
-Combat.prototype.processEndOfMobCombat = function(combatInterval, player, opponent, roomObj)  {
+Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, roomObj)  {
 	var exp = 0,
 	corpse,
-	endOfCombatMsg = '';
+	endOfCombatMsg = '',
+	respawnRoom;
 
 	if (combatInterval) {
 		clearInterval(combatInterval);
 	}
 	
-	opponent.position = 'dead';
-	opponent.opponent = null;
-	opponent.killedBy = player.name;
-
+	mob.opponent = null;
+	mob.killedBy = player.name;
+	
 	player.opponent = null;
 	player.position = 'standing';
 
-	if (opponent.position === 'dead' && opponent.isPlayer) {
-		opponent.position = 'standing';
-		opponent.chp = opponent.hp;
+	World.processEvents('onDeath', roomObj, mob, player);
+	World.processEvents('onDeath', mob, roomObj, player);
+	World.processEvents('onVictory', player, roomObj, mob);	
 
-		World.msgPlayer(player, {
-			msg: 'At the moment player death is impossible',
-			styleClass: 'red'
-		});
+	if (!mob.isPlayer) {
+		Room.removeMob(roomObj, mob);
+	} else {
+		respawnRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
+		
+		Room.removePlayer(roomObj, player);
+					
+		targetRoom.playersInRoom.push(target);
+	
+		Character.unequip(player);
+
+		target.items = [];
 	}
 
-	Room.removeMob(roomObj, opponent);
+	exp = World.dice.calExp(player, mob);
 
-	exp = World.dice.calExp(player, opponent);
+	corpse = Character.createCorpse(mob);
 
-	Character.createCorpse(opponent);
-
-	Room.addCorpse(roomObj, opponent);
+	Room.addItem(roomObj, corpse);
 
 	player.position = 'standing';
 	
@@ -448,14 +454,14 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 		if (World.dice.roll(1, 2) === 1) {
 			endOfCombatMsg = 'You won but learned nothing.';
 		} else {
-			endOfCombatMsg = 'You did not learn anything from the battle.';
+			endOfCombatMsg = 'You did not learn anything from the fight.';
 		}
 	}
 
-	if (opponent.gold) {
-		player.gold += opponent.gold;
+	if (mob.gold) {
+		player.gold +- mob.gold;
 
-		endOfCombatMsg += ' <span class="yellow">You find ' + opponent.gold 
+		endOfCombatMsg += ' <span class="yellow">You find ' + mob.gold 
 			+ ' ' + World.config.coinage  + ' on the corpse.</span>';
 	}
 	
@@ -466,18 +472,6 @@ Combat.prototype.processEndOfMobCombat = function(combatInterval, player, oppone
 	}
 
 	player.killed += 1;
-
-	if (roomObj.onDeath) {
-		roomObj.onDeath(opponent, player);
-	}
-	
-	if (opponent.onDeath) {
-		opponent.onDeath(player, roomObj);
-	}
-
-	if (player.onVictory) {
-		player.onVictory(opponent, roomObj);
-	}
 
 	if (player.exp >= player.expToLevel) {
 		World.msgPlayer(player, {
@@ -565,29 +559,9 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 				clearInterval(combatInterval);
 			} else {
 				if (opponent.chp <= 0 && !opponent.isPlayer) {
-					combat.processEndOfMobCombat(combatInterval, player, opponent, roomObj);
+					combat.processEndOfCombat(combatInterval, player, opponent, roomObj);
 				} else if (player.chp <= 0 && !player.isPlayer) {
-					combat.processEndOfMobCombat(combatInterval, opponent, player, roomObj);
-				} else if (player.isPlayer && player.chp <= 0 || opponent.isPlayer && opponent.chp <= 0) {
-					clearInterval(combatInterval);
-					
-					opponent.position = 'standing';
-					opponent.chp = opponent.hp;
-					opponent.opponent = null;
-
-					player.position = 'standing';
-					player.chp = player.hp;
-					player.opponent = null;
-
-					World.msgPlayer(player, {
-						msg: 'You should be dead, but since this is unfinished we will just reset everything.',
-						styleClass: 'victory'
-					});
-					
-					World.msgPlayer(opponent, {
-						msg: 'You should be dead, but since this is unfinished we will just reset everything.',
-						styleClass: 'victory'
-					});
+					combat.processEndOfCombat(combatInterval, opponent, player, roomObj);
 				} else {
 					World.prompt(player);
 					World.prompt(opponent);

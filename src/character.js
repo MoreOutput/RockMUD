@@ -999,61 +999,80 @@ Character.prototype.removeStatMods = function(player, item) {
 	}
 }
 
-Character.prototype.wearWeapon = function(target, weapon) {
-	var slot = this.getEmptyWeaponSlot(target),
-	roomObj;
-
-	if (slot) {
-		roomObj = World.getRoomObject(target.area, target.roomId);
-		weapon.equipped = true;
+Character.prototype.wearWeapon = function(target, weapon, roomObj) {
+	var slot = this.getEmptyWeaponSlot(target);
 	
-		slot.item = weapon.refId;
+	if (!weapon.equipped) {
+		if (slot) {
+			weapon.equipped = true;
+	
+			slot.item = weapon.refId;
 
-		this.addStatMods(target, weapon);
-
-		World.msgPlayer(target, {
-			msg: 'You wield a ' + weapon.displayName + ' in your ' + slot.name.toLowerCase() + '.'
-		});
+			this.addStatMods(target, weapon);
+	
+			World.msgPlayer(target, {
+				msg: 'You wield a ' + weapon.displayName + ' in your ' + slot.name.toLowerCase() + '.'
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'Your hands are too full to wield a ' + weapon.short + '.'
+			});
+		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'Your hands are too full to wield a ' + weapon.short + '.'
+			msg: 'You are already wielding ' + weapon.short + '.',
+			styleClass: 'error'
 		});
 	}
 };
 
-Character.prototype.wearShield = function(target, shield) {
+Character.prototype.wearShield = function(target, shield, roomObj) {
 	var slot = this.getEmptyWeaponSlot(target);
 
-	if (slot) {
-		shield.equipped = true;
-	
-		slot.item = shield.refId;
+	if (!shield.equipped) {
+		if (slot) {
+			shield.equipped = true;
 
-		this.addStatMods(target, shield);
+			slot.item = shield.refId;
 
-		World.msgPlayer(target, {
-			msg: 'You begin defending yourself with a ' + shield.displayName + '.'
-		});
+			this.addStatMods(target, shield);
+
+			World.msgPlayer(target, {
+				msg: 'You begin defending yourself with a ' + shield.displayName + '.'
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You can\'t use a ' + shield.short + ' because your hands are full.'
+			});
+		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You can\'t use a ' + shield.short + ' because your hands are full.'
+			msg: 'You are already using ' + weapon.short + '.',
+			styleClass: 'error'
 		});
 	}
 };
 
-Character.prototype.wearArmor = function(target, armor) {
+Character.prototype.wearArmor = function(target, armor, roomObj) {
 	var slot = this.getSlot(target, armor.slot);
+	
+	if (!armor.equipped) {
+		if (slot) {
+			armor.equipped = true;	
 
-	if (slot) {
-		armor.equipped = true;
-
-		slot.item = armor.refId;
+			slot.item = armor.refId;
 		
-		World.msgPlayer(target, {
-			msg: 'You wear a ' + armor.short + ' on your ' + slot.name.toLowerCase() + '.'
-		});
+			World.msgPlayer(target, {
+				msg: 'You wear a ' + armor.short + ' on your ' + slot.name.toLowerCase() + '.'
+			});
+		} else {
+			return false;
+		}
 	} else {
-		return false;
+		World.msgPlayer(target, {
+			msg: 'You are already wearing ' + weapon.short + '.',
+			styleClass: 'error'
+		});
 	}
 };
 
@@ -1164,18 +1183,22 @@ Character.prototype.canSee = function(player, roomObj) {
 };
 
 Character.prototype.createCorpse = function(player) {
-	player.level = 1;
-	player.short = 'rotting corpse of a ' + player.name;
-	player.long = 'The ' + player.short + ' is here on the ground';
-	player.decay = 1;
-	player.itemType = 'corpse';
-	player.corpse = true;
-	player.chp = 0;
-	player.hp = 0;
-	player.cmana = 0;
-	player.mana = 0;
-	player.cmv = 0;
-	player.mv = 0;
+	return {
+		level: player.level,
+		short: 'rotting corpse of a ' + player.name,
+		long: 'The ' + player.short + ' is here on the ground',
+		decay: 1,
+		itemType: 'corpse',
+		corpse: true,
+		chp: 0,
+		hp: player.hp,
+		cmana: 0,
+		mana: player.mana,
+		cmv: 0,
+		mv: player.mv,
+		killedBy: player.killedBy,
+		items: player.items
+	};
 };
 
 Character.prototype.getMaxCarry = function(player) {

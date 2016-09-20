@@ -1217,6 +1217,8 @@ World.prototype.extend = function(extendObj, readObj) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
 				} else if (typeof extendObj[prop] !== 'string' && !isNaN(extendObj[prop]) && !isNaN(readObj[prop])) {
 					extendObj[prop] += readObj[prop];
+				} else if (prop === 'size' || prop === 'recall')  {
+					extendObj[prop] = readObj[prop];
 				} else if (typeof extendObj[prop] === 'object' && typeof readObj[prop] === 'object')  {
 					for (prop2 in readObj[prop]) {
 						this.extend(extendObj[prop][prop2], readObj[prop][prop2]);

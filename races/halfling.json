@@ -9,7 +9,6 @@
 	"attackType": "punch",
 	"size": {"value": 2, "display": "very small"},
 	"diceNum": 1,
-	"diceSides": 3,
-	"affects": []
+	"diceSides": 2
 }
 

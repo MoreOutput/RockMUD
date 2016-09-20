@@ -32,6 +32,8 @@ window.onload = function() {
 		c: 'cast',
 		k: 'kill',
 		adv: 'kill',
+		attack: 'kill',
+		murder: 'kill',
 		re: 'rest',
 		sl: 'sleep',
 		h: 'help',
@@ -54,7 +56,8 @@ window.onload = function() {
 		wo: 'worth',
 		re: 'recall',
 		gi: 'give',
-		wield: 'wear'
+		wield: 'wear',
+		dr: 'drop'
 	},
 	isScrolledToBottom = false,
 	playerIsLogged = null,

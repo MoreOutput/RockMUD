@@ -1142,7 +1142,7 @@ Cmd.prototype.get = function(target, command, fn) {
 	item,
 	container,
 	canGet = true,
-	itemLen,
+	itemLen = 0,
 	maxCarry = Character.getMaxCarry(target);
 
 	if (target.position !== 'sleeping') {
@@ -1207,13 +1207,18 @@ Cmd.prototype.get = function(target, command, fn) {
 					}
 				} else {
 					itemLen = roomObj.items.length;
-
-					while (roomObj.items.length > 0) {
-						item = roomObj.items[0];
+	
+					for (i; i < itemLen > 0; i += 1) {
+						item = roomObj.items[i];
 						
-						Room.removeItem(roomObj, item);
-
-						Character.addItem(target, item);
+						if (item.weight <= maxCarry) {
+							Room.removeItem(roomObj, item);
+			
+							Character.addItem(target, item);
+							
+							i -= 1;
+							itemLen = roomObj.items.length;
+						}
 					}
 					
 					World.msgRoom(roomObj, {
@@ -2432,7 +2437,14 @@ Cmd.prototype.skills = function(target, command) {
 };
 
 Cmd.prototype.wear = function(target, command) {
-	var item;
+	var item,
+	roomObj;
+
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
 
 	if (target.position !== 'sleeping' && target.position !== 'resting') {
 		if (command.msg !== '') {
@@ -2440,7 +2452,7 @@ Cmd.prototype.wear = function(target, command) {
 
 			if (item) {
 				if (Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)]) {
-					Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)](target, item);
+					Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)](target, item, roomObj);
 				} else {
 					World.msgPlayer(target, {
 						msg: 'You can\'t figure out how to wear a ' + item.short,

@@ -323,11 +323,6 @@ Room.prototype.removeMob = function(roomObj, mob) {
 	roomObj.monsters = newArr;
 };
 
-Room.prototype.addCorpse = function(roomObj, corpse) {
-	var room = this;
-	room.addItem(roomObj, corpse);
-};
-
 // returns an array of valid exit commands for the room
 Room.prototype.getExitCommands = function(roomObj) {
 
