@@ -1061,6 +1061,7 @@ World.prototype.search = function(arr, itemType, command) {
 			}
 		}
 	}
+
 	return result;
 };
 

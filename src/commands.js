@@ -1342,7 +1342,18 @@ Cmd.prototype.drop = function(target, command, fn) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 
 			if (command.msg !== 'all') {
-				item = World.search(target.items, command);
+				itemArr = Character.getItems(target, command);
+				
+				
+				for (i; i < itemArr.length; i += 1) {
+					if (itemArr[i].equipped === false) {
+						item = itemArr[i];
+					}
+				}
+
+				if (!item) {
+					item = itemArr[0];
+				}
 
 				if (item && !item.equipped) {
 					canDrop = World.processEvents('beforeDrop', item, roomObj, target);
