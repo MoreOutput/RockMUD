@@ -36,8 +36,8 @@ margin-top: 0;
 font-size: 145%;
 }
 #mudwrapper {
-padding-top: 415px;
-height: 980px;
+padding-top: 280px;
+height: 850px;
 width: 980px;
 margin: 0 auto;
 }
@@ -56,8 +56,8 @@ font-style: italic;
 width: 99%;
 }
 #inputwrapper {
-padding-top: 1em;
 width: 980px;
+padding-top: 5px;
 }
 #cmd {
 border: none;
