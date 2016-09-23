@@ -1047,7 +1047,7 @@ Character.prototype.wearShield = function(target, shield, roomObj) {
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You are already using ' + weapon.short + '.',
+			msg: 'You are already using ' + shield.short + '.',
 			styleClass: 'error'
 		});
 	}
@@ -1070,7 +1070,7 @@ Character.prototype.wearArmor = function(target, armor, roomObj) {
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You are already wearing ' + weapon.short + '.',
+			msg: 'You are already wearing ' + armor.short + '.',
 			styleClass: 'error'
 		});
 	}
