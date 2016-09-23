@@ -37,6 +37,16 @@ server = http.createServer(function (req, res) {
 			res.write(data);
 			res.end();
 		});
+	} else if (req.url === '/bg.jpg') {
+		fs.readFile('./public/images/terminal_bg.jpg', function (err, data) {
+			if (err) {
+				throw err;
+			}
+
+			res.writeHead(200, {'Content-Type': 'image/jpeg'});
+			res.write(data);
+			res.end();
+		});
 	}
 }),
 World = require('./src/world').world,

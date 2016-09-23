@@ -1,3 +1,4 @@
+
 'use strict';
 var World = require('./world').world,
 Character = require('./character').character,
@@ -421,7 +422,9 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 
 	World.processEvents('onDeath', roomObj, mob, player);
 	World.processEvents('onDeath', mob, roomObj, player);
-	World.processEvents('onVictory', player, roomObj, mob);	
+	World.processEvents('onVictory', player, roomObj, mob);
+
+	corpse = Character.createCorpse(mob);
 
 	if (!mob.isPlayer) {
 		Room.removeMob(roomObj, mob);
@@ -430,16 +433,12 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 		
 		Room.removePlayer(roomObj, player);
 					
-		targetRoom.playersInRoom.push(target);
+		respawnRoom.playersInRoom.push(target);
 	
-		Character.unequip(player);
-
 		target.items = [];
 	}
 
 	exp = World.dice.calExp(player, mob);
-
-	corpse = Character.createCorpse(mob);
 
 	Room.addItem(roomObj, corpse);
 
@@ -492,18 +491,15 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn) {
 	var combat = this;
 	
-	opponent.position = 'fighting';
-	
 	if (!opponent.opponent) {
 		opponent.opponent = player;
 	}
 
-	player.position = 'fighting';
-	
 	if (!player.opponent) {
 		player.opponent = opponent;
 	}
-
+	
+	if (player.area === opponent.area && player.roomid === opponent.roomid) {
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent, playerCanSee) {
 		combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2, oppCanSee) {
 			var oppStatus = Character.getStatusReport(opponent),
@@ -560,7 +556,9 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 			} else {
 				if (opponent.chp <= 0 && !opponent.isPlayer) {
 					combat.processEndOfCombat(combatInterval, player, opponent, roomObj);
-				} else if (player.chp <= 0 && !player.isPlayer) {
+				} 
+
+				if (player.chp <= 0 && player.isPlayer) {
 					combat.processEndOfCombat(combatInterval, opponent, player, roomObj);
 				} else {
 					World.prompt(player);
@@ -569,6 +567,9 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 			}
 		});
 	});
+	} else {
+		this.processEndOfCombat(combatInterval, player, opponent, roomObj);
+	}
 }
 
 module.exports.combat = new Combat();

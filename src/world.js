@@ -1,6 +1,5 @@
 /*
-* Working with game-wide data. Areas, Races, Classes and in-game Time
-* This can be considered the entry point of the application.
+* Working with game-wide data. Areas, races, classes and game time
 */
 'use strict';
 var fs = require('fs'),

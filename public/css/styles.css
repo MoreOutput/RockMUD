@@ -11,6 +11,10 @@ font-size: .9em;
 padding: .5em;
 height: 100%;
 letter-spacing: 0.0650em;
+background-image: url('bg.jpg');
+background-repeat: no-repeat;
+background-attachment: fixed;
+background-position: center; 
 }
 html, body a {
 color: #60f066;
@@ -33,7 +37,7 @@ margin-top: 0;
 font-size: 145%;
 }
 #mudwrapper.container {
-width: 100%;
+width: 80%;
 max-width: 1200px;
 padding-bottom: .5em;
 height: 90%;
@@ -42,12 +46,11 @@ height: 90%;
 margin-bottom: .3em;
 }
 #terminal {
-background-color: #000;
 padding: 1em 1em 1em 1em;
-height: 100%;
-min-height:100%;
+width: 970px;
+height: 570px;
 overflow: auto;
-border: 1px solid #555;
+margin: 300px 0 0 100px;
 }
 #terminal .subtext {
 font-style: italic;
@@ -57,8 +60,13 @@ width: 99%;
 }
 #inputwrapper {
 padding-top: 1em;
-width: 100%;
+width: 52%;
 max-width: 1200px;
+}
+#cmd {
+border: none;
+padding: 0 auto 0 auto;
+opacity: 0.75;
 }
 .opening-title {
 font-size: 3em;

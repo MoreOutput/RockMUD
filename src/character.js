@@ -1186,7 +1186,7 @@ Character.prototype.createCorpse = function(player) {
 	return {
 		level: player.level,
 		short: 'rotting corpse of a ' + player.name,
-		long: 'The ' + player.short + ' is here on the ground',
+		long: 'The corpse of ' + player.short + ' is here on the ground',
 		decay: 1,
 		itemType: 'corpse',
 		corpse: true,
