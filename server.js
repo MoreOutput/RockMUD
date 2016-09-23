@@ -44,8 +44,8 @@ server = http.createServer(function (req, res) {
 			}
 
 			res.writeHead(200, {
-				'Expires': new Date(Date.now() + 2592000000).toUTCString(),
 				'Cache-Control': 'public, max-age=85400',
+				'Expires': new Date(Date.now() + 2592000000).toUTCString(),
 				'Content-Type': 'image/jpeg'
 			});
 
