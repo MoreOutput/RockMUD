@@ -8,7 +8,8 @@ html, body {
 background-color: #000;
 color: #fff;
 font-size: .9em;
-padding: .5em;
+padding: 0;
+margin: 0;
 height: 100%;
 letter-spacing: 0.0650em;
 background-image: url('bg.jpg');

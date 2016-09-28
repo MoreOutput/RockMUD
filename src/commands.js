@@ -1207,36 +1207,43 @@ Cmd.prototype.get = function(target, command, fn) {
 					}
 				} else {
 					itemLen = roomObj.items.length;
-	
-					for (i; i < itemLen > 0; i += 1) {
-						item = roomObj.items[i];
-						
-						if (item.weight <= maxCarry) {
-							Room.removeItem(roomObj, item);
-			
-							Character.addItem(target, item);
-							
-							i -= 1;
-							itemLen = roomObj.items.length;
-						}
-					}
 					
-					World.msgRoom(roomObj, {
-						msg: target.displayName + ' grabs everything they can.',
-						playerName: target.name,
-						styleClass: 'yellow'
-					});
+					if (itemLen) {	
+						for (i; i < itemLen > 0; i += 1) {
+							item = roomObj.items[i];
+						
+							if (item.weight <= maxCarry) {
+								Room.removeItem(roomObj, item);
+			
+								Character.addItem(target, item);
+							
+								i -= 1;
+								itemLen = roomObj.items.length;
+							}
+						}
+					
+						World.msgRoom(roomObj, {
+							msg: target.displayName + ' grabs everything they can.',
+							playerName: target.name,
+							styleClass: 'yellow'
+						});
 
-					World.msgPlayer(target, {
-						msg: 'You grab everything!',
-						styleClass: 'blue'
-					});
+						World.msgPlayer(target, {
+							msg: 'You grab everything!',
+							styleClass: 'blue'
+						});
 
-					World.processEvents('onGet', roomObj.items, roomObj, item, target);
-					World.processEvents('onGet', target, roomObj, item, container);
+						World.processEvents('onGet', roomObj.items, roomObj, null, target);
+						World.processEvents('onGet', target, roomObj, roomObj.items);
 
-					if (typeof fn === 'function') {
-						return fn(target, roomObj, item);
+						if (typeof fn === 'function') { 
+							return fn(target, roomObj, item);
+						}
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You don\'t see any items here.',
+							styleClass: 'error'
+						});
 					}
 				}
 			} else {
@@ -1335,6 +1342,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 	itemLen,
 	itemArr,
 	canDrop = true,
+	dropCnt = 0,
 	item;
 
 	if (target.position !== 'sleeping') {
@@ -1351,7 +1359,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 					}
 				}
 
-				if (!item) {
+				if (!item && itemArr.length) {
 					item = itemArr[0];
 				}
 
@@ -1364,7 +1372,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 						Room.addItem(roomObj, item);
 
 						World.msgRoom(roomObj, {
-							msg: target.displayName + '  drops ' + item.short,
+							msg: target.displayName + ' drops ' + item.short,
 							playerName: target.name,
 							styleClass: 'yellow'
 						});
@@ -1373,7 +1381,6 @@ Cmd.prototype.drop = function(target, command, fn) {
 							msg: 'You drop ' + item.short,
 							styleClass: 'blue'
 						});
-
 
 						World.processEvents('onDrop', target, roomObj, item);
 						World.processEvents('onDrop', roomObj, target, item);
@@ -1396,32 +1403,37 @@ Cmd.prototype.drop = function(target, command, fn) {
 				itemLen = target.items.length;
 				itemArr = target.items;
 
-				for (i; i < itemLen; i += 1) {
-					item = itemArr[i];
+				if (itemLen) {
+					for (i; i < itemLen; i += 1) {
+						item = itemArr[i];
+						
+						if (!item.equipped) {
+							dropCnt += 1;
+		
+							Character.removeItem(target, item);
 
-					Character.removeItem(target, item);
-
-					if (item) {
-						Room.addItem(roomObj, item);
-
-						if (roomObj.items.length === itemLen) {
-							World.msgRoom(roomObj, {
-								msg: target.displayName + ' drops everything they are carrying',
-								playerName: target.name,
-								styleClass: 'yellow'
-							});
-
-							World.msgPlayer(target, {
-								msg: 'You drop everything',
-								styleClass: 'blue'
-							});
+							Room.addItem(roomObj, item);
 						}
-					} else {
-						World.msgPlayer(target, {
-							msg: 'Could not drop ' + item.short,
-							styleClass: 'error'
+					}
+					
+					if (dropCnt > 1) {
+						World.msgRoom(roomObj, {
+							msg: target.displayName + ' drops some things.',
+							playerName: target.name,
+							styleClass: 'yellow'
+						});
+					} else if (dropCnt === 1) {
+						World.msgRoom(roomObj, {
+							msg: target.displayName + ' drops ' + item.short + '.',
+							playerName: target.name,
+							styleClass: 'yellow'
 						});
 					}
+
+					World.msgPlayer(target, {
+						msg: 'You drop everything that you can.',
+						styleClass: 'blue'
+					});
 				}
 			}
 		} else {

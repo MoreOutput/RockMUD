@@ -1035,7 +1035,7 @@ World.prototype.search = function(arr, itemType, command) {
 	if (command.arg) {
 		if (!itemType) {
 			for (i; i < arr.length; i += 1) {
-				if (arr[i].name.toLowerCase().indexOf(command.arg) !== -1) {
+				if (arr[i].name && arr[i].name.toLowerCase().indexOf(command.arg) !== -1) {
 					matchedIndexes.push(i);
 				}
 			}
