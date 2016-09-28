@@ -11,7 +11,7 @@ Try the latest on this Heroku hobby instance: http://rockmud.heroku.com. If you 
 * Empower client side scripting for GUI.
 * DB agnostic -- GET/POST JSON to your defined service or save as a flat file.
 
-###Dependencies:### 
+###Dependencies:###
 * Socket.io 1.0 or greater is required.
 * Development keeps up with latest node release.
 * Default terminal loads Bootstrap from CDN.
