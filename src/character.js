@@ -1183,10 +1183,17 @@ Character.prototype.canSee = function(player, roomObj) {
 };
 
 Character.prototype.createCorpse = function(player) {
+	var corpseDisplayStr = player.short;
+
+	if (!corpseDisplayStr) {
+		corpseDisplayStr = player.displayName;
+	}
+
 	return {
 		level: player.level,
-		short: 'rotting corpse of a ' + player.name,
-		long: 'The corpse of ' + player.short + ' is here on the ground',
+		name: 'Corpse of ' + player.displayName,
+		short: 'a corpse of ' + corpseDisplayStr,
+		long: 'The corpse of ' + corpseDisplayStr + ' is lying here on the ground.',
 		decay: 1,
 		itemType: 'corpse',
 		corpse: true,

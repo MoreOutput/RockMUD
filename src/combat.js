@@ -429,13 +429,25 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 	if (!mob.isPlayer) {
 		Room.removeMob(roomObj, mob);
 	} else {
-		respawnRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
+		respawnRoom = World.getRoomObject(mob.recall.area, mob.recall.roomid);
 		
-		Room.removePlayer(roomObj, player);
-					
-		respawnRoom.playersInRoom.push(target);
+		Room.removePlayer(roomObj, mob);
 	
-		target.items = [];
+		mob.items = [];
+		mob.position = 'standing';
+		
+		respawnRoom.playersInRoom.push(mob);
+
+		mob.roomid = respawnRoom.id;
+		mob.area = respawnRoom.area;
+		mob.chp = 1;
+		mob.cmana = 1;
+		mob.cmv = 5;
+	
+		World.msgPlayer(mob, {
+			msg: '<strong>You died! Make it back to your corpse before it rots to save your gear!</strong>',
+			styleClass: 'error'
+		});
 	}
 
 	exp = World.dice.calExp(player, mob);
@@ -500,77 +512,83 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 	}
 	
 	if (player.area === opponent.area && player.roomid === opponent.roomid) {
-	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent, playerCanSee) {
-		combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2, oppCanSee) {
-			var oppStatus = Character.getStatusReport(opponent),
-			playerStatus= Character.getStatusReport(player),
-			preventPrompt = false;
+		combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent, playerCanSee) {
+			combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2, oppCanSee) {
+				var oppStatus = Character.getStatusReport(opponent),
+				playerStatus= Character.getStatusReport(player),
+				preventPrompt = false;
 
-			msgForPlayer += msgForPlayer2;
-			
-			msgForOpponent += msgForOpponent2;
+				msgForPlayer += msgForPlayer2;
 
-			if (player.isPlayer) {
-				if (opponent.chp > 0) {
-					if (!player.canViewHp) {
-						msgForPlayer += '<div class="rnd-status">' + opponent.prefixStatusMsg + oppStatus.msg
-						+ '</div>';
+				msgForOpponent += msgForOpponent2;
+
+				if (player.isPlayer) {
+					if (opponent.chp > 0) {
+						if (!player.canViewHp) {
+							msgForPlayer += '<div class="rnd-status">' + opponent.prefixStatusMsg + oppStatus.msg
+							+ '</div>';
+						} else {
+							msgForPlayer += '<div class="rnd-status">' + opponent.prefixStatusMsg + oppStatus.msg
+								+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+						}
 					} else {
-						msgForPlayer += '<div class="rnd-status">' + opponent.prefixStatusMsg + oppStatus.msg
-							+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+						msgForPlayer += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to ' 
+							+ opponent.short + '</strong>!</div>';
 					}
-				} else {
-					msgForPlayer += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to ' 
-						+ opponent.short + '</strong>!</div>';
 				}
-			}
 
-			if (opponent.isPlayer) {
-				if (!opponent.canViewHp) {
-					msgForOpponent += '<div class="rnd-status">' + opponent.prefixStatusMsg + playerStatus.msg
-						+ '</div>';
-				} else {
-					msgForOpponent += '<div class="rnd-status">' + player.prefixStatusMsg + playerStatus.msg
-						+ ' (' + player.chp + '/' + player.hp +')</div>';
+				if (opponent.isPlayer) {
+					if (!opponent.canViewHp) {
+						msgForOpponent += '<div class="rnd-status">' + opponent.prefixStatusMsg + playerStatus.msg
+							+ '</div>';
+					} else {
+						msgForOpponent += '<div class="rnd-status">' + player.prefixStatusMsg + playerStatus.msg
+							+ ' (' + player.chp + '/' + player.hp +')</div>';
+					}
 				}
-			}
 
-			if (opponent.chp <= 0 || player.chp <= 0) {
-				preventPrompt = true;
-			}
+				if (opponent.chp <= 0 || player.chp <= 0) {
+					preventPrompt = true;
+				}
 
-			World.msgPlayer(player, {
-				msg: msgForPlayer,
-				noPrompt: preventPrompt,
-				styleClass: 'player-hit yellow'
+				World.msgPlayer(player, {
+					msg: msgForPlayer,
+					noPrompt: preventPrompt,
+					styleClass: 'player-hit yellow'
+				});
+
+				World.msgPlayer(opponent, {
+					msg: msgForOpponent,
+					noPrompt: preventPrompt,
+					styleClass: 'player-hit yellow'
+				});
+
+				if (player.position !== 'fighting' || opponent.position !== 'fighting') {	
+					if (player.postion === 'fighting' && player.opponent.name === opponent.name) {
+						player.position = 'standing';
+					}
+
+					if (opponent.postion === 'fighting' && opponent.opponent.name === player.name) {
+						opponent.position = 'standing';
+					}
+
+					clearInterval(combatInterval);
+				} else {
+					if (opponent.chp <= 0) {
+						combat.processEndOfCombat(combatInterval, player, opponent, roomObj);
+					} else if (player.chp <= 0) {
+						combat.processEndOfCombat(combatInterval, opponent, player, roomObj);
+					} else {
+						World.prompt(player);
+						World.prompt(opponent);
+					}
+				}
 			});
-
-			World.msgPlayer(opponent, {
-				msg: msgForOpponent,
-				noPrompt: preventPrompt,
-				styleClass: 'player-hit yellow'
-			});
-
-			if (player.position !== 'fighting' || opponent.position !== 'fighting') {
-				clearInterval(combatInterval);
-			} else {
-				if (opponent.chp <= 0 && !opponent.isPlayer) {
-					combat.processEndOfCombat(combatInterval, player, opponent, roomObj);
-				} 
-
-				if (player.chp <= 0 && player.isPlayer) {
-					combat.processEndOfCombat(combatInterval, opponent, player, roomObj);
-				} else {
-					World.prompt(player);
-					World.prompt(opponent);
-				}
-			}
 		});
-	});
 	} else {
 		this.processEndOfCombat(combatInterval, player, opponent, roomObj);
 	}
-}
+};
 
 module.exports.combat = new Combat();
 
