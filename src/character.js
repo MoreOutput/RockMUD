@@ -450,8 +450,8 @@ Character.prototype.save = function(player, fn) {
 		player.saved = new Date().toString();
 
  		
-		player.opponent = {};
-		player.following = {};
+		player.opponent = false;
+		player.following = false;
 		player.socket = null;
 
 		player = World.sanitizeBehaviors(player);

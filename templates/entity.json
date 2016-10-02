@@ -57,7 +57,7 @@
 	"recall": {"roomid": "1", "area": "Midgaard"},
 	"description": "",
 	"reply": "",
-	"following": {},
+	"following": false,
 	"followers": [],
 	"noFollow": false,
 	"group": [],
@@ -88,7 +88,7 @@
 	"killedBy": "",
 	"lastAttackedBy": "",
 	"lastAttacked": "",
-	"opponent": {},
+	"opponent": false,
 	"eq": [{
 		"name": "Head",
 		"item": null,
