@@ -13,37 +13,74 @@ World = require('../src/world').world;
 	via portal or the like would then not trigger the aggressive behavior).
 
 	Setting mob.mobAggressive to true will empower the mob to attack other mobs.
+
+	Setting revenge to true limits the mob to only being aggie against the thing that attacked it last.
 */
 
 module.exports = {
 	attackOnVisit: true,
 	attackOnAlive: true,
+	playerAggressive: true,
 	mobAggressive: false,
 	onlyAttackLarger: false,
 	onlyAttackSmaller: false,
+	revenge: false,
 	onVisit: function(mob, roomObj, target, command) {	
-		if (mob && mob.attackOnVisit === true
-			&& mob.position === 'standing'
-			&& (target.isPlayer || mob.mobAggressive)
-			&& target.roomid === mob.roomid) {
-			Cmd.kill(mob, {
-				arg: target.name
-			});
+		var target;
+		
+		if (roomObj.playersInRoom.length && mob.playerAggressive) {
+			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
+		} else if (roomObj.monsters.length && mob.mobAggressive) {
+			target = roomObj.monsters[World.dice.roll(1, roomObj.monsters.length) - 1];
+		}
+
+		if (mob.onlyAttackLarger && mob.size.value >= target.size.value) {
+			target = false;
+		} else if (mob.onlyAttackSmaller && mob.size.value <= target.size.value) {
+			target = false;
+		}
+		
+		if (target && mob.attackOnVisit && mob.position === 'standing' && target.roomid === mob.roomid) {
+			if (!mob.revenge) {
+				Cmd.kill(mob, {
+					arg: target.name,
+					roomObj: roomObj
+				});
+			} else if (target.refId === mob.lastAttackedBy) {
+				Cmd.kill(mob, {
+					arg: target.name,
+					roomObj: roomObj
+				});
+			}
 		}
 	},
 	onAlive: function(mob, roomObj) {
 		var target;
 		
-		if (roomObj.playersInRoom) {
+		if (roomObj.playersInRoom.length && mob.playerAggressive) {
 			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
+		} else if (roomObj.monsters.length && mob.mobAggressive) {
+			target = roomObj.monsters[World.dice.roll(1, roomObj.monsters.length) - 1];
+		}
+
+		if (mob.onlyAttackLarger && mob.size.value >= target.size.value) {
+			target = false;
+		} else if (mob.onlyAttackSmaller && mob.size.value <= target.size.value) {
+			target = false;
 		}
 		
-		if (target && mob.position === 'standing'
-			&& (target.isPlayer || mob.mobAggressive)
-			&& target.roomid === mob.roomid && mob.attackOnAlive) {
-			Cmd.kill(mob, {
-				arg: target.name
-			});
+		if (target && mob.attackOnAlive && mob.position === 'standing' && target.roomid === mob.roomid) {
+			if (!mob.revenge) {
+				Cmd.kill(mob, {
+					arg: target.name,
+					roomObj: roomObj
+				});
+			} else if (target.refId === mob.lastAttackedBy) {
+				Cmd.kill(mob, {
+					arg: target.name,
+					roomObj: roomObj
+				});
+			}
 		}
 	}
 };

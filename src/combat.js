@@ -399,7 +399,7 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 				combat.round(combatInterval, player, opponent, roomObj);
 			}, 1900);
 		} else {
-			combat.processEndOfMobCombat(null, player, opponent, roomObj);
+			combat.processEndOfCombat(null, player, opponent, roomObj);
 		}
 	});
 };
@@ -453,7 +453,7 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 	exp = World.dice.calExp(player, mob);
 
 	Room.addItem(roomObj, corpse);
-
+ 
 	player.position = 'standing';
 	
 	if (exp > 0) {
@@ -491,7 +491,7 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 			styleClass: 'victory'
 		});
 	
-		Character.level(player);			
+		Character.level(player);	
 	} else {
 		World.msgPlayer(player, {
 			msg: endOfCombatMsg,

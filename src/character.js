@@ -216,7 +216,8 @@ Character.prototype.create = function(s) {
 
 	s.player = World.extend(s.player, raceObj);
 	s.player = World.extend(s.player, classObj);
-
+	
+	s.player.refId = 'entity-' + s.id;
 	s.player.chp += 30;
 	s.player.cmana += 5;
 	s.player.cmv += 100;
@@ -254,6 +255,7 @@ Character.prototype.create = function(s) {
 	s.player.wis = s.player.baseWis;
 	s.player.con = s.player.baseCon;
 	s.player.dex = s.player.baseDex;
+	s.player.noFollow = false;	
 
 	character.generateSalt(function(salt) {
 		s.player.salt = salt;
@@ -447,10 +449,9 @@ Character.prototype.save = function(player, fn) {
 	if (player.isPlayer) {
 		player.saved = new Date().toString();
 
- 		if (player.opponent) {
-			player.opponent = null;
-		};
-
+ 		
+		player.opponent = {};
+		player.following = {};
 		player.socket = null;
 
 		player = World.sanitizeBehaviors(player);

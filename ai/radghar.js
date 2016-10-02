@@ -10,16 +10,17 @@ module.exports = {
 	exclimations: [
 		'The Midgaardian Academy isn\'t much but its better than venturing out with no experience.',
 		'I am the acting Fighter Guildmaster. You can find other Guildmasters in town.',
-		'You can <strong>practice</strong> and learn new skills from Guildmasters along with <strong>train</strong>ing stats.'
+		'You can <strong>practice</strong> and learn new skills from Guildmasters and Trainers along with <strong>train</strong>ing stats.'
 	],
-	currentlyEnrolled: [],
+	currentlyTraining: '',
+	currentStep: 0,
 	onSay: function(mob, roomObj, player, command) {
 		if (player.isPlayer && command) {
 			if (command.msg.toLowerCase().indexOf('yes') !== -1) {
 				Cmd.say(mob, {
 					msg: 'Thats great to hear ' + player.displayName  +  '! Let me get you signed up. Just a second...',
 					roomObj: roomObj
-				});				
+				});
 			}
 		}
 	},
@@ -31,6 +32,11 @@ module.exports = {
 				roomObj: roomObj
 			});
 		}
+
+		Cmd.follow(mob, {
+			arg: player.name,
+			roomObj: roomObj
+		});
 	},
 	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 60);

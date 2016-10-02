@@ -362,7 +362,7 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 	
 			item.refId = refId += index;
 			
-			item = world.extend(item, world.itemTemplate);
+			item = world.extend(item, JSON.parse(JSON.stringify(world.itemTemplate)));
 
 			if (Array.isArray(item.name)) {
 				item.name = item.name[world.dice.roll(1, item.name.length) - 1];
@@ -425,7 +425,7 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 World.prototype.rollMobs = function(mobArr, roomid, area) {
 	var world = this,
 	diceMod,
-	refId = Math.random().toString().replace('0.', 'mob-'),
+	refId = Math.random().toString().replace('0.', 'entity-'),
 	i = 0;
 
 	for (i; i < mobArr.length; i += 1) {
@@ -446,9 +446,9 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 
 			classObj = world.getClass(mob.charClass);
 			
-			mob = world.extend(mob, world.mobTemplate);		
-			mob = world.extend(mob, raceObj);
-			mob = world.extend(mob, classObj);
+			mob = world.extend(mob, JSON.parse(JSON.stringify(world.mobTemplate)));		
+			mob = world.extend(mob, JSON.parse(JSON.stringify(raceObj)));
+			mob = world.extend(mob, JSON.parse(JSON.stringify(classObj)));
 
 			if (!mob.id) {
 				mob.id = refId;
@@ -571,7 +571,7 @@ World.prototype.setupArea = function(area) {
 	j;
 	
 	if (!area.wasExtended) {
-		area = world.extend(area, world.areaTemplate);	
+		area = world.extend(area, JSON.parse(JSON.stringify(world.areaTemplate)));	
 	}
 
 	for (i; i < area.messages.length; i += 1) {
@@ -590,7 +590,7 @@ World.prototype.setupArea = function(area) {
 		j = 0;
 	
 		if (!area.wasExtended) {
-			area.rooms[i] = world.extend(area.rooms[i], world.roomTemplate);
+			area.rooms[i] = world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)));
 			
 			if (!area.rooms[i].area) {
 				area.rooms[i].area = area.name;

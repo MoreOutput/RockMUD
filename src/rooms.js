@@ -262,6 +262,14 @@ Room.prototype.addItem = function(roomObj, item) {
 	roomObj.items.push(item);
 };
 
+Room.prototype.addItems = function(roomObj, items) {
+	var i = 0;
+
+	for (i; i < items.length; i += 1) {
+		roomObj.items.push(items[i]);
+	}
+}
+
 Room.prototype.getItem = function(roomObj, command) {
 	return World.search(roomObj.items, command);
 };

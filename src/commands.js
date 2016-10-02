@@ -75,7 +75,7 @@ Cmd.prototype.buy = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	if (target.position !== 'sleeping') {
+	if (target.position === 'standing' || target.position === 'resting') {
 		merchant = Room.getMerchants(roomObj)[0];
 		
 		if (merchant) {
@@ -119,9 +119,15 @@ Cmd.prototype.buy = function(target, command) {
 			});
 		}
 	} else {
-		World.msgPlayer(target, {
-			msg: 'Wake up first.'
-		});
+		if (target.position === 'sleep') {
+			World.msgPlayer(target, {
+				msg: 'Wake up first.'
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You cannot buy anything while in this position.'
+			});
+		}
 	}
 };
 
@@ -137,7 +143,7 @@ Cmd.prototype.sell = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	if (target.position !== 'sleeping') {
+	if (target.position === 'standing') {
 		merchant = Room.getMerchants(roomObj)[0];
 		
 		if (merchant) {
@@ -167,15 +173,21 @@ Cmd.prototype.sell = function(target, command) {
 				}
 			} else {
 				World.msgPlayer(target, {
-					msg: marchant.displayName + 'doesn\'t seem to recognize the name.',
+					msg: marchant.displayName + ' doesn\'t seem to recognize the name.',
 					styleClass: 'error'
 				});
 			}
 		} else {
-
+			World.msgPlayer(target, {
+				msg: 'There doesn\'t seem to be a merchant here by that name.',
+				styleClass: 'error'
+			});
 		}
 	} else {
-	
+		World.msgPlayer(target, {
+			msg: 'You should be standing if you intend to sell something.',
+			styleClass: 'error'
+		});
 	}
 };
 
@@ -235,7 +247,7 @@ Cmd.prototype.give = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	if (target.position !== 'sleeping') {
+	if (target.position === 'standing' || target.position === 'fighting' || target.position === 'resting') {
 		if (command.msg && command.msg.indexOf(' ' + World.config.coinage) === -1) {
 			if (canSee) {
 				receiver = Room.getEntity(roomObj, {
@@ -395,10 +407,80 @@ Cmd.prototype.scan = function(target, command) {
 	}
 };
 
+Cmd.prototype.follow = function(target, command) {
+	var roomObj = World.getRoomObject(target.area, target.roomid),
+	entityToFollow,
+	roomObj,
+	canSee = Character.canSee(target, roomObj);
+	
+	roomObj = command.roomObj;
+
+	if (target.position === 'standing' && !target.following) {
+		if (canSee) {
+			entityToFollow = Room.getPlayer(roomObj, command);
+			
+			if (!entityToFollow) {
+				entityToFollow = Room.getMonster(roomObj, command);
+			}
+	
+			if (entityToFollow && !entityToFollow.noFollow) {
+				entityToFollow.followers.push(target);
+			
+				target.following = entityToFollow;
+
+				World.msgPlayer(entityToFollow, {
+					msg: target.displayName + ' begins following you.'
+				});
+
+				World.msgPlayer(target, {
+					msg: 'You begin following ' + entityToFollow.displayName + '.'
+				});
+			} else {
+				World.msgPlayer(target, {
+					msg: 'You dont see anything here by that name.',
+					styleClass: 'error'
+				});
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You don\'t see them here.'
+			});
+		}
+	} else {
+		World.msgPlayer(target, {
+			msg: 'You need to be standing if you want to follow something.'
+		});
+	}
+};
+
+Cmd.prototype.unfollow = function(target, command) {
+	var i = 0;
+ 
+	if (target.following) {
+		for (i; i < target.following.followers.length; i += 1) {
+			if (target.following.followers[i].refId === target.refId) {
+				target.following.followers.splice(i, 1);
+			}
+		}
+
+		target.following = '';
+
+		World.msgPlayer(target, {
+			msg: 'You are not longer following anyone.'
+		});
+	} else {
+		target.following = '';
+		
+		World.msgPlayer(target, {
+			msg: 'You are not following anyone at the moment.'
+		});
+	}
+};
+
 Cmd.prototype.emote = function(target, command) {
 	var roomObj;
 	
-	if (target.position !== 'sleeping') {
+	if (target.position === 'standing' || target.position === 'resting') {
 		if (!command.roomObj) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 		} else {
@@ -406,8 +488,8 @@ Cmd.prototype.emote = function(target, command) {
 		}
 
 		World.msgRoom(roomObj, {
-			msg: target.displayName + ' ' + command.msg,
-			darkMsg:  'You can feel movement in the area.',
+			msg: '<i>' +  target.displayName + ' ' + command.msg + '</i>',
+			darkMsg: 'You can feel movement in the area.',
 			styleClass: 'cmd-emote yellow',
 			checkSight: true
 		});
@@ -420,7 +502,7 @@ Cmd.prototype.eat = function(target, command) {
 	var roomObj,
 	item;
 
-	if (target.position !== 'sleeping') {
+	if (target.position === 'standing' || target.position === 'resting') {
 		if (command.msg !== '') {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 
@@ -459,7 +541,7 @@ Cmd.prototype.eat = function(target, command) {
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You can\'t eat while sleeping.',
+			msg: 'You can\'t eat while in this position.',
 			styleClass: 'error'
 		});
 	}
@@ -865,7 +947,8 @@ Cmd.prototype.recall = function(target, command) {
 
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
-	var direction = command.arg,
+	var cmd = this,
+	direction = command.arg,
 	dexMod = World.dice.getDexMod(target),
 	exitObj,
 	displayHTML,
@@ -894,7 +977,7 @@ Cmd.prototype.move = function(target, command, fn) {
 	if (target.size.value > 3) {
 		cost += 2;
 	}
-	
+
 	cost = Math.round(cost - dexMod);
 
 	if ((target.position === 'standing' || target.position === 'fleeing') 
@@ -912,129 +995,147 @@ Cmd.prototype.move = function(target, command, fn) {
 			if (!exitObj || !exitObj.door || exitObj.door.isOpen === true) {
 				sneakAff = Character.getAffect(target, 'sneak');
 				
-				targetRoom = World.getRoomObject(exitObj.area, exitObj.id);
+				if (!command.targetRoom) {
+					targetRoom = World.getRoomObject(exitObj.area, exitObj.id);
+				} else {
+					targetRoom = command.targetRoom;
+				}
 
 				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value))) {
 					canEnter = World.processEvents('beforeEnter', targetRoom, roomObj, target);
 					canEnter = World.processEvents('beforeMove', roomObj, target, command);
 					canEnter = World.processEvents('beforeMove', roomObj, target.items, command);
 
-					target.cmv -= cost;
-
-					if (exitObj.area !== target.area) {
-						target.area = exitObj.area;
-					}
-
-					if (target.cmv < 0) {
-						target.cmv = 0;
-					}
-
-					target.area = targetRoom.area;
-					target.roomid = targetRoom.id;
-
 					if (canEnter) {
+						if (target.followers.length) {
+							for (i; i < target.followers.length; i += 1) {
+								(function(index) {
+									setTimeout(function() {
+										cmd.move(target.followers[index], {
+											arg: command.arg,
+											roomObj: roomObj,
+											targetRoom: targetRoom
+										});
+									}, 450);
+								}(i));
+							}							
+						}
+
+						target.cmv -= cost;
+	
+						if (exitObj.area !== target.area) {
+							target.area = exitObj.area;
+						}
+
+						if (target.cmv < 0) {
+							target.cmv = 0;
+						}
+
+						target.area = targetRoom.area;
+						target.roomid = targetRoom.id;
+
 						World.processEvents('onExit', roomObj, target, targetRoom, command);
-						World.processEvents('onMove', roomObj, target, targetRoom, command);
-					}
+						World.processEvents('onMove', roomObj, target, targetRoom, command);						
 
-					if (targetRoom.terrianMod) {
-						target.wait += targetRoom.terrianMod;
-					}
+						if (targetRoom.terrianMod) {
+							target.wait += targetRoom.terrianMod;
+						}
 
-					if (target.isPlayer) {
-						this.look(target);
+						if (target.isPlayer) {
+							this.look(target);
 
-						Room.removePlayer(roomObj, target);
+							Room.removePlayer(roomObj, target);
 
-						targetRoom.playersInRoom.push(target);
-					} else {
-						Room.removeMob(roomObj, target);
+							targetRoom.playersInRoom.push(target);
+						} else {
+							Room.removeMob(roomObj, target);
 
-						targetRoom.monsters.push(target);
-					}
-					
-					World.msgRoom(targetRoom, {
-						msg: function(receiver, fn) {
-							var msg = '';
+							targetRoom.monsters.push(target);
+						}
 
-							if (!sneakAff) {
-								if (Character.canSee(receiver, targetRoom)) {
-									if (!target.inName) {
-										if (target.long) {
-											msg = '<strong>' + target.long
-												+ '</strong> walks in from '
-												+ parseMovementMsg(exitObj) + '.';
-										} else {
-											msg = '<strong>' + target.displayName
-												+ '</strong> walks in from '
-												+ parseMovementMsg(exitObj) + '.';
-										}	
-									} else if (target.inName && !target.inMessage) {
-										msg = '<strong>' + target.inName
-											+ '</strong> enters from '
-											+ parseMovementMsg(exitObj) + '.';
-									} else {
-										msg = '<strong>' + target.inName
-											+ '</strong> ' + target.inMessage  + ' '
-											+ parseMovementMsg(exitObj) + '.';
-									}
-								} else if (receiver.hearing) {
-									if (World.dice.roll(1, 2) === 1) {
-										msg = '<strong>Something</strong> enters from '
-											+ parseMovementMsg(exitObj) + '.';
-									} else {
-										msg = '<strong>Something</strong> comes in from '
-											+ parseMovementMsg(exitObj) + '.';
-									}
-								}
-							}
+						World.msgRoom(targetRoom, {
+							msg: function(receiver, fn) {
+								var msg = '';
 
-							return fn(true, msg);
-						},
-						playerName: target.name
-					});
-
-					World.msgRoom(roomObj, {
-						msg: function(receiver, fn) {
-							var msg = '';
-					
-							if (!sneakAff) {
-								if (Character.canSee(receiver, roomObj)) {
-									if (!target.outName) {
-										if (target.long) {
-											if (World.dice.roll(1, 2) === 1) {
-												msg = '<span class="yellow">' + target.long
-													+ ' leaves heading <strong class="grey">' 
-													+ direction + '</strong>.</span>';	
+								if (!sneakAff) {
+									if (Character.canSee(receiver, targetRoom)) {
+										if (!target.inName) {
+											if (target.long) {
+												msg = '<strong>' + target.long
+													+ '</strong> walks in from '
+													+ parseMovementMsg(exitObj) + '.';
 											} else {
-												msg = '<span class="yellow">' + target.long
-													+ ' leaves traveling <strong class="grey">' 
-													+ direction + '</strong>.</span>';
-											}
+												msg = '<strong>' + target.displayName
+													+ '</strong> walks in from '
+													+ parseMovementMsg(exitObj) + '.';
+											}	
+										} else if (target.inName && !target.inMessage) {
+											msg = '<strong>' + target.inName
+												+ '</strong> enters from '
+												+ parseMovementMsg(exitObj) + '.';
 										} else {
-											msg = '<span class="yellow">' + target.displayName
-												+ ' leaves going <strong class="grey">' + direction + '</strong>.</span>';
+											msg = '<strong>' + target.inName
+												+ '</strong> ' + target.inMessage  + ' '
+												+ parseMovementMsg(exitObj) + '.';
 										}
-									} else if (target.outName && !target.outMessage) {
-										msg = '<span class="yellow">' + target.outName
-										+ ' leaves traveling <strong class="grey">' + direction + '</strong>.</span>';
-									} else {
-										msg = '<span class="yellow">' + target.outName + target.outMessage
-										+ ' <strong class="grey">' + direction + '</strong>.</span>';
+									} else if (receiver.hearing) {
+										if (World.dice.roll(1, 2) === 1) {
+											msg = '<strong>Something</strong> enters from '
+												+ parseMovementMsg(exitObj) + '.';
+										} else {
+											msg = '<strong>Something</strong> comes in from '
+												+ parseMovementMsg(exitObj) + '.';
+										}
 									}
-								} else if (receiver.hearing) {
-									msg = '<span class="yellow">You can sense some movement in the area.</span>';
 								}
-							}
-							
-							return fn(true, msg);
-						},
-						playerName: target.name
-					});
 
-					World.processEvents('onMove', target, targetRoom, roomObj, command);
-					World.processEvents('onEnter', targetRoom, roomObj, target, command);
-					World.processEvents('onVisit', targetRoom.monsters, targetRoom, target, command);
+								return fn(true, msg);
+							},
+							playerName: target.name
+						});
+
+						World.msgRoom(roomObj, {
+							msg: function(receiver, fn) {
+								var msg = '';
+
+								if (!sneakAff) {
+									if (Character.canSee(receiver, roomObj)) {
+										if (!target.outName) {
+											if (target.long) {
+												if (World.dice.roll(1, 2) === 1) {
+													msg = '<span class="yellow">' + target.long
+														+ ' leaves heading <strong class="grey">' 
+														+ direction + '</strong>.</span>';	
+												} else {
+													msg = '<span class="yellow">' + target.long
+														+ ' leaves traveling <strong class="grey">' 
+														+ direction + '</strong>.</span>';
+												}
+											} else {
+												msg = '<span class="yellow">' + target.displayName
+													+ ' leaves going <strong class="grey">' + direction + '</strong>.</span>';
+											}
+										} else if (target.outName && !target.outMessage) {
+											msg = '<span class="yellow">' + target.outName
+											+ ' leaves traveling <strong class="grey">' + direction + '</strong>.</span>';
+										} else {
+											msg = '<span class="yellow">' + target.outName + target.outMessage
+											+ ' <strong class="grey">' + direction + '</strong>.</span>';
+										}
+									} else if (receiver.hearing) {
+										msg = '<span class="yellow">You can sense some movement in the area.</span>';
+									}
+								}
+
+								return fn(true, msg);
+							},
+							playerName: target.name
+						});
+
+						World.processEvents('onMove', target, targetRoom, roomObj, command);
+						World.processEvents('onEnter', targetRoom, roomObj, target, command);
+						World.processEvents('onVisit', targetRoom.monsters, targetRoom, target, command);
+					}
 				} else {
 					if (targetRoom.size) {
 						World.msgPlayer(target, {
