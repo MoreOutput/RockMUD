@@ -61,6 +61,7 @@
 	"followers": [],
 	"noFollow": false,
 	"group": [],
+	"noGroup": true,
 	"prefixStatusMsg": "",
 	"ownershipMsg": "",
 	"inName": "",

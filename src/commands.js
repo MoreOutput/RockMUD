@@ -477,6 +477,80 @@ Cmd.prototype.unfollow = function(target, command) {
 	}
 };
 
+Cmd.prototype.group = function(target, command) {
+	var roomObj = World.getRoomObject(target.area, target.roomid),
+	entityJoiningGroup,
+	leadMax = World.dice.getConMod(target) + 1,
+	roomObj,
+	canSee = Character.canSee(target, roomObj);
+	
+	roomObj = command.roomObj;
+
+	if (command.arg) {
+		if (target.position === 'standing' || target.position === 'resting' || target.position === 'fighting') {
+			if (target.followers.length) {
+				entityJoiningGroup = Room.getPlayer(roomObj, command);
+			
+				if (target.followers.indexOf(entityJoiningGroup) === -1) {			
+					if (target.group.length < leadMax) {
+						if (!entityJoiningGroup.noGroup) {
+							if (target.group.indexOf(entityJoiningGroup) !== -1) {
+								target.group.push(entityJoiningGroup);
+
+								World.msgPlayer(entityJoiningGroup, {
+									msg: target.displayName + ' groups up with you.'
+								});
+
+								World.msgPlayer(target, {
+									msg: 'You group up with ' + entityJoiningGroup  + '.'
+								});
+
+								if (entityJoiningGroup.group.indexOf(target) === -1) {
+									entityJoiningGroup.group.push(target);
+								}
+							} else {
+								World.msgPlayer(target, {
+									msg: entityDisplayName.displayName + ' is already in your group.'
+								});
+							}
+						 } else {
+							World.msgPlayer(target, {
+								msg: 'Theres nothing following you by that name.',
+								styleClass: 'error'
+							});
+						 }
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You are not strong enough to head a larger party.'
+						});
+					}
+				} else {
+					Character.ungroup(target, entityJoiningGroup);
+					
+					World.msgPlayer(target, {
+						msg: 'You are no longer partied with ' + entityJoiningGroup.displayName + '.'
+					});
+			
+					World.msgPlayer(entityJoiningGroup, {
+						msg: 'You are no longer partied with ' + target.displayName + '.'
+					});
+				}
+			} else {
+				World.msgPlayer(target, {
+					msg: 'Nothing seems to be following you.',
+					styleClass: 'yellow'
+				});
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You are in no position to lead a group.'
+			});
+		}
+	} else {
+		
+	}
+};
+
 Cmd.prototype.emote = function(target, command) {
 	var roomObj;
 	

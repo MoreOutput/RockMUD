@@ -256,6 +256,7 @@ Character.prototype.create = function(s) {
 	s.player.con = s.player.baseCon;
 	s.player.dex = s.player.baseDex;
 	s.player.noFollow = false;	
+	s.player.noGroup = false;
 
 	character.generateSalt(function(salt) {
 		s.player.salt = salt;
@@ -452,6 +453,7 @@ Character.prototype.save = function(player, fn) {
  		
 		player.opponent = false;
 		player.following = false;
+		player.group = [];
 		player.socket = null;
 
 		player = World.sanitizeBehaviors(player);
@@ -1215,6 +1217,11 @@ Character.prototype.getMaxCarry = function(player) {
 	} else  {
 		return Math.round((player.str + player.con / 3) * 10 + player.size.value);
 	}
+};
+
+Character.prototype.ungroup = function(player, entityInGroup) {
+	player.group.splice(target.group.indexOf(entityInGroup), 1);
+	entityInGroup.group.splice(entityInGroup.group.indexOf(player), 1);
 };
 
 Character.prototype.level = function(player) {

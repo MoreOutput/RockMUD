@@ -22,6 +22,7 @@ window.onload = function() {
 		fol: 'follow',
 		f: 'follow',
 		uf: 'unfollow',
+		gr: 'group',
 		l: 'look',
 		sca: 'scan',
 		i: 'inventory',
