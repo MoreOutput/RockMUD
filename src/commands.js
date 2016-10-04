@@ -490,11 +490,11 @@ Cmd.prototype.group = function(target, command) {
 		if (target.position === 'standing' || target.position === 'resting' || target.position === 'fighting') {
 			if (target.followers.length) {
 				entityJoiningGroup = Room.getPlayer(roomObj, command);
-			
-				if (target.followers.indexOf(entityJoiningGroup) === -1) {			
-					if (target.group.length < leadMax) {
-						if (!entityJoiningGroup.noGroup) {
-							if (target.group.indexOf(entityJoiningGroup) !== -1) {
+				
+				if (target.group.indexOf(entityJoiningGroup) === -1) {			
+					if (target.followers.indexOf(entityJoiningGroup) !== -1) {			
+						if (target.group.length < leadMax) {
+							if (!entityJoiningGroup.noGroup) {
 								target.group.push(entityJoiningGroup);
 
 								World.msgPlayer(entityJoiningGroup, {
@@ -502,26 +502,27 @@ Cmd.prototype.group = function(target, command) {
 								});
 
 								World.msgPlayer(target, {
-									msg: 'You group up with ' + entityJoiningGroup  + '.'
+									msg: 'You group up with ' + entityJoiningGroup.displayName + '.'
 								});
 
 								if (entityJoiningGroup.group.indexOf(target) === -1) {
 									entityJoiningGroup.group.push(target);
 								}
-							} else {
+							 } else {
 								World.msgPlayer(target, {
-									msg: entityDisplayName.displayName + ' is already in your group.'
+									msg: 'You can\'t group with ' + entityJoiningGroup.displayName  + '.',
+									styleClass: 'error'
 								});
-							}
-						 } else {
+							 }
+						} else {
 							World.msgPlayer(target, {
-								msg: 'Theres nothing following you by that name.',
-								styleClass: 'error'
+								msg: 'You are not strong enough to head a larger party.'
 							});
-						 }
+						}
 					} else {
 						World.msgPlayer(target, {
-							msg: 'You are not strong enough to head a larger party.'
+							msg: 'Theres nothing following you by that name.',
+							styleClass: 'error'
 						});
 					}
 				} else {

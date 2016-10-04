@@ -1220,7 +1220,7 @@ Character.prototype.getMaxCarry = function(player) {
 };
 
 Character.prototype.ungroup = function(player, entityInGroup) {
-	player.group.splice(target.group.indexOf(entityInGroup), 1);
+	player.group.splice(player.group.indexOf(entityInGroup), 1);
 	entityInGroup.group.splice(entityInGroup.group.indexOf(player), 1);
 };
 
