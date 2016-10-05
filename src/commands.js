@@ -2737,7 +2737,7 @@ Cmd.prototype.inventory = function(player, command) {
 		});
 	} else {
 		World.msgPlayer(player, {
-			msg: 'No items in your inventory, can carry ' + player.carry + ' pounds of items and treasure.'
+			msg: 'No items in your inventory, can carry ' + Character.getMaxCarry(player) + ' pounds of items and treasure.'
 		});
 	}
 };

@@ -11,8 +11,8 @@ Combat = function() {
 		{value: 'MAIMING', damage: 25},
 		{value: '*MAIMING*', damage: 30},
 		{value: 'great', damage: 40},
-		{value: 'devestating', damage: 50},
-		{value: 'DEVESTATING', damage: 60}
+		{value: 'devastating', damage: 50},
+		{value: 'DEVASTATING', damage: 60}
 	];
 
 	this.abstractNouns = ['intensity', 'force', 'strength', 'power'];
