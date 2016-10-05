@@ -445,15 +445,19 @@ Character.prototype.newCharacter = function(s, command) {
 
 Character.prototype.save = function(player, fn) {
 	var character = this,
-	socket = player.socket;
+	socket = player.socket,
+	followers = player.followers,
+	group = player.group,
+	opponent = player.opponent,
+	following = player.following;
 
 	if (player.isPlayer) {
 		player.saved = new Date().toString();
-
  		
 		player.opponent = false;
 		player.following = false;
 		player.group = [];
+		player.followers = [];
 		player.socket = null;
 
 		player = World.sanitizeBehaviors(player);
@@ -462,7 +466,11 @@ Character.prototype.save = function(player, fn) {
 			player.socket = socket;
 
 			player = World.setupBehaviors(player);
-
+			player.opponent = opponent;
+			player.following = following;
+			player.followers = followers;
+			player.group = group;
+			
 			if (err) {
 				return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
 			} else {
@@ -1219,9 +1227,9 @@ Character.prototype.getMaxCarry = function(player) {
 	}
 };
 
-Character.prototype.ungroup = function(player, entityInGroup) {
-	player.group.splice(player.group.indexOf(entityInGroup), 1);
-	entityInGroup.group.splice(entityInGroup.group.indexOf(player), 1);
+Character.prototype.ungroup = function(player, entity) {
+	player.group.splice(player.group.indexOf(entity), 1);
+	entity.group.splice(entity.group.indexOf(player), 1);
 };
 
 Character.prototype.level = function(player) {

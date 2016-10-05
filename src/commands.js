@@ -495,22 +495,29 @@ Cmd.prototype.group = function(target, command) {
 					if (target.followers.indexOf(entityJoiningGroup) !== -1) {			
 						if (target.group.length < leadMax) {
 							if (!entityJoiningGroup.noGroup) {
-								target.group.push(entityJoiningGroup);
+								if (canSee) {
+									target.group.push(entityJoiningGroup);
 
-								World.msgPlayer(entityJoiningGroup, {
-									msg: target.displayName + ' groups up with you.'
-								});
+									World.msgPlayer(entityJoiningGroup, {
+										msg: target.displayName + ' groups up with you.'
+									});
 
-								World.msgPlayer(target, {
-									msg: 'You group up with ' + entityJoiningGroup.displayName + '.'
-								});
+									World.msgPlayer(target, {
+										msg: 'You group up with ' + entityJoiningGroup.displayName + '.'
+									});
 
-								if (entityJoiningGroup.group.indexOf(target) === -1) {
-									entityJoiningGroup.group.push(target);
+									if (entityJoiningGroup.group.indexOf(target) === -1) {
+										entityJoiningGroup.group.push(target);
+									}
+								} else {
+									World.msgPlayer(target, {
+										msg: 'You don\'t see anyone by that name.',
+										styleClass: 'error'
+									});
 								}
 							 } else {
 								World.msgPlayer(target, {
-									msg: 'You can\'t group with ' + entityJoiningGroup.displayName  + '.',
+									msg: 'You can\'t group with ' + entityJoiningGroup.displayName + '.',
 									styleClass: 'error'
 								});
 							 }
@@ -548,7 +555,35 @@ Cmd.prototype.group = function(target, command) {
 			});
 		}
 	} else {
-		
+		var groupListStr = '';
+		var i = 0;
+
+		if (target.group.length) {
+			for (i; i < target.group.length; i += 1) {
+				groupListStr += '<tr>'
+					+ '<td>' + target.group[i].displayName + '</td>'
+					+ '<td>' + target.group[i].charClass + '</td>'
+					+ '<td>' + target.group[i].chp + '</td>'
+				+ '</tr>'			
+			}
+			
+			groupListStr = '<h2>Party List</h2>'
+				+ '<table class="table table-condensed table-no-border who-list">'
+				+ '<thead>'
+					+ '<tr>'
+						+ '<td width="5%">Name</td>'
+						+ '<td width="5%">Class</td>'
+						+ '<td width="75">Condition</td>'
+					+ '</tr>'
+				+ '</thead><tbody>' + groupListStr + '</tbody>'
+			+ '</table>';
+		} else {
+			groupListStr = 'Not currently in a group.';
+		}
+
+		World.msgPlayer(target, {
+			msg: groupListStr
+		});
 	}
 };
 
@@ -1936,8 +1971,8 @@ Cmd.prototype.where = function(target, command) {
 		msgObj.msg += '<li>You don\'t see anyone else around.</li>';
 	} else {
 		for (i; i < players.length; i += 1) {
-			msgObj.msg += '<li>Name: ' + target.displayName + '</li>'
-				+ '<li>Current Area: ' + target.area + '</li>';	
+			msgObj.msg += '<li>Name: ' + players[i].displayName + '</li>'
+				+ '<li>Current Area: ' + players[i].area + '</li>';	
 		}
 	}
 
