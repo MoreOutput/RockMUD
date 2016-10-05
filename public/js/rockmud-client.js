@@ -28,7 +28,7 @@ window.onload = function() {
 		i: 'inventory',
 		sc: 'score',
 		o: 'open',
-		op 'open',
+		op: 'open',
 		stats: 'score',
 		eq: 'equipment',
 		equip: 'wear',

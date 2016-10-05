@@ -482,6 +482,8 @@ Cmd.prototype.group = function(target, command) {
 	entityJoiningGroup,
 	leadMax = World.dice.getConMod(target) + 1,
 	roomObj,
+	i = 0,
+	groupListStr = '',
 	canSee = Character.canSee(target, roomObj);
 	
 	roomObj = command.roomObj;
@@ -555,16 +557,13 @@ Cmd.prototype.group = function(target, command) {
 			});
 		}
 	} else {
-		var groupListStr = '';
-		var i = 0;
-
 		if (target.group.length) {
 			for (i; i < target.group.length; i += 1) {
 				groupListStr += '<tr>'
 					+ '<td>' + target.group[i].displayName + '</td>'
 					+ '<td>' + target.group[i].charClass + '</td>'
 					+ '<td>' + target.group[i].chp + '</td>'
-				+ '</tr>'			
+				+ '</tr>';			
 			}
 			
 			groupListStr = '<h2>Party List</h2>'
@@ -604,7 +603,10 @@ Cmd.prototype.emote = function(target, command) {
 			checkSight: true
 		});
 	} else {
-		World.msgPlayer(target, {msg: 'You can\'t emote right now.', styleClass: 'error'});
+		World.msgPlayer(target, {
+			msg: 'You can\'t emote right now.',
+			styleClass: 'error'
+		});
 	}
 };
 
@@ -809,9 +811,7 @@ Cmd.prototype.open = function(target, command, fn) {
 	targetExit,
 	exitObj;
 
-	if (target.position === 'standing' 
-		|| target.position === 'resting' 
-		|| target.position === 'fighting') {
+	if (target.position === 'standing' || target.position === 'resting' || target.position === 'fighting') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
 		exitObj = Room.getExit(roomObj, command.arg);
@@ -1126,7 +1126,7 @@ Cmd.prototype.move = function(target, command, fn) {
 											roomObj: roomObj,
 											targetRoom: targetRoom
 										});
-									}, 450);
+									}, 150);
 								}(i));
 							}							
 						}
