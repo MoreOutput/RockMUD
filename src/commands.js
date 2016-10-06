@@ -484,6 +484,7 @@ Cmd.prototype.group = function(target, command) {
 	roomObj,
 	i = 0,
 	groupListStr = '',
+	groupMemberIsInSameRoom = true,
 	canSee = Character.canSee(target, roomObj);
 	
 	roomObj = command.roomObj;
@@ -561,9 +562,17 @@ Cmd.prototype.group = function(target, command) {
 			for (i; i < target.group.length; i += 1) {
 				groupListStr += '<tr>'
 					+ '<td>' + target.group[i].displayName + '</td>'
-					+ '<td>' + target.group[i].charClass + '</td>'
-					+ '<td>' + target.group[i].chp + '</td>'
-				+ '</tr>';			
+					+ '<td>' + target.group[i].level + '</td>'
+					+ '<td>' + target.group[i].chp + '</td>';
+
+					if (target.area === target.group[i].area && target.roomid === target.group[i].roomid) {
+						groupListStr += '<td>' + target.group[i].position + '</td>';
+					} else {
+						groupListStr += '<td>Not here</td>';
+					}
+					
+
+					groupListStr += '</tr>';			
 			}
 			
 			groupListStr = '<h2>Party List</h2>'
@@ -571,8 +580,9 @@ Cmd.prototype.group = function(target, command) {
 				+ '<thead>'
 					+ '<tr>'
 						+ '<td width="5%">Name</td>'
-						+ '<td width="5%">Class</td>'
-						+ '<td width="75">Condition</td>'
+						+ '<td width="5%">Level</td>'
+						+ '<td width="15%">Hp</td>'
+						+ '<td width="75%">Position</td>'
 					+ '</tr>'
 				+ '</thead><tbody>' + groupListStr + '</tbody>'
 			+ '</table>';
@@ -756,14 +766,18 @@ Cmd.prototype.rest = function(target, command) {
 
 	if (target.position !== 'resting') {
 		if (target.position === 'standing' || target.position === 'sleeping') {
-			target.position = 'sleeping';
+			target.position = 'resting';
 
 			World.msgPlayer(target, {
-				msg: 'You begin resting.',
+				msg: 'You try to make yourself comfortable and begin resting.',
 				styleClass: 'cmd-rest'
 			});
-
-			roomObj = World.getRoomObject(target.area, target.roomid);
+			
+			if (command.roomObj) {
+				roomObj = command.roomObj;
+			} else {
+				roomObj = World.getRoomObject(target.area, target.roomid);
+			}
 
 			World.msgRoom(roomObj, {
 				msg: target.displayName + ' begins to rest.',
