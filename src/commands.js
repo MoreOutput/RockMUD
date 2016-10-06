@@ -500,7 +500,7 @@ Cmd.prototype.group = function(target, command) {
 							if (!entityJoiningGroup.noGroup) {
 								if (canSee) {
 									target.group.push(entityJoiningGroup);
-
+									
 									World.msgPlayer(entityJoiningGroup, {
 										msg: target.displayName + ' groups up with you.'
 									});
@@ -1761,7 +1761,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 						if (!command.input && player.opponent) {
 							return Spells[command.arg](skillObj, player, player.opponent, roomObj, command, function() {
 								if (!player.opponent && player.position !== 'fighting') {
-									cmd.kill(player, command, roomObj, fn);
+									cmd.kill(player, command, fn);
 								}
 							
 								World.processEvents('onSpell', player, roomObj, skillObj);
@@ -1774,7 +1774,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 							if (mob) {
 								return Spells[command.arg](skillObj, player, mob, roomObj, command, function() {
 									if (!player.opponent && player.position !== 'fighting') {
-										cmd.kill(player, command, roomObj, fn);
+										cmd.kill(player, command, fn);
 									}
 									
 									World.processEvents('onSpell', player, roomObj, skillObj);
@@ -1813,17 +1813,23 @@ Cmd.prototype.cast = function(player, command, fn) {
 	}
 };
 
-// For attacking in-game monsters
-Cmd.prototype.kill = function(player, command, roomObj, fn) {
+Cmd.prototype.kill = function(player, command, avoidGroupCheck, fn) {
 	var roomObj,
+	i = 0,
 	opponent;
 
-	if (player.position !== 'sleeping' && player.position !== 'resting') {
-		if (!roomObj) {
+	if (player.position === 'standing') {
+		if (command.roomObj) {
+			roomObj = command.roomObj;
+		} else {	
 			roomObj = World.getRoomObject(player.area, player.roomid);
 		}
 		
 		opponent = World.search(roomObj.monsters, command);
+
+		if (!opponent) {
+			opponent = World.search(roomObj.playersInRoom, command);
+		}
 
 		if (opponent && opponent.roomid === player.roomid) {
 			World.msgPlayer(player, {
@@ -1839,29 +1845,17 @@ Cmd.prototype.kill = function(player, command, roomObj, fn) {
 			});
 
 			Combat.processFight(player, opponent, roomObj);
-		} else {
-			opponent = World.search(roomObj.playersInRoom, command);
 
-			if (opponent && opponent.roomid === player.roomid) {
-
-				World.msgPlayer(player, {
-					msg: 'You scream and charge at a ' + opponent.name,
-					noPrompt: true
-				});
-
-				World.msgPlayer(opponent, {
-					msg: '<strong class="red">A ' + player.displayName 
-						+ ' screams and charges at you!</strong>',
-					noPrompt: true
-				});
-
-				Combat.processFight(player, opponent, roomObj);
-			} else {
-				World.msgPlayer(player, {
-					msg: 'There is nothing by that name here.',
-					styleClass: 'error'
-				});
+			if (player.group.length && !avoidGroupCheck) {
+				for (i; i < player.group.length; i += 1) {
+					this.kill(player.group[i], command, true);
+				}
 			}
+		} else {
+			World.msgPlayer(player, {
+				msg: 'There is nothing by that name here.',
+				styleClass: 'error'
+			});
 		}
 	} else {
 		World.msgPlayer(player, {
