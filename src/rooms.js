@@ -1,6 +1,7 @@
 'use strict';
 var fs = require('fs'),
 World = require('./world').world,
+Character = require('./character').character,
 io = World.io,
 players = World.players,
 time = World.time,
@@ -86,21 +87,25 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 	if (monsters.length > 0 || playersInRoom.length > 0) {
 		for (i; i < monsters.length; i += 1) {
-			if (monsters[i].long) {
-				displayHTML += '<li class="room-monster grey">' + monsters[i].long + ' is ' + 
-				 monsters[i].position + ' here</li>';
-			} else {
-				displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is ' + 
-				 monsters[i].position + ' here</li>';
+			if (1 > 0) {
+				if (monsters[i].long) {
+					displayHTML += '<li class="room-monster grey">' + monsters[i].long + ' is ' + 
+					 monsters[i].position + ' here.</li>';
+				} else {
+					displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is ' + 
+					 monsters[i].position + ' here.</li>';
+				}
 			}
 		}
 
 		i = 0;
 	
 		for (i; i < playersInRoom.length; i += 1) {
-			if (!options || !options.hideCallingPlayer || options.hideCallingPlayer !== playersInRoom[i].name ) {
-				displayHTML += '<li class="room-player">' + playersInRoom[i].name 
-					+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here</li>';
+			if (1 > 0) {
+				if (!options || !options.hideCallingPlayer || options.hideCallingPlayer !== playersInRoom[i]) {
+					displayHTML += '<li class="room-player">' + playersInRoom[i].name 
+						+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here.</li>';
+				}
 			}
 		}
 	}

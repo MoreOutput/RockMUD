@@ -62,6 +62,18 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 	return cmdObj;
 };
 
+Cmd.prototype.whizinvis = function(target, command) {
+	Character.addAffect(target, {
+		id: 'whizinvis',
+		affect: ['invis'],
+		display: 'Admin Invisiblity',
+		caster: target.name,
+		modifiers: null,
+		decay: -1,
+		startingRoom: command.roomObj
+	});
+};
+
 Cmd.prototype.buy = function(target, command) {
 	var i = 0,
 	roomObj,
@@ -1895,7 +1907,7 @@ Cmd.prototype.look = function(target, command) {
 			if (!command.msg) {
 				if (Character.canSee(target, roomObj)) {
 					displayHTML = Room.getDisplayHTML(roomObj, {
-						hideCallingPlayer: target.name
+						hideCallingPlayer: target
 					});
 
 					World.msgPlayer(target, {

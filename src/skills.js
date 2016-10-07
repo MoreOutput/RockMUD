@@ -19,7 +19,7 @@ Skill.prototype.shieldBlock = function(skillObj, player, roomObj, shield) {
 	}
 };
 
-Skill.prototype.secondAttack = function(skillObj, player) {
+Skill.prototype.secondAttack = function(skillObj, player, roomObj) {
 	var intMod = World.dice.getIntMod(player);
 
 	if (skillObj.train >= 80 && World.dice.roll(1, 100, intMod) > 95) {
@@ -47,23 +47,34 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 	affObj;
 
 	if (!skillAff) {
-		// run a check; chance of auto failure
-		if (skillObj.train > 0 && World.dice.roll(1, 6) < 6) {
-			affObj = {
-				id: skillObj.id,
-				display: skillObj.name,
-				decay: World.dice.roll(1 + player.level/2, 10, (player.detection + player.knowledge/2) + skillObj.train/5),
-				modifiers: null,
-				begunSneaking: {area: roomObj.area, roomid: roomObj.id}
-			};
+		if (player.position === 'standing') {
+			// run a check; chance of auto failure
+			if (skillObj.train > 0 && World.dice.roll(1, 6) < 6) {
+				affObj = {
+					id: skillObj.id,
+					affect: ['sneak'],
+					display: false,
+					decay: World.dice.roll(1 + player.level/2, 10, (player.detection + player.knowledge/2) + skillObj.train/5),
+					modifiers: null,
+					startingRoom: roomObj
+				};
 
-			Character.addAffect(player, affObj);
+				Character.addAffect(player, affObj);
 
-			if (skillObj.wait) {
-				player.wait += skillObj.wait;
-			} else {
-				player.wait += 1;
+				if (skillObj.wait) {
+					player.wait += skillObj.wait;
+				} else {
+					player.wait += 1;
+				}
 			}
+			// Players never know if they're successfully sneaking
+			World.msgPlayer(player, {
+				msg: 'You begin sneaking.'
+			});
+		} else {
+			World.msgPlayer(player, {
+				msg: 'You can\'t sneak in this position.'
+			});
 		}
 	} else {
 		// already sneaking

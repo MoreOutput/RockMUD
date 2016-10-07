@@ -8,6 +8,7 @@ var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms').room,
 World = require('./world').world,
+Skill = require('./skills').skill,
 Cmds,
 Character = function () {
 	this.statusReport = [
@@ -1126,11 +1127,11 @@ Character.prototype.getStatusReport = function(player) {
 	}
 };
 
-Character.prototype.getAffect = function(player, affectName) {
+Character.prototype.getAffect = function(player, affectId) {
 	var i = 0;
 
 	for (i; i < player.affects.length; i += 1) {
-		if (player.affects[i].id === affectName) {
+		if (player.affects[i].id === affectId) {
 			return player.affects[i];
 		}
 	}
@@ -1166,7 +1167,7 @@ Character.prototype.addAffect = function(player) {
 	return true;;
 };
 
-// Can the character see, checks sight property
+// Can the character see in a given room, also checks player sight property
 // if the room is dark, if the player has needed vision skills
 // and if its currently dark outside
 Character.prototype.canSee = function(player, roomObj) {
@@ -1217,6 +1218,35 @@ Character.prototype.createCorpse = function(player) {
 		killedBy: player.killedBy,
 		items: player.items
 	};
+};
+
+Character.prototype.canSeeEntity = function(player, entity) {
+	var canSee = true,
+	detectInvis = this.getAffect(player, 'detect_invisibility'),
+	detectHide = this.getAffect(player, 'detect_hidden'),
+	hideCheck = 0;
+
+	return true;
+};
+
+Character.prototype.isInvisible = function(player) {
+	if (player.affects.length) {
+		if (player.affects[i].affect.toString().indexOf('invis') !== -1) {
+			return true;
+		}
+	} else {
+		return false;
+	}
+};
+
+Character.prototype.isHidden = function(player) {
+	if (player.affects.length) {
+		if (player.affects[i].affect.toString().indexOf('hide') !== -1) {
+			return true;
+		}
+	} else {
+		return false;
+	}	
 };
 
 Character.prototype.getMaxCarry = function(player) {
