@@ -8,7 +8,6 @@ var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms').room,
 World = require('./world').world,
-Skill = require('./skills').skill,
 Cmds,
 Character = function () {
 	this.statusReport = [
