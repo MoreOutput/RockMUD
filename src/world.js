@@ -603,6 +603,10 @@ World.prototype.setupArea = function(area) {
 			if (!exitObj.area) {
 				exitObj.area = area.name;
 			}
+
+			if (!exitObj.affects) {
+				exitObj.affects = [];
+			}
 		}
 
 		world.rollMobs(area.rooms[i].monsters, area.rooms[i].id, area);
@@ -635,23 +639,29 @@ World.prototype.reloadArea = function(area) {
 	newArea,
 	i = 0;
 
-	newArea = world.setupArea(require('../areas/' + area.name.toLowerCase()), false);
+	newArea = world.setupArea(require('../areas/' + area.id), false);
 
-	for (i; i < area.rooms.length; i +=1) {
-		if (area.rooms[i].playersInRoom) {
-			newArea.rooms[i].playersInRoom = area.rooms[i].playersInRoom;
-		}
+	for (i; i < world.areas.length; i += 1) {
+		if (world.areas[i].id === newArea.id) {
+			world.areas[i] = newArea;
+		}		
 	}
 
-	require.cache[require.resolve('../areas/' + area.name.toLowerCase())] = null;
+	require.cache[require.resolve('../areas/' + area.id)] = null;
 
 	return newArea;
 };
 
 World.prototype.getRoomObject = function(areaName, roomId) {
 	var world = this,
-	area = world.getAreaByName(areaName),
+	area,
 	i = 0;
+
+	if (areaName.id) {
+		area = areaName;
+	} else {
+		area = world.getAreaByName(areaName);
+	}
 	
 	if (area) {
 		for (i; i < area.rooms.length; i += 1) {
@@ -706,7 +716,6 @@ World.prototype.getAllMonstersFromArea = function(areaName) {
 
 	return mobArr;
 };
-
 
 World.prototype.getAllPlayersFromArea = function(areaName) {
 	var area,
@@ -1272,7 +1281,7 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 		for (i; i < gameEntities.length; i += 1) {
 			gameEntity = gameEntities[i];	
 			
-			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)]) {
+			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)] || gameEntity.behaviors.length === 0) {
 				 if (gameEntity[evtName]) {
 					 allTrue = gameEntity[evtName](gameEntity, roomObj, param, param2);
 				 }

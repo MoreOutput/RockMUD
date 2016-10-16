@@ -28,6 +28,7 @@
 	"value": 0,
 	"behaviors": [],
 	"modifiers": {},
+	"affects": [],
 	"hasEvents": false
 }
 

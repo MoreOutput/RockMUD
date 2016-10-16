@@ -30,61 +30,65 @@ setInterval(function() {
 
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
-				World.processEvents('onDay', World.areas[i]);
+				(function(area, areaIndex) {
+					World.processEvents('onDay', area);
 
-				monsters = World.getAllMonstersFromArea(World.areas[i]);
+					monsters = World.getAllMonstersFromArea(area);
 
-				monsters.forEach(function(monster, i) {
-					var roomObj = World.getRoomObject(monster.area, monster.roomid);
+					monsters.forEach(function(monster, i) {
+						var roomObj = World.getRoomObject(area, monster.roomid);
 
-					if (monster.chp >= 1) {
-						World.processEvents('onDay', monster, roomObj);
-						World.processEvents('onDay', monster.items, roomObj);
-					}
-				});
+						if (monster.chp >= 1) {
+							World.processEvents('onDay', monster, roomObj);
+							World.processEvents('onDay', monster.items, roomObj);
+						}
+					});
 
-				players = World.getAllPlayersFromArea(World.areas[i]);
+					players = World.getAllPlayersFromArea(area);
 
-				players.forEach(function(player, i) {
-					var roomObj = World.getRoomObject(player.area, player.roomid);
+					players.forEach(function(player, i) {
+						var roomObj = World.getRoomObject(area, player.roomid);
 
-					if (player.chp >= 1) {
-						World.processEvents('onDay', player, roomObj);
-						World.processEvents('onDay', player.items, roomObj);
-					}
-				});
+						if (player.chp >= 1) {
+							World.processEvents('onDay', player, roomObj);
+							World.processEvents('onDay', player.items, roomObj);
+						}
+					});
+				}(World.areas[i], i));
 			}	
 		}
 	} else if (World.time.hour === World.time.month.hourOfNight && World.time.minute === 1) {
 		World.time.isDay = false;
 
 		areaMsg = 'The sun fades fully from view as night falls.';
-	
+ 	
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
-				World.processEvents('onDay', World.areas[i]);
+				(function(area, areaIndex) {
+					World.processEvents('onNight', area);
 
-				monsters = World.getAllMonstersFromArea(World.areas[i]);
+					monsters = World.getAllMonstersFromArea(area);
 
-				monsters.forEach(function(monster, i) {
-					var roomObj = World.getRoomObject(monster.area, monster.roomid);
+					monsters.forEach(function(monster, i) {
+						var roomObj = World.getRoomObject(area, monster.roomid);
 
-					if (monster.chp >= 1) {
-						World.processEvents('onNight', monster, roomObj);
-						World.processEvents('onNight', monster.items, roomObj);
-					}
-				});
+						if (monster.chp >= 1) {
+							World.processEvents('onNight', monster, roomObj);
+							World.processEvents('onNight', monster.items, roomObj);
+						}
+					});
 
-				players = World.getAllPlayersFromArea(World.areas[i]);
+					players = World.getAllPlayersFromArea(area);
 
-				players.forEach(function(player, i) {
-					var roomObj = World.getRoomObject(player.area, player.roomid);
+					players.forEach(function(player, i) {
+						var roomObj = World.getRoomObject(area, player.roomid);
 
-					if (player.chp >= 1) {
-						World.processEvents('onNight', player, roomObj);
-						World.processEvents('onNight', player.items, roomObj);
-					}
-				});
+						if (player.chp >= 1) {
+							World.processEvents('onNight', player, roomObj);
+							World.processEvents('onNight', player.items, roomObj);
+						}
+					});
+				}(World.areas[i], i));
 			}	
 		}
 	}
@@ -133,55 +137,43 @@ setInterval(function() {
 // area.respawnOn (default is 3 -- 12 minutes). A respawnOn value of 0 prevents respawn.
 // areas do not update if someone is fighting
 setInterval(function() {
-	var i = 0,
-	j = 0,
-	k = 0,
+	var playersInArea, 
+	area,
+	i = 0,
 	refresh = true;
 
-	for (i; i < World.areas.length; i += 1) {
-		(function(area, index) {
-			if (area.respawnOn > 0) {
-				area.respawnTick += 1;
-			}
+	for (i; i < World.areas.length; i += 1) {  
+		area = World.areas[i];
+		playersInArea = World.getPlayersByArea(World.areas[i].name);
 
-			for (j; j < area.rooms.length; j += 1) {
-				(function(room, index, roomIndex) {
-					if (room.playersInRoom) {
-						for (k; k < room.playersInRoom.length; k += 1) {
-							if (room.playersInRoom[k].position === 'fighting') {
-								refresh = false;
-								area.respawnTick -= 1;
-							}
-						}
+		if (playersInArea.length) {
+			refresh = false;
+		} else {
+			if (World.dice.roll(1, 2) === 1) {
+				if (area.respawnOn > area.respawnTick) {
+					area.respawnTick += 1;
+				}
 
-						if (World.dice.roll(1, 20) > 18) {
-							area.respawnTick -= 1;
-						}
-					}
+				if (area.respawnTick >= area.respawnOn) {
+					area.respawnTick = 0;
 
-					if (World.areas.length - 1 === index 
-						&& roomIndex === area.rooms.length - 1) {
-						if ((area.respawnTick === area.respawnOn && area.respawnOn > 0 && refresh)) {
-							area = World.reloadArea(area);
-							area.respawnTick = 0;
-
-							World.areas[index] = area;
-
-							if (area.onReload) {
-								area.onReload();
-							}
+					if (refresh) {
+						area = World.reloadArea(area);
+					
+						if (area.onReload) {
+							area.onReload();
 						}
 					}
-				}(area.rooms[j], index, j));
+				}
 			}
-		}(World.areas[i], i))
+		}
 	}
 }, 240000); // 4 minutes
 
 // decay timer, affects all items with decay, decayLight
 // if an item with decay (not decayLight) reaches zero it goes away
 // if an item with decayLight reaches zero it goes out. Printing a generic message unless an onDestory event is found
-// if onDestory is found then the programmer should return a message
+// if onDestroy is found then the programmer should return a message
 // fires onDecay, onDecayLight, onDestory
 // simple msg override in the form of decayMsg, decayLightMsg and lightFlickerMsg
 setInterval(function() {
@@ -326,22 +318,23 @@ setInterval(function() {
 
 	if (World.areas.length && World.dice.roll(1, 10) > 6) {
 		for (i; i < World.areas.length; i += 1) {
+			players = World.getAllPlayersFromArea(World.areas[i]);
 			monsters = World.getAllMonstersFromArea(World.areas[i]);
+			
+			if (players.length || World.dice.roll(1, 100) === 1) {
+				monsters.forEach(function(monster) {
+					var roomObj = World.getRoomObject(World.areas[i], monster.roomid);
 
-			monsters.forEach(function(monster, i) {
-				var roomObj = World.getRoomObject(monster.area, monster.roomid);
-
-				if (monster.chp >= 1) {
-					World.processEvents('onAlive', monster, roomObj);
-					World.processEvents('onAlive', monster.items, roomObj);
-				}
-			});
+					if (monster.chp >= 1) {
+						World.processEvents('onAlive', monster, roomObj);
+						World.processEvents('onAlive', monster.items, roomObj);
+					}
+				});
+			}
 
 			if (World.dice.roll(1, 10) > 5) {
-				players = World.getAllPlayersFromArea(World.areas[i]);
-
-				players.forEach(function(player, i) {
-					var roomObj = World.getRoomObject(player.area, player.roomid);
+				players.forEach(function(player) {
+					var roomObj = World.getRoomObject(World.areas[i], player.roomid);
 
 					if (player.chp >= 1) {
 						World.processEvents('onAlive', player, roomObj);

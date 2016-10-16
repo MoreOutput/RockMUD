@@ -5,7 +5,7 @@ World = require('../src/world').world;
 
 module.exports = {
 	name: 'Midgaard',
-	id: '1',
+	id: 'midgaard',
 	type: 'city',
 	levels: 'All',
 	description: 'The first city.',
@@ -18,7 +18,6 @@ module.exports = {
 		{msg: 'The bustle of the city can be distracting. Keep an eye out for thieves.'}
 	],
 	respawnOn: 8,
-	respawnTick: 0,
 	rooms: [
 		{
 			id: '1',
@@ -190,7 +189,12 @@ module.exports = {
 				weight: 1,
 				slot: 'hands',
 				equipped: false,
-				flags: []
+				flags: [],
+				affects: [{
+					id: 'invis',
+					affect: 'invis',
+					decay: -1
+				}]
 			}, {
 				name: 'Loaf of Bread',
 				short: 'a brown loaf of bread',

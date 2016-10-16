@@ -889,7 +889,7 @@ Character.prototype.getSkill = function(player, skillName) {
 	var i = 0;
 
 	for (i; i < player.skills.length; i += 1) {
-		if (player.skills[i].id.toLowerCase().indexOf(skillName) !== -1) {
+		if (player.skills[i].id === skillName || player.skills[i].display.toLowerCase().indexOf(skillName) === 0) {
 			return player.skills[i];
 		}
 	}
@@ -1219,29 +1219,62 @@ Character.prototype.createCorpse = function(player) {
 	};
 };
 
-Character.prototype.canSeeEntity = function(player, entity) {
+Character.prototype.canSeeObject = function(player, entity) {
 	var canSee = true,
 	detectInvis = this.getAffect(player, 'detect_invisibility'),
 	detectHide = this.getAffect(player, 'detect_hidden'),
-	hideCheck = 0;
+	isInvisible = this.isInvisible(entity),
+	isHidden = this.isHidden(entity),
+	playerHideRoll = World.dice.roll(1, 10, player.detection),
+	hideCheck = World.dice.roll(1, 10, entity.level) + player.level;
+	
+	if (entity.affects.length) {
+		if (isHidden) {
+			canSee = false;
 
-	return true;
+			if (detectHidden) {
+				canSee = true;
+			}
+
+			if (!canSee && playerHideRoll > hideCheck) {
+				canSee = true;	
+			}
+		}
+
+		if (isInvisible && canSee) {
+			canSee = false;
+
+			if (detectInvis) {
+				canSee = true;
+			}
+		}
+	}
+
+	return canSee;
 };
 
 Character.prototype.isInvisible = function(player) {
+	var i = 0;
+
 	if (player.affects.length) {
-		if (player.affects[i].affect.toString().indexOf('invis') !== -1) {
-			return true;
+		for (i; i < player.affects.length; i += 1) {
+			if (player.affects[i].affect === 'invis') {
+				return true;
+			}
 		}
 	} else {
-		return false;
+		return false; 
 	}
 };
 
 Character.prototype.isHidden = function(player) {
+	var i = 0;
+
 	if (player.affects.length) {
-		if (player.affects[i].affect.toString().indexOf('hide') !== -1) {
-			return true;
+		for (i; i < player.affects.length; i += 1) {
+			if (player.affects[i].affect === 'hide') {
+				return true;
+			}
 		}
 	} else {
 		return false;

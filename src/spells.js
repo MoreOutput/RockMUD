@@ -3,6 +3,9 @@ var World = require('./world').world,
 Character = require('./character').character,
 Spell = function() {};
 
+/*
+* Damage Spells
+*/
 Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command, fn) {
 	var intMod,
 	cost = 2,
@@ -24,12 +27,13 @@ Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command, f
 			World.msgPlayer(player, {
 				msg: 'You cast spark and a series of crackling '
 					+ '<span class="blue">bright blue sparks</span> burn ' + opponent.displayName 
-					+ ' with maiming intensity! (' + damage + ')'
+					+ ' with maiming intensity! (' + damage + ')',
+				noPrompt: true
 			});
 
 			World.msgPlayer(opponent, {
 				msg: player.displayName + ' casts  spark and burns you ' 
-				+ opponent.displayName + ' with maiming intensity! (' + damage + ')'
+					+ opponent.displayName + ' with maiming intensity! (' + damage + ')'
 			});
 		} else {
 			// spell failed
@@ -45,6 +49,26 @@ Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command, f
 			msg: 'You dont have enough mana to cast spark!',
 			styleClass: 'error'
 		});
+	}
+};
+
+/*
+* Passive Spells
+*/
+
+Spell.prototype.detectInvis = function(skillObj, player, roomObj, command, fn) {
+	var intMod = World.dice.getIntMod(player),
+	failRoll,
+	successRoll,
+	// Check if we already have this passive 
+	// false if we dont have the affect otherwise the affect object
+	currentAffect,
+	cost = 1;
+
+	if (1 > 0) {
+		console.log('here');
+	} else {
+
 	}
 };
 

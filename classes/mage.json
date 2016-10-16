@@ -16,6 +16,17 @@
 			"prerequisites": {
 				"level": 1
 			}
+		}, {
+			"id": "detectInvis",
+			"display": "Detect Invisibility",
+			"mod": 0,
+			"train": 70,
+			"type": "spell passive",
+			"wait": 2,
+			"learned": true,
+			"prerequisites": {
+				"level": 1
+			}
 		}
 	]
 }

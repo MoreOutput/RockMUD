@@ -32,7 +32,7 @@ Room.prototype.checkEntranceCriteria = function(roomObj, exitObj, player) {
 	return true;
 };
 
-Room.prototype.getDisplayHTML = function(roomObj, options) {
+Room.prototype.getDisplayHTML = function(roomObj, player) {
 	var room = this,
 	i = 0,
 	displayHTML = '',
@@ -40,8 +40,16 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 	playersInRoom = roomObj.playersInRoom,
 	monsters = roomObj.monsters,
 	titleStyleClass = 'room-title',
-	titleHtmlTag = 'h2',		
+	titleHtmlTag = 'h2',
+	canSeeInvis = false,
+	canSeeHidden = false,
+	hideCheck = 0,
+	playerHideRoll = World.dice.getDexMod(player) + player.detection + World.dice.roll(1, 4),
 	items = roomObj.items;
+
+	if (!Character) {
+		Character = require('./character').character;
+	}
 
 	if (roomObj.titleHtmlTag) {
 		titleHtmlTag = roomObj.titleHtmlTag;
@@ -50,17 +58,19 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 	if (roomObj.titleStyleClass) {
 		titleStyleClass = roomObj.titleStyleClass;
 	}
-	
+
 	if (exits.length > 0) {
 		displayHTML += '<ul class="room-exits list-inline"><li class="list-label">Visible Exits: </li>';
 
 		for (i; i < exits.length; i += 1) {
-			if (!exits[i].door) {
-				displayHTML += '<li>' + exits[i].cmd + '</li>';
-			} else if (exits[i].door && !exits[i].door.isOpen) {
-				displayHTML += '<li class="grey">' + exits[i].cmd + '</li>';
-			} else {
-				displayHTML += '<li class="yellow">' + exits[i].cmd + '</li>';
+			if (Character.canSeeObject(player, exits[i])) {
+				if (!exits[i].door) {
+					displayHTML += '<li>' + exits[i].cmd + '</li>';
+				} else if (exits[i].door && !exits[i].door.isOpen) {
+					displayHTML += '<li class="grey">' + exits[i].cmd + '</li>';
+				} else {
+					displayHTML += '<li class="yellow">' + exits[i].cmd + '</li>';
+				}
 			}
 		}
 
@@ -75,10 +85,12 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 	if (items.length > 0) {
 		for (i; i < items.length; i += 1) {
-			if (items[i].long) {
-				displayHTML += '<li class="room-item">' + items[i].long + '</li>';
-			} else {
-				displayHTML += '<li class="room-item">A ' + items[i].name + '</li>';
+			if (Character.canSeeObject(player, items[i])) {
+				if (items[i].long) {
+					displayHTML += '<li class="room-item">' + items[i].long + '</li>';
+				} else {
+					displayHTML += '<li class="room-item">A ' + items[i].name + '</li>';
+				}
 			}
 		}
 	}
@@ -87,13 +99,13 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 
 	if (monsters.length > 0 || playersInRoom.length > 0) {
 		for (i; i < monsters.length; i += 1) {
-			if (1 > 0) {
+			if (Character.canSeeObject(player, monsters[i])) {
 				if (monsters[i].long) {
-					displayHTML += '<li class="room-monster grey">' + monsters[i].long + ' is ' + 
-					 monsters[i].position + ' here.</li>';
+					displayHTML += '<li class="room-monster grey">' + monsters[i].long + ' is '
+						+ monsters[i].position + ' here.</li>';
 				} else {
-					displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is ' + 
-					 monsters[i].position + ' here.</li>';
+					displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is ' 
+						+ monsters[i].position + ' here.</li>';
 				}
 			}
 		}
@@ -101,8 +113,8 @@ Room.prototype.getDisplayHTML = function(roomObj, options) {
 		i = 0;
 	
 		for (i; i < playersInRoom.length; i += 1) {
-			if (1 > 0) {
-				if (!options || !options.hideCallingPlayer || options.hideCallingPlayer !== playersInRoom[i]) {
+			if (playersInRoom[i] !== player) {
+				if (Character.canSeeObject(player, playersInRoom[i])) {
 					displayHTML += '<li class="room-player">' + playersInRoom[i].name 
 						+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here.</li>';
 				}

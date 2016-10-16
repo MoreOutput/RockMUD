@@ -52,11 +52,9 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 			if (skillObj.train > 0 && World.dice.roll(1, 6) < 6) {
 				affObj = {
 					id: skillObj.id,
-					affect: ['sneak'],
+					affect: 'sneak',
 					display: false,
-					decay: World.dice.roll(1 + player.level/2, 10, (player.detection + player.knowledge/2) + skillObj.train/5),
-					modifiers: null,
-					startingRoom: roomObj
+					decay: World.dice.roll(1 + player.level/2, 10, (player.detection + player.knowledge/2) + skillObj.train/5)
 				};
 
 				Character.addAffect(player, affObj);
@@ -83,11 +81,14 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 
 /*
 * Melee Skills, called by a game entity
+*/
+
+/*
 * Can only work on standing opponents
 * Chance of knocking the target down; chances increased with a shield
 * If the target is already on the ground dex check to fall
-* If the target is two sizes smaller do a dex check against missing, a 1 causes the user to trip
-* Smaller targets take more damage if the user is two sizes bigger
+* If the target is two sizes smaller do a dex check against missing, a critical fail causes the user to trip
+* Attacker does .5 more damage per size difference in target
 */
 Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 	var opponent,

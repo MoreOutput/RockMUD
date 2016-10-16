@@ -65,12 +65,11 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 Cmd.prototype.whizinvis = function(target, command) {
 	Character.addAffect(target, {
 		id: 'whizinvis',
-		affect: ['invis'],
+		affect: 'invis',
 		display: 'Admin Invisiblity',
 		caster: target.name,
 		modifiers: null,
-		decay: -1,
-		startingRoom: command.roomObj
+		decay: -1
 	});
 };
 
@@ -1759,46 +1758,71 @@ Cmd.prototype.cast = function(player, command, fn) {
 	var cmd = this,
 	mob,
 	skillObj,
-	roomObj;
+	roomObj,
+	spellTarget;
+
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(player.area, player.roomid);
+	}
 
 	if (player.position !== 'sleeping') {
 		if (command.arg) {
-			if (command.arg in Spells) {
-				skillObj = Character.getSkillById(player, command.arg);
+			skillObj = Character.getSkill(player, command.arg);
 
-				if (skillObj) {
-					if (player.position !== 'sleeping' && player.position !== 'resting' && player.position !== 'fleeing') {
-						roomObj = World.getRoomObject(player.area, player.roomid);
+			if (skillObj.id in Spells) {
+				if (player.position === 'standing' || player.position === 'fighting') {
+					if (!command.input) {
+						if (skillObj.type.indexOf('passive') === -1) {
+							if (player.opponent) {
+								spellTarget = player.opponent;
 
-						if (!command.input && player.opponent) {
-							return Spells[command.arg](skillObj, player, player.opponent, roomObj, command, function() {
-								if (!player.opponent && player.position !== 'fighting') {
-									cmd.kill(player, command, fn);
-								}
-							
-								World.processEvents('onSpell', player, roomObj, skillObj);
-								World.processEvents('onSpell', player.items, roomObj, skillObj);
-								World.processEvents('onSpell', roomObj, player, skillObj);
-							});
-						} else {
-							mob = World.search(roomObj.monsters, command);
-
-							if (mob) {
-								return Spells[command.arg](skillObj, player, mob, roomObj, command, function() {
-									if (!player.opponent && player.position !== 'fighting') {
+								return Spells[skillObj.id](skillObj, player, spellTarget, roomObj, command, function() {
+									if (!player.opponent && player.position === 'standing') {
 										cmd.kill(player, command, fn);
 									}
-									
+
 									World.processEvents('onSpell', player, roomObj, skillObj);
 									World.processEvents('onSpell', player.items, roomObj, skillObj);
 									World.processEvents('onSpell', roomObj, player, skillObj);
 								});
 							} else {
 								World.msgPlayer(player, {
-									msg: 'You do not see anything by that name here.',
-									styleClass: 'error'
+									msg: 'You need to specify a target!'
 								});
 							}
+						} else {
+							return Spells[skillObj.id](skillObj, player, player, roomObj, command, function() {	
+								World.processEvents('onSpell', player, roomObj, skillObj);
+								World.processEvents('onSpell', player.items, roomObj, skillObj);
+								World.processEvents('onSpell', roomObj, player, skillObj);
+							});
+						}
+					} else {
+						if (command.input === 'self' || command.input === 'me') {
+							spellTarget = player;
+						} else {
+							spellTarget = World.search(roomObj.monsters, {arg: command.input, input: command.arg});
+						}
+
+						if (spellTarget) {
+							return Spells[skillObj.id](skillObj, player, spellTarget, roomObj, command, function() {
+								if (!player.opponent && player.position !== 'fighting' && skillObj.type.indexOf('passive') === -1) {								
+									command.target = spellTarget;
+
+									cmd.kill(player, command, fn);
+								}
+
+								World.processEvents('onSpell', player, roomObj, skillObj);
+								World.processEvents('onSpell', player.items, roomObj, skillObj);
+								World.processEvents('onSpell', roomObj, player, skillObj);
+							});
+						} else {
+							World.msgPlayer(player, {
+								msg: 'You do not see anything by that name here.',
+								styleClass: 'error'
+							});
 						}
 					}
 				} else {
@@ -1837,7 +1861,12 @@ Cmd.prototype.kill = function(player, command, avoidGroupCheck, fn) {
 			roomObj = World.getRoomObject(player.area, player.roomid);
 		}
 		
-		opponent = World.search(roomObj.monsters, command);
+
+		if (!command.target) {
+			opponent = World.search(roomObj.monsters, command);
+		} else {
+			opponent = command.target;
+		}
 
 		if (!opponent) {
 			opponent = World.search(roomObj.playersInRoom, command);
@@ -1906,9 +1935,7 @@ Cmd.prototype.look = function(target, command) {
 		if (target.position !== 'sleeping') {
 			if (!command.msg) {
 				if (Character.canSee(target, roomObj)) {
-					displayHTML = Room.getDisplayHTML(roomObj, {
-						hideCallingPlayer: target
-					});
+					displayHTML = Room.getDisplayHTML(roomObj, target);
 
 					World.msgPlayer(target, {
 						msg: displayHTML,

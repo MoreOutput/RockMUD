@@ -5,7 +5,7 @@ World = require('../src/world').world;
 
 module.exports = {
 	name: 'Midgaard Academy',
-	id: '3',
+	id: 'midgaard_academy',
 	type: 'building',
 	levels: 'All',
 	description: 'Famous for preparing new adventuers for the world of RockMUD.',

@@ -5,7 +5,7 @@ World = require('../src/world').world;
 
 module.exports = {
 	name : 'The Great Valley',
-	id : '2',
+	id: 'the_great_valley',
 	defaultRoom: '1',
 	type : 'grasslands',
 	levels : 'All',
