@@ -41,10 +41,6 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 	monsters = roomObj.monsters,
 	titleStyleClass = 'room-title',
 	titleHtmlTag = 'h2',
-	canSeeInvis = false,
-	canSeeHidden = false,
-	hideCheck = 0,
-	playerHideRoll = World.dice.getDexMod(player) + player.detection + World.dice.roll(1, 4),
 	items = roomObj.items;
 
 	if (!Character) {

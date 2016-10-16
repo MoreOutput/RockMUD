@@ -60,8 +60,6 @@ io = require('socket.io')(server, {
 	transports: ['websocket']
 });
 
-process.env.NODE_ENV = 'production';
-
 World.setup(io, cfg, function(Character, Cmds, Skills) {
 	server.listen(process.env.PORT || cfg.port);
 
