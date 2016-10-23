@@ -1196,6 +1196,10 @@ World.prototype.capitalizeFirstLetter = function(str) {
 	return str[0].toUpperCase() + str.slice(1);
 };
 
+World.prototype.lowerCaseFirstLetter = function(str) {
+	return str[0].toLowerCase() + str.slice(1);
+};
+
 // Creates json representation of area
 World.prototype.saveArea = function(areaName) {
 	var area,
