@@ -53,6 +53,7 @@
 	"diceSides": 0,
 	"attackType":"punch",
 	"area": "",
+	"originatingArea": "",
 	"roomid": "1",
 	"recall": {"roomid": "1", "area": "Midgaard"},
 	"description": "",

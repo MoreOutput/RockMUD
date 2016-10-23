@@ -34,7 +34,7 @@ module.exports = {
 				charClass: 'fighter',
 				level: 35,
 				short: 'Lord Radghar',
-				long: '<span class="yellow">Radghar</span>, a retired Midgaardian guard captain',
+				long: '<span class="yellow">Radghar</span>, a retired Midgaardian guard captain is here training recurits',
 				description: '',
 				inName: 'Lord Radghar',
 				race: 'human',

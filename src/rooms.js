@@ -97,8 +97,7 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 		for (i; i < monsters.length; i += 1) {
 			if (Character.canSeeObject(player, monsters[i])) {
 				if (monsters[i].long) {
-					displayHTML += '<li class="room-monster grey">' + monsters[i].long + ' is '
-						+ monsters[i].position + ' here.</li>';
+					displayHTML += '<li class="room-monster grey">' + monsters[i].long + '</li>';
 				} else {
 					displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is ' 
 						+ monsters[i].position + ' here.</li>';

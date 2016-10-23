@@ -19,11 +19,15 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 		fs.readdir(path, function(err, areaNames) {
 			areaNames.forEach(function(areaName, i) {
-				var area = require('.' + path + areaName.toLowerCase().replace(/ /g, '_'));
+				var area;
+				
+				if (areaName.indexOf('#') === -1 && areaName.indexOf('omit_') === -1) {
+					area = require('.' + path + areaName.toLowerCase().replace(/ /g, '_'));
 
-				area.itemType = 'area';
-
-				areas.push(area);
+					area.itemType = 'area';
+	
+					areas.push(area);
+				}
 			});
 
 			return fn(areas);
@@ -505,6 +509,10 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			mob.isPlayer = false;
 			mob.roomid = roomid;
 			mob.area = area.name;
+
+			if (!mob.originatingArea) {
+				mob.originatingArea = mob.area;
+			}
 
 			if (!mob.hp) {
 				if (mob.level > 5) {

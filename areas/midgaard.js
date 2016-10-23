@@ -63,7 +63,7 @@ module.exports = {
 					name: 'Rufus',
 					level: 15,
 					short: 'Mayor Rufus',
-					long: 'Rufus, current mayor of Midgaard,',
+					long: 'Rufus, current mayor of Midgaard, is here pacing around the room',
 					description: '',
 					inName: 'Mayor Rufus',
 					race: 'human',
@@ -84,7 +84,7 @@ module.exports = {
 					items: [{
 						name: 'Midgaard city key',
 						short: 'a thin gold key',
-						long: 'A thin gold key with a ruby embbeded to the end lies here.' ,
+						long: 'A thin gold key with a ruby embbeded to the end lies here' ,
 						area: 'Midgaard',
 						id: '10',
 						level: 1,
@@ -104,10 +104,10 @@ module.exports = {
 					}]
 				}, {
 					name: 'Boar',
-					displayName: ['Brown boar', 'Light brown boar'],
+					displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
 					level: 1,
-					short: ['a large brown boar', 'a large scarred boar', 'a young tan boar'],
-					long: ['A boar with a number of scars on its side', 'A large brown boar', 'A timid dark brown boar'],
+					short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a young tan boar'],
+					long: ['A boar with a number of scars on its side is here', 'A large dark brown boar', 'A larget brown boar is here'],
 					inName: 'A boar',
 					race: 'animal',
 					id: '6',
@@ -130,7 +130,7 @@ module.exports = {
 			items: [{
 				name: 'Fountain',
 				short: 'a large stone fountain',
-				long: 'A large stone fountain is erected here full of sparkling water.',
+				long: 'A large stone fountain full of sparkling water',
 				area: 'Midgaard',
 				id: '112',
 				waterSource: true,
@@ -448,7 +448,7 @@ module.exports = {
 					name: 'Thomas',
 					level: 15,
 					short: 'Thomas, the dwarven shopkeep',
-					long: 'Thomas a dwarven shopkeeper',
+					long: 'Thomas the dwarven shopkeeper is here',
 					description: '',
 					race: 'dwarf',
 					id: '9',
@@ -470,7 +470,7 @@ module.exports = {
 					items: [{
 						name: 'Pemmican',
 						short: 'a piece of Pemmican',
-						long: 'A small bit of Pemmican was left here.' ,
+						long: 'A bit of Pemmican was left here' ,
 						area: 'Midgaard',
 						id: '110',
 						level: 1,
