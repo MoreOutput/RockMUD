@@ -1195,8 +1195,8 @@ Cmd.prototype.move = function(target, command, fn) {
 								if (!sneakAff) {
 									if (Character.canSee(receiver, targetRoom)) {
 										if (!target.inName) {
-											if (target.long) {
-												msg = '<strong>' + target.long
+											if (target.short) {
+												msg = '<strong>' + World.capitalizeFirstLettert(target.short)
 													+ '</strong> walks in from '
 													+ parseMovementMsg(exitObj) + '.';
 											} else {
@@ -1236,13 +1236,13 @@ Cmd.prototype.move = function(target, command, fn) {
 								if (!sneakAff) {
 									if (Character.canSee(receiver, roomObj)) {
 										if (!target.outName) {
-											if (target.long) {
+											if (target.short) {
 												if (World.dice.roll(1, 2) === 1) {
-													msg = '<span class="yellow">' + target.long
+													msg = '<span class="yellow">' + World.capitalizeFirstLetter(target.short)
 														+ ' leaves heading <strong class="grey">' 
 														+ direction + '</strong>.</span>';	
 												} else {
-													msg = '<span class="yellow">' + target.long
+													msg = '<span class="yellow">' + World.capitalizeFirstLetter(target.short)
 														+ ' leaves traveling <strong class="grey">' 
 														+ direction + '</strong>.</span>';
 												}
