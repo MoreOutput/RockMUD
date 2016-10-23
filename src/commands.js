@@ -2476,8 +2476,8 @@ Cmd.prototype.practice = function(target, command) {
 			}
 		}
 	},
-	roomObj = World.getRoomObject(target.area, target.roomid),
-	trainers = Room.getTrainers(roomObj, command),
+	roomObj,
+	trainers,
 	trainer,
 	trainerSkillObj,
 	practiceDisplay = '',
@@ -2485,19 +2485,29 @@ Cmd.prototype.practice = function(target, command) {
 	cost = 6,
 	skillObj,
 	canPrac = true,
-	canSee = Character.canSee(target, roomObj),
+	canSee,
 	intMod = World.dice.getIntMod(target);
 	
-	if (target.position !== 'sleeping' && target.position !== 'fighting') {
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
+
+	trainers = Room.getTrainers(roomObj, command);
+
+	canSee = Character.canSee(target, roomObj);
+
+	if (target.position === 'standing') {
 		if (canSee) {
 			if (trainers.length) {
 				trainer = trainers[0];
 		
 				if (command.arg) {
 					trainerSkillObj = Character.getSkill(trainer, command.arg);				
-					
+				
 					skillObj = Character.getSkill(target, command.arg);
-					
+
 					if (trainer.beforePractice) {
 						canPrac = trainer.beforePractice(target, skillObj, trainerSkillObj);
 					}	
@@ -2527,7 +2537,7 @@ Cmd.prototype.practice = function(target, command) {
 						}
 					}
 				} else {
-					practiceDisplay = '<p>The table below showcases the <strong>skills currently known by '
+					practiceDisplay = '<p>The table below showcases the <strong>skills currently offered by '
 						+ trainer.displayName + '</strong></p><table class="table table-condensed prac-table">'
 						+ '<thead><tr><td class="prac-name-header yellow"><strong>' 
 						+ trainer.displayName +  ' Skills</strong></td>'
@@ -2541,7 +2551,7 @@ Cmd.prototype.practice = function(target, command) {
 							practiceDisplay += '<tr><td class="prac-skill">' + trainer.skills[i].display + '</td>';
 
 							if (!skillObj) {
-								practiceDisplay += '<td class="prac-known blue">Unknown</td>';
+								practiceDisplay += '<td class="prac-known blue">Not Trainable</td>';
 							} else {
 								if (!Character.meetsSkillPrepreqs(target, skillObj)) {
 									practiceDisplay += '<td class="prac-known red">Unmet prerequisites</td>';
