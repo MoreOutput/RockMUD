@@ -177,11 +177,11 @@ window.onload = function() {
 		if (r.evt && !r.evt.data) {
 			r.evt = new CustomEvent(r.evt);
 			
-			if (!r.data) {
-				document.dispatchEvent(r.evt);
-			} else {
-				document.dispatchEvent(r.evt, r.data);
+			if (r.data) {
+				r.evt.data = r.data;
 			}
+
+			document.dispatchEvent(r.evt);
 		}
 	});
 
