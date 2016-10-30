@@ -2943,6 +2943,27 @@ Cmd.prototype.xyzzy = function(target, command) {
 * ADMIN COMMANDS  
 ************************************************************************************************************/
 
+// List file names found in /players
+Cmd.prototype.plist = function(target, command) {
+	fs.readdir('./players/', function(err, playerNames) {
+		var i = 0;
+
+		for (i; i < playerNames.length; i += 1) {
+			if (playerNames[i].indexOf('.git') !== -1) {
+				playerNames.splice(i, 1);
+			}
+
+			playerNames[i] = playerNames[i].replace('.json', '');
+		}
+
+		World.msgPlayer(target, {
+			msg: '<h3>Created Players: ' + playerNames.length + '</h3>' 
+				+ '<p>' + playerNames.toString() + '</p>',
+			styleClass: 'yellow'
+		});	
+	});
+};
+
 /*
 * View a string representation of the JSON behind a world object.
 * Syntax: json objectType (item, room, monster or player)

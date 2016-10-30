@@ -20,7 +20,6 @@ window.onload = function() {
 		down: 'move down',
 		fl: 'flee',
 		fol: 'follow',
-		f: 'follow',
 		uf: 'unfollow',
 		gr: 'group',
 		l: 'look',

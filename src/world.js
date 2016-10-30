@@ -117,7 +117,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.areaTemplate = {};
 	world.ai = {};
 	world.motd = '';
-
+	
 	// Initial game loading, embrace callback hell!
 	loadAreas(function(areas) {
 		loadTime(function(err, time) {
@@ -437,7 +437,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 	i = 0;
 
 	for (i; i < mobArr.length; i += 1) {
-		if (mobArr[i].spawn && mobArr[i].spawn > 1 ) {
+		if (mobArr[i].spawn && mobArr[i].spawn > 1) {
 			mobArr[i].spawn -= 1;
 			mobArr.push(JSON.parse(JSON.stringify(mobArr[i])));
 		}

@@ -32,7 +32,7 @@ module.exports = {
 				
 			for (j; j < y; j += 1) {
 				roomObj = World.extend({}, World.roomTemplate);
-			
+
 				roomObj.id = i + '-' + j;
 				roomObj.content = 'A room';
 				roomObj.title = 'Empty room ' +  i + '-' + j;
@@ -148,6 +148,41 @@ module.exports = {
 			id: enteranceRoomId,
 			area: this.name
 		});
+
+		i = 0;
+/*
+		for (i; i < this.rooms.length; i += 1) {
+			if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 2) === 1) {;
+				this.rooms[i].monsters.push({
+					name: 'Boar',
+					displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
+					level: 1,
+					short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a young tan boar'],
+					long: [
+						'A boar with a number of scars on its side is here',
+						'A large dark brown boar',
+						'A large brown boar is here'
+					],
+					inName: 'A boar',
+					race: 'animal',
+					id: '6',
+					area: 'the_great_valley',
+					weight: 120,
+					position: 'standing',
+					attackType: 'bite',
+					ac: 4,
+					hp: 15,
+					chp: 13,
+					gold: 1,
+					size: {value: 2, display: 'very small'},
+					itemType: 'mob',
+					behaviors: [{  
+						module: 'wander'
+					}]	
+				});
+			}
+		}
+*/
 	},
 	rooms: [
 		{
@@ -162,30 +197,7 @@ module.exports = {
 				}
 			],
 			playersInRoom: [],
-			monsters: [{
-				name: 'Boar',
-				displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
-				level: 1,
-				short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a young tan boar'],
-				long: ['A boar with a number of scars on its side is here', 'A large dark brown boar', 'A large brown boar is here'],
-				inName: 'A boar',
-				race: 'animal',
-				id: '6',
-				area: 'the_great_valley',
-				weight: 120,
-				position: 'standing',
-				attackType: 'bite',
-				ac: 4,
-				hp: 15,
-				chp: 13,
-				gold: 1,
-				size: {value: 2, display: 'very small'},
-				itemType: 'mob',
-				spawn: 7,
-				behaviors: [{  
-					module: 'wander'
-				}]	
-			}],
+			monsters: [],
 			items: [],
 			flags: [],
 			outdoors: true

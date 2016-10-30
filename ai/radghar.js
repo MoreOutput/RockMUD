@@ -21,27 +21,32 @@ module.exports = {
 					msg: 'Thats great to hear ' + player.displayName  +  '! Let me get you signed up. Just a second...',
 					roomObj: roomObj
 				});
+
+				this.currentlyTraining = player.name;
+				this.currentStep = 1;
+
+				setTimeout(function() {
+					Cmd.say(mob, {
+						msg: 'Alright, move north from here and we\'ll get you some gear.',
+						roomObj: roomObj
+					});	
+				}, 1000);
 			}
 		}
 	},
 	onVisit: function(mob, roomObj, player, command) {
-		if (player.level <= 2) {
+		if (player.level <= 2 && !this.currentlyTraining) {
 			Cmd.say(mob, {
 				msg: 'Greetings ' + player.displayName + ' are you here to train at the '
 					+ '<strong class="red">Midgaardian Academy</strong>?',
 				roomObj: roomObj
 			});
 		}
-
-		Cmd.follow(mob, {
-			arg: player.name,
-			roomObj: roomObj
-		});
 	},
 	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 60);
-
-		if (roll === 10) {
+		
+		if (!this.currentlyTraining && roll === 10) {
 			Cmd.say(mob, {
 				msg: mob.exclimations[parseInt(Math.random() * ((mob.exclimations.length)))],
 				roomObj: roomObj
