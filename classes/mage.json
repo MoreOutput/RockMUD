@@ -21,7 +21,7 @@
 			"display": "Detect Invisibility",
 			"mod": 0,
 			"train": 70,
-			"type": "spell passive",
+			"type": "passive spell",
 			"wait": 2,
 			"learned": true,
 			"prerequisites": {

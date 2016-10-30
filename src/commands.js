@@ -2699,27 +2699,36 @@ Cmd.prototype.skills = function(target, command) {
 	if (target.skills) {
 		for (i; i < target.skills.length; i += 1) {
 			skillObj = target.skills[i];
-			
+
 			if (skillObj.learned) {
-				learnedStatus = 'a <strong>learned</strong>';
-				trainedLevel = ' <strong class="green"> (' + skillObj.train + '%)</strong>';
+				learnedStatus = '<strong>' + skillObj.train + '</strong>';
 			} else {
-				learnedStatus = 'an unpracticed';
+				learnedStatus = 'Unpracticed';
 			}
 
 			if (skillObj.prerequisites.level) {
 				skillLevel = skillObj.prerequisites.level; 
 			}
 
-			skills += '<li><strong>' + skillObj.display + '</strong> ' + learnedStatus  + ' ' +  skillObj.type
-				+ ' skill at  level ' + skillLevel + '.';
-				
+			skills += '<tr>'
+				+ '<td><strong>' + skillObj.display + '</strong></td>' 
+				+ '<td><strong>' + skillLevel + '</strong></td>'
+				+ '<td><strong>' + learnedStatus + '</strong></td>'
+				+ '<td><strong>' + skillObj.mod + '</strong></td>'
+				+ '</tr>';
+	
 			if (trainedLevel) {
 				skills += trainedLevel;
 			}
 		}
 
-		skills = '<ul class="list">' + skills + '</ul>';
+		skills = '<table class="table table-condensed prac-table">'
+			+ '<thead><tr><td>Skill</td>'
+			+ '<td>Level</td>'
+			+ '<td>Proficiency</td>'
+			+ '<td>Bonus</td>'
+			+ '</tr></thead><tbody>'
+			+ skills + '</tbody></table>';
 		
 		World.msgPlayer(target, {msg: skills, styleClass: 'eq' });
 	} else {
