@@ -33,7 +33,7 @@ module.exports = {
 			direction = mob.moveDirections[World.dice.roll(1, mob.moveDirections.length) - 1];
 
 			exitObj = Room.getExit(roomObj, direction);
-			
+
 			if (exitObj && ((mob.stayInArea === false) || (mob.stayInArea === true && mob.area === exitObj.area))) {
 				Cmd.move(mob, {
 					arg: direction,

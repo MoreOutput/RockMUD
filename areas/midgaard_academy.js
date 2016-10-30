@@ -18,14 +18,14 @@ module.exports = {
 		{
 			id: '1',
 			title: 'Academy Entrance',
-			area: 'Midgaard Academy',
+			area: 'midgaard_academy',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			outdoors: false,
 			exits: [
 				{
 					cmd: 'down',
 					id: '1',
-					area: 'Midgaard'
+					area: 'midgaard'
 				}
 			],
 			monsters: [{
@@ -39,7 +39,7 @@ module.exports = {
 				inName: 'Lord Radghar',
 				race: 'human',
 				id: 2,
-				area: 'Midgaard Academy',
+				area: 'midgaard_academy',
 				weight: 195,
 				diceNum: 3,
 				diceSides: 10,

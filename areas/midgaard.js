@@ -23,7 +23,7 @@ module.exports = {
 			id: '1',
 			title: 'Midgaard Town Square',
 			light: true,
-			area: 'Midgaard',
+			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			outdoors: true,
 			exits: [
@@ -68,7 +68,7 @@ module.exports = {
 					inName: 'Mayor Rufus',
 					race: 'human',
 					id: 9,
-					area: 'Midgaard',
+					area: 'midgaard',
 					weight: 245,
 					diceNum: 2,
 					diceSides: 8,
@@ -85,7 +85,7 @@ module.exports = {
 						name: 'Midgaard city key',
 						short: 'a thin gold key',
 						long: 'A thin gold key with a ruby embbeded to the end lies here' ,
-						area: 'Midgaard',
+						area: 'midgaard',
 						id: '10',
 						level: 1,
 						itemType: 'key',
@@ -111,7 +111,7 @@ module.exports = {
 					inName: 'A boar',
 					race: 'animal',
 					id: '6',
-					area: 'Midgaard',
+					area: 'midgaard',
 					weight: 120,
 					position: 'standing',
 					attackType: 'bite',
@@ -121,7 +121,6 @@ module.exports = {
 					gold: 1,
 					size: {value: 2, display: 'very small'},
 					itemType: 'mob',
-					spawn: 3,
 					behaviors: [{  
 						module: 'wander'
 					}]
@@ -131,7 +130,7 @@ module.exports = {
 				name: 'Fountain',
 				short: 'a large stone fountain',
 				long: 'A large stone fountain full of sparkling water',
-				area: 'Midgaard',
+				area: 'midgaard',
 				id: '112',
 				waterSource: true,
 				weight: 10000,
@@ -140,7 +139,7 @@ module.exports = {
 				name: 'Leather Armor',
 				short: 'a leather chestplate',
 				long: 'Some leather armor was left here',
-				area: 'Midgaard',
+				area: 'midgaard',
 				id: '111',
 				level: 1,
 				itemType: 'armor',
@@ -154,7 +153,7 @@ module.exports = {
 				name: 'Torch', 
 				short: 'a wooden torch',
 				long: 'A wooden torch rests on the ground' ,
-				area: 'Midgaard',
+				area: 'midgaard',
 				id: '104', 
 				level: 1,
 				itemType: 'weapon',
@@ -180,7 +179,7 @@ module.exports = {
 				name: 'Small Buckler', 
 				short: 'a small round buckler',
 				long: 'A small basic looking round buckler lies here' ,
-				area: 'Midgaard',
+				area: 'midgaard',
 				id: '103', 
 				level: 1,
 				itemType: 'shield',
@@ -199,7 +198,7 @@ module.exports = {
 				name: 'Loaf of Bread',
 				short: 'a brown loaf of bread',
 				long: 'A rather stale looking loaf of bread is lying on the ground' ,
-				area: 'Midgaard',
+				area: 'midgaard',
 				id: '7',
 				level: 1,
 				itemType: 'food',
@@ -214,7 +213,7 @@ module.exports = {
 				displayName: 'Short Sword',
 				short: 'a common looking short sword',
 				long: 'A short sword with a hilt wrapped in leather straps was left on the ground' ,
-				area: 'Midgaard',
+				area: 'midgaard',
 				id: '8',
 				level: 1,
 				itemType: 'weapon',
@@ -236,7 +235,7 @@ module.exports = {
 				name: 'Burlap sack',
 				short: 'a worn, tan, burlap sack',
 				long: 'A tan burlap sack with frizzed edges and various stains lies here',
-				area: 'Midgaard',
+				area: 'midgaard',
 				id: '27',
 				level: 1,
 				itemType: 'container',
@@ -245,7 +244,7 @@ module.exports = {
 					name: 'Sewer key', 
 					short: 'small rusty key',
 					long: 'A small rusty key made iron was left here',
-					area: 'Midgaard',
+					area: 'midgaard',
 					id: '101',
 					level: 1,
 					itemType: 'key',
@@ -271,7 +270,7 @@ module.exports = {
 		{
 			id: '2',
 			title: 'North of Town Square',
-			area: 'Midgaard',
+			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			outdoors: true,
 			exits: [
@@ -282,7 +281,7 @@ module.exports = {
 				{
 					cmd: 'north',
 					id: '1',
-					area: 'The Great Valley'
+					area: 'the_great_valley'
 				}
 			],
 			playersInRoom: [],
@@ -291,7 +290,7 @@ module.exports = {
 				name: 'Tattered Buckler', 
 				short: 'a tattered buckler',
 				long: 'A round buckler that looks like its seen heavy use is lying here' ,
-				area: 'Midgaard',
+				area: 'midgaard',
 				id: '2', 
 				level: 1,
 				itemType: 'shield',
@@ -307,7 +306,7 @@ module.exports = {
 		{
 			id: '3',
 			title: 'East of Town Square',
-			area: 'Midgaard',
+			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			terrian: 'stone-road',
 			terrianMod: 0,
@@ -324,7 +323,7 @@ module.exports = {
 				name: 'Brown waterskin', 
 				short: 'a light brown waterskin',
 				long: 'A brown waterskin, the hide seems worn and used, was left here.' ,
-				area: 'Midgaard',
+				area: 'midgaard',
 				id: '102',
 				level: 1,
 				drinks: 6,
@@ -340,7 +339,7 @@ module.exports = {
 		{
 			id: '4',
 			title: 'South of Town Square',
-			area: 'Midgaard',
+			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			outdoors: true,
 			exits: [
@@ -357,7 +356,7 @@ module.exports = {
 		{
 			id: '5',
 			title: 'West of Town Square',
-			area: 'Midgaard',
+			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			exits: [
 				{
@@ -375,7 +374,7 @@ module.exports = {
 				name: 'Leather Helmet', 
 				short: 'a leather helmet',
 				long: 'A simple leather helmet was left here' ,
-				area: 'Midgaard',
+				area: 'midgaard',
 				id: '3', 
 				level: 1,
 				itemType: 'armor',
@@ -391,7 +390,7 @@ module.exports = {
 		{
 			id: '6',
 			title: 'Beneath Town Square',
-			area: 'Midgaard',
+			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			size: {value: 3, display: 'medium'},
 			outdoors: false,
@@ -433,7 +432,7 @@ module.exports = {
 		{
 			id: '8',
 			title: 'The General Store',
-			area: 'Midgaard',
+			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			outdoors: false,
 			exits: [
@@ -452,7 +451,7 @@ module.exports = {
 					description: '',
 					race: 'dwarf',
 					id: '9',
-					area: 'Midgaard',
+					area: 'midgaard',
 					weight: 200,
 					diceNum: 2,
 					diceSides: 8,
@@ -471,7 +470,7 @@ module.exports = {
 						name: 'Pemmican',
 						short: 'a piece of Pemmican',
 						long: 'A bit of Pemmican was left here' ,
-						area: 'Midgaard',
+						area: 'midgaard',
 						id: '110',
 						level: 1,
 						itemType: 'food',

@@ -327,16 +327,20 @@ World.prototype.getPlayerByName = function(playerName) {
 	return false;
 };
 
-World.prototype.getPlayersByArea = function(areaName) {
+World.prototype.getPlayersByArea = function(areaId) {
 	var world = this,
 	arr = [],
 	player,
 	i = 0;
 
+	if (areaId.id) {
+		areaId = areaId.id;
+	}
+
 	for (i; i < world.players.length; i += 1) {
 		player = world.players[i];
 
-		if (player.area === areaName) {
+		if (player.area === areaId) {
 			arr.push(player);
 		}
 	}
@@ -397,7 +401,7 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 				item.weight += 2;
 			}
 			
-			item.area = area.name;
+			item.area = area.id;
 			item.roomid = roomid;
 
 			if (item.behaviors.length > 0) {
@@ -508,7 +512,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 	
 			mob.isPlayer = false;
 			mob.roomid = roomid;
-			mob.area = area.name;
+			mob.area = area.id;
 
 			if (!mob.originatingArea) {
 				mob.originatingArea = mob.area;
@@ -595,25 +599,11 @@ World.prototype.setupArea = function(area) {
 	}
 
 	for (i; i < area.rooms.length; i += 1) {
-		j = 0;
-	
 		if (!area.wasExtended) {
 			area.rooms[i] = world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)));
 			
 			if (!area.rooms[i].area) {
-				area.rooms[i].area = area.name;
-			}
-		}
-		
-		for (j; j < area.rooms[i].exits.length; j += 1) {
-			exitObj = area.rooms[i].exits[j];
-
-			if (!exitObj.area) {
-				exitObj.area = area.name;
-			}
-
-			if (!exitObj.affects) {
-				exitObj.affects = [];
+				area.rooms[i].area = area.id;
 			}
 		}
 
@@ -623,6 +613,22 @@ World.prototype.setupArea = function(area) {
 		if (area.rooms[i].monsters) {
 			area.monsters = world.shuffle(area.rooms[i].monsters);
 		}
+	
+		area.rooms[i].area = area.id;
+		
+		j = 0;
+
+		for (j; j < area.rooms[i].exits.length; j += 1) {
+			exitObj = area.rooms[i].exits[j];
+
+			if (!exitObj.area || exitObj.area === area.name) {
+				exitObj.area = area.id;
+			}
+
+			if (!exitObj.affects) {
+				exitObj.affects = [];
+			}
+		}
 	}
 
 	area.wasExtended = true;
@@ -630,11 +636,11 @@ World.prototype.setupArea = function(area) {
 	return area;
 };
 
-World.prototype.getAreaByName = function(areaName) {
+World.prototype.getArea = function(areaId) {
 	var i = 0;
 
 	for (i; i < this.areas.length; i += 1) {
-		if (this.areas[i].name.toLowerCase() === areaName.toLowerCase()) {
+		if (this.areas[i].id === areaId || this.areas[i].name.toLowerCase() === areaId.toLowerCase()) {
 			return this.areas[i];
 		}
 	}
@@ -660,15 +666,15 @@ World.prototype.reloadArea = function(area) {
 	return newArea;
 };
 
-World.prototype.getRoomObject = function(areaName, roomId) {
+World.prototype.getRoomObject = function(areaId, roomId) {
 	var world = this,
 	area,
 	i = 0;
 
-	if (areaName.id) {
-		area = areaName;
+	if (areaId.id) {
+		area = areaId;
 	} else {
-		area = world.getAreaByName(areaName);
+		area = world.getArea(areaId);
 	}
 	
 	if (area) {
@@ -682,7 +688,7 @@ World.prototype.getRoomObject = function(areaName, roomId) {
 	return false;
 };
 
-World.prototype.getAllItemsFromArea = function(areaName) {
+World.prototype.getAllItemsFromArea = function(areaId) {
 	var world = this,
 	area,
 	i = 0,
@@ -691,10 +697,10 @@ World.prototype.getAllItemsFromArea = function(areaName) {
 	roomItems,
 	itemArr = [];
 
-	if (areaName.name) {
-		area = areaName;
+	if (areaId.id) {
+		area = areaId.id;
 	} else {
-		area = world.getAreaByName(areaName)
+		area = world.getArea(areaId)
 	}
 
 	itemArr = itemArr.concat(world.getAllMobItemsFromArea(area));
@@ -704,16 +710,16 @@ World.prototype.getAllItemsFromArea = function(areaName) {
 	return itemArr;
 };
 
-World.prototype.getAllMonstersFromArea = function(areaName) {
+World.prototype.getAllMonstersFromArea = function(areaId) {
 	var world = this,
 	area,
 	i = 0,
 	mobArr = [];
 
-	if (areaName.name) {
-		area = areaName;
+	if (areaId.id) {
+		area = areaId;
 	} else {
-		area = world.getAreaByName(areaName)
+		area = world.getArea(areaId)
 	}
 
 	for (i; i < area.rooms.length; i += 1) {
@@ -725,15 +731,15 @@ World.prototype.getAllMonstersFromArea = function(areaName) {
 	return mobArr;
 };
 
-World.prototype.getAllPlayersFromArea = function(areaName) {
+World.prototype.getAllPlayersFromArea = function(areaId) {
 	var area,
 	i = 0,
 	playerArr = [];
 
-	if (areaName.name) {
-		area = areaName;
+	if (areaId.id) {
+		area = areaId;
 	} else {
-		area = this.getAreaByName(areaName);
+		area = this.getArea(areaId);
 	}
 
 	for (i; i < area.rooms.length; i += 1) {
@@ -745,17 +751,17 @@ World.prototype.getAllPlayersFromArea = function(areaName) {
 	return playerArr;
 };
 
-World.prototype.getAllRoomItemsFromArea = function(areaName) {
+World.prototype.getAllRoomItemsFromArea = function(areaId) {
 	var world = this,
 	area,
 	i = 0,
 	itemArr = [];
 
 
-	if (areaName.name) {
-		area = areaName;
+	if (areaId.name) {
+		area = areaId;
 	} else {
-		area = world.getAreaByName(areaName)
+		area = world.getArea(areaId)
 	}
 
 	for (i; i < area.rooms.length; i += 1) {
@@ -767,17 +773,17 @@ World.prototype.getAllRoomItemsFromArea = function(areaName) {
 	return itemArr;
 };
 
-World.prototype.getAllMonsterItemsFromArea = function(areaName) {
+World.prototype.getAllMonsterItemsFromArea = function(areaId) {
 	var world = this,
 	area,
 	i = 0,
 	monsters,
 	itemArr = [];
 
-	if (areaName.name) {
-		area = areaName;
+	if (areaId.name) {
+		area = areaId;
 	} else {
-		area = world.getAreaByName(areaName)
+		area = world.getArea(areaId)
 	}
 
 	monsters = world.getAllMonstersFromArea(area);
@@ -791,18 +797,18 @@ World.prototype.getAllMonsterItemsFromArea = function(areaName) {
 	return itemArr;
 };
 
-World.prototype.getAllPlayerItemsFromArea = function(areaName) {
+World.prototype.getAllPlayerItemsFromArea = function(areaId) {
 	var world = this,
 	area,
 	i = 0,
 	players,
 	itemArr = [];
 
-	if (areaName.name) {
-		areaName = area.name;
+	if (areaId.id) {
+		areaId = area.id;
 	}
 
-	players = world.getPlayersByArea(areaName);
+	players = world.getPlayersByArea(areaId);
 
 	for (i; i < players.length; i += 1) {
 		if (players[i].items.length > 0) {
@@ -1003,7 +1009,7 @@ World.prototype.msgRoom = function(roomObj, msgObj) {
 };
 
 // Emit a message to all the players in an area
-World.prototype.msgArea = function(areaName, msgObj) {
+World.prototype.msgArea = function(areaId, msgObj) {
 	var world = this,
 	i = 0,
 	s;
@@ -1014,7 +1020,7 @@ World.prototype.msgArea = function(areaName, msgObj) {
 
 			s = world.players[i].socket;
 			
-			if (s.player.name !== msgObj.playerName && s.player.area === areaName) {
+			if (s.player.name !== msgObj.playerName && s.player.area === areaId) {
 				world.msgPlayer(s, msgObj);
 			}
 		}
@@ -1201,15 +1207,15 @@ World.prototype.lowerCaseFirstLetter = function(str) {
 };
 
 // Creates json representation of area
-World.prototype.saveArea = function(areaName) {
+World.prototype.saveArea = function(areaId) {
 	var area,
 	j = 0,
 	i = 0;
 
-	if (areaName.name) {
-		area = areaName;
+	if (areaId.id) {
+		area = areaId;
 	} else {
-		area = this.getAreaByName(areaName);
+		area = this.getArea(areaId);
 	}
 
 	area = JSON.parse(JSON.stringify(area));

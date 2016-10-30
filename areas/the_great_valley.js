@@ -17,7 +17,7 @@ module.exports = {
 			msg: 'A warm breeze blows southward toward Midgaard.'
 		}
 	],
-	afterLoad: function() {
+	beforeLoad: function() {
 		var x = 10,
 		y = 10,
 		roomObj,
@@ -32,8 +32,7 @@ module.exports = {
 			for (j; j < y; j += 1) {
 				roomObj = World.extend({}, World.roomTemplate);
 			
-				roomObj.id = i + '-' + j;			
-				roomObj.area = this.name;
+				roomObj.id = i + '-' + j;
 				roomObj.content = 'A room';
 				roomObj.title = 'Empty room ' +  i + '-' + j;
 				roomObj.playersInRoom = [];
@@ -42,116 +41,92 @@ module.exports = {
 				if (i === 0 && j === 0) {
 					roomObj.exits.push({
 						cmd: 'north',
-						id: i + '-' + (j + 1),
-						area: this.name
+						id: i + '-' + (j + 1)
 					}, {
 						cmd: 'east',
-						id: (i + 1) + '-' + j,
-						area: this.name
+						id: (i + 1) + '-' + j
 					});
 				} else if (i === 0 && j === y - 1) {
 					roomObj.exits.push({
 						cmd: 'east',
-						id: (i + 1) + '-' + j,
-						area: this.name
+						id: (i + 1) + '-' + j
 					}, {
 						cmd: 'south',
-						area: this.name,
 						id: i + (y - 1)
 					});
 				} else if (i === 0 && j < y - 1) {
 					roomObj.exits.push({
 						cmd: 'north',
-						area: this.name,
 						id: i + '-' + (j + 1)
 					}, {
 						cmd: 'east',
-						id: (i + 1) + '-' + (j + 1),
-						area: this.name
+						id: (i + 1) + '-' + (j + 1)
 					}, {
 						cmd: 'south',
-						id: (i) + '-' + (j - 1),
-						area: this.name
+						id: (i) + '-' + (j - 1)
 					});
 				} else if (i === x - 1 && j === 0) {
 					roomObj.exits.push({
 						cmd: 'north',
-						area: this.name,
 						id: i + '-' + (j + 1)
 					}, {
 						cmd: 'west',
-						area: this.name,
 						id: (i - 1) + '-' + j
 					});
 				} else if (i < x -1  && j === 0) {
 					roomObj.exits.push({
 						cmd: 'north',
-						area: this.name,
 						id: i + '-' + (j + 1)
 					}, {
 						cmd: 'east',
-						id: (i + 1) + '-' + j,
-						area: this.name
+						id: (i + 1) + '-' + j
 					}, {
 						cmd: 'west',
-						area: this.name,
 						id: (i - 1) + '-' + j
 					});
 				} else if (i < x - 1 && j === y - 1) {
 					roomObj.exits.push({
 						cmd: 'east',
-						id: (i + 1) + '-' + j,
-						area: this.name
+						id: (i + 1) + '-' + j
 					}, {
 						cmd: 'south',
-						area: this.name,
 						id: i + '-' + (j - 1)
 					}, {
 						cmd: 'west',
-						area: this.name,
 						id: (i - 1) + '-' + j
 					});
 				} else if (i === x - 1 && j === y - 1) {
 					roomObj.exits.push({
 						cmd: 'south',
-						area: this.name,
 						id: i + '-' + (j - 1)
 					}, {
 						cmd: 'west',
-						area: this.name,
 						id: (i - 1) + '-' + j
 					});
 				} else if (i === x - 1 && j < y - 1) {
 					roomObj.exits.push({
 						cmd: 'north',
-						area: this.name,
 						id: i + '-' + (j + 1)
 					}, {
 						cmd: 'south',
-						id: (i) + '-' + (j - 1),
-						area: this.name
+						id: (i) + '-' + (j - 1)
 					}, {
 						cmd: 'west',
-						area: this.name,
 						id: (i - 1) + '-' + j
 					});
 				} else {
 					roomObj.exits.push({
 						cmd: 'north',
-						area: this.name,
 						id: i + '-' + (j + 1)
 					}, {
 						cmd: 'east',
-						area: this.name,
 						id: (i + 1) + '-' + j
 					}, {
 						cmd: 'south',
-						id: i + '-' + (j - 1),
-						area: this.name
+						id: i + '-' + (j - 1)
 					}, {
 						cmd: 'west',
-						id: (i - 1) + '-' + j,
-						area: this.name
+						id: (i - 1) + '-' + j
 					});
 				}
 
@@ -177,17 +152,39 @@ module.exports = {
 		{
 			id: '1',
 			title: 'Just outside the northern exit',
-			area: 'The Great Valley',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			exits : [
 				{
 					cmd: 'south',
 					id: '2',
-					area: 'Midgaard'
+					area: 'midgaard'
 				}
 			],
 			playersInRoom: [],
-			monsters: [],
+			monsters: [{
+				name: 'Boar',
+				displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
+				level: 1,
+				short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a young tan boar'],
+				long: ['A boar with a number of scars on its side is here', 'A large dark brown boar', 'A larget brown boar is here'],
+				inName: 'A boar',
+				race: 'animal',
+				id: '6',
+				area: 'the_great_valley',
+				weight: 120,
+				position: 'standing',
+				attackType: 'bite',
+				ac: 4,
+				hp: 15,
+				chp: 13,
+				gold: 1,
+				size: {value: 2, display: 'very small'},
+				itemType: 'mob',
+				spawn: 10,
+				behaviors: [{  
+					module: 'wander'
+				}]	
+			}],
 			items: [],
 			flags: [],
 			outdoors: true

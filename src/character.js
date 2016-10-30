@@ -34,7 +34,7 @@ Character.prototype.login = function(r, s, fn) {
 			fs.readFile('./players/' + name + '.json', function (err, r) {
 				var i = 0;
 
-				if (err === null) {
+				if (!err) {
 					for (i; i < World.players.length; i += 1) {
 						if (World.players[i].name.toLowerCase() === name) {
 							World.msgPlayer(World.players[i], {
@@ -648,11 +648,6 @@ Character.prototype.thirst = function(target) {
 
 		World.msgPlayer(target, {msg: 'You are dying of thirst.', styleClass: 'thirst'});
 	}
-};
-
-// Removes experience and gained levels from character
-Character.prototype.xpRot = function() {
-
 };
 
 // push an item into a players inventory, checks items to ensure a player can use it
