@@ -436,11 +436,13 @@ setInterval(function() {
 		'Use the SCAN command to get a quick look at the rooms adjacent to you.'
 	];
 
-	if (World.players.length > 0) {
-		World.msgWorld(false, {
-			msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
-				+ alerts[World.dice.roll(1, alerts.length) - 1] + '</span></span>'
-		});
+	if (World.players.length) {
+		if (World.players.position !== 'fighting') {
+			World.msgWorld(false, {
+				msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
+					+ alerts[World.dice.roll(1, alerts.length) - 1] + '</span></span>'
+			});
+		}
 	}
-}, 200000);
+}, 500000);
 

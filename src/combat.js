@@ -453,8 +453,6 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 	exp = World.dice.calExp(player, mob);
 
 	Room.addItem(roomObj, corpse);
- 
-	player.position = 'standing';
 	
 	if (exp > 0) {
 		player.exp += exp;

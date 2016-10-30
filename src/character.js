@@ -214,7 +214,7 @@ Character.prototype.create = function(s) {
 	if (!Array.isArray(World.config.startingArea)) {
 		startingArea = World.config.startingArea;
 	} else {
-		startingArea = World.config.startingArea[World.dice.roll(1, World.config.startingArea.length - 1)];
+		startingArea = World.config.startingArea[World.dice.roll(1, World.config.startingArea.length) - 1];
 	}
 	
 	raceObj = World.getRace(s.player.race);
@@ -1217,7 +1217,8 @@ Character.prototype.createCorpse = function(player) {
 		cmv: 0,
 		mv: player.mv,
 		killedBy: player.killedBy,
-		items: player.items
+		items: player.items,
+		affects: []
 	};
 };
 

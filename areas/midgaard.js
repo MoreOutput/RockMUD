@@ -107,7 +107,7 @@ module.exports = {
 					displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
 					level: 1,
 					short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a young tan boar'],
-					long: ['A boar with a number of scars on its side is here', 'A large dark brown boar', 'A larget brown boar is here'],
+					long: ['A boar with a number of scars on its side is here', 'A large dark brown boar', 'A large brown boar is here'],
 					inName: 'A boar',
 					race: 'animal',
 					id: '6',

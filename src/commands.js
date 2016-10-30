@@ -2711,7 +2711,8 @@ Cmd.prototype.skills = function(target, command) {
 			}
 
 			skills += '<tr>'
-				+ '<td><strong>' + skillObj.display + '</strong></td>' 
+				+ '<td><strong>' + skillObj.display + '</strong></td>'
+				+ '<td><strong>' + skillObj.type + '</strong></td>' 
 				+ '<td><strong>' + skillLevel + '</strong></td>'
 				+ '<td><strong>' + learnedStatus + '</strong></td>'
 				+ '<td><strong>' + skillObj.mod + '</strong></td>'
@@ -2723,7 +2724,9 @@ Cmd.prototype.skills = function(target, command) {
 		}
 
 		skills = '<table class="table table-condensed prac-table">'
-			+ '<thead><tr><td>Skill</td>'
+			+ '<thead><tr>'
+			+ '<td>Skill</td>'
+			+ '<td>Type</td>'
 			+ '<td>Level</td>'
 			+ '<td>Proficiency</td>'
 			+ '<td>Bonus</td>'
