@@ -1922,7 +1922,7 @@ Cmd.prototype.look = function(target, command) {
 	i = 0;
 	
 	if (!command) {
-		command = {msg: ''};
+		command = {};
 	}
 	
 	if (!command.roomObj) {

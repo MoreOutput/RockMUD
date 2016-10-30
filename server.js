@@ -167,9 +167,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						s.player.verifiedPassword = true;
 						s.player.logged = true;
 						
-						if (s.player) {
-							Cmds.look(s.player); // we auto fire the look command on login
-						}
+						Cmds.look(s.player); // we auto fire the look command on login
 					});
 				} else {
 					World.msgPlayer(s, {
