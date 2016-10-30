@@ -5,8 +5,15 @@ exports.server = {
 		version: '0.3.0',
 		website: 'https://github.com/MoreOutput/RockMUD',
 		description: 'Websockets MUD Engine Demo',
+		// Name of world currency -- referenced in game
 		coinage: 'gold',
-		persistenceTick: 245000
+		// Area the player starts in -- can be an array.
+		// if its an array the selection is randomized.
+		// used in Character.create()
+		startingArea: {
+			area: 'midgaard',
+			roomid: '1'
+		}
 	},
 	admins: []
 };

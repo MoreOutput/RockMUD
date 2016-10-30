@@ -208,7 +208,14 @@ Character.prototype.create = function(s) {
 	var character = this,
 	raceObj,
 	classObj,
-	socket;
+	socket,
+	startingArea;
+
+	if (!Array.isArray(World.config.startingArea)) {
+		startingArea = World.config.startingArea;
+	} else {
+		startingArea = World.config.startingArea[World.dice.roll(1, World.config.startingArea.length - 1)];
+	}
 	
 	raceObj = World.getRace(s.player.race);
 

@@ -22,6 +22,7 @@
 	"respawnTick": 0,
 	"wasExtended": false,
 	"itemType": "area",
-	"hasEvents": false
+	"hasEvents": false,
+	"runOnAliveWhenEmpty": false
 }
 

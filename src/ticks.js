@@ -108,7 +108,7 @@ setInterval(function() {
 	if (World.time.month.day > World.time.month.days) {
 		World.time.month = World.time.months[0];
 	}
-}, 1200);
+}, 1250);
 
 // wait-state removal
 setInterval(function() {
@@ -314,37 +314,43 @@ setInterval(function() {
 	var i = 0,
 	j = 0,
 	players,
-	monsters;
+	monsters,
+	roomObj;
 
-	if (World.areas.length && World.dice.roll(1, 10) > 6) {
+	if (World.dice.roll(1, 10) > 6) {
 		for (i; i < World.areas.length; i += 1) {
 			players = World.getAllPlayersFromArea(World.areas[i]);
-			monsters = World.getAllMonstersFromArea(World.areas[i]);
 			
-			if (players.length || World.dice.roll(1, 100) === 1) {
-				monsters.forEach(function(monster) {
-					var roomObj = World.getRoomObject(World.areas[i], monster.roomid);
+			if (World.areas[i].runOnAliveWhenEmpty || players.length) {
+				monsters = World.getAllMonstersFromArea(World.areas[i]);
 
-					if (monster.chp >= 1) {
-						World.processEvents('onAlive', monster, roomObj);
-						World.processEvents('onAlive', monster.items, roomObj);
-					}
-				});
-			}
+				if (World.dice.roll(1, 2) === 1) {
+					j = 0;
 
-			if (World.dice.roll(1, 10) > 5) {
-				players.forEach(function(player) {
-					var roomObj = World.getRoomObject(World.areas[i], player.roomid);
+					for (j; j < monsters.length; j += 1) {
+						roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
 
-					if (player.chp >= 1) {
-						World.processEvents('onAlive', player, roomObj);
-						World.processEvents('onAlive', player.items, roomObj);
+						if (monsters[j].chp >= 1) {
+							World.processEvents('onAlive', monsters[j], roomObj);
+						}
 					}
-					
-					if (player.position !== 'fighting' && World.dice.roll(1, 100) === 100) {
-						Character.save(player);
+				}
+
+				if (World.dice.roll(1, 2) === 0) {
+					j = 0;
+
+					for (j; j < players.length; j += 1) {
+						roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
+
+						if (players[j].chp >= 1) {
+							World.processEvents('onAlive', players[j], roomObj);
+						}
+
+						if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
+							Character.save(player);
+						}
 					}
-				});
+				}
 			}
 		}
 	}
@@ -415,10 +421,12 @@ setInterval(function() {
 
 	if (World.players.length > 0) {
 		for (i; i < World.players.length; i += 1) {
-			Character.save(World.players[i]);
+			if (World.players[i].position === 'standing' && !World.players[i].opoonent) {
+				Character.save(World.players[i]);
+			}
 		}
 	}
-}, World.config.persistenceTick); // 4.5 minutes
+}, 2450000); // 4.5 minutes
 
 // Random mud-wide messages
 setInterval(function() {

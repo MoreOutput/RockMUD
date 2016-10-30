@@ -12,6 +12,7 @@ module.exports = {
 	description : 'The second area.',
 	reloads: 0,
 	author: 'Rocky',
+	runOnAliveWhenEmpty: true,
 	messages: [
 		{
 			msg: 'A warm breeze blows southward toward Midgaard.'
