@@ -317,38 +317,34 @@ setInterval(function() {
 	monsters,
 	roomObj;
 
-	if (World.dice.roll(1, 10) > 6) {
-		for (i; i < World.areas.length; i += 1) {
+	for (i; i < World.areas.length; i += 1) {
+		if (World.dice.roll(1, 2) === 1) {
 			players = World.getAllPlayersFromArea(World.areas[i]);
-			
+
 			if (World.areas[i].runOnAliveWhenEmpty || players.length) {
 				monsters = World.getAllMonstersFromArea(World.areas[i]);
 
-				if (World.dice.roll(1, 2) === 1) {
-					j = 0;
+				j = 0;
 
-					for (j; j < monsters.length; j += 1) {
-						roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
+				for (j; j < monsters.length; j += 1) {
+					roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
 
-						if (monsters[j].chp >= 1) {
-							World.processEvents('onAlive', monsters[j], roomObj);
-						}
+					if (monsters[j].chp >= 1) {
+						World.processEvents('onAlive', monsters[j], roomObj);
 					}
 				}
 
-				if (World.dice.roll(1, 2) === 0) {
-					j = 0;
+				j = 0;
 
-					for (j; j < players.length; j += 1) {
-						roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
+				for (j; j < players.length; j += 1) {
+					roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
 
-						if (players[j].chp >= 1) {
-							World.processEvents('onAlive', players[j], roomObj);
-						}
+					if (players[j].chp >= 1) {
+						World.processEvents('onAlive', players[j], roomObj);
+					}
 
-						if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
-							Character.save(player);
-						}
+					if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
+						Character.save(players[j]);
 					}
 				}
 			}

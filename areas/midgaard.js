@@ -13,6 +13,7 @@ module.exports = {
 	created: '',
 	saved: '',
 	author: 'Rocky',
+	runOnAliveWhenEmpty: true,
 	messages: [
 		{msg: 'A cool breeze blows through the streets of Midgaard.'},
 		{msg: 'The bustle of the city can be distracting. Keep an eye out for thieves.'}
