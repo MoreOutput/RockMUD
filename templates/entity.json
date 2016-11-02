@@ -39,6 +39,7 @@
 	"wait": 0,
 	"magicRes": 0,
 	"meleeRes": 0,
+	"merchant": false,
 	"poisonRes": 0,
 	"detection": 0,
 	"knowledge": 0,

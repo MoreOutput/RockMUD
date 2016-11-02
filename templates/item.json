@@ -29,6 +29,7 @@
 	"behaviors": [],
 	"modifiers": {},
 	"affects": [],
-	"hasEvents": false
+	"hasEvents": false,
+	"originatingArea": ""
 }
 

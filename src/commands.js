@@ -1833,7 +1833,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 				}
 			} else {
 				World.msgPlayer(player, {
-					msg: 'Cast what?',
+					msg: 'You can\'t do that right now.',
 					styleClass: 'error'
 				});
 			}

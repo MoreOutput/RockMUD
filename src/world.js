@@ -404,6 +404,10 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 			item.area = area.id;
 			item.roomid = roomid;
 
+			if (!item.originatingArea) {
+				item.originatingArea = area.id;
+			}
+
 			if (item.behaviors.length > 0) {
 				item = world.setupBehaviors(item);
 

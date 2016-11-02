@@ -320,37 +320,38 @@ setInterval(function() {
 	for (i; i < World.areas.length; i += 1) {
 		if (World.dice.roll(1, 2) === 1) {
 			players = World.getAllPlayersFromArea(World.areas[i]);
+			monsters = World.getAllMonstersFromArea(World.areas[i]);
 
-			if (World.areas[i].runOnAliveWhenEmpty || players.length) {
-				monsters = World.getAllMonstersFromArea(World.areas[i]);
+			j = 0;
 
-				j = 0;
-
-				for (j; j < monsters.length; j += 1) {
+			for (j; j < monsters.length; j += 1) {
+				if ((World.areas[i].runOnAliveWhenEmpty || players.length)
+					|| (monsters[j].originatingArea !== World.areas[i].id)) {
+					
 					roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
 
 					if (monsters[j].chp >= 1) {
 						World.processEvents('onAlive', monsters[j], roomObj);
 					}
 				}
+			}
 
-				j = 0;
+			j = 0;
 
-				for (j; j < players.length; j += 1) {
-					roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
+			for (j; j < players.length; j += 1) {
+				roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
+			
+				if (players[j].chp >= 1) {
+					World.processEvents('onAlive', players[j], roomObj);
+				}
 
-					if (players[j].chp >= 1) {
-						World.processEvents('onAlive', players[j], roomObj);
-					}
-
-					if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
-						Character.save(players[j]);
-					}
+				if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
+					Character.save(players[j]);
 				}
 			}
 		}
 	}
-}, 700);
+}, 1000);
 
 setInterval(function() {
 	var i = 0,
