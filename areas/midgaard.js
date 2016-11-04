@@ -105,11 +105,11 @@ module.exports = {
 						module: 'wander'
 					}]
 				}, {
-					name: 'Boar',
-					displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
+					name: 'Dog',
+					displayName: 'Hunting hound',
 					level: 1,
-					short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a young tan boar'],
-					long: ['A boar with a number of scars on its side is here', 'A large dark brown boar', 'A large brown boar is here'],
+					short: 'a healthy looking brown and white hound',
+					long: 'A large spotted brown and white hound sniffs about the area',
 					inName: 'A boar',
 					race: 'animal',
 					id: '6',

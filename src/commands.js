@@ -1109,7 +1109,7 @@ Cmd.prototype.move = function(target, command, fn) {
 		}
 	};
 
-	if (target.size.value >= 3) {
+	if (target.size.value > 3) {
 		cost += 1;
 	}
 
@@ -1124,6 +1124,10 @@ Cmd.prototype.move = function(target, command, fn) {
 			roomObj = command.roomObj;
 		}
 
+		if (roomObj.moveMod) {				
+			cost += World.dice.roll(1, roomObj.moveMod);
+		}
+
 		exitObj = Room.getExit(roomObj, direction);
 
 		if (exitObj) {
@@ -1135,8 +1139,6 @@ Cmd.prototype.move = function(target, command, fn) {
 				} else {
 					targetRoom = command.targetRoom;
 				}
-				
-				cost += World.dice.roll(1, targetRoom.moveMod);
 
 				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value))) {
 					canEnter = World.processEvents('beforeEnter', targetRoom, roomObj, target);
@@ -1176,8 +1178,8 @@ Cmd.prototype.move = function(target, command, fn) {
 						World.processEvents('onExit', roomObj, target, targetRoom, command);
 						World.processEvents('onMove', roomObj, target, targetRoom, command);						
 
-						if (targetRoom.waitMod) {
-							target.wait += targetRoom.waitMod;
+						if (roomObj.waitMod) {
+							target.wait += roomObj.waitMod;
 						}
 
 						if (target.isPlayer) {
