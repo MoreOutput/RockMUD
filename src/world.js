@@ -452,21 +452,29 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			classObj;
 
 			mob.refId = refId += index;
-		
-			raceObj = world.getRace(mob.race);
 
-			classObj = world.getClass(mob.charClass);
-			
 			mob = world.extend(mob, JSON.parse(JSON.stringify(world.mobTemplate)));		
-			mob = world.extend(mob, JSON.parse(JSON.stringify(raceObj)));
-			mob = world.extend(mob, JSON.parse(JSON.stringify(classObj)));
-
+			
+			if (mob.race) {
+				raceObj = world.getRace(mob.race);
+				mob = world.extend(mob, JSON.parse(JSON.stringify(raceObj)));
+			}
+			
+			if (mob.charClass) {
+				classObj = world.getClass(mob.charClass);
+				mob = world.extend(mob, JSON.parse(JSON.stringify(classObj)));
+			}
+			
 			if (!mob.id) {
 				mob.id = refId;
 			}
 
 			if (Array.isArray(mob.name)) {
 				mob.name = mob.name[world.dice.roll(1, mob.name.length) - 1];
+			}
+
+			if (Array.isArray(mob.lastname)) {
+				mob.lastname = mob.lastname[world.dice.roll(1, mob.lastname.length) - 1];
 			}
 
 			if (!mob.displayName) {
