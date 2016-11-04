@@ -1,6 +1,7 @@
 'use strict';
 var Cmd = require('../src/commands').cmd,
 Room = require('../src/rooms').room,
+Character = require('../src/character').character,
 World = require('../src/world').world;
 
 module.exports = {
@@ -309,8 +310,8 @@ module.exports = {
 			title: 'East of Town Square',
 			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
-			terrian: 'stone-road',
-			terrianMod: 0,
+			terrain: 'stone-road',
+			terrainMod: 1,
 			outdoors: true,
 			exits: [
 				{
@@ -334,8 +335,7 @@ module.exports = {
 				weight: 0,
 				value: 1,
 				equipped: false
-			}],
-			flags: []
+			}]
 		},
 		{
 			id: '4',

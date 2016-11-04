@@ -126,8 +126,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 					loadTemplates(function(err, templates) {
 						loadAI(function() {
 							var area,
-							i = 0,
-							j;
+							i = 0;
 
 							fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
 								if (err) {
@@ -1286,7 +1285,7 @@ World.prototype.shuffle = function (arr) {
 World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, param2) {
 	var i = 0,
 	j = 0,
-	allTrue,
+	allTrue = true,
 	gameEntities = [];
 	
 	if (gameEntity) {
@@ -1305,8 +1304,8 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 			
 			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)] || gameEntity.behaviors.length === 0) {
 				 if (gameEntity[evtName]) {
-					 allTrue = gameEntity[evtName](gameEntity, roomObj, param, param2);
-				 }
+					allTrue = gameEntity[evtName](gameEntity, roomObj, param, param2);
+				}
 
 				for (j; j < gameEntity.behaviors.length; j += 1) {
 					if (this.ai[gameEntity.behaviors[j].module][evtName]) {

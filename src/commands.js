@@ -1094,7 +1094,7 @@ Cmd.prototype.move = function(target, command, fn) {
 	canEnter = true, // event result, must be true to move into targetRoom
 	canLeave = true, // event result, must be true to leave roomObj	
 	i = 0,
-	cost = 3,
+	cost = 1 + target.size.value,
 	parseMovementMsg = function(exitObj) {
 		if (!exitObj.cmdMsg) {
 			if (exitObj.cmd === 'up') {
@@ -1109,11 +1109,11 @@ Cmd.prototype.move = function(target, command, fn) {
 		}
 	};
 
-	if (target.size.value > 3) {
-		cost += 2;
+	if (target.size.value >= 3) {
+		cost += 1;
 	}
 
-	cost = Math.round(cost - dexMod);
+	cost -= dexMod;
 
 	if ((target.position === 'standing' || target.position === 'fleeing') 
 		&& (target.cmv > cost && target.wait === 0)) {
@@ -1135,11 +1135,15 @@ Cmd.prototype.move = function(target, command, fn) {
 				} else {
 					targetRoom = command.targetRoom;
 				}
+				
+				cost += World.dice.roll(1, targetRoom.moveMod);
 
 				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value))) {
 					canEnter = World.processEvents('beforeEnter', targetRoom, roomObj, target);
-					canEnter = World.processEvents('beforeMove', roomObj, target, command);
-					canEnter = World.processEvents('beforeMove', roomObj, target.items, command);
+
+					if (canEnter) {
+						canEnter = World.processEvents('beforeMove', roomObj, target, command);
+					}
 
 					if (canEnter) {
 						if (target.followers.length) {
@@ -1172,8 +1176,8 @@ Cmd.prototype.move = function(target, command, fn) {
 						World.processEvents('onExit', roomObj, target, targetRoom, command);
 						World.processEvents('onMove', roomObj, target, targetRoom, command);						
 
-						if (targetRoom.terrianMod) {
-							target.wait += targetRoom.terrianMod;
+						if (targetRoom.waitMod) {
+							target.wait += targetRoom.waitMod;
 						}
 
 						if (target.isPlayer) {
@@ -2961,6 +2965,22 @@ Cmd.prototype.plist = function(target, command) {
 				+ '<p>' + playerNames.toString() + '</p>',
 			styleClass: 'yellow'
 		});	
+	});
+};
+
+// list all loaded rooms with their total room count
+Cmd.prototype.alist = function(target, command) {
+	var i = 0,
+	str = '';
+
+	for (i; i < World.areas.length; i += 1) {
+		str += '<li>' + World.areas[i].id  + ' (' + World.areas[i].rooms.length  + ')</li>';
+	}
+
+	World.msgPlayer(target, {
+		msg: '<h3>Loaded Areas: ' + World.areas.length + '</h3>' 
+			+ '<ul>' + str + '</ul>',
+		styleClass: 'yellow'
 	});
 };
 
