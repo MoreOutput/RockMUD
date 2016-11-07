@@ -23,6 +23,6 @@
 	"wasExtended": false,
 	"itemType": "area",
 	"hasEvents": false,
-	"runOnAliveWhenEmpty": false
+	"runOnAliveWhenEmpty": true
 }
 

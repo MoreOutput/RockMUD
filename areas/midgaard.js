@@ -14,7 +14,6 @@ module.exports = {
 	created: '',
 	saved: '',
 	author: 'Rocky',
-	runOnAliveWhenEmpty: true,
 	messages: [
 		{msg: 'A cool breeze blows through the streets of Midgaard.'},
 		{msg: 'The bustle of the city can be distracting. Keep an eye out for thieves.'}
@@ -41,13 +40,11 @@ module.exports = {
 				}, {
 					cmd: 'west',
 					id: '5'
-				},
-				{
+				}, {
 					cmd: 'up',
 					id: '1',
 					area: 'Midgaard Academy'
-				},
-				{
+				}, {
 					cmd: 'down',
 					id: '6',
 					door: {
@@ -83,6 +80,7 @@ module.exports = {
 					ac: 20,
 					wanderCheck: 38,
 					itemType: 'mob',
+					runOnAliveWhenEmpty: false,
 					items: [{
 						name: 'Midgaard city key',
 						short: 'a thin gold key',
@@ -279,8 +277,7 @@ module.exports = {
 				{
 					cmd: 'south',
 					id: '1'
-				},
-				{
+				}, {
 					cmd: 'north',
 					id: '1',
 					area: 'the_great_valley'
@@ -363,8 +360,7 @@ module.exports = {
 				{
 					cmd: 'west',
 					id: '8'
-				},
-				{
+				}, {
 					cmd: 'east',
 					id: '1'
 				}

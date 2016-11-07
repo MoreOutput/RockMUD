@@ -1141,10 +1141,10 @@ Cmd.prototype.move = function(target, command, fn) {
 				}
 
 				if (targetRoom && (!targetRoom.size || (targetRoom.size.value >= target.size.value))) {
-					canEnter = World.processEvents('beforeEnter', targetRoom, roomObj, target);
+					canEnter = World.processEvents('beforeEnter', targetRoom, target, roomObj, command);
 
 					if (canEnter) {
-						canEnter = World.processEvents('beforeMove', roomObj, target, command);
+						canEnter = World.processEvents('beforeMove', roomObj, target, targetRoom, command);
 					}
 
 					if (canEnter) {
@@ -1174,7 +1174,7 @@ Cmd.prototype.move = function(target, command, fn) {
 
 						target.area = targetRoom.area;
 						target.roomid = targetRoom.id;
-
+					
 						World.processEvents('onExit', roomObj, target, targetRoom, command);
 						World.processEvents('onMove', roomObj, target, targetRoom, command);						
 
@@ -1274,8 +1274,8 @@ Cmd.prototype.move = function(target, command, fn) {
 						});
 
 						World.processEvents('onMove', target, targetRoom, roomObj, command);
-						World.processEvents('onEnter', targetRoom, roomObj, target, command);
-						World.processEvents('onVisit', targetRoom.monsters, targetRoom, target, command);
+						World.processEvents('onEnter', targetRoom, target, roomObj, command);
+						World.processEvents('onVisit', targetRoom.monsters, targetRoom, targetRoom, target, command);
 					}
 				} else {
 					if (targetRoom.size) {
@@ -1311,10 +1311,17 @@ Cmd.prototype.move = function(target, command, fn) {
 		}
 	} else {
 		if (target.cmv > cost) {
-			World.msgPlayer(target, {
-				msg: 'You cannot do that now.', 
-				styleClass: 'error'
-			});
+			if (target.position !== 'standing') {
+				World.msgPlayer(target, {
+					msg: 'You\re not even <strong>stand</strong>ing up!', 
+					styleClass: 'error'
+				});
+			} else {
+				World.msgPlayer(target, {
+					msg: 'You cannot do that right now.', 
+					styleClass: 'error'
+				});
+			}
 		} else {
 			World.msgPlayer(target, {
 				msg: 'You are too tired to move.', 
@@ -2850,6 +2857,34 @@ Cmd.prototype.inventory = function(player, command) {
 			msg: 'No items in your inventory, can carry ' + Character.getMaxCarry(player) + ' pounds of items and treasure.'
 		});
 	}
+};
+
+Cmd.prototype.quests = function(target, commands) {
+	var i = 0,
+	questsArr = Character.getQuests(target),
+	questObj,
+	listStr = '',
+	qStr = '<h2>Current Quests</h2><ul>';
+
+	if (questsArr.length === 0) {
+		qStr += '<li>No current quests.</li>';
+	} else {
+		for (i; i < questsArr.length; i += 1) {
+			questObj = World.getLog(questsArr[i].id);
+			
+			if (questObj.title) {
+				listStr = '<h3 class="yellow">' + questObj.title  + '</h3>';
+			}
+
+			listStr += '<p>' + questObj.entries[questsArr[i].entryId]  + '</p>';
+
+			qStr += '<li>' + listStr  + '</li>';
+		}
+	}
+	
+	qStr += '</ul>';
+
+	World.msgPlayer(target, {msg: qStr});
 };
 
 Cmd.prototype.score = function(target, command) {

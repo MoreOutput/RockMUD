@@ -25,7 +25,7 @@ module.exports = {
 	onlyAttackLarger: false,
 	onlyAttackSmaller: false,
 	revenge: false,
-	onVisit: function(mob, roomObj, target, command) {	
+	onVisit: function(mob, roomObj, target, incomingRoomObj, command) {	
 		var target;
 		
 		if (roomObj.playersInRoom.length && mob.playerAggressive) {

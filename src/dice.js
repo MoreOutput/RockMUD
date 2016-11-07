@@ -113,14 +113,14 @@ Roller.prototype.getStrMod = function(target, mod) {
 		mod += 1;
 	}
 	
-	if (target.size < 3) {
-		sizeMod = -(target.size - 2);
-	} else if (target.size > 3) {
-		sizeMod += ( target.size );
+	if (target.size.value < 3) {
+		sizeMod = -(target.size.value - 2);
+	} else if (target.size.value > 3) {
+		sizeMod += ( target.size.value/2 );
 	}
 
 	if (target.str > 11) {
-		return Math.round( (target.str/4) + mod + sizeMod);
+		return Math.round( (target.str/8) + mod + sizeMod);
 	} else {
 		return 0;
 	}

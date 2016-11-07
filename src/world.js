@@ -117,6 +117,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.areaTemplate = {};
 	world.ai = {};
 	world.motd = '';
+	world.log = []; // array of all game quests built from loaded areas
 	
 	// Initial game loading, embrace callback hell!
 	loadAreas(function(areas) {
@@ -126,7 +127,8 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 					loadTemplates(function(err, templates) {
 						loadAI(function() {
 							var area,
-							i = 0;
+							i = 0,
+							j = 0;
 
 							fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
 								if (err) {
@@ -158,6 +160,14 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 							
 							for (i; i < world.areas.length; i += 1) {
 								area = world.areas[i];
+								
+								if (area.quests) {
+									for (j; j < area.quests.length; j += 1) {
+										area.quests[j].quest = true;
+									}
+
+									world.log = world.log.concat(area.quests);
+								}
 
 								world.setupArea(area);
 							}
@@ -859,6 +869,17 @@ World.prototype.prompt = function(target) {
 	prompt += '</div>';
 	
 	return prompt;
+};
+
+World.prototype.getLog = function(logId) {
+	var i = 0,
+	len = this.log.length;
+	
+	for (i; i < len; i += 1) {
+		if (this.log[i].id === logId) {
+			return this.log[i];
+		}
+	}
 };
 
 World.prototype.msgPlayer = function(target, msgObj, canSee) {

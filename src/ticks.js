@@ -330,7 +330,7 @@ setInterval(function() {
 					
 					roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
 
-					if (monsters[j].chp >= 1) {
+					if (monsters[j].chp >= 1 && (monsters[j].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
 						World.processEvents('onAlive', monsters[j], roomObj);
 					}
 				}

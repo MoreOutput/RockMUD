@@ -456,11 +456,12 @@ Character.prototype.save = function(player, fn) {
 	followers = player.followers,
 	group = player.group,
 	opponent = player.opponent,
+	area = World.getArea(player.area),
 	following = player.following;
 
-	if (player.isPlayer) {
+	if (player.isPlayer && area) {
 		player.saved = new Date().toString();
- 		
+
 		player.opponent = false;
 		player.following = false;
 		player.group = [];
@@ -477,7 +478,7 @@ Character.prototype.save = function(player, fn) {
 			player.following = following;
 			player.followers = followers;
 			player.group = group;
-			
+
 			if (err) {
 				return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
 			} else {
@@ -944,6 +945,10 @@ Character.prototype.meetsSkillPrepreqs = function(player, skillObj) {
 	}
 };
 
+Character.prototype.addSkill = function(player, skillObj) {
+	player.skills.push(skillObj);
+};
+
 Character.prototype.removeItem = function(player, item) {
 	var i = 0,
 	newArr = [];
@@ -990,6 +995,51 @@ Character.prototype.getItems = function(player, command) {
 	}
 
 	return newArr;
+};
+
+Character.prototype.getQuests = function(player) {
+	var i = 0,
+	result = [],
+	len = player.log.length;
+
+	for (i; i < len; i += 1) {
+		if (player.log[i].quest === true) {
+			result.push(player.log[i]);
+		}
+	}
+
+	return result;
+};
+
+Character.prototype.getLog = function(player, logId) {
+	var i = 0,
+	len = player.log.length;
+
+	for (i; i < len; i += 1) {
+		if (player.log[i].id === logId) {
+			return player.log[i];
+		}
+	}
+};
+
+Character.prototype.addLog = function(player, logId, logEntryId) {
+	var i = 0,
+	len = World.log.length,
+	prop;
+
+	for (i; i < len; i += 1) {
+		if (World.log[i].id === logId) {
+			for (prop in World.log[i].entries) {
+				if (prop === logEntryId) {
+					player.log.push({
+						id: logId, 
+						entryId: logEntryId,
+						quest: World.log[i].quest
+					});
+				}
+			}
+		}
+	}
 };
 
 Character.prototype.addStatMods = function(player, item) {

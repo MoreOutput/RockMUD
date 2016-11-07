@@ -1,5 +1,6 @@
 'use strict';
 var Cmd = require('../src/commands').cmd,
+Character = require('../src/character').character,
 Room = require('../src/rooms').room,
 World = require('../src/world').world;
 
@@ -9,44 +10,80 @@ World = require('../src/world').world;
 module.exports = {
 	exclimations: [
 		'The Midgaardian Academy isn\'t much but its better than venturing out with no experience.',
-		'I am the acting Fighter Guildmaster. You can find other Guildmasters in town.',
-		'You can <strong>practice</strong> and learn new skills from Guildmasters and Trainers along with <strong>train</strong>ing stats.'
+		'You can <strong>practice</strong> and learn new skills along with <strong>train</strong>ing stats.'
 	],
-	currentlyTraining: '',
-	currentStep: 0,
 	onSay: function(mob, roomObj, player, command) {
+		var quest,
+		climbSkill;
+
 		if (player.isPlayer && command) {
-			if (command.msg.toLowerCase().indexOf('yes') !== -1) {
-				Cmd.say(mob, {
-					msg: 'Thats great to hear ' + player.displayName  +  '! Let me get you signed up. Just a second...',
-					roomObj: roomObj
-				});
+			quest = Character.getLog(player, 'mud_school');
 
-				this.currentlyTraining = player.name;
-				this.currentStep = 1;
-
-				setTimeout(function() {
+			if (!quest) {
+				if (command.msg.toLowerCase().indexOf('yes') !== -1) {
 					Cmd.say(mob, {
-						msg: 'Alright, move north from here and we\'ll get you some gear.',
+						msg: 'Thats great to hear ' + player.displayName  +  '! Let me get you signed up. Just a second...',
 						roomObj: roomObj
-					});	
-				}, 1000);
+					});
+
+					Character.addLog(player, 'mud_school', '0');
+
+					climbSkill = Character.getSkill(player, 'climb');
+
+					setTimeout(function() {
+						Cmd.say(mob, {
+							msg: 'Alright, ' + player.name  + ', time for the enterance exam. You see this rope?'
+								+ ' Climb up to the top floor of the Academy Tower. A solider will meet you there.',
+							roomObj: roomObj
+						});
+
+						if (!climbSkill) {
+							climbSkill = Character.getSkill(mob, 'climb');
+
+							Character.addSkill(player, climbSkill);
+
+							World.msgPlayer(player, {
+								msg: 'You obtain a new skill from ' + mob.displayName + ': <strong>Improved Climbing</strong>.',
+								styleClass: 'success'
+							});
+						}
+					
+						Cmd.emote(mob, {
+							msg: 'points at a rope running up to a window in the tower above. ' 
+								+ 'It is very quite high. [<strong class="grey">Hint: Move up to continue</strong>]',
+							roomObj: roomObj
+						});
+					}, 1200);
+				}
 			}
 		}
 	},
-	onVisit: function(mob, roomObj, player, command) {
-		if (player.level <= 2 && !this.currentlyTraining) {
-			Cmd.say(mob, {
-				msg: 'Greetings ' + player.displayName + ' are you here to train at the '
-					+ '<strong class="red">Midgaardian Academy</strong>?',
-				roomObj: roomObj
-			});
+	onVisit: function(mob, roomObj, incomingRoomObj, player, command) {
+		var quest;
+
+		if (player.level <= 2) {
+			quest = Character.getLog(player, 'mud_school');
+
+			if (!quest) {
+				Cmd.say(mob, {
+					msg: 'Greetings ' + player.displayName + ' are you here to train at the '
+						+ '<strong class="red">Midgaardian Academy</strong>?',
+					roomObj: roomObj
+				});
+			} else if (quest.entryId === '0') {
+				if (World.dice.roll(1, 2) === 1) {
+					Cmd.say(mob, {
+						msg: 'You\'ve not climbed this damn rope yet ' + player.displayName  + '? I hope you\'re taking this seriously.',
+						roomObj: roomObj
+					});
+				}
+			}
 		}
 	},
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 60);
+		var roll = World.dice.roll(1, 100);
 		
-		if (!this.currentlyTraining && roll === 10) {
+		if (roll === 1) {
 			Cmd.say(mob, {
 				msg: mob.exclimations[parseInt(Math.random() * ((mob.exclimations.length)))],
 				roomObj: roomObj

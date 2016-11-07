@@ -167,6 +167,8 @@
 	"autoloot": true,
 	"autosac": false,
 	"behaviors": [],
-	"trainer": false
+	"trainer": false,
+	"log": [],
+	"runOnAliveWhenEmpty": true
 }
 
