@@ -29,6 +29,7 @@ module.exports = {
 			area: 'midgaard_academy',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			outdoors: false,
+			light: true,
 			exits: [
 				{
 					cmd: 'down',
@@ -87,6 +88,7 @@ module.exports = {
 			area: 'midgaard_academy',
 			moveMod: 2,
 			content: '',
+			light: true,
 			exits: [
 				{
 					cmd: 'down',
@@ -114,9 +116,6 @@ module.exports = {
 						msg: msg
 					});
 				}
-			},
-			onExit: function(roomObj, entity, incomingRoomObj, command) {
-
 			}
 		}, {
 			id: '3',
@@ -124,6 +123,7 @@ module.exports = {
 			area: 'midgaard_academy',
 			moveMod: 2,
 			content: '',
+			light: true,
 			exits: [
 				{
 					cmd: 'down',
