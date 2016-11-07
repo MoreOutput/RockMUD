@@ -101,19 +101,20 @@ module.exports = {
 			],
 			onEnter: function(roomObj, entity, incomingRoomObj, command) {
 				var climbSkill = Character.getSkill(entity, 'climb'),
+				displayAfter = 1200,
 				msg = '';
 
 				if (World.dice.roll(1, 3) === 1) {
-					msg += '<p>A strong wind causes you to sway against the Tower.</p>'
+					msg += '<strong class="grey">A strong wind causes you to sway against the Tower.</strong> ';
 				}
 
 				if (!climbSkill && entity.isPlayer && entity.level === 1) {
-					msg += '<p>You do not have the climb skill. Climbing further could result in death!</p>';
+					msg += 'You do not have the climb skill. Climbing further could result in death!';
 				}	
 
 				if (msg) {
 					World.msgPlayer(entity, {
-						msg: msg
+						msg: '<p>' + msg + '</p>'
 					});
 				}
 			}
