@@ -10,9 +10,10 @@ Try the latest on this Heroku hobby instance: http://rockmud.heroku.com. If you 
 * Enable quick development.
 * Empower client side scripting for GUI.
 * DB agnostic -- GET/POST JSON to your defined service or save as a flat file.
+* Cross-platform
 
 ###Dependencies:###
-* Socket.io 1.0 or greater is required.
+* Socket.io 1.0 or greater is required. This is the single outside dependency and is contained to the core message passing functions.
 * Development keeps up with latest node release.
 * Default terminal loads Bootstrap from CDN.
 

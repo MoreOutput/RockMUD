@@ -76,15 +76,22 @@ Spell.prototype.detectHidden = function(skillObj, player, roomObj, command, fn) 
 	var intMod = World.dice.getIntMod(player),
 	failRoll,
 	successRoll,
-	// Check if we already have this passive 
-	// false if we dont have the affect otherwise the affect object
-	currentAffect,
+	currentlyAffected = Character.getAffect(player, 'detectHidden'),
 	cost = 1;
 
-	if (1 > 0) {
-		console.log('here');
-	} else {
+	if (!currentlyAffected) {
+		console.log('here', intMod);
 
+		Character.addAffect({
+			id: 'detect_hidden',
+			affect: 'detectHidden',
+			display: 'Detect Hidden',
+			caster: player.refId,
+			modifiers: null,
+			decay: 5
+		});
+	} else {
+		console.log('already detecting hidden objects');
 	}
 };
 

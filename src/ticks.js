@@ -418,7 +418,7 @@ setInterval(function() {
 
 	if (World.players.length > 0) {
 		for (i; i < World.players.length; i += 1) {
-			if (World.players[i].position === 'standing' && !World.players[i].opoonent) {
+			if (World.players[i].position === 'standing' && !World.players[i].opponent) {
 				Character.save(World.players[i]);
 			}
 		}

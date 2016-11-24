@@ -67,7 +67,7 @@ Cmd.prototype.whizinvis = function(target, command) {
 		id: 'whizinvis',
 		affect: 'invis',
 		display: 'Admin Invisiblity',
-		caster: target.name,
+		caster: target.refId,
 		modifiers: null,
 		decay: -1
 	});
@@ -3078,7 +3078,7 @@ Cmd.prototype.restore = function(admin, command) {
 	var i = 0,
 	player;
 
-	if (admin.role === 'player') {
+	if (admin.role === 'player' || admin.role === 'admin') {
 		for (i; i < World.players.length; i += 1) {
 			player = World.players[i];
 			player.chp = player.hp;

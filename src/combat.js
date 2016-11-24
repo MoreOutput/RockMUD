@@ -373,7 +373,13 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 		}
 
 		if (!opponent.isPlayer) {
-			msgForOpponent += '<div class="rnd-status">' + player.long + ' ' + playerStatus.msg + '</div>';
+			if (player.long) {
+				msgForOpponent += '<div class="rnd-status">' + player.long + ' ' + playerStatus.msg + '</div>';
+			} else if (player.short) {
+				msgForOpponent += '<div class="rnd-status">' + World.capitalizeFirstLetter(player.short) + ' ' + playerStatus.msg + '</div>';
+			} else {
+				msgForOpponent += '<div class="rnd-status">' + player.displayName + ' ' + playerStatus.msg + '</div>';
+			}
 		} else {
 			msgForOpponent += '<div class="rnd-status">' + player.displayName + ' ' + playerStatus.msg + '</div>';
 		}

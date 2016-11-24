@@ -377,7 +377,7 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 			var chanceRoll = world.dice.roll(1, 20),
 			prop;
 	
-			item.refId = refId += index;
+			item.refId = refId + '-' + index;
 			
 			item = world.extend(item, JSON.parse(JSON.stringify(world.itemTemplate)));
 
@@ -461,10 +461,10 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			prop,
 			classObj;
 
-			mob.refId = refId += index;
+			mob.refId = refId + '-' + index;
 
-			mob = world.extend(mob, JSON.parse(JSON.stringify(world.mobTemplate)));		
-			
+			mob = world.extend(mob, JSON.parse(JSON.stringify(world.mobTemplate)));
+
 			if (mob.race) {
 				raceObj = world.getRace(mob.race);
 				mob = world.extend(mob, JSON.parse(JSON.stringify(raceObj)));
@@ -572,11 +572,11 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 				mob.gold += world.dice.roll(1, 8);
 			}
 
-			if (mob.items.length) {
+			if (mob.items) {
 				world.rollItems(mob.items, roomid, area);	
 			}
 
-			if (mob.behaviors.length > 0) {
+			if (mob.behaviors) {
 				mob = world.setupBehaviors(mob);
 
 				mobArr[index] = mob;

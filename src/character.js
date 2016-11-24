@@ -136,7 +136,7 @@ Character.prototype.generateSalt = function(fn) {
 Character.prototype.getPassword = function(s, command, fn) {
 	var character = this;
 
-	if (command.cmd.length > 7) {
+	if (command.cmd && command.cmd.length > 7) {
 		character.hashPassword(s.player.salt, command.cmd, 1000, function(hash) {
 			var roomObj;
 
