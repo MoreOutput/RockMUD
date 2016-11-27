@@ -739,12 +739,8 @@ Cmd.prototype.drink = function(target, command) {
 					styleClass: 'cmd-drop red'
 				});
 			}
-		} else {
-			console.log(command.arg);
-		
+		} else {		
 			waterSource = Room.getWatersource(roomObj, command);
-
-			console.log('defined watersource', waterSource);
 
 			if (waterSource) {
 				World.msgPlayer(target, {
@@ -760,7 +756,7 @@ Cmd.prototype.drink = function(target, command) {
 		}
 	} else {
 		waterSource = Room.getWatersource(roomObj);
-		console.log('found water source' + waterSource.name);
+
 		World.msgPlayer(target, {
 			msg: 'Drink from what?',
 			styleClass: 'error'

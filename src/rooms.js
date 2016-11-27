@@ -318,7 +318,6 @@ Room.prototype.getWatersource = function(roomObj, command) {
 	len = roomObj.items.length;
 	
 	for (i; i < len; i += 1) {
-		console.log(roomObj.items[i].name, roomObj.items[i].waterSource);
 		if (roomObj.items[i].waterSource === true && pattern.test(roomObj.items[i].name.toLowerCase())) {
 			waterSource = roomObj.items[i];
 		}
