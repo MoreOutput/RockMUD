@@ -1286,23 +1286,17 @@ Character.prototype.createCorpse = function(player) {
 
 Character.prototype.canSeeObject = function(player, entity) {
 	var canSee = true,
-	detectInvis = this.getAffect(player, 'detect_invisibility'),
-	detectHide = this.getAffect(player, 'detect_hidden'),
+	detectInvis = this.getAffect(player, 'detectInvisibility'),
+	detectHide = this.getAffect(player, 'detectHidden'),
 	isInvisible = this.isInvisible(entity),
-	isHidden = this.isHidden(entity),
-	playerHideRoll = World.dice.roll(1, 10, player.detection),
-	hideCheck = World.dice.roll(1, 10, entity.level) + player.level;
+	isHidden = this.isHidden(entity);
 	
 	if (entity.affects.length) {
 		if (isHidden) {
 			canSee = false;
 
-			if (detectHidden) {
+			if (detectHide) {
 				canSee = true;
-			}
-
-			if (!canSee && playerHideRoll > hideCheck) {
-				canSee = true;	
 			}
 		}
 
@@ -1337,7 +1331,7 @@ Character.prototype.isHidden = function(player) {
 
 	if (player.affects.length) {
 		for (i; i < player.affects.length; i += 1) {
-			if (player.affects[i].affect === 'hide') {
+			if (player.affects[i].affect === 'hidden') {
 				return true;
 			}
 		}

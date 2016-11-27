@@ -78,7 +78,7 @@ Spell.prototype.detectHidden = function(skillObj, player, roomObj, command, fn) 
 	successRoll = World.dice.roll(1 + player.level/2, 5, intMod),
 	failMsg = 'Your eyes flicker blue as you <strong>fail to cast detect hidden</strong>.',
 	successMsg = 'Your eyes shine bright blue as you become more aware of your surroundings!',
-	roomMsg = '',
+	roomMsg =  ' eyes shine bright blue as you become more aware of your surroundings!',
 	alreadyAffectedMsg = 'You are already experiencing increased awareness.',
 	currentlyAffected = Character.getAffect(player, 'detectHidden'),
 	cost = 1;
@@ -87,7 +87,7 @@ Spell.prototype.detectHidden = function(skillObj, player, roomObj, command, fn) 
 		if (successRoll > toBeat) {
 			Character.addAffect(player, {
 				id: skillObj.id,
-				affect: 'detectHidden',
+				affect: 'hidden',
 				display: 'Detect Hidden',
 				caster: player.refId,
 				modifiers: null,

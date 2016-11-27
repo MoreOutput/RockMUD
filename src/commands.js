@@ -1432,6 +1432,10 @@ Cmd.prototype.get = function(target, command, fn) {
 			if (!container) {
 				if (command.msg !== 'all') {
 					item = Room.getItem(roomObj, command);
+					
+					if (!Character.canSeeObject(target, item)) {
+						item = false;
+					}
 
 					if (item) {
 						canGet = World.processEvents('beforeGet', item, roomObj, target);
