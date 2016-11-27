@@ -1381,14 +1381,14 @@ Cmd.prototype.who = function(target, command) {
 			}
 
 			str += '<tr>' +
-				'<td class="who-lvl warning">' + player.level + '</td>' +
+				'<td class="who-lvl">' + player.level + '</td>' +
 				'<td class="who-race green">' + player.race + '</td>' +
 				'<td class="who-class red">' + player.charClass + '</td>' +
 				'<td class="who-player">' + displayName + '</td>' +
 			'</tr>';
 		}
 
-		str = '<div class="cmd-who"><h2>Visible Players</h2>' +
+		str = '<div class="cmd-who"><h2>Visible Heros</h2>' +
 			'<table class="table table-condensed table-no-border who-list">' +
 			'<thead>' +
 				'<tr>' +
