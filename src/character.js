@@ -272,6 +272,10 @@ Character.prototype.create = function(s) {
 			s.player.password = hash;
 			s.player.socket = null;
 			
+			s.player.personalPronoun = character.getPersonalPronoun(s.player);
+			
+			s.player.possessivePronoun = character.getPossessivePronoun(s.player);
+
 			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null), function (err) {
 				character.load(s.player.name, s, function(s) {
 					var roomObj;
@@ -1042,6 +1046,24 @@ Character.prototype.addLog = function(player, logId, logEntryId) {
 	}
 };
 
+Character.prototype.getPersonalPronoun = function(player) {
+	if (player.sex === 'male') {
+		return 'his';	
+	} else if (player.sex === 'female') {
+		return 'her';
+	} else {
+		return 'their';
+	}
+};
+
+Character.prototype.getPossessivePronoun = function(player) {
+	if (player.displayName[player.displayName.length - 1].toLowerCase() === 's') {
+		return player.displayName + '\'';
+	} else {
+		return player.displayName + '\'s';
+	}
+};
+
 Character.prototype.addStatMods = function(player, item) {
 	var prop;
 
@@ -1202,17 +1224,7 @@ Character.prototype.removeAffect = function(player, affectName) {
 	return false;
 };
 
-Character.prototype.addAffect = function(player) {
-	var i = 0;
-
-	for (i; i < player.affects.length; i += 1) {
-		if (player.affects[i].id === affectName) {
-			player.affects[i].decay += 1;
-
-			return false;
-		}
-	}
-
+Character.prototype.addAffect = function(player, affect) {
 	player.affects.push(affect);
 	
 	return true;;

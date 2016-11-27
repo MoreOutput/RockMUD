@@ -198,7 +198,6 @@ module.exports = {
 			playersInRoom: [],
 			monsters: [],
 			items: [],
-			flags: [],
 			outdoors: true
 		}
 	]

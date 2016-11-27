@@ -74,24 +74,43 @@ Spell.prototype.detectInvis = function(skillObj, player, roomObj, command, fn) {
 
 Spell.prototype.detectHidden = function(skillObj, player, roomObj, command, fn) {
 	var intMod = World.dice.getIntMod(player),
-	failRoll,
-	successRoll,
+	toBeat = World.dice.roll(1 + player.level/2, 6),
+	successRoll = World.dice.roll(1 + player.level/2, 5, intMod),
+	failMsg = 'Your eyes flicker blue as you <strong>fail to cast detect hidden</strong>.',
+	successMsg = 'Your eyes shine bright blue as you become more aware of your surroundings!',
+	roomMsg = '',
+	alreadyAffectedMsg = 'You are already experiencing increased awareness.',
 	currentlyAffected = Character.getAffect(player, 'detectHidden'),
 	cost = 1;
 
 	if (!currentlyAffected) {
-		console.log('here', intMod);
+		if (successRoll > toBeat) {
+			Character.addAffect(player, {
+				id: skillObj.id,
+				affect: 'detectHidden',
+				display: 'Detect Hidden',
+				caster: player.refId,
+				modifiers: null,
+				decay: 1
+			});
 
-		Character.addAffect({
-			id: 'detect_hidden',
-			affect: 'detectHidden',
-			display: 'Detect Hidden',
-			caster: player.refId,
-			modifiers: null,
-			decay: 5
-		});
+			World.msgPlayer(player, {
+				msg: successMsg
+			});
+
+			World.msgRoom(roomObj, {
+				msg: roomMsg,
+				playerName: player.name
+			});
+		} else {
+			World.msgPlayer(player, {
+				msg: failMsg
+			});
+		}
 	} else {
-		console.log('already detecting hidden objects');
+		World.msgPlayer(player, {
+			msg: alreadyAffectedMsg
+		});
 	}
 };
 

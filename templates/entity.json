@@ -66,6 +66,8 @@
 	"noGroup": true,
 	"prefixStatusMsg": "",
 	"ownershipMsg": "",
+	"possessivePronoun": "",
+	"personalPronoun": "",
 	"inName": "",
 	"outName": "",
 	"outMessage": "",

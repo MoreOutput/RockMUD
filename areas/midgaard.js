@@ -94,8 +94,7 @@ module.exports = {
 						slot: '',
 						value: 1000,
 						equipped: false,
-						isKey: true,
-						flags: []
+						isKey: true
 					}],
 					behaviors: [{
 						module: 'mayor'
@@ -108,7 +107,7 @@ module.exports = {
 					level: 1,
 					short: 'a healthy looking brown and white hound',
 					long: 'A large spotted brown and white hound sniffs about the area',
-					inName: 'A boar',
+					inName: 'A canine',
 					race: 'animal',
 					id: '6',
 					area: 'midgaard',
@@ -171,7 +170,6 @@ module.exports = {
 				lightDecay: 10,
 				flickerMsg: '',
 				extinguishMsg: '',
-				flags: [],
 				beforeDrop: function(item, roomObj) {
 					return true;
 				}
@@ -188,10 +186,9 @@ module.exports = {
 				weight: 1,
 				slot: 'hands',
 				equipped: false,
-				flags: [],
 				affects: [{
-					id: 'invis',
-					affect: 'invis',
+					id: 'hidden',
+					affect: 'hidden',
 					decay: -1
 				}]
 			}, {
@@ -206,8 +203,7 @@ module.exports = {
 				diceNum: 1,
 				diceSides: 6,
 				diceMod: 1,
-				decay: 7,
-				flags: []
+				decay: 3
 			}, {
 				name: 'Short Sword',
 				displayName: 'Short Sword',
@@ -229,8 +225,7 @@ module.exports = {
 				equipped: false,
 				modifiers: {
 					damRoll: 1
-				},
-				flags: []
+				}
 			}, {
 				name: 'Burlap sack',
 				short: 'a worn, tan, burlap sack',
@@ -256,10 +251,8 @@ module.exports = {
 					isKey: true
 				}],
 				isOpen: true,
-				carryLimit: 50,
-				flags: []
+				carryLimit: 50
 			}],
-			flags: [],
 			beforeEnter: function(roomObj, fromRoom, target) {
 				return true;
 			},
@@ -297,10 +290,8 @@ module.exports = {
 				ac: 2, 
 				weight: 6,
 				slot: 'hands',
-				equipped: false,
-				flags: []
-			}],
-			flags: []
+				equipped: false
+			}]
 		},
 		{
 			id: '3',
@@ -348,8 +339,7 @@ module.exports = {
 			],
 			playersInRoom: [],
 			monsters: [],
-			items: [],
-			flags: []
+			items: []
 		},
 		{
 			id: '5',
@@ -379,10 +369,8 @@ module.exports = {
 				ac: 1, 
 				weight: 1,
 				slot: 'head',
-				equipped: false,
-				flags: []
-			}],
-			flags: []
+				equipped: false
+			}]
 		},
 		{
 			id: '6',
@@ -423,8 +411,7 @@ module.exports = {
 					module: 'aggie'
 				}]
 			}],
-			items: [],
-			flags: []
+			items: []
 		},
 		{
 			id: '8',
@@ -493,8 +480,7 @@ module.exports = {
 					}
 				}
 			],
-			items: [],
-			flags: []
+			items: []
 		}
 	]
 };

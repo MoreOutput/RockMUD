@@ -21,11 +21,12 @@ Cmd = function () {};
 
 /*
 	command object = {
-		cmd: cmdArr[0].toLowerCase(), // {cast} spark boar
-		msg: cmdArr.slice(1).join(' '), // cast {spark boar}
-		arg: cmdArr[1].toLowerCase(), // cast {spark} boar
-		input: cmdArr.slice(2).join(' '), // cast spark {boar ...}
-		number: 1 // argument target -- cast spark 2.boar
+		cmd: cmdArr[0].toLowerCase(), // {cast} detect hidden player
+		msg: cmdArr.slice(1).join(' '), // cast {detect hidden player}
+		arg: cmdArr[1].toLowerCase(), // cast {detect hidden} player
+		input: cmdArr.slice(2).join(' '), // cast detect hidden {player}
+		last: // cast detect hidden {player}
+		number: 1 // argument target -- cast detect hidden 2.player
 	};
 */
 Cmd.prototype.createCommandObject = function(resFromClient) {
@@ -37,19 +38,29 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 	}
 
 	if (/[`~@#$%^&*()-+={}[]|<>]+$/g.test(resFromClient.msg) === false) {
-		cmdObj = {
-			cmd: cmdArr[0].toLowerCase(),
-			msg: cmdArr.slice(1).join(' '),
-			arg: cmdArr[1].toLowerCase(),
-			input: cmdArr.slice(2).join(' '),
-			number: 1
-		};
+		cmdObj.cmd = cmdArr[0].toLowerCase();
+		cmdObj.msg = cmdArr.slice(1).join(' ');
+		cmdObj.last = cmdArr[cmdArr.length - 1];
+		cmdObj.number = 1;
+	
+		if (cmdArr.length < 4) {
+			if (cmdArr.length === 3) {
+				cmdObj.arg = cmdArr[1].toLowerCase() + ' ' + cmdArr[2].toLowerCase();
+			} else {
+				cmdObj.arg = cmdArr[1].toLowerCase();
+			}
+
+			cmdObj.input = cmdObj.last;
+		} else {
+			cmdObj.arg = cmdArr[1].toLowerCase() + ' ' + cmdArr[2].toLowerCase(),
+			cmdObj.input = cmdArr.slice(3).join(' ')
+		}
 
 		if (cmdObj.input && !isNaN(parseInt(cmdObj.input[0]))
 			|| (!cmdObj.input && !isNaN(parseInt(cmdObj.msg[0]))) ) {
 
 			cmdObj.arg = cmdObj.arg.replace(/.*[.]/g, '');
-			cmdObj.number = parseInt(cmdObj.msg[0]);
+			cmdObj.number = parseInt(cmdObj.last[0]);
 
 			if (!cmdObj.input) {
 				cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
@@ -115,7 +126,7 @@ Cmd.prototype.buy = function(target, command) {
 					} else {
 						World.msgPlayer(target, {
 							msg: 'You can\'t afford that.',
-							styleClass: 'yellow'
+							styleClass: 'warning'
 						});
 					}
 				} else {
@@ -217,7 +228,7 @@ Cmd.prototype.list = function(target, command) {
 				if (merchant.items.length > 0) {
 					for (i; i < merchant.items.length; i += 1) {
 						storeDisplay += '<li>' + merchant.items[i].name  +
-							' <span class="yellow">(' + merchant.items[i].value + 'gp)</span></li>';
+							' <span class="warning">(' + merchant.items[i].value + 'gp)</span></li>';
 					}
 
 					World.msgPlayer(target, {
@@ -333,7 +344,7 @@ Cmd.prototype.give = function(target, command) {
 			
 						World.msgPlayer(target,  {
 							msg: 'You give ' + receiver.displayName + ' some ' + World.config.coinage + '.',
-							styleClass: 'yellow'
+							styleClass: 'warning'
 						});
 		
 						World.msgPlayer(receiver,  {
@@ -560,7 +571,7 @@ Cmd.prototype.group = function(target, command) {
 			} else {
 				World.msgPlayer(target, {
 					msg: 'Nothing seems to be following you.',
-					styleClass: 'yellow'
+					styleClass: 'warning'
 				});
 			}
 		} else {
@@ -620,7 +631,7 @@ Cmd.prototype.emote = function(target, command) {
 		World.msgRoom(roomObj, {
 			msg: '<i>' +  target.displayName + ' ' + command.msg + '</i>',
 			darkMsg: 'You can feel movement in the area.',
-			styleClass: 'cmd-emote yellow',
+			styleClass: 'cmd-emote warning',
 			checkSight: true
 		});
 	} else {
@@ -653,7 +664,7 @@ Cmd.prototype.eat = function(target, command) {
 				World.msgRoom(roomObj, {
 					msg: target.displayName + ' eats a ' + item.short,
 					playerName: target.name,
-					styleClass: 'cmd-drop yellow'
+					styleClass: 'cmd-drop warning'
 				});
 
 				World.msgPlayer(target, {
@@ -682,11 +693,16 @@ Cmd.prototype.eat = function(target, command) {
 
 Cmd.prototype.drink = function(target, command) {
 	var roomObj,
+	waterSource,
 	bottle;
 
-	if (command.msg !== '') {
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
 		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
 
+	if (command.msg) {
 		bottle = Character.getBottle(target, command);
 
 		if (bottle) {
@@ -710,7 +726,7 @@ Cmd.prototype.drink = function(target, command) {
 				World.msgRoom(roomObj, {
 					msg: target.displayName + ' drinks from a ' + bottle.short,
 					playerName: target.name,
-					styleClass: 'cmd-drop yellow'
+					styleClass: 'cmd-drop warning'
 				});
 
 				World.msgPlayer(target, {
@@ -724,12 +740,27 @@ Cmd.prototype.drink = function(target, command) {
 				});
 			}
 		} else {
-			World.msgPlayer(target, {
-				msg: 'You can\'t drink something you dont have.',
-				styleClass: 'error'
-			});
+			console.log(command.arg);
+		
+			waterSource = Room.getWatersource(roomObj, command);
+
+			console.log('defined watersource', waterSource);
+
+			if (waterSource) {
+				World.msgPlayer(target, {
+					msg: 'You can\'t drink something you dont have.',
+					styleClass: 'error'
+				});
+			} else {
+				World.msgPlayer(target, {
+					msg: 'You can\'t drink something you dont have.',
+					styleClass: 'error'
+				});
+			}
 		}
 	} else {
+		waterSource = Room.getWatersource(roomObj);
+		console.log('found water source' + waterSource.name);
 		World.msgPlayer(target, {
 			msg: 'Drink from what?',
 			styleClass: 'error'
@@ -864,7 +895,7 @@ Cmd.prototype.open = function(target, command, fn) {
 				});
 
 				if (exitObj.door.openMsg) {
-					World.msgPlayer(roomObj, {msg: exitObj.door.openMsg, styleClass: 'yellow'});
+					World.msgPlayer(roomObj, {msg: exitObj.door.openMsg, styleClass: 'warning'});
 				}
 
 				World.msgRoom(targetRoom, {
@@ -1244,27 +1275,27 @@ Cmd.prototype.move = function(target, command, fn) {
 										if (!target.outName) {
 											if (target.short) {
 												if (World.dice.roll(1, 2) === 1) {
-													msg = '<span class="yellow">' + World.capitalizeFirstLetter(target.short)
+													msg = '<span class="warning">' + World.capitalizeFirstLetter(target.short)
 														+ ' leaves heading <strong class="grey">' 
 														+ direction + '</strong>.</span>';	
 												} else {
-													msg = '<span class="yellow">' + World.capitalizeFirstLetter(target.short)
+													msg = '<span class="warning">' + World.capitalizeFirstLetter(target.short)
 														+ ' leaves traveling <strong class="grey">' 
 														+ direction + '</strong>.</span>';
 												}
 											} else {
-												msg = '<span class="yellow">' + target.displayName
+												msg = '<span class="warning">' + target.displayName
 													+ ' leaves going <strong class="grey">' + direction + '</strong>.</span>';
 											}
 										} else if (target.outName && !target.outMessage) {
-											msg = '<span class="yellow">' + target.outName
+											msg = '<span class="warning">' + target.outName
 											+ ' leaves traveling <strong class="grey">' + direction + '</strong>.</span>';
 										} else {
-											msg = '<span class="yellow">' + target.outName + target.outMessage
+											msg = '<span class="warning">' + target.outName + target.outMessage
 											+ ' <strong class="grey">' + direction + '</strong>.</span>';
 										}
 									} else if (receiver.hearing) {
-										msg = '<span class="yellow">You can sense some movement in the area.</span>';
+										msg = '<span class="warning">You can sense some movement in the area.</span>';
 									}
 								}
 
@@ -1354,7 +1385,7 @@ Cmd.prototype.who = function(target, command) {
 			}
 
 			str += '<tr>' +
-				'<td class="who-lvl yellow">' + player.level + '</td>' +
+				'<td class="who-lvl warning">' + player.level + '</td>' +
 				'<td class="who-race green">' + player.race + '</td>' +
 				'<td class="who-class red">' + player.charClass + '</td>' +
 				'<td class="who-player">' + displayName + '</td>' +
@@ -1420,7 +1451,7 @@ Cmd.prototype.get = function(target, command, fn) {
 									World.msgRoom(roomObj, {
 										msg: target.displayName + ' picks up ' + item.short,
 										playerName: target.name,
-										styleClass: 'yellow'
+										styleClass: 'warning'
 									});
 
 									World.msgPlayer(target, {
@@ -1474,7 +1505,7 @@ Cmd.prototype.get = function(target, command, fn) {
 						World.msgRoom(roomObj, {
 							msg: target.displayName + ' grabs everything they can.',
 							playerName: target.name,
-							styleClass: 'yellow'
+							styleClass: 'warning'
 						});
 
 						World.msgPlayer(target, {
@@ -1623,7 +1654,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 						World.msgRoom(roomObj, {
 							msg: target.displayName + ' drops ' + item.short,
 							playerName: target.name,
-							styleClass: 'yellow'
+							styleClass: 'warning'
 						});
 
 						World.msgPlayer(target, {
@@ -1669,13 +1700,13 @@ Cmd.prototype.drop = function(target, command, fn) {
 						World.msgRoom(roomObj, {
 							msg: target.displayName + ' drops some things.',
 							playerName: target.name,
-							styleClass: 'yellow'
+							styleClass: 'warning'
 						});
 					} else if (dropCnt === 1) {
 						World.msgRoom(roomObj, {
 							msg: target.displayName + ' drops ' + item.short + '.',
 							playerName: target.name,
-							styleClass: 'yellow'
+							styleClass: 'warning'
 						});
 					}
 
@@ -1783,8 +1814,8 @@ Cmd.prototype.cast = function(player, command, fn) {
 	if (player.position !== 'sleeping') {
 		if (command.arg) {
 			skillObj = Character.getSkill(player, command.arg);
-
-			if (skillObj.id in Spells) {
+		
+			if (skillObj && skillObj.id in Spells) {
 				if (player.position === 'standing' || player.position === 'fighting') {
 					if (!command.input) {
 						if (skillObj.type.indexOf('passive') === -1) {
@@ -1813,10 +1844,14 @@ Cmd.prototype.cast = function(player, command, fn) {
 							});
 						}
 					} else {
-						if (command.input === 'self' || command.input === 'me') {
+						if (command.last === 'self' || command.last === 'me' || command.last === command.input) {
 							spellTarget = player;
 						} else {
-							spellTarget = World.search(roomObj.monsters, {arg: command.input, input: command.arg});
+							if (command.last === command.input) {
+								spellTarget = World.search(roomObj.monsters, {arg: command.input, input: command.arg});
+							} else {
+								spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg});
+							}
 						}
 
 						if (spellTarget) {
@@ -2045,87 +2080,108 @@ Cmd.prototype.where = function(target, command) {
 Cmd.prototype.say = function(target, command) {
 	var roomObj,
 	i = 0;
+	
+	if (!target.mute) {
+		if (target.position !== 'sleeping') {
+			if (command.msg !== '') {
+				World.msgPlayer(target, {
+					msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>'
+				});
 
-	if (target.position !== 'sleeping') {
-		if (command.msg !== '') {
-			World.msgPlayer(target, {
-				msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>'
-			});
-			
-			if (!command.roomObj) {
-				roomObj = World.getRoomObject(target.area, target.roomid);
+				if (!command.roomObj) {
+					roomObj = World.getRoomObject(target.area, target.roomid);
+				} else {
+					roomObj = command.roomObj
+				}
+
+				World.msgRoom(roomObj, {
+					msg: function(receiver, fn) {
+						var msg;
+
+						if (Character.canSee(receiver, roomObj)) {
+							msg = '<div class="cmd-say"><span class="msg-name">'
+								+ target.displayName + ' says></span> ' + command.msg + '</div>';
+						} else {
+							msg = '<div class="cmd-say"><span class="msg-name">Someone says></span> ' + command.msg + '</div>';
+						}
+
+						return fn(true, msg);
+					},
+					playerName: target.name
+				});
+
+				World.processEvents('onSay', target, roomObj, command);
+				World.processEvents('onSay', roomObj, target, command);
+				World.processEvents('onSay', roomObj.monsters, roomObj, target, command);
 			} else {
-				roomObj = command.roomObj
+				World.msgPlayer(target, {
+					msg: 'You have nothing to say.',
+					styleClass: 'error'
+				});
 			}
-			
-			World.msgRoom(roomObj, {
-				msg: function(receiver, fn) {
-					var msg;
-
-					if (Character.canSee(receiver, roomObj)) {
-						msg = '<div class="cmd-say"><span class="msg-name">'
-							+ target.displayName + ' says></span> ' + command.msg + '</div>';
-					} else {
-						msg = '<div class="cmd-say"><span class="msg-name">Someone says></span> ' + command.msg + '</div>';
-					}
-
-					return fn(true, msg);
-				},
-				playerName: target.name
-			});
-
-			World.processEvents('onSay', target, roomObj, command);
-			World.processEvents('onSay', roomObj, target, command);
-			World.processEvents('onSay', roomObj.monsters, roomObj, target, command);
 		} else {
 			World.msgPlayer(target, {
-				msg: 'You have nothing to say.',
+				msg: 'You can\'t say anything while sleeping!',
 				styleClass: 'error'
 			});
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You can\'t say anything while sleeping!',
+			msg: 'You can\'t speak!',
 			styleClass: 'error'
 		});
 	}
 };
 
 Cmd.prototype.yell = function(target, command) {
-	if (command.msg !== '') {
-		World.msgPlayer(target, {
-			msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' 
-				+ command.msg + '</div>'
-		});
-		
-		World.msgArea(target.area, {
-			msg: '<div class="cmd-yell"><span class="msg-name">' + target.displayName 
-				+ ' yells></span> ' + command.msg + '</div>',
-			playerName: target.name
-		});
+	if (!target.mute) {
+		if (command.msg !== '') {
+			World.msgPlayer(target, {
+				msg: '<div class="cmd-yell"><span class="msg-name">You yell></span> ' 
+					+ command.msg + '</div>'
+			});
+
+			World.msgArea(target.area, {
+				msg: '<div class="cmd-yell"><span class="msg-name">' + target.displayName 
+					+ ' yells></span> ' + command.msg + '</div>',
+				playerName: target.name
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You open your mouth to yell and nothing comes out. You feel like an idiot.',
+				styleClass: 'error'
+			});
+		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You open your mouth to yell and nothing comes out. You feel like an idiot.',
+			msg: 'You can\'t speak!',
 			styleClass: 'error'
 		});
 	}
 };
 
 Cmd.prototype.chat = function(target, command) {
-	if (command.msg !== '') {
-		World.msgPlayer(target, {
-			msg: '<span class="msg-name">You chat></span> ' + command.msg,
-			styleClsss: 'cmd-chat'
-		});
+	if (!target.mute) {
+		if (command.msg !== '') {
+			World.msgPlayer(target, {
+				msg: '<span class="msg-name">You chat></span> ' + command.msg,
+				styleClsss: 'cmd-chat'
+			});
 
-		World.msgWorld(target, {
-			msg: '<div class="cmd-chat"><span class="msg-name">' + target.displayName + '></span> ' + command.msg + '</div>',
-			playerName: target.name
-		});
+			World.msgWorld(target, {
+				msg: '<div class="cmd-chat"><span class="msg-name">' + target.displayName + '></span> ' + command.msg + '</div>',
+				playerName: target.name
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'To send a message to everyone on the game use <strong>chat [message]</strong>. ' 
+					+ 'To learn more about communication try <strong>help communication</strong>',
+				styleClass: 'error'
+			});
+		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'To send a message to everyone on the game use <strong>chat [message]</strong>. ' 
-				+ 'To learn more about communication try <strong>help communication</strong>',
+			msg: 'You can\'t speak!',
 			styleClass: 'error'
 		});
 	}
@@ -2134,49 +2190,63 @@ Cmd.prototype.chat = function(target, command) {
 Cmd.prototype.tell = function(target, command) {
 	var player;
 
-	if (command.msg) {
-		player = World.getPlayerByName(command.arg);
+	if (!target.mute) {
+		if (command.msg) {
+			player = World.getPlayerByName(command.arg);
 
-		if (player) {
-			World.msgPlayer(player, {
-				msg: '<strong>' + target.displayName + ' tells you></strong> ' + command.input,
-				styleClass: 'red'
-			});
+			if (player) {
+				World.msgPlayer(player, {
+					msg: '<strong>' + target.displayName + ' tells you></strong> ' + command.input,
+					styleClass: 'red'
+				});
 
-			player.reply = target.name;
+				player.reply = target.name;
 
-			World.msgPlayer(target, {msg: 'You tell ' + player.displayName + '> ' + command.input, styleClass: 'cmd-say red'});
+				World.msgPlayer(target, {msg: 'You tell ' + player.displayName + '> ' + command.input, styleClass: 'cmd-say red'});
+			} else {
+				World.msgPlayer(target, {msg: 'You do not see that person.', styleClass: 'error'});
+			}
 		} else {
-			World.msgPlayer(target, {msg: 'You do not see that person.', styleClass: 'error'});
+			return World.msgPlayer(target, {msg: 'Tell who?', styleClass: 'error'});
 		}
 	} else {
-		return World.msgPlayer(target, {msg: 'Tell who?', styleClass: 'error'});
+		World.msgPlayer(target, {
+			msg: 'You can\'t speak!',
+			styleClass: 'error'
+		});
 	}
 };
 
 Cmd.prototype.reply = function(target, command) {
 	var player;
 	
-	if (command.msg && target.reply) {
-		player = World.getPlayerByName(target.reply);
+	if (!target.mute) {
+		if (command.msg && target.reply) {
+			player = World.getPlayerByName(target.reply);
 
-		if (player) {
-			World.msgPlayer(player, {
-				msg: '<strong>' + target.displayName + ' replies></strong> ' + command.msg,
-				styleClass: 'green'
-			});
+			if (player) {
+				World.msgPlayer(player, {
+					msg: '<strong>' + target.displayName + ' replies></strong> ' + command.msg,
+					styleClass: 'green'
+				});
 
-			target.reply = player.name;
+				target.reply = player.name;
 
-			World.msgPlayer(target, {
-				msg: 'You reply to ' + player.displayName + '> ' + command.msg, 
-				styleClass: 'cmd-say yellow'
-			});
+				World.msgPlayer(target, {
+					msg: 'You reply to ' + player.displayName + '> ' + command.msg, 
+					styleClass: 'cmd-say warning'
+				});
+			} else {
+				World.msgPlayer(target, {msg: 'They arent there anymore.', styleClass: 'error'});
+			}
 		} else {
-			World.msgPlayer(target, {msg: 'They arent there anymore.', styleClass: 'error'});
+			return World.msgPlayer(target, {msg: 'Takes more than that to reply to someone.', styleClass: 'error'});
 		}
 	} else {
-		return World.msgPlayer(target, {msg: 'Takes more than that to reply to someone.', styleClass: 'error'});
+		World.msgPlayer(target, {
+			msg: 'You can\'t speak!',
+			styleClass: 'error'
+		});
 	}
 };
 
@@ -2236,7 +2306,7 @@ Cmd.prototype.quit = function(target, command) {
 			target.logged = false;
 			target.verifiedName = false;
 			target.verifiedPassword = false;
-			target.following = "";
+			target.following = '';
 
 			Character.save(target, function() {
 				World.msgPlayer(target, {
@@ -2274,7 +2344,7 @@ Cmd.prototype.train = function(target, command) {
 	cost = 5,
 	costDisplay = cost,
 	canTrain = true,
-	trainers = Room.getTrainers(roomObj, command),
+	trainers = Room.getTrainers(roomObj),
 	trainer,
 	stats = World.getGameStatArr(),
 	canSee = Character.canSee(target, roomObj);
@@ -2360,9 +2430,9 @@ Cmd.prototype.train = function(target, command) {
 					trainDisplay = '<p>You can train the follow stats with ' + trainer.displayName 
 						+ '. <strong>You currently have ' + target.trains 
 						+ ' Trains to spend</strong>.</p><table class="table table-condensed train-table">'
-						+ '<thead><tr><td class="train-name-header yellow"><strong>Stat</strong></td>'
-						+ '<td class="train-cost-header yellow"><strong>Current Value</strong></td>'
-						+ '<td class="train-cost-header yellow"><strong>Cost</strong></td>'
+						+ '<thead><tr><td class="train-name-header warning"><strong>Stat</strong></td>'
+						+ '<td class="train-cost-header warning"><strong>Current Value</strong></td>'
+						+ '<td class="train-cost-header warning"><strong>Cost</strong></td>'
 						+ '</tr></thead><tbody>';
 
 					for (i; i < stats.length; i += 1) {
@@ -2507,7 +2577,7 @@ Cmd.prototype.practice = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	trainers = Room.getTrainers(roomObj, command);
+	trainers = Room.getTrainers(roomObj);
 
 	canSee = Character.canSee(target, roomObj);
 
@@ -2552,9 +2622,9 @@ Cmd.prototype.practice = function(target, command) {
 				} else {
 					practiceDisplay = '<p>The table below showcases the <strong>skills currently offered by '
 						+ trainer.displayName + '</strong></p><table class="table table-condensed prac-table">'
-						+ '<thead><tr><td class="prac-name-header yellow"><strong>' 
+						+ '<thead><tr><td class="prac-name-header warning"><strong>' 
 						+ trainer.displayName +  ' Skills</strong></td>'
-						+ '<td class="prac-max-header yellow"><strong>Status</strong></td>'
+						+ '<td class="prac-max-header warning"><strong>Status</strong></td>'
 						+ '</tr></thead><tbody>';
 
 					for (i; i < trainer.skills.length; i += 1) {
@@ -2678,13 +2748,13 @@ Cmd.prototype.equipment = function(target, command) {
 			eqStr += ' Nothing</li>';
 		} else {
 			if (!item.light) {
-				eqStr += '<label class="yellow">' + item.displayName + '</label></li>';
+				eqStr += '<label class="warning">' + item.displayName + '</label></li>';
 			} else {
 				if (item.lightDecay > 0) {
-					eqStr += '<label class="yellow">' + item.displayName
+					eqStr += '<label class="warning">' + item.displayName
 						+ ' (<span class="red">Providing light</span>)</label></li>';
 				} else {
-					eqStr += '<label class="yellow">' + item.displayName
+					eqStr += '<label class="warning">' + item.displayName
 						+ ' (<span class="red">Not providing light</span>)</label></li>';
 				}
 			}
@@ -2873,7 +2943,7 @@ Cmd.prototype.quests = function(target, commands) {
 			questObj = World.getLog(questsArr[i].id);
 			
 			if (questObj.title) {
-				listStr = '<h3 class="yellow">' + questObj.title  + '</h3>';
+				listStr = '<h3 class="warning">' + questObj.title  + '</h3>';
 			}
 
 			listStr += '<p>' + questObj.entries[questsArr[i].entryId]  + '</p>';
@@ -2933,7 +3003,7 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span>.</li>' +
 					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' '
 						+ target.charClass + ' of ' + target.size.display + ' size with ' 
-						+ '<span class="yellow">' + target.gold + ' ' + World.config.coinage  + '</span>.</li>' +
+						+ '<span class="warning">' + target.gold + ' ' + World.config.coinage  + '</span>.</li>' +
 					'<li class="stat-carry">You are carrying ' 
 						+ target.weight + '/' + Character.getMaxCarry(target) + ' pounds.</li>' +
 					'<li class="stat-xp">You need <strong>' + (target.expToLevel - target.exp)
@@ -3000,7 +3070,7 @@ Cmd.prototype.plist = function(target, command) {
 		World.msgPlayer(target, {
 			msg: '<h3>Created Players: ' + playerNames.length + '</h3>' 
 				+ '<p>' + playerNames.toString() + '</p>',
-			styleClass: 'yellow'
+			styleClass: 'warning'
 		});	
 	});
 };
@@ -3017,7 +3087,7 @@ Cmd.prototype.alist = function(target, command) {
 	World.msgPlayer(target, {
 		msg: '<h3>Loaded Areas: ' + World.areas.length + '</h3>' 
 			+ '<ul>' + str + '</ul>',
-		styleClass: 'yellow'
+		styleClass: 'warning'
 	});
 };
 

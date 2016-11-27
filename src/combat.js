@@ -222,7 +222,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							if (opponent.isPlayer) {
 								if (!criticalAttack) {
 									if (attackerCanSee) {
-										msgForOpponent += '<div class="grey">' + attacker.ownershipMsg + ' ' 
+										msgForOpponent += '<div class="grey">' + attacker.possessivePronoun + ' ' 
 											+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
 											+ ' <span class="red">(' + damage + ')</span></div>';
 									} else {
@@ -232,7 +232,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 									}
 								} else {
 									if (attackerCanSee) {
-										msgForOpponent += '<div class="grey"><strong>' + attacker.ownershipMsg + ' ' 
+										msgForOpponent += '<div class="grey"><strong>' + attacker.possessivePronoun + ' ' 
 											+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
 											+ '</strong> <span class="red">(' + damage + ')</span></div>';
 									} else {
@@ -462,9 +462,14 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 	
 	if (exp > 0) {
 		player.exp += exp;
-
-		endOfCombatMsg = 'You won the fight! You learn some things, resulting in <strong>'
-			+ exp + ' experience points</strong>.';
+		
+		if (World.dice.roll(1, 2) === 1) {
+			endOfCombatMsg = 'You won the fight! You learn some things resulting in <strong>'
+				+ exp + ' experience points</strong>.';
+		} else {
+			endOfCombatMsg = '<strong>You are victorious! You earn <span class="red">'
+				+ exp + '</span> experience points!';
+		}
 	} else {
 		if (World.dice.roll(1, 2) === 1) {
 			endOfCombatMsg = 'You won but learned nothing.';
@@ -476,7 +481,7 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 	if (mob.gold) {
 		player.gold +- mob.gold;
 
-		endOfCombatMsg += ' <span class="yellow">You find ' + mob.gold 
+		endOfCombatMsg += ' <span class="yelloW">You find ' + mob.gold 
 			+ ' ' + World.config.coinage  + ' on the corpse.</span>';
 	}
 	
@@ -558,13 +563,13 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 				World.msgPlayer(player, {
 					msg: msgForPlayer,
 					noPrompt: preventPrompt,
-					styleClass: 'player-hit yellow'
+					styleClass: 'player-hit warning'
 				});
 
 				World.msgPlayer(opponent, {
 					msg: msgForOpponent,
 					noPrompt: preventPrompt,
-					styleClass: 'player-hit yellow'
+					styleClass: 'player-hit warning'
 				});
 
 				if (player.position !== 'fighting' || opponent.position !== 'fighting') {	

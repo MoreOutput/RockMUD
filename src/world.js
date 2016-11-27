@@ -77,10 +77,10 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 		fs.readdir(path, function(err, fileNames) {
 			fileNames.forEach(function(fileName, i) {
 				fs.readFile(path + fileName, function (err, tmp) {
-					var tmp = JSON.parse(tmp);
+				var tmp = JSON.parse(tmp);
 
 					tmp.fileName = fileName.replace(/.json/g, '');
-
+				
 					tmpArr.push(tmp);
 	
 					if (i === fileNames.length - 1) {
@@ -509,13 +509,13 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 				}
 			}
 
-			if (!mob.ownershipMsg) {
-				if (mob.displayName[mob.displayName.length - 1].toLowerCase() === 's') {
-					mob.ownershipMsg = mob.displayName + '\'';
-				} else {
-					mob.ownershipMsg = mob.displayName + 's';
-				}
-			}	
+			if (!mob.possessivePronoun) {
+				mob.possessivePronoun = Character.getPossessivePronoun(mob);
+			}
+
+			if (!mob.personalPronoun) {
+				mob.personalPronoun = Character.getPersonalPronoun(mob);
+			}
 
 			if (mob.rollStats) {
 				mob.baseStr += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.str;
@@ -860,7 +860,7 @@ World.prototype.prompt = function(target) {
 	prompt = '<div class="col-md-12"><div class="cprompt"><strong><' 
 		+ player.chp + '/'  + player.hp + '<span class="red">hp</span>><' 
 		+ player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' 
-		+ player.cmv + '/'  + player.mv +'<span class="yellow">mv</span>></strong></div>';
+		+ player.cmv + '/'  + player.mv +'<span class="warning">mv</span>></strong></div>';
 
 	if (player.role === 'admin') {
 		prompt += '<' + player.wait + 'w>';
@@ -1274,7 +1274,9 @@ World.prototype.extend = function(extendObj, readObj) {
 			if (extendObj[prop]) {
 				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
-				} else if (typeof extendObj[prop] !== 'string' && !isNaN(extendObj[prop]) && !isNaN(readObj[prop])) {
+				} else if (typeof extendObj[prop] !== 'string' && !isNaN(extendObj[prop]) && !isNaN(readObj[prop]) 
+					&& typeof extendObj[prop] !== 'boolean') {
+					
 					extendObj[prop] += readObj[prop];
 				} else if (prop === 'size' || prop === 'recall')  {
 					extendObj[prop] = readObj[prop];
@@ -1282,8 +1284,6 @@ World.prototype.extend = function(extendObj, readObj) {
 					for (prop2 in readObj[prop]) {
 						this.extend(extendObj[prop][prop2], readObj[prop][prop2]);
 					}
-				} else {
-
 				}
 			} else {
 				extendObj[prop] = readObj[prop];
@@ -1337,7 +1337,8 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 				}
 
 				for (j; j < gameEntity.behaviors.length; j += 1) {
-					if (this.ai[gameEntity.behaviors[j].module][evtName]) {
+					if (this.ai[gameEntity.behaviors[j].module][evtName] && 
+						(!gameEntity.behaviors[j].random || World.dice.roll(1, 2) === 1)) {
 						allTrue = this.ai[gameEntity.behaviors[j].module][evtName](gameEntity, roomObj, param, param2);
 					}
 				}

@@ -17,8 +17,8 @@
 				"level": 1
 			}
 		}, {
-			"id": "detectInvis",
-			"display": "Detect Invisibility",
+			"id": "detectHidden",
+			"display": "Detect Hidden",
 			"mod": 0,
 			"train": 70,
 			"type": "passive spell",

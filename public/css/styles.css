@@ -42,6 +42,18 @@ height: 850px;
 width: 980px;
 margin: 0 auto;
 }
+.error {
+color: #ff0033;
+}
+.success {
+color: #60f066;
+}
+.warning {
+color: #ffcc00;
+}
+.alert {
+color: #0066ff;
+}
 .row {
 margin-bottom: .3em;
 }
@@ -148,9 +160,6 @@ font-weight: bold;
 }
 .logout-msg {
 font-weight: bold;
-color: #ff0033;
-}
-.error {
 color: #ff0033;
 }
 .table-no-border>thead>tr>th, 

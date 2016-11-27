@@ -243,7 +243,7 @@ Room.prototype.getBrief = function(roomObj, options) {
 	return displayHTML;
 };
 
-Room.prototype.getTrainers = function(roomObj, command) {
+Room.prototype.getTrainers = function(roomObj) {
 	var i = 0,
 	trainers = [];
 	
@@ -256,7 +256,7 @@ Room.prototype.getTrainers = function(roomObj, command) {
 	return trainers;
 };
 
-Room.prototype.getMerchants = function(roomObj, command) {
+Room.prototype.getMerchants = function(roomObj) {
 	var i = 0,
 	merchants = [],
 	possibleMerchants = roomObj.monsters.concat(roomObj.playersInRoom); 
@@ -268,6 +268,63 @@ Room.prototype.getMerchants = function(roomObj, command) {
 	}
 	
 	return merchants;
+};
+
+Room.prototype.getMerchant = function(roomObj, command) {
+	var i = 0,
+	merchant = false,
+	possibleMerchants = roomObj.monsters.concat(roomObj.playersInRoom), 
+	pattern = new RegExp('^' + command.arg),
+	len = possibleMerchants.length;
+	
+	for (i; i < len; i += 1) {
+		if (!possibleMerchants[i].isPlayer) {
+			if (possibleMerchants[i].merchant === true) {
+				if (pattern.test(possibleMerchants[i].name.toLowerCase())) {
+					merchant = possibleMerchants[i];
+				} else if (merchant.short && pattern.test(possibleMerchants[i].short.toLowerCase())) {
+				
+				}
+			} 
+		} else {
+			if (possibleMerchants[i].merchant === true && pattern.test(possibleMerchants[i].name.toLowerCase())) {
+				merchant = possibleMerchants[i];
+			}
+		}
+	}
+	
+	return merchant;  
+};
+
+Room.prototype.getWatersources = function(roomObj) {
+	var i = 0,
+	results = [],
+	arrToSearch = roomObj.items.concat(roomObj.monsters),
+	len = arrToSearch.length;
+	
+	for (i; i < len; i += 1) {
+		if (arrToSearch[i].waterSource === true) {
+			results.push(arrToSearch[i]);
+		}
+	}
+	
+	return results;  
+};
+
+Room.prototype.getWatersource = function(roomObj, command) {
+	var i = 0,
+	waterSource = false,
+	pattern = new RegExp('^' + command.arg),
+	len = roomObj.items.length;
+	
+	for (i; i < len; i += 1) {
+		console.log(roomObj.items[i].name, roomObj.items[i].waterSource);
+		if (roomObj.items[i].waterSource === true && pattern.test(roomObj.items[i].name.toLowerCase())) {
+			waterSource = roomObj.items[i];
+		}
+	}
+	
+	return waterSource;  
 };
 
 Room.prototype.addItem = function(roomObj, item) {

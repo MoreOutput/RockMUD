@@ -50,7 +50,7 @@ module.exports = {
 					
 						Cmd.emote(mob, {
 							msg: 'points at a rope running up to a window in the tower above. ' 
-								+ 'It is very quite high. [<strong class="grey">Hint: Move up to continue</strong>]',
+								+ 'It is very high. [<strong class="grey">Hint: Move up to continue</strong>]',
 							roomObj: roomObj
 						});
 					}, 1200);

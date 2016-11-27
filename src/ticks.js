@@ -8,7 +8,28 @@ setInterval(function() {
 	var i = 0,
 	areaMsg,
 	players,
-	monsters;
+	monsters,
+	processAffectDecay = function(entity) {
+		var i = 0,
+		affLen = entity.affects.length,
+		affect;
+
+		for (i; i < affLen; i += 1) {
+			affect = entity.affects[i];
+			
+			if (affect.decay !== -1) {
+				if (affect.decay > 0) {
+					affect.decay -= 1;
+				} else {
+					if (affect.decayMsg) {
+						World.msgPlayer(entity, {msg: affect.decayMsg});
+					}
+
+					Character.removeAffect(entity, affect.id);
+				}
+			}
+		}
+	};
 
 	World.time.minute += 1;
 
@@ -41,6 +62,8 @@ setInterval(function() {
 						if (monster.chp >= 1) {
 							World.processEvents('onDay', monster, roomObj);
 							World.processEvents('onDay', monster.items, roomObj);
+							
+							processAffectDecay(monster);
 						}
 					});
 
@@ -52,6 +75,8 @@ setInterval(function() {
 						if (player.chp >= 1) {
 							World.processEvents('onDay', player, roomObj);
 							World.processEvents('onDay', player.items, roomObj);
+							
+							processAffectDecay(player);
 						}
 					});
 				}(World.areas[i], i));
@@ -75,6 +100,8 @@ setInterval(function() {
 						if (monster.chp >= 1) {
 							World.processEvents('onNight', monster, roomObj);
 							World.processEvents('onNight', monster.items, roomObj);
+							
+							processAffectDecay(monster);
 						}
 					});
 
@@ -85,7 +112,9 @@ setInterval(function() {
 
 						if (player.chp >= 1) {
 							World.processEvents('onNight', player, roomObj);
-							World.processEvents('onNight', player.items, roomObj);
+							World.processEvents('onNi	ght', player.items, roomObj);
+						
+							processAffectDecay(player);
 						}
 					});
 				}(World.areas[i], i));
@@ -132,7 +161,7 @@ setInterval(function() {
 	}
 }, 1900);
 
-// If the area is not empty the respawnTick property on the area object increments by one
+// Area respawn. If the area is not empty the respawnTick property on the area object increments by one
 // areas with players 'in' them respawn every X ticks; where X is the value of
 // area.respawnOn (default is 3 -- 12 minutes). A respawnOn value of 0 prevents respawn.
 // areas do not update if someone is fighting
@@ -148,7 +177,7 @@ setInterval(function() {
 
 		if (playersInArea.length) {
 			refresh = false;
-		} else {
+		} else if (!area.preventRespawn) {
 			if (World.dice.roll(1, 2) === 1) {
 				if (area.respawnOn > area.respawnTick) {
 					area.respawnTick += 1;
@@ -300,7 +329,7 @@ setInterval(function() {
 				j = 0;
 
 				for (j; j < rooms.length; j += 1) {
-					if (rooms[j].items) {
+					if (!rooms[j].preventDecay && rooms[j].items) {
 						processItemDecay(rooms[j]);
 					}
 				}
@@ -412,7 +441,7 @@ setInterval(function() {
 
 
 // Saving
-setInterval(function() { 
+setInterval(function() {
 	var i = 0,
 	player; 
 
