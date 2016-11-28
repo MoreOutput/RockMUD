@@ -25,7 +25,7 @@ setInterval(function() {
 						World.msgPlayer(entity, {msg: affect.decayMsg});
 					}
 
-					Character.removeAffect(entity, affect.id);
+					World.removeAffect(entity, affect.id);
 				}
 			}
 		}

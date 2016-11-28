@@ -1336,32 +1336,32 @@ World.prototype.isHidden = function(obj) {
 };
 
 
-World.prototype.getAffect = function(player, affectId) {
+World.prototype.getAffect = function(obj, affectId) {
 	var i = 0;
 
-	for (i; i < player.affects.length; i += 1) {
-		if (player.affects[i].id === affectId) {
-			return player.affects[i];
+	for (i; i < obj.affects.length; i += 1) {
+		if (obj.affects[i].id === affectId) {
+			return obj.affects[i];
 		}
 	}
 
 	return false;
 };
 
-World.prototype.removeAffect = function(player, affectName) {
+World.prototype.removeAffect = function(obj, affectName) {
 	var i = 0;
 
-	for (i; i < player.affects.length; i += 1) {
-		if (player.affects[i].id === affectName) {
-			return player.affects[i];
+	for (i; i < obj.affects.length; i += 1) {
+		if (obj.affects[i].id === affectName) {
+			return obj.affects[i];
 		}
 	}
 
 	return false;
 };
 
-World.prototype.addAffect = function(player, affect) {
-	player.affects.push(affect);
+World.prototype.addAffect = function(obj, affect) {
+	obj.affects.push(affect);
 	
 	return true;;
 };
