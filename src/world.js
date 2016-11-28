@@ -1307,6 +1307,34 @@ World.prototype.shuffle = function (arr) {
 	return arr;
 };
 
+World.prototype.isInvisible = function(obj) {
+	var i = 0;
+
+	if (obj.affects.length) {
+		for (i; i < obj.affects.length; i += 1) {
+			if (obj.affects[i].affect === 'invis') {
+				return true;
+			}
+		}
+	} else {
+		return false; 
+	}
+};
+
+World.prototype.isHidden = function(obj) {
+	var i = 0;
+
+	if (obj.affects.length) {
+		for (i; i < obj.affects.length; i += 1) {
+			if (obj.affects[i].affect === 'hidden') {
+				return true;
+			}
+		}
+	} else {
+		return false;
+	}	
+};
+
 World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, param2) {
 	var i = 0,
 	j = 0,

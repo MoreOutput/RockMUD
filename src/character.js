@@ -1302,8 +1302,8 @@ Character.prototype.canSeeObject = function(player, entity) {
 	var canSee = true,
 	detectInvis = this.getAffect(player, 'detectInvisibility'),
 	detectHide = this.getAffect(player, 'detectHidden'),
-	isInvisible = this.isInvisible(entity),
-	isHidden = this.isHidden(entity);
+	isInvisible = World.isInvisible(entity),
+	isHidden = World.isHidden(entity);
 	
 	if (entity.affects.length) {
 		if (isHidden) {
@@ -1324,36 +1324,6 @@ Character.prototype.canSeeObject = function(player, entity) {
 	}
 
 	return canSee;
-};
-
-// move to world
-Character.prototype.isInvisible = function(player) {
-	var i = 0;
-
-	if (player.affects.length) {
-		for (i; i < player.affects.length; i += 1) {
-			if (player.affects[i].affect === 'invis') {
-				return true;
-			}
-		}
-	} else {
-		return false; 
-	}
-};
-
-// move to world
-Character.prototype.isHidden = function(player) {
-	var i = 0;
-
-	if (player.affects.length) {
-		for (i; i < player.affects.length; i += 1) {
-			if (player.affects[i].affect === 'hidden') {
-				return true;
-			}
-		}
-	} else {
-		return false;
-	}	
 };
 
 Character.prototype.getMaxCarry = function(player) {
