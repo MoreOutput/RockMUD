@@ -85,7 +85,7 @@ Spell.prototype.detectHidden = function(skillObj, player, roomObj, command, fn) 
 
 	if (!currentlyAffected) {
 		if (successRoll > toBeat) {
-			Character.addAffect(player, {
+			World.addAffect(player, {
 				id: skillObj.id,
 				affect: 'hidden',
 				display: 'Detect Hidden',

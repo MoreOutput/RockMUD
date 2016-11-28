@@ -1335,6 +1335,37 @@ World.prototype.isHidden = function(obj) {
 	}	
 };
 
+
+World.prototype.getAffect = function(player, affectId) {
+	var i = 0;
+
+	for (i; i < player.affects.length; i += 1) {
+		if (player.affects[i].id === affectId) {
+			return player.affects[i];
+		}
+	}
+
+	return false;
+};
+
+World.prototype.removeAffect = function(player, affectName) {
+	var i = 0;
+
+	for (i; i < player.affects.length; i += 1) {
+		if (player.affects[i].id === affectName) {
+			return player.affects[i];
+		}
+	}
+
+	return false;
+};
+
+World.prototype.addAffect = function(player, affect) {
+	player.affects.push(affect);
+	
+	return true;;
+};
+
 World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, param2) {
 	var i = 0,
 	j = 0,

@@ -43,7 +43,7 @@ Skill.prototype.secondAttack = function(skillObj, player, roomObj) {
 * Non combat skills, typically checked by a game entity
 */
 Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
-	var skillAff = Character.getAffect(player, 'sneak'),
+	var skillAff = World.getAffect(player, 'sneak'),
 	affObj;
 
 	if (!skillAff) {
@@ -57,7 +57,7 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 					decay: World.dice.roll(1 + player.level/2, 10, (player.detection + player.knowledge/2) + skillObj.train/5)
 				};
 
-				Character.addAffect(player, affObj);
+				World.addAffect(player, affObj);
 
 				if (skillObj.wait) {
 					player.wait += skillObj.wait;

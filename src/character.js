@@ -1213,36 +1213,6 @@ Character.prototype.getStatusReport = function(player) {
 	}
 };
 
-Character.prototype.getAffect = function(player, affectId) {
-	var i = 0;
-
-	for (i; i < player.affects.length; i += 1) {
-		if (player.affects[i].id === affectId) {
-			return player.affects[i];
-		}
-	}
-
-	return false;
-};
-
-Character.prototype.removeAffect = function(player, affectName) {
-	var i = 0;
-
-	for (i; i < player.affects.length; i += 1) {
-		if (player.affects[i].id === affectName) {
-			return player.affects[i];
-		}
-	}
-
-	return false;
-};
-
-Character.prototype.addAffect = function(player, affect) {
-	player.affects.push(affect);
-	
-	return true;;
-};
-
 // Can the character see in a given room, also checks player sight property
 // if the room is dark, if the player has needed vision skills
 // and if its currently dark outside
@@ -1300,8 +1270,8 @@ Character.prototype.createCorpse = function(player) {
 
 Character.prototype.canSeeObject = function(player, entity) {
 	var canSee = true,
-	detectInvis = this.getAffect(player, 'detectInvisibility'),
-	detectHide = this.getAffect(player, 'detectHidden'),
+	detectInvis = World.getAffect(player, 'detectInvisibility'),
+	detectHide = World.getAffect(player, 'detectHidden'),
 	isInvisible = World.isInvisible(entity),
 	isHidden = World.isHidden(entity);
 	

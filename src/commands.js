@@ -74,7 +74,7 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 };
 
 Cmd.prototype.whizinvis = function(target, command) {
-	Character.addAffect(target, {
+	World.addAffect(target, {
 		id: 'whizinvis',
 		affect: 'invis',
 		display: 'Admin Invisiblity',
@@ -1159,7 +1159,7 @@ Cmd.prototype.move = function(target, command, fn) {
 
 		if (exitObj) {
 			if (!exitObj || !exitObj.door || exitObj.door.isOpen === true) {
-				sneakAff = Character.getAffect(target, 'sneak');
+				sneakAff = World.getAffect(target, 'sneak');
 				
 				if (!command.targetRoom) {
 					targetRoom = World.getRoomObject(exitObj.area, exitObj.id);
