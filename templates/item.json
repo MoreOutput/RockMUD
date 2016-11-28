@@ -38,6 +38,8 @@
 	"light": false,
 	"lightDecay": 0,
 	"flickerMsg": "",
-	"extinguishMsg": ""
+	"extinguishMsg": "",
+	"spell": {},
+	"spellLevel": 0
 }
 

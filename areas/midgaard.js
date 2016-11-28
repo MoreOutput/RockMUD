@@ -43,7 +43,7 @@ module.exports = {
 				}, {
 					cmd: 'up',
 					id: '1',
-					area: 'Midgaard Academy'
+					area: 'midgaard_academy'
 				}, {
 					cmd: 'down',
 					id: '6',
@@ -170,6 +170,14 @@ module.exports = {
 				lightDecay: 10,
 				flickerMsg: '',
 				extinguishMsg: '',
+				spell: {
+					id: 'spark',
+					display: 'Spark',
+					mod: 0,
+					train: 85,
+					type: 'spell',
+					wait: 2
+				},
 				beforeDrop: function(item, roomObj) {
 					return true;
 				}

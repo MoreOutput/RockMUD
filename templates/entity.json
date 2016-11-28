@@ -64,7 +64,7 @@
 	"noFollow": false,
 	"group": [],
 	"noGroup": true,
-	"prefixStatusMsg": "",
+	"capitalShort": "",
 	"ownershipMsg": "",
 	"possessivePronoun": "",
 	"personalPronoun": "",
@@ -170,6 +170,7 @@
 	"autosac": false,
 	"behaviors": [],
 	"trainer": false,
+	"trainMsg": "",
 	"log": [],
 	"runOnAliveWhenEmpty": true
 }

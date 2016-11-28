@@ -45,6 +45,9 @@ margin: 0 auto;
 .error {
 color: #ff0033;
 }
+.failure {
+color: #ff0033;
+}
 .success {
 color: #60f066;
 }

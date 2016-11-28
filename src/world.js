@@ -501,12 +501,8 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 				mob.long = mob.long[world.dice.roll(1, mob.long.length) - 1];
 			}
 
-			if (!mob.prefixStatusMsg) {
-				if (mob.long) {
-					mob.prefixStatusMsg = mob.long;
-				} else {
-					mob.prefixStatusMsg = world.capitalizeFirstLetter(mob.short);
-				}
+			if (!mob.capitalShort && mob.short) {
+				mob.capitalShort = world.capitalizeFirstLetter(mob.short);
 			}
 
 			if (!mob.possessivePronoun) {

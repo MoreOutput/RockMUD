@@ -1229,7 +1229,7 @@ Cmd.prototype.move = function(target, command, fn) {
 									if (Character.canSee(receiver, targetRoom)) {
 										if (!target.inName) {
 											if (target.short) {
-												msg = '<strong>' + World.capitalizeFirstLettert(target.short)
+												msg = '<strong>' + target.capitalizeShort
 													+ '</strong> walks in from '
 													+ parseMovementMsg(exitObj) + '.';
 											} else {
@@ -1271,17 +1271,18 @@ Cmd.prototype.move = function(target, command, fn) {
 										if (!target.outName) {
 											if (target.short) {
 												if (World.dice.roll(1, 2) === 1) {
-													msg = '<span class="warning">' + World.capitalizeFirstLetter(target.short)
+													msg = '<span class="warning">' + target.capitalShort
 														+ ' leaves heading <strong class="grey">' 
 														+ direction + '</strong>.</span>';	
 												} else {
-													msg = '<span class="warning">' + World.capitalizeFirstLetter(target.short)
+													msg = '<span class="warning">' + target.capitalShort
 														+ ' leaves traveling <strong class="grey">' 
 														+ direction + '</strong>.</span>';
 												}
 											} else {
 												msg = '<span class="warning">' + target.displayName
-													+ ' leaves going <strong class="grey">' + direction + '</strong>.</span>';
+													+ ' leaves going <strong class="grey">' + direction 
+													+ '</strong>.</span>';
 											}
 										} else if (target.outName && !target.outMessage) {
 											msg = '<span class="warning">' + target.outName
@@ -1797,6 +1798,47 @@ Cmd.prototype.flee = function(player, command) {
 	}
 };
 
+Cmd.prototype.mlist = function(player, command) {
+	var mods = World.dice.getMods(player),
+	msg = '<strong>Modifiers: </strong> Str: ' + mods.str + ', Wis: ' + mods.wis
+		+ ', Int: ' + mods.int + ', Dex: ' + mods.dex
+		+ ', Con: ' + mods.con;
+	
+	World.msgPlayer(player, {
+		msg: msg
+	});
+};
+
+Cmd.prototype.brandish = function(player, command) {
+	var scroll = Character.getItem(player, command),
+	playerLevel = player.level;
+
+	if (player.mainStat !== 'int') {
+		playerLevel -= 5;
+	}
+
+	if (playerLevel < 0) {
+		playerLevel = 0;
+	}
+
+	if (scroll && scroll.spell) {
+		if (!scroll.spellLevel || scroll.spellLevel <= playerLevel) {
+			this.cast(player, {
+				skillObj: scroll.spell,
+				last: command.last,
+				roomObj: command.roomObj,
+				input: command.input
+			}, function() {
+				
+			});
+		} else {
+
+		}
+	} else {
+		
+	}
+};
+
 // triggering spell skills
 Cmd.prototype.cast = function(player, command, fn) {
 	var cmd = this,
@@ -1804,17 +1846,23 @@ Cmd.prototype.cast = function(player, command, fn) {
 	skillObj,
 	roomObj,
 	spellTarget;
-
+	
 	if (command.roomObj) {
 		roomObj = command.roomObj;
 	} else {
 		roomObj = World.getRoomObject(player.area, player.roomid);
 	}
 
+	if (command.skillObj) {
+		skillObj = command.skillObj;
+	}
+
 	if (player.position !== 'sleeping') {
-		if (command.arg) {
-			skillObj = Character.getSkill(player, command.arg);
-		
+		if (command.arg || skillObj) {
+			if (!skillObj) {
+				skillObj = Character.getSkill(player, command.arg);
+			}
+
 			if (skillObj && skillObj.id in Spells) {
 				if (player.position === 'standing' || player.position === 'fighting') {
 					if (!command.input) {
@@ -1847,11 +1895,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 						if (command.last === 'self' || command.last === 'me' || command.last === command.input) {
 							spellTarget = player;
 						} else {
-							if (command.last === command.input) {
-								spellTarget = World.search(roomObj.monsters, {arg: command.input, input: command.arg});
-							} else {
-								spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg});
-							}
+							spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg});
 						}
 
 						if (spellTarget) {
@@ -2389,6 +2433,12 @@ Cmd.prototype.train = function(target, command) {
 								cost -= 1;
 							}
 
+							if (target.mainStat === 'str' && stat === 'int') {
+								cost += 1;
+							} else if (target.mainStat === 'int' && stat === 'con') {
+								cost += 1;
+							}
+
 							if (trainer.level > target.level) {
 								if (cost <= target.trains) {
 									if (trainer.onTrain) {
@@ -2430,9 +2480,9 @@ Cmd.prototype.train = function(target, command) {
 					trainDisplay = '<p>You can train the follow stats with ' + trainer.displayName 
 						+ '. <strong>You currently have ' + target.trains 
 						+ ' Trains to spend</strong>.</p><table class="table table-condensed train-table">'
-						+ '<thead><tr><td class="train-name-header warning"><strong>Stat</strong></td>'
-						+ '<td class="train-cost-header warning"><strong>Current Value</strong></td>'
-						+ '<td class="train-cost-header warning"><strong>Cost</strong></td>'
+						+ '<thead><tr><td class="train-name-header"><strong>Stat</strong></td>'
+						+ '<td class="train-cost-header"><strong>Current Value</strong></td>'
+						+ '<td class="train-cost-header"><strong>Cost</strong></td>'
 						+ '</tr></thead><tbody>';
 
 					for (i; i < stats.length; i += 1) {
@@ -2442,6 +2492,12 @@ Cmd.prototype.train = function(target, command) {
 
 						if (stats[i].id === target.mainStat) {
 							costDisplay -= 1;
+						}
+
+						if (target.mainStat === 'str' && stats[i].id === 'int') {
+							costDisplay += 1;
+						} else if (target.mainStat === 'int' && stats[i].id === 'con') {
+							costDisplay += 1;
 						}
 						
 						trainDisplay += '<tr>';
@@ -2521,19 +2577,11 @@ Cmd.prototype.practice = function(target, command) {
 				}
 
 				if (!trainer.trainMsg) {
-					if (trainer.long) {
-						World.msgPlayer(target, {
-							msg: trainer.long + ' trains you in the art of ' 
-								+ skillObj.display + '.',
-							styleClass: 'green'
-						});
-					} else {
-						World.msgPlayer(target, {
-							msg: trainer.displayName + ' trains you in the art of '
-								+ skillObj.display + '.',
-							styleClass: 'green'
-						});
-					}
+					World.msgPlayer(target, {
+						msg: trainer.capitalShort + ' trains you in the art of ' 
+							+ skillObj.display + '.',
+						styleClass: 'green'
+					});
 				} else {
 					World.msgPlayer(target, {
 						msg: trainer.trainMsg,
@@ -2542,7 +2590,7 @@ Cmd.prototype.practice = function(target, command) {
 				}
 
 				World.msgRoom(roomObj, {
-					msg: trainer.long + ' trains ' + target.displayName
+					msg: trainer.capitalShort + ' trains ' + target.displayName
 						+ ' in the art of ' + skillObj.display + '.',
 					styleClass: 'green',
 					playerName: target.name
@@ -2899,17 +2947,26 @@ Cmd.prototype.inventory = function(player, command) {
 		iStr += '<tr>';
 
 		for (i; i < player.items.length; i += 1) {
-			iStr += '<td class="i-name">' + player.items[i].name + '</td>';
-			iStr += '<td class="i-level">' + player.items[i].level + '</td>';
+			if (Character.canSeeObject(player, player.items[i]) || player.items[i].equipped) {
+				iStr += '<td class="i-name">' + player.items[i].name + '</td>';
+				iStr += '<td class="i-level">' + player.items[i].level + '</td>';
 
-			if (!player.items[i].equipped) {
-				iStr += '<td class="i-equipped">No</td>';
+				if (!player.items[i].equipped) {
+					iStr += '<td class="i-equipped">No</td>';
+				} else {
+					iStr += '<td class="i-equipped">Yes</td>';
+				}
+
+				iStr += '<td class="i-type">' + player.items[i].itemType + '</td>'
+					+ '<td class="i-weight">' + player.items[i].weight + '</td></tr>';
 			} else {
-				iStr += '<td class="i-equipped">Yes</td>';
-			}
+				iStr += '<td class="i-name">Something</td>';
+				iStr += '<td class="i-level">?</td>';
+				iStr += '<td class="i-equipped">No</td>';
 
-			iStr += '<td class="i-type">' + player.items[i].itemType + '</td>'
-				+ '<td class="i-weight">' + player.items[i].weight + '</td></tr>';
+				iStr += '<td class="i-type">Unknown</td>'
+					+ '<td class="i-weight">' + player.items[i].weight + '</td></tr>';
+			}
 		}
 
 		if (player.level <= 2) {

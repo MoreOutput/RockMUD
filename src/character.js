@@ -753,6 +753,19 @@ Character.prototype.getLights = function(player) {
 	return lights;
 };
 
+Character.prototype.getFood = function(player) {
+	var i = 0,
+	food = [];
+
+	for (i; i < player.items.length; i += 1) {
+		if (player.items[i].itemType === 'food') {
+			food.push(player.items[i]);
+		}
+	}
+
+	return food;
+};
+
 // All keys in the characters inventory
 Character.prototype.getKeys = function(player) {
 	var i = 0,
@@ -1195,7 +1208,7 @@ Character.prototype.getStatusReport = function(player) {
 
 	for (i; i < this.statusReport.length; i += 1) {
 		if (this.statusReport[i].percentage >= ((player.chp/player.hp) * 100) ) {
-			return player, this.statusReport[i];
+			return this.statusReport[i];
 		}
 	}
 };
@@ -1267,7 +1280,8 @@ Character.prototype.createCorpse = function(player) {
 	return {
 		level: player.level,
 		name: 'Corpse of ' + player.displayName,
-		short: 'a corpse of ' + corpseDisplayStr,
+		short: 'the corpse of ' + corpseDisplayStr,
+		capitalShort: 'The corpse of ' + corpseDisplayStr, 
 		long: 'The corpse of ' + corpseDisplayStr + ' is lying here on the ground.',
 		decay: 1,
 		itemType: 'corpse',
@@ -1312,6 +1326,7 @@ Character.prototype.canSeeObject = function(player, entity) {
 	return canSee;
 };
 
+// move to world
 Character.prototype.isInvisible = function(player) {
 	var i = 0;
 
@@ -1326,6 +1341,7 @@ Character.prototype.isInvisible = function(player) {
 	}
 };
 
+// move to world
 Character.prototype.isHidden = function(player) {
 	var i = 0;
 

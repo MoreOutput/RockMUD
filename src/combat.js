@@ -1,31 +1,21 @@
-
 'use strict';
 var World = require('./world').world,
 Character = require('./character').character,
 Room = require('./rooms').room,	
 Combat = function() {
 	this.adjective = [
-		{value: 'weak', damage: 5},
+		{value: ['weak', 'hardly any'], damage: 5},
 		{value: 'some', damage: 10},
+		{value: 'directed', damage: 15},
 		{value: 'maiming', damage: 20},
-		{value: 'MAIMING', damage: 25},
-		{value: '*MAIMING*', damage: 30},
 		{value: 'great', damage: 40},
-		{value: 'devastating', damage: 50},
-		{value: 'DEVASTATING', damage: 60}
+		{value: 'demolishing', damage: 50},
+		{value: '<span class="green">~~***<strong class="red">DEVASTATING</strong>***~~</span>', damage: 60}
 	];
 
-	this.abstractNouns = ['intensity', 'force', 'strength', 'power'];
+	this.abstractNouns = ['intensity', 'force', 'strength', 'power', 'might', 'effort', 'energy'];
 },
 Skill;
-
-/*
-General idea behind a hit:
-Your Short Sword (proper noun) slices (verb attached to item) a 
-Red Dragon (proper noun) with barbaric (adjective) intensity (abstract noun) (damage)
-
-You slice a Red Dragon with barbaric intensity (14)
-*/
 
 /*
 * Starting combat, begin() much return true and the target node for a fight to continue
@@ -255,10 +245,10 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 
 							if (opponent.isPlayer) {
 								if (World.dice.roll(1, 2) === 1) {
-									msgForAttacker += '<div class="green">' + attacker.long
+									msgForAttacker += '<div class="green">' + attacker.capitalShort
 										+ ' tries to attack but you dodge at the last minute!</div>';
 								} else {
-									msgForAttacker += '<div class="green">A ' + attacker.long
+									msgForAttacker += '<div class="green">' + attacker.capitalShort
 										+ ' lunges and you with ' + weapon.short +  ' and misses!</div>';
 								}
 							}
@@ -286,7 +276,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 
 						if (opponent.isPlayer) {
 							if (!shield) {
-								msgForOpponent += '<div class="green">' + attacker.long +
+								msgForOpponent += '<div class="green">' + attacker.capitalShort +
 								' swings widly and you narrowly block their attack!</div>';
 							}
 						}
@@ -310,11 +300,29 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 };
 
 Combat.prototype.getDamageAdjective = function(damage) {
-	var i = 0;
+	var i = 0,
+	value,
+	damLevel = damage / this.adjective[i].damage * 100;
 
 	for (i; i < this.adjective.length; i += 1) {
-		if (this.adjective[i].damage >= damage ) {
-			return this.adjective[i].value;
+		if (this.adjective[i].damage >= damage) {	
+			if (!Array.isArray(this.adjective[i].value)) {
+				value = this.adjective[i].value;
+			} else {
+				value = this.adjective[i].value[World.dice.roll(1, this.adjective[i].value.length) - 1];
+			}
+	
+			if (damage > 10) {
+				if (damLevel === 100) {
+					return '**' + value.toUpperCase() + '**';	
+				} else if (damLevel >= 80) {
+					return value.toUpperCase();
+				} else {
+					return value;
+				}
+			} else {
+				return value;
+			}	
 		}
 	}
 
@@ -354,7 +362,7 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 
 		if (opponent.chp > 0) {
 			if (!opponent.isPlayer) {	
-				msgForPlayer += '<div class="rnd-status">' + opponent.long + ' ' + oppStatus.msg + '</div>';
+				msgForPlayer += '<div class="rnd-status">' + opponent.capitalShort + ' ' + oppStatus.msg + '</div>';
 			} else {
 				msgForPlayer += '<div class="rnd-status">' + opponent.displayName + ' ' + oppStatus.msg + '</div>';
 			}
@@ -372,15 +380,7 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 			}
 		}
 
-		if (!opponent.isPlayer) {
-			if (player.long) {
-				msgForOpponent += '<div class="rnd-status">' + player.long + ' ' + playerStatus.msg + '</div>';
-			} else if (player.short) {
-				msgForOpponent += '<div class="rnd-status">' + World.capitalizeFirstLetter(player.short) + ' ' + playerStatus.msg + '</div>';
-			} else {
-				msgForOpponent += '<div class="rnd-status">' + player.displayName + ' ' + playerStatus.msg + '</div>';
-			}
-		} else {
+		if (opponent.isPlayer) {
 			msgForOpponent += '<div class="rnd-status">' + player.displayName + ' ' + playerStatus.msg + '</div>';
 		}
 
@@ -391,13 +391,13 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 		World.msgPlayer(player, {
 			msg: msgForPlayer,
 			noPrompt: preventPrompt,
-			styleClass: 'player-hit yellow'
+			styleClass: 'player-hit warning'
 		});
 
 		World.msgPlayer(opponent, {
 			msg: msgForOpponent,
 			noPrompt: preventPrompt,
-			styleClass: 'player-hit yellow'
+			styleClass: 'player-hit warning'
 		});
 
 		if (opponent.chp > 0) {
@@ -481,7 +481,7 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 	if (mob.gold) {
 		player.gold +- mob.gold;
 
-		endOfCombatMsg += ' <span class="yelloW">You find ' + mob.gold 
+		endOfCombatMsg += ' <span class="yellow">You find ' + mob.gold 
 			+ ' ' + World.config.coinage  + ' on the corpse.</span>';
 	}
 	
@@ -534,10 +534,10 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 				if (player.isPlayer) {
 					if (opponent.chp > 0) {
 						if (!player.canViewHp) {
-							msgForPlayer += '<div class="rnd-status">' + opponent.prefixStatusMsg + oppStatus.msg
+							msgForPlayer += '<div class="rnd-status">' + opponent.capitalShort + oppStatus.msg
 							+ '</div>';
 						} else {
-							msgForPlayer += '<div class="rnd-status">' + opponent.prefixStatusMsg + oppStatus.msg
+							msgForPlayer += '<div class="rnd-status">' + opponent.capitalShort + oppStatus.msg
 								+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
 						}
 					} else {
@@ -548,10 +548,10 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 
 				if (opponent.isPlayer) {
 					if (!opponent.canViewHp) {
-						msgForOpponent += '<div class="rnd-status">' + opponent.prefixStatusMsg + playerStatus.msg
+						msgForOpponent += '<div class="rnd-status">' + opponent.capitalShort + playerStatus.msg
 							+ '</div>';
 					} else {
-						msgForOpponent += '<div class="rnd-status">' + player.prefixStatusMsg + playerStatus.msg
+						msgForOpponent += '<div class="rnd-status">' + player.capitalShort + playerStatus.msg
 							+ ' (' + player.chp + '/' + player.hp +')</div>';
 					}
 				}
