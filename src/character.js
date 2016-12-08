@@ -220,7 +220,9 @@ Character.prototype.create = function(s) {
 	raceObj = World.getRace(s.player.race);
 
 	classObj = World.getClass(s.player.charClass);
-
+	
+	s.player.name = s.player.name.toLowerCase();
+	
 	s.player = World.extend(s.player, raceObj);
 	s.player = World.extend(s.player, classObj);
 	
@@ -829,7 +831,7 @@ Character.prototype.getFist = function(player) {
 };
 
 Character.prototype.getContainer = function(player, command) {
-	return World.search(player.items, 'container', {arg: command.input});
+	return World.search(player.items, 'container', command);
 };
 
 Character.prototype.getContainers = function(player) {
@@ -1002,16 +1004,7 @@ Character.prototype.getItem = function(player, command) {
 };
 
 Character.prototype.getItems = function(player, command) {
-	var i = 0,
-	newArr = [];
-
-	for (i; i < player.items.length; i += 1) {
-		if (player.items[i].name.toLowerCase().indexOf(command.arg) !== -1) {
-			newArr.push(player.items[i]);
-		}
-	}
-
-	return newArr;
+	return World.search(player.items, false, true, command);
 };
 
 Character.prototype.getQuests = function(player) {
@@ -1222,7 +1215,7 @@ Character.prototype.canSee = function(player, roomObj) {
 	hasDarkvision;
 
 	if (canSee && !roomObj.light && !World.time.isDay) {
-		hasDarkvision = this.getAffect(player, 'darkvision');
+		hasDarkvision = World.getAffect(player, 'darkvision');
 
 		if (!hasDarkvision) {
 			canSee = false;

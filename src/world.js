@@ -417,7 +417,7 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 				item.originatingArea = area.id;
 			}
 
-			if (item.behaviors.length > 0) {
+			if (item.behaviors && item.behaviors.length > 0) {
 				item = world.setupBehaviors(item);
 
 				itemArr[index] = item;
@@ -1044,8 +1044,7 @@ World.prototype.msgArea = function(areaId, msgObj) {
 
 	for (i; i < world.players.length; i += 1) {
 		if ((!msgObj.randomPlayer || msgObj.randomPlayer === false)
-			|| (msgObj.randomPlayer === true && world.dice.roll(1,10) > 6)) {
-
+		|| (msgObj.randomPlayer === true && world.dice.roll(1,10) > 6)) {
 			s = world.players[i].socket;
 			
 			if (s.player.name !== msgObj.playerName && s.player.area === areaId) {
@@ -1071,44 +1070,87 @@ World.prototype.msgWorld = function(target, msgObj) {
 };
 
 // convenience function for searching a given array and return an item based 
-// on on a given command object. Matches against objects name property
-World.prototype.search = function(arr, itemType, command) {
+// on on a given command object. Matches against objects name and displayName properties
+World.prototype.search = function(arr, itemType, returnArr, command) {
 	var canSearch = true,
 	matchedIndexes = [],
 	result = false,
-	i = 0;
+	pattern,
+	wordArr,
+	i = 0,
+	j = 0,
+	fnd = false;
+
+	if (arguments.length === 3) {
+		command = returnArr;
+		returnArr = false;
+	}
 
 	if (!command) {
 		command = itemType;
 		itemType = false;
 	}
-	
+
 	if (command.arg) {
 		if (!itemType) {
 			for (i; i < arr.length; i += 1) {
-				if (arr[i].name && arr[i].name.toLowerCase().indexOf(command.arg) !== -1) {
-					matchedIndexes.push(i);
+				wordArr = arr[i].name.toLowerCase().split(' ');
+
+				j = 0;
+
+				fnd = false;
+
+				for (j; j < wordArr.length; j += 1) {
+					pattern = new RegExp('^' + command.arg);
+
+					if (fnd === false && pattern.test(wordArr[j]) 
+					|| pattern.test(arr[i].displayName.toLowerCase())) {
+						fnd = true;
+						matchedIndexes.push(i);
+					}
 				}
 			}
 		} else {		
 			for (i; i < arr.length; i += 1) {
-				if (arr[i].itemType === itemType && arr[i].name.toLowerCase().indexOf(command.arg) !== -1) {
-					matchedIndexes.push(i);
+				wordArr = arr[i].name.toLowerCase().split(' ');
+
+				j = 0;
+
+				fnd = false;
+			
+				for (j; j < wordArr.length; j += 1) {
+					pattern = new RegExp('^' + command.arg);
+
+					if (fnd === false && arr[i].itemType === itemType && pattern.test(wordArr[j]) 
+					|| pattern.test(arr[i].displayName.toLowerCase())) {
+						fnd = true;
+						matchedIndexes.push(i);
+					}
 				}
 			}
 		}
 
 		if (matchedIndexes) {
-			if (matchedIndexes.length > 1 && command.number > 1) {
+			if (!returnArr) {
+				if (matchedIndexes.length > 1 && command.number > 1) {
+					i = 0;
+
+					for (i; i < matchedIndexes.length; i += 1) {
+						if ((i + 1) === command.number) {
+							result = arr[matchedIndexes[i]];
+						}
+					}
+				} else {
+					result = arr[matchedIndexes[0]];
+				}
+			} else {
+				result = [];
+
 				i = 0;
 
 				for (i; i < matchedIndexes.length; i += 1) {
-					if ((i + 1) === command.number) {
-						result = arr[matchedIndexes[i]];
-					}
+					result.push(arr[matchedIndexes[i]]);
 				}
-			} else {
-				result = arr[matchedIndexes[0]];
 			}
 		}
 	}

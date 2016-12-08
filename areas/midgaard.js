@@ -102,7 +102,7 @@ module.exports = {
 						module: 'wander'
 					}]
 				}, {
-					name: 'Dog',
+					name: 'Hound Dog',
 					displayName: 'Hunting hound',
 					level: 1,
 					short: 'a healthy looking brown and white hound',

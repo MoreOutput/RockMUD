@@ -43,7 +43,7 @@ module.exports = {
 							Character.addSkill(player, climbSkill);
 
 							World.msgPlayer(player, {
-								msg: 'You obtain a new skill from ' + mob.displayName + ': <strong>Improved Climbing</strong>.',
+								msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>.',
 								styleClass: 'success'
 							});
 						}

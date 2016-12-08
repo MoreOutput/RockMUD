@@ -459,7 +459,9 @@ setInterval(function() {
 	var s,
 	alerts = [
 		'Commands are not case sensitive. Use HELP COMMANDS to see the current command list.',
-		'Use the SCAN command to get a quick look at the rooms adjacent to you.'
+		'Use the SCAN command to get a quick look at the rooms adjacent to you.',
+		'Save your character with the <strong>save</strong> command.',
+		'Try the <strong>say</strong> command when you want to send a message to everyone in your current room.'
 	];
 
 	if (World.players.length) {

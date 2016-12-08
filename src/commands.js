@@ -46,7 +46,7 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 		if (cmdArr.length < 4) {
 			if (cmdArr.length === 3) {
 				cmdObj.arg = cmdArr[1].toLowerCase() + ' ' + cmdArr[2].toLowerCase();
-			} else {
+			} else if (cmdArr.length > 1) {
 				cmdObj.arg = cmdArr[1].toLowerCase();
 			}
 
@@ -1423,18 +1423,22 @@ Cmd.prototype.get = function(target, command, fn) {
 	maxCarry = Character.getMaxCarry(target);
 
 	if (target.position !== 'sleeping') {
-		roomObj = World.getRoomObject(target.area, target.roomid);
+		if (command.roomObj) {
+			roomObj = command.roomObj;
+		} else {
+			roomObj = World.getRoomObject(target.area, target.roomid);
+		}
 
 		if (command.msg !== '' && Character.canSee(target, roomObj)) {
 			if (command.input) {
 				container = Character.getContainer(target, command);
 			}
-
+	
 			if (!container) {
 				if (command.msg !== 'all') {
 					item = Room.getItem(roomObj, command);
-					
-					if (!Character.canSeeObject(target, item)) {
+			
+					if (item && !Character.canSeeObject(target, item)) {
 						item = false;
 					}
 
@@ -1811,6 +1815,7 @@ Cmd.prototype.mlist = function(player, command) {
 
 Cmd.prototype.brandish = function(player, command) {
 	var scroll = Character.getItem(player, command),
+	castCmd = 'cast ',
 	playerLevel = player.level;
 
 	if (player.mainStat !== 'int') {
@@ -1823,14 +1828,20 @@ Cmd.prototype.brandish = function(player, command) {
 
 	if (scroll && scroll.spell) {
 		if (!scroll.spellLevel || scroll.spellLevel <= playerLevel) {
-			this.cast(player, {
-				skillObj: scroll.spell,
-				last: command.last,
-				roomObj: command.roomObj,
-				input: command.input
-			}, function() {
-				
-			});
+			if (scroll.spell.type.indexOf('passive') === -1) {
+				if (command.msg === command.arg) {
+					
+				}
+			} else {
+				if (command.msg === command.arg) {
+				}
+			}
+			
+			castCmd = this.createCommandObject({msg: castCmd});
+
+			castCmd.skillObj = scroll.spell;
+
+			this.cast(player, castCmd);
 		} else {
 
 		}
@@ -1892,7 +1903,11 @@ Cmd.prototype.cast = function(player, command, fn) {
 							});
 						}
 					} else {
-						if (command.last === 'self' || command.last === 'me' || command.last === command.input) {
+						if (command.last === 'self' 
+							|| command.last === 'me' 
+							|| command.last === player.name
+							|| (command.msg === command.arg && command.arg === command.input)
+						) {	
 							spellTarget = player;
 						} else {
 							spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg});
@@ -1946,54 +1961,61 @@ Cmd.prototype.kill = function(player, command, avoidGroupCheck, fn) {
 	i = 0,
 	opponent;
 
-	if (player.position === 'standing') {
-		if (command.roomObj) {
-			roomObj = command.roomObj;
-		} else {	
-			roomObj = World.getRoomObject(player.area, player.roomid);
-		}
-		
+	if (command.arg !== player.name) {
+		if (player.position === 'standing') {
+			if (command.roomObj) {
+				roomObj = command.roomObj;
+			} else {	
+				roomObj = World.getRoomObject(player.area, player.roomid);
+			}
 
-		if (!command.target) {
-			opponent = World.search(roomObj.monsters, command);
-		} else {
-			opponent = command.target;
-		}
 
-		if (!opponent) {
-			opponent = World.search(roomObj.playersInRoom, command);
-		}
+			if (!command.target) {
+				opponent = World.search(roomObj.monsters, command);
+			} else {
+				opponent = command.target;
+			}
 
-		if (opponent && opponent.roomid === player.roomid) {
-			World.msgPlayer(player, {
-				msg: '<strong class="grey">You scream and charge at a ' 
-					+ opponent.name + '!</strong>',
-				noPrompt: true
-			});
+			if (!opponent) {
+				opponent = World.search(roomObj.playersInRoom, command);
+			}
 
-			World.msgPlayer(opponent, {
-				msg: '<strong class="red">A ' + player.displayName 
-					+ ' screams and charges at you!</strong>',
-				noPrompt: true
-			});
+			if (opponent && opponent.roomid === player.roomid) {
+				World.msgPlayer(player, {
+					msg: '<strong class="grey">You scream and charge at a ' 
+						+ opponent.name + '!</strong>',
+					noPrompt: true
+				});
 
-			Combat.processFight(player, opponent, roomObj);
+				World.msgPlayer(opponent, {
+					msg: '<strong class="red">A ' + player.displayName 
+						+ ' screams and charges at you!</strong>',
+					noPrompt: true
+				});
 
-			if (player.group.length && !avoidGroupCheck) {
-				for (i; i < player.group.length; i += 1) {
-					this.kill(player.group[i], command, true);
+				Combat.processFight(player, opponent, roomObj);
+
+				if (player.group.length && !avoidGroupCheck) {
+					for (i; i < player.group.length; i += 1) {
+						this.kill(player.group[i], command, true);
+					}
 				}
+			} else {
+				World.msgPlayer(player, {
+					msg: 'There is nothing by that name here.',
+					styleClass: 'error'
+				});
 			}
 		} else {
 			World.msgPlayer(player, {
-				msg: 'There is nothing by that name here.',
-				styleClass: 'error'
+				msg: 'Hard to do that from this position.',
+				styleClass: 'combat-death'
 			});
 		}
 	} else {
 		World.msgPlayer(player, {
-			msg: 'Hard to do that from this position.',
-			styleClass: 'combat-death'
+			msg: 'Fight yourself? Thats impossible.',
+			styleClass: 'error'
 		});
 	}
 };
@@ -2737,6 +2759,8 @@ Cmd.prototype.save = function(target, command) {
 	if (target.isPlayer) {
 		if (target.position === 'standing' && target.wait === 0) {
 			Character.save(target, function() {
+				target.wait += 1;
+
 				World.msgPlayer(target, {
 					msg: target.displayName + ' was saved. Whew!',
 					styleClass: 'save green'
