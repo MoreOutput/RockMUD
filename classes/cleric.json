@@ -8,11 +8,11 @@
 		{
 			"id": "cureLight",
 			"display": "Cure Light",
-			"mod": 0,
+			"mod": 2,
 			"train": 65,
 			"type": "passive spell",
 			"wait": 2,
-			"learned": false,
+			"learned": true,
 			"prerequisites": {
 				"level": 1
 			}

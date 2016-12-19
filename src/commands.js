@@ -1875,14 +1875,50 @@ Cmd.prototype.cast = function(player, command, fn) {
 			}
 
 			if (skillObj && skillObj.id in Spells) {
-				if (player.position === 'standing' || player.position === 'fighting') {
-					if (!command.input) {
-						if (skillObj.type.indexOf('passive') === -1) {
-							if (player.opponent) {
-								spellTarget = player.opponent;
+				if (player.cmana > 0) {
+					if (player.position === 'standing' || player.position === 'fighting') {
+						if (!command.input) {
+							if (skillObj.type.indexOf('passive') === -1) {
+								if (player.opponent) {
+									spellTarget = player.opponent;
 
+									return Spells[skillObj.id](skillObj, player, spellTarget, roomObj, command, function() {
+										if (!player.opponent && player.position === 'standing') {
+											cmd.kill(player, command, fn);
+										}
+
+										World.processEvents('onSpell', player, roomObj, skillObj);
+										World.processEvents('onSpell', player.items, roomObj, skillObj);
+										World.processEvents('onSpell', roomObj, player, skillObj);
+									});
+								} else {
+									World.msgPlayer(player, {
+										msg: 'You need to specify a target!'
+									});
+								}
+							} else {
+								return Spells[skillObj.id](skillObj, player, player, roomObj, command, function() {	
+									World.processEvents('onSpell', player, roomObj, skillObj);
+									World.processEvents('onSpell', player.items, roomObj, skillObj);
+									World.processEvents('onSpell', roomObj, player, skillObj);
+								});
+							}
+						} else {
+							if (command.last === 'self' 
+								|| command.last === 'me' 
+								|| command.last === player.name
+								|| (command.msg === command.arg && command.last === command.input)
+							) {	
+								spellTarget = player;
+							} else {
+								spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg});
+							}
+
+							if (spellTarget) {
 								return Spells[skillObj.id](skillObj, player, spellTarget, roomObj, command, function() {
-									if (!player.opponent && player.position === 'standing') {
+									if (!player.opponent && player.position !== 'fighting' && skillObj.type.indexOf('passive') === -1) {								
+										command.target = spellTarget;
+
 										cmd.kill(player, command, fn);
 									}
 
@@ -1892,55 +1928,27 @@ Cmd.prototype.cast = function(player, command, fn) {
 								});
 							} else {
 								World.msgPlayer(player, {
-									msg: 'You need to specify a target!'
+									msg: 'You do not see anything by that name here.',
+									styleClass: 'error'
 								});
 							}
-						} else {
-							return Spells[skillObj.id](skillObj, player, player, roomObj, command, function() {	
-								World.processEvents('onSpell', player, roomObj, skillObj);
-								World.processEvents('onSpell', player.items, roomObj, skillObj);
-								World.processEvents('onSpell', roomObj, player, skillObj);
-							});
 						}
 					} else {
-						if (command.last === 'self' 
-							|| command.last === 'me' 
-							|| command.last === player.name
-							|| (command.msg === command.arg && command.arg === command.input)
-						) {	
-							spellTarget = player;
-						} else {
-							spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg});
-						}
-
-						if (spellTarget) {
-							return Spells[skillObj.id](skillObj, player, spellTarget, roomObj, command, function() {
-								if (!player.opponent && player.position !== 'fighting' && skillObj.type.indexOf('passive') === -1) {								
-									command.target = spellTarget;
-
-									cmd.kill(player, command, fn);
-								}
-
-								World.processEvents('onSpell', player, roomObj, skillObj);
-								World.processEvents('onSpell', player.items, roomObj, skillObj);
-								World.processEvents('onSpell', roomObj, player, skillObj);
-							});
-						} else {
-							World.msgPlayer(player, {
-								msg: 'You do not see anything by that name here.',
-								styleClass: 'error'
-							});
-						}
+						World.msgPlayer(player, {
+							msg: 'You do not know that spell.',
+							styleClass: 'blue'
+						});				
 					}
 				} else {
 					World.msgPlayer(player, {
-						msg: 'You do not know that spell.',
-						styleClass: 'blue'
-					});				
+						msg: 'You don\'t have any mana!',
+						styleClass: 'error'
+					});
+
 				}
 			} else {
 				World.msgPlayer(player, {
-					msg: 'You can\'t do that right now.',
+					msg: '<strong>You dont\'t know any spells by that name</strong>.',
 					styleClass: 'error'
 				});
 			}

@@ -24,6 +24,7 @@ module.exports = {
 	mobAggressive: false,
 	onlyAttackLarger: false,
 	onlyAttackSmaller: false,
+	onlyAttackSleeping: false,
 	revenge: false,
 	onVisit: function(mob, roomObj, target, incomingRoomObj, command) {	
 		var target;
@@ -66,6 +67,10 @@ module.exports = {
 		if (mob.onlyAttackLarger && mob.size.value >= target.size.value) {
 			target = false;
 		} else if (mob.onlyAttackSmaller && mob.size.value <= target.size.value) {
+			target = false;
+		}
+
+		if (mob.onlyAttackSleeping === true && target.position !== 'sleeping') {
 			target = false;
 		}
 		

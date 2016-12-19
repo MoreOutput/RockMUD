@@ -6,6 +6,8 @@
 	"levels" : "All",
 	"defaultRoom": "1",
 	"description" : "",
+	"dayTrainsitionMsg": "The sun appears over the horizon.",
+	"nightTransitionMsg": "The sun fades fully from view as night falls.",
 	"reloads": 0,
 	"created": "",
 	"saved": "",

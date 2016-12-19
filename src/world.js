@@ -853,6 +853,18 @@ World.prototype.prompt = function(target) {
 		player = target;
 	}
 
+	if (!target.chp && target.chp !== 0) {
+		target.chp = 0;
+	}
+
+	if (!target.cmana && target.cmana !== 0) {
+		target.cmana = 0;
+	}
+
+	if (!target.cmv && target.cmv !== 0) {
+		target.cmv = 0;
+	}
+
 	prompt = '<div class="col-md-12"><div class="cprompt"><strong><' 
 		+ player.chp + '/'  + player.hp + '<span class="red">hp</span>><' 
 		+ player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' 
