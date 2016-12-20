@@ -25,7 +25,7 @@ Cmd = function () {};
 		msg: cmdArr.slice(1).join(' '), // cast {detect hidden player}
 		arg: cmdArr[1].toLowerCase(), // cast {detect hidden} player
 		input: cmdArr.slice(2).join(' '), // cast detect hidden {player}
-		last: // cast detect hidden {player}
+		last: // cast detect hidden {player} -- always the last word
 		number: 1 // argument target -- cast detect hidden 2.player
 	};
 */
@@ -1222,7 +1222,7 @@ Cmd.prototype.move = function(target, command, fn) {
 						}
 
 						World.msgRoom(targetRoom, {
-							msg: function(receiver, fn) {
+							msg: function(receiver, fn2) {
 								var msg = '';
 
 								if (!sneakAff) {
@@ -1257,13 +1257,13 @@ Cmd.prototype.move = function(target, command, fn) {
 									}
 								}
 
-								return fn(true, msg);
+								return fn2(true, msg);
 							},
 							playerName: target.name
 						});
 
 						World.msgRoom(roomObj, {
-							msg: function(receiver, fn) {
+							msg: function(receiver, fn2) {
 								var msg = '';
 
 								if (!sneakAff) {
@@ -1296,7 +1296,7 @@ Cmd.prototype.move = function(target, command, fn) {
 									}
 								}
 
-								return fn(true, msg);
+								return fn2(true, msg);
 							},
 							playerName: target.name
 						});
@@ -1304,6 +1304,10 @@ Cmd.prototype.move = function(target, command, fn) {
 						World.processEvents('onMove', target, targetRoom, roomObj, command);
 						World.processEvents('onEnter', targetRoom, target, roomObj, command);
 						World.processEvents('onVisit', targetRoom.monsters, targetRoom, targetRoom, target, command);
+
+						if (typeof fn === 'function') {
+							return fn(true);
+						}
 					}
 				} else {
 					if (targetRoom.size) {
@@ -1325,13 +1329,15 @@ Cmd.prototype.move = function(target, command, fn) {
 
 				if (typeof fn === 'function') {
 					return fn(false);
-				}
+				} 
 			}
 		} else {
-			World.msgPlayer(target, {
-				msg: 'There is no exit in that direction.',
-				styleClass: 'error'
-			});
+			if (command.cmd !== 'flee') {
+				World.msgPlayer(target, {
+					msg: 'There is no exit in that direction.',
+					styleClass: 'error'
+				});
+			}
 
 			if (typeof fn === 'function') {
 				return fn(false);
@@ -1737,51 +1743,68 @@ Cmd.prototype.drop = function(target, command, fn) {
 
 Cmd.prototype.flee = function(player, command) {
 	var cmd = this,
-	fleeCheck,
+	chanceRoll,
 	directions = ['north', 'east', 'west', 'south', 'down', 'up'];
 
 	if (player.opponent) {
-		fleeCheck = World.dice.roll(1, 20, World.dice.getDexMod(player));
+		if (player.position === 'fighting') {
+			chanceRoll = World.dice.roll(1, 20, World.dice.getDexMod(player));
 
-		if (fleeCheck > 10 && player.wait === 0) {
-			player.position = 'fleeing';
-
-			if (!command.msg) {
-				command.msg = directions[World.dice.roll(1, directions.length) - 1];
+			if (player.mainStat === 'dex') {
+				chanceRoll += 1;
 			}
 
-			cmd.move(player, command, function(moved) {
-				if (moved) {
-					player.position = 'standing';
-					player.opponent.position = 'standing';
+			if (chanceRoll > 7 && player.wait === 0) {
+				player.position = 'fleeing';
 
-					World.msgPlayer(player.opponent, {
-						msg: player.displayName + ' fled ' + command.msg +'!',
-						styleClass: 'grey'
-					});
+				if (!command.msg) {
+					command.msg = directions[World.dice.roll(1, directions.length) - 1];
+				}
 
+				cmd.move(player, command, function(moved, fn) {
+					if (moved) {
+						player.position = 'standing';
+						player.opponent.position = 'standing';
+
+						World.msgPlayer(player.opponent, {
+							msg: player.displayName + ' fled ' + command.msg +'!',
+							styleClass: 'grey'
+						});
+
+						World.msgPlayer(player, {
+							msg: '<strong>You fled ' + command.msg +'</strong>!',
+							styleClass: 'success'
+						});
+						
+						player.opponent.opponent = false;
+						player.opponent = false;
+					} else {
+						player.position = 'fighting';
+
+						World.msgPlayer(player.opponent, {
+							msg: '<p>' + player.displayName + ' tries to flee ' + command.msg + '.</p>',
+							styleClass: 'grey'
+						});
+						
+						World.msgPlayer(player, {
+							msg: 'You cannot flee in that direction!',
+							styleClass: 'red'
+						});
+					}
+				});
+			} else {
+				if (World.dice.roll(1, 2) === 1) {
 					World.msgPlayer(player, {
-						msg: 'You fled ' + command.msg +'!',
-						styleClass: 'red'
+						msg: '<strong>You are in no position to flee!</strong>',
+						styleClass: 'error'
 					});
-					
-					player.opponent.opponent = null;
-					player.opponent = null;
-					
 				} else {
-					player.position = 'fighting';
-
-					World.msgPlayer(player.opponent, {
-						msg: '<p>' + player.displayName + ' tries to flee ' + command.msg + '.</p>',
-						styleClass: 'grey'
-					});
-					
 					World.msgPlayer(player, {
-						msg: 'You cannot flee in that direction!',
-						styleClass: 'red'
+						msg: '<strong>Your attempt to flee fails!</strong>',
+						styleClass: 'error'
 					});
 				}
-			});
+			}
 		} else {
 			player.position = 'fighting';
 
@@ -3245,6 +3268,7 @@ Cmd.prototype.restore = function(admin, command) {
 			player.cmv = player.mv;
 			player.hunger = 0;
 			player.thirst = 0;
+			player.wait = 0;
 		}
 
 		World.msgWorld(admin, {msg: 'You feel refreshed!'});

@@ -161,7 +161,12 @@ Spell.prototype.cureLight = function(skillObj, player, opponent, roomObj, comman
 	manaFailMsg = 'Not enough mana to cast ' + skillObj.display,
 	failMsg = 'Your eyes flicker blue as you <strong>fail to cast ' + skillObj.display + '</strong>.',
 	successMsg = '',
-	roomMsg =  '';	
+	roomMsg =  '',
+	wait = 2;
+
+	if (skillObj.wait) {
+		wait = skillObj.wait;
+	}
 	
 	if (cost < player.cmana) {
 		if (World.dice.roll(1, 100) <= skillObj.train && chanceRoll > 2) {
@@ -190,6 +195,7 @@ Spell.prototype.cureLight = function(skillObj, player, opponent, roomObj, comman
 				}
 			} else if (player.mainStat === 'str') {
 				cost += 1;
+				wait += 2;
 			}
 
 			intMod = World.dice.getIntMod(player);
@@ -199,10 +205,10 @@ Spell.prototype.cureLight = function(skillObj, player, opponent, roomObj, comman
 			if (skillObj.mod) {
 				wisMod += World.dice.roll(1, skillObj.mod);
 
-				intMod+= World.dice.roll(1, skillObj.mod);
+				intMod += World.dice.roll(1, skillObj.mod);
 			}
 
-			player.wait += skillObj.wait;
+			player.wait += wait;
 			player.cmana -= cost;
 
 			if (opponent.chp > opponent.hp) {

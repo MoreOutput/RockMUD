@@ -419,93 +419,95 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 	if (combatInterval) {
 		clearInterval(combatInterval);
 	}
-	
-	mob.opponent = null;
-	mob.killedBy = player.name;
-	
-	player.opponent = null;
-	player.position = 'standing';
 
-	World.processEvents('onDeath', roomObj, mob, player);
-	World.processEvents('onDeath', mob, roomObj, player);
-	World.processEvents('onVictory', player, roomObj, mob);
-
-	corpse = Character.createCorpse(mob);
-
-	if (!mob.isPlayer) {
-		Room.removeMob(roomObj, mob);
-	} else {
-		respawnRoom = World.getRoomObject(mob.recall.area, mob.recall.roomid);
+	if (mob.chp <= 0) {
+		mob.opponent = null;
+		mob.killedBy = player.name;
 		
-		Room.removePlayer(roomObj, mob);
-	
-		mob.items = [];
-		mob.position = 'standing';
-		
-		respawnRoom.playersInRoom.push(mob);
+		player.opponent = null;
+		player.position = 'standing';
 
-		mob.roomid = respawnRoom.id;
-		mob.area = respawnRoom.area;
-		mob.chp = 1;
-		mob.cmana = 1;
-		mob.cmv = 5;
-	
-		World.msgPlayer(mob, {
-			msg: '<strong>You died! Make it back to your corpse before it rots to save your gear!</strong>',
-			styleClass: 'error'
-		});
-	}
+		World.processEvents('onDeath', roomObj, mob, player);
+		World.processEvents('onDeath', mob, roomObj, player);
+		World.processEvents('onVictory', player, roomObj, mob);
 
-	exp = World.dice.calExp(player, mob);
+		corpse = Character.createCorpse(mob);
 
-	Room.addItem(roomObj, corpse);
-	
-	if (exp > 0) {
-		player.exp += exp;
-		
-		if (World.dice.roll(1, 2) === 1) {
-			endOfCombatMsg = 'You won the fight! You learn some things resulting in <strong>'
-				+ exp + ' experience points</strong>.';
+		if (!mob.isPlayer) {
+			Room.removeMob(roomObj, mob);
 		} else {
-			endOfCombatMsg = '<strong>You are victorious! You earn <span class="red">'
-				+ exp + '</span> experience points!';
+			respawnRoom = World.getRoomObject(mob.recall.area, mob.recall.roomid);
+			
+			Room.removePlayer(roomObj, mob);
+		
+			mob.items = [];
+			mob.position = 'standing';
+			
+			respawnRoom.playersInRoom.push(mob);
+
+			mob.roomid = respawnRoom.id;
+			mob.area = respawnRoom.area;
+			mob.chp = 1;
+			mob.cmana = 1;
+			mob.cmv = 7;
+		
+			World.msgPlayer(mob, {
+				msg: '<strong>You died! Make it back to your corpse before it rots to save your gear!</strong>',
+				styleClass: 'error'
+			});
 		}
-	} else {
-		if (World.dice.roll(1, 2) === 1) {
-			endOfCombatMsg = 'You won but learned nothing.';
+
+		exp = World.dice.calExp(player, mob);
+
+		Room.addItem(roomObj, corpse);
+		
+		if (exp > 0) {
+			player.exp += exp;
+			
+			if (World.dice.roll(1, 2) === 1) {
+				endOfCombatMsg = 'You won the fight! You learn some things resulting in <strong>'
+					+ exp + ' experience points</strong>.';
+			} else {
+				endOfCombatMsg = '<strong>You are victorious! You earn <span class="red">'
+					+ exp + '</span> experience points!';
+			}
 		} else {
-			endOfCombatMsg = 'You did not learn anything from the fight.';
+			if (World.dice.roll(1, 2) === 1) {
+				endOfCombatMsg = 'You won but learned nothing.';
+			} else {
+				endOfCombatMsg = 'You did not learn anything from the fight.';
+			}
 		}
-	}
 
-	if (mob.gold) {
-		player.gold +- mob.gold;
+		if (mob.gold) {
+			player.gold +- mob.gold;
 
-		endOfCombatMsg += ' <span class="yellow">You find ' + mob.gold 
-			+ ' ' + World.config.coinage  + ' on the corpse.</span>';
-	}
-	
-	if (player.wait > 0) {
-		player.wait -= 1;
-	} else {
-		player.wait = 0;
-	}
+			endOfCombatMsg += ' <span class="yellow">You find ' + mob.gold 
+				+ ' ' + World.config.coinage  + ' on the corpse.</span>';
+		}
+		
+		if (player.wait > 0) {
+			player.wait -= 1;
+		} else {
+			player.wait = 0;
+		}
 
-	player.killed += 1;
+		player.killed += 1;
 
-	if (player.exp >= player.expToLevel) {
-		World.msgPlayer(player, {
-			msg: endOfCombatMsg,
-			noPrompt: true,
-			styleClass: 'victory'
-		});
-	
-		Character.level(player);	
-	} else {
-		World.msgPlayer(player, {
-			msg: endOfCombatMsg,
-			styleClass: 'victory'
-		});
+		if (player.exp >= player.expToLevel) {
+			World.msgPlayer(player, {
+				msg: endOfCombatMsg,
+				noPrompt: true,
+				styleClass: 'victory'
+			});
+		
+			Character.level(player);	
+		} else {
+			World.msgPlayer(player, {
+				msg: endOfCombatMsg,
+				styleClass: 'victory'
+			});
+		}
 	}
 };
 

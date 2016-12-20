@@ -24,19 +24,17 @@ module.exports = {
 		generateNorthOf = World.getRoomObject(this.name, this.defaultRoom),
 		i = 0,
 		enteranceRoomId = '4-0',
+		startingRoom,
 		j = 0;
 
 		for (i; i < x; i += 1) {
 			j = 0;
 				
 			for (j; j < y; j += 1) {
-				roomObj = World.extend({}, World.roomTemplate);
-
+				roomObj = World.extend({}, JSON.parse(JSON.stringify(World.roomTemplate)));
 				roomObj.id = i + '-' + j;
 				roomObj.content = 'A room';
 				roomObj.title = 'Empty room ' +  i + '-' + j;
-				roomObj.playersInRoom = [];
-				roomObj.exits = [];
 
 				if (i === 0 && j === 0) {
 					roomObj.exits.push({
@@ -134,9 +132,9 @@ module.exports = {
 			}
 		}
 
-		roomObj = World.getRoomObject(this.name, enteranceRoomId);
+		startingRoom = World.getRoomObject(this.name, enteranceRoomId);
 
-		roomObj.exits.push({
+		startingRoom.exits.push({
 			cmd: 'south',
 			id: this.defaultRoom,
 			area: this.name
@@ -149,17 +147,17 @@ module.exports = {
 		});
 
 		i = 0;
-/*
+
 		for (i; i < this.rooms.length; i += 1) {
-			if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 2) === 1) {;
+			if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 3) === 1) {
 				this.rooms[i].monsters.push({
 					name: 'Boar',
 					displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
 					level: 1,
-					short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a young tan boar'],
+					short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a tan boar'],
 					long: [
 						'A boar with a number of scars on its side is here',
-						'A large dark brown boar',
+						'A dark brown boar',
 						'A large brown boar is here'
 					],
 					inName: 'A boar',
@@ -181,7 +179,6 @@ module.exports = {
 				});
 			}
 		}
-*/
 	},
 	rooms: [
 		{

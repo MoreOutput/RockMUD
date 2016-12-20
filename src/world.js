@@ -159,32 +159,36 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 							world.config = cfg;
 							
 							for (i; i < world.areas.length; i += 1) {
-								area = world.areas[i];
-								
-								if (area.quests) {
-									for (j; j < area.quests.length; j += 1) {
-										area.quests[j].quest = true;
+								(function(area, index) {									
+									if (area.quests) {
+										for (j; j < area.quests.length; j += 1) {
+											area.quests[j].quest = true;
+										}
+
+										world.log = world.log.concat(area.quests);
 									}
 
-									world.log = world.log.concat(area.quests);
-								}
+									world.setupArea(area, index, function(area, final) {
+										var j = 0;
 
-								world.setupArea(area);
+										if (final) {
+											for (j; j < world.areas.length; j += 1) {
+												(function(area, postIndex) {	
+													if (area.afterLoad) {
+														area.afterLoad();
+													}
+
+													if (postIndex === world.areas.length - 1) {
+														world.ticks = require('./ticks');
+
+														return fn(Character, Cmds, Skills);
+													}
+												}(world.areas[j], j));
+											}
+										}
+									});
+								}(world.areas[i], i));
 							}
-
-							i = 0;
-
-							for (i; i < world.areas.length; i += 1) {
-								area = world.areas[i];
-
-								if (area.afterLoad) {
-									area.afterLoad();
-								}
-							}
-
-							world.ticks = require('./ticks');
-
-							return fn(Character, Cmds, Skills);
 						});
 					});
 				});
@@ -593,11 +597,15 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 	}
 };
 
-World.prototype.setupArea = function(area) {
+World.prototype.setupArea = function(area, areaIndex, fn) {
 	var world = this,
 	exitObj,
 	i = 0,
 	j;
+
+	if (!fn && typeof areaIndex === 'function') {
+		fn = areaIndex;
+	}
 	
 	if (!area.wasExtended) {
 		area = world.extend(area, JSON.parse(JSON.stringify(world.areaTemplate)));	
@@ -650,7 +658,15 @@ World.prototype.setupArea = function(area) {
 
 	area.wasExtended = true;
 
-	return area;
+	if (areaIndex) {
+		if (areaIndex === world.areas.length - 1) {
+			return fn(area, true);
+		} else {
+			return fn(area, false);
+		}
+	} else if (typeof fn === 'function') {
+		return fn(area);
+	}
 };
 
 World.prototype.getArea = function(areaId) {
@@ -1321,7 +1337,7 @@ World.prototype.extend = function(extendObj, readObj) {
 
 	if (arguments.length === 2) {
 		for (prop in readObj) {
-			if (extendObj[prop]) {
+			if (extendObj[prop] !== undefined) {
 				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
 				} else if (typeof extendObj[prop] !== 'string' && !isNaN(extendObj[prop]) && !isNaN(readObj[prop]) 
