@@ -13,25 +13,54 @@ Room;
 World.prototype.setup = function(socketIO, cfg, fn) {
 	var world = this,
 	loadAreas = function(fn) {
-		var i = 0,
-		path = './areas/',
+		var path = './areas/',
 		areas = [];
 
-		fs.readdir(path, function(err, areaNames) {
-			areaNames.forEach(function(areaName, i) {
-				var area;
-				
-				if (areaName.indexOf('#') === -1 && areaName.indexOf('omit_') === -1) {
-					area = require('.' + path + areaName.toLowerCase().replace(/ /g, '_'));
+		if (!world.persistenceDriver || !world.persistenceDriver.loadAreas) {
+			fs.readdir(path, function(err, areaNames) {
+				areaNames.forEach(function(areaName, i) {
+					var area,
+					areaId;
+					
+					if (areaName.indexOf('#') === -1 && areaName.indexOf('omit_') === -1) {
+						areaId = areaName.toLowerCase().replace(/ /g, '_');
 
-					area.itemType = 'area';
-	
-					areas.push(area);
-				}
+						area = require('.' + path + areaId);
+
+						area.id = areaId;
+						area.itemType = 'area';
+
+						areas.push(area);
+					}
+				});
+
+				return fn(areas);
 			});
+		} else {
+			fs.readdir(path, function(err, areaNames) {
+				world.persistenceDriver.loadAreas(areaNames, function(areas) {
+					areas.forEach(function(area, i) {
+						if (areaNames.indexOf(area.id) !== -1) {
+							console.log('slicing area names');
+							areaNames.slice(0, i)
+						}
+					});
 
-			return fn(areas);
-		});
+					console.log('missing', areaNames);
+
+					areaNames.forEach(function(areaName, i) {
+						area = require('.' + path + areaId);
+
+						area.id = areaId;
+						area.itemType = 'area';
+
+						areas.push(area);
+
+						world.persistenceDriver.saveArea(area, true);
+					});
+				});
+			});
+		}
 	},
 	loadTime = function (fn) {
 		fs.readFile('./templates/time.json', function (err, r) {
@@ -105,7 +134,6 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	};
 
 	world.dice = require('./dice').roller;
-	world.io = null; // Websocket object, Socket.io
 	world.races = []; // Race JSON definition is in memory
 	world.classes = []; // Class JSON definition is in memory
 	world.areas = []; // Loaded areas
@@ -118,6 +146,13 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.ai = {};
 	world.motd = '';
 	world.log = []; // array of all game quests built from loaded areas
+	world.persistenceDriver;
+	world.io = socketIO;
+	world.config = cfg;
+
+	if (world.config.persistence && world.config.persistence.driver) {
+		world.persistenceDriver = require('./database/' +  world.config.persistence.driver);
+	}
 	
 	// Initial game loading, embrace callback hell!
 	loadAreas(function(areas) {
@@ -154,9 +189,6 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 							Skills = require('./skills').skills;
 							Spells = require('./spells').spells;
 							Room = require('./rooms').room;
-
-							world.io = socketIO;
-							world.config = cfg;
 							
 							for (i; i < world.areas.length; i += 1) {
 								(function(area, index) {									
@@ -435,7 +467,7 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 			
 			for (prop in item) {
 				if (item[prop] === 'function' && !item.hasEvents) {
-					//item.hasEvents = true;
+					item.hasEvents = true;
 				}
 			}
 
@@ -586,7 +618,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 		
 			for (prop in mob) {
 				if (mob[prop] === 'function' && !mob.hasEvents) {
-					//mob.hasEvents = true;
+					mob.hasEvents = true;
 				}
 			}
 

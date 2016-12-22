@@ -15,5 +15,9 @@ exports.server = {
 			roomid: '1'
 		}
 	},
-	admins: []
+	admins: [],
+	persistence: {
+		data: 'flat',
+		players: 'flat'
+	}
 };

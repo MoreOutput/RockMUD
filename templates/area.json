@@ -26,6 +26,7 @@
 	"itemType": "area",
 	"hasEvents": false,
 	"runOnAliveWhenEmpty": true,
-	"preventRespawn": false
+	"preventRespawn": false,
+	"persistence": false
 }
 
