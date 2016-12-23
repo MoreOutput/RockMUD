@@ -1,7 +1,7 @@
 'use strict';
 var fs = require('fs'),
-World = require('./world').world,
-Character = require('./character').character,
+World = require('./world'),
+Character = require('./character'),
 io = World.io,
 players = World.players,
 time = World.time,
@@ -43,8 +43,8 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 	titleHtmlTag = 'h2',
 	items = roomObj.items;
 
-	if (!Character) {
-		Character = require('./character').character;
+	if (!Object.keys(Character).length) {
+		Character = require('./character');
 	}
 
 	if (roomObj.titleHtmlTag) {
@@ -402,7 +402,6 @@ Room.prototype.removeMob = function(roomObj, mob) {
 // returns an array of valid exit commands for the room
 Room.prototype.getExitCommands = function(roomObj) {
 
-}
+};
 
-module.exports.room = new Room();
-
+module.exports = (function() { return new Room(); }());

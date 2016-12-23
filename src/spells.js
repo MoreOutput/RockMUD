@@ -1,6 +1,6 @@
 'use strict';
-var World = require('./world').world,
-Character = require('./character').character,
+var World = require('./world'),
+Character = require('./character'),
 Spell = function() {};
 
 /*
@@ -258,5 +258,4 @@ Spell.prototype.cureLight = function(skillObj, player, opponent, roomObj, comman
 	}
 };
 
-module.exports.spells = new Spell();
-
+module.exports = (function() { return new Spell(); }());

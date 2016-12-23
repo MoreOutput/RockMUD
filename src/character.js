@@ -6,8 +6,8 @@
 'use strict';
 var fs = require('fs'),
 crypto = require('crypto'),
-Room = require('./rooms').room,
-World = require('./world').world,
+Room = require('./rooms'),
+World = require('./world'),
 Cmds,
 Character = function () {
 	this.statusReport = [
@@ -318,7 +318,7 @@ Character.prototype.newCharacter = function(s, command) {
 	i = 0;
 	
 	if (!Cmds) {
-		Cmds = require('./commands').cmd;
+		Cmds = require('./commands');
 	}
 	
 	if (s.player.creationStep === 1) {
@@ -1032,19 +1032,19 @@ Character.prototype.getLog = function(player, logId) {
 	}
 };
 
-Character.prototype.addLog = function(player, logId, logEntryId) {
+Character.prototype.addLog = function(player, questId, logEntryId) {
 	var i = 0,
-	len = World.log.length,
+	len = World.quests.length,
 	prop;
 
 	for (i; i < len; i += 1) {
-		if (World.log[i].id === logId) {
-			for (prop in World.log[i].entries) {
+		if (World.quests[i].id === questId) {
+			for (prop in World.quests[i].entries) {
 				if (prop === logEntryId) {
 					player.log.push({
-						id: logId, 
+						id: questId, 
 						entryId: logEntryId,
-						quest: World.log[i].quest
+						quest: World.quests[i].quest
 					});
 				}
 			}
@@ -1358,5 +1358,4 @@ Character.prototype.calculateGear = function() {
 
 };
 
-module.exports.character = new Character();
-
+module.exports = (function() { return new Character(); }());

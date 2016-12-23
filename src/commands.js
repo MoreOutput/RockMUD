@@ -8,11 +8,11 @@
 'use strict';
 var fs = require('fs'),
 util = require('util'),
-Character = require('./character').character,
-World = require('./world').world,
-Room = require('./rooms').room,
-Combat = require('./combat').combat,
-Spells = require('./spells').spells,
+Character = require('./character'),
+World = require('./world'),
+Room = require('./rooms'),
+Combat = require('./combat'),
+Spells = require('./spells'),
 players = World.players,
 time = World.time,
 areas = World.areas,
@@ -3052,7 +3052,7 @@ Cmd.prototype.quests = function(target, commands) {
 		qStr += '<li>No current quests.</li>';
 	} else {
 		for (i; i < questsArr.length; i += 1) {
-			questObj = World.getLog(questsArr[i].id);
+			questObj = World.getQuest(questsArr[i].id);
 			
 			if (questObj.title) {
 				listStr = '<h3 class="warning">' + questObj.title  + '</h3>';
@@ -3247,9 +3247,9 @@ Cmd.prototype.reboot = function(target, command) {
 		require.cache[require.resolve('../src/dice')] = null;
 		
 		World.ticks = require('./ticks');
-		World.dice = require('./dice').roller;
+		World.dice = require('./dice');
 
-		Room = require('./rooms').room;
+		Room = require('./rooms');
 	} else {
 		World.msgPlayer(target, {msg: 'No.', styleClass: 'error' });
 	}
@@ -3286,5 +3286,4 @@ Cmd.prototype.peace = function(target, command) {
 	}
 };
 
-module.exports.cmd = new Cmd();
-
+module.exports = (function() { return new Cmd() }());

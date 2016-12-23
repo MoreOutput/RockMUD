@@ -1,8 +1,8 @@
 'use strict';
-var Cmd = require('../src/commands').cmd,
-Character = require('../src/character').character,
-Room = require('../src/rooms').room,
-World = require('../src/world').world;
+var Cmd = require('../src/commands'),
+Character = require('../src/character'),
+Room = require('../src/rooms'),
+World = require('../src/world');
 
 /*
 	Fighter Guildmaster and Midgaard Academy guide. 

@@ -13,11 +13,13 @@ exports.server = {
 		startingArea: {
 			area: 'midgaard',
 			roomid: '1'
+		},
+		// Persistence drivers for data. Server information and players can use differing drivers.
+		persistenceDriverDir: '../databases/',
+		persistence: {
+			data: {driver: 'flat'},
+			player: {driver: 'flat'}
 		}
 	},
-	admins: [],
-	persistence: {
-		data: 'flat',
-		players: 'flat'
-	}
+	admins: []
 };

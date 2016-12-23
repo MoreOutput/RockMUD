@@ -1,8 +1,8 @@
 'use strict';
-var World = require('./world').world,
-Character = require('./character').character,
-Room = require('./rooms').room,
-Combat = require('./combat').combat,
+var World = require('./world'),
+Character = require('./character'),
+Room = require('./rooms'),
+Combat = require('./combat'),
 Skill = function() {};
 
 /*
@@ -316,5 +316,5 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 	}
 };
 
-module.exports.skills = new Skill();
+module.exports = (function() { return new Skill() }());
 
