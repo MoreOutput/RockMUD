@@ -22,7 +22,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 					var area,
 					areaId;
 					
-					if (areaName.indexOf('#') === -1 && areaName.indexOf('omit_') === -1) {
+					if (areaName[0] !== '.' && areaName.indexOf('#') === -1 && areaName.indexOf('omit_') === -1) {
 						areaId = areaName.toLowerCase().replace(/ /g, '_').replace('.js', '');
 
 						area = require('.' + path + areaId + '.js');
@@ -38,22 +38,69 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 			});
 		} else {
 			fs.readdir(path, function(err, areaFileNames) {
+				var areaIds = [];
+
+				if (!err) {
+					areaFileNames.forEach(function(fileName, i) {
+						if (fileName.indexOf('.js') !== -1 && fileName[0] !== '.' && fileName.indexOf('#') === -1 && fileName.indexOf('omit_') === -1) {
+							areaIds.push(fileName.replace('.js', ''));
+						}
+					});
+				}
+
 				world.dataDriver.loadAreas(function(areas) {
 					var unsavedAreas = [];
 
-					areaFileNames.forEach(function(areaId, i) {
-						var foundMatch = false;
+					if (areas.length) {
+						areas.forEach(function(area, i) {
+							var foundMatch = false;
 
-						areas.forEach(function(area, j) {
-							if (area.id === areaId) {
+							if (areaIds.indexOf(area.id) !== -1) {
 								foundMatch = true;
 							}
-						});
 
-						if (!foundMatch) {
-							unsavedAreas.push(areaId);
+							if (!foundMatch) {
+								unsavedAreas.push(area.id);
+							}
+						});
+					} else {
+						unsavedAreas = areaIds;
+					}
+
+					areas.forEach(function(area, i) {
+						var newArea = require('.' + path + area.id + '.js'),
+						prop;
+
+						for (prop in newArea) {
+							if (area[prop] === undefined || typeof newArea[prop] === 'function') {
+								area[prop] = area[prop];
+							}
 						}
 					});
+
+					if (unsavedAreas.length) {
+						unsavedAreas.forEach(function(unsavedAreaId, i) {
+							var unsavedAreaId = unsavedAreaId.toLowerCase().replace(/ /g, '_').replace('.js', ''),
+							area = require('.' + path + unsavedAreaId + '.js');
+
+							if (area.persistence === true) {
+								area.id = unsavedAreaId;
+								area.itemType = 'area';
+
+								if (world.dataDriver && world.dataDriver.saveArea) {
+									world.dataDriver.saveArea(area, function(savedArea) {
+										if (savedArea) {
+											areas.push(savedArea);
+										}
+									});
+								}
+							} else {
+								areas.push(area);
+							}
+						});
+					}
+
+					return fn(areas);
 				});
 			});
 		}

@@ -1,7 +1,9 @@
 /*
-	Flat file data persistence for RockMUD
+	Flat file data persistence for RockMUD Areas
 
 	Persistence files are saved in directories within the areas folder. 
+
+	No player persistence code; instead we can use RockMUDs default flat-file behavior
 */
 'use strict';
 var fs = require('fs');
@@ -9,8 +11,9 @@ var fs = require('fs');
 module.exports = function(config) {
 	// Setup driver wide properties
 	var Driver = function() {
-		var defaultPath = '../areas';
-		var folderPrefix = 'persistence_';
+		var defaultPath = './areas';
+		var persistenceFolder = '/persistence';
+		var persistenceFolderExists = false;
 
 		if (config) {
 			if (!config.path) {
@@ -19,10 +22,10 @@ module.exports = function(config) {
 				this.path = config.path;
 			}
 	
-			if (!config.folderPrefix) {
-				this.folderPrefix = folderPrefix;
+			if (!config.persistenceFolder) {
+				this.persistenceFolder= persistenceFolder;
 			} else {
-				this.folderPrefix = config.folderPrefix;
+				this.persistenceFolder = config.persistenceFolder;
 			}
 
 			this.config = config;
@@ -32,57 +35,68 @@ module.exports = function(config) {
 	};
 	
 	// Get all areas. First driver function called.
-	// Must be given and return a function.
+	// Must be given a function with is called with a creared areas array.
+	// Arrays array must be a set of JSON areas.
 	Driver.prototype.loadAreas = function(fn) {
 		var driver = this,
 		areas  = [];
-	/*
-		console.log(this.path);	
 
-		areaNames.forEach(function(areaId, index) {
-			areaId = areaId.toLowerCase().replace(/ /g, '_');
+		if (!driver.persistenceFolderExists) {
+			fs.readdir(driver.path + driver.persistenceFolder, function(err, persistenceDirectoryFiles) {
+				if (err && err.code === 'ENOENT') {
+					fs.mkdir(driver.path + driver.persistenceFolder, function(err) {
+						if (!err) {
+							driver.persistenceFolderExists = true;
 
-			fs.readFile('./areas/' + driver.folderPrefix + areaId + '/' + areaId + '.json', function (err, r) {
-				var area;
+							return fn(areas);
+						}
+					});
+				} else {
+					driver.persistenceFolderExists = true;
 
-				area = require('.' + path + );
+					persistenceDirectoryFiles.forEach(function(filename, index) {
+						var areaId = filename.replace('.json', '');
 
-				areas.push(area);
-			});
-		});
-	*/
-		return fn(areas);
-	};
+						driver.loadArea(areaId, function(area) {
+							if (area) {
+								areas.push(area);
+							}
 
-	/*
-	Driver.prototype.loadArea = function(area, fn) {
-
-	};
-
-	Driver.prototype.saveArea = function(area, initialSave, fn) {
-		if (initialSave) {
-			fs.mkdir('./areas/' + driver.folderPrefix + area.id, function(err) {
-				if (!err) {
-					fs.writeFile('./areas/' + driver.folderPrefix + area.id + '/' + area.id + '.json', JSON.stringify(area, null), function (err) {
-
+							if (index === persistenceDirectoryFiles.length - 1) {
+								return fn(areas);
+							}
+						});
 					});
 				}
-			});
-		} else {
-			fs.writeFile('./areas/' + driver.folderPrefix + area.id + '/' + area.id + '.json', JSON.stringify(area, null), function (err) {
-
 			});
 		}
 	};
 
-	Driver.prototype.savePlayer = function(area, fn) {
+	Driver.prototype.loadArea = function(areaId, fn) {
+		var driver = this;
 
+		fs.readFile(driver.path + driver.persistenceFolder + '/' + areaId + '.json', function (err, r) {
+			if (err) {
+				return fn(false);
+			} else {
+				return fn(JSON.parse(r));
+			}
+		});
 	};
 
-	Driver.prototype.saveMob = function(area, fn) {
+	Driver.prototype.saveArea = function(area, fn) {
+		var driver = this;
 
+		if (driver.persistenceFolderExists) {
+			fs.writeFile(driver.path + driver.persistenceFolder + '/' + area.id + '.json', JSON.stringify(area, null), function (err) {
+				if (!err) {
+					return fn(area);
+				} else {
+					return fn(err);
+				}
+			});
+		}
 	};
-	*/
 
 	return new Driver();
 }

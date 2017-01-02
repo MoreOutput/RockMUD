@@ -27,6 +27,7 @@
 	"hasEvents": false,
 	"runOnAliveWhenEmpty": true,
 	"preventRespawn": false,
-	"persistence": false
+	"persistence": false,
+	"wasSaved": false
 }
 

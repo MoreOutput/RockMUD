@@ -12,11 +12,13 @@ lib-cov
 *.swp
 *.sublime-project
 .DS_Store	
+.DS_Store?
 
 pids
 logs
 results
 
+areas/persistence
 node_modules
 npm-debug.log
 notes.md

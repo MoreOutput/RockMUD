@@ -188,6 +188,10 @@ setInterval(function() {
 
 					if (refresh) {
 						area = World.reloadArea(area);
+
+						if (World.dataDriver && World.dataDriver.saveArea && area.persistence) {
+							World.dataDriver.saveArea(area);
+						}
 					}
 				}
 			}
