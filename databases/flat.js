@@ -51,6 +51,10 @@ module.exports = function(config) {
 							return fn(areas);
 						}
 					});
+				} else if (!persistenceDirectoryFiles.length) {
+					driver.persistenceFolderExists = true;
+					
+					return fn(areas);
 				} else {
 					driver.persistenceFolderExists = true;
 
@@ -90,9 +94,13 @@ module.exports = function(config) {
 		if (driver.persistenceFolderExists) {
 			fs.writeFile(driver.path + driver.persistenceFolder + '/' + area.id + '.json', JSON.stringify(area, null), function (err) {
 				if (!err) {
-					return fn(area);
+					if (fn) {
+						return fn(area);
+					}
 				} else {
-					return fn(err);
+					if (fn) {
+						return fn(err);
+					}
 				}
 			});
 		}

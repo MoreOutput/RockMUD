@@ -187,9 +187,9 @@ setInterval(function() {
 					area.respawnTick = 0;
 
 					if (refresh) {
-						area = World.reloadArea(area);
-
-						if (World.dataDriver && World.dataDriver.saveArea && area.persistence) {
+						if (!area.persistence) {
+							World.reloadArea(area);
+						} else if (World.dataDriver && World.dataDriver.saveArea) {
 							World.dataDriver.saveArea(area);
 						}
 					}

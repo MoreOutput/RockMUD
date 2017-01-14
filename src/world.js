@@ -50,7 +50,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 				world.dataDriver.loadAreas(function(areas) {
 					var unsavedAreas = [];
-
+				
 					if (areas.length) {
 						areas.forEach(function(area, i) {
 							var foundMatch = false;
@@ -80,8 +80,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 					if (unsavedAreas.length) {
 						unsavedAreas.forEach(function(unsavedAreaId, i) {
-							var unsavedAreaId = unsavedAreaId.toLowerCase().replace(/ /g, '_').replace('.js', ''),
-							area = require('.' + path + unsavedAreaId + '.js');
+							var area = require('.' + path + unsavedAreaId + '.js');
 
 							if (area.persistence === true) {
 								area.id = unsavedAreaId;
@@ -203,7 +202,6 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	
 	/*
 	if (world.config.persistence && world.config.persistence.player) {
-		console.log('loading playerDriver');
 		if (world.dataDriver && world.config.persistence.player === world.config.persistence.data) {
 			world.playerDriver = world.dataDriver;
 		} else {
