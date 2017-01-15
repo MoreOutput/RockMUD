@@ -26,7 +26,6 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 						areaId = areaName.toLowerCase().replace(/ /g, '_').replace('.js', '');
 
 						area = require('.' + path + areaId + '.js');
-
 						area.id = areaId;
 						area.itemType = 'area';
 

@@ -81,7 +81,7 @@ module.exports = {
 		}
 	},
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 100);
+		var roll = World.dice.roll(1, 200);
 		
 		if (roll === 1) {
 			Cmd.say(mob, {

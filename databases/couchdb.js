@@ -8,7 +8,7 @@
 	Databases should already be seetup within couch.
 */
 'use strict';
-var http = require('http');
+var http = require('https');
 
 module.exports = function(config) {
 	// Setup driver wide properties
@@ -19,8 +19,8 @@ module.exports = function(config) {
 		driver.playerDbName = 'rockmud_players';
 		driver.dbHost = '127.0.0.1';
 		driver.dbPort = 5984;
-		driver.username = 'makestuff';
-		driver.password = 'makestuff';
+		driver.username = '';
+		driver.password = '';
 		driver.dataView = 'areasByName',
 		driver.playerView = '_design/players/_view/byName?key=';
 		driver.authHeader = 'Basic ' + new Buffer(driver.username + ':' + driver.password).toString('base64');
@@ -34,8 +34,7 @@ module.exports = function(config) {
 				path: path,	
   				headers: {
     				'Content-Type': 'application/json',
-					'Authorization': driver.authHeader,
-					'Host': driver.dbHost
+					'Authorization': driver.authHeader
   				}
 			};
 		};
@@ -55,6 +54,10 @@ module.exports = function(config) {
   			});
 		});
 
+		req.on('error', function(e) {
+			
+		});
+
 		req.write(obj);
 		req.end();
 	};
@@ -63,12 +66,12 @@ module.exports = function(config) {
 		var driver = this,
 		options = {
 			method: 'GET',
-			host: driver.dbHost, 
-			path: '/' + driver.playerDbName + '/' + driver.playerView + '%22' + name.toLowerCase() + '%22',
+			host: driver.dbHost,
 			port: driver.dbPort,
+			path: '/' + driver.playerDbName + '/' + driver.playerView + '%22' + name.toLowerCase() + '%22',
 			headers: {
 				'Authorization': driver.authHeader,
-				'Host': driver.dbHost
+				'Content-Type': 'application/json'
 			}
 		},
 		result = '',
@@ -78,16 +81,21 @@ module.exports = function(config) {
 			});
 
 			res.on('end', function() {
-				result = JSON.parse(result);	
+				result = JSON.parse(result);
 
 				if (result) {
 					if (result.rows.length) {
 						result = result.rows[0].value;
+
+						// the player ID should match document ID
+						if (result.id !== result._id) {
+							result.id = result._id;
+						}
 					} else {
 						result = false;
 					}
 				}
-	
+
 				if (result) {
     				return fn(false, result);
 				} else {

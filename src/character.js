@@ -54,7 +54,7 @@ Character.prototype.login = function(r, s, fn) {
 						s.player = r;
 					}
 
-					s.player.name = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
+					s.player.displayName = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
 	
 					if (s.player.lastname !== '') {
 						s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
@@ -96,7 +96,7 @@ Character.prototype.load = function(name, s, fn) {
 		
 		s.player = r;
 
-		s.player.name = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
+		s.player.displayName = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
 
 		if (s.player.lastname !== '') {
 			s.player.lastname = s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
@@ -279,7 +279,7 @@ Character.prototype.create = function(s) {
 			
 			s.player.possessivePronoun = character.getPossessivePronoun(s.player);
 
-			character.write(s.player.name, JSON.stringify(s.player, null), function (err) {
+			character.write(s.player.name, s.player, function (err) {
 				character.load(s.player.name, s, function(s) {
 					var roomObj;
 					
@@ -477,7 +477,7 @@ Character.prototype.save = function(player, fn) {
 
 		player = World.sanitizeBehaviors(player);
 
-		character.write(player.name.toLowerCase(), JSON.stringify(player, null), function (err) {
+		character.write(player.name.toLowerCase(), player, function (err) {
 			player.socket = socket;
 
 			player = World.setupBehaviors(player);
@@ -494,8 +494,6 @@ Character.prototype.save = function(player, fn) {
 				}
 			}
 		});
-	} else if (player.persist && World.config.persistence) {
-		// saving a world item, which means saving the area it is in
 	}
 };
 
@@ -1362,8 +1360,14 @@ Character.prototype.calculateGear = function() {
 // Generalized function to get player object from the fs or driver
 Character.prototype.read = function(name, fn) {
 	if (!World.playerDriver || !World.playerDriver.savePlayer) {
-		fs.readFile('./players/' + name + '.json', function (err, r) {
-			return fn(err, JSON.parse(r));
+		fs.readFile('./players/' + name.toLowerCase() + '.json', function (err, r) {
+			if (!err) {
+				r = JSON.parse(r);
+
+				return fn(false, r);
+			} else {
+				return fn(err, false);
+			}
 		});
 	} else {
 		World.playerDriver.getPlayer(name, function(err, player) {
@@ -1375,7 +1379,7 @@ Character.prototype.read = function(name, fn) {
 // Generalized function to save player object or call driver
 Character.prototype.write = function(name, obj, fn) {
 	if (!World.playerDriver || !World.playerDriver.getPlayer) {
-		fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null), function (err) {
+		fs.writeFile('./players/' + name.toLowerCase() + '.json', JSON.stringify(obj, null), function (err) {
 			return fn(err, obj);
 		});
 	} else {
