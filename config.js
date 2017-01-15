@@ -16,11 +16,13 @@ exports.server = {
 		},
 		// Persistence drivers for data. Server information and players can use differing drivers.
 		persistenceDriverDir: '../databases/',
-		//persistence: false
+		persistence: false
+		/*
 		persistence: {
-			data: false,
+			data: {driver: 'flat'},
 			player: {driver: 'couchdb'}
 		}
+		*/
 	},
 	admins: []
 };
