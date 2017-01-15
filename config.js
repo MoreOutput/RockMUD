@@ -1,6 +1,6 @@
 exports.server = {
 	game: {
-		port: 4000,
+		port: 3000,
 		name: 'RockMUD',
 		version: '0.3.0',
 		website: 'https://github.com/MoreOutput/RockMUD',
@@ -16,13 +16,11 @@ exports.server = {
 		},
 		// Persistence drivers for data. Server information and players can use differing drivers.
 		persistenceDriverDir: '../databases/',
-		persistence: false
-		/*
+		//persistence: false
 		persistence: {
-			data: {driver: 'flat'},
+			data: false,
 			player: {driver: 'couchdb'}
 		}
-		*/
 	},
 	admins: []
 };

@@ -1383,7 +1383,7 @@ Character.prototype.write = function(name, obj, fn) {
 			return fn(err, obj);
 		});
 	} else {
-		World.playerDriver.savePlayer(obj, function(err, player) {
+		World.playerDriver.savePlayer(JSON.stringify(obj), function(err, player) {
 			return fn(err, player);
 		});
 	}

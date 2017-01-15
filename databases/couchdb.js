@@ -8,7 +8,7 @@
 	Databases should already be seetup within couch.
 */
 'use strict';
-var http = require('https');
+var http = require('http');
 
 module.exports = function(config) {
 	// Setup driver wide properties

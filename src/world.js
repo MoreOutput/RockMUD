@@ -206,7 +206,6 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 			world.playerDriver = require(world.config.persistenceDriverDir + world.config.persistence.player.driver + '.js')(world.config.persistence.player);
 		}
 	}
-
 	// Initial game loading, embrace callback hell!
 	loadAreas(function(areas) {
 		loadTime(function(err, time) {
@@ -242,7 +241,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 							Skills = require('./skills');
 							Spells = require('./spells');
 							Room = require('./rooms');
-							
+
 							for (i; i < world.areas.length; i += 1) {
 								(function(area, index) {
 									if (area.quests) {
