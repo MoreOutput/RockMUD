@@ -27,11 +27,12 @@ Character = function () {
 };
 
 Character.prototype.login = function(r, s, fn) {
-	var name = r.msg.replace(/_.*/,'').toLowerCase();
+	var character = this,
+	name = r.msg.replace(/_.*/,'').toLowerCase();
 	
 	if (r.msg.length > 2) {
 		if  (/^[a-z]+$/g.test(r.msg) === true && /[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
-			fs.readFile('./players/' + name + '.json', function (err, r) {
+			character.read(name, function(err, r) {
 				var i = 0;
 
 				if (!err) {
@@ -50,7 +51,7 @@ Character.prototype.login = function(r, s, fn) {
 					}
 
 					if (!s.player) {
-						s.player = JSON.parse(r);
+						s.player = r;
 					}
 
 					s.player.name = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
@@ -88,12 +89,12 @@ Character.prototype.login = function(r, s, fn) {
 };
 
 Character.prototype.load = function(name, s, fn) {
-	fs.readFile('./players/' + name + '.json', function (err, r) {
+	this.read(name, function (err, r) {
 		if (err) {
 			throw err;
 		}
 		
-		s.player = JSON.parse(r);
+		s.player = r;
 
 		s.player.name = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
 
@@ -278,10 +279,10 @@ Character.prototype.create = function(s) {
 			
 			s.player.possessivePronoun = character.getPossessivePronoun(s.player);
 
-			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null), function (err) {
+			character.write(s.player.name, JSON.stringify(s.player, null), function (err) {
 				character.load(s.player.name, s, function(s) {
 					var roomObj;
-
+					
 					if (err) {
 						throw err;
 					}
@@ -476,7 +477,7 @@ Character.prototype.save = function(player, fn) {
 
 		player = World.sanitizeBehaviors(player);
 
-		fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null), function (err) {
+		character.write(player.name.toLowerCase(), JSON.stringify(player, null), function (err) {
 			player.socket = socket;
 
 			player = World.setupBehaviors(player);
@@ -1356,6 +1357,32 @@ Character.prototype.level = function(player) {
 // Add in gear modifiers and return the updated object
 Character.prototype.calculateGear = function() {
 
+};
+
+// Generalized function to get player object from the fs or driver
+Character.prototype.read = function(name, fn) {
+	if (!World.playerDriver || !World.playerDriver.savePlayer) {
+		fs.readFile('./players/' + name + '.json', function (err, r) {
+			return fn(err, JSON.parse(r));
+		});
+	} else {
+		World.playerDriver.getPlayer(name, function(err, player) {
+			return fn(err, player);
+		});
+	}
+};
+
+// Generalized function to save player object or call driver
+Character.prototype.write = function(name, obj, fn) {
+	if (!World.playerDriver || !World.playerDriver.getPlayer) {
+		fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null), function (err) {
+			return fn(err, obj);
+		});
+	} else {
+		World.playerDriver.savePlayer(obj, function(err, player) {
+			return fn(err, player);
+		});
+	}
 };
 
 module.exports = (function() { return new Character(); }());

@@ -18,7 +18,7 @@ exports.server = {
 		persistenceDriverDir: '../databases/',
 		persistence: {
 			data: {driver: 'flat'},
-			player: {driver: 'flat'}
+			player: {driver: 'couchdb'}
 		}
 	},
 	admins: []

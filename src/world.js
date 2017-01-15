@@ -200,15 +200,13 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 		world.dataDriver = require(world.config.persistenceDriverDir + world.config.persistence.data.driver + '.js')(world.config.persistence.data);
 	}
 	
-	/*
 	if (world.config.persistence && world.config.persistence.player) {
 		if (world.dataDriver && world.config.persistence.player === world.config.persistence.data) {
 			world.playerDriver = world.dataDriver;
 		} else {
-			world.playerDriver = require(world.config.persistenceDriverDir + world.config.persistence.player.driver);
+			world.playerDriver = require(world.config.persistenceDriverDir + world.config.persistence.player.driver + '.js')(world.config.persistence.player);
 		}
 	}
-	*/
 
 	// Initial game loading, embrace callback hell!
 	loadAreas(function(areas) {

@@ -1,9 +1,10 @@
 /*
-	Flat file data persistence for RockMUD Areas
+	Flat file data persistence for RockMUD Areas. Data saves a JSON file.
 
 	Persistence files are saved in directories within the areas folder. 
 
-	No player persistence code; instead we can use RockMUDs default flat-file behavior
+	No player persistence code. Instead we can rely on RockMUDs default flat-file behavior
+	which saves players into the players directory.
 */
 'use strict';
 var fs = require('fs');

@@ -19,7 +19,7 @@ module.exports = {
 		{msg: 'The bustle of the city can be distracting. Keep an eye out for thieves.'}
 	],
 	respawnOn: 8,
-	persistence: true,
+	persistence: false,
 	rooms: [
 		{
 			id: '1',
