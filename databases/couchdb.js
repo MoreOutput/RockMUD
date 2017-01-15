@@ -8,7 +8,7 @@
 	Databases should already be seetup within couch.
 */
 'use strict';
-var http = require('http');
+var http = require('https');
 
 module.exports = function(config) {
 	// Setup driver wide properties
@@ -17,10 +17,10 @@ module.exports = function(config) {
 
 		driver.dataDbName = 'rockmud';
 		driver.playerDbName = 'rockmud_players';
-		driver.dbHost = '127.0.0.1';
-		driver.dbPort = 5984;
-		driver.username = '';
-		driver.password = '';
+		driver.dbHost = 'moreoutput.cloudant.com';
+        driver.dbPort = 443;
+        driver.username = 'moreoutput';
+        driver.password = 'rolento1';
 		driver.dataView = 'areasByName',
 		driver.playerView = '_design/players/_view/byName?key=';
 		driver.authHeader = 'Basic ' + new Buffer(driver.username + ':' + driver.password).toString('base64');
