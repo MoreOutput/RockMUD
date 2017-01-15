@@ -1,7 +1,7 @@
 'use strict';
-var Cmd = require('../src/commands').cmd,
-Room = require('../src/rooms').room,
-World = require('../src/world').world;
+var Cmd = require('../src/commands'),
+Room = require('../src/rooms'),
+World = require('../src/world');
 
 /*
 	Wander behavior. Mob will walk about selecting a random move direction from

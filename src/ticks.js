@@ -1,7 +1,7 @@
 'use strict';
 var fs = require('fs'),
-Character = require('./character').character,
-World = require('./world').world;
+Character = require('./character'),
+World = require('./world');
 
 // time, saved to time.json every 12 hours
 setInterval(function() {
@@ -173,8 +173,8 @@ setInterval(function() {
 
 	for (i; i < World.areas.length; i += 1) {  
 		area = World.areas[i];
-		playersInArea = World.getPlayersByArea(World.areas[i].name);
-
+		playersInArea = World.getPlayersByArea(World.areas[i].id);
+		
 		if (playersInArea.length) {
 			refresh = false;
 		} else if (!area.preventRespawn) {
@@ -187,10 +187,10 @@ setInterval(function() {
 					area.respawnTick = 0;
 
 					if (refresh) {
-						area = World.reloadArea(area);
-					
-						if (area.onReload) {
-							area.onReload();
+						if (!area.persistence) {
+							World.reloadArea(area);
+						} else if (World.dataDriver && World.dataDriver.saveArea) {
+							World.dataDriver.saveArea(area);
 						}
 					}
 				}

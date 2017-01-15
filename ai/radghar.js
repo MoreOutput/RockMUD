@@ -1,8 +1,8 @@
 'use strict';
-var Cmd = require('../src/commands').cmd,
-Character = require('../src/character').character,
-Room = require('../src/rooms').room,
-World = require('../src/world').world;
+var Cmd = require('../src/commands'),
+Character = require('../src/character'),
+Room = require('../src/rooms'),
+World = require('../src/world');
 
 /*
 	Fighter Guildmaster and Midgaard Academy guide. 
@@ -81,7 +81,7 @@ module.exports = {
 		}
 	},
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 100);
+		var roll = World.dice.roll(1, 200);
 		
 		if (roll === 1) {
 			Cmd.say(mob, {

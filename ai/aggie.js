@@ -1,7 +1,7 @@
 'use strict';
-var Cmd = require('../src/commands').cmd,
-Room = require('../src/rooms').room,
-World = require('../src/world').world;
+var Cmd = require('../src/commands'),
+Room = require('../src/rooms'),
+World = require('../src/world');
 
 /*
 	Aggie behavior, mob will attack whatever creature enters the room,

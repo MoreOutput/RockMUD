@@ -1,8 +1,8 @@
 'use strict';
-var Cmd = require('../src/commands').cmd,
-Room = require('../src/rooms').room,
-Character = require('../src/character').character,
-World = require('../src/world').world;
+var Cmd = require('../src/commands'),
+Room = require('../src/rooms'),
+Character = require('../src/character'),
+World = require('../src/world');
 
 module.exports = {
 	name: 'Midgaard',
@@ -19,6 +19,7 @@ module.exports = {
 		{msg: 'The bustle of the city can be distracting. Keep an eye out for thieves.'}
 	],
 	respawnOn: 8,
+	persistence: false,
 	rooms: [
 		{
 			id: '1',
@@ -492,4 +493,3 @@ module.exports = {
 		}
 	]
 };
-

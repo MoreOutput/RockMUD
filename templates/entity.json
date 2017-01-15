@@ -171,6 +171,7 @@
 	"trainer": false,
 	"trainMsg": "",
 	"log": [],
+	"hasEvents": false,
 	"runOnAliveWhenEmpty": true
 }
 

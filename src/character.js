@@ -6,8 +6,8 @@
 'use strict';
 var fs = require('fs'),
 crypto = require('crypto'),
-Room = require('./rooms').room,
-World = require('./world').world,
+Room = require('./rooms'),
+World = require('./world'),
 Cmds,
 Character = function () {
 	this.statusReport = [
@@ -27,11 +27,12 @@ Character = function () {
 };
 
 Character.prototype.login = function(r, s, fn) {
-	var name = r.msg.replace(/_.*/,'').toLowerCase();
+	var character = this,
+	name = r.msg.replace(/_.*/,'').toLowerCase();
 	
 	if (r.msg.length > 2) {
 		if  (/^[a-z]+$/g.test(r.msg) === true && /[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
-			fs.readFile('./players/' + name + '.json', function (err, r) {
+			character.read(name, function(err, r) {
 				var i = 0;
 
 				if (!err) {
@@ -50,10 +51,10 @@ Character.prototype.login = function(r, s, fn) {
 					}
 
 					if (!s.player) {
-						s.player = JSON.parse(r);
+						s.player = r;
 					}
 
-					s.player.name = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
+					s.player.displayName = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
 	
 					if (s.player.lastname !== '') {
 						s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
@@ -88,14 +89,14 @@ Character.prototype.login = function(r, s, fn) {
 };
 
 Character.prototype.load = function(name, s, fn) {
-	fs.readFile('./players/' + name + '.json', function (err, r) {
+	this.read(name, function (err, r) {
 		if (err) {
 			throw err;
 		}
 		
-		s.player = JSON.parse(r);
+		s.player = r;
 
-		s.player.name = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
+		s.player.displayName = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
 
 		if (s.player.lastname !== '') {
 			s.player.lastname = s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
@@ -278,10 +279,10 @@ Character.prototype.create = function(s) {
 			
 			s.player.possessivePronoun = character.getPossessivePronoun(s.player);
 
-			fs.writeFile('./players/' + s.player.name + '.json', JSON.stringify(s.player, null), function (err) {
+			character.write(s.player.name, s.player, function (err) {
 				character.load(s.player.name, s, function(s) {
 					var roomObj;
-
+					
 					if (err) {
 						throw err;
 					}
@@ -318,7 +319,7 @@ Character.prototype.newCharacter = function(s, command) {
 	i = 0;
 	
 	if (!Cmds) {
-		Cmds = require('./commands').cmd;
+		Cmds = require('./commands');
 	}
 	
 	if (s.player.creationStep === 1) {
@@ -476,7 +477,7 @@ Character.prototype.save = function(player, fn) {
 
 		player = World.sanitizeBehaviors(player);
 
-		fs.writeFile('./players/' + player.name.toLowerCase() + '.json', JSON.stringify(player, null), function (err) {
+		character.write(player.name.toLowerCase(), player, function (err) {
 			player.socket = socket;
 
 			player = World.setupBehaviors(player);
@@ -493,8 +494,6 @@ Character.prototype.save = function(player, fn) {
 				}
 			}
 		});
-	} else if (player.persist && World.config.persistence) {
-		// saving a world item, which means saving the area it is in
 	}
 };
 
@@ -1032,19 +1031,19 @@ Character.prototype.getLog = function(player, logId) {
 	}
 };
 
-Character.prototype.addLog = function(player, logId, logEntryId) {
+Character.prototype.addLog = function(player, questId, logEntryId) {
 	var i = 0,
-	len = World.log.length,
+	len = World.quests.length,
 	prop;
 
 	for (i; i < len; i += 1) {
-		if (World.log[i].id === logId) {
-			for (prop in World.log[i].entries) {
+		if (World.quests[i].id === questId) {
+			for (prop in World.quests[i].entries) {
 				if (prop === logEntryId) {
 					player.log.push({
-						id: logId, 
+						id: questId, 
 						entryId: logEntryId,
-						quest: World.log[i].quest
+						quest: World.quests[i].quest
 					});
 				}
 			}
@@ -1358,5 +1357,36 @@ Character.prototype.calculateGear = function() {
 
 };
 
-module.exports.character = new Character();
+// Generalized function to get player object from the fs or driver
+Character.prototype.read = function(name, fn) {
+	if (!World.playerDriver || !World.playerDriver.savePlayer) {
+		fs.readFile('./players/' + name.toLowerCase() + '.json', function (err, r) {
+			if (!err) {
+				r = JSON.parse(r);
 
+				return fn(false, r);
+			} else {
+				return fn(err, false);
+			}
+		});
+	} else {
+		World.playerDriver.getPlayer(name, function(err, player) {
+			return fn(err, player);
+		});
+	}
+};
+
+// Generalized function to save player object or call driver
+Character.prototype.write = function(name, obj, fn) {
+	if (!World.playerDriver || !World.playerDriver.getPlayer) {
+		fs.writeFile('./players/' + name.toLowerCase() + '.json', JSON.stringify(obj, null), function (err) {
+			return fn(err, obj);
+		});
+	} else {
+		World.playerDriver.savePlayer(obj, function(err, player) {
+			return fn(err, player);
+		});
+	}
+};
+
+module.exports = (function() { return new Character(); }());

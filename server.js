@@ -54,7 +54,7 @@ server = http.createServer(function (req, res) {
 		});
 	}
 }),
-World = require('./src/world').world,
+World = require('./src/world'),
 io = require('socket.io')(server, {
 	log: false,
 	transports: ['websocket']
@@ -215,4 +215,3 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		});
 	});
 });
-

@@ -1,7 +1,7 @@
 'use strict';
-var World = require('./world').world,
-Character = require('./character').character,
-Room = require('./rooms').room,	
+var World = require('./world'),
+Character = require('./character'),
+Room = require('./rooms'),
 Combat = function() {
 	this.adjective = [
 		{value: ['weak', 'hardly any'], damage: 5},
@@ -601,5 +601,4 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 	}
 };
 
-module.exports.combat = new Combat();
-
+module.exports = (function() { return new Combat(); }());

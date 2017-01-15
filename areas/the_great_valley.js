@@ -1,7 +1,7 @@
 'use strict';
-var Cmd = require('../src/commands').cmd,
-Room = require('../src/rooms').room,
-World = require('../src/world').world;
+var Cmd = require('../src/commands'),
+Room = require('../src/rooms'),
+World = require('../src/world');
 
 module.exports = {
 	name : 'The Great Valley',
@@ -17,7 +17,7 @@ module.exports = {
 			msg: 'A warm breeze blows southward toward Midgaard.'
 		}
 	],
-	beforeLoad: function() {
+	beforeLoad: function(fn) {
 		var x = 10,
 		y = 10,
 		roomObj,
@@ -26,159 +26,163 @@ module.exports = {
 		enteranceRoomId = '4-0',
 		startingRoom,
 		j = 0;
+		
+		if (this.rooms.length === 1) {
+			for (i; i < x; i += 1) {
+				j = 0;
 
-		for (i; i < x; i += 1) {
-			j = 0;
-				
-			for (j; j < y; j += 1) {
-				roomObj = World.extend({}, JSON.parse(JSON.stringify(World.roomTemplate)));
-				roomObj.id = i + '-' + j;
-				roomObj.content = 'A room';
-				roomObj.title = 'Empty room ' +  i + '-' + j;
+				for (j; j < y; j += 1) {
+					roomObj = World.extend({}, JSON.parse(JSON.stringify(World.roomTemplate)));
+					roomObj.id = i + '-' + j;
+					roomObj.content = 'A room';
+					roomObj.title = 'Empty room ' +  i + '-' + j;
 
-				if (i === 0 && j === 0) {
-					roomObj.exits.push({
-						cmd: 'north',
-						id: i + '-' + (j + 1)
-					}, {
-						cmd: 'east',
-						id: (i + 1) + '-' + j
-					});
-				} else if (i === 0 && j === y - 1) {
-					roomObj.exits.push({
-						cmd: 'east',
-						id: (i + 1) + '-' + j
-					}, {
-						cmd: 'south',
-						id: i + (y - 1)
-					});
-				} else if (i === 0 && j < y - 1) {
-					roomObj.exits.push({
-						cmd: 'north',
-						id: i + '-' + (j + 1)
-					}, {
-						cmd: 'east',
-						id: (i + 1) + '-' + (j + 1)
-					}, {
-						cmd: 'south',
-						id: (i) + '-' + (j - 1)
-					});
-				} else if (i === x - 1 && j === 0) {
-					roomObj.exits.push({
-						cmd: 'north',
-						id: i + '-' + (j + 1)
-					}, {
-						cmd: 'west',
-						id: (i - 1) + '-' + j
-					});
-				} else if (i < x -1  && j === 0) {
-					roomObj.exits.push({
-						cmd: 'north',
-						id: i + '-' + (j + 1)
-					}, {
-						cmd: 'east',
-						id: (i + 1) + '-' + j
-					}, {
-						cmd: 'west',
-						id: (i - 1) + '-' + j
-					});
-				} else if (i < x - 1 && j === y - 1) {
-					roomObj.exits.push({
-						cmd: 'east',
-						id: (i + 1) + '-' + j
-					}, {
-						cmd: 'south',
-						id: i + '-' + (j - 1)
-					}, {
-						cmd: 'west',
-						id: (i - 1) + '-' + j
-					});
-				} else if (i === x - 1 && j === y - 1) {
-					roomObj.exits.push({
-						cmd: 'south',
-						id: i + '-' + (j - 1)
-					}, {
-						cmd: 'west',
-						id: (i - 1) + '-' + j
-					});
-				} else if (i === x - 1 && j < y - 1) {
-					roomObj.exits.push({
-						cmd: 'north',
-						id: i + '-' + (j + 1)
-					}, {
-						cmd: 'south',
-						id: (i) + '-' + (j - 1)
-					}, {
-						cmd: 'west',
-						id: (i - 1) + '-' + j
-					});
-				} else {
-					roomObj.exits.push({
-						cmd: 'north',
-						id: i + '-' + (j + 1)
-					}, {
-						cmd: 'east',
-						id: (i + 1) + '-' + j
-					}, {
-						cmd: 'south',
-						id: i + '-' + (j - 1)
-					}, {
-						cmd: 'west',
-						id: (i - 1) + '-' + j
+					if (i === 0 && j === 0) {
+						roomObj.exits.push({
+							cmd: 'north',
+							id: i + '-' + (j + 1)
+						}, {
+							cmd: 'east',
+							id: (i + 1) + '-' + j
+						});
+					} else if (i === 0 && j === y - 1) {
+						roomObj.exits.push({
+							cmd: 'east',
+							id: (i + 1) + '-' + j
+						}, {
+							cmd: 'south',
+							id: i + (y - 1)
+						});
+					} else if (i === 0 && j < y - 1) {
+						roomObj.exits.push({
+							cmd: 'north',
+							id: i + '-' + (j + 1)
+						}, {
+							cmd: 'east',
+							id: (i + 1) + '-' + (j + 1)
+						}, {
+							cmd: 'south',
+							id: (i) + '-' + (j - 1)
+						});
+					} else if (i === x - 1 && j === 0) {
+						roomObj.exits.push({
+							cmd: 'north',
+							id: i + '-' + (j + 1)
+						}, {
+							cmd: 'west',
+							id: (i - 1) + '-' + j
+						});
+					} else if (i < x -1  && j === 0) {
+						roomObj.exits.push({
+							cmd: 'north',
+							id: i + '-' + (j + 1)
+						}, {
+							cmd: 'east',
+							id: (i + 1) + '-' + j
+						}, {
+							cmd: 'west',
+							id: (i - 1) + '-' + j
+						});
+					} else if (i < x - 1 && j === y - 1) {
+						roomObj.exits.push({
+							cmd: 'east',
+							id: (i + 1) + '-' + j
+						}, {
+							cmd: 'south',
+							id: i + '-' + (j - 1)
+						}, {
+							cmd: 'west',
+							id: (i - 1) + '-' + j
+						});
+					} else if (i === x - 1 && j === y - 1) {
+						roomObj.exits.push({
+							cmd: 'south',
+							id: i + '-' + (j - 1)
+						}, {
+							cmd: 'west',
+							id: (i - 1) + '-' + j
+						});
+					} else if (i === x - 1 && j < y - 1) {
+						roomObj.exits.push({
+							cmd: 'north',
+							id: i + '-' + (j + 1)
+						}, {
+							cmd: 'south',
+							id: (i) + '-' + (j - 1)
+						}, {
+							cmd: 'west',
+							id: (i - 1) + '-' + j
+						});
+					} else {
+						roomObj.exits.push({
+							cmd: 'north',
+							id: i + '-' + (j + 1)
+						}, {
+							cmd: 'east',
+							id: (i + 1) + '-' + j
+						}, {
+							cmd: 'south',
+							id: i + '-' + (j - 1)
+						}, {
+							cmd: 'west',
+							id: (i - 1) + '-' + j
+						});
+					}
+
+					this.rooms.push(roomObj);
+				}
+			}
+
+			startingRoom = World.getRoomObject(this.name, enteranceRoomId);
+
+			startingRoom.exits.push({
+				cmd: 'south',
+				id: this.defaultRoom,
+				area: this.name
+			});
+
+			generateNorthOf.exits.push({
+				cmd: 'north',
+				id: enteranceRoomId,
+				area: this.name
+			});
+
+			i = 0;
+
+			for (i; i < this.rooms.length; i += 1) {
+				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 3) === 1) {
+					this.rooms[i].monsters.push({
+						name: 'Boar',
+						displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
+						level: 1,
+						short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a tan boar'],
+						long: [
+							'A boar with a number of scars on its side is here',
+							'A dark brown boar',
+							'A large brown boar is here'
+						],
+						inName: 'A boar',
+						race: 'animal',
+						id: '6',
+						area: 'the_great_valley',
+						weight: 120,
+						position: 'standing',
+						attackType: 'bite',
+						ac: 4,
+						hp: 15,
+						chp: 13,
+						gold: 1,
+						size: {value: 2, display: 'very small'},
+						itemType: 'mob',
+						behaviors: [{  
+							module: 'wander'
+						}]	
 					});
 				}
-
-				this.rooms.push(roomObj);
 			}
 		}
 
-		startingRoom = World.getRoomObject(this.name, enteranceRoomId);
-
-		startingRoom.exits.push({
-			cmd: 'south',
-			id: this.defaultRoom,
-			area: this.name
-		});
-
-		generateNorthOf.exits.push({
-			cmd: 'north',
-			id: enteranceRoomId,
-			area: this.name
-		});
-
-		i = 0;
-
-		for (i; i < this.rooms.length; i += 1) {
-			if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 3) === 1) {
-				this.rooms[i].monsters.push({
-					name: 'Boar',
-					displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
-					level: 1,
-					short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a tan boar'],
-					long: [
-						'A boar with a number of scars on its side is here',
-						'A dark brown boar',
-						'A large brown boar is here'
-					],
-					inName: 'A boar',
-					race: 'animal',
-					id: '6',
-					area: 'the_great_valley',
-					weight: 120,
-					position: 'standing',
-					attackType: 'bite',
-					ac: 4,
-					hp: 15,
-					chp: 13,
-					gold: 1,
-					size: {value: 2, display: 'very small'},
-					itemType: 'mob',
-					behaviors: [{  
-						module: 'wander'
-					}]	
-				});
-			}
-		}
+		return fn();
 	},
 	rooms: [
 		{
@@ -199,4 +203,3 @@ module.exports = {
 		}
 	]
 };
-

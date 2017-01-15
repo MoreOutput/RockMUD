@@ -1,9 +1,6 @@
 'use strict';
-var Roller = function() {
+var Roller = function() {};
 
-};
-
-// General dice rolling
 Roller.prototype.roll = function(dNum, dSides, mod) {
 	var total = 0,
 	i = 0;
@@ -182,5 +179,4 @@ Roller.prototype.calExp = function(player, expOpt) {
 	}
 };
 
-module.exports.roller = new Roller();
-
+module.exports = (function() { return new Roller() }());
