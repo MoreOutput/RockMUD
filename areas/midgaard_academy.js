@@ -109,7 +109,7 @@ module.exports = {
 				}
 
 				if (!climbSkill && entity.isPlayer && entity.level === 1) {
-					msg += 'You do not have the climb skill. Climbing further could result in death!';
+					msg += '1You do not have the climb skill. Climbing further could result in a fall!';
 				}	
 
 				if (msg) {
@@ -120,7 +120,7 @@ module.exports = {
 			}
 		}, {
 			id: '3',
-			title: 'Further up the side of the Academy Tower',
+			title: 'Climbing up the south side of the Academy Tower',
 			area: 'midgaard_academy',
 			moveMod: 2,
 			content: '',
@@ -129,6 +129,38 @@ module.exports = {
 				{
 					cmd: 'down',
 					id: '2',
+					area: 'midgaard_academy'
+				}, {
+					cmd: 'up',
+					id: '4'
+				}
+			],
+			onEnter: function(roomObj, entity, incomingRoomObj, command) {
+				var climbSkill = Character.getSkill(entity, 'climb'),
+				displayAfter = 1200,
+				msg = '';
+
+				if (!climbSkill && entity.isPlayer && entity.level === 1) {
+					msg += '2You do not have the climb skill. Climbing further could result in death!';
+				}	
+	
+				if (msg) {
+					World.msgPlayer(entity, {
+						msg: '<p>' + msg + '</p>'
+					});
+				}
+			}
+		}, {
+			id: '4',
+			title: 'Further up the side of the Academy Tower',
+			area: 'midgaard_academy',
+			moveMod: 2,
+			content: '',
+			light: true,
+			exits: [
+				{
+					cmd: 'down',
+					id: '3',
 					area: 'midgaard_academy'
 				}
 			],
@@ -143,8 +175,10 @@ module.exports = {
 				climbSkill = Character.getSkill(entity, 'climb');
 
 				if (!climbSkill) {
-					climbRoll = World.dice.roll(1, 3, strMod);
-			
+					//climbRoll = World.dice.roll(1, 3, strMod);
+					climbRoll = 1;
+					console.log('climbRoll: ' + climbRoll);
+
 					if (climbRoll < climbCheck) {
 						msg += '<strong>You fail to climb up and slip downward!</strong>';
 
@@ -173,6 +207,40 @@ module.exports = {
 					return true;
 				}
 			}
+		}, {
+			id: '5',
+			title: 'Room at the top of the Academy Tower',
+			area: 'midgaard_academy',
+			content: '',
+			light: true,
+			monsters: [{
+				name: 'Thomas',
+				displayName: 'Thomas',
+				charClass: 'fighter',
+				level: 25,
+				short: 'Squire Thomas',
+				long: '<span class="yellow">Thomas the tall thin squire of Captain Radghar</span> is here standing next to the twower window',
+				description: '',
+				inName: 'Thomas',
+				race: 'human',
+				id: 3,
+				area: 'midgaard_academy',
+				weight: 155,
+				diceNum: 2,
+				diceSides: 10,
+				diceMod: 5,
+				str: 20,
+				dex: 18,
+				position: 'standing',
+				attackType: 'punch',
+				damRoll: 20,
+				hitRoll: 15,
+				ac: 20,
+				items: [],
+				trainer: true,
+				runOnAliveWhenEmpty: false
+			}],
+			exits: []
 		}
 	]
 };

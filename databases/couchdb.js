@@ -20,7 +20,7 @@ module.exports = function(config) {
 		driver.dbHost = 'moreoutput.cloudant.com';
         driver.dbPort = 443;
         driver.username = 'moreoutput';
-        driver.password = 'rolento1';
+        driver.password = 'supernintindogames1';
 		driver.dataView = 'areasByName',
 		driver.playerView = '_design/players/_view/byName?key=';
 		driver.authHeader = 'Basic ' + new Buffer(driver.username + ':' + driver.password).toString('base64');

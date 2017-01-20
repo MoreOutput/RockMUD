@@ -149,7 +149,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 				fs.readFile(path + fileName, function (err, tmp) {
 				var tmp = JSON.parse(tmp);
 
-					tmp.fileName = fileName.replace(/.json/g, '');
+					tmp.template = fileName.replace(/.json/g, '');
 				
 					tmpArr.push(tmp);
 	
@@ -288,7 +288,7 @@ World.prototype.getTemplate = function(fileName) {
 	j;
 
 	for (i; i < this.templates.length; i += 1) {
-		if (this.templates[i].fileName === fileName) {
+		if (this.templates[i].template === fileName) {
 			return this.templates[i];
 		}
 	}
