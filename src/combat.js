@@ -601,4 +601,4 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 	}
 };
 
-module.exports = (function() { return new Combat(); }());
+module.exports = new Combat();

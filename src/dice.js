@@ -179,4 +179,4 @@ Roller.prototype.calExp = function(player, expOpt) {
 	}
 };
 
-module.exports = (function() { return new Roller() }());
+module.exports = new Roller();

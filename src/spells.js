@@ -258,4 +258,4 @@ Spell.prototype.cureLight = function(skillObj, player, opponent, roomObj, comman
 	}
 };
 
-module.exports = (function() { return new Spell(); }());
+module.exports = new Spell();;

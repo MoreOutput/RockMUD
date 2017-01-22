@@ -2080,6 +2080,7 @@ Cmd.prototype.look = function(target, command) {
 		if (target.position !== 'sleeping') {
 			if (!command.msg) {
 				if (Character.canSee(target, roomObj)) {
+					console.log('Initial look', roomObj.id, target.name, target.refId, World.areas.length);
 					displayHTML = Room.getDisplayHTML(roomObj, target);
 
 					World.msgPlayer(target, {
@@ -3286,4 +3287,4 @@ Cmd.prototype.peace = function(target, command) {
 	}
 };
 
-module.exports = (function() { return new Cmd() }());
+module.exports = new Cmd();

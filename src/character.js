@@ -1389,4 +1389,4 @@ Character.prototype.write = function(name, obj, fn) {
 	}
 };
 
-module.exports = (function() { return new Character(); }());
+module.exports = new Character();

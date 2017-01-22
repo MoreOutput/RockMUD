@@ -404,4 +404,4 @@ Room.prototype.getExitCommands = function(roomObj) {
 
 };
 
-module.exports = (function() { return new Room(); }());
+module.exports = new Room();

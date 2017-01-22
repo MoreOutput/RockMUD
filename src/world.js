@@ -1465,6 +1465,10 @@ World.prototype.shuffle = function (arr) {
 World.prototype.isInvisible = function(obj) {
 	var i = 0;
 
+	if (!obj.affects) {
+		console.log(obj);
+	}
+
 	if (obj.affects.length) {
 		for (i; i < obj.affects.length; i += 1) {
 			if (obj.affects[i].affect === 'invis') {
@@ -1563,4 +1567,4 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 	return allTrue;
 };
 
-module.exports = (function() { return new World() }());
+module.exports = new World();

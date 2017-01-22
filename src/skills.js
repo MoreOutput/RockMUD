@@ -316,5 +316,5 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 	}
 };
 
-module.exports = (function() { return new Skill() }());
+module.exports = new Skill();
 
