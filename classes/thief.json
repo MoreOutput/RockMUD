@@ -38,7 +38,7 @@
 			"type": "passive",
 			"prerequisites": {
 				"level": 1,
-				"skill": {"id": "backstab", "prop": "train", "value": "78"}
+				"skill": {"id": "backstab", "prop": "train", "value": 78}
 			}
 		}
 	]

@@ -9,8 +9,7 @@ Skill = function() {};
 * Passive Skills, typically called by name within commands
 */
 
-// Return a mod for AC rolls when the opponent has a shield"melee",
-
+// Return a mod for AC rolls when the opponent has a shield,
 Skill.prototype.shieldBlock = function(skillObj, player, roomObj, shield) {
 	if (World.dice.roll(1, 100) <= skillObj.train) {
 		return World.dice.roll(1, skillObj.train/10, shield.ac + skillObj.mod);
@@ -24,7 +23,7 @@ Skill.prototype.secondAttack = function(skillObj, player, roomObj) {
 
 	if (skillObj.train >= 80 && World.dice.roll(1, 100, intMod) > 95) {
 		skillObj.train += 1;
-	
+
 		World.msgPlayer(player, {
 			msg: '<strong>You skills with second attack improve!</strong>',
 			styleClass: 'green',
@@ -236,7 +235,7 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 
 					damage = rollDamage(opponent);
 			
-					opponent.chp -= damage;					
+					opponent.chp -= damage;
 					
 					if (!player.opponent || opponent.refId !== player.opponent.refId) {
 						Combat.processFight(player, opponent, roomObj);
@@ -278,16 +277,17 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 	var opponent = Room.getMonster(roomObj, command),
 	weaponSlots,
 	i = 0,
-	dexMod = World.dice.getDexMod(player), 
+	dexMod = World.dice.getDexMod(player),
 	damage;
 
-	if (player.position === 'standing'
-		&& (opponent.position !== 'fighting')) {
+	console.log(command, roomObj.id);
+
+	if (opponent && player.position === 'standing' && (opponent.position !== 'fighting')) {
 		if (World.dice.roll(1, 100) <= skillObj.train) {
 			// backstab!
-			damage = World.dice.roll(1, 20, dexMod);
+			damage = World.dice.roll(1, 20 + dexMod, dexMod);
 
-			if (World.dice.roll(1, 20 + player.level, dexMod) > (17 + player.level + 1) ) {
+			if (World.dice.roll(1, 20 + player.level, dexMod) > (17 + player.level + 1)) {
 				if (!player.sneaking) {
 					damage = damage * 1.5;
 				} else {
@@ -316,5 +316,4 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 	}
 };
 
-module.exports = (function() { return new Skill() }());
-
+module.exports = new Skill();

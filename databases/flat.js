@@ -10,7 +10,7 @@
 var fs = require('fs');
 
 module.exports = function(config) {
-	// Setup driver wide properties
+	// Setup driver-wide properties
 	var Driver = function() {
 		var defaultPath = './areas';
 		var persistenceFolder = '/persistence';
@@ -22,7 +22,7 @@ module.exports = function(config) {
 			} else {
 				this.path = config.path;
 			}
-	
+
 			if (!config.persistenceFolder) {
 				this.persistenceFolder= persistenceFolder;
 			} else {
@@ -31,13 +31,12 @@ module.exports = function(config) {
 
 			this.config = config;
 		}
- 
+
 		return this;
 	};
 	
-	// Get all areas. First driver function called.
-	// Must be given a function with is called with a creared areas array.
-	// Arrays array must be a set of JSON areas.
+	// Get all areas. This is the first driver callback executed.
+	// Must be given a function which is passed an array of created areas.
 	Driver.prototype.loadAreas = function(fn) {
 		var driver = this,
 		areas  = [];
@@ -109,3 +108,4 @@ module.exports = function(config) {
 
 	return new Driver();
 }
+

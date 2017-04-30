@@ -11,9 +11,9 @@ World = require('./world'),
 Cmds,
 Character = function () {
 	this.statusReport = [
-		{msg: ' is <span class="red">bleeding all over the place</span> and looks nearly dead!', percentage: 0},
+		{msg: ' is <span class="red">bleeding all over the place</span> and looks <strong>nearly dead!</strong>', percentage: 0},
 		{msg: ' is <span class="red">bleeding</span> profusely.', percentage: 10},
-		{msg: ' has some major cuts and brusies.', percentage: 20},
+		{msg: ' has some <strong>major cuts and brusies.</strong>', percentage: 20},
 		{msg: ' has some large cuts and looks exhausted!', percentage: 30},
 		{msg: ' has some minor cuts and brusies.', percentage: 40},
 		{msg: ' is tired and bruised.', percentage: 50},
@@ -47,7 +47,9 @@ Character.prototype.login = function(r, s, fn) {
 							World.players[i].socket.disconnect();
 
 							s.player = World.players[i];
-						}				
+
+							s.player.refId = World.createRefId(s.player);
+						}
 					}
 
 					if (!s.player) {
@@ -55,14 +57,15 @@ Character.prototype.login = function(r, s, fn) {
 					}
 
 					s.player.displayName = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
-	
+
 					if (s.player.lastname !== '') {
 						s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
 					}
 
 					s.player.sid = s.id;
 					s.player.socket = s;
-		
+					s.player.refId = World.createRefId(s.player);
+
 					s.player.logged = false;
 					s.player.verifiedPassword = false;
 					s.player.verifiedName = false;
@@ -74,7 +77,7 @@ Character.prototype.login = function(r, s, fn) {
 			});
 		} else {
 			return World.msgPlayer(s, {
-				msg : '<b>Invalid Entry</b>. Enter your name:', 
+				msg : '<b>Invalid Entry</b>. Enter your name:',
 				styleClass: 'enter-name',
 				noPrompt: true
 			});
@@ -108,7 +111,7 @@ Character.prototype.load = function(name, s, fn) {
 		s.player.logged = true;
 		s.player.verifiedPassword = true;
 		s.player.verifiedName = true;
-				
+
 		return fn(s);
 	});
 };
@@ -116,7 +119,7 @@ Character.prototype.load = function(name, s, fn) {
 Character.prototype.hashPassword = function(salt, password, iterations, fn) {
 	var hash = password,
 	i = 0;
-		
+
 	for (i; i < iterations; i += 1) {
 		hash = crypto.createHmac('sha512', salt).update(hash).digest('hex');
 	}
@@ -144,9 +147,9 @@ Character.prototype.getPassword = function(s, command, fn) {
 			if (s.player.password === hash) {
 				if (character.addPlayer(s)) {
 					s.player = World.setupBehaviors(s.player);
-					
+
 					World.sendMotd(s);
-					
+
 					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 
 					roomObj.playersInRoom.push(s.player);
@@ -227,7 +230,8 @@ Character.prototype.create = function(s) {
 	s.player = World.extend(s.player, raceObj);
 	s.player = World.extend(s.player, classObj);
 	
-	s.player.refId = 'entity-' + s.id;
+	s.player.refId = World.createRefId(s.player);
+	s.player.id = s.player.name;
 	s.player.chp += 30;
 	s.player.cmana += 5;
 	s.player.cmv += 100;
@@ -265,7 +269,7 @@ Character.prototype.create = function(s) {
 	s.player.wis = s.player.baseWis;
 	s.player.con = s.player.baseCon;
 	s.player.dex = s.player.baseDex;
-	s.player.noFollow = false;	
+	s.player.noFollow = false;
 	s.player.noGroup = false;
 
 	character.generateSalt(function(salt) {
@@ -282,7 +286,7 @@ Character.prototype.create = function(s) {
 			character.write(s.player.name, s.player, function (err) {
 				character.load(s.player.name, s, function(s) {
 					var roomObj;
-					
+
 					if (err) {
 						throw err;
 					}
@@ -317,7 +321,7 @@ Character.prototype.create = function(s) {
 Character.prototype.newCharacter = function(s, command) {
 	var character = this,
 	i = 0;
-	
+
 	if (!Cmds) {
 		Cmds = require('./commands');
 	}
@@ -329,12 +333,12 @@ Character.prototype.newCharacter = function(s, command) {
 				+ '<strong class="red">select a race from the list below by typing in the full name</strong>.',
 			noPrompt: true
 		});
-		
+
 		Cmds.help(s.player, {
 			msg: 'races',
 			noPrompt: true
 		});
-		
+
 		s.player.creationStep = 2;
 
 		command.firstCall = true;
@@ -373,13 +377,13 @@ Character.prototype.newCharacter = function(s, command) {
 					}
 				}
 			}
-		
+
 			break;
 		case 3:
 			if (World.isPlayableClass(command.cmd)) {
 				s.player.creationStep = 4;
 				s.player.charClass = command.cmd;
-				
+
 				World.msgPlayer(s, {
 					msg: s.player.displayName + ' is a ' + s.player.charClass
 						+ '! <strong>Two more steps before ' + s.player.displayName
@@ -412,7 +416,7 @@ Character.prototype.newCharacter = function(s, command) {
 				} else {
 					s.player.sex = 'female';
 				}
-				
+
 				World.msgPlayer(s, {
 					msg: s.player.displayName + ' is a ' + s.player.sex
 						+ '! <strong>One more step before ' + s.player.displayName
@@ -450,7 +454,7 @@ Character.prototype.newCharacter = function(s, command) {
 					noPrompt: true
 				});
 			}
-		
+
 			break;
 		default:
 			break;
@@ -1389,4 +1393,5 @@ Character.prototype.write = function(name, obj, fn) {
 	}
 };
 
-module.exports = (function() { return new Character(); }());
+module.exports = new Character();
+

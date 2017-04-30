@@ -86,7 +86,7 @@ setInterval(function() {
 		World.time.isDay = false;
 
 		areaMsg = 'The sun fades fully from view as night falls.';
- 	
+
 		if (World.areas.length) {
 			for (i; i < World.areas.length; i += 1) {
 				(function(area, areaIndex) {
@@ -166,12 +166,12 @@ setInterval(function() {
 // area.respawnOn (default is 3 -- 12 minutes). A respawnOn value of 0 prevents respawn.
 // areas do not update if someone is fighting
 setInterval(function() {
-	var playersInArea, 
+	var playersInArea,
 	area,
 	i = 0,
 	refresh = true;
 
-	for (i; i < World.areas.length; i += 1) {  
+	for (i; i < World.areas.length; i += 1) {
 		area = World.areas[i];
 		playersInArea = World.getPlayersByArea(World.areas[i].id);
 		
@@ -407,7 +407,7 @@ setInterval(function() {
 			}
 		}
 	}
-}, 720000); // 12 minutes
+}, 1020000); // 17 minutes
 
 // Player Regen
 setInterval(function() { 
@@ -422,9 +422,9 @@ setInterval(function() {
 			}
 		}
 	}
-}, 30000);
+}, 32000);
 
-// Hunger and Thirst Tick 
+// Hunger and Thirst Tick
 setInterval(function() { 
 	var i = 0,
 	player; 
@@ -437,8 +437,7 @@ setInterval(function() {
 			Character.thirst(player);
 		}
 	}
-}, 240000); // 4 minutes
-
+}, 242000); // 4 minutes
 
 // Saving
 setInterval(function() {
@@ -447,7 +446,7 @@ setInterval(function() {
 
 	if (World.players.length > 0) {
 		for (i; i < World.players.length; i += 1) {
-			if (World.players[i].position === 'standing' && !World.players[i].opponent) {
+			if (World.players[i].position === 'standing' && !World.players[i].opponent && World.dice.roll(1, 10) > 8) {
 				Character.save(World.players[i]);
 			}
 		}
@@ -473,4 +472,3 @@ setInterval(function() {
 		}
 	}
 }, 500000);
-

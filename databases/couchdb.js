@@ -2,40 +2,39 @@
 	CouchDB Driver for RockMUD. Example REST driver.
 
 	Basically we just make rest calls to an outlined database and grab JSON blobs.
-	
+
 	Objects have the same form as the default flat-file system.
 
-	Databases should already be seetup within couch.
+	Database and players/byName should already be setup within couch.
 */
 'use strict';
-var http = require('http');
+var http = require('https'),
+dbConfig = require('./config.json');
 
 module.exports = function(config) {
 	// Setup driver wide properties
 	var Driver = function() {
 		var driver = this;
 
-		driver.dataDbName = 'rockmud';
-		driver.playerDbName = 'rockmud_players';
-		driver.dbHost = '127.0.0.1';
-		driver.dbPort = 5984;
-		driver.username = '';
-		driver.password = '';
-		driver.dataView = 'areasByName',
-		driver.playerView = '_design/players/_view/byName?key=';
+		driver.playerDbName = dbConfig.db;
+		driver.dbHost = dbConfig.host;
+		driver.dbPort = dbConfig.port;
+		driver.username = dbConfig.username;
+		driver.password = dbConfig.password;
+		driver.playerView = dbConfig.players; // _design/players/_view/byName?key=
 		driver.authHeader = 'Basic ' + new Buffer(driver.username + ':' + driver.password).toString('base64');
 		driver.createGenericOpt = function(method, db, data) {
-			var path = '/' + driver.playerDbName;	
+			var path = '/' + driver.playerDbName;
 
 			return {
 				hostname: driver.dbHost,
-  				method: method,
+				method: method,
 				port: driver.dbPort,
 				path: path,	
-  				headers: {
-    				'Content-Type': 'application/json',
+				headers: {
+					'Content-Type': 'application/json',
 					'Authorization': driver.authHeader
-  				}
+				}
 			};
 		};
 
@@ -50,12 +49,12 @@ module.exports = function(config) {
 			});
 
 			res.on('end', function() {
-    			fn(false, obj);
-  			});
+				fn(false, obj);
+			});
 		});
 
 		req.on('error', function(e) {
-			
+			console.log('couchDB Driver error in savePlayer()', e);
 		});
 
 		req.write(obj);
@@ -97,14 +96,14 @@ module.exports = function(config) {
 				}
 
 				if (result) {
-    				return fn(false, result);
+					return fn(false, result);
 				} else {
 					return fn(true, false);
 				}
-  			});
+			});
 		}).end();
 	};
 
 	return new Driver();
 }
- 
+
