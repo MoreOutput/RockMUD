@@ -10,7 +10,7 @@
 	"role": "",
 	"sex": "",
 	"race": "",
-	"charClass": "", 
+	"charClass": "",
 	"level": 1,
 	"exp": 0,
 	"expToLevel": 1000,
@@ -71,13 +71,11 @@
 	"outName": "",
 	"outMessage": "",
 	"inMessage": "",
-	"short": "",
-	"long" : "",
 	"trains": 0,
 	"hearing": true,
 	"sight": true,
 	"touch": true,
-	"smell": true, 
+	"smell": true,
 	"taste": true,
 	"mute": false,
 	"size": {"value": 3, "display": "medium"},
@@ -174,4 +172,3 @@
 	"hasEvents": false,
 	"runOnAliveWhenEmpty": true
 }
-

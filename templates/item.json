@@ -1,5 +1,5 @@
 {
-	"name": "", 
+	"name": "",
 	"short": "",
 	"long": "" ,
 	"displayName": "",
@@ -9,11 +9,11 @@
 	"refId": "",
 	"level": 0,
 	"itemType": "",
-	"material": "", 
+	"material": "",
 	"diceNum": 0,
 	"diceSides": 0,
 	"diceMod": 0,
-	"attackType": "", 
+	"attackType": "",
 	"attackElement": "",
 	"weight": 0,
 	"value": 0,
@@ -25,7 +25,6 @@
 	"isKey": false,
 	"equipped": false,
 	"isOpen": true,
-	"value": 0,
 	"behaviors": [],
 	"modifiers": {},
 	"affects": [],
@@ -40,6 +39,6 @@
 	"flickerMsg": "",
 	"extinguishMsg": "",
 	"spell": {},
-	"spellLevel": 0
+	"spellLevel": 0,
+	"spellCharges": 0
 }
-

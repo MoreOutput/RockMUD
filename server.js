@@ -126,7 +126,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				Character.newCharacter(s, cmdObj);
 			}
 		};
-		
+
 		World.msgPlayer(s, {
 			msg : 'Enter your name:', 
 			evt: 'reqInitialLogin', 
@@ -191,7 +191,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			var i = 0,
 			j = 0,
 			roomObj;
-			
+
 			if (s.player !== undefined) {
 				for (i; i < World.players.length; i += 1) {
 					if (World.players[i].name === s.player.name) {
@@ -200,7 +200,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				}
 
 				roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-				
+
 				if (roomObj) {
 					for (j; j < roomObj.playersInRoom.length; j += 1) {
 						if (roomObj.playersInRoom[j].name === s.player.name) {

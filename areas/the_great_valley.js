@@ -32,7 +32,7 @@ module.exports = {
 				j = 0;
 
 				for (j; j < y; j += 1) {
-					roomObj = World.extend({}, JSON.parse(JSON.stringify(World.roomTemplate)));
+					roomObj = JSON.parse(JSON.stringify(World.roomTemplate)),
 					roomObj.id = i + '-' + j;
 					roomObj.content = 'A room';
 					roomObj.title = 'Empty room ' +  i + '-' + j;

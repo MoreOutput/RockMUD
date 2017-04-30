@@ -1,9 +1,9 @@
 /*
 * All non-combat commands that one would consider 'general' to a all
 * users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
-* the actual combat loop is, of course, in combat.js.
+* the actual combat loop is in combat.js.
 * 
-* Events fired on particular commands are also fired here; for example onEnter, onLeave
+* Events fired on particular commands are also triggered here; for example onEnter, onLeave
 */
 'use strict';
 var fs = require('fs'),
@@ -228,7 +228,7 @@ Cmd.prototype.list = function(target, command) {
 				if (merchant.items.length > 0) {
 					for (i; i < merchant.items.length; i += 1) {
 						storeDisplay += '<li>' + merchant.items[i].name  +
-							' <span class="warning">(' + merchant.items[i].value + 'gp)</span></li>';
+						' <span class="warning">(' + merchant.items[i].value + 'gp)</span></li>';
 					}
 
 					World.msgPlayer(target, {
@@ -516,8 +516,8 @@ Cmd.prototype.group = function(target, command) {
 			if (target.followers.length) {
 				entityJoiningGroup = Room.getPlayer(roomObj, command);
 				
-				if (target.group.indexOf(entityJoiningGroup) === -1) {			
-					if (target.followers.indexOf(entityJoiningGroup) !== -1) {			
+				if (target.group.indexOf(entityJoiningGroup) === -1) {
+					if (target.followers.indexOf(entityJoiningGroup) !== -1) {
 						if (target.group.length < leadMax) {
 							if (!entityJoiningGroup.noGroup) {
 								if (canSee) {
@@ -594,7 +594,7 @@ Cmd.prototype.group = function(target, command) {
 					}
 					
 
-					groupListStr += '</tr>';			
+					groupListStr += '</tr>';
 			}
 			
 			groupListStr = '<h2>Party List</h2>'
@@ -916,8 +916,8 @@ Cmd.prototype.close = function(target, command, fn) {
 	targetExit,
 	exitObj;
 	
-	if (target.position === 'standing' 
-		|| target.position === 'resting' 
+	if (target.position === 'standing'
+		|| target.position === 'resting'
 		|| target.position === 'fighting') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
@@ -972,8 +972,8 @@ Cmd.prototype.unlock = function(target, command) {
 	key;
 
 	if (command.msg) {
-		if (target.position === 'standing' 
-			|| target.position === 'resting' 
+		if (target.position === 'standing'
+			|| target.position === 'resting'
 			|| target.position === 'fighting') {
 			
 			roomObj = World.getRoomObject(target.area, target.roomid);
@@ -1016,8 +1016,8 @@ Cmd.prototype.lock = function(target, command, fn) {
 	key;
 
 	if (command.msg) {
-		if (target.position === 'standing' 
-			|| target.position === 'resting' 
+		if (target.position === 'standing'
+			|| target.position === 'resting'
 			|| target.position === 'fighting') {
 			
 			roomObj = World.getRoomObject(target.area, target.roomid);
@@ -1058,7 +1058,7 @@ Cmd.prototype.lock = function(target, command, fn) {
 Cmd.prototype.recall = function(target, command) {
 	var targetRoom,
 	roomObj;
-	
+
 	if (command.roomObj) {
 		roomObj = command.roomObj;
 	} else {
@@ -1068,25 +1068,25 @@ Cmd.prototype.recall = function(target, command) {
 	if (!command.msg && target.recall.roomid && target.recall.area) {
 		if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
 			targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
-		
+
 			if (targetRoom) {
 				target.area = target.recall.area;
 				target.roomid = target.recall.roomid;
-	
+
 				if (target.isPlayer) {
 					Room.removePlayer(roomObj, target);
-					
+
 					targetRoom.playersInRoom.push(target);
 
 					this.look(target, {roomObj: targetRoom});
 				} else {
 					Room.removeMob(roomObj, target);
-	
+
 					targetRoom.monsters.push(target);
 				}
-	
+
 				World.msgPlayer(target, {
-					msg: 'You have recalled back to ' + target.recall.area  + '!',
+					msg: '<strong>You have recalled back to ' + target.recall.area  + '!</strong>',
 					styleClass: 'green'
 				});
 			}
@@ -1099,7 +1099,7 @@ Cmd.prototype.recall = function(target, command) {
 	} else if (command.msg && command.arg === 'set' && !targetRoom.preventRecall) {
 		target.recall.area = roomObj.area;
 		target.recall.roomid = roomObj.id;
-	
+
 		World.msgPlayer(target, {
 			msg: 'You will now recall to the current room!',
 			styleClass: 'green'
@@ -2062,25 +2062,24 @@ Cmd.prototype.look = function(target, command) {
 	var roomObj,
 	displayHTML,
 	monster,
-	itemDescription,	
+	itemDescription,
 	item,
 	i = 0;
 	
 	if (!command) {
 		command = {};
 	}
-	
+
 	if (!command.roomObj) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	} else {
 		roomObj = command.roomObj;
 	}
-	
+
 	if (target.sight) {
 		if (target.position !== 'sleeping') {
 			if (!command.msg) {
 				if (Character.canSee(target, roomObj)) {
-					console.log('Initial look', roomObj.id, target.name, target.refId, World.areas.length);
 					displayHTML = Room.getDisplayHTML(roomObj, target);
 
 					World.msgPlayer(target, {
@@ -2687,16 +2686,16 @@ Cmd.prototype.practice = function(target, command) {
 		if (canSee) {
 			if (trainers.length) {
 				trainer = trainers[0];
-		
+
 				if (command.arg) {
-					trainerSkillObj = Character.getSkill(trainer, command.arg);				
-				
+					trainerSkillObj = Character.getSkill(trainer, command.arg);
+
 					skillObj = Character.getSkill(target, command.arg);
 
 					if (trainer.beforePractice) {
 						canPrac = trainer.beforePractice(target, skillObj, trainerSkillObj);
-					}	
-					
+					}
+
 					if (canPrac) {
 						if (trainerSkillObj && skillObj && skillObj.learned) {
 							pracSkill();
@@ -2752,7 +2751,6 @@ Cmd.prototype.practice = function(target, command) {
 							practiceDisplay += '</tr>';
 						}
 					}
-							
 					World.msgPlayer(target, {
 						msg: practiceDisplay + '</tbody></table><p class="red"><strong>' 
 							+ 'To practice a skill you must have it on your' 
@@ -2784,7 +2782,7 @@ Cmd.prototype.practice = function(target, command) {
 			msg: '<strong>You can\'t train while sleeping!</strong>',
 			styleClass: 'error'
 		});
-	} 
+	}
 };
 
 Cmd.prototype.save = function(target, command) {
@@ -2882,7 +2880,7 @@ Cmd.prototype.skills = function(target, command) {
 	skillLevel = 1,
 	trainedLevel,
 	skillId;
-	
+
 	if (target.skills) {
 		for (i; i < target.skills.length; i += 1) {
 			skillObj = target.skills[i];
@@ -2904,7 +2902,7 @@ Cmd.prototype.skills = function(target, command) {
 				+ '<td><strong>' + learnedStatus + '</strong></td>'
 				+ '<td><strong>' + skillObj.mod + '</strong></td>'
 				+ '</tr>';
-	
+
 			if (trainedLevel) {
 				skills += trainedLevel;
 			}
@@ -3064,7 +3062,7 @@ Cmd.prototype.quests = function(target, commands) {
 			qStr += '<li>' + listStr  + '</li>';
 		}
 	}
-	
+
 	qStr += '</ul>';
 
 	World.msgPlayer(target, {msg: qStr});

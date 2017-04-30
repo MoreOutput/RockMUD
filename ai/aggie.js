@@ -16,7 +16,6 @@ World = require('../src/world');
 
 	Setting revenge to true limits the mob to only being aggie against the thing that attacked it last.
 */
-
 module.exports = {
 	attackOnVisit: true,
 	attackOnAlive: true,

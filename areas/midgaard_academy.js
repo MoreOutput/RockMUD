@@ -1,3 +1,4 @@
+
 'use strict';
 var Cmd = require('../src/commands'),
 Room = require('../src/rooms'),
@@ -9,17 +10,17 @@ module.exports = {
 	id: 'midgaard_academy',
 	type: 'building',
 	levels: 'All',
-	description: 'Famous for preparing new adventuers for the world of RockMUD.',
+	description: 'Famous for preparing new adventuers for the world of ' + World.config.name + '.',
 	reloads: 0,
 	author: 'Rocky',
 	messages: [{
-		msg: '<span class=\'grey\'>The sounds of sparring apprentices can be heard throughout the halls.</span>'
+		msg: '<span class=\'grey\'>The sounds of sparring apprentices can be heard from somewhere in the Academy.</span>'
 	}],
 	quests: [{
 		id: 'mud_school',
 		title: 'Midgaard Training Academy',
 		entries: {
-			0: 'You have joined the Midgaardian Academy! Climb to the top of the tower and begin training to make it official.'
+			0: 'You have joined the Midgaardian Academy! Climb to the top of the tower and begin training and make it official.'
 		}
 	}],
 	rooms: [
@@ -58,8 +59,6 @@ module.exports = {
 				diceMod: 5,
 				str: 20,
 				dex: 18,
-				position: 'standing',
-				attackType: 'punch',
 				damRoll: 20,
 				hitRoll: 15,
 				ac: 20,
@@ -75,8 +74,8 @@ module.exports = {
 					learned: true,
 					prerequisites: {
 						'level': 1
-					}	
-				}],	
+					}
+				}],
 				behaviors: [{
 					module: 'radghar'
 				}]
@@ -110,7 +109,7 @@ module.exports = {
 
 				if (!climbSkill && entity.isPlayer && entity.level === 1) {
 					msg += '1You do not have the climb skill. Climbing further could result in a fall!';
-				}	
+				}
 
 				if (msg) {
 					World.msgPlayer(entity, {
@@ -141,7 +140,7 @@ module.exports = {
 				msg = '';
 
 				if (!climbSkill && entity.isPlayer && entity.level === 1) {
-					msg += '2You do not have the climb skill. Climbing further could result in death!';
+					msg += 'You do not have the climb skill. Be careful!!';
 				}	
 	
 				if (msg) {
@@ -152,7 +151,7 @@ module.exports = {
 			}
 		}, {
 			id: '4',
-			title: 'Further up the side of the Academy Tower',
+			title: 'Further up the side of Midgaard Academy Tower',
 			area: 'midgaard_academy',
 			moveMod: 2,
 			content: '',
@@ -219,7 +218,7 @@ module.exports = {
 				charClass: 'fighter',
 				level: 25,
 				short: 'Squire Thomas',
-				long: '<span class="yellow">Thomas the tall thin squire of Captain Radghar</span> is here standing next to the twower window',
+				long: '<span class="yellow">Thomas a tall thin squire of Captain Radghar</span> is here standing next to the twower window',
 				description: '',
 				inName: 'Thomas',
 				race: 'human',

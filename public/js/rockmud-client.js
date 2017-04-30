@@ -39,7 +39,7 @@ window.onload = function() {
 		adv: 'kill',
 		attack: 'kill',
 		murder: 'kill',
-		re: 'rest',
+		res: 'rest',
 		sl: 'sleep',
 		h: 'help',
 		wh: 'who',
@@ -60,7 +60,7 @@ window.onload = function() {
 		nod: 'emote nods solemly.',
 		laugh: 'emote laughs heartily.',
 		wo: 'worth',
-		re: 'recall',
+		rec: 'recall',
 		gi: 'give',
 		wield: 'wear',
 		dr: 'drop'

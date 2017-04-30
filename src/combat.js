@@ -15,7 +15,7 @@ Combat = function() {
 
 	this.abstractNouns = ['intensity', 'force', 'strength', 'power', 'might', 'effort', 'energy'];
 },
-Skill;
+Skill = require('./skills');
 
 /*
 * Starting combat, begin() much return true and the target node for a fight to continue
@@ -322,7 +322,7 @@ Combat.prototype.getDamageAdjective = function(damage) {
 				}
 			} else {
 				return value;
-			}	
+			}
 		}
 	}
 
@@ -348,10 +348,6 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 		player.opponent = opponent;
 	}
 
-	if (!Skill) {
-		Skill = require('./skills').skills;
-	}
-	
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent, attackerCanSee) {
 		var oppStatus = Character.getStatusReport(opponent),
 		playerStatus = Character.getStatusReport(player),

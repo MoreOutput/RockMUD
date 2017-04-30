@@ -21,8 +21,10 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 				areaNames.forEach(function(areaName, i) {
 					var area,
 					areaId;
-					
-					if (areaName[0] !== '.' && areaName.indexOf('#') === -1 && areaName.indexOf('omit_') === -1) {
+
+					if (areaName[0] !== '.'
+						&& areaName.indexOf('#') === -1
+						&& areaName.indexOf('omit_') === -1) {
 						areaId = areaName.toLowerCase().replace(/ /g, '_').replace('.js', '');
 
 						area = require('.' + path + areaId + '.js');
@@ -41,7 +43,10 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 				if (!err) {
 					areaFileNames.forEach(function(fileName, i) {
-						if (fileName.indexOf('.js') !== -1 && fileName[0] !== '.' && fileName.indexOf('#') === -1 && fileName.indexOf('omit_') === -1) {
+						if (fileName.indexOf('.js') !== -1
+							&& fileName[0] !== '.'
+							&& fileName.indexOf('#') === -1
+							&& fileName.indexOf('omit_') === -1) {
 							areaIds.push(fileName.replace('.js', ''));
 						}
 					});
@@ -49,7 +54,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 				world.dataDriver.loadAreas(function(areas) {
 					var unsavedAreas = [];
-				
+
 					if (areas.length) {
 						areas.forEach(function(area, i) {
 							var foundMatch = false;
@@ -143,7 +148,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	loadTemplates = function (fn) {
 		var tmpArr = [],
 		path = './templates/';
-	
+
 		fs.readdir(path, function(err, fileNames) {
 			fileNames.forEach(function(fileName, i) {
 				fs.readFile(path + fileName, function (err, tmp) {
@@ -152,7 +157,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 					tmp.template = fileName.replace(/.json/g, '');
 				
 					tmpArr.push(tmp);
-	
+
 					if (i === fileNames.length - 1) {
 						return fn(err, tmpArr);
 					}
@@ -198,7 +203,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	if (world.config.persistence && world.config.persistence.data) {
 		world.dataDriver = require(world.config.persistenceDriverDir + world.config.persistence.data.driver + '.js')(world.config.persistence.data);
 	}
-	
+
 	if (world.config.persistence && world.config.persistence.player) {
 		if (world.dataDriver && world.config.persistence.player === world.config.persistence.data) {
 			world.playerDriver = world.dataDriver;
@@ -206,7 +211,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 			world.playerDriver = require(world.config.persistenceDriverDir + world.config.persistence.player.driver + '.js')(world.config.persistence.player);
 		}
 	}
-	// Initial game loading, embrace callback hell!
+
 	loadAreas(function(areas) {
 		loadTime(function(err, time) {
 			loadRaces(function(err, races) {
@@ -229,8 +234,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 							world.time = time;
 							world.races = races;
 							world.classes = classes;
-							world.templates = templates;							
-
+							world.templates = templates;
 							world.areaTemplate = world.getTemplate('area');
 							world.itemTemplate = world.getTemplate('item');
 							world.mobTemplate = world.getTemplate('entity');
@@ -258,7 +262,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 											if (setupIndex === world.areas.length - 1) {
 												for (j; j < world.areas.length; j += 1) {
-													(function(area, postIndex) {	
+													(function(area, postIndex) {
 														if (area.afterLoad) {
 															area.afterLoad();
 														}
@@ -272,7 +276,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 												}
 											}
 										});
-									}(index));	
+									}(index));
 								}(world.areas[i], i));
 							}
 						});
@@ -454,7 +458,6 @@ World.prototype.getPlayersByArea = function(areaId) {
 World.prototype.rollItems = function(itemArr, roomid, area) {
 	var world = this,
 	diceMod,
-	refId = Math.random().toString().replace('0.', 'item-'),
 	i = 0;
 
 	for (i; i < itemArr.length; i += 1) {
@@ -466,14 +469,14 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 		(function(item, index) {
 			var chanceRoll = world.dice.roll(1, 20),
 			prop;
-	
-			item.refId = refId + '-' + index;
-			
+
+			item.refId = world.createRefId(item) + '-' + index;
+
 			item = world.extend(item, JSON.parse(JSON.stringify(world.itemTemplate)));
 
 			if (Array.isArray(item.name)) {
 				item.name = item.name[world.dice.roll(1, item.name.length) - 1];
-			}	
+			}
 			
 			if (!item.displayName) {
 				item.displayName = item.name[0].toUpperCase() + item.name.slice(1);
@@ -499,7 +502,7 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 				item.diceNum -= 1
 				item.weight += 2;
 			}
-			
+
 			item.area = area.id;
 			item.roomid = roomid;
 
@@ -518,11 +521,15 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 			if (item.items) {
 				world.rollItems(item.items, roomid, area);
 			}
-			
+
 			for (prop in item) {
 				if (item[prop] === 'function' && !item.hasEvents) {
 					item.hasEvents = true;
 				}
+			}
+
+			if (!item.id) {
+				item.id = item.refId;
 			}
 
 			if (item.onRolled) {
@@ -536,7 +543,6 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 World.prototype.rollMobs = function(mobArr, roomid, area) {
 	var world = this,
 	diceMod,
-	refId = Math.random().toString().replace('0.', 'entity-'),
 	i = 0;
 
 	for (i; i < mobArr.length; i += 1) {
@@ -551,7 +557,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			prop,
 			classObj;
 
-			mob.refId = refId + '-' + index;
+			mob.refId = world.createRefId(mob) + '-' + index;
 
 			mob = world.extend(mob, JSON.parse(JSON.stringify(world.mobTemplate)));
 
@@ -564,9 +570,9 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 				classObj = world.getClass(mob.charClass);
 				mob = world.extend(mob, JSON.parse(JSON.stringify(classObj)));
 			}
-			
+
 			if (!mob.id) {
-				mob.id = refId;
+				mob.id = mob.refId;
 			}
 
 			if (Array.isArray(mob.name)) {
@@ -616,7 +622,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 				mob.wis = mob.baseWis;
 				mob.con = mob.baseCon;
 			}
-	
+
 			mob.isPlayer = false;
 			mob.roomid = roomid;
 			mob.area = area.id;
@@ -669,7 +675,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			} else {
 				mobArr[index] = mob;
 			}
-		
+
 			for (prop in mob) {
 				if (mob[prop] === 'function' && !mob.hasEvents) {
 					mob.hasEvents = true;
@@ -700,9 +706,6 @@ World.prototype.setupArea = function(area, fn) {
 				}
 			}
 
-			world.rollMobs(area.rooms[i].monsters, area.rooms[i].id, area);
-			world.rollItems(area.rooms[i].items, area.rooms[i].id, area);
-
 			if (area.rooms[i].monsters) {
 				area.monsters = world.shuffle(area.rooms[i].monsters);
 			}
@@ -725,14 +728,21 @@ World.prototype.setupArea = function(area, fn) {
 		}
 
 		area.wasExtended = true;
-		
+
+		i = 0;
+
+		for (i; i < area.rooms.length; i += 1) {
+			world.rollMobs(area.rooms[i].monsters, area.rooms[i].id, area);
+			world.rollItems(area.rooms[i].items, area.rooms[i].id, area);
+		}
+
 		if (typeof fn === 'function') {
 			return fn(area);
 		}
 	};
 
 	if (!area.wasExtended) {
-		area = world.extend(area, JSON.parse(JSON.stringify(world.areaTemplate)));	
+		area = world.extend(area, JSON.parse(JSON.stringify(world.areaTemplate)));
 	}
 
 	for (i; i < area.messages.length; i += 1) {
@@ -751,6 +761,16 @@ World.prototype.setupArea = function(area, fn) {
 		return setupRooms(area, fn);
 	}
 };
+
+World.prototype.createRefId = function(gameEntity) {
+	if (gameEntity.isPlayer === true) {
+		return 'entity-' + gameEntity.sid;
+	} else if (gameEntity.itemType === 'entity') {
+		Math.random().toString().replace('0.', 'entity-');
+	} else {
+		Math.random().toString().replace('0.', 'item-');
+	}
+}
 
 World.prototype.getArea = function(areaId) {
 	var i = 0;
@@ -771,7 +791,7 @@ World.prototype.reloadArea = function(area) {
 	require.cache[require.resolve('../areas/' + area.id)] = null;
 
 	newArea = require('../areas/' + area.id  + '.js');
-	
+
 	world.setupArea(newArea, function(newArea) {
 		var i = 0;
 		newArea.id = area.id;
@@ -779,7 +799,7 @@ World.prototype.reloadArea = function(area) {
 		for (i; i < world.areas.length; i += 1) {
 			if (world.areas[i].id === newArea.id) {
 				world.areas[i] = newArea;
-			}		
+			}
 		}
 	});
 };
@@ -1412,26 +1432,30 @@ World.prototype.saveArea = function(areaId) {
 			area.rooms[i].monsters[j] = this.sanitizeBehaviors(area.rooms[i].monsters[j]);
 		}
 	}
-
-	
 };
 
-World.prototype.extend = function(extendObj, readObj) {
+World.prototype.extend = function(extendObj, readObj, fn) {
 	var prop,
+	propCnt,
 	prop2;
 
 	if (arguments.length === 2) {
+		propCnt = Object.keys(readObj).length;
+
 		for (prop in readObj) {
 			if (extendObj[prop] !== undefined) {
-				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
+				if (Array.isArray(extendObj[prop]) 
+				&& Array.isArray(readObj[prop])) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
-				} else if (typeof extendObj[prop] !== 'string' && !isNaN(extendObj[prop]) && !isNaN(readObj[prop]) 
-					&& typeof extendObj[prop] !== 'boolean') {
-					
+				} else if (typeof extendObj[prop] !== 'string'
+				&& !isNaN(extendObj[prop])
+				&& !isNaN(readObj[prop])
+				&& typeof extendObj[prop] !== 'boolean') {
 					extendObj[prop] += readObj[prop];
-				} else if (prop === 'size' || prop === 'recall')  {
+				} else if (prop === 'size' || prop === 'recall') {
 					extendObj[prop] = readObj[prop];
-				} else if (typeof extendObj[prop] === 'object' && typeof readObj[prop] === 'object')  {
+				} else if (typeof extendObj[prop] === 'object'
+				&& typeof readObj[prop] === 'object') {
 					for (prop2 in readObj[prop]) {
 						this.extend(extendObj[prop][prop2], readObj[prop][prop2]);
 					}
@@ -1441,7 +1465,7 @@ World.prototype.extend = function(extendObj, readObj) {
 			}
 		}
 	}
-	
+
 	return extendObj;
 };
 
@@ -1464,10 +1488,6 @@ World.prototype.shuffle = function (arr) {
 
 World.prototype.isInvisible = function(obj) {
 	var i = 0;
-
-	if (!obj.affects) {
-		console.log(obj);
-	}
 
 	if (obj.affects.length) {
 		for (i; i < obj.affects.length; i += 1) {
@@ -1568,3 +1588,4 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 };
 
 module.exports = new World();
+

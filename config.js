@@ -1,8 +1,8 @@
 exports.server = {
 	game: {
-		port: 3000,
+		port: 3001,
 		name: 'RockMUD',
-		version: '0.3.0',
+		version: '0.3.5',
 		website: 'https://github.com/MoreOutput/RockMUD',
 		description: 'Websockets MUD Engine Demo',
 		// Name of world currency -- referenced in game
@@ -19,7 +19,7 @@ exports.server = {
 		//persistence: false
 		persistence: {
 			data: false,
-			player: {driver: 'couchdb'}
+			player: false // {driver: 'couchdb'}
 		}
 	},
 	admins: []
