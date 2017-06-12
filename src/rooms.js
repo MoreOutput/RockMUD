@@ -56,16 +56,16 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 	}
 
 	if (exits.length > 0) {
-		displayHTML += '<ul class="room-exits list-inline"><li class="list-label">Visible Exits: </li>';
+		displayHTML += '<ul class="room-exits list-inline"><li class="list-label list-inline-item">Visible Exits: </li>';
 
 		for (i; i < exits.length; i += 1) {
 			if (Character.canSeeObject(player, exits[i])) {
 				if (!exits[i].door) {
-					displayHTML += '<li>' + exits[i].cmd + '</li>';
+					displayHTML += '<li class="list-inline-item">' + exits[i].cmd + '</li>';
 				} else if (exits[i].door && !exits[i].door.isOpen) {
-					displayHTML += '<li class="grey">' + exits[i].cmd + '</li>';
+					displayHTML += '<li class="grey list-inline-item">' + exits[i].cmd + '</li>';
 				} else {
-					displayHTML += '<li class="yellow">' + exits[i].cmd + '</li>';
+					displayHTML += '<li class="yellow list-inline-item">' + exits[i].cmd + '</li>';
 				}
 			}
 		}

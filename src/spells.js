@@ -66,7 +66,7 @@ Spell.prototype.detectInvis = function(skillObj, player, roomObj, command, fn) {
 	cost = 1;
 
 	if (1 > 0) {
-		console.log('here');
+
 	} else {
 
 	}
@@ -143,7 +143,7 @@ Spell.prototype.invisibility = function(skillObj, player, roomObj, command, fn) 
 	cost = 1;
 
 	if (1 > 0) {
-		console.log('here');
+
 	} else {
 
 	}

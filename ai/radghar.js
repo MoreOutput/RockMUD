@@ -32,8 +32,9 @@ module.exports = {
 
 					setTimeout(function() {
 						Cmd.say(mob, {
-							msg: 'Alright, ' + player.name  + ', time for the enterance exam. You see this rope?'
-								+ ' Climb up to the top floor of the Academy Tower. A solider will meet you there.',
+							msg: '"Alright, ' + player.name  + ', time for the enterance exam. You see this rope?'
+								+ ' Climb up to the top floor of the Academy Tower. A solider will meet you there." <i class="grey">He points at a rope running up to a window in the tower above. ' 
+								+ 'It is very high.</a> [<strong class="grey">Hint: Move up to continue</strong>]',
 							roomObj: roomObj
 						});
 
@@ -47,12 +48,6 @@ module.exports = {
 								styleClass: 'success'
 							});
 						}
-					
-						Cmd.emote(mob, {
-							msg: 'points at a rope running up to a window in the tower above. ' 
-								+ 'It is very high. [<strong class="grey">Hint: Move up to continue</strong>]',
-							roomObj: roomObj
-						});
 					}, 1200);
 				}
 			}

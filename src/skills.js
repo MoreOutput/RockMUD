@@ -280,8 +280,6 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 	dexMod = World.dice.getDexMod(player),
 	damage;
 
-	console.log(command, roomObj.id);
-
 	if (opponent && player.position === 'standing' && (opponent.position !== 'fighting')) {
 		if (World.dice.roll(1, 100) <= skillObj.train) {
 			// backstab!
@@ -301,8 +299,6 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 
 			player.wait += 3;
 			opponent.wait += 3;
-
-			console.log('backstab hit!');
 		} else {
 			// missed
 			if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
@@ -310,8 +306,6 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 			} else {
 				player.wait += 6;
 			}
-
-			console.log('backstab missed!');
 		}
 	}
 };

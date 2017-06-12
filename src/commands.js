@@ -2844,10 +2844,10 @@ Cmd.prototype.equipment = function(target, command) {
 		}
 
 		eqStr += '<li class="eq-slot-' + target.eq[i].slot.replace(/ /g, '') + 
-			'"><label>' + target.eq[i].name + '</label>: ';
+			'"><label><strong>' + target.eq[i].name + '</strong></label>: ';
 		
 		if (!item || target.eq[i].item === '') {
-			eqStr += ' Nothing</li>';
+			eqStr += ' <span class="grey">Nothing</span></li>';
 		} else {
 			if (!item.light) {
 				eqStr += '<label class="warning">' + item.displayName + '</label></li>';
@@ -3077,10 +3077,10 @@ Cmd.prototype.score = function(target, command) {
 			'<div class="col-md-12">' +
 				'<div class="row">' + 
 				'<ul class="col-md-12 score-info list-inline">' +
-					'<li class="stat-hp first"><label>HP:</label> <strong>' +  target.chp + '</strong>/' + target.hp + ' </li>' +
-					'<li class="stat-mana"><label>Mana:</label> <strong>' + target.cmana + '</strong>/' + target.mana + '</li>' +
-					'<li class="stat-mv"><label>Moves:</label> <strong>' + target.cmv + '</strong>/' + target.mv + '</li>' +
-					'<li class="stat-levl"><label>Level:</label> ' +  target.level + '</li>' +
+					'<li class="stat-hp first list-inline-item"><label>HP:</label> <strong>' +  target.chp + '</strong>/' + target.hp + ' </li>' +
+					'<li class="stat-mana list-inline-item"><label>Mana:</label> <strong>' + target.cmana + '</strong>/' + target.mana + '</li>' +
+					'<li class="stat-mv list-inline-item"><label>Moves:</label> <strong>' + target.cmv + '</strong>/' + target.mv + '</li>' +
+					'<li class="stat-levl list-inline-item"><label>Level:</label> ' +  target.level + '</li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-str first"><label>STR:</label> ' + target.baseStr + ' <strong>(' + target.str + ')</strong></li>' +
@@ -3095,8 +3095,8 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-thirst"><label>Thirst:</label> ' + target.thirst +'</li>' +
 					'<li class="stat-trains last"><label>Trains:</label> ' + target.trains + '</li>' +
 				'</ul>' +
-				'<div class="stat-details">' +
-					'<ul class="col-md-3 score-stats list-unstyled">' +
+				'<div class="stat-details col-md-5">' +
+					'<ul class="score-stats list-unstyled">' +
 						'<li class="stat-hitroll"><label>Hit Bonus: </labels> ' + target.hitRoll + '</li>' +
 						'<li class="stat-damroll"><label>Damage Bonus: </label> ' + target.damRoll + '</li>' +
 						'<li class="stat-magicRes"><label>Magic resistance: </label> ' + target.magicRes + '</li>' +
@@ -3105,7 +3105,7 @@ Cmd.prototype.score = function(target, command) {
 						'<li class="stat-detection"><label>Detection: </label> ' + target.detection + '</li>' +
 						'<li class="stat-knowlege"><label>Knowledge: </label> ' + target.knowledge + '</li>' +
 					'</ul>' +
-					'<div class="col-md-3 score-affects">' +
+					'<div class="score-affects">' +
 						'<h6 class="sans-serif">Affected by:</h6>' +
 						'<p>You don\'t feel affected by anything.</p>' +
 					'</div>' +
@@ -3123,7 +3123,7 @@ Cmd.prototype.score = function(target, command) {
 				'</ul>' +
 			'</div>'
 		'</div></div>';
-	
+
 	World.msgPlayer(target, {
 		msg: score
 	});

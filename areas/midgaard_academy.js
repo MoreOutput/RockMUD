@@ -176,7 +176,6 @@ module.exports = {
 				if (!climbSkill) {
 					//climbRoll = World.dice.roll(1, 3, strMod);
 					climbRoll = 1;
-					console.log('climbRoll: ' + climbRoll);
 
 					if (climbRoll < climbCheck) {
 						msg += '<strong>You fail to climb up and slip downward!</strong>';

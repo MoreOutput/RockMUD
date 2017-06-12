@@ -4,7 +4,7 @@
   "dependencies": {
     "socket.io": ">= 1.4.8"
   },
-  "version": "0.3.0",
+  "version": "0.3.5",
   "engines": {
     "node": ">= 6.9.0"
   },

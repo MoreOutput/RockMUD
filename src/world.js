@@ -1310,7 +1310,7 @@ World.prototype.setupBehaviors = function(gameEntity) {
 			}
 
 			if (behaviorObj) {
-				gameEntity = this.extend(gameEntity, behaviorObj);
+				gameEntity = this.extend(gameEntity, JSON.parse(JSON.stringify(behaviorObj)));
 			}
 		}
 	}
@@ -1331,7 +1331,7 @@ World.prototype.setupBehaviors = function(gameEntity) {
 					}
 
 					if (behaviorObj) {
-						gameEntity.items[j] = this.extend(gameEntity.items[j], behaviorObj);
+						gameEntity.items[j] = this.extend(gameEntity.items[j], JSON.parse(JSON.stringify(behaviorObj)));
 					}
 				}
 			}	
@@ -1436,12 +1436,10 @@ World.prototype.saveArea = function(areaId) {
 
 World.prototype.extend = function(extendObj, readObj, fn) {
 	var prop,
-	propCnt,
+	propCnt = Object.keys(readObj).length,
 	prop2;
 
-	if (arguments.length === 2) {
-		propCnt = Object.keys(readObj).length;
-
+	if (arguments.length === 2 && propCnt > 0) {
 		for (prop in readObj) {
 			if (extendObj[prop] !== undefined) {
 				if (Array.isArray(extendObj[prop]) 
@@ -1457,7 +1455,7 @@ World.prototype.extend = function(extendObj, readObj, fn) {
 				} else if (typeof extendObj[prop] === 'object'
 				&& typeof readObj[prop] === 'object') {
 					for (prop2 in readObj[prop]) {
-						this.extend(extendObj[prop][prop2], readObj[prop][prop2]);
+						this.extend(extendObj[prop][prop2], JSON.parse(JSON.stringify(behaviorObj)));
 					}
 				}
 			} else {
