@@ -755,8 +755,7 @@ Cmd.prototype.drink = function(target, command) {
 			}
 		}
 	} else {
-		waterSource = Room.getWatersource(roomObj);
-
+		waterSource = Room.getWatersource(roomObj, command);
 		World.msgPlayer(target, {
 			msg: 'Drink from what?',
 			styleClass: 'error'
