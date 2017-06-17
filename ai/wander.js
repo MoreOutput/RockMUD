@@ -9,15 +9,15 @@ World = require('../src/world');
 
 	If the mob.stayinArea property is set to false the mob can wander outside of its starting area.
 
-	Adding a mob.wanderCheck value provides a check against 1d10; movement only occurs if the roll
+	Adding a mob.wanderCheck value provides a check against 1d100; movement only occurs if the roll
 	beats the given wanderCheck value.
 */
 module.exports = {
 	stayInArea: true,
-	wanderCheck: 35,
+	wanderCheck: 75,
 	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'],
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 40),
+		var roll = World.dice.roll(1, 100),
 		exitObj,
 		direction;
 

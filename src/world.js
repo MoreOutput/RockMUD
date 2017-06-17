@@ -1368,7 +1368,7 @@ World.prototype.sanitizeBehaviors = function(gameEntity) {
 			if (gameEntity.items[j].behaviors) {
 				for (i; i < gameEntity.items[j].behaviors.length; i += 1) {
 					behavior = this.getAI(gameEntity.items[j].behaviors[i]);
-	
+
 					if (behavior) {
 						for (prop in behavior) {
 							if (gameEntity.items[j][prop]) {
@@ -1389,6 +1389,12 @@ World.prototype.sanitizeBehaviors = function(gameEntity) {
 
 	return gameEntity;
 };
+
+World.prototype.isSafeCommand = function(command) {
+	var str = command.cmd + ' ' + command.msg;
+
+	return !(/<[a-z/][\s\S]*>/i.test(str));
+}
 
 // Return an array of objects representing possible stat properties on the player object
 World.prototype.getGameStatArr = function() {

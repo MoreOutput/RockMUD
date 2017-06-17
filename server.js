@@ -66,10 +66,13 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 	io.on('connection', function (s) {
 		var parseCmd = function(r, s) {
 			var skillObj,
-			cmdObj = Cmds.createCommandObject(r);
+			cmdObj = Cmds.createCommandObject(r),
+			valid = false;
+
+			valid = World.isSafeCommand(cmdObj);
 			
 			if (!s.player.creationStep) {
-				if (cmdObj) {
+				if (valid) {
 					if (cmdObj.cmd) {
 						cmdObj.roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 						
@@ -82,13 +85,13 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							skillObj = Character.getSkill(s.player, cmdObj.cmd);
 
 							if (skillObj && s.player.wait === 0) {
-								return Skills[cmdObj.cmd](
+								Skills[cmdObj.cmd](
 									skillObj,
 									s.player,
 									cmdObj.roomObj,
 									cmdObj
 								);
-							
+
 								World.processEvents('onSkill', s.player, cmdObj.roomObj, skillObj);
 								World.processEvents('onSkill', s.player.items, cmdObj.roomObj, skillObj);
 								World.processEvents('onSkill', cmdObj.roomObj, s.player, skillObj);
@@ -101,7 +104,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 								} else {
 									World.msgPlayer(s, {
 										msg: '<strong>You can\'t do that yet!.</strong>',
-										styleClass: 'error'
+										styleClass: 'warning'
 									});
 								}
 							}
@@ -117,9 +120,8 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						});
 					}
 				} else {
-					World.msgPlayer(s, {
-						msg: 'You have to be more specific with your command.',
-						styleClass: 'error'
+					return World.msgPlayer(s, {
+						onlyPrompt: true
 					});
 				}
 			} else {
