@@ -31,7 +31,6 @@
 	"hasEvents": false,
 	"originatingArea": "",
 	"waterSource": false,
-	"waterSourceLimit": 0,
 	"waterSourceDrinkMsg": "",
 	"waterSourceEmptyMsg": "",
 	"light": false,

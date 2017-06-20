@@ -85,12 +85,12 @@ module.exports = {
 					items: [{
 						name: 'Midgaard city key',
 						short: 'a thin gold key',
-						long: 'A thin gold key with a ruby embbeded to the end lies here' ,
+						long: 'A thin gold key with a ruby embbeded to the end lies here',
 						area: 'midgaard',
 						id: '10',
 						level: 1,
 						itemType: 'key',
-						material: 'gold', 
+						material: 'gold',
 						weight: 0,
 						slot: '',
 						value: 1000,
@@ -133,6 +133,8 @@ module.exports = {
 				area: 'midgaard',
 				id: '112',
 				waterSource: true,
+				drinks: 0,
+				maxDrinks: 100,
 				weight: 10000,
 				itemType: 'ornament'
 			}, {
@@ -150,9 +152,9 @@ module.exports = {
 				equipped: false,
 				value: 5
 			}, {
-				name: 'Torch', 
+				name: 'Torch',
 				short: 'a wooden torch',
-				long: 'A wooden torch rests on the ground' ,
+				long: 'A wooden torch rests on the ground',
 				area: 'midgaard',
 				id: '104', 
 				level: 1,

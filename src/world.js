@@ -1448,21 +1448,25 @@ World.prototype.extend = function(extendObj, readObj, fn) {
 	if (arguments.length === 2 && propCnt > 0) {
 		for (prop in readObj) {
 			if (extendObj[prop] !== undefined) {
-				if (Array.isArray(extendObj[prop]) 
-				&& Array.isArray(readObj[prop])) {
+				if (Array.isArray(extendObj[prop])
+					&& Array.isArray(readObj[prop])) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
 				} else if (typeof extendObj[prop] !== 'string'
-				&& !isNaN(extendObj[prop])
-				&& !isNaN(readObj[prop])
-				&& typeof extendObj[prop] !== 'boolean') {
+					&& !isNaN(extendObj[prop])
+					&& !isNaN(readObj[prop])
+					&& typeof extendObj[prop] !== 'boolean') {
 					extendObj[prop] += readObj[prop];
 				} else if (prop === 'size' || prop === 'recall') {
 					extendObj[prop] = readObj[prop];
 				} else if (typeof extendObj[prop] === 'object'
-				&& typeof readObj[prop] === 'object') {
+					&& typeof readObj[prop] === 'object') {
 					for (prop2 in readObj[prop]) {
 						this.extend(extendObj[prop][prop2], JSON.parse(JSON.stringify(behaviorObj)));
 					}
+				} else if (typeof extendObj[prop] === 'string'
+					&& typeof readObj[prop] === 'string'
+					&& typeof readObj[prop] !== '' && extendObj[prop] === '') {
+					extendObj[prop] = readObj[prop];
 				}
 			} else {
 				extendObj[prop] = readObj[prop];

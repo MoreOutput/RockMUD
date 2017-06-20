@@ -227,8 +227,8 @@ Character.prototype.create = function(s) {
 	
 	s.player.name = s.player.name.toLowerCase();
 	
-	s.player = World.extend(s.player, raceObj);
-	s.player = World.extend(s.player, classObj);
+	s.player = World.extend(s.player, JSON.parse(JSON.stringify(raceObj)));
+	s.player = World.extend(s.player, JSON.parse(JSON.stringify(classObj)));
 	
 	s.player.refId = World.createRefId(s.player);
 	s.player.id = s.player.name;
@@ -666,6 +666,22 @@ Character.prototype.thirst = function(target) {
 		World.msgPlayer(target, {msg: 'You are dying of thirst.', styleClass: 'thirst'});
 	}
 };
+
+Character.prototype.reduceThirst = function(player, reduction) {
+	player.thirst -= reduction;
+
+	if (player.thirst < 0) {
+		player.thirst = 0;
+	}
+}
+
+Character.prototype.reduceHunger = function(player, reduction) {
+	player.hunger -= reduction;
+
+	if (player.hunger < 0) {
+		player.hunger = 0;
+	}
+}
 
 // push an item into a players inventory, checks items to ensure a player can use it
 Character.prototype.addItem = function(player, item) {

@@ -693,7 +693,7 @@ Cmd.prototype.eat = function(target, command) {
 
 Cmd.prototype.drink = function(target, command) {
 	var roomObj,
-	waterSource,
+	watersource,
 	bottle;
 
 	if (command.roomObj) {
@@ -713,11 +713,7 @@ Cmd.prototype.drink = function(target, command) {
 			}
 
 			if (bottle.drinks > 0) {
-				target.thirst -= World.dice.roll(1, 3);
-
-				if (target.thirst < 0) {
-					target.thirst = 0;
-				}
+				Character.reduceThirst(target, World.dice.roll(1, 3));
 
 				if (typeof bottle.onDrink === 'function') {
 					bottle.onDrink(target, roomObj, bottle);
@@ -739,24 +735,32 @@ Cmd.prototype.drink = function(target, command) {
 					styleClass: 'cmd-drop red'
 				});
 			}
-		} else {		
-			waterSource = Room.getWatersource(roomObj, command);
+		} else {
+			watersource = Room.getWatersource(roomObj, command);
 
-			if (waterSource) {
+			if (!watersource) {
 				World.msgPlayer(target, {
 					msg: 'You can\'t drink something you dont have.',
 					styleClass: 'error'
 				});
 			} else {
+				watersource.drinks -= World.dice.roll(1, 2);
+
+				Character.reduceThirst(target, World.dice.roll(1, 2));
+
 				World.msgPlayer(target, {
-					msg: 'You can\'t drink something you dont have.',
-					styleClass: 'error'
+					msg: 'You drink from ' + watersource.short + '.',
+					styleClass: 'success'
+				});
+
+				World.msgRoom(roomObj, {
+					msg: target.displayName + ' drinks from a ' + watersource.short,
+					playerName: target.name,
+					styleClass: 'success'
 				});
 			}
 		}
 	} else {
-		waterSource = Room.getWatersource(roomObj, command);
-
 		World.msgPlayer(target, {
 			msg: 'Drink from what?',
 			styleClass: 'error'
@@ -3045,10 +3049,10 @@ Cmd.prototype.quests = function(target, commands) {
 	questsArr = Character.getQuests(target),
 	questObj,
 	listStr = '',
-	qStr = '<h2>Current Quests</h2><ul>';
+	qStr = '<h2>Current Quests</h2><ul class="list-inline">';
 
 	if (questsArr.length === 0) {
-		qStr += '<li>No current quests.</li>';
+		qStr += '<li class="list-inline-item">No current quests.</li>';
 	} else {
 		for (i; i < questsArr.length; i += 1) {
 			questObj = World.getQuest(questsArr[i].id);
@@ -3059,7 +3063,7 @@ Cmd.prototype.quests = function(target, commands) {
 
 			listStr += '<p>' + questObj.entries[questsArr[i].entryId]  + '</p>';
 
-			qStr += '<li>' + listStr  + '</li>';
+			qStr += '<li class="list-inline-item">' + listStr  + '</li>';
 		}
 	}
 
