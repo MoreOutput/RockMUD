@@ -2737,12 +2737,20 @@ Cmd.prototype.practice = function(target, command) {
 								if (trainerSkillObj && Character.meetsSkillPrepreqs(target, skillObj)) {
 									pracSkill();
 								} else {
-									this.say(trainer, {
-										msg: 'You are not ready to learn ' + skillObj.display 
-											+ ', you have unmet prerequisites.',
-										styleClass: 'error',
-										roomObj: roomObj
-									});
+									if (trainerSkillObj) {
+										this.say(trainer, {
+											msg: 'You are not ready to learn ' + skillObj.display 
+												+ ', you have unmet prerequisites.',
+											styleClass: 'error',
+											roomObj: roomObj
+										});
+									} else {
+										this.say(trainer, {
+											msg: 'I cannot teach you something I do not know.',
+											styleClass: 'warning',
+											roomObj: roomObj
+										});
+									}
 								}
 							} else {
 								World.msgPlayer(target, {

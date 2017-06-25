@@ -7,7 +7,7 @@
 	"ac": 1,
 	"playable": true,
 	"attackType": "punch",
-	"size": {"value": 3, "display": "small"},
+	"size": {"value": 2, "display": "small"},
 	"diceNum": 1,
 	"diceSides": 5,
 	"affects": []

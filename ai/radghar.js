@@ -44,7 +44,7 @@ module.exports = {
 							Character.addSkill(player, climbSkill);
 
 							World.msgPlayer(player, {
-								msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>.',
+								msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>. Improved Climbling increases the chance of a successful climb, and reduces and falling damage.',
 								styleClass: 'success'
 							});
 						}
