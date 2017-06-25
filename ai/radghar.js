@@ -5,7 +5,7 @@ Room = require('../src/rooms'),
 World = require('../src/world');
 
 /*
-	Fighter Guildmaster and Midgaard Academy guide. 
+	Fighter Guildmaster and Midgaard Academy guide.
 */
 module.exports = {
 	exclimations: [

@@ -79,9 +79,10 @@ module.exports = {
 					damRoll: 10,
 					hitRoll: 10,
 					ac: 20,
-					wanderCheck: 38,
+					wanderCheck: 50,
 					itemType: 'mob',
-					runOnAliveWhenEmpty: false,
+					// this is asking if we want to run the ai behaviors when theres no players in the room with the mob
+					runOnAliveWhenEmpty: true,
 					items: [{
 						name: 'Midgaard city key',
 						short: 'a thin gold key',
@@ -121,7 +122,7 @@ module.exports = {
 					gold: 1,
 					size: {value: 2, display: 'very small'},
 					itemType: 'mob',
-					behaviors: [{  
+					behaviors: [{
 						module: 'wander'
 					}]
 				}
@@ -164,7 +165,7 @@ module.exports = {
 				diceNum: 1, 
 				diceSides: 2,
 				diceMod: -5,
-				attackType: 'smash', 
+				attackType: 'smash',
 				ac: -1,
 				weight: 2,
 				slot: 'hands',
@@ -173,6 +174,9 @@ module.exports = {
 				lightDecay: 10,
 				flickerMsg: '',
 				extinguishMsg: '',
+				behaviors: [{
+					module: 'cursed_item'
+				}],
 				spell: {
 					id: 'spark',
 					display: 'Spark',
@@ -180,9 +184,6 @@ module.exports = {
 					train: 85,
 					type: 'spell',
 					wait: 2
-				},
-				beforeDrop: function(item, roomObj) {
-					return true;
 				}
 			}, {
 				name: 'Small Buckler', 

@@ -20,7 +20,7 @@ Try the latest on this Heroku hobby instance: https://rockmud.herokuapp.com/. If
 ## 10000 feet:
 All design/data elements of RockMUD must be either valid JSON or .js files. Please look at the current code and make an effort to match the current style if you plan to submit a pull request. Documentation has started -- see the github wiki.
 
-###RockMUD development chat through gitter:###
+### RockMUD development chat through gitter:
 
 https://gitter.im/rockmud/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link
 

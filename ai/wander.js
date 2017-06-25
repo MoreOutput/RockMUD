@@ -4,13 +4,11 @@ Room = require('../src/rooms'),
 World = require('../src/world');
 
 /*
-	Wander behavior. Mob will walk about selecting a random move direction from
-	mob.moveDirections.
+	Wander behavior. Mob will walk about selecting a random move direction from mob.moveDirections.
 
 	If the mob.stayinArea property is set to false the mob can wander outside of its starting area.
 
-	Adding a mob.wanderCheck value provides a check against 1d100; movement only occurs if the roll
-	beats the given wanderCheck value.
+	Adding a mob.wanderCheck value provides a check against 1d100; movement only occurs if the roll beats the given wanderCheck value.
 */
 module.exports = {
 	stayInArea: true,
@@ -22,14 +20,6 @@ module.exports = {
 		direction;
 
 		if (mob && mob.wanderCheck && roll > mob.wanderCheck && mob.position === 'standing') {
-			if (!mob.moveDirections) {
-				mob.moveDirections = mob.moveDirections;
-			}
-
-			if (!mob.stayInArea) {
-				mob.stayInArea = mob.stayInArea;
-			}
-
 			direction = mob.moveDirections[World.dice.roll(1, mob.moveDirections.length) - 1];
 
 			exitObj = Room.getExit(roomObj, direction);

@@ -201,10 +201,10 @@ setInterval(function() {
 
 // decay timer, affects all items with decay, decayLight
 // if an item with decay (not decayLight) reaches zero it goes away
-// if an item with decayLight reaches zero it goes out. Printing a generic message unless an onDestory event is found
+// if an item with decayLight reaches zero it goes out. Printing a generic message unless an onDestroy event is found
 // if onDestroy is found then the programmer should return a message
-// fires onDecay, onDecayLight, onDestory
-// simple msg override in the form of decayMsg, decayLightMsg and lightFlickerMsg
+// fires onDecay, onDecayLight, onDestroy
+// simple msg override in the form of decayMsg, decayLightMsg and lightFlickerMsg -- so you can avoid unneeded onDestroy
 setInterval(function() {
 	var i = 0,
 	j,
@@ -225,6 +225,7 @@ setInterval(function() {
 				if (item.decay && item.decay >= 1) {
 					item.decay -= 1;
 
+					// Level reduction for rotting corpses
 					if (obj.itemType === 'corpse' && obj.level >= 2) {
 						obj.level -= 1;
 					}
@@ -295,6 +296,25 @@ setInterval(function() {
 		}
 	}
 
+	// decay room items
+	if (World.dice.roll(1, 20) < 18) {
+		i = 0;
+
+		for (i; i < World.areas.length; i += 1) {
+			rooms = World.areas[i].rooms;
+
+			if (rooms) {
+				j = 0;
+
+				for (j; j < rooms.length; j += 1) {
+					if (!rooms[j].preventDecay && rooms[j].items) {
+						processItemDecay(rooms[j]);
+					}
+				}
+			} 
+		}
+	}
+
 	/*
 	// decay mob items
 	if (World.dice.roll(1, 20) < 10) {
@@ -317,25 +337,6 @@ setInterval(function() {
 		}
 	}
 	*/
-
-	// decay room items
-	if (World.dice.roll(1, 20) < 18) {
-		i = 0;
-
-		for (i; i < World.areas.length; i += 1) {
-			rooms = World.areas[i].rooms;
-
-			if (rooms) {
-				j = 0;
-
-				for (j; j < rooms.length; j += 1) {
-					if (!rooms[j].preventDecay && rooms[j].items) {
-						processItemDecay(rooms[j]);
-					}
-				}
-			} 
-		}
-	}
 }, 245000); // 4.5 minutes
 
 // AI Ticks and random player save
@@ -394,24 +395,24 @@ setInterval(function() {
 		if (World.areas[i].messages.length) {
 			msgObj = World.areas[i].messages[World.dice.roll(1, World.areas[i].messages.length) - 1];
 
-			if (!msgObj.hour) {
+			if (!msgObj.hour) { // check to see if this message can only be sent at a specific game hour
 				World.msgArea(World.areas[i].name, {
 					msg: msgObj.msg,
-					randomPlayer: msgObj.random // this options randomizes who hears the message
+					randomPlayer: msgObj.random // this option randomizes who hears the message
 				});
 			} else if (msgObj.hour === World.time.hour) {
 				World.msgArea(World.areas[i].name, {
 					msg: msgObj.msg,
-					randomPlayer: msg.random // this options randomizes who hears the message
+					randomPlayer: msg.random // this option randomizes who hears the message
 				});
 			}
 		}
 	}
-}, 1020000); // 17 minutes
+}, 75000);
 
 // Player Regen
-setInterval(function() { 
-	var i = 0; 
+setInterval(function() {
+	var i = 0;
 
 	if (World.players.length) {
 		if (World.dice.roll(1, 3) <= 2) {

@@ -43,7 +43,7 @@ Character.prototype.login = function(r, s, fn) {
 								styleClass: 'error',
 								noPrompt: true
 							});
-							
+
 							World.players[i].socket.disconnect();
 
 							s.player = World.players[i];
@@ -69,7 +69,7 @@ Character.prototype.login = function(r, s, fn) {
 					s.player.logged = false;
 					s.player.verifiedPassword = false;
 					s.player.verifiedName = false;
-					
+
 					return fn(s, true);
 				} else {
 					return fn(s, false);
@@ -850,7 +850,15 @@ Character.prototype.getFist = function(player) {
 };
 
 Character.prototype.getContainer = function(player, command) {
-	return World.search(player.items, 'container', command);
+	var i = 0;
+
+	for (i; i <  player.items.length; i += 1) {
+		if (player.items[i].itemType === 'container' && player.items[i].name.toLowerCase().indexOf(command.input) !== -1) {
+			return player.items[i];
+		}
+	}
+
+	return false;
 };
 
 Character.prototype.getContainers = function(player) {
@@ -874,7 +882,7 @@ Character.prototype.getFromContainer = function(container, command) {
 	var i = 0;
 
 	for (i; i < container.items.length; i += 1) {
-		if (container.items[i].name.toLowerCase().indexOf(command.arg) !== -1) {
+		if (container.items[i].name.toLowerCase().indexOf(command.second) !== -1) {
 			return container.items[i];
 		}
 	}

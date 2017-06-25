@@ -63,7 +63,9 @@ window.onload = function() {
 		rec: 'recall',
 		gi: 'give',
 		wield: 'wear',
-		dr: 'drop'
+		dr: 'drop',
+		j: 'quests',
+		quest: 'quests'
 	},
 	isScrolledToBottom = false,
 	playerIsLogged = null,
@@ -169,7 +171,7 @@ window.onload = function() {
 	};
 
 	node.focus();
-	
+
 	ws.on('msg', function(r) {
 		display(r, true);
 

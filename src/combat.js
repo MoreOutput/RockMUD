@@ -433,12 +433,12 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 			Room.removeMob(roomObj, mob);
 		} else {
 			respawnRoom = World.getRoomObject(mob.recall.area, mob.recall.roomid);
-			
+
 			Room.removePlayer(roomObj, mob);
-		
+
 			mob.items = [];
 			mob.position = 'standing';
-			
+
 			respawnRoom.playersInRoom.push(mob);
 
 			mob.roomid = respawnRoom.id;
@@ -446,7 +446,7 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 			mob.chp = 1;
 			mob.cmana = 1;
 			mob.cmv = 7;
-		
+
 			World.msgPlayer(mob, {
 				msg: '<strong>You died! Make it back to your corpse before it rots to save your gear!</strong>',
 				styleClass: 'error'

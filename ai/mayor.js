@@ -15,7 +15,6 @@ module.exports = {
 		'Each day before sunrise I lower the bridge and open the city.'
 	],
 	moveDirections: ['north', 'east', 'west', 'south'],
-	wanderCheck: 50,
 	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 40);
 

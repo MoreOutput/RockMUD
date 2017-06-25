@@ -732,8 +732,13 @@ World.prototype.setupArea = function(area, fn) {
 		i = 0;
 
 		for (i; i < area.rooms.length; i += 1) {
-			world.rollMobs(area.rooms[i].monsters, area.rooms[i].id, area);
-			world.rollItems(area.rooms[i].items, area.rooms[i].id, area);
+			if (area.rooms[i].monsters.length > 0) {
+				world.rollMobs(area.rooms[i].monsters, area.rooms[i].id, area);
+			}
+
+			if (area.rooms[i].items.length > 0) {
+				world.rollItems(area.rooms[i].items, area.rooms[i].id, area);
+			}
 		}
 
 		if (typeof fn === 'function') {
@@ -1239,11 +1244,12 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 					if (fnd === false && pattern.test(wordArr[j]) 
 					|| pattern.test(arr[i].displayName.toLowerCase())) {
 						fnd = true;
+
 						matchedIndexes.push(i);
 					}
 				}
 			}
-		} else {		
+		} else {
 			for (i; i < arr.length; i += 1) {
 				wordArr = arr[i].name.toLowerCase().split(' ');
 
@@ -1257,6 +1263,7 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 					if (fnd === false && arr[i].itemType === itemType && pattern.test(wordArr[j]) 
 					|| pattern.test(arr[i].displayName.toLowerCase())) {
 						fnd = true;
+
 						matchedIndexes.push(i);
 					}
 				}
@@ -1310,7 +1317,7 @@ World.prototype.setupBehaviors = function(gameEntity) {
 			}
 
 			if (behaviorObj) {
-				gameEntity = this.extend(gameEntity, JSON.parse(JSON.stringify(behaviorObj)));
+				gameEntity = this.extend(gameEntity, behaviorObj);
 			}
 		}
 	}
@@ -1331,7 +1338,7 @@ World.prototype.setupBehaviors = function(gameEntity) {
 					}
 
 					if (behaviorObj) {
-						gameEntity.items[j] = this.extend(gameEntity.items[j], JSON.parse(JSON.stringify(behaviorObj)));
+						gameEntity.items[j] = this.extend(gameEntity.items[j], behaviorObj);
 					}
 				}
 			}	
