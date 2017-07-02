@@ -172,11 +172,16 @@ module.exports = {
 						hp: 15,
 						chp: 13,
 						gold: 1,
+						str: 3,
 						size: {value: 2, display: 'very small'},
-						itemType: 'mob',
-						behaviors: [{  
+						onRolled: function(mob) {
+							if (World.dice.roll(1, 3) > 1) {
+								mob.behaviors = [];
+							}
+						},
+						behaviors: [{
 							module: 'wander'
-						}]	
+						}]
 					});
 				}
 			}

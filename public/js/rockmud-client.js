@@ -4,8 +4,8 @@ window.onload = function() {
 	terminal = document.getElementById('terminal'),
 	node = document.getElementById('cmd'),
 	rowCnt = 0,
-	canSend = true,	
-	aliases = {	
+	canSend = true,
+	aliases = {
 		n: 'move north',
 		e: 'move east',
 		w: 'move west',
@@ -65,13 +65,14 @@ window.onload = function() {
 		wield: 'wear',
 		dr: 'drop',
 		j: 'quests',
+		ql: 'quests',
 		quest: 'quests'
 	},
 	isScrolledToBottom = false,
 	playerIsLogged = null,
 	display = function(r, addToDom) {
 		var i = 0;
-	
+
 		if (addToDom) {
 			terminal.innerHTML += '<div class="row">' + r.msg + '</div>';
 
@@ -139,11 +140,11 @@ window.onload = function() {
 
 	document.addEventListener('onLogged', function(e) {
 		e.preventDefault();
-		
+
 		node.type = 'text';
 		node.placeholder = 'Enter a Command -- type \'help commands\' for a list of basic commands';
 	}, false);
-	
+
 	document.getElementById('console').onsubmit = function (e) {
 		var messageNodes = [],
 		msg = node.value.toLowerCase().trim(),

@@ -7,5 +7,6 @@
 	"attackType": "punch",
 	"diceNum": 1,
 	"diceSides": 4,
-	"diceMod": 1
+	"diceMod": 1,
+	"minStat": 10
 }

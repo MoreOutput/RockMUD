@@ -258,9 +258,11 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 									(function(setupIndex) {
 										world.setupArea(area, function(area) {
-											var j = 0;
+											var j;
 
 											if (setupIndex === world.areas.length - 1) {
+												j = 0;
+
 												for (j; j < world.areas.length; j += 1) {
 													(function(area, postIndex) {
 														if (area.afterLoad) {
@@ -470,9 +472,9 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 			var chanceRoll = world.dice.roll(1, 20),
 			prop;
 
-			item.refId = world.createRefId(item) + '-' + index;
-
 			item = world.extend(item, JSON.parse(JSON.stringify(world.itemTemplate)));
+
+			item.refId = world.createRefId(item) + '-' + index;
 
 			if (Array.isArray(item.name)) {
 				item.name = item.name[world.dice.roll(1, item.name.length) - 1];
@@ -557,17 +559,19 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			prop,
 			classObj;
 
-			mob.refId = world.createRefId(mob) + '-' + index;
-
 			mob = world.extend(mob, JSON.parse(JSON.stringify(world.mobTemplate)));
+
+			mob.refId = world.createRefId(mob) + '-' + index;
 
 			if (mob.race) {
 				raceObj = world.getRace(mob.race);
+
 				mob = world.extend(mob, JSON.parse(JSON.stringify(raceObj)));
 			}
-			
+
 			if (mob.charClass) {
 				classObj = world.getClass(mob.charClass);
+
 				mob = world.extend(mob, JSON.parse(JSON.stringify(classObj)));
 			}
 
@@ -610,17 +614,11 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			}
 
 			if (mob.rollStats) {
-				mob.baseStr += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.str;
-				mob.baseDex += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.dex;
-				mob.baseInt += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.int;
-				mob.baseWis += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.wis;
-				mob.baseCon += world.dice.roll(3, 6) - (mob.size.value * 3) + mob.con;
-				
-				mob.str = mob.baseStr;
-				mob.dex = mob.baseDex;
-				mob.int = mob.baseInt;
-				mob.wis = mob.baseWis;
-				mob.con = mob.baseCon;
+				mob.baseStr = mob.str + mob.minStat;
+				mob.baseDex = mob.dex + mob.minStat;
+				mob.baseInt = mob.int + mob.minStat;
+				mob.baseWis = mob.wis + mob.minStat;
+				mob.baseCon = mob.con + mob.minStat;
 			}
 
 			mob.isPlayer = false;
@@ -771,9 +769,9 @@ World.prototype.createRefId = function(gameEntity) {
 	if (gameEntity.isPlayer === true) {
 		return 'entity-' + gameEntity.sid;
 	} else if (gameEntity.itemType === 'entity') {
-		Math.random().toString().replace('0.', 'entity-');
+		return Math.random().toString().replace('0.', 'entity-');
 	} else {
-		Math.random().toString().replace('0.', 'item-');
+		return 	Math.random().toString().replace('0.', 'item-');
 	}
 }
 
@@ -1468,7 +1466,9 @@ World.prototype.extend = function(extendObj, readObj, fn) {
 				} else if (typeof extendObj[prop] === 'object'
 					&& typeof readObj[prop] === 'object') {
 					for (prop2 in readObj[prop]) {
-						this.extend(extendObj[prop][prop2], JSON.parse(JSON.stringify(behaviorObj)));
+						if (extendObj[prop][prop2] === undefined) {
+							extendObj[prop][prop2] = readObj[prop][prop2];
+						}
 					}
 				} else if (typeof extendObj[prop] === 'string'
 					&& typeof readObj[prop] === 'string'
@@ -1603,4 +1603,3 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 };
 
 module.exports = new World();
-

@@ -1,7 +1,7 @@
 {
 	"name": "Ogre",
-	"str": 4,
-	"int": -2,
+	"str": 5,
+	"int": -1,
 	"dex": -1,
 	"hp": 20,
 	"playable": true,
@@ -11,5 +11,6 @@
 	"magicRes": -3,
 	"attackType": "smash",
 	"diceNum": 1,
-	"diceSides": 8
+	"diceSides": 8,
+	"minStat": 9
 }

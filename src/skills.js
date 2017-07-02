@@ -12,7 +12,7 @@ Skill = function() {};
 // Return a mod for AC rolls when the opponent has a shield,
 Skill.prototype.shieldBlock = function(skillObj, player, roomObj, shield) {
 	if (World.dice.roll(1, 100) <= skillObj.train) {
-		return World.dice.roll(1, skillObj.train/10, shield.ac + skillObj.mod);
+		return World.dice.roll(1, skillObj.train / 10, shield.ac + skillObj.mod);
 	} else {
 		return shield.ac;
 	}
@@ -203,7 +203,7 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 	opponent,
 	rollDamage = function(opponent) {
 		var oppDexMod = World.dice.getDexMod(opponent);
-	
+
 		if (opponent.mainStat && opponent.mainStat === 'dex' || World.dice.roll(1, 20) <= 2) {
 			return World.dice.roll(player.diceNum + 1, player.diceSides + player.size.value, strMod + player.size.value) 
 				* (Math.round(player.level/2) + 1) - opponent.ac;
@@ -234,9 +234,9 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 					opponent = roomObj.monsters[i];
 
 					damage = rollDamage(opponent);
-			
+
 					opponent.chp -= damage;
-					
+
 					if (!player.opponent || opponent.refId !== player.opponent.refId) {
 						Combat.processFight(player, opponent, roomObj);
 					}

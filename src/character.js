@@ -1,6 +1,6 @@
 /*
-* Characters.js controls everything dealing with a 'Character' which includes in game creatures.
-* No in game commands are defiend here; Commands.js does share some function names with this module, 
+* Characters.js controls everything dealing with a 'Character' which includes in game creatures
+* No in game commands are defiend here; Commands.js does share some function names with this module,
 * see: save().
 */
 'use strict';
@@ -8,6 +8,7 @@ var fs = require('fs'),
 crypto = require('crypto'),
 Room = require('./rooms'),
 World = require('./world'),
+Skills = require('./skills'),
 Cmds,
 Character = function () {
 	this.statusReport = [
@@ -29,7 +30,7 @@ Character = function () {
 Character.prototype.login = function(r, s, fn) {
 	var character = this,
 	name = r.msg.replace(/_.*/,'').toLowerCase();
-	
+
 	if (r.msg.length > 2) {
 		if  (/^[a-z]+$/g.test(r.msg) === true && /[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
 			character.read(name, function(err, r) {
@@ -199,6 +200,9 @@ Character.prototype.addPlayer = function(s) {
 	for (i; i < World.players.length; i += 1) {
 		if (s.player.name === World.players[i].name) {
 			World.players.splice(i, 1);
+			World.players.push(s.player);
+
+			return true;
 		}
 	}
 
@@ -208,7 +212,7 @@ Character.prototype.addPlayer = function(s) {
 };
 
 // A New Character is saved
-Character.prototype.create = function(s) { 
+Character.prototype.create = function(s) {
 	var character = this,
 	raceObj,
 	classObj,
@@ -220,16 +224,16 @@ Character.prototype.create = function(s) {
 	} else {
 		startingArea = World.config.startingArea[World.dice.roll(1, World.config.startingArea.length) - 1];
 	}
-	
+
 	raceObj = World.getRace(s.player.race);
 
 	classObj = World.getClass(s.player.charClass);
-	
+
 	s.player.name = s.player.name.toLowerCase();
-	
+
 	s.player = World.extend(s.player, JSON.parse(JSON.stringify(raceObj)));
 	s.player = World.extend(s.player, JSON.parse(JSON.stringify(classObj)));
-	
+
 	s.player.refId = World.createRefId(s.player);
 	s.player.id = s.player.name;
 	s.player.chp += 30;
@@ -278,9 +282,9 @@ Character.prototype.create = function(s) {
 		character.hashPassword(salt, s.player.password, 1000, function(hash) {
 			s.player.password = hash;
 			s.player.socket = null;
-			
+
 			s.player.personalPronoun = character.getPersonalPronoun(s.player);
-			
+
 			s.player.possessivePronoun = character.getPossessivePronoun(s.player);
 
 			character.write(s.player.name, s.player, function (err) {
@@ -323,6 +327,7 @@ Character.prototype.newCharacter = function(s, command) {
 	i = 0;
 
 	if (!Cmds) {
+		// this can be refactored and look can be called iniitally in server.js
 		Cmds = require('./commands');
 	}
 	
@@ -1123,11 +1128,11 @@ Character.prototype.wearWeapon = function(target, weapon, roomObj) {
 	if (!weapon.equipped) {
 		if (slot) {
 			weapon.equipped = true;
-	
+
 			slot.item = weapon.refId;
 
 			this.addStatMods(target, weapon);
-	
+
 			World.msgPlayer(target, {
 				msg: 'You wield a ' + weapon.displayName + ' in your ' + slot.name.toLowerCase() + '.'
 			});
@@ -1250,8 +1255,8 @@ Character.prototype.canSee = function(player, roomObj) {
 	}
 	
 	if (!canSee && player.sight) {
- 		light = this.getLights(player)[0];
-		
+		light = this.getLights(player)[0];
+
 		if (light) {
 			canSee = true;
 		}
@@ -1294,7 +1299,7 @@ Character.prototype.canSeeObject = function(player, entity) {
 	detectHide = World.getAffect(player, 'detectHidden'),
 	isInvisible = World.isInvisible(entity),
 	isHidden = World.isHidden(entity);
-	
+
 	if (entity.affects.length) {
 		if (isHidden) {
 			canSee = false;
@@ -1418,4 +1423,3 @@ Character.prototype.write = function(name, obj, fn) {
 };
 
 module.exports = new Character();
-

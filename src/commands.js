@@ -627,7 +627,7 @@ Cmd.prototype.group = function(target, command) {
 
 Cmd.prototype.emote = function(target, command) {
 	var roomObj;
-	
+
 	if (target.position === 'standing' || target.position === 'resting') {
 		if (!command.roomObj) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
@@ -637,9 +637,14 @@ Cmd.prototype.emote = function(target, command) {
 
 		World.msgRoom(roomObj, {
 			msg: '<i>' +  target.displayName + ' ' + command.msg + '</i>',
-			darkMsg: 'You can feel movement in the area.',
+			darkMsg: 'You sense some movement in the area.',
 			styleClass: 'cmd-emote warning',
 			checkSight: true
+		});
+
+		World.msgPlayer(target, {
+			msg: '<i>' +  target.displayName + ' ' + command.msg + '</i>',
+			styleClass: 'cmd-emote'
 		});
 	} else {
 		World.msgPlayer(target, {
@@ -772,8 +777,51 @@ Cmd.prototype.drink = function(target, command) {
 	}
 };
 
-Cmd.prototype.fill = function() {
-			
+// replishing a watersource, only admins can fill room level watersource items
+// watersources within a players inventory can be poured into one another
+Cmd.prototype.fill = function(target, command) {
+	var roomObj,
+	toEmptyWatersource, // the item to emptied, must also be a watersource
+	toFillWatersource; // the item to be filled
+
+	if (target.position === 'standing') {
+		if (command.roomObj) {
+			roomObj = command.roomObj;
+		} else {
+			roomObj = World.getRoomObject(target.area, target.roomid);
+		}
+
+		toFillWaterSource = Character.getBottle(target, command);
+
+		if (!toFillWaterSource) {
+				toEmptyWatersource = Room.getWatersource(roomObj, command);
+
+			if (!toEmptyWatersource) {
+				// if no room level item was found to fill from try the characters inventory
+				toEmptyWatersource = Character.getBottle(target, command);
+			}
+
+			if (toEmptyWatersource) {
+				World.msgPlayer(target, {
+					msg: 'You fill ' + watersource.short + ' to the brim.'
+				});
+			} else {
+				World.msgPlayer(target, {
+					msg: 'Theres nothing by that name around that can be used to fill ' + toFillWaterSource.short,
+					styleClass: 'error'
+				});
+			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'It is impossible to fill something you do not have in your inventory...',
+				styleClass: 'error'
+			});
+		}
+	} else {
+		World.msgPlayer(target, {
+			msg: 'You cannot do that from this position. Try standing up first.'
+		});
+	}
 };
 
 Cmd.prototype.sleep = function(target, command) {
@@ -886,9 +934,7 @@ Cmd.prototype.open = function(target, command, fn) {
 				targetExit.door.isOpen = true;
 
 				World.msgPlayer(target, {
-					msg: 'You open a ' 
-						+ exitObj.door.name + ' ' + exitObj.cmd 
-						+ ' from here.',
+					msg: 'You open a ' + exitObj.door.name + ' ' + exitObj.cmd + ' from here.',
 					styleClass: 'cmd-wake'
 				});
 
@@ -908,7 +954,7 @@ Cmd.prototype.open = function(target, command, fn) {
 					styleClass: 'cmd-sleep'
 				});
 			} else {
-				World.msgPlayer(target, {msg: 'It can\'t be opened right now.'});
+				World.msgPlayer(target, {msg: 'Appears to be locked.'});
 			}
 		} else {
 			World.msgPlayer(target, {msg: 'Nothing to open in that direction.'});
@@ -1893,9 +1939,6 @@ Cmd.prototype.brandish = function(player, command) {
 			castCmd = this.createCommandObject({msg: castCmd});
 
 			castCmd.skillObj = scroll.spell;
-
-
-			console.log('time to cast!', castCmd);
 
 			this.cast(player, castCmd);
 		} else {

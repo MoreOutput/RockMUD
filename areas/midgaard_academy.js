@@ -57,8 +57,8 @@ module.exports = {
 				diceNum: 3,
 				diceSides: 10,
 				diceMod: 5,
-				str: 20,
-				dex: 18,
+				str: 10,
+				dex: 8,
 				damRoll: 20,
 				hitRoll: 15,
 				ac: 20,
@@ -193,8 +193,8 @@ module.exports = {
 
 						World.msgPlayer(entity, {
 							msg: msg
-						});	
-						
+						});
+
 						if (success) {
 							return true;
 						} else {

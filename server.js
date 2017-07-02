@@ -75,10 +75,10 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 				if (valid) {
 					if (cmdObj.cmd) {
 						cmdObj.roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-						
+
 						if (cmdObj.cmd in Cmds) {
 							Cmds[cmdObj.cmd](s.player, cmdObj);
-							
+
 							World.processEvents('onCommand', s.player, cmdObj.roomObj, cmdObj);
 							World.processEvents('onCommand', s.player.items, cmdObj.roomObj, cmdObj);
 						} else if (cmdObj.cmd in Skills) {
@@ -160,7 +160,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 							s.player.creationStep = 1;
 							s.player.isPlayer = true;
 							s.player.logged = true;
-						
+
 							parseCmd(r, s);
 						}
 					})			
@@ -168,7 +168,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 					Character.getPassword(s, Cmds.createCommandObject(r), function(s) {
 						s.player.verifiedPassword = true;
 						s.player.logged = true;
-						
+
 						Cmds.look(s.player); // we auto fire the look command on login
 					});
 				} else {

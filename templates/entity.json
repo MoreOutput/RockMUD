@@ -33,6 +33,7 @@
 	"baseInt": 0,
 	"baseDex": 0,
 	"baseCon": 0,
+	"minStat": 0,
 	"ac": 0,
 	"damRoll": 0,
 	"hitRoll": 0,

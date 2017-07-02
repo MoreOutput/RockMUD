@@ -80,7 +80,6 @@ module.exports = {
 					hitRoll: 10,
 					ac: 20,
 					wanderCheck: 50,
-					itemType: 'mob',
 					// this is asking if we want to run the ai behaviors when theres no players in the room with the mob
 					runOnAliveWhenEmpty: true,
 					items: [{
@@ -121,7 +120,6 @@ module.exports = {
 					chp: 15,
 					gold: 1,
 					size: {value: 2, display: 'very small'},
-					itemType: 'mob',
 					behaviors: [{
 						module: 'wander'
 					}]
@@ -230,7 +228,7 @@ module.exports = {
 				diceNum: 1, 
 				diceSides: 6,
 				diceMod: 0,
-				attackType: 'slash', 
+				attackType: 'slash',
 				attackElement: '',
 				weight: 4,
 				slot: 'hands',
@@ -460,7 +458,6 @@ module.exports = {
 					hitRoll: 10,
 					ac: 20,
 					merchant: true,
-					itemType: 'mob',
 					preventItemDecay: true,
 					items: [{
 						name: 'Pemmican',

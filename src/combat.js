@@ -14,13 +14,8 @@ Combat = function() {
 	];
 
 	this.abstractNouns = ['intensity', 'force', 'strength', 'power', 'might', 'effort', 'energy'];
-},
-Skill = require('./skills');
+};
 
-/*
-* Starting combat, begin() much return true and the target node for a fight to continue
-* otherwise both parties are left in the state prior. Beginning combat does not add Wait.
-*/
 Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, opponentMods) {
 	var numOfAttacks = Math.round(((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4) - 1),
 	secondAttackSkill = Character.getSkillById(attacker, 'secondAttack');
@@ -28,7 +23,7 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 	if (numOfAttacks <= 0) {
 		numOfAttacks = 1;
 	}
-	
+
 	if (weapon.modifiers && weapon.modifiers.numOfAttacks) {
 		numOfAttacks += weapon.modifiers.numOfAttacks;
 	}
@@ -48,9 +43,9 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 			numOfAttacks += 1;
 		}
 	}
-	
+
 	if (secondAttackSkill) {
-		numOfAttacks += Skill.secondAttack(secondAttackSkill, attacker);
+		numOfAttacks += World.dice.roll(1, 2);
 	} else if (numOfAttacks === 1 && World.dice.roll(1, 6) === 4) {
 		numOfAttacks = 2;
 	}
@@ -65,6 +60,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	attackerMods = World.dice.getMods(attacker),
 	opponentMods = World.dice.getMods(opponent),
 	numOfAttacks,
+	shieldBlockSkill = Character.getSkillById(opponent, 'shieldBlock'),
 	i = 0,
 	j = 0,
 	msgForAttacker = '',
@@ -100,7 +96,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	} else {
 		attacker.wait = 0;
 	}
-	
+
 	if (attacker.position === 'fighting') {
 		weaponSlots = Character.getWeaponSlots(attacker);
 
@@ -111,22 +107,24 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 				shield = shieldSlots[0].item;
 			}
 		}
-		
+
 		for (i; i < weaponSlots.length; i += 1) {
 			if (weaponSlots[i].item) {
 				weapon = Character.getItemByRefId(attacker, weaponSlots[i].item);
 			} else if (!weapon && !weaponSlots[i].item) {
 				weapon = Character.getFist(attacker);
 			}
-			
+
 			numOfAttacks = combat.getNumberOfAttacks(attacker, weapon, attackerMods, opponentMods);
-			
+
 			if (numOfAttacks) {
 				j = 0;
 
 				for (j; j < numOfAttacks; j += 1) {
 					if (shield) {
-						shieldAC = Skill.shieldBlock(Character.getSkillById(opponent, 'shieldBlock'), opponent, roomObj, shield);
+						if (shieldBlockSkill) {
+							acCheck += World.dice.roll(1, attacker.level);
+						}
 
 						acCheck += shieldAC;
 					}
@@ -138,7 +136,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 					if (opponent.resistantTo && opponent.resistantTo.toString().indexOf(weapon.attackType) !== -1) {
 						damage -= World.dice.roll(1, 4 + weapon.level);
 					}
-					
+
 					if (acCheck < hitRoll) {
 						if (dodgeCheck < hitRoll) {
 							damage = World.dice.roll(weapon.diceNum, weapon.diceSides, attacker.damRoll + weapon.diceMod + attackerMods.str);
@@ -148,10 +146,10 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							if (attackerMods.str >= opponentMods.con) {
 								damage += damRoll/3;
 							}
-	
+
 							damage -= opponent.ac/2;
 							damage -= opponent.meleeRes;
-			
+
 							if (numOfAttacks > 3 && j > 3) {
 								damage = damage/2;
 							}
@@ -161,7 +159,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 								criticalAttackXP = World.dice.roll(1 + attacker.level, 20);
 
 								attacker.exp += criticalAttackXP;
-								
+
 								damage = (damage * 3) + attacker.str;
 							}
 
@@ -172,7 +170,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							}
 
 							adjective = combat.getDamageAdjective(damage);
-							
+
 							abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
 
 							opponent.chp -= damage;
@@ -180,17 +178,17 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							if (attacker.isPlayer) {
 								if (!criticalAttack) {
 									if (attackerCanSee) {
-										msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short 
+										msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short
 											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
 											+ damage + ')</strong></div>';
 									} else {
-										msgForAttacker += '<div>You ' + weapon.attackType + ' <strong>something</strong> '  
+										msgForAttacker += '<div>You ' + weapon.attackType + ' <strong>something</strong> '
 											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
 											+ damage + ')</strong></div>';
 									}
 								} else {
 									if (attackerCanSee) {
-										msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short 
+										msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short
 											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
 											+ damage + ')</strong></div>'
 											+ '<div class="green">You landed a critical hit and gain '
@@ -212,7 +210,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							if (opponent.isPlayer) {
 								if (!criticalAttack) {
 									if (attackerCanSee) {
-										msgForOpponent += '<div class="grey">' + attacker.possessivePronoun + ' ' 
+										msgForOpponent += '<div class="grey">' + attacker.possessivePronoun + ' '
 											+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
 											+ ' <span class="red">(' + damage + ')</span></div>';
 									} else {
@@ -222,7 +220,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 									}
 								} else {
 									if (attackerCanSee) {
-										msgForOpponent += '<div class="grey"><strong>' + attacker.possessivePronoun + ' ' 
+										msgForOpponent += '<div class="grey"><strong>' + attacker.possessivePronoun + ' '
 											+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
 											+ '</strong> <span class="red">(' + damage + ')</span></div>';
 									} else {
@@ -239,7 +237,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 										+ opponent.short + ' and miss!</div>';
 								} else {
 									msgForAttacker += '<div class="red">You swing at '
-										+ opponent.short + ' with <strong>' + weapon.short + '</strong> and miss!</div>';	
+										+ opponent.short + ' with <strong>' + weapon.short + '</strong> and miss!</div>';
 								}
 							}
 
@@ -305,16 +303,16 @@ Combat.prototype.getDamageAdjective = function(damage) {
 	damLevel = damage / this.adjective[i].damage * 100;
 
 	for (i; i < this.adjective.length; i += 1) {
-		if (this.adjective[i].damage >= damage) {	
+		if (this.adjective[i].damage >= damage) {
 			if (!Array.isArray(this.adjective[i].value)) {
 				value = this.adjective[i].value;
 			} else {
 				value = this.adjective[i].value[World.dice.roll(1, this.adjective[i].value.length) - 1];
 			}
-	
+
 			if (damage > 10) {
 				if (damLevel === 100) {
-					return '**' + value.toUpperCase() + '**';	
+					return '**' + value.toUpperCase() + '**';
 				} else if (damLevel >= 80) {
 					return value.toUpperCase();
 				} else {
@@ -329,7 +327,7 @@ Combat.prototype.getDamageAdjective = function(damage) {
 	return this.adjective[1].value;
 };
 
-Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
+Combat.prototype.processFight = function(player, opponent, roomObj) {
 	var combat = this,
 	oppStatus,
 	playerStatus,
@@ -343,7 +341,7 @@ Combat.prototype.processFight = function(player, opponent, roomObj, fn) {
 	}
 
 	player.position = 'fighting';
-	
+
 	if (!player.opponent) {
 		player.opponent = opponent;
 	}
@@ -419,7 +417,7 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 	if (mob.chp <= 0) {
 		mob.opponent = null;
 		mob.killedBy = player.name;
-		
+
 		player.opponent = null;
 		player.position = 'standing';
 
@@ -456,10 +454,10 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 		exp = World.dice.calExp(player, mob);
 
 		Room.addItem(roomObj, corpse);
-		
+
 		if (exp > 0) {
 			player.exp += exp;
-			
+
 			if (World.dice.roll(1, 2) === 1) {
 				endOfCombatMsg = 'You won the fight! You learn some things resulting in <strong>'
 					+ exp + ' experience points</strong>.';
@@ -496,7 +494,7 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 				noPrompt: true,
 				styleClass: 'victory'
 			});
-		
+
 			Character.level(player);	
 		} else {
 			World.msgPlayer(player, {

@@ -1,6 +1,5 @@
 {
 	"name": "Halfling",
-	"raceAbbr": "Hlf",
 	"con": -1,
 	"dex": 2,
 	"hp": -10,
@@ -9,5 +8,6 @@
 	"attackType": "punch",
 	"size": {"value": 2, "display": "very small"},
 	"diceNum": 1,
-	"diceSides": 2
+	"diceSides": 2,
+	"minStat": 10
 }
