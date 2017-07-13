@@ -1205,14 +1205,14 @@ Cmd.prototype.move = function(target, command, fn) {
 			roomObj = command.roomObj;
 		}
 
-		if (roomObj.moveMod) {				
+		if (roomObj.moveMod) {
 			cost += World.dice.roll(1, roomObj.moveMod);
 		}
 
 		exitObj = Room.getExit(roomObj, direction);
 
 		if (exitObj) {
-			if (!exitObj || !exitObj.door || exitObj.door.isOpen === true) {
+			if (!exitObj.door || exitObj.door.isOpen === true) {
 				sneakAff = World.getAffect(target, 'sneak');
 
 				if (!command.targetRoom) {
@@ -1832,22 +1832,26 @@ Cmd.prototype.flee = function(player, command) {
 			if (chanceRoll > 7 && player.wait === 0) {
 				player.position = 'fleeing';
 
-				if (!command.msg) {
-					command.msg = directions[World.dice.roll(1, directions.length) - 1];
+				if (!command.arg) {
+					command.arg = directions[World.dice.roll(1, directions.length) - 1];
 				}
 
-				cmd.move(player, command, function(moved, fn) {
+				cmd.move(player, command, function(moved) {
 					if (moved) {
 						player.position = 'standing';
 						player.opponent.position = 'standing';
 
+						if (World.dice.roll(1, 10) > 8 && player.wait < 2) {
+							player.wait += 1;
+						}
+
 						World.msgPlayer(player.opponent, {
-							msg: player.displayName + ' fled ' + command.msg +'!',
+							msg: player.displayName + ' fled ' + command.arg +'!',
 							styleClass: 'grey'
 						});
 
 						World.msgPlayer(player, {
-							msg: '<strong>You fled ' + command.msg +'</strong>!',
+							msg: '<strong>You fled ' + command.arg +'</strong>!',
 							styleClass: 'success'
 						});
 
@@ -1857,7 +1861,7 @@ Cmd.prototype.flee = function(player, command) {
 						player.position = 'fighting';
 
 						World.msgPlayer(player.opponent, {
-							msg: '<p>' + player.displayName + ' tries to flee ' + command.msg + '.</p>',
+							msg: '<p>' + player.displayName + ' tries to flee ' + command.arg + '.</p>',
 							styleClass: 'grey'
 						});
 
@@ -1887,10 +1891,6 @@ Cmd.prototype.flee = function(player, command) {
 				msg: 'You try to flee and fail!',
 				styleClass: 'green'
 			});
-		}
-
-		if (World.dice.roll(1, 10) < 6) {
-			player.wait += 1;
 		}
 	} else {
 		World.msgPlayer(player, {

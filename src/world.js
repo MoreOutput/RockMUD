@@ -994,7 +994,7 @@ World.prototype.prompt = function(target) {
 		+ player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' 
 		+ player.cmv + '/'  + player.mv +'<span class="warning">mv</span>></strong></div>';
 
-	if (player.role === 'admin') {
+	if (player.sid) {
 		prompt += '<' + player.wait + 'w>';
 	}
 
@@ -1447,10 +1447,14 @@ World.prototype.saveArea = function(areaId) {
 
 World.prototype.extend = function(extendObj, readObj, fn) {
 	var prop,
-	propCnt = Object.keys(readObj).length,
+	propCnt,
 	prop2;
 
-	if (arguments.length === 2 && propCnt > 0) {
+	if (readObj) { // refactor, shouldn't need this check
+		propCnt = Object.keys(readObj).length;
+	}
+
+	if (arguments.length === 2 && propCnt) {
 		for (prop in readObj) {
 			if (extendObj[prop] !== undefined) {
 				if (Array.isArray(extendObj[prop])

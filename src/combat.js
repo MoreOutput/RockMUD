@@ -115,7 +115,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 		for (i; i < weaponSlots.length; i += 1) {
 			if (weaponSlots[i].item) {
 				weapon = Character.getItemByRefId(attacker, weaponSlots[i].item);
-			} else if (!weapon && !weaponSlots[i].item) {
+			} else {
 				weapon = Character.getFist(attacker);
 			}
 
