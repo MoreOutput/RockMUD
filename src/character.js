@@ -31,6 +31,11 @@ Character.prototype.login = function(r, s, fn) {
 	var character = this,
 	name = r.msg.replace(/_.*/,'').toLowerCase();
 
+		if (!Cmds) {
+		// this can be refactored and look can be called iniitally in server.js
+		Cmds = require('./commands');
+	}
+
 	if (r.msg.length > 2) {
 		if  (/^[a-z]+$/g.test(r.msg) === true && /[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
 			character.read(name, function(err, r) {
@@ -207,13 +212,6 @@ Character.prototype.addPlayer = function(s) {
 	}
 
 	World.players.push(s.player);
-
-	// refactor
-	if (!Cmds) {
-		// this can be refactored and look can be called iniitally in server.js
-		Cmds = require('./commands');
-	}
-	
 
 	return true;
 };
