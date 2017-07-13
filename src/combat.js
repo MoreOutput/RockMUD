@@ -54,6 +54,10 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 };
 
 Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
+	if (!Character.getSkillById) {
+		Character = require('./character');
+	}
+
 	var combat = this,
 	weaponSlots,
 	shieldSlots,
@@ -333,6 +337,11 @@ Combat.prototype.processFight = function(player, opponent, roomObj) {
 	playerStatus,
 	msgForPlayer,
 	msgForOpponent;
+
+	if (!Character) {
+		// this can be refactored and look can be called iniitally in server.js
+		Character = require('./character');
+	}
 
 	opponent.position = 'fighting';
 

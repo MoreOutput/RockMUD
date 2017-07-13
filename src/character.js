@@ -208,6 +208,13 @@ Character.prototype.addPlayer = function(s) {
 
 	World.players.push(s.player);
 
+	// refactor
+	if (!Cmds) {
+		// this can be refactored and look can be called iniitally in server.js
+		Cmds = require('./commands');
+	}
+	
+
 	return true;
 };
 
@@ -326,11 +333,6 @@ Character.prototype.newCharacter = function(s, command) {
 	var character = this,
 	i = 0;
 
-	if (!Cmds) {
-		// this can be refactored and look can be called iniitally in server.js
-		Cmds = require('./commands');
-	}
-	
 	if (s.player.creationStep === 1) {
 		World.msgPlayer(s, {
 			msg: '<p>' + s.player.displayName + ' is a new character! There are three steps until '
