@@ -111,12 +111,10 @@ window.onload = function() {
 
 		for (i; i < nodes.length; i += 1) {
 			(function(nodeRef, index) {
-				console.log(nodeRef.getAttribute('data-cmd'));
 				if (nodeRef.getAttribute('data-cmd')) {
 					nodeRef.setAttribute('data-cmd', false);
 					nodeRef.addEventListener('click', processCmdClick, false);
 				} else {
-					console.log('removing!')
 					nodeRef.removeEventListener('click', processCmdClick, true);
 				}
 			}(nodes[i], i));
