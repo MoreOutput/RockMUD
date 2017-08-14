@@ -78,6 +78,8 @@ window.onload = function() {
 
 			terminal.innerHTML += '<div class="row">' + r.msg + '</div>';
 
+			checkCmdEvents(rowCnt);
+
 			if (rowCnt >= 160) {
 				for (i; i < terminal.childNodes.length; i += 1) {
 					terminal.removeChild(terminal.childNodes[i]);
@@ -93,8 +95,6 @@ window.onload = function() {
 			}
 		}
 
-		checkCmdEvents(rowCnt);
-
 		return parseCmd(r);
 	},
 	checkCmdEvents = function(rowCnt) {
@@ -105,18 +105,15 @@ window.onload = function() {
 			if (nodes[i].getAttribute('data-cmd')) {
 				nodes[i].setAttribute('data-cmd', false);
 
-				console.log(nodes[i]);
+				(function(nodeRef, index) {
+					nodeRef.addEventListener('click', function(evt) {
+						evt.preventDefault();
 
-				nodes[i].addEventListener('click', function(evt) {
-					evt.preventDefault();
+						node.value = nodeRef.getAttribute('data-cmd-value');
 
-					//node.value = nodes[i].getAttribute('[data-cmd-value]');
-
-					console.log(nodes[i]);
-					
-
-					//document.getElementById('console').submit();
-				}, false);
+						send(evt);
+					}, false);
+				}(nodes[i], i));
 			}
 		}
 	},
@@ -150,27 +147,8 @@ window.onload = function() {
 		}
 
 		return fn(cmd + ' ' + msg);
-	};
-
-	document.onclick = function() {
-		node.focus();
-	};
-
-	document.addEventListener('reqPassword', function(e) {
-		e.preventDefault();
-		
-		node.type = 'password';
-		node.placeholder = 'Login password';
-	}, false);
-
-	document.addEventListener('onLogged', function(e) {
-		e.preventDefault();
-
-		node.type = 'text';
-		node.placeholder = 'Enter a Command -- type \'help commands\' for a list of basic commands';
-	}, false);
-
-	document.getElementById('console').onsubmit = function (e) {
+	},
+	send = function(e) {
 		var messageNodes = [],
 		msg = node.value.toLowerCase().trim(),
 		msgObj = {
@@ -194,6 +172,28 @@ window.onload = function() {
 		} else {
 			return false;
 		}
+	};
+
+	document.onclick = function() {
+		node.focus();
+	};
+
+	document.addEventListener('reqPassword', function(e) {
+		e.preventDefault();
+		
+		node.type = 'password';
+		node.placeholder = 'Login password';
+	}, false);
+
+	document.addEventListener('onLogged', function(e) {
+		e.preventDefault();
+
+		node.type = 'text';
+		node.placeholder = 'Enter a Command -- type \'help commands\' for a list of basic commands';
+	}, false);
+
+	document.getElementById('console').onsubmit = function (e) {
+		send(e);
 	};
 
 	node.focus();
