@@ -265,7 +265,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 												for (j; j < world.areas.length; j += 1) {
 													(function(area, postIndex) {
-														if (area.afterLoad) {
+														if (area.afterLoad && !area.preventAfterLoad) {
 															area.afterLoad();
 														}
 
@@ -663,7 +663,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 			}
 
 			if (mob.items) {
-				world.rollItems(mob.items, roomid, area);	
+				world.rollItems(mob.items, roomid, area);
 			}
 
 			if (mob.behaviors) {
@@ -754,7 +754,7 @@ World.prototype.setupArea = function(area, fn) {
 		}
 	}
 
-	if (typeof area.beforeLoad === 'function') {
+	if (typeof area.beforeLoad === 'function' && !area.preventBeforeLoad) {
 		area.beforeLoad(function(err) {
 			if (!err) {
 				return setupRooms(area, fn);
@@ -790,7 +790,7 @@ World.prototype.getArea = function(areaId) {
 World.prototype.reloadArea = function(area) {
 	var world = this,
 	newArea;
-	
+
 	require.cache[require.resolve('../areas/' + area.id)] = null;
 
 	newArea = require('../areas/' + area.id  + '.js');
@@ -801,6 +801,7 @@ World.prototype.reloadArea = function(area) {
 
 		for (i; i < world.areas.length; i += 1) {
 			if (world.areas[i].id === newArea.id) {
+
 				world.areas[i] = newArea;
 			}
 		}
@@ -992,13 +993,13 @@ World.prototype.prompt = function(target) {
 	prompt = '<div class="col-md-12"><div class="cprompt"><strong><' 
 		+ player.chp + '/'  + player.hp + '<span class="red">hp</span>><' 
 		+ player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' 
-		+ player.cmv + '/'  + player.mv +'<span class="warning">mv</span>></strong></div>';
+		+ player.cmv + '/'  + player.mv +'<span class="warning">mv</span>></strong>';
 
 	if (player.sid) {
 		prompt += '<' + player.wait + 'w>';
 	}
 
-	prompt += '</div>';
+	prompt += '</div></div>';
 	
 	return prompt;
 };
@@ -1515,7 +1516,7 @@ World.prototype.isInvisible = function(obj) {
 			}
 		}
 	} else {
-		return false; 
+		return false;
 	}
 };
 

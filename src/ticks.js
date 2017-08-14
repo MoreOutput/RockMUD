@@ -178,7 +178,7 @@ setInterval(function() {
 		if (playersInArea.length) {
 			refresh = false;
 		} else if (!area.preventRespawn) {
-			if (World.dice.roll(1, 2) === 1) {
+			if (World.dice.roll(1, 4) > 1) {
 				if (area.respawnOn > area.respawnTick) {
 					area.respawnTick += 1;
 				}
@@ -197,7 +197,7 @@ setInterval(function() {
 			}
 		}
 	}
-}, 240000); // 4 minutes
+}, 120000); // 2 minutes
 
 // decay timer, affects all items with decay, decayLight
 // if an item with decay (not decayLight) reaches zero it goes away
@@ -237,7 +237,7 @@ setInterval(function() {
 					} else {
 						decayMsg = item.short + ' ' + item.decayMsg;
 					}
-				
+
 					if (obj.playersInRoom) {
 						World.msgRoom(obj, {
 							msg: decayMsg,

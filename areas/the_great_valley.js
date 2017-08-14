@@ -26,7 +26,7 @@ module.exports = {
 		enteranceRoomId = '4-0',
 		startingRoom,
 		j = 0;
-		
+
 		if (this.rooms.length === 1) {
 			for (i; i < x; i += 1) {
 				j = 0;
@@ -138,13 +138,7 @@ module.exports = {
 			startingRoom.exits.push({
 				cmd: 'south',
 				id: this.defaultRoom,
-				area: this.name
-			});
-
-			generateNorthOf.exits.push({
-				cmd: 'north',
-				id: enteranceRoomId,
-				area: this.name
+				area: this.id
 			});
 
 			i = 0;
@@ -199,6 +193,11 @@ module.exports = {
 					cmd: 'south',
 					id: '2',
 					area: 'midgaard'
+				},
+				{
+					cmd: 'north',
+					id: '4-0',
+					area: 'the_great_valley'
 				}
 			],
 			playersInRoom: [],
