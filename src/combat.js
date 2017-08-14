@@ -279,7 +279,7 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						if (opponent.isPlayer) {
 							if (!shield) {
 								msgForOpponent += '<div class="green">' + attacker.capitalShort +
-								' swings widly and you narrowly block their attack!</div>';
+								' swings wildy and you narrowly block their attack!</div>';
 							}
 						}
 					}
