@@ -74,9 +74,9 @@ window.onload = function() {
 		var i = 0;
 
 		if (addToDom) {
-			terminal.innerHTML += '<div class="row">' + r.msg + '</div>';
-
 			rowCnt += 1;
+
+			terminal.innerHTML += '<div class="row">' + r.msg + '</div>';
 
 			if (rowCnt >= 160) {
 				for (i; i < terminal.childNodes.length; i += 1) {
@@ -93,7 +93,32 @@ window.onload = function() {
 			}
 		}
 
+		checkCmdEvents(rowCnt);
+
 		return parseCmd(r);
+	},
+	checkCmdEvents = function(rowCnt) {
+		var i = 0,
+		nodes = document.querySelectorAll('[data-cmd="true"]');
+
+		for (i; i < nodes.length; i += 1) {
+			if (nodes[i].getAttribute('data-cmd')) {
+				nodes[i].setAttribute('data-cmd', false);
+
+				console.log(nodes[i]);
+
+				nodes[i].addEventListener('click', function(evt) {
+					evt.preventDefault();
+
+					//node.value = nodes[i].getAttribute('[data-cmd-value]');
+
+					console.log(nodes[i]);
+					
+
+					//document.getElementById('console').submit();
+				}, false);
+			}
+		}
 	},
 	parseCmd = function(r) {
 		if (r.msg !== undefined) {

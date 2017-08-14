@@ -61,7 +61,7 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 		for (i; i < exits.length; i += 1) {
 			if (Character.canSeeObject(player, exits[i])) {
 				if (!exits[i].door) {
-					displayHTML += '<li class="list-inline-item">' + exits[i].cmd + '</li>';
+					displayHTML += '<li class="list-inline-item"><button class="btn btn-link" data-cmd="true" data-cmd-value="move west">' + exits[i].cmd + '</button></li>';
 				} else if (exits[i].door && !exits[i].door.isOpen) {
 					displayHTML += '<li class="grey list-inline-item">' + exits[i].cmd + '</li>';
 				} else {

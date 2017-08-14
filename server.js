@@ -142,7 +142,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 					Character.login(r, s, function (s) {
 						if (s.player) {
 							s.player.verifiedName = true;
-							s.join('mud'); // mud is one of two rooms, 'creation' being the other		
+							s.join('mud'); // mud is one of two rooms, 'creation' being the other
 
 							World.msgPlayer(s, {
 								msg: 'Password for ' + s.player.displayName  + ': ',
