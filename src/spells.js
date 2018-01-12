@@ -138,8 +138,7 @@ Spell.prototype.invisibility = function(skillObj, player, roomObj, command, fn) 
 	failRoll,
 	successRoll,
 	// Check if we already have this passive 
-	// false if we dont have the affect otherwise the affect object
-	currentAffect,
+	inEffect = false,
 	cost = 1;
 
 	if (1 > 0) {

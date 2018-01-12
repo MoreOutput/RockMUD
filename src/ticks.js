@@ -54,6 +54,10 @@ setInterval(function() {
 				(function(area, areaIndex) {
 					World.processEvents('onDay', area);
 
+					World.msgArea(area.id, {
+						msg: areaMsg
+					});
+
 					monsters = World.getAllMonstersFromArea(area);
 
 					monsters.forEach(function(monster, i) {
@@ -62,7 +66,7 @@ setInterval(function() {
 						if (monster.chp >= 1) {
 							World.processEvents('onDay', monster, roomObj);
 							World.processEvents('onDay', monster.items, roomObj);
-							
+
 							processAffectDecay(monster);
 						}
 					});
@@ -75,7 +79,7 @@ setInterval(function() {
 						if (player.chp >= 1) {
 							World.processEvents('onDay', player, roomObj);
 							World.processEvents('onDay', player.items, roomObj);
-							
+
 							processAffectDecay(player);
 						}
 					});
@@ -92,6 +96,10 @@ setInterval(function() {
 				(function(area, areaIndex) {
 					World.processEvents('onNight', area);
 
+					World.msgArea(area.id, {
+						msg: areaMsg
+					});
+
 					monsters = World.getAllMonstersFromArea(area);
 
 					monsters.forEach(function(monster, i) {
@@ -100,7 +108,7 @@ setInterval(function() {
 						if (monster.chp >= 1) {
 							World.processEvents('onNight', monster, roomObj);
 							World.processEvents('onNight', monster.items, roomObj);
-							
+
 							processAffectDecay(monster);
 						}
 					});
@@ -112,13 +120,13 @@ setInterval(function() {
 
 						if (player.chp >= 1) {
 							World.processEvents('onNight', player, roomObj);
-							World.processEvents('onNi	ght', player.items, roomObj);
-						
+							World.processEvents('onNight', player.items, roomObj);
+
 							processAffectDecay(player);
 						}
 					});
 				}(World.areas[i], i));
-			}	
+			}
 		}
 	}
 
@@ -259,7 +267,7 @@ setInterval(function() {
 
 					if (World.dice.roll(1, 4) >= 2 && item.lightDecay !== 1) {
 						if (!item.lightFlickerMsg) {
-							lightFlickerMsg = 'The light from ' + item.short +' flickers';
+							lightFlickerMsg = 'The light from ' + item.short +' flickers.';
 						} else {
 							lightFlickerMsg = item.displayName + ' ' + item.lightFlickerMsg;
 						}

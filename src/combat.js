@@ -17,11 +17,11 @@ Combat = function() {
 };
 
 Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, opponentMods) {
-	var numOfAttacks = Math.round(((attacker.hitRoll/5 + attacker.level/20) + attackerMods.dex/4) - 1),
+	var numOfAttacks = 0,
 	secondAttackSkill = Character.getSkillById(attacker, 'secondAttack');
 
-	if (numOfAttacks <= 0) {
-		numOfAttacks = 1;
+	if (secondAttackSkill && World.dice.roll(1, 100) >= secondAttackSkill.train) {
+		secondAttackSkill === false;
 	}
 
 	if (weapon.modifiers && weapon.modifiers.numOfAttacks) {
@@ -32,22 +32,28 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 		numOfAttacks += 1;
 	}
 
-	if (numOfAttacks <= 3 && attackerMods.str > opponentMods.dex) {
+	if (numOfAttacks <= 1 && attackerMods.dex > opponentMods.dex) {
 		if (World.dice.roll(1, 2) === 2) {
 			numOfAttacks += 1;
 		}
 	}
 
-	if (numOfAttacks <= 3 && attackerMods.dex > opponentMods.dex) {
-		if (World.dice.roll(1, 2) === 2) {
-			numOfAttacks += 1;
-		}
+	if (numOfAttacks === 0 && World.dice.roll(1, 2) === 1) {
+		numOfAttacks = 1;
 	}
 
-	if (secondAttackSkill) {
-		numOfAttacks += World.dice.roll(1, 2);
-	} else if (numOfAttacks === 1 && World.dice.roll(1, 6) === 4) {
+	if (secondAttackSkill && numOfAttacks === 1) {
 		numOfAttacks = 2;
+	} else if (secondAttackSkill && World.dice.roll(1, 4) === 1) {
+		numOfAttacks += 1;
+	}
+
+	if (numOfAttacks === 0 && World.dice.roll(1, 6) === 1) {
+		numOfAttacks = 1;
+	}
+
+	if (World.dice.roll(1, 4) > 2) {
+		numOfAttacks += Math.round(attacker.hitRoll/10) + attackerMods.dex;
 	}
 
 	return numOfAttacks;
@@ -458,6 +464,8 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 				msg: '<strong>You died! Make it back to your corpse before it rots to save your gear!</strong>',
 				styleClass: 'error'
 			});
+
+			Character.save(mob);
 		}
 
 		exp = World.dice.calExp(player, mob);
@@ -485,7 +493,7 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 		if (mob.gold) {
 			player.gold +- mob.gold;
 
-			endOfCombatMsg += ' <span class="yellow">You find ' + mob.gold 
+			endOfCombatMsg += ' <span class="yellow">You find ' + mob.gold
 				+ ' ' + World.config.coinage  + ' on the corpse.</span>';
 		}
 		
@@ -504,12 +512,14 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 				styleClass: 'victory'
 			});
 
-			Character.level(player);	
+			Character.level(player);
 		} else {
 			World.msgPlayer(player, {
 				msg: endOfCombatMsg,
 				styleClass: 'victory'
 			});
+
+			Character.save(player);
 		}
 	}
 };

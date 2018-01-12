@@ -542,7 +542,7 @@ World.prototype.rollItems = function(itemArr, roomid, area) {
 };
 
 // Rolls values for Mobs, including their equipment
-World.prototype.rollMobs = function(mobArr, roomid, area) {
+World.prototype.rollMobs = function(mobArr, roomid, area, fn) {
 	var world = this,
 	diceMod,
 	i = 0;
@@ -690,59 +690,7 @@ World.prototype.rollMobs = function(mobArr, roomid, area) {
 World.prototype.setupArea = function(area, fn) {
 	var world = this,
 	exitObj,
-	i = 0,
-	j,
-	setupRooms = function(area, fn) {
-		var i = 0;
-
-		for (i; i < area.rooms.length; i += 1) {
-			if (!area.wasExtended) {
-				area.rooms[i] = world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)));
-
-				if (!area.rooms[i].area) {
-					area.rooms[i].area = area.id;
-				}
-			}
-
-			if (area.rooms[i].monsters) {
-				area.monsters = world.shuffle(area.rooms[i].monsters);
-			}
-
-			area.rooms[i].area = area.id;
-
-			j = 0;
-
-			for (j; j < area.rooms[i].exits.length; j += 1) {
-				exitObj = area.rooms[i].exits[j];
-
-				if (!exitObj.area || exitObj.area === area.name) {
-					exitObj.area = area.id;
-				}
-
-				if (!exitObj.affects) {
-					exitObj.affects = [];
-				}
-			}
-		}
-
-		area.wasExtended = true;
-
-		i = 0;
-
-		for (i; i < area.rooms.length; i += 1) {
-			if (area.rooms[i].monsters.length > 0) {
-				world.rollMobs(area.rooms[i].monsters, area.rooms[i].id, area);
-			}
-
-			if (area.rooms[i].items.length > 0) {
-				world.rollItems(area.rooms[i].items, area.rooms[i].id, area);
-			}
-		}
-
-		if (typeof fn === 'function') {
-			return fn(area);
-		}
-	};
+	i = 0;
 
 	if (!area.wasExtended) {
 		area = world.extend(area, JSON.parse(JSON.stringify(world.areaTemplate)));
@@ -757,11 +705,68 @@ World.prototype.setupArea = function(area, fn) {
 	if (typeof area.beforeLoad === 'function' && !area.preventBeforeLoad) {
 		area.beforeLoad(function(err) {
 			if (!err) {
-				return setupRooms(area, fn);
+				return world.setupRooms(area, fn);
 			}
 		});
 	} else {
-		return setupRooms(area, fn);
+		return world.setupRooms(area, fn);
+	}
+};
+
+World.prototype.setupRooms = function(area, fn) {
+	var world = this,
+	i = 0,
+	j = 0,
+	exitObj;
+
+	for (i; i < area.rooms.length; i += 1) {
+		if (!area.wasExtended) {
+			area.rooms[i] = world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)));
+
+			if (!area.rooms[i].area) {
+				area.rooms[i].area = area.id;
+			}
+		}
+
+		if (area.rooms[i].monsters) {
+			area.monsters = world.shuffle(area.rooms[i].monsters);
+		}
+
+		area.rooms[i].area = area.id;
+
+		j = 0;
+
+		for (j; j < area.rooms[i].exits.length; j += 1) {
+			exitObj = area.rooms[i].exits[j];
+
+			if (!exitObj.area || exitObj.area === area.name) {
+				exitObj.area = area.id;
+			}
+
+			exitObj.affects = [];
+		}
+	}
+
+	area.wasExtended = true;
+
+	i = 0;
+
+	for (i; i < area.rooms.length; i += 1) {
+		(function(room, index) {
+			if (room.monsters.length > 0) {
+				world.rollMobs(room.monsters, room.id, area);
+			}
+
+			if (room.items.length > 0) {
+				world.rollItems(room.items, room.id, area);
+			}
+
+			if (area.rooms.length - 1 === index) {
+				if (typeof fn === 'function') {
+					return fn(area);
+				}
+			}
+		}(area.rooms[i], i));
 	}
 };
 
@@ -1183,7 +1188,7 @@ World.prototype.msgArea = function(areaId, msgObj) {
 		if ((!msgObj.randomPlayer || msgObj.randomPlayer === false)
 		|| (msgObj.randomPlayer === true && world.dice.roll(1,10) > 6)) {
 			s = world.players[i].socket;
-			
+
 			if (s.player.name !== msgObj.playerName && s.player.area === areaId) {
 				world.msgPlayer(s, msgObj);
 			}
@@ -1458,8 +1463,7 @@ World.prototype.extend = function(extendObj, readObj, fn) {
 	if (arguments.length === 2 && propCnt) {
 		for (prop in readObj) {
 			if (extendObj[prop] !== undefined) {
-				if (Array.isArray(extendObj[prop])
-					&& Array.isArray(readObj[prop])) {
+				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
 				} else if (typeof extendObj[prop] !== 'string'
 					&& !isNaN(extendObj[prop])
@@ -1509,15 +1513,13 @@ World.prototype.shuffle = function (arr) {
 World.prototype.isInvisible = function(obj) {
 	var i = 0;
 
-	if (obj.affects.length) {
-		for (i; i < obj.affects.length; i += 1) {
-			if (obj.affects[i].affect === 'invis') {
-				return true;
-			}
+	for (i; i < obj.affects.length; i += 1) {
+		if (obj.affects[i].affect === 'invis') {
+			return true;
 		}
-	} else {
-		return false;
 	}
+
+	return false;
 };
 
 World.prototype.isHidden = function(obj) {
@@ -1529,9 +1531,11 @@ World.prototype.isHidden = function(obj) {
 				return true;
 			}
 		}
+
+		return false;
 	} else {
 		return false;
-	}	
+	}
 };
 
 
