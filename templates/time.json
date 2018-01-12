@@ -7,9 +7,9 @@
 		"abbv": "Jan",
 		"day": 1,
 		"days": 30,
-		"hoursInDay": 1,
-		"hourOfLight": 1,
-		"hourOfNight": 1
+		"hoursInDay": 24,
+		"hourOfLight": 12,
+		"hourOfNight": 12
 	},
 	"day": 1,
 	"hour": 1,
