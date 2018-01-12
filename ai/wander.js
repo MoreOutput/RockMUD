@@ -12,7 +12,7 @@ World = require('../src/world');
 */
 module.exports = {
 	stayInArea: true,
-	wanderCheck: 75,
+	wanderCheck: 90,
 	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'],
 	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 100),

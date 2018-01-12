@@ -66,52 +66,60 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 	io.on('connection', function (s) {
 		var parseCmd = function(r, s) {
 			var skillObj,
-			cmdObj = Cmds.createCommandObject(r),
+			cmdObj,
 			valid = false;
 
-			valid = World.isSafeCommand(cmdObj);
-			
-			if (!s.player.creationStep) {
-				if (valid) {
-					if (cmdObj.cmd) {
-						cmdObj.roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+			if (r.msg) {
+			 cmdObj = Cmds.createCommandObject(r);
 
-						if (cmdObj.cmd in Cmds) {
-							Cmds[cmdObj.cmd](s.player, cmdObj);
+				valid = World.isSafeCommand(cmdObj);
 
-							World.processEvents('onCommand', s.player, cmdObj.roomObj, cmdObj);
-							World.processEvents('onCommand', s.player.items, cmdObj.roomObj, cmdObj);
-						} else if (cmdObj.cmd in Skills) {
-							skillObj = Character.getSkill(s.player, cmdObj.cmd);
+				if (!s.player.creationStep) {
+					if (valid) {
+						if (cmdObj.cmd) {
+							cmdObj.roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 
-							if (skillObj && s.player.wait === 0) {
-								Skills[cmdObj.cmd](
-									skillObj,
-									s.player,
-									cmdObj.roomObj,
-									cmdObj
-								);
+							if (cmdObj.cmd in Cmds) {
+								Cmds[cmdObj.cmd](s.player, cmdObj);
 
-								World.processEvents('onSkill', s.player, cmdObj.roomObj, skillObj);
-								World.processEvents('onSkill', s.player.items, cmdObj.roomObj, skillObj);
-								World.processEvents('onSkill', cmdObj.roomObj, s.player, skillObj);
-							} else {
-								if (!skillObj) {
-									World.msgPlayer(s, {
-										msg: 'You do not know how to ' + cmdObj.cmd + '.',
-										styleClass: 'error'
-									});
+								World.processEvents('onCommand', s.player, cmdObj.roomObj, cmdObj);
+								World.processEvents('onCommand', s.player.items, cmdObj.roomObj, cmdObj);
+							} else if (cmdObj.cmd in Skills) {
+								skillObj = Character.getSkill(s.player, cmdObj.cmd);
+
+								if (skillObj && s.player.wait === 0) {
+									Skills[cmdObj.cmd](
+										skillObj,
+										s.player,
+										cmdObj.roomObj,
+										cmdObj
+									);
+
+									World.processEvents('onSkill', s.player, cmdObj.roomObj, skillObj);
+									World.processEvents('onSkill', s.player.items, cmdObj.roomObj, skillObj);
+									World.processEvents('onSkill', cmdObj.roomObj, s.player, skillObj);
 								} else {
-									World.msgPlayer(s, {
-										msg: '<strong>You can\'t do that yet!.</strong>',
-										styleClass: 'warning'
-									});
+									if (!skillObj) {
+										World.msgPlayer(s, {
+											msg: 'You do not know how to ' + cmdObj.cmd + '.',
+											styleClass: 'error'
+										});
+									} else {
+										World.msgPlayer(s, {
+											msg: '<strong>You can\'t do that yet!.</strong>',
+											styleClass: 'warning'
+										});
+									}
 								}
+							} else {
+								World.msgPlayer(s, {
+									msg: cmdObj.cmd + ' is not a valid command.',
+									styleClass: 'error'
+								});
 							}
 						} else {
-							World.msgPlayer(s, {
-								msg: cmdObj.cmd + ' is not a valid command.',
-								styleClass: 'error'
+							return World.msgPlayer(s, {
+								onlyPrompt: true
 							});
 						}
 					} else {
@@ -120,12 +128,12 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						});
 					}
 				} else {
-					return World.msgPlayer(s, {
-						onlyPrompt: true
-					});
+					Character.newCharacter(s, cmdObj);
 				}
 			} else {
-				Character.newCharacter(s, cmdObj);
+				return World.msgPlayer(s, {
+					onlyPrompt: true
+				});
 			}
 		};
 

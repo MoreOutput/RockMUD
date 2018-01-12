@@ -39,11 +39,11 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 	}
 
 	if (/[`~@#$%^&*()-+={}[]|<>]+$/g.test(resFromClient.msg) === false) {
-		cmdObj.cmd = cmdArr[0].toLowerCase();
+		cmdObj.cmd = cmdArr[0];
 		cmdObj.msg = cmdArr.slice(1).join(' ');
-		cmdObj.last = cmdArr[cmdArr.length - 1];
+		cmdObj.last = cmdArr[cmdArr.length - 1].toLowerCase();
 		cmdObj.number = 1;
-	
+
 		if (cmdArr.length < 4) {
 			if (cmdArr.length === 3) {
 				cmdObj.arg = cmdArr[1].toLowerCase() + ' ' + cmdArr[2].toLowerCase();
@@ -389,20 +389,20 @@ Cmd.prototype.scan = function(target, command) {
 	canSee = true,
 	scanStr = '';
 
-	if (target.position === 'standing') {	
+	if (target.position === 'standing') {
 		if (command.roomObj) {
 			roomObj = command.roomObj;
 		} else {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 		}
 
-		canSee = Character.canSee(target, roomObj);	
+		canSee = Character.canSee(target, roomObj);
 
 		if (canSee) {
 			rooms = Room.getAdjacent(roomObj);
 
 			for (i; i < rooms.length; i += 1) {
-				scanStr += Room.getBrief(rooms[i]);
+				scanStr += '<h4>' + rooms[i].direction.cmd + '</h4> ' + Room.getBrief(rooms[i].room);
 			}
 
 			World.msgPlayer(target, {
@@ -843,6 +843,10 @@ Cmd.prototype.sleep = function(target, command) {
 				playerName: target.name,
 				styleClass: 'cmd-sleep'
 			});
+
+			if (World.dice.roll(1, 4) === 1) {
+				Character.save(target);
+			}
 		} else {
 			World.msgPlayer(target, {
 				msg: 'You can\'t go to sleep in this position.'
@@ -1445,7 +1449,7 @@ Cmd.prototype.who = function(target, command) {
 				'<td class="who-lvl">' + player.level + '</td>' +
 				'<td class="who-race green">' + player.race + '</td>' +
 				'<td class="who-class red">' + player.charClass + '</td>' +
-				'<td class="who-player">' + displayName + '</td>' +
+				'<td class="who-player"><strong>' + displayName + '</strong></td>' +
 			'</tr>';
 		}
 
@@ -1539,7 +1543,9 @@ Cmd.prototype.get = function(target, command, fn) {
 
 							World.processEvents('onGet', roomObj, target, item);
 							World.processEvents('onGet', item, roomObj, target);
-							World.processEvents('onGet', target, roomObj, item);						
+							World.processEvents('onGet', target, roomObj, item);
+
+							Character.save(target);
 						}
 					} else {
 						if (!item) {
@@ -1553,7 +1559,7 @@ Cmd.prototype.get = function(target, command, fn) {
 				} else {
 					itemLen = roomObj.items.length;
 
-					if (itemLen) {	
+					if (itemLen) {
 						for (i; i < itemLen; i += 1) {
 							item = roomObj.items[i];
 
@@ -1582,7 +1588,9 @@ Cmd.prototype.get = function(target, command, fn) {
 						World.processEvents('onGet', roomObj.items, roomObj, null, target);
 						World.processEvents('onGet', target, roomObj, roomObj.items);
 
-						if (typeof fn === 'function') { 
+						Character.save(target);
+
+						if (typeof fn === 'function') {
 							return fn(target, roomObj, item);
 						}
 					} else {
@@ -1608,6 +1616,8 @@ Cmd.prototype.get = function(target, command, fn) {
 
 					World.processEvents('onGet', container, roomObj, item, target);
 					World.processEvents('onGet', target, roomObj, item, container);
+
+					Character.save(target);
 				} else {
 					World.msgPlayer(target, {
 						msg: 'You don\'t see that in there.',
@@ -1660,6 +1670,8 @@ Cmd.prototype.put = function(target, command) {
 					});
 
 					World.processEvents('onPut', container, roomObj, item);
+
+					Character.save(target);
 				} else {
 					if (item && item.refId !== container.refId) {
 						World.msgPlayer(target, {
@@ -1732,6 +1744,8 @@ Cmd.prototype.drop = function(target, command, fn) {
 						World.processEvents('onDrop', target, roomObj, item);
 						World.processEvents('onDrop', roomObj, target, item);
 						World.processEvents('onDrop', item, roomObj, target);
+
+						Character.save(target);
 					} else {
 						World.msgPlayer(target, {
 							msg: 'You could not drop ' + item.short + '!',
@@ -1800,6 +1814,8 @@ Cmd.prototype.drop = function(target, command, fn) {
 							styleClass: 'warning'
 						});
 					}
+
+					Character.save(target);
 				}
 			}
 		} else {
@@ -1851,12 +1867,14 @@ Cmd.prototype.flee = function(player, command) {
 						});
 
 						World.msgPlayer(player, {
-							msg: '<strong>You fled ' + command.arg +'</strong>!',
+							msg: '<strong>You fled ' + command.arg + '</strong>!',
 							styleClass: 'success'
 						});
 
 						player.opponent.opponent = false;
 						player.opponent = false;
+
+						Character.save(player);
 					} else {
 						player.position = 'fighting';
 
@@ -2672,8 +2690,9 @@ Cmd.prototype.train = function(target, command) {
 Cmd.prototype.practice = function(target, command) {
 	var	pracSkill = function() {
 		if (!skillObj.learned) {
+			skillObj.train = 40;
 			skillObj.learned = true;
-		}		
+		}
 
 		if (skillObj.train < 100) {
 			if (skillObj.mainStat === target.mainStat) {
@@ -2805,10 +2824,10 @@ Cmd.prototype.practice = function(target, command) {
 						}
 					}
 				} else {
-					practiceDisplay = '<p>The table below showcases the <strong>skills currently offered by '
+					practiceDisplay = '<p>The table below showcases the <strong class="yellow">skills currently offered by '
 						+ trainer.displayName + '</strong></p><table class="table table-condensed prac-table">'
 						+ '<thead><tr><td class="prac-name-header warning"><strong>' 
-						+ trainer.displayName +  ' Skills</strong></td>'
+						+ trainer.possessivePronoun +  ' Skills</strong></td>'
 						+ '<td class="prac-max-header warning"><strong>Status</strong></td>'
 						+ '</tr></thead><tbody>';
 
@@ -2927,9 +2946,9 @@ Cmd.prototype.equipment = function(target, command) {
 			item = false;
 		}
 
-		eqStr += '<li class="eq-slot-' + target.eq[i].slot.replace(/ /g, '') + 
+		eqStr += '<li class="eq-slot-' + target.eq[i].slot.replace(/ /g, '') +
 			'"><label><strong>' + target.eq[i].name + '</strong></label>: ';
-		
+
 		if (!item || target.eq[i].item === '') {
 			eqStr += ' <span class="grey">Nothing</span></li>';
 		} else {
@@ -3025,6 +3044,8 @@ Cmd.prototype.wear = function(target, command) {
 			if (item) {
 				if (Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)]) {
 					Character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)](target, item, roomObj);
+
+					Character.save(target);
 				} else {
 					World.msgPlayer(target, {
 						msg: 'You can\'t figure out how to wear a ' + item.short,
@@ -3058,6 +3079,8 @@ Cmd.prototype.remove = function(target, command) {
 
 			if (item) {
 				Character.removeEq(target, item);
+
+				Character.save(target);
 			} else {
 				World.msgPlayer(target, {msg: 'You are not wearing that.', styleClass: 'error'});
 			}
@@ -3080,7 +3103,7 @@ Cmd.prototype.inventory = function(player, command) {
 		'<td class="i-type-header">Type</td>' +
 		'<td class="i-weight-header">Weight</td>' +
 		'</tr></thead><tbody>';
-	
+
 	if (player.items.length > 0) {
 		iStr += '<tr>';
 
@@ -3167,32 +3190,36 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-levl list-inline-item"><label>Level:</label> ' +  target.level + '</li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
-					'<li class="stat-str first"><label>STR:</label> ' + target.baseStr + ' <strong>(' + target.str + ')</strong></li>' +
-					'<li class="stat-wis"><label>WIS:</label> ' + target.baseWis + ' <strong>(' + target.wis + ')</strong></li>' +
-					'<li class="stat-int"><label>INT:</label> ' + target.baseInt + ' <strong>(' + target.int + ')</strong></li>' +
-					'<li class="stat-dex"><label>DEX:</label> ' + target.baseDex + ' <strong>(' + target.dex + ')</strong></li>' +
-					'<li class="stat-con"><label>CON:</label> ' + target.baseCon + ' <strong>(' + target.con + ')</strong></li>' +
+					'<li class="stat-str first"><label><strong>STR:</strong></label> ' + target.baseStr + ' <strong>(' + target.str + ')</strong></li>' +
+					'<li class="stat-wis"><label><strong>WIS:</strong></label> ' + target.baseWis + ' <strong>(' + target.wis + ')</strong></li>' +
+					'<li class="stat-int"><label><strong>INT:</strong></label> ' + target.baseInt + ' <strong>(' + target.int + ')</strong></li>' +
+					'<li class="stat-dex"><label><strong>DEX:</strong></label> ' + target.baseDex + ' <strong>(' + target.dex + ')</strong></li>' +
+					'<li class="stat-con"><label><strong>CON:</strong></label> ' + target.baseCon + ' <strong>(' + target.con + ')</strong></li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
-					'<li class="stat-armor"><label>Armor:</label> ' + target.ac + '</li>' +
-					'<li class="stat-hunger"><label>Hunger:</label> ' + target.hunger +'</li>' +
-					'<li class="stat-thirst"><label>Thirst:</label> ' + target.thirst +'</li>' +
-					'<li class="stat-trains last"><label>Trains:</label> ' + target.trains + '</li>' +
+					'<li class="stat-armor"><label><strong>Armor:</strong></label> ' + target.ac + '</li>' +
+					'<li class="stat-hunger"><label><strong>Hunger:</strong></label> ' + target.hunger +'</li>' +
+					'<li class="stat-thirst"><label><strong>Thirst:</strong></label> ' + target.thirst +'</li>' +
+					'<li class="stat-trains last"><label><strong>Trains:</strong></label> ' + target.trains + '</li>' +
 				'</ul>' +
-				'<div class="stat-details col-md-5">' +
+				'<div class="stat-details col-md-3">' +
 					'<ul class="score-stats list-unstyled">' +
-						'<li class="stat-hitroll"><label>Hit Bonus: </labels> ' + target.hitRoll + '</li>' +
-						'<li class="stat-damroll"><label>Damage Bonus: </label> ' + target.damRoll + '</li>' +
-						'<li class="stat-magicRes"><label>Magic resistance: </label> ' + target.magicRes + '</li>' +
-						'<li class="stat-meleeRes"><label>Melee resistance: </label> ' + target.meleeRes + '</li>' +
-						'<li class="stat-poisonRes"><label>Poison resistance: </label> ' + target.poisonRes + '</li>' +
-						'<li class="stat-detection"><label>Detection: </label> ' + target.detection + '</li>' +
-						'<li class="stat-knowlege"><label>Knowledge: </label> ' + target.knowledge + '</li>' +
+						'<li class="stat-hitroll"><label><strong>Hit Bonus: </strong></labels> ' + target.hitRoll + '</li>' +
+						'<li class="stat-damroll"><label><strong>Damage Bonus: </strong></label> ' + target.damRoll + '</li>' +
+						'<li class="stat-magicRes"><label><strong>Magic resistance: </strong></label> ' + target.magicRes + '</li>' +
+						'<li class="stat-meleeRes"><label><strong>Melee resistance: </strong></label> ' + target.meleeRes + '</li>' +
 					'</ul>' +
-					'<div class="score-affects">' +
-						'<h6 class="sans-serif">Affected by:</h6>' +
-						'<p>You don\'t feel affected by anything.</p>' +
-					'</div>' +
+				'</div>' +
+				'<div class="stat-details col-md-3">' +
+					'<ul class="score-stats list-unstyled">' +
+						'<li class="stat-poisonRes"><label><strong>Poison resistance: </strong></label> ' + target.poisonRes + '</li>' +
+						'<li class="stat-detection"><label><strong>Detection: </strong></label> ' + target.detection + '</li>' +
+						'<li class="stat-knowlege"><label><strong>Knowledge: </strong></label> ' + target.knowledge + '</li>' +
+					'</ul>' +
+				'</div>' +
+				'<div class="col-md-12 score-affects">' +
+					'<h6 class="sans-serif">Affected by:</h6>' +
+					'<p>You don\'t feel affected by anything.</p>' +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
 					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span>.</li>' +
@@ -3233,12 +3260,6 @@ Cmd.prototype.xyzzy = function(target, command) {
 	if (target.position !== 'sleeping') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
-		World.msgRoom(roomObj, {
-			msg: target.name + 	' tries to xyzzy but nothing happens.', 
-			roomid: target.roomid,
-			playerName: target.name
-		});
-
 		World.msgPlayer(target, {msg: 'Nothing happens. Why would it?', styleClass: 'error' });
 	} else {
 		World.msgPlayer(target, {msg: 'You dream of powerful forces.', styleClass: 'error' });
@@ -3246,7 +3267,7 @@ Cmd.prototype.xyzzy = function(target, command) {
 };
 
 /**********************************************************************************************************
-* ADMIN COMMANDS  
+* ADMIN COMMANDS
 ************************************************************************************************************/
 
 // List file names found in /players

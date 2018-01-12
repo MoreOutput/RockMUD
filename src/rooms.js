@@ -83,9 +83,9 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 		for (i; i < items.length; i += 1) {
 			if (Character.canSeeObject(player, items[i])) {
 				if (items[i].long) {
-					displayHTML += '<li class="room-item">' + items[i].long + '</li>';
+					displayHTML += '<li class="room-item">' + items[i].long + ' (' + items[i].level + ')</li>';
 				} else {
-					displayHTML += '<li class="room-item">A ' + items[i].name + '</li>';
+					displayHTML += '<li class="room-item">A ' + items[i].name + ' (' + items[i].level + ')</li>';
 				}
 			}
 		}
@@ -154,9 +154,10 @@ Room.prototype.getAdjacent = function(roomObj) {
 
 	for (i; i < roomObj.exits.length; i += 1) {
 		if (!roomObj.exits[i].door || roomObj.exits[i].door.isOpen) {
-			fndRoom = World.getRoomObject(roomObj.exits[i].area, roomObj.exits[i].id);
-
-			roomArr.push(fndRoom);
+			roomArr.push({
+				room: World.getRoomObject(roomObj.exits[i].area, roomObj.exits[i].id),
+				direction: roomObj.exits[i]
+			});
 		}
 	}
 

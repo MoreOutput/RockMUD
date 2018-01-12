@@ -201,6 +201,7 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 	shieldArr,
 	shield,
 	opponent,
+	noPrompt = false,
 	rollDamage = function(opponent) {
 		var oppDexMod = World.dice.getDexMod(opponent);
 
@@ -216,10 +217,15 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 	if (roomObj.monsters.length) {
 		if (player.position === 'standing' || player.position === 'fighting') {
 			if (World.dice.roll(1, 100) <= skillObj.train) {
+				if (player.position === 'standing') {
+					noPrompt = true;
+				}
+
+
 				World.msgPlayer(player, {
 					msg: 'You spin around the room slashing at everything!',
 					styleClass: 'green',
-					noPrompt: true
+					noPrompt: noPrompt
 				});
 
 				World.msgRoom(roomObj, {
@@ -251,7 +257,7 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 				World.msgPlayer(player, {
 					msg: 'You begin to turn and stumble. Your whirlwind attempt fails!',
 					styleClass: 'error',
-					noPrompt: true
+					noPrompt: noPrompt
 				});
 
 				if (!player.opponent || opponent.refId !== player.opponent.refId) {

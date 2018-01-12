@@ -1278,6 +1278,7 @@ Character.prototype.createCorpse = function(player) {
 		short: 'the corpse of ' + corpseDisplayStr,
 		capitalShort: 'The corpse of ' + corpseDisplayStr, 
 		long: 'The corpse of ' + corpseDisplayStr + ' is lying here on the ground.',
+		displayName: player.displayName,
 		decay: 1,
 		itemType: 'corpse',
 		corpse: true,

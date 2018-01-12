@@ -153,7 +153,7 @@ window.onload = function() {
 	},
 	send = function(e) {
 		var messageNodes = [],
-		msg = node.value.toLowerCase().trim(),
+		msg = node.value.trim(),
 		msgObj = {
 			msg: checkAlias(msg, function(cmd) {
 				return cmd;
