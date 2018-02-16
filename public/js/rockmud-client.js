@@ -76,7 +76,13 @@ window.onload = function() {
 		if (addToDom) {
 			rowCnt += 1;
 
-			terminal.innerHTML += '<div class="row">' + r.msg + '</div>';
+			var node = document.createElement('div');
+
+			node.classList.add('row');
+
+			node.innerHTML = r.msg;
+
+			terminal.appendChild(node);
 
 			checkCmdEvents(rowCnt);
 

@@ -16,7 +16,7 @@ module.exports = {
 	],
 	moveDirections: ['north', 'east', 'west', 'south'],
 	onAlive: function(mob, roomObj) {
-		var roll = World.dice.roll(1, 40);
+		var roll = World.dice.roll(1, 100);
 
 		if (mob.position === 'standing') {
 			if (roll === 5) {
