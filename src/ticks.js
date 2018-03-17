@@ -1,6 +1,8 @@
 'use strict';
 var fs = require('fs'),
 Character = require('./character'),
+Cmds = require('./commands'),
+Skills = require('./skills'),
 World = require('./world');
 
 // time, saved to time.json every 12 hours
@@ -351,12 +353,14 @@ setInterval(function() {
 setInterval(function() {
 	var i = 0,
 	j = 0,
+	cmdObj,
 	players,
 	monsters,
+	cmdArr,
 	roomObj;
 
 	for (i; i < World.areas.length; i += 1) {
-		if (World.dice.roll(1, 2) === 1) {
+		if (World.dice.roll(1, 20) === 1) {
 			players = World.getAllPlayersFromArea(World.areas[i]);
 			monsters = World.getAllMonstersFromArea(World.areas[i]);
 
@@ -389,7 +393,29 @@ setInterval(function() {
 			}
 		}
 	}
-}, 1000);
+
+	cmdArr = World.cmds.slice();
+
+	World.cmds = [];
+
+	while(cmdArr.length) {
+		cmdObj = cmdArr[0];
+
+		if (!cmdObj.skill) {
+			Cmds[cmdObj.cmd](cmdObj.entity, cmdObj);
+		} else {
+			Skills[cmdObj.cmd](
+				cmdObj.skill,
+				cmdObj.entity,
+				cmdObj.roomObj,
+				cmdObj
+			);
+		}
+
+		cmdArr.splice(0, 1);
+	}
+
+}, 100);
 
 setInterval(function() {
 	var i = 0,

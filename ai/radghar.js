@@ -21,22 +21,24 @@ module.exports = {
 
 			if (!quest) {
 				if (command.msg.toLowerCase().indexOf('yes') !== -1) {
-					Cmd.say(mob, {
+					World.addCommand({
+						cmd: 'say',
 						msg: 'Thats great to hear ' + player.displayName  +  '! Let me get you signed up. Just a second...',
 						roomObj: roomObj
-					});
+					}, mob);
 
 					Character.addLog(player, 'mud_school', '0');
 
 					climbSkill = Character.getSkill(player, 'climb');
 
 					setTimeout(function() {
-						Cmd.say(mob, {
+						World.addCommand({
+							cmd: 'say',
 							msg: '"Alright, ' + player.name  + ', time for the enterance exam. You see this rope?'
 								+ ' Climb up to the top floor of the Academy Tower. A solider will meet you there." <i class="grey">He points at a rope running up to a window in the tower above. ' 
 								+ 'It is very high.</a> [<strong class="grey">Hint: Move up to continue</strong>]',
 							roomObj: roomObj
-						});
+						}, mob);
 
 						if (!climbSkill) {
 							climbSkill = Character.getSkill(mob, 'climb');
@@ -44,8 +46,8 @@ module.exports = {
 							Character.addSkill(player, climbSkill);
 
 							World.msgPlayer(player, {
-								msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>. Improved Climbling increases the chance of a successful climb, and reduces and falling damage.',
-								styleClass: 'success'
+								msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>. Improved Climbling increases the chance'
+									+ ' of a successful climb, and reduces and falling damage.'
 							});
 						}
 					}, 1200);
@@ -60,29 +62,32 @@ module.exports = {
 			quest = Character.getLog(player, 'mud_school');
 
 			if (!quest) {
-				Cmd.say(mob, {
+				World.addCommand({
+					cmd: 'say',
 					msg: 'Greetings ' + player.displayName + ' are you here to train at the '
 						+ '<strong class="red">Midgaardian Academy</strong>?',
 					roomObj: roomObj
-				});
+				}, mob);
 			} else if (quest.entryId === '0') {
 				if (World.dice.roll(1, 2) === 1) {
-					Cmd.say(mob, {
+					World.addCommand({
+						cmd: 'say',
 						msg: 'You\'ve not climbed this damn rope yet ' + player.displayName  + '? I hope you\'re taking this seriously.',
 						roomObj: roomObj
-					});
+					}, mob);
 				}
 			}
 		}
 	},
 	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 200);
-		
+
 		if (roll === 1) {
-			Cmd.say(mob, {
+			World.addCommand({
+				cmd: 'say',
 				msg: mob.exclimations[parseInt(Math.random() * ((mob.exclimations.length)))],
 				roomObj: roomObj
-			});
+			}, mob);
 		}
 	}
 };

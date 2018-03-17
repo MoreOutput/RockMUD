@@ -1404,10 +1404,17 @@ Cmd.prototype.move = function(target, command, fn) {
 	} else {
 		if (target.cmv > cost) {
 			if (target.position !== 'standing') {
-				World.msgPlayer(target, {
-					msg: 'You\re not even <strong>stand</strong>ing up!',
-					styleClass: 'error'
-				});
+				if (target.position !== 'fighting') {
+					World.msgPlayer(target, {
+						msg: 'You\'re not even <strong>stand</strong>ing up!',
+						styleClass: 'error'
+					});
+				} else {
+					World.msgPlayer(target, {
+						msg: 'You can\'t do that right now! Try fleeing combat first!',
+						styleClass: 'error'
+					});
+				}
 			} else {
 				World.msgPlayer(target, {
 					msg: 'You cannot do that right now.',
@@ -1605,7 +1612,7 @@ Cmd.prototype.get = function(target, command, fn) {
 				
 				if (item) {
 					Character.removeFromContainer(container, item);
-				
+
 					Character.addItem(target, item);
 
 					World.msgPlayer(target, {
@@ -2094,15 +2101,14 @@ Cmd.prototype.kill = function(player, command, avoidGroupCheck, fn) {
 				roomObj = World.getRoomObject(player.area, player.roomid);
 			}
 
-
 			if (!command.target) {
 				opponent = World.search(roomObj.monsters, command);
+
+				if (!opponent) {
+					opponent = World.search(roomObj.playersInRoom, command);
+				}
 			} else {
 				opponent = command.target;
-			}
-
-			if (!opponent) {
-				opponent = World.search(roomObj.playersInRoom, command);
 			}
 
 			if (opponent && opponent.roomid === player.roomid) {
@@ -2271,7 +2277,9 @@ Cmd.prototype.where = function(target, command) {
 Cmd.prototype.say = function(target, command) {
 	var roomObj,
 	i = 0;
-	
+
+	console.log('SAY COMMAND')
+
 	if (!target.mute) {
 		if (target.position !== 'sleeping') {
 			if (command.msg !== '') {
@@ -2405,6 +2413,12 @@ Cmd.prototype.tell = function(target, command) {
 			msg: 'You can\'t speak!',
 			styleClass: 'error'
 		});
+	}
+};
+
+Cmd.prototype.alert = function(target, command) {
+	if (target.isPlayer) {
+		World.msgPlayer(target, command);
 	}
 };
 
@@ -2742,6 +2756,11 @@ Cmd.prototype.practice = function(target, command) {
 						+ ' in the art of ' + skillObj.display + '.',
 					styleClass: 'green',
 					playerName: target.name
+				});
+			} else {
+				World.msgPlayer(target, {
+					msg: 'You do not have enough Trains to practice ' + skillObj.display + '.',
+					styleClass: 'error'
 				});
 			}
 		} else {

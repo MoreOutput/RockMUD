@@ -27,7 +27,7 @@ module.exports = {
 	revenge: false,
 	onVisit: function(mob, roomObj, target, incomingRoomObj, command) {	
 		var target;
-		
+
 		if (roomObj.playersInRoom.length && mob.playerAggressive) {
 			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
 		} else if (roomObj.monsters.length && mob.mobAggressive) {
@@ -39,24 +39,26 @@ module.exports = {
 		} else if (mob.onlyAttackSmaller && mob.size.value <= target.size.value) {
 			target = false;
 		}
-		
+
 		if (target && mob.attackOnVisit && mob.position === 'standing' && target.roomid === mob.roomid) {
 			if (!mob.revenge) {
-				Cmd.kill(mob, {
+				World.addCommand({
+					cmd: 'kill',
 					arg: target.name,
 					roomObj: roomObj
-				});
+				}, mob);
 			} else if (target.refId === mob.lastAttackedBy) {
-				Cmd.kill(mob, {
+				World.addCommand({
+					cmd: 'kill',
 					arg: target.name,
 					roomObj: roomObj
-				});
+				}, mob);
 			}
 		}
 	},
 	onAlive: function(mob, roomObj) {
 		var target;
-		
+
 		if (roomObj.playersInRoom.length && mob.playerAggressive) {
 			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
 		} else if (roomObj.monsters.length && mob.mobAggressive) {
@@ -72,18 +74,20 @@ module.exports = {
 		if (mob.onlyAttackSleeping === true && target.position !== 'sleeping') {
 			target = false;
 		}
-		
+
 		if (target && mob.attackOnAlive && mob.position === 'standing' && target.roomid === mob.roomid) {
 			if (!mob.revenge) {
-				Cmd.kill(mob, {
+				World.addCommand({
+					cmd: 'kill',
 					arg: target.name,
 					roomObj: roomObj
-				});
+				}, mob);
 			} else if (target.refId === mob.lastAttackedBy) {
-				Cmd.kill(mob, {
+				World.addCommand({
+					cmd: 'kill',
 					arg: target.name,
 					roomObj: roomObj
-				});
+				}, mob);
 			}
 		}
 	}

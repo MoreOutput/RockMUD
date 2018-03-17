@@ -82,10 +82,18 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 	if (items.length > 0) {
 		for (i; i < items.length; i += 1) {
 			if (Character.canSeeObject(player, items[i])) {
-				if (items[i].long) {
-					displayHTML += '<li class="room-item">' + items[i].long + ' (' + items[i].level + ')</li>';
+				if (items[i].level) {
+					if (items[i].long) {
+						displayHTML += '<li class="room-item">' + items[i].long + ' (' + items[i].level + ')</li>';
+					} else {
+						displayHTML += '<li class="room-item">A ' + items[i].name + ' (' + items[i].level + ')</li>';
+					}
 				} else {
-					displayHTML += '<li class="room-item">A ' + items[i].name + ' (' + items[i].level + ')</li>';
+					if (items[i].long) {
+						displayHTML += '<li class="room-item">' + items[i].long + '</li>';
+					} else {
+						displayHTML += '<li class="room-item">A ' + items[i].name + '</li>';
+					}
 				}
 			}
 		}
@@ -99,14 +107,14 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 				if (monsters[i].long) {
 					displayHTML += '<li class="room-monster grey">' + monsters[i].long + '</li>';
 				} else {
-					displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is ' 
+					displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is '
 						+ monsters[i].position + ' here.</li>';
 				}
 			}
 		}
 
 		i = 0;
-	
+
 		for (i; i < playersInRoom.length; i += 1) {
 			if (playersInRoom[i] !== player) {
 				if (Character.canSeeObject(player, playersInRoom[i])) {

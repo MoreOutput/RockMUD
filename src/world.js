@@ -184,6 +184,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.classes = []; // Class JSON definition is in memory
 	world.areas = []; // Loaded areas
 	world.players = []; // Loaded players
+	world.cmds = []; // current command queue, processed in ticks module
 	world.time = null; // Current Time data
 	world.itemTemplate = {};
 	world.mobTemplate = {};
@@ -1067,7 +1068,7 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 	if (target) {
 		if (s) {
 			if (!msgObj.onlyPrompt && typeof msgObj.msg !== 'function' && msgObj.msg) {
-				baseMsg = msgObj.msg;	
+				baseMsg = msgObj.msg;
 
 				if (!canSee && msgObj.darkMsg) {
 					msgObj.msg = msgObj.darkMsg
@@ -1565,8 +1566,14 @@ World.prototype.removeAffect = function(obj, affectName) {
 
 World.prototype.addAffect = function(obj, affect) {
 	obj.affects.push(affect);
-	
-	return true;;
+
+	return true;
+};
+
+World.prototype.addCommand = function(cmdObj, entity) {
+	cmdObj.entity = entity;
+
+	this.cmds.push(cmdObj);
 };
 
 World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, param2) {
@@ -1574,7 +1581,7 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 	j = 0,
 	allTrue = true,
 	gameEntities = [];
-	
+
 	if (gameEntity) {
 		if (!Array.isArray(gameEntity)) {
 			gameEntities = [gameEntity];
@@ -1607,7 +1614,7 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 			}
 		}
 	}
-	
+
 	return allTrue;
 };
 

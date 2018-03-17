@@ -345,7 +345,6 @@ Combat.prototype.processFight = function(player, opponent, roomObj) {
 	msgForOpponent;
 
 	if (!Character) {
-		// this can be refactored and look can be called iniitally in server.js
 		Character = require('./character');
 	}
 

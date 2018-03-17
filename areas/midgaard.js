@@ -476,12 +476,12 @@ module.exports = {
 					}],
 					behaviors: [],
 					beforeSell: function(merchant, roomObj, buyer) {
-						if (buyer.race === 'ogre') {
-							Cmd.say(merchant, {
+						if (buyer.race === 'human') {
+							World.addCommand({
+								cmd: 'say',
 								msg: 'Sell to an Ogre? Are you insane?',
 								roomObj: roomObj
-							});
-
+							}, merchant);
 							return false;
 						} else {
 							return true;

@@ -72,32 +72,22 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			if (r.msg) {
 			 cmdObj = Cmds.createCommandObject(r);
 
-				valid = World.isSafeCommand(cmdObj);
-
 				if (!s.player.creationStep) {
+					valid = World.isSafeCommand(cmdObj);
+
 					if (valid) {
 						if (cmdObj.cmd) {
 							cmdObj.roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 
 							if (cmdObj.cmd in Cmds) {
-								Cmds[cmdObj.cmd](s.player, cmdObj);
-
-								World.processEvents('onCommand', s.player, cmdObj.roomObj, cmdObj);
-								World.processEvents('onCommand', s.player.items, cmdObj.roomObj, cmdObj);
+								World.addCommand(cmdObj, s.player);
 							} else if (cmdObj.cmd in Skills) {
 								skillObj = Character.getSkill(s.player, cmdObj.cmd);
 
 								if (skillObj && s.player.wait === 0) {
-									Skills[cmdObj.cmd](
-										skillObj,
-										s.player,
-										cmdObj.roomObj,
-										cmdObj
-									);
+									cmdObj.skill = skillObj;
 
-									World.processEvents('onSkill', s.player, cmdObj.roomObj, skillObj);
-									World.processEvents('onSkill', s.player.items, cmdObj.roomObj, skillObj);
-									World.processEvents('onSkill', cmdObj.roomObj, s.player, skillObj);
+									World.addCommand(cmdObj, s.player);
 								} else {
 									if (!skillObj) {
 										World.msgPlayer(s, {
@@ -171,7 +161,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 
 							parseCmd(r, s);
 						}
-					})			
+					})
 				} else if (r.msg && s.player && !s.player.verifiedPassword) {
 					Character.getPassword(s, Cmds.createCommandObject(r), function(s) {
 						s.player.verifiedPassword = true;

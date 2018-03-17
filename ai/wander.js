@@ -25,10 +25,11 @@ module.exports = {
 			exitObj = Room.getExit(roomObj, direction);
 
 			if (exitObj && ((mob.stayInArea === false) || (mob.stayInArea === true && mob.area === exitObj.area))) {
-				Cmd.move(mob, {
+				World.addCommand({
+					cmd: 'move',
 					arg: direction,
 					roomObj: roomObj
-				});
+				}, mob);
 			}
 		}
 	}

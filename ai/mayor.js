@@ -20,16 +20,17 @@ module.exports = {
 
 		if (mob.position === 'standing') {
 			if (roll === 5) {
-				Cmd.emote(mob, {
+				World.addCommand({
+					cmd: 'emote',
 					msg: 'looks <span class="grey">skyward</span> in thought.',
 					roomObj: roomObj
-				});
+				}, mob);
 			} else if (roll === 1 && roomObj.playersInRoom.length) {
-				// Most of the time we just proclaim something
-				Cmd.say(mob, {
+				World.addCommand({
+					cmd: 'say',
 					msg: mob.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],
 					roomObj: roomObj
-				});
+				}, mob);
 			}
 		}
 	}

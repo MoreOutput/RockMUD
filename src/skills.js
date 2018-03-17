@@ -33,7 +33,7 @@ Skill.prototype.secondAttack = function(skillObj, player, roomObj) {
 
 	if (World.dice.roll(1, 100) <= skillObj.train) {
 		return 1 + skillObj.mod;
-	} else { 
+	} else {
 		return 0;
 	}
 };
