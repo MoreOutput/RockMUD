@@ -354,6 +354,7 @@ setInterval(function() {
 	var i = 0,
 	j = 0,
 	cmdObj,
+	cmdEntity,
 	players,
 	monsters,
 	cmdArr,
@@ -400,13 +401,16 @@ setInterval(function() {
 
 	while(cmdArr.length) {
 		cmdObj = cmdArr[0];
+		cmdEntity = cmdObj.entity;
+
+		cmdObj.entity = null;
 
 		if (!cmdObj.skill) {
-			Cmds[cmdObj.cmd](cmdObj.entity, cmdObj);
+			Cmds[cmdObj.cmd](cmdEntity, cmdObj);
 		} else {
 			Skills[cmdObj.cmd](
 				cmdObj.skill,
-				cmdObj.entity,
+				cmdEntity,
 				cmdObj.roomObj,
 				cmdObj
 			);

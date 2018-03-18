@@ -360,6 +360,7 @@ Combat.prototype.processFight = function(player, opponent, roomObj) {
 		player.opponent = opponent;
 	}
 
+
 	combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent, attackerCanSee) {
 		var oppStatus = Character.getStatusReport(opponent),
 		playerStatus = Character.getStatusReport(player),
@@ -396,17 +397,19 @@ Combat.prototype.processFight = function(player, opponent, roomObj) {
 			preventPrompt = true;
 		}
 
-		World.msgPlayer(player, {
+		World.addCommand({
+			cmd: 'alert',
 			msg: msgForPlayer,
 			noPrompt: preventPrompt,
 			styleClass: 'player-hit warning'
-		});
+		}, player);
 
-		World.msgPlayer(opponent, {
+		World.addCommand({
+			cmd: 'alert',
 			msg: msgForOpponent,
 			noPrompt: preventPrompt,
 			styleClass: 'player-hit warning'
-		});
+		}, opponent);
 
 		if (opponent.chp > 0) {
 			combatInterval = setInterval(function() {
@@ -505,18 +508,20 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 		player.killed += 1;
 
 		if (player.exp >= player.expToLevel) {
-			World.msgPlayer(player, {
+			World.addCommand({
+				cmd: 'alert',
 				msg: endOfCombatMsg,
 				noPrompt: true,
 				styleClass: 'victory'
-			});
+			}, player);
 
 			Character.level(player);
 		} else {
-			World.msgPlayer(player, {
+			World.addCommand({
+				cmd: 'alert',
 				msg: endOfCombatMsg,
 				styleClass: 'victory'
-			});
+			}, player);
 
 			Character.save(player);
 		}
@@ -525,7 +530,7 @@ Combat.prototype.processEndOfCombat = function(combatInterval, player, mob, room
 
 Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn) {
 	var combat = this;
-	
+
 	if (!opponent.opponent) {
 		opponent.opponent = player;
 	}
@@ -533,7 +538,7 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 	if (!player.opponent) {
 		player.opponent = opponent;
 	}
-	
+
 	if (player.area === opponent.area && player.roomid === opponent.roomid) {
 		combat.attack(player, opponent, roomObj, function(player, opponent, roomObj, msgForPlayer, msgForOpponent, playerCanSee) {
 			combat.attack(opponent, player, roomObj, function(opponent, player, roomObj, msgForOpponent2, msgForPlayer2, oppCanSee) {
@@ -555,7 +560,7 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 								+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
 						}
 					} else {
-						msgForPlayer += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to ' 
+						msgForPlayer += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to '
 							+ opponent.short + '</strong>!</div>';
 					}
 				}
@@ -574,17 +579,19 @@ Combat.prototype.round = function(combatInterval, player, opponent, roomObj, fn)
 					preventPrompt = true;
 				}
 
-				World.msgPlayer(player, {
+				World.addCommand({
+					cmd: 'alert',
 					msg: msgForPlayer,
 					noPrompt: preventPrompt,
 					styleClass: 'player-hit warning'
-				});
+				}, player);
 
-				World.msgPlayer(opponent, {
+				World.addCommand({
+					cmd: 'alert',
 					msg: msgForOpponent,
 					noPrompt: preventPrompt,
 					styleClass: 'player-hit warning'
-				});
+				}, opponent);
 
 				if (player.position !== 'fighting' || opponent.position !== 'fighting') {	
 					if (player.postion === 'fighting' && player.opponent.name === opponent.name) {

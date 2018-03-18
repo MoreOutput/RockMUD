@@ -472,11 +472,11 @@ module.exports = {
 						slot: '',
 						value: 10,
 						equipped: false,
-						spawn: 3
+						spawn: 4
 					}],
 					behaviors: [],
 					beforeSell: function(merchant, roomObj, buyer) {
-						if (buyer.race === 'human') {
+						if (buyer.race === 'ogre') {
 							World.addCommand({
 								cmd: 'say',
 								msg: 'Sell to an Ogre? Are you insane?',

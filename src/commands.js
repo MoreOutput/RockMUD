@@ -2088,7 +2088,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 	}
 };
 
-Cmd.prototype.kill = function(player, command, avoidGroupCheck, fn) {
+Cmd.prototype.kill = function(player, command, avoidGroupCheck) {
 	var roomObj,
 	i = 0,
 	opponent;
@@ -2122,6 +2122,13 @@ Cmd.prototype.kill = function(player, command, avoidGroupCheck, fn) {
 					msg: '<strong class="red">A ' + player.displayName 
 						+ ' screams and charges at you!</strong>',
 					noPrompt: true
+				});
+
+				World.msgRoom(roomObj, {
+					msg: '<strong class="red">A ' + player.displayName 
+						+ ' screams and charges at ' + opponent.long + '</strong>',
+					noPrompt: true,
+					playerName: player.name
 				});
 
 				Combat.processFight(player, opponent, roomObj);
@@ -2278,8 +2285,6 @@ Cmd.prototype.say = function(target, command) {
 	var roomObj,
 	i = 0;
 
-	console.log('SAY COMMAND')
-
 	if (!target.mute) {
 		if (target.position !== 'sleeping') {
 			if (command.msg !== '') {
@@ -2424,7 +2429,7 @@ Cmd.prototype.alert = function(target, command) {
 
 Cmd.prototype.reply = function(target, command) {
 	var player;
-	
+
 	if (!target.mute) {
 		if (command.msg && target.reply) {
 			player = World.getPlayerByName(target.reply);
