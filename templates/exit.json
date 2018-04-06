@@ -1,0 +1,13 @@
+{
+	"id": "",
+	"affects": [],
+	"cmd": "",
+	"cmdMsg": "",
+	"door": false,
+	"isOpen": true,
+	"name": "",
+	"locked": false,
+	"area": "",
+	"key": "",
+	"openMsg": ""
+}

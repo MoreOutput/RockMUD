@@ -18,8 +18,8 @@ Room.prototype.getAdjacentExit = function(targetRoom, exitObj, player) {
 
 	for (i; i < targetRoom.exits.length; i += 1) {
 		if (exitObj.id === targetRoom.id && targetRoom.exits[i].door) {
-			if (targetRoom.exits[i].door.name === exitObj.door.name || targetRoom.exits[i].door.id
-				&& exitObj.door.id && targetRoom.exits[i].door.id === exitObj.door.id) {
+			if (targetRoom.exits[i].name === exitObj.name || targetRoom.exits[i].id
+				&& exitObj.id && targetRoom.exits[i].id === exitObj.id) {
 				targetExit = targetRoom.exits[i];
 			}
 		}
@@ -62,7 +62,7 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 			if (Character.canSeeObject(player, exits[i])) {
 				if (!exits[i].door) {
 					displayHTML += '<li class="list-inline-item"><button class="link-btn red" data-cmd="true" data-cmd-value="move ' + exits[i].cmd + '">' + exits[i].cmd + '</button></li>';
-				} else if (exits[i].door && !exits[i].door.isOpen) {
+				} else if (exits[i].door && !exits[i].isOpen) {
 					displayHTML += '<li class="list-inline-item"><button class="link-btn grey" data-cmd="true" data-cmd-value="move ' + exits[i].cmd + '">' +  exits[i].cmd + '</button></li>';
 				} else {
 					displayHTML += '<li class="list-inline-item"><button class="link-btn yellow" data-cmd="true" data-cmd-value="move ' + exits[i].cmd + '">' + exits[i].cmd + '</button></li>';
@@ -143,7 +143,7 @@ Room.prototype.getExit = function(roomObj, direction) {
 		for (i; i < roomObj.exits.length; i += 1) {
 			if (direction === roomObj.exits[i].cmd) {
 				return roomObj.exits[i];
-			} else if (roomObj.exits[i].door && roomObj.exits[i].door.name === direction) {
+			} else if (roomObj.exits[i].door && roomObj.exits[i].name === direction) {
 				return roomObj.exits[i];
 			}
 		}
@@ -161,7 +161,7 @@ Room.prototype.getAdjacent = function(roomObj) {
 	roomArr = [];
 
 	for (i; i < roomObj.exits.length; i += 1) {
-		if (!roomObj.exits[i].door || roomObj.exits[i].door.isOpen) {
+		if (!roomObj.exits[i].door || roomObj.exits[i].isOpen) {
 			roomArr.push({
 				room: World.getRoomObject(roomObj.exits[i].area, roomObj.exits[i].id),
 				direction: roomObj.exits[i]
@@ -214,7 +214,7 @@ Room.prototype.getBrief = function(roomObj, options) {
 	playersInRoom = roomObj.playersInRoom,
 	monsters = roomObj.monsters;
 
-	if (monsters.length > 0 || playersInRoom.length > 0) {
+	if (roomObj && (monsters.length > 0 || playersInRoom.length > 0)) {
 		displayHTML += '<ul class="room-here list-inline">';
 		
 		for (i; i < monsters.length; i += 1) {

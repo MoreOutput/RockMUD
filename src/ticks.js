@@ -147,7 +147,7 @@ setInterval(function() {
 	if (World.time.month.day > World.time.month.days) {
 		World.time.month = World.time.months[0];
 	}
-}, 1250);
+}, 1275);
 
 // wait-state removal
 setInterval(function() {
@@ -370,7 +370,7 @@ setInterval(function() {
 			for (j; j < monsters.length; j += 1) {
 				if ((World.areas[i].runOnAliveWhenEmpty || players.length)
 					|| (monsters[j].originatingArea !== World.areas[i].id)) {
-					
+
 					roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
 
 					if (monsters[j].chp >= 1 && (monsters[j].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
@@ -383,7 +383,7 @@ setInterval(function() {
 
 			for (j; j < players.length; j += 1) {
 				roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
-			
+
 				if (players[j].chp >= 1) {
 					World.processEvents('onAlive', players[j], roomObj);
 				}
@@ -418,8 +418,24 @@ setInterval(function() {
 
 		cmdArr.splice(0, 1);
 	}
+}, 250);
 
-}, 100);
+// Combat Ticks and random player save
+setInterval(function() {
+	var i = 0,
+	j = 0,
+	cmdObj,
+	cmdEntity,
+	players,
+	monsters,	
+	cmdArr,
+	entities,
+	roomObj;
+
+	for (i; i < World.areas.length; i += 1) {
+		entities = World.getAllPlayersFromArea(World.areas[i]).concat(World.getAllMonstersFromArea(World.areas[i]));
+	}
+}, 1200);
 
 setInterval(function() {
 	var i = 0,

@@ -393,12 +393,11 @@ module.exports = {
 				{
 					cmd: 'up',
 					id: '1',
-					door: {
-						name: 'gate',
-						isOpen: false,
-						locked: true,
-						key: '101'
-					}
+					door: true,
+					name: 'gate',
+					isOpen: false,
+					locked: true,
+					key: '101'
 				}
 			],
 			playersInRoom: [],

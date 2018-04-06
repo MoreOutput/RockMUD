@@ -102,7 +102,7 @@ Character.prototype.load = function(name, s, fn) {
 		if (err) {
 			throw err;
 		}
-		
+
 		s.player = r;
 
 		s.player.displayName = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
@@ -310,9 +310,10 @@ Character.prototype.create = function(s) {
 
 						roomObj.playersInRoom.push(s.player);
 
-						Cmds.look(s.player, {
+						World.addCommand({
+							cmd: 'look',
 							roomObj: roomObj
-						});
+						}, s.player);
 					} else {
 						World.msgPlayer(s, {
 							msg: 'Error logging in. Reconnect and retry.'
@@ -807,7 +808,7 @@ Character.prototype.getKeys = function(player) {
 };
 
 // if a character has a specific key
-// keyId is the id found on exitObj.door.id
+// keyId is the id found on exitObj.door
 Character.prototype.getKey = function(player, keyId) {
 	var i = 0,
 	key;
@@ -1076,7 +1077,7 @@ Character.prototype.addLog = function(player, questId, logEntryId) {
 					player.log.push({
 						id: questId, 
 						entryId: logEntryId,
-						quest: World.quests[i].quest
+						quest: true
 					});
 				}
 			}
@@ -1124,7 +1125,7 @@ Character.prototype.removeStatMods = function(player, item) {
 
 Character.prototype.wearWeapon = function(target, weapon, roomObj) {
 	var slot = this.getEmptyWeaponSlot(target);
-	
+
 	if (!weapon.equipped) {
 		if (slot) {
 			weapon.equipped = true;
