@@ -48,13 +48,12 @@ module.exports = {
 				}, {
 					cmd: 'down',
 					id: '6',
-					door: {
-						isOpen: false,
-						locked: true,
-						key: '101',
-						openMsg: 'A foul smell flows in from below.',
-						name: 'gate'
-					}
+					door: true,
+					isOpen: false,
+					locked: true,
+					key: '101',
+					name: 'gate',
+					openMsg: 'A foul smell flows in from below.'
 				}
 			],
 			playersInRoom: [],

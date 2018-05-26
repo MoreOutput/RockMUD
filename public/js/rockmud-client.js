@@ -105,23 +105,26 @@ window.onload = function() {
 	},
 	checkCmdEvents = function(rowCnt) {
 		var i = 0,
-		processCmdClick = function(evt, nodeRef) {
+		processCmdClick = function(evt) {
 			evt.preventDefault();
 
 			node.value = this.getAttribute('data-cmd-value');
 
-
 			send(evt);
+
+			this.setAttribute('data-cmd-value', '');
 		},
 		nodes = document.querySelectorAll('[data-cmd="true"]');
 
 		for (i; i < nodes.length; i += 1) {
 			(function(nodeRef, index) {
+				nodeRef.fn = processCmdClick;
+
 				if (nodeRef.getAttribute('data-cmd')) {
 					nodeRef.setAttribute('data-cmd', false);
-					nodeRef.addEventListener('click', processCmdClick, false);
+					nodeRef.addEventListener('click', nodeRef.fn, true);
 				} else {
-					nodeRef.removeEventListener('click', processCmdClick, true);
+					nodeRef.removeEventListener('click', nodeRef.fn, false);
 				}
 			}(nodes[i], i));
 		}

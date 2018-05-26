@@ -241,7 +241,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 							world.itemTemplate = world.getTemplate('item');
 							world.mobTemplate = world.getTemplate('entity');
 							world.roomTemplate = world.getTemplate('room');
-							world.exitTemplate = world.getTemplate('exit');
+							world.exitTemplate = world.getTemplate('exit');	
 
 							Character = require('./character');
 							Cmds = require('./commands');
@@ -1022,9 +1022,7 @@ World.prototype.reloadArea = function(area) {
 
 	newArea = require('../areas/' + area.id  + '.js');
 
-	(function(area) {
-		console.log(area.id, area.behaviors);
-
+	(function(newArea) {
 		world.setupArea(newArea, function(err, newArea) {
 			var i = 0;
 
@@ -1037,7 +1035,7 @@ World.prototype.reloadArea = function(area) {
 				}
 			}
 		});
-	}(world.extend(area, JSON.parse(JSON.stringify(world.areaTemplate)))));
+	}(world.extend(newArea, JSON.parse(JSON.stringify(world.areaTemplate)))));
 };
 
 World.prototype.getRoomObject = function(areaId, roomId) {
@@ -1740,6 +1738,8 @@ World.prototype.shuffle = function (arr) {
 World.prototype.isInvisible = function(obj) {
 	var i = 0;
 
+	console.log(obj.id, obj.name, obj.area)
+
 	for (i; i < obj.affects.length; i += 1) {
 		if (obj.affects[i].affect === 'invis') {
 			return true;
@@ -1827,7 +1827,9 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 					allTrue = gameEntity[evtName](gameEntity, roomObj, param, param2);
 				}
 
-				console.log(gameEntity.id);
+				if (!gameEntity.behaviors) {
+					console.log('ERROR', gameEntity.id, gameEntity.name, gameEntities.items);
+				}
 
 				for (j; j < gameEntity.behaviors.length; j += 1) {
 					if (this.ai[gameEntity.behaviors[j].module][evtName] && 

@@ -1,7 +1,7 @@
 RockMUD
 ===============================
 
-**RockMUD (0.3.5) is a WebSockets MUD server**
+**RockMUD (0.4.0) is a WebSockets MUD server**
 
 Try the latest on this Heroku hobby instance: https://rockmud.herokuapp.com/. If you connect to the demo server type 'help commands' to get a full(ish) list of the current commands.
 

@@ -6,7 +6,6 @@
 'use strict';
 var fs = require('fs'),
 crypto = require('crypto'),
-Room = require('./rooms'),
 World = require('./world'),
 Skills = require('./skills'),
 Cmds,
@@ -31,9 +30,11 @@ Character.prototype.login = function(r, s, fn) {
 	var character = this,
 	name = r.msg.replace(/_.*/,'').toLowerCase();
 
-		if (!Cmds) {
+	if (!Cmds) {
 		// this can be refactored and look can be called iniitally in server.js
 		Cmds = require('./commands');
+
+		console.log(123);
 	}
 
 	if (r.msg.length > 2) {
@@ -1387,7 +1388,7 @@ Character.prototype.level = function(player) {
 	this.save(player);
 };
 
-// Add in gear modifiers and return the updated object
+// Adjust the core character stats from the worn gear
 Character.prototype.calculateGear = function() {
 
 };

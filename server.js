@@ -55,6 +55,12 @@ server = http.createServer(function (req, res) {
 	}
 }),
 World = require('./src/world'),
+Character = require('./src/character'),
+Cmds = require('./src/commands'),
+Skills = require('./src/skills'),
+Spells = require('./src/spells'),
+Room = require('./src/rooms'),
+Combat = require('./src/rooms'),
 io = require('socket.io')(server, {
 	log: false,
 	transports: ['websocket']

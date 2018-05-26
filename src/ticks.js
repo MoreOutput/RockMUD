@@ -435,7 +435,7 @@ setInterval(function() {
 	for (i; i < World.areas.length; i += 1) {
 		entities = World.getAllPlayersFromArea(World.areas[i]).concat(World.getAllMonstersFromArea(World.areas[i]));
 	}
-}, 1200);
+}, 1100);
 
 setInterval(function() {
 	var i = 0,

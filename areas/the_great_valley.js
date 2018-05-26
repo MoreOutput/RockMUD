@@ -23,9 +23,9 @@ module.exports = {
 		roomObj,
 		generateNorthOf = World.getRoomObject(this.name, this.defaultRoom),
 		i = 0,
-		enteranceRoomId = '4-0',
-		startingRoom,
-		j = 0;
+		j = 0,
+		enteranceRoomId = '0-0',
+		startingRoom;
 
 		if (this.rooms.length === 1) {
 			for (i; i < x; i += 1) {
@@ -196,7 +196,7 @@ module.exports = {
 				},
 				{
 					cmd: 'north',
-					id: '4-0',
+					id: '0-0',
 					area: 'the_great_valley'
 				}
 			],

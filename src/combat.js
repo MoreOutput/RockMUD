@@ -61,7 +61,7 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 
 
 Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
-	if (!Character.getSkillById) {
+	if (!Character) {
 		Character = require('./character');
 	}
 
