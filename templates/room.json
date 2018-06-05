@@ -16,5 +16,6 @@
 	"hasEvents": false,
 	"preventRecall": false,
 	"preventDecay": false,
-	"behaviors": []
+	"behaviors": [],
+	"affects": []
 }

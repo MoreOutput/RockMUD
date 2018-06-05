@@ -1,8 +1,5 @@
 'use strict';
 var World = require('./world'),
-Character = require('./character'),
-Room = require('./rooms'),
-Combat = require('./combat'),
 Skill = function() {};
 
 /*
@@ -90,7 +87,7 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 * Attacker does .5 more damage per size difference in target
 */
 Skill.prototype.bash = function(skillObj, player, roomObj, command) {
-	var opponent,
+	var opponent = player.opponent,
 	weaponSlots,
 	i = 0,
 	strMod = World.dice.getStrMod(player),
@@ -119,76 +116,85 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 		return dmg;
 	};
 
-	if (!player.opponent && command.arg && player.position === 'standing') {
-		opponent = Room.getMonster(roomObj, command);
-	} else if (player.opponent && player.position === 'fighting') {
-		opponent = player.opponent;
-	}
-
-	if (opponent) {
-		shieldArr = Character.getSlotsWithShields(player);
-
-		if (shieldArr.length) {
-			shield = shieldArr[0].item;
+	if (skillObj.train > 5) {
+		if (!opponent && command.arg && player.position === 'standing') {
+			opponent = World.room.getMonster(roomObj, command);
 		}
 
-		if (player.position === 'standing' || player.position === 'fighting') {
-			if (World.dice.roll(1, 100) <= skillObj.train) {
-				damage = rollDamage(shield);
+		if (opponent) {
+			shieldArr = World.character.getSlotsWithShields(player);
 
-				if (!shield) {
-					World.msgPlayer(player, {
-						msg: 'You bash and charge at a ' + opponent.name + ' (' + damage + ')',
-						noPrompt: true
-					});
+			if (shieldArr.length) {
+				shield = shieldArr[0].item;
+			}
 
-					World.msgPlayer(opponent, {
-						msg: 'A ' + player.displayName + ' bashes and charges at you!',
-						noPrompt: true
-					});
+			if (player.position === 'standing' || player.position === 'fighting') {
+				if (World.dice.roll(1, 100) <= skillObj.train) {
+					damage = rollDamage(shield);
+
+					if (!shield) {
+						opponent.chp -= damage;
+
+						World.msgPlayer(player, {
+							msg: 'You bash and charge at a ' + opponent.name + ' (' + damage + ')'
+						});
+
+						World.msgPlayer(opponent, {
+							msg: 'A ' + player.displayName + ' bashes and charges at you!',
+							noPrompt: true
+						});
+					} else {
+						opponent.chp -= damage;
+
+						World.msgPlayer(player, {
+							msg: 'You use a ' + shield.displayName + ' to bash and charge at a '
+								+ opponent.name + ' (' + damage + ')',
+							noPrompt: true
+						});
+
+						World.msgPlayer(opponent, {
+							msg: 'A ' + player.displayName + ' bashes and charges at you with a '
+								+ shield.displayName + '!' + ' (' + damage + ')',
+							noPrompt: true
+						});
+					}
+					
+					if (player.position !== 'fighting') {
+						World.combat.processFight(player, opponent, roomObj);
+					}
+
+					if (player.mainStat === 'str') {
+						player.wait += 3;
+					} else {
+						player.wait += 4;
+					}
+
+					opponent.wait += 4;
 				} else {
 					World.msgPlayer(player, {
-						msg: 'You use a ' + shield.displayName + ' to bash and charge at a ' 
-							+ opponent.name + ' (' + damage + ')',
-						noPrompt: true
+						msg: 'You lunge forward and mistime your bash but manage to keep your footing!'
 					});
 
-					World.msgPlayer(opponent, {
-						msg: 'A ' + player.displayName + ' bashes and charges at you with a ' 
-							+ shield.displayName + '!' + ' (' + damage + ')',
-						noPrompt: true
-					});
-				}
-			
-				if (!player.opponent || player.opponent.refId !== opponent.refId) {
-					Combat.processFight(player, opponent, roomObj);
-				}
+					if (player.position !== 'fighting') {
+						World.combat.processFight(player, opponent, roomObj);
+					}
 
-				if (player.mainStat === 'str') {
-					player.wait += 3;
-				} else {
-					player.wait += 4;
-				}
-
-				opponent.wait += 3;
-			} else {
-				World.msgPlayer(player, {
-					msg: 'You lunge forward and mistime your bash but manage to keep your footing!',
-					noPrompt: true
-				});
-
-				Combat.processFight(player, opponent, roomObj);
-
-				if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
-					player.wait += 2;
-				} else {
-					player.wait += 3;
+					if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
+						player.wait += 4;
+					} else {
+						player.wait += 5;
+					}
 				}
 			}
+		} else {
+			World.msgPlayer(player, {
+				msg: 'Bash what?'
+			});
 		}
 	} else {
 		World.msgPlayer(player, {
-			msg: 'Bash what?'
+			msg: 'You need to train more before using Bash.',
+			styleClass: 'error'
 		});
 	}
 };
@@ -244,7 +250,7 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 					opponent.chp -= damage;
 
 					if (!player.opponent || opponent.refId !== player.opponent.refId) {
-						Combat.processFight(player, opponent, roomObj);
+						World.combat.processFight(player, opponent, roomObj);
 					}
 				}
 
@@ -261,7 +267,7 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 				});
 
 				if (!player.opponent || opponent.refId !== player.opponent.refId) {
-					Combat.processFight(player, opponent, roomObj);
+					World.combat.processFight(player, opponent, roomObj);
 				}
 
 				if (playerMods.dexMod > 18 || skillObj.train === 100) {
@@ -280,7 +286,7 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 };
 
 Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
-	var opponent = Room.getMonster(roomObj, command),
+	var opponent = World.room.getMonster(roomObj, command),
 	weaponSlots,
 	i = 0,
 	dexMod = World.dice.getDexMod(player),

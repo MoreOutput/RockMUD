@@ -1,6 +1,5 @@
 'use strict';
 var World = require('./world'),
-Character = require('./character'),
 Spell = function() {};
 
 /*
@@ -80,7 +79,7 @@ Spell.prototype.detectHidden = function(skillObj, player, roomObj, command, fn) 
 	roomMsg =  player.possessivePronoun + ' eyes shine bright blue as you become more aware of your surroundings!',
 	oppSuccessMsg = player.displayName + ' tries to cast a spell and fails.',
 	alreadyAffectedMsg = 'You are already experiencing increased awareness.',
-	currentlyAffected = Character.getAffect(player, 'detectHidden'),
+	currentlyAffected = World.character.getAffect(player, 'detectHidden'),
 	timer = 1,
 	cost = 1;
 

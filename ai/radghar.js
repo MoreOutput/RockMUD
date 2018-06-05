@@ -1,8 +1,5 @@
 'use strict';
-var Cmd = require('../src/commands'),
-Character = require('../src/character'),
-Room = require('../src/rooms'),
-World = require('../src/world');
+var World = require('../src/world');
 
 /*
 	Fighter Guildmaster and Midgaard Academy guide.
@@ -17,7 +14,7 @@ module.exports = {
 		climbSkill;
 
 		if (player.isPlayer && command) {
-			quest = Character.getLog(player, 'mud_school');
+			quest = World.character.getLog(player, 'mud_school');
 
 			if (!quest) {
 				if (command.msg.toLowerCase().indexOf('yes') !== -1) {
@@ -27,9 +24,9 @@ module.exports = {
 						roomObj: roomObj
 					}, mob);
 
-					Character.addLog(player, 'mud_school', '0');
+					World.character.addLog(player, 'mud_school', '0');
 
-					climbSkill = Character.getSkill(player, 'climb');
+					climbSkill = World.character.getSkill(player, 'climb');
 
 					setTimeout(function() {
 						World.addCommand({
@@ -41,9 +38,9 @@ module.exports = {
 						}, mob);
 
 						if (!climbSkill) {
-							climbSkill = Character.getSkill(mob, 'climb');
+							climbSkill = world.character.getSkill(mob, 'climb');
 
-							Character.addSkill(player, climbSkill);
+							World.character.addSkill(player, climbSkill);
 
 							World.msgPlayer(player, {
 								msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>. Improved Climbling increases the chance'
@@ -59,7 +56,7 @@ module.exports = {
 		var quest;
 
 		if (player.level <= 2) {
-			quest = Character.getLog(player, 'mud_school');
+			quest = World.character.getLog(player, 'mud_school');
 
 			if (!quest) {
 				World.addCommand({

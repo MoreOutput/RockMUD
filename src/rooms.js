@@ -1,7 +1,6 @@
 'use strict';
 var fs = require('fs'),
 World = require('./world'),
-Character = require('./character'),
 io = World.io,
 players = World.players,
 time = World.time,
@@ -43,10 +42,6 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 	titleHtmlTag = 'h2',
 	items = roomObj.items;
 
-	if (!Object.keys(Character).length) {
-		Character = require('./character');
-	}
-
 	if (roomObj.titleHtmlTag) {
 		titleHtmlTag = roomObj.titleHtmlTag;
 	}
@@ -59,7 +54,7 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 		displayHTML += '<ul class="room-exits list-inline"><li class="list-label list-inline-item"><strong>Visible Exits: </strong></li>';
 
 		for (i; i < exits.length; i += 1) {
-			if (Character.canSeeObject(player, exits[i])) {
+			if (World.character.canSeeObject(player, exits[i])) {
 				if (!exits[i].door) {
 					displayHTML += '<li class="list-inline-item"><button class="link-btn red" data-cmd="true" data-cmd-value="move ' + exits[i].cmd + '">' + exits[i].cmd + '</button></li>';
 				} else if (exits[i].door && !exits[i].isOpen) {
@@ -81,7 +76,7 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 
 	if (items.length > 0) {
 		for (i; i < items.length; i += 1) {
-			if (Character.canSeeObject(player, items[i])) {
+			if (World.character.canSeeObject(player, items[i])) {
 				if (items[i].level && items[i].itemType !== 'corpse' && items[i].itemType !== 'ornament') {
 					if (items[i].long) {
 						displayHTML += '<li class="room-item">' + items[i].long + ' (' + items[i].level + ')</li>';
@@ -103,7 +98,7 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 
 	if (monsters.length > 0 || playersInRoom.length > 0) {
 		for (i; i < monsters.length; i += 1) {
-			if (Character.canSeeObject(player, monsters[i])) {
+			if (World.character.canSeeObject(player, monsters[i])) {
 				if (monsters[i].long) {
 					displayHTML += '<li class="room-monster grey">' + monsters[i].long + '</li>';
 				} else {
@@ -117,7 +112,7 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 
 		for (i; i < playersInRoom.length; i += 1) {
 			if (playersInRoom[i] !== player) {
-				if (Character.canSeeObject(player, playersInRoom[i])) {
+				if (World.character.canSeeObject(player, playersInRoom[i])) {
 					displayHTML += '<li class="room-player">' + playersInRoom[i].name 
 						+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here.</li>';
 				}

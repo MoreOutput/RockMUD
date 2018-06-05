@@ -1,7 +1,5 @@
 'use strict';
-var Cmd = require('../src/commands'),
-Room = require('../src/rooms'),
-World = require('../src/world');
+var World = require('../src/world');
 
 /*
 	The mayor walks aroud midgaard acting as a crier and greeting the masses.

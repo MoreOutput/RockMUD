@@ -7,8 +7,6 @@
 var fs = require('fs'),
 crypto = require('crypto'),
 World = require('./world'),
-Skills = require('./skills'),
-Cmds,
 Character = function () {
 	this.statusReport = [
 		{msg: ' is <span class="red">bleeding all over the place</span> and looks <strong>nearly dead!</strong>', percentage: 0},
@@ -29,13 +27,6 @@ Character = function () {
 Character.prototype.login = function(r, s, fn) {
 	var character = this,
 	name = r.msg.replace(/_.*/,'').toLowerCase();
-
-	if (!Cmds) {
-		// this can be refactored and look can be called iniitally in server.js
-		Cmds = require('./commands');
-
-		console.log(123);
-	}
 
 	if (r.msg.length > 2) {
 		if  (/^[a-z]+$/g.test(r.msg) === true && /[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
@@ -59,9 +50,7 @@ Character.prototype.login = function(r, s, fn) {
 						}
 					}
 
-					if (!s.player) {
-						s.player = r;
-					}
+					s.player = r;
 
 					s.player.displayName = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
 
@@ -148,20 +137,28 @@ Character.prototype.getPassword = function(s, command, fn) {
 	var character = this;
 
 	if (command.cmd && command.cmd.length > 7) {
-		character.hashPassword(s.player.salt, command.cmd, 1000, function(hash) {
-			var roomObj;
+		character.hashPassword(s.player.salt, command.cmd, 1000, function(hash) {			
+			var roomObj,
+			areaObj;
 
 			if (s.player.password === hash) {
 				if (character.addPlayer(s)) {
-					s.player = World.setupBehaviors(s.player);
-
-					World.sendMotd(s);
-
 					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+					areaObj = World.getArea(s.player.area);
 
-					roomObj.playersInRoom.push(s.player);
+					World.setupBehaviors(s.player, areaObj, roomObj, function(err, player) {
+						if (err) {
+							return fn(err, player);
+						}
 
-					fn(s);
+						s.player = player;
+
+						World.sendMotd(s);
+
+						roomObj.playersInRoom.push(s.player);
+	
+						fn(s);
+					});
 				} else {
 					if (r.msg === undefined) {
 						World.msgPlayer(s, {
@@ -237,98 +234,98 @@ Character.prototype.create = function(s) {
 
 	s.player.name = s.player.name.toLowerCase();
 
-	s.player = World.extend(s.player, JSON.parse(JSON.stringify(raceObj)));
-	s.player = World.extend(s.player, JSON.parse(JSON.stringify(classObj)));
-
-	s.player.refId = World.createRefId(s.player);
-	s.player.id = s.player.name;
-	s.player.chp += 30;
-	s.player.cmana += 5;
-	s.player.cmv += 100;
-	s.player.isPlayer = true;
-	s.player.salt = '';
-	s.player.created = new Date();
-	s.player.saved = null;
-	s.player.role = 'player';
-	s.player.area = 'Midgaard';
-	s.player.roomid = '1';
-	s.player.trains += 25;
-	s.player.deaths = 0;
-	s.player.baseStr += 12 + s.player.str;
-	s.player.baseInt += 12 + s.player.int;
-	s.player.baseWis += 12 + s.player.wis;
-	s.player.baseCon += 12 + s.player.con;
-	s.player.baseDex += 12 + s.player.dex;
-	s.player.settings = {
-		autosac: false,
-		autoloot: true,
-		autocoin: true,
-		wimpy: 0,
-		channels: {
-			blocked: ['flame']
-		}
-	};
-
-	socket = s.player.socket;
-
-	s.player.mv = s.player.cmv;
-	s.player.mana = s.player.cmana;
-	s.player.hp = s.player.chp;
-	s.player.str = s.player.baseStr;
-	s.player.int = s.player.baseInt;
-	s.player.wis = s.player.baseWis;
-	s.player.con = s.player.baseCon;
-	s.player.dex = s.player.baseDex;
-	s.player.noFollow = false;
-	s.player.noGroup = false;
-
-	character.generateSalt(function(salt) {
-		s.player.salt = salt;
-
-		character.hashPassword(salt, s.player.password, 1000, function(hash) {
-			s.player.password = hash;
-			s.player.socket = null;
-
-			s.player.personalPronoun = character.getPersonalPronoun(s.player);
-
-			s.player.possessivePronoun = character.getPossessivePronoun(s.player);
-
-			character.write(s.player.name, s.player, function (err) {
-				character.load(s.player.name, s, function(s) {
-					var roomObj;
-
-					if (err) {
-						throw err;
-					}
-
-					if (character.addPlayer(s)) {
-						s.leave('creation');
-						s.join('mud');
-
-						World.sendMotd(s);
-
-						roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-
-						roomObj.playersInRoom.push(s.player);
-
-						World.addCommand({
-							cmd: 'look',
-							roomObj: roomObj
-						}, s.player);
-					} else {
-						World.msgPlayer(s, {
-							msg: 'Error logging in. Reconnect and retry.'
+	World.extend(s.player, raceObj, function(err, player) {
+		World.extend(s.player, classObj, function(err, player) {
+			s.player.refId = World.createRefId(s.player);
+			s.player.id = s.player.name;
+			s.player.chp += 30;
+			s.player.cmana += 5;
+			s.player.cmv += 100;
+			s.player.isPlayer = true;
+			s.player.salt = '';
+			s.player.created = new Date();
+			s.player.saved = null;
+			s.player.role = 'player';
+			s.player.area = 'Midgaard';
+			s.player.roomid = '1';
+			s.player.trains += 25;
+			s.player.deaths = 0;
+			s.player.baseStr += 12 + s.player.str;
+			s.player.baseInt += 12 + s.player.int;
+			s.player.baseWis += 12 + s.player.wis;
+			s.player.baseCon += 12 + s.player.con;
+			s.player.baseDex += 12 + s.player.dex;
+			s.player.settings = {
+				autosac: false,
+				autoloot: true,
+				autocoin: true,
+				wimpy: 0,
+				channels: {
+					blocked: ['flame']
+				}
+			};
+		
+			socket = s.player.socket;
+		
+			s.player.mv = s.player.cmv;
+			s.player.mana = s.player.cmana;
+			s.player.hp = s.player.chp;
+			s.player.str = s.player.baseStr;
+			s.player.int = s.player.baseInt;
+			s.player.wis = s.player.baseWis;
+			s.player.con = s.player.baseCon;
+			s.player.dex = s.player.baseDex;
+			s.player.noFollow = false;
+			s.player.noGroup = false;
+		
+			character.generateSalt(function(salt) {
+				s.player.salt = salt;
+		
+				character.hashPassword(salt, s.player.password, 1000, function(hash) {
+					s.player.password = hash;
+					s.player.socket = null;
+		
+					s.player.personalPronoun = character.getPersonalPronoun(s.player);
+		
+					s.player.possessivePronoun = character.getPossessivePronoun(s.player);
+		
+					character.write(s.player.name, s.player, function (err) {
+						character.load(s.player.name, s, function(s) {
+							var roomObj;
+		
+							if (err) {
+								throw err;
+							}
+		
+							if (character.addPlayer(s)) {
+								s.leave('creation');
+								s.join('mud');
+		
+								World.sendMotd(s);
+		
+								roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+		
+								roomObj.playersInRoom.push(s.player);
+		
+								World.addCommand({
+									cmd: 'look',
+									roomObj: roomObj
+								}, s.player);
+							} else {
+								World.msgPlayer(s, {
+									msg: 'Error logging in. Reconnect and retry.'
+								});
+		
+								s.disconnect();
+							}
 						});
-
-						s.disconnect();
-					}
+					});
 				});
 			});
 		});
 	});
 };
 
-// recursive function fired in server.js, checked when a new character is being made
 Character.prototype.newCharacter = function(s, command) {
 	var character = this,
 	i = 0;
@@ -341,7 +338,7 @@ Character.prototype.newCharacter = function(s, command) {
 			noPrompt: true
 		});
 
-		Cmds.help(s.player, {
+		world.commands.help(s.player, {
 			msg: 'races',
 			noPrompt: true
 		});
@@ -365,7 +362,7 @@ Character.prototype.newCharacter = function(s, command) {
 						noPrompt: true
 					});
 
-					Cmds.help(s.player, {
+					world.commands.help(s.player, {
 						msg: 'classes',
 						noPrompt: true
 					});
@@ -377,7 +374,7 @@ Character.prototype.newCharacter = function(s, command) {
 							noPrompt: true
 						});
 					} else {
-						Cmds.help(s, {
+						world.commands.help(s, {
 							msg: command.msg,
 							noPrompt: true
 						});
@@ -406,7 +403,7 @@ Character.prototype.newCharacter = function(s, command) {
 						noPrompt: true
 					});
 				} else {
-					Cmds.help(s, {
+					world.commands.help(s, {
 						msg: command.msg,
 						noPrompt: true
 					});
@@ -439,7 +436,7 @@ Character.prototype.newCharacter = function(s, command) {
 						noPrompt: true
 					});
 				} else {
-					Cmds.help(s, {
+					World.commands.help(s, {
 						msg: command.msg,
 						noPrompt: true
 					});
@@ -475,6 +472,7 @@ Character.prototype.save = function(player, fn) {
 	group = player.group,
 	opponent = player.opponent,
 	area = World.getArea(player.area),
+	room = World.getRoomObject(player.area, player.roomid),
 	following = player.following;
 
 	if (player.isPlayer && area) {
@@ -491,19 +489,20 @@ Character.prototype.save = function(player, fn) {
 		character.write(player.name.toLowerCase(), player, function (err) {
 			player.socket = socket;
 
-			player = World.setupBehaviors(player);
-			player.opponent = opponent;
-			player.following = following;
-			player.followers = followers;
-			player.group = group;
+			player = World.setupBehaviors(player, area, room, function(err, player) {
+				player.opponent = opponent;
+				player.following = following;
+				player.followers = followers;
+				player.group = group;
 
-			if (err) {
-				return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
-			} else {
-				if (fn) {
-					return fn(player);
+				if (err) {
+					return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
+				} else {
+					if (fn) {
+						return fn(player);
+					}
 				}
-			}
+			});
 		});
 	}
 };

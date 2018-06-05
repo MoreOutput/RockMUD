@@ -1,7 +1,5 @@
 'use strict';
-var Cmd = require('../src/commands'),
-Room = require('../src/rooms'),
-World = require('../src/world');
+var World = require('../src/world');
 
 /*
 	Wander behavior. Mob will walk about selecting a random move direction from mob.moveDirections.
@@ -12,7 +10,7 @@ World = require('../src/world');
 */
 module.exports = {
 	stayInArea: true,
-	wanderCheck: 99,
+	wanderCheck: 90,
 	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'],
 	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 100),
@@ -22,8 +20,8 @@ module.exports = {
 		if (mob && mob.wanderCheck && roll > mob.wanderCheck && mob.position === 'standing') {
 			direction = mob.moveDirections[World.dice.roll(1, mob.moveDirections.length) - 1];
 
-			exitObj = Room.getExit(roomObj, direction);
-
+			exitObj = World.room.getExit(roomObj, direction);
+		
 			if (exitObj && ((mob.stayInArea === false) || (mob.stayInArea === true && mob.area === exitObj.area))) {
 				World.addCommand({
 					cmd: 'move',

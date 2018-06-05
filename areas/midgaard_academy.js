@@ -1,9 +1,6 @@
 
 'use strict';
-var Cmd = require('../src/commands'),
-Room = require('../src/rooms'),
-Character = require('../src/character'),
-World = require('../src/world');
+var World = require('../src/world');
 
 module.exports = {
 	name: 'Midgaard Academy',
@@ -99,7 +96,7 @@ module.exports = {
 				}
 			],
 			onEnter: function(roomObj, entity, incomingRoomObj, command) {
-				var climbSkill = Character.getSkill(entity, 'climb'),
+				var climbSkill = world.character.getSkill(entity, 'climb'),
 				displayAfter = 1200,
 				msg = '';
 
@@ -135,7 +132,7 @@ module.exports = {
 				}
 			],
 			onEnter: function(roomObj, entity, incomingRoomObj, command) {
-				var climbSkill = Character.getSkill(entity, 'climb'),
+				var climbSkill = world.character.getSkill(entity, 'climb'),
 				displayAfter = 1200,
 				msg = '';
 
@@ -171,7 +168,7 @@ module.exports = {
 				climbCheck = 5,
 				msg = '';
 
-				climbSkill = Character.getSkill(entity, 'climb');
+				climbSkill = world.character.getSkill(entity, 'climb');
 
 				if (!climbSkill) {
 					//climbRoll = World.dice.roll(1, 3, strMod);

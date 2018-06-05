@@ -28,5 +28,6 @@
 	"runOnAliveWhenEmpty": true,
 	"preventRespawn": false,
 	"persistence": false,
-	"wasSaved": false
+	"wasSaved": false,
+	"affects": []
 }

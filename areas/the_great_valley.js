@@ -1,7 +1,5 @@
 'use strict';
-var Cmd = require('../src/commands'),
-Room = require('../src/rooms'),
-World = require('../src/world');
+var World = require('../src/world');
 
 module.exports = {
 	name : 'The Great Valley',
@@ -32,6 +30,7 @@ module.exports = {
 				j = 0;
 
 				for (j; j < y; j += 1) {
+					// copy the template
 					roomObj = JSON.parse(JSON.stringify(World.roomTemplate)),
 					roomObj.id = i + '-' + j;
 					roomObj.content = 'A room';

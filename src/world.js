@@ -3,12 +3,7 @@
 */
 'use strict';
 var fs = require('fs'),
-World = function() {},
-Character,
-Cmds,
-Skills,
-Spells,
-Room;
+World = function() {};
 
 World.prototype.setup = function(socketIO, cfg, fn) {
 	var world = this,
@@ -152,11 +147,11 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 		fs.readdir(path, function(err, fileNames) {
 			fileNames.forEach(function(fileName, i) {
 				fs.readFile(path + fileName, function (err, tmp) {
-				var tmp = JSON.parse(tmp);
+					var tmp = JSON.parse(tmp);
 
 					tmp.template = fileName.replace(/.json/g, '');
-				
-					tmpArr.push(tmp);
+					
+					world[tmp.template + 'Template'] = tmp;
 
 					if (i === fileNames.length - 1) {
 						return fn(err, tmpArr);
@@ -179,18 +174,18 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 		});
 	};
 
-	world.dice = require('./dice');
 	world.races = []; // Race JSON definition is in memory
 	world.classes = []; // Class JSON definition is in memory
 	world.areas = []; // Loaded areas
 	world.players = []; // Loaded players
 	world.cmds = []; // current command queue, processed in ticks module
+	world.battles = [] // current battle queue -- each item here is the meta data for upcoming combat messages
 	world.time = null; // Current Time data
-	world.itemTemplate = {};
-	world.mobTemplate = {};
-	world.roomTemplate = {};
-	world.areaTemplate = {};
-	world.exitTemplate = {};
+	world.itemTemplate;
+	world.entityTemplate;
+	world.roomTemplate;
+	world.areaTemplate;
+	world.exitTemplate;
 	world.ai = {};
 	world.motd = '';
 	world.quests = []; // array of all game quests built from loaded areas
@@ -201,6 +196,13 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.dataDriver = null; 
 	// without a driver player data is saved as a flat file to the players folder
 	world.playerDriver = null;
+	world.character = require('./character');
+	world.commands = require('./commands');
+	world.skills = require('./skills');
+	world.spells = require('./spells');
+	world.room = require('./rooms');
+	world.combat = require('./combat')
+	world.dice = require('./dice');
 
 	if (world.config.persistence && world.config.persistence.data) {
 		world.dataDriver = require(world.config.persistenceDriverDir + world.config.persistence.data.driver + '.js')(world.config.persistence.data);
@@ -237,30 +239,17 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 							world.races = races;
 							world.classes = classes;
 							world.templates = templates;
-							world.areaTemplate = world.getTemplate('area');
-							world.itemTemplate = world.getTemplate('item');
-							world.mobTemplate = world.getTemplate('entity');
-							world.roomTemplate = world.getTemplate('room');
-							world.exitTemplate = world.getTemplate('exit');	
-
-							Character = require('./character');
-							Cmds = require('./commands');
-							Skills = require('./skills');
-							Spells = require('./spells');
-							Room = require('./rooms');
 
 							for (i; i < world.areas.length; i += 1) {
-								(function(area, index) {
-									area.extended = true;
-
+								world.extend(world.areas[i], world.areaTemplate, function(err, area) {
 									if (area.quests && area.quests.length) {
 										world.quests = world.quests.concat(area.quests);
 									}
 
 									world.setupArea(area, function(err, area) {
-										if (index === world.areas.length - 1) {
-											world.ticks = require('./ticks');
+										area.extended = true;
 
+										if (i === world.areas.length - 1) {
 											i = 0;
 
 											for (i; i < world.areas.length; i += 1) {
@@ -269,64 +258,21 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 												}
 											}
 
-											return fn(Character, Cmds, Skills);
+											if (world.config.preventTicks === false) {
+												world.ticks = require('./ticks');
+											}
+
+											return fn();
 										}
 									});
-								}(world.extend(world.areas[i], JSON.parse(JSON.stringify(world.areaTemplate))), i));
+								});
 							}
-
-							/*
-							for (i; i < world.areas.length; i += 1) {
-								(function(area, index) {
-									if (area.quests && area.quests.length) {
-										world.quests = world.quests.concat(area.quests);
-									}
-
-									(function(setupIndex) {
-										world.setupArea(area, function(area) {
-											var j;
-
-											if (setupIndex === world.areas.length - 1) {
-												j = 0;
-
-												for (j; j < world.areas.length; j += 1) {
-													(function(area, postIndex) {
-														if (area.afterLoad && !area.preventAfterLoad) {
-															area.afterLoad();
-														}
-
-														if (postIndex === world.areas.length - 1) {
-															world.ticks = require('./ticks');
-
-															return fn(Character, Cmds, Skills);
-														}
-													}(world.areas[j], j));
-												}
-											}
-										});
-									}(index));
-								}(world.areas[i], i));
-							}
-							*/
 						});
 					});
 				});
 			});
 		});
 	});
-};
-
-World.prototype.getTemplate = function(fileName) {
-	var i = 0,
-	j;
-
-	for (i; i < this.templates.length; i += 1) {
-		if (this.templates[i].template === fileName) {
-			return this.templates[i];
-		}
-	}
-
-	return false;
 };
 
 World.prototype.getPlayableRaces = function() {
@@ -484,124 +430,94 @@ World.prototype.getPlayersByArea = function(areaId) {
 * Area and item setup on boot
 */
 
-World.prototype.rollItems = function(itemArr, roomid, area) {
+World.prototype.rollItem = function(item, area, room, callback) {
 	var world = this,
 	diceMod,
+	chanceRoll = world.dice.roll(1, 20),
+	prop,
 	i = 0;
 
-	for (i; i < itemArr.length; i += 1) {
-		if (itemArr[i].spawn && itemArr[i].spawn > 1 ) {
-			itemArr[i].spawn -= 1;
-			itemArr.push(JSON.parse(JSON.stringify(itemArr[i])));
+	item.refId = world.createRefId(item);
+
+	if (!item.id) {
+		item.id = item.refId;
+	}
+
+	if (Array.isArray(item.name)) {
+		item.name = item.name[world.dice.roll(1, item.name.length) - 1];
+	}
+	
+	if (!item.displayName) {
+		item.displayName = item.name[0].toUpperCase() + item.name.slice(1);
+	} else if (Array.isArray(item.displayName)) {
+		item.displayName = item.displayName[world.dice.roll(1, item.displayName.length) - 1];
+	}
+
+	if (Array.isArray(item.short)) {
+		item.short = item.short[world.dice.roll(1, item.short.length) - 1];
+	}
+
+	if (Array.isArray(item.long)) {
+		item.long = item.long[world.dice.roll(1, item.long.length) - 1];
+	}
+
+	if (chanceRoll === 20) {
+		item.diceNum += 1;
+		item.diceSides += 1;
+		item.diceMod += 1;
+	} else if (chanceRoll > 18) {
+		item.diceNum += 1;
+	} else if (chanceRoll === 1 && item.diceNum > 1) {
+		item.diceNum -= 1
+		item.weight += 2;
+	}
+
+	item.area = area.id;
+	item.roomid = room.id;
+
+	if (!item.originatingArea) {
+		item.originatingArea = area.id;
+	}
+
+	for (prop in item) {
+		if (item[prop] === 'function' && !item.hasEvents) {
+			item.hasEvents = true;
 		}
+	}
 
-		(function(item, index) {
-			var chanceRoll = world.dice.roll(1, 20),
-			prop;
-
-			item = world.extend(item, JSON.parse(JSON.stringify(world.itemTemplate)));
-
-			item.refId = world.createRefId(item) + '-' + index;
-
-			if (Array.isArray(item.name)) {
-				item.name = item.name[world.dice.roll(1, item.name.length) - 1];
-			}
-			
-			if (!item.displayName) {
-				item.displayName = item.name[0].toUpperCase() + item.name.slice(1);
-			} else if (Array.isArray(item.displayName)) {
-				item.displayName = item.displayName[world.dice.roll(1, item.displayName.length) - 1];
-			}
-
-			if (Array.isArray(item.short)) {
-				item.short = item.short[world.dice.roll(1, item.short.length) - 1];
-			}
-
-			if (Array.isArray(item.long)) {
-				item.long = item.long[world.dice.roll(1, item.long.length) - 1];
-			}
-
-			if (chanceRoll === 20) {
-				item.diceNum += 1;
-				item.diceSides += 1;
-				item.diceMod += 1;
-			} else if (chanceRoll > 18) {
-				item.diceNum += 1;
-			} else if (chanceRoll === 1 && item.diceNum > 1) {
-				item.diceNum -= 1
-				item.weight += 2;
-			}
-
-			item.area = area.id;
-			item.roomid = roomid;
-
-			if (!item.originatingArea) {
-				item.originatingArea = area.id;
-			}
-
-			if (item.behaviors && item.behaviors.length > 0) {
-				item = world.setupBehaviors(item);
-
-				itemArr[index] = item;
-			} else {
-				itemArr[index] = item;
-			}
-
-			if (item.items) {
-				world.rollItems(item.items, roomid, area);
-			}
-
-			for (prop in item) {
-				if (item[prop] === 'function' && !item.hasEvents) {
-					item.hasEvents = true;
-				}
-			}
-
-			if (!item.id) {
-				item.id = item.refId;
-			}
-
-			if (item.onRolled) {
-				item.onRolled(item);
-			}
-		}(itemArr[i], i));
+	if (item.behaviors) {
+		world.setupBehaviors(item, area, room, function(err, item) {
+			return callback(err, item);
+		});
+	} else {
+		return callback(false, item);
 	}
 };
 
 // Rolls values for Mobs, including their equipment
-World.prototype.rollMob = function(mob, roomid, area, fn) {
+World.prototype.rollMob = function(mob, area, room, callback) {
 	var world = this,
 	diceMod,
-	i = 0;
+	prop,
+	raceObj = world.getRace(mob.race),
+	classObj = world.getClass(mob.charClass);
 
-	for (i; i < mobArr.length; i += 1) {
+	mob.refId = world.createRefId(mob);
 
-		(function(mob, index) {
-			var raceObj,
-			j = 0,
-			prop,
-			classObj;
+	if (!mob.id) {
+		mob.id = mob.refId;
+	}
 
-			mob = world.extend(mob, JSON.parse(JSON.stringify(world.mobTemplate)));
+	if (!mob.race) {
+		mob.race = 'animal';
+	}
 
-			mob.refId = world.createRefId(mob) + '-' + index;
+	if (!mob.race) {
+		mob.charClass = 'fighter';
+	}
 
-			if (mob.race) {
-				raceObj = world.getRace(mob.race);
-
-				mob = world.extend(mob, JSON.parse(JSON.stringify(raceObj)));
-			}
-
-			if (mob.charClass) {
-				classObj = world.getClass(mob.charClass);
-
-				mob = world.extend(mob, JSON.parse(JSON.stringify(classObj)));
-			}
-
-			if (!mob.id) {
-				mob.id = mob.refId;
-			}
-
+	world.extend(mob, raceObj, function(err, mob) {
+		world.extend(mob, classObj, function(err, mob) {
 			if (Array.isArray(mob.name)) {
 				mob.name = mob.name[world.dice.roll(1, mob.name.length) - 1];
 			}
@@ -615,11 +531,11 @@ World.prototype.rollMob = function(mob, roomid, area, fn) {
 			} else if (Array.isArray(mob.displayName)) {
 				mob.displayName = mob.displayName[world.dice.roll(1, mob.displayName.length) - 1];
 			}
-		
+
 			if (Array.isArray(mob.short)) {
 				mob.short = mob.short[world.dice.roll(1, mob.short.length) - 1];
 			}
-		
+
 			if (Array.isArray(mob.long)) {
 				mob.long = mob.long[world.dice.roll(1, mob.long.length) - 1];
 			}
@@ -629,11 +545,11 @@ World.prototype.rollMob = function(mob, roomid, area, fn) {
 			}
 
 			if (!mob.possessivePronoun) {
-				mob.possessivePronoun = Character.getPossessivePronoun(mob);
+				mob.possessivePronoun = world.character.getPossessivePronoun(mob);
 			}
 
 			if (!mob.personalPronoun) {
-				mob.personalPronoun = Character.getPersonalPronoun(mob);
+				mob.personalPronoun = world.character.getPersonalPronoun(mob);
 			}
 
 			if (mob.rollStats) {
@@ -645,7 +561,7 @@ World.prototype.rollMob = function(mob, roomid, area, fn) {
 			}
 
 			mob.isPlayer = false;
-			mob.roomid = roomid;
+			mob.roomid = room.id;
 			mob.area = area.id;
 
 			if (!mob.originatingArea) {
@@ -661,7 +577,7 @@ World.prototype.rollMob = function(mob, roomid, area, fn) {
 			} else {
 				mob.hp += (mob.level + world.dice.roll(1, mob.con/4));
 			}
-			
+
 			mob.chp = mob.hp;
 
 			if (!mob.mana) {
@@ -685,29 +601,21 @@ World.prototype.rollMob = function(mob, roomid, area, fn) {
 				mob.gold += world.dice.roll(1, 8);
 			}
 
-			if (mob.items) {
-				world.rollItems(mob.items, roomid, area);
-			}
-
-			if (mob.behaviors) {
-				mob = world.setupBehaviors(mob);
-
-				mobArr[index] = mob;
-			} else {
-				mobArr[index] = mob;
-			}
-
 			for (prop in mob) {
 				if (mob[prop] === 'function' && !mob.hasEvents) {
 					mob.hasEvents = true;
 				}
 			}
 
-			if (mob.onRolled) {
-				mob.onRolled(mob);
+			if (mob.behaviors) {
+			world.setupBehaviors(mob, area, room, function(err, mob) {
+					return callback(err, mob);
+				});
+			} else {
+				return callback(false, mob);
 			}
-		}(mobArr[i], i));
-	}
+		});
+	});
 };
 
 World.prototype.setupArea = function(area, callback) {
@@ -715,15 +623,15 @@ World.prototype.setupArea = function(area, callback) {
 	world = this,
 	setup = function() {
 		for (i; i < area.rooms.length; i += 1) {
-			(function(room, index) {
-				room.extended = true;
-
+			world.extend(area.rooms[i], world.roomTemplate, function(err, room) {
 				world.setupRoom(area, room, function(error, area, room) {
-					if (index === area.rooms.length - 1) {
+					room.extended = true;
+
+					if (i === area.rooms.length - 1) {
 						callback(false, area);
 					}
 				});
-			}(world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate))), i));
+			});
 		}
 	};
 
@@ -746,34 +654,6 @@ World.prototype.setupArea = function(area, callback) {
 	}
 }
 
-/*
-World.prototype.setupArea = function(area, fn) {
-	var world = this,
-	exitObj,
-	i = 0;
-
-	if (!area.wasExtended) {
-		area = world.extend(area, JSON.parse(JSON.stringify(world.areaTemplate)));
-	}
-
-	for (i; i < area.messages.length; i += 1) {
-		if (!area.messages[i].random && area.messages[i].random !== false) {
-			area.messages[i].random = true;
-		}
-	}
-
-	if (typeof area.beforeLoad === 'function' && !area.preventBeforeLoad) {
-		area.beforeLoad(function(err) {
-			if (!err) {
-				return world.setupRooms(area, fn);
-			}
-		});
-	} else {
-		return world.setupRooms(area, fn);
-	}
-};
-*/
-
 World.prototype.setupRoom = function(area, room, callback) {
 	var i = 0,
 	world = this;
@@ -782,62 +662,62 @@ World.prototype.setupRoom = function(area, room, callback) {
 
 	if (room.monsters.length) {
 		for (i; i < room.monsters.length; i += 1) {
-			// setting the spawn property will inject more of the mob into the array
-			if (room.monsters[i].spawn && room.monsters[i].spawn > 1) {
-				room.monsters[i].spawn -= 1;
-				room.monsters[i].push(JSON.parse(JSON.stringify(room.monsters[i])));
-			}
-
-			(function(mob, index) {
-				mob.extended = true;
+			world.extend(room.monsters[i], world.entityTemplate, function(err, mob) {
 				mob.area = area.id;
 
-				world.setupMob(mob, function(error, mob) {
-					if (index === room.monsters.length - 1) {
+				world.setupMob(mob, area, room, function(err, mob) {
+					mob.extended = true;
+
+					if (err) {
+						return callback(err, mob);
+					}
+
+					if (i === room.monsters.length - 1) {
 						i = 0;
 
 						if (room.items.length) {
 							for (i; i < room.items.length; i += 1) {
-								(function(item, index) {
-									item.extended = true;
+								world.extend(room.items[i], world.itemTemplate, function(err, item) {
 									item.area  = area.id;
 
-									world.setupItem(item, function(err, item) {
-										if (index ===  room.items.length - 1) {
+									world.setupItem(item, area, room, function(err, item) {
+										item.extended = true;
+
+										if (i ===  room.items.length - 1) {
 											i = 0;
 
 											if (room.exits.length) {
 												for (i; i < room.exits.length; i += 1) {
-													(function(exit, index) {
+													world.extend(room.exits[i], world.exitTemplate, function(err, exit) {
 														if (!exit.area) {
 															exit.area = room.area;
 														}
 
-														if (index === room.exits.length - 1) {
+														if (i === room.exits.length - 1) {
 															callback(false, area, room);
 														}
-													}(world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate))), i));
+													});
 												}
 											} else {
 												callback(false, area, room);
 											}
 										}
 									});
-								}(world.extend(room.items[i], JSON.parse(JSON.stringify(world.itemTemplate))), i));
+								});
 							}
 						} else {
 							i = 0;
 							if (room.exits.length) {
 								for (i; i < room.exits.length; i += 1) {
-									(function(exit, index) {
+									world.extend(room.exits[i], world.exitTemplate, function(err, exit) {
 										if (!exit.area) {
 											exit.area = room.area;
 										}
 
-										if (index === room.exits.length - 1) {
+										if (i === room.exits.length - 1) {
 											callback(false, area, room);
 										}
-									}(world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate))), i));
+									});
 								}
 							} else {
 								callback(false, area, room);
@@ -845,50 +725,52 @@ World.prototype.setupRoom = function(area, room, callback) {
 						}
 					}
 				});
-			}(world.extend(room.monsters[i], JSON.parse(JSON.stringify(world.mobTemplate))), i));
+			});
 		}
 	} else {
 		if (room.items.length) {
 			for (i; i < room.items.length; i += 1) {
-				(function(item, index) {
-					item.extended = true;
+				world.extend(room.items[i], world.itemTemplate, function(err, item) {
 					item.area = area.id;
 
-					world.setupItem(item, function(err, item) {
-						if (index ===  room.items.length - 1) {
+					world.setupItem(item, area, room, function(err, item) {
+						item.extended = true;
+
+						if (i ===  room.items.length - 1) {
 							i = 0;
+
 							if (room.exits.length) {
 								for (i; i < room.exits.length; i += 1) {
-									(function(exit, index) {
+									world.extend(room.exits[i], world.exitTemplate, function(err, exit) {
 										if (!exit.area) {
 											exit.area = room.area;
 										}
 
-										if (index === room.exits.length - 1) {
+										if (i === room.exits.length - 1) {
 											callback(false, area, room);
 										}
-									}(world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate))), i));
+									});
 								}
 							} else {
 								callback(false, area, room);
 							}
 						}
 					});
-				}(world.extend(room.items[i], JSON.parse(JSON.stringify(world.itemTemplate))), i));
+				});
 			}
 		} else {
 			i = 0;
 			if (room.exits.length) {
 				for (i; i < room.exits.length; i += 1) {
-					(function(exit, index) {
+					world.extend(room.exits[i], world.exitTemplate, function(err, exit) {
 						if (!exit.area) {
 							exit.area = room.area;
 						}
 
-						if (index === room.exits.length - 1) {
+						if (i === room.exits.length - 1) {
 							callback(false, area, room);
 						}
-					}(world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate))), i));
+					});
 				}
 			} else {
 				callback(false, area, room);
@@ -897,26 +779,40 @@ World.prototype.setupRoom = function(area, room, callback) {
 	}
 };
 
-World.prototype.setupMob = function(mob, callback) {
+World.prototype.setupMob = function(mob, area, room, callback) {
 	var i = 0,
 	world = this;
 
-	if (mob.items.length) {
-		for (i; i < mob.items.length; i += 1) {
-			(function(item, index) {
-				item.extended = true;
-				item.area = mob.area;
+	// TODO: confirm onRoll runs for each item after world game objects
+	// have been fully loaded
 
-				world.setupItem(item, function(err, item) {
-					if (index ===  mob.items.length - 1) {
-						callback(false, mob);
-					}
-				});
-			}(world.extend(mob.items[i], JSON.parse(JSON.stringify(world.itemTemplate))), i));
+	world.rollMob(mob, area, room, function(err, mob) {
+		if (err) {
+			return callback(error, mob);
 		}
-	} else {
-		callback(false, mob);
-	}
+
+		if (mob.items.length) {
+			for (i; i < mob.items.length; i += 1) {
+				world.extend(mob.items[i], world.itemTemplate, function(err, item) {
+					item.area = mob.area;
+	
+					world.setupItem(item, area, room, function(err, item) {
+						item.extended = true;
+
+						if (err) {
+							return callback(err, item);
+						}
+
+						if (i ===  mob.items.length - 1) {
+							return callback(false, mob);
+						}
+					});
+				});
+			}
+		} else {
+			callback(false, mob);
+		}
+	});
 };
 
 World.prototype.setupExit = function(exit, callback) {
@@ -926,71 +822,20 @@ World.prototype.setupExit = function(exit, callback) {
 	callback(false, exit);
 };
 
-World.prototype.setupItem = function(item, callback) {
+World.prototype.setupItem = function(item, area, room, callback) {
 	var i = 0,
 	world = this;
 
+	world.rollItem(item, area, room, function(error, item) {
+		if (error) {
+			return callback(error, item);
+		}
+
+		callback(false, item)
+	});
+
 	callback(false, item);
 };
-
-/*
-World.prototype.setupRooms = function(area, fn) {
-	var world = this,
-	i = 0,
-	j = 0,
-	exitObj;
-
-	for (i; i < area.rooms.length; i += 1) {
-		if (!area.wasExtended) {
-			area.rooms[i] = world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)));
-
-			if (!area.rooms[i].area) {
-				area.rooms[i].area = area.id;
-			}
-		}
-
-		if (area.rooms[i].monsters) {
-			area.monsters = world.shuffle(area.rooms[i].monsters);
-		}
-
-		area.rooms[i].area = area.id;
-
-		j = 0;
-
-		for (j; j < area.rooms[i].exits.length; j += 1) {
-			exitObj = area.rooms[i].exits[j];
-
-			if (!exitObj.area || exitObj.area === area.name) {
-				exitObj.area = area.id;
-			}
-
-			exitObj.affects = [];
-		}
-	}
-
-	area.wasExtended = true;
-
-	i = 0;
-
-	for (i; i < area.rooms.length; i += 1) {
-		(function(room, index) {
-			if (room.monsters.length > 0) {
-				world.rollMobs(room.monsters, room.id, area);
-			}
-
-			if (room.items.length > 0) {
-				world.rollItems(room.items, room.id, area);
-			}
-
-			if (area.rooms.length - 1 === index) {
-				if (typeof fn === 'function') {
-					return fn(area);
-				}
-			}
-		}(area.rooms[i], i));
-	}
-};
-*/
 
 World.prototype.createRefId = function(gameEntity) {
 	if (gameEntity.isPlayer === true) {
@@ -1022,11 +867,12 @@ World.prototype.reloadArea = function(area) {
 
 	newArea = require('../areas/' + area.id  + '.js');
 
-	(function(newArea) {
+	world.extend(newArea, world.areaTemplate, function(err, newArea) {
 		world.setupArea(newArea, function(err, newArea) {
 			var i = 0;
 
 			newArea.id = area.id;
+			newArea.extended = true;
 
 			for (i; i < world.areas.length; i += 1) {
 				if (world.areas[i].id === newArea.id) {
@@ -1035,7 +881,7 @@ World.prototype.reloadArea = function(area) {
 				}
 			}
 		});
-	}(world.extend(newArea, JSON.parse(JSON.stringify(world.areaTemplate)))));
+	});
 };
 
 World.prototype.getRoomObject = function(areaId, roomId) {
@@ -1368,7 +1214,7 @@ World.prototype.msgRoom = function(roomObj, msgObj) {
 			s = roomObj.playersInRoom[i].socket;
 
 			if (msgObj.checkSight) {
-				canSee = Character.canSee(s.player, roomObj);
+				canSee = world.character.canSee(s.player, roomObj);
 			}
 
 			if (s && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id 
@@ -1382,7 +1228,7 @@ World.prototype.msgRoom = function(roomObj, msgObj) {
 			s = roomObj.playersInRoom[i].socket;
 
 			if (msgObj.checkSight) {
-				canSee = Character.canSee(s.player, roomObj);
+				canSee = world.character.canSee(s.player, roomObj);
 			}
 
 			if (s && s.player.roomid === roomObj.id && s.player.area === roomObj.area) {
@@ -1512,7 +1358,7 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 				} else {
 					result = arr[matchedIndexes[0]];
 				}
-			} else {
+		} else {
 				result = [];
 
 				i = 0;
@@ -1527,54 +1373,22 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 	return result;
 };
 
-World.prototype.setupBehaviors = function(gameEntity) {
-	var prop,
+World.prototype.setupBehaviors = function(gameEntity, area, room, callback) {
+	var world = this,
+	prop,
 	behavior,
 	behaviorObj,
-	i = 0,
-	j = 0;
-
-	if (gameEntity.behaviors) {		
-		for (i; i < gameEntity.behaviors.length; i += 1) {
-			behavior = this.getAI(gameEntity.behaviors[i]),
-			behaviorObj = {};
-
-			for (prop in behavior) {
-				if (typeof behavior[prop] !== 'function' && !gameEntity[prop]) {
-					 behaviorObj[prop] = behavior[prop]; 
-				}
-			}
-
-			if (behaviorObj) {
-				gameEntity = this.extend(gameEntity, behaviorObj);
-			}
-		}
-	}
-
 	i = 0;
 
-	if (gameEntity.items) {
-		for (j; j < gameEntity.items; j =+ 1) {
-			if (gameEntitiy.items[j].behaviors) {
-				for (i; i < gameEnitity.items[j].behaviors.length; i += 1) {
-					behavior = this.getAI(gameEntity.items[j].behaviors[i]);
-					behaviorObj = {};
-
-					for (prop in behavior) {
-						if (typeof behavior[prop] !== 'function' && !gameEntity.items[j][prop]) {
-							 behaviorObj[prop] = behavior[prop]; 
-						}
-					}
-
-					if (behaviorObj) {
-						gameEntity.items[j] = this.extend(gameEntity.items[j], behaviorObj);
-					}
-				}
-			}	
+	if (gameEntity.behaviors.length) {
+		for (i; i < gameEntity.behaviors.length; i += 1) {
+			world.extend(gameEntity, world.getAI(gameEntity.behaviors[i]), function(err, gameEntity) {
+				return callback(false, gameEntity);
+			});
 		}
+	} else {
+		return callback(false, gameEntity);
 	}
-
-	return gameEntity;
 };
 
 World.prototype.sanitizeBehaviors = function(gameEntity) {
@@ -1676,16 +1490,12 @@ World.prototype.saveArea = function(areaId) {
 	}
 };
 
-World.prototype.extend = function(extendObj, readObj) {
+World.prototype.extend = function(extendObj, readObj, callback) {
 	var prop,
 	propCnt,
 	prop2;
 
-	if (readObj) { // refactor, shouldn't need this check
-		propCnt = Object.keys(readObj).length;
-	}
-
-	if (arguments.length === 2 && propCnt && !extendObj.extended) {
+	if (extendObj && readObj) {
 		for (prop in readObj) {
 			if (extendObj[prop] !== undefined) {
 				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
@@ -1715,7 +1525,7 @@ World.prototype.extend = function(extendObj, readObj) {
 		}
 	}
 
-	return extendObj;
+	return callback(false, extendObj);
 };
 
 // Shuffle an array
@@ -1738,7 +1548,9 @@ World.prototype.shuffle = function (arr) {
 World.prototype.isInvisible = function(obj) {
 	var i = 0;
 
-	console.log(obj.id, obj.name, obj.area)
+	if (!obj.affects) {
+		console.log(obj.name, obj.id);
+	}
 
 	for (i; i < obj.affects.length; i += 1) {
 		if (obj.affects[i].affect === 'invis') {
@@ -1822,20 +1634,13 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 		for (i; i < gameEntities.length; i += 1) {
 			gameEntity = gameEntities[i];
 
-			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)] || gameEntity.behaviors.length === 0) {
+			if (!Array.isArray(gameEntity.behaviors)) {
+				console.log(gameEntity.name, gameEntity.id);
+			}
+
+			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)] && gameEntity.behaviors.length > 0) {
 				 if (gameEntity[evtName]) {
 					allTrue = gameEntity[evtName](gameEntity, roomObj, param, param2);
-				}
-
-				if (!gameEntity.behaviors) {
-					console.log('ERROR', gameEntity.id, gameEntity.name, gameEntities.items);
-				}
-
-				for (j; j < gameEntity.behaviors.length; j += 1) {
-					if (this.ai[gameEntity.behaviors[j].module][evtName] && 
-						(!gameEntity.behaviors[j].random || World.dice.roll(1, 2) === 1)) {
-						allTrue = this.ai[gameEntity.behaviors[j].module][evtName](gameEntity, roomObj, param, param2);
-					}
 				}
 			}
 

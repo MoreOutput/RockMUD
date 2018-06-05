@@ -1,8 +1,5 @@
 'use strict';
-var Cmd = require('../src/commands'),
-Room = require('../src/rooms'),
-Character = require('../src/character'),
-World = require('../src/world');
+var World = require('../src/world');
 
 module.exports = {
 	name: 'Midgaard',

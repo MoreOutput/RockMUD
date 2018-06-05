@@ -55,18 +55,12 @@ server = http.createServer(function (req, res) {
 	}
 }),
 World = require('./src/world'),
-Character = require('./src/character'),
-Cmds = require('./src/commands'),
-Skills = require('./src/skills'),
-Spells = require('./src/spells'),
-Room = require('./src/rooms'),
-Combat = require('./src/rooms'),
 io = require('socket.io')(server, {
 	log: false,
 	transports: ['websocket']
 });
 
-World.setup(io, cfg, function(Character, Cmds, Skills) {
+World.setup(io, cfg, function() {
 	server.listen(process.env.PORT || cfg.port);
 
 	io.on('connection', function (s) {
@@ -76,7 +70,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			valid = false;
 
 			if (r.msg) {
-			 cmdObj = Cmds.createCommandObject(r);
+				cmdObj = World.commands.createCommandObject(r);
 
 				if (!s.player.creationStep) {
 					valid = World.isSafeCommand(cmdObj);
@@ -85,10 +79,10 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						if (cmdObj.cmd) {
 							cmdObj.roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 
-							if (cmdObj.cmd in Cmds) {
+							if (cmdObj.cmd in World.commands) {
 								World.addCommand(cmdObj, s.player);
-							} else if (cmdObj.cmd in Skills) {
-								skillObj = Character.getSkill(s.player, cmdObj.cmd);
+							} else if (cmdObj.cmd in World.skills) {
+								skillObj = World.character.getSkill(s.player, cmdObj.cmd);
 
 								if (skillObj && s.player.wait === 0) {
 									cmdObj.skill = skillObj;
@@ -124,7 +118,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						});
 					}
 				} else {
-					Character.newCharacter(s, cmdObj);
+					World.character.newCharacter(s, cmdObj);
 				}
 			} else {
 				return World.msgPlayer(s, {
@@ -134,8 +128,8 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		};
 
 		World.msgPlayer(s, {
-			msg : 'Enter your name:', 
-			evt: 'reqInitialLogin', 
+			msg : 'Enter your name:',
+			evt: 'reqInitialLogin',
 			styleClass: 'enter-name',
 			noPrompt: true
 		});
@@ -143,7 +137,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 		s.on('cmd', function (r) {
 			if (r.msg !== '' && !s.player || s.player && !s.player.logged) {
 				if (!s.player || !s.player.verifiedName) {
-					Character.login(r, s, function (s) {
+					World.character.login(r, s, function (s) {
 						if (s.player) {
 							s.player.verifiedName = true;
 							s.join('mud'); // mud is one of two rooms, 'creation' being the other
@@ -156,7 +150,7 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						} else {
 							s.join('creation'); // creation is one of two rooms, 'mud' being the other
 
-							s.player = JSON.parse(JSON.stringify(World.mobTemplate));
+							s.player = JSON.parse(JSON.stringify(World.entityTemplate));
 							s.player.name = r.msg;
 							s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
 							s.player.sid = s.id;
@@ -169,11 +163,11 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						}
 					})
 				} else if (r.msg && s.player && !s.player.verifiedPassword) {
-					Character.getPassword(s, Cmds.createCommandObject(r), function(s) {
+					World.character.getPassword(s, World.commands.createCommandObject(r), function(s) {
 						s.player.verifiedPassword = true;
 						s.player.logged = true;
 
-						Cmds.look(s.player); // we auto fire the look command on login
+						World.commands.look(s.player); // we auto fire the look command on login
 					});
 				} else {
 					World.msgPlayer(s, {

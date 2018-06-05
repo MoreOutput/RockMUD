@@ -14,13 +14,17 @@ exports.server = {
 			area: 'midgaard',
 			roomid: '1'
 		},
-		// Persistence drivers for data. Server information and players can use differing drivers.
+		// Persistence drivers for data. World and Player data can use differing drivers.
 		persistenceDriverDir: '../databases/',
 		persistence: false,
 		persistence: {
 			data: false, // {driver: 'flat'}
 			player: false // {driver: 'couchdb'}
-		}
+		},
+		// will log every command object to console when true
+		printCommands: false,
+		// will prevent ticks (time based functions) from running
+		preventTicks: false
 	},
 	admins: []
 };

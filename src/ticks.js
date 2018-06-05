@@ -1,8 +1,5 @@
 'use strict';
 var fs = require('fs'),
-Character = require('./character'),
-Cmds = require('./commands'),
-Skills = require('./skills'),
 World = require('./world');
 
 // time, saved to time.json every 12 hours
@@ -169,7 +166,7 @@ setInterval(function() {
 			}
 		}
 	}
-}, 1900);
+}, 2000);
 
 // Area respawn. If the area is not empty the respawnTick property on the area object increments by one
 // areas with players 'in' them respawn every X ticks; where X is the value of
@@ -389,7 +386,7 @@ setInterval(function() {
 				}
 
 				if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
-					Character.save(players[j]);
+					World.character.save(players[j]);
 				}
 			}
 		}
@@ -406,9 +403,9 @@ setInterval(function() {
 		cmdObj.entity = null;
 
 		if (!cmdObj.skill) {
-			Cmds[cmdObj.cmd](cmdEntity, cmdObj);
+			World.commands[cmdObj.cmd](cmdEntity, cmdObj);
 		} else {
-			Skills[cmdObj.cmd](
+			World.skills[cmdObj.cmd](
 				cmdObj.skill,
 				cmdEntity,
 				cmdObj.roomObj,
@@ -424,18 +421,37 @@ setInterval(function() {
 setInterval(function() {
 	var i = 0,
 	j = 0,
-	cmdObj,
-	cmdEntity,
-	players,
-	monsters,	
-	cmdArr,
-	entities,
-	roomObj;
+	battle;
 
-	for (i; i < World.areas.length; i += 1) {
-		entities = World.getAllPlayersFromArea(World.areas[i]).concat(World.getAllMonstersFromArea(World.areas[i]));
+	for (i; i < World.battles.length; i += 1) {
+		battle = World.battles[i];
+
+		battle.round += 1;
+
+		World.combat.round(battle);
+
+		j = 0;
+
+		// wait points are reducded by one per round
+		for (j; j < battle.attackers.length; j += 1) {
+			battle.attackers[i].wait -= 1;
+
+			if (battle.attackers[i].wait < 0) {
+				battle.attackers[i].wait = 0;
+			}
+		}
+
+		j = 0;
+
+		for (j; j < battle.defenders.length; j += 1) {
+			battle.defenders[i].wait -= 1;
+
+			if (battle.defenders[i].wait < 0) {
+				battle.defenders[i].wait = 0;
+			}
+		}
 	}
-}, 1100);
+}, 1700);
 
 setInterval(function() {
 	var i = 0,
@@ -471,9 +487,9 @@ setInterval(function() {
 	if (World.players.length) {
 		if (World.dice.roll(1, 3) <= 2) {
 			for (i; i < World.players.length; i += 1) {
-				Character.hpRegen(World.players[i]);
-				Character.manaRegen(World.players[i]);
-				Character.mvRegen(World.players[i]);
+				World.character.hpRegen(World.players[i]);
+				World.character.manaRegen(World.players[i]);
+				World.character.mvRegen(World.players[i]);
 			}
 		}
 	}
@@ -488,8 +504,8 @@ setInterval(function() {
 		for (i; i < World.players.length; i += 1) {
 			player = World.players[i];
 
-			Character.hunger(player);
-			Character.thirst(player);
+			World.character.hunger(player);
+			World.character.thirst(player);
 		}
 	}
 }, 242000); // 4 minutes
@@ -502,7 +518,7 @@ setInterval(function() {
 	if (World.players.length > 0) {
 		for (i; i < World.players.length; i += 1) {
 			if (World.players[i].position === 'standing' && !World.players[i].opponent && World.dice.roll(1, 10) > 8) {
-				Character.save(World.players[i]);
+				World.character.save(World.players[i]);
 			}
 		}
 	}
