@@ -159,10 +159,6 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 						});
 					}
 					
-					if (player.position !== 'fighting') {
-						World.combat.processFight(player, opponent, roomObj);
-					}
-
 					if (player.mainStat === 'str') {
 						player.wait += 3;
 					} else {
@@ -170,20 +166,20 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 					}
 
 					opponent.wait += 4;
+
+					World.combat.processFight(player, opponent, roomObj);
 				} else {
 					World.msgPlayer(player, {
 						msg: 'You lunge forward and mistime your bash but manage to keep your footing!'
 					});
-
-					if (player.position !== 'fighting') {
-						World.combat.processFight(player, opponent, roomObj);
-					}
 
 					if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
 						player.wait += 4;
 					} else {
 						player.wait += 5;
 					}
+
+					World.combat.processFight(player, opponent, roomObj);
 				}
 			}
 		} else {

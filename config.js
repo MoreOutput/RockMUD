@@ -21,8 +21,6 @@ exports.server = {
 			data: false, // {driver: 'flat'}
 			player: false // {driver: 'couchdb'}
 		},
-		// will log every command object to console when true
-		printCommands: false,
 		// will prevent ticks (time based functions) from running
 		preventTicks: false
 	},

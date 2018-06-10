@@ -357,98 +357,100 @@ setInterval(function() {
 	cmdArr,
 	roomObj;
 
-	for (i; i < World.areas.length; i += 1) {
-		if (World.dice.roll(1, 20) === 1) {
-			players = World.getAllPlayersFromArea(World.areas[i]);
-			monsters = World.getAllMonstersFromArea(World.areas[i]);
+	if (World.cmds.length) {
+		for (i; i < World.areas.length; i += 1) {
+			if (World.dice.roll(1, 20) === 1) {
+				players = World.getAllPlayersFromArea(World.areas[i]);
+				monsters = World.getAllMonstersFromArea(World.areas[i]);
 
-			j = 0;
+				j = 0;
 
-			for (j; j < monsters.length; j += 1) {
-				if ((World.areas[i].runOnAliveWhenEmpty || players.length)
-					|| (monsters[j].originatingArea !== World.areas[i].id)) {
+				for (j; j < monsters.length; j += 1) {
+					if ((World.areas[i].runOnAliveWhenEmpty || players.length)
+						|| (monsters[j].originatingArea !== World.areas[i].id)) {
 
-					roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
+						roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
 
-					if (monsters[j].chp >= 1 && (monsters[j].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
-						World.processEvents('onAlive', monsters[j], roomObj);
+						if (monsters[j].chp >= 1 && (monsters[j].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
+							World.processEvents('onAlive', monsters[j], roomObj);
+						}
+					}
+				}
+
+				j = 0;
+
+				for (j; j < players.length; j += 1) {
+					roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
+
+					if (players[j].chp >= 1) {
+						World.processEvents('onAlive', players[j], roomObj);
+					}
+
+					if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
+						World.character.save(players[j]);
 					}
 				}
 			}
+		}
 
-			j = 0;
+		cmdArr = World.cmds.slice();
 
-			for (j; j < players.length; j += 1) {
-				roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
+		World.cmds = [];
 
-				if (players[j].chp >= 1) {
-					World.processEvents('onAlive', players[j], roomObj);
-				}
+		while(cmdArr.length) {
+			cmdObj = cmdArr[0];
+			cmdEntity = cmdObj.entity;
 
-				if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
-					World.character.save(players[j]);
-				}
+			cmdObj.entity = null;
+
+			if (!cmdObj.skill) {
+				World.commands[cmdObj.cmd](cmdEntity, cmdObj);
+			} else {
+				World.skills[cmdObj.cmd](
+					cmdObj.skill,
+					cmdEntity,
+					cmdObj.roomObj,
+					cmdObj
+				);
 			}
+
+			cmdArr.splice(0, 1);
 		}
-	}
-
-	cmdArr = World.cmds.slice();
-
-	World.cmds = [];
-
-	while(cmdArr.length) {
-		cmdObj = cmdArr[0];
-		cmdEntity = cmdObj.entity;
-
-		cmdObj.entity = null;
-
-		if (!cmdObj.skill) {
-			World.commands[cmdObj.cmd](cmdEntity, cmdObj);
-		} else {
-			World.skills[cmdObj.cmd](
-				cmdObj.skill,
-				cmdEntity,
-				cmdObj.roomObj,
-				cmdObj
-			);
-		}
-
-		cmdArr.splice(0, 1);
 	}
 }, 250);
 
 // Combat Ticks and random player save
 setInterval(function() {
 	var i = 0,
-	j = 0,
 	battle;
 
-	for (i; i < World.battles.length; i += 1) {
-		battle = World.battles[i];
+	if (World.battleLock === 0 && World.battles.length) {
+		World.battleLock = World.battles.length;
 
-		battle.round += 1;
+		for (i; i < World.battles.length; i += 1) {
+			battle = World.battles[i];
 
-		World.combat.round(battle);
+			battle.round += 1;
 
-		j = 0;
+			World.combat.round(battle);
 
-		// wait points are reducded by one per round
-		for (j; j < battle.attackers.length; j += 1) {
-			battle.attackers[i].wait -= 1;
+			battle.attacker.wait -= 1;
 
-			if (battle.attackers[i].wait < 0) {
-				battle.attackers[i].wait = 0;
+			if (battle.attacker.wait < 0) {
+				battle.attacker.wait = 0;
+			}
+
+			battle.defender.wait -= 1;
+
+			if (battle.defender.wait < 0) {
+				battle.defender.wait = 0;
 			}
 		}
 
-		j = 0;
-
-		for (j; j < battle.defenders.length; j += 1) {
-			battle.defenders[i].wait -= 1;
-
-			if (battle.defenders[i].wait < 0) {
-				battle.defenders[i].wait = 0;
-			}
+		if (World.battleLock > 0) {
+			World.battleLock -= 1;
+		} else {
+			World.battleLock = 0;
 		}
 	}
 }, 1700);

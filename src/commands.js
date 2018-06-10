@@ -73,10 +73,6 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 		}
 	}
 
-	if (World.config.printCommands) {
-		console.log('COMMAND: ', commandObj);
-	}
-
 	return cmdObj;
 };
 
@@ -2106,7 +2102,7 @@ Cmd.prototype.kill = function(player, command) {
 
 			if (opponent && opponent.roomid === player.roomid) {
 				World.msgPlayer(player, {
-					msg: '<strong class="grey">You scream and charge at a ' 
+					msg: '<strong class="grey">You scream and charge at a '
 						+ opponent.name + '!</strong>',
 					noPrompt: true
 				});

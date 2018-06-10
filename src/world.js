@@ -114,13 +114,11 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 		fs.readdir(path, function(err, fileNames) {
 			fileNames.forEach(function(fileName, i) {
-				fs.readFile(path + fileName, function (err, messageTmp) {
-					tmpArr.push(JSON.parse(messageTmp));
+				tmpArr.push(JSON.parse(fs.readFileSync(path + fileName)));
 
-					if (i === fileNames.length - 1) {
-						return fn(err, tmpArr);
-					}
-				});
+				if (i === fileNames.length - 1) {
+					return fn(err, tmpArr);
+				}
 			});
 		});
 	},
@@ -130,13 +128,11 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	
 		fs.readdir(path, function(err, fileNames) {
 			fileNames.forEach(function(fileName, i) {
-				fs.readFile(path + fileName, function (err, messageTmp) {
-					tmpArr.push(JSON.parse(messageTmp));
+				tmpArr.push(JSON.parse(fs.readFileSync(path + fileName)));
 
-					if (i === fileNames.length - 1) {
-						return fn(err, tmpArr);
-					}
-				});
+				if (i === fileNames.length - 1) {
+					return fn(err, tmpArr);
+				}
 			});
 		});
 	},
@@ -146,17 +142,15 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 		fs.readdir(path, function(err, fileNames) {
 			fileNames.forEach(function(fileName, i) {
-				fs.readFile(path + fileName, function (err, tmp) {
-					var tmp = JSON.parse(tmp);
+				var tmp = JSON.parse(fs.readFileSync(path + fileName));
 
-					tmp.template = fileName.replace(/.json/g, '');
-					
-					world[tmp.template + 'Template'] = tmp;
+				tmp.template = fileName.replace(/.json/g, '');
+				
+				world[tmp.template + 'Template'] = tmp;
 
-					if (i === fileNames.length - 1) {
-						return fn(err, tmpArr);
-					}
-				});
+				if (i === fileNames.length - 1) {
+					return fn(err, tmpArr);
+				}
 			});
 		});
 	},
@@ -203,6 +197,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.room = require('./rooms');
 	world.combat = require('./combat')
 	world.dice = require('./dice');
+	world.battleLock = 0;
 
 	if (world.config.persistence && world.config.persistence.data) {
 		world.dataDriver = require(world.config.persistenceDriverDir + world.config.persistence.data.driver + '.js')(world.config.persistence.data);
@@ -499,8 +494,8 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 	var world = this,
 	diceMod,
 	prop,
-	raceObj = world.getRace(mob.race),
-	classObj = world.getClass(mob.charClass);
+	raceObj,
+	classObj;
 
 	mob.refId = world.createRefId(mob);
 
@@ -512,9 +507,13 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 		mob.race = 'animal';
 	}
 
-	if (!mob.race) {
+	if (!mob.charClass) {
 		mob.charClass = 'fighter';
 	}
+
+	raceObj = world.getRace(mob.race);
+
+	classObj = world.getClass(mob.charClass);
 
 	world.extend(mob, raceObj, function(err, mob) {
 		world.extend(mob, classObj, function(err, mob) {
@@ -665,6 +664,10 @@ World.prototype.setupRoom = function(area, room, callback) {
 			world.extend(room.monsters[i], world.entityTemplate, function(err, mob) {
 				mob.area = area.id;
 
+				if (!Array.isArray(mob.items)) {
+					console.log(mob);
+				}
+				
 				world.setupMob(mob, area, room, function(err, mob) {
 					mob.extended = true;
 
@@ -1491,13 +1494,16 @@ World.prototype.saveArea = function(areaId) {
 };
 
 World.prototype.extend = function(extendObj, readObj, callback) {
-	var prop,
-	propCnt,
+	var propCnt,
+	cnt = 0,
+	prop,
 	prop2;
 
-	if (extendObj && readObj) {
+	propCnt = Object.keys(readObj).length;
+
+	if (extendObj && readObj && propCnt) {
 		for (prop in readObj) {
-			if (extendObj[prop] !== undefined) {
+			if (extendObj.hasOwnProperty(prop)) {
 				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
 				} else if (typeof extendObj[prop] !== 'string'
@@ -1522,10 +1528,16 @@ World.prototype.extend = function(extendObj, readObj, callback) {
 			} else {
 				extendObj[prop] = readObj[prop];
 			}
-		}
-	}
 
-	return callback(false, extendObj);
+			cnt += 1;
+
+			if (cnt === propCnt) {
+				return callback(false, extendObj);
+			}
+		}
+	} else {
+		return callback(false, extendObj);
+	}
 };
 
 // Shuffle an array
@@ -1547,10 +1559,6 @@ World.prototype.shuffle = function (arr) {
 
 World.prototype.isInvisible = function(obj) {
 	var i = 0;
-
-	if (!obj.affects) {
-		console.log(obj.name, obj.id);
-	}
 
 	for (i; i < obj.affects.length; i += 1) {
 		if (obj.affects[i].affect === 'invis') {
@@ -1633,10 +1641,6 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 
 		for (i; i < gameEntities.length; i += 1) {
 			gameEntity = gameEntities[i];
-
-			if (!Array.isArray(gameEntity.behaviors)) {
-				console.log(gameEntity.name, gameEntity.id);
-			}
 
 			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)] && gameEntity.behaviors.length > 0) {
 				 if (gameEntity[evtName]) {

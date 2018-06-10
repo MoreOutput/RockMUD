@@ -338,7 +338,7 @@ Character.prototype.newCharacter = function(s, command) {
 			noPrompt: true
 		});
 
-		world.commands.help(s.player, {
+		World.commands.help(s.player, {
 			msg: 'races',
 			noPrompt: true
 		});
@@ -362,7 +362,7 @@ Character.prototype.newCharacter = function(s, command) {
 						noPrompt: true
 					});
 
-					world.commands.help(s.player, {
+					World.commands.help(s.player, {
 						msg: 'classes',
 						noPrompt: true
 					});
@@ -374,7 +374,7 @@ Character.prototype.newCharacter = function(s, command) {
 							noPrompt: true
 						});
 					} else {
-						world.commands.help(s, {
+						World.commands.help(s, {
 							msg: command.msg,
 							noPrompt: true
 						});
@@ -403,9 +403,9 @@ Character.prototype.newCharacter = function(s, command) {
 						noPrompt: true
 					});
 				} else {
-					world.commands.help(s, {
+					World.commands.help(s, {
 						msg: command.msg,
-						noPrompt: true
+					noPrompt: true
 					});
 				}
 			}
@@ -479,6 +479,7 @@ Character.prototype.save = function(player, fn) {
 		player.saved = new Date().toString();
 
 		player.opponent = false;
+		player.fighting = false;
 		player.following = false;
 		player.group = [];
 		player.followers = [];
