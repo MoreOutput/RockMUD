@@ -67,6 +67,7 @@ World.setup(io, cfg, function() {
 		var parseCmd = function(r, s) {
 			var skillObj,
 			cmdObj,
+			battle,
 			valid = false;
 
 			if (r.msg) {

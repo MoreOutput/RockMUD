@@ -92,9 +92,10 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 	i = 0,
 	strMod = World.dice.getStrMod(player),
 	oppDexMod,
-	damage = 0,
 	shieldArr,
 	shield,
+	skillOutput = World.combat.createSkillProfile(player, skillObj),
+	dmg,
 	rollDamage = function(shield) {
 		var dmg = 0;
 
@@ -130,56 +131,41 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 
 			if (player.position === 'standing' || player.position === 'fighting') {
 				if (World.dice.roll(1, 100) <= skillObj.train) {
-					damage = rollDamage(shield);
+					dmg = rollDamage(shield);
+	
+					skillOutput.defenderMods.chp = -dmg;
 
 					if (!shield) {
-						opponent.chp -= damage;
+						skillOutput.msgToAttacker = 'You bash and charge at a ' + opponent.name + ' (' + dmg + ')';
 
-						World.msgPlayer(player, {
-							msg: 'You bash and charge at a ' + opponent.name + ' (' + damage + ')'
-						});
-
-						World.msgPlayer(opponent, {
-							msg: 'A ' + player.displayName + ' bashes and charges at you!',
-							noPrompt: true
-						});
+						skillOutput.msgToDefender = 'A ' + player.displayName + ' bashes and charges at you!' + ' (' + dmg + ')';
 					} else {
-						opponent.chp -= damage;
+						skillOutput.msgToAttacker = 'You use a ' + shield.displayName + ' to bash and charge at a '
+							+ opponent.name + ' (' + dmg + ')';
 
-						World.msgPlayer(player, {
-							msg: 'You use a ' + shield.displayName + ' to bash and charge at a '
-								+ opponent.name + ' (' + damage + ')',
-							noPrompt: true
-						});
-
-						World.msgPlayer(opponent, {
-							msg: 'A ' + player.displayName + ' bashes and charges at you with a '
-								+ shield.displayName + '!' + ' (' + damage + ')',
-							noPrompt: true
-						});
+						skillOutput.msgToDefender = 'A ' + player.displayName + ' bashes and charges at you with a '
+							+ shield.displayName + '! (' + dmg + ')';
 					}
 					
 					if (player.mainStat === 'str') {
-						player.wait += 3;
+						skillOutput.attackerMods.wait += 3;
 					} else {
-						player.wait += 4;
+						skillOutput.attackerMods.wait += 4;
 					}
 
-					opponent.wait += 4;
+					skillOutput.defenderMods.wait += 4;
 
-					World.combat.processFight(player, opponent, roomObj);
+					World.combat.processSkill(player, skillOutput);
 				} else {
-					World.msgPlayer(player, {
-						msg: 'You lunge forward and mistime your bash but manage to keep your footing!'
-					});
+					skillOutput.msgToAttacker = 'You lunge forward and mistime your bash but manage to keep your footing!';
 
 					if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
-						player.wait += 4;
+						skillOutput.attackerMods.wait += 3;
 					} else {
-						player.wait += 5;
+						skillOutput.attackerMods.wait += 5;
 					}
 
-					World.combat.processFight(player, opponent, roomObj);
+					World.combat.processSkill(player, skillOutput);
 				}
 			}
 		} else {

@@ -664,10 +664,6 @@ World.prototype.setupRoom = function(area, room, callback) {
 			world.extend(room.monsters[i], world.entityTemplate, function(err, mob) {
 				mob.area = area.id;
 
-				if (!Array.isArray(mob.items)) {
-					console.log(mob);
-				}
-				
 				world.setupMob(mob, area, room, function(err, mob) {
 					mob.extended = true;
 

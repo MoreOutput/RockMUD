@@ -1026,7 +1026,7 @@ Character.prototype.removeEq = function(player, item) {
 		}
 	}
 	
-	this.removeStatMods(player, item);
+	this.removeMods(player, item.modifiers);
 
 	World.msgPlayer(player, {
 		msg: 'You stopped using ' + item.short + '.'
@@ -1104,25 +1104,25 @@ Character.prototype.getPossessivePronoun = function(player) {
 	}
 };
 
-Character.prototype.addStatMods = function(player, item) {
+Character.prototype.applyMods = function(player, mods) {
 	var prop;
 
-	for (prop in item.modifiers) {
-		if (player[prop]) {
-			player[prop] += item.modifiers[prop];
+	for (prop in mods) {
+		if (player[prop] !== undefined) {
+			player[prop] += mods[prop];
 		}
 	}
 };
 
-Character.prototype.removeStatMods = function(player, item) {
+Character.prototype.removeMods = function(player, mods) {
 	var prop;
 
-	for (prop in item.modifiers) {
-		if (player[prop]) {
-			player[prop] -= item.modifiers[prop];
+	for (prop in mods) {
+		if (player[prop] !== undefined) {
+			player[prop] -= mods[prop];
 		}
 	}
-}
+};
 
 Character.prototype.wearWeapon = function(target, weapon, roomObj) {
 	var slot = this.getEmptyWeaponSlot(target);
@@ -1133,7 +1133,7 @@ Character.prototype.wearWeapon = function(target, weapon, roomObj) {
 
 			slot.item = weapon.refId;
 
-			this.addStatMods(target, weapon);
+			this.applyMods(target, weapon.modifiers);
 
 			World.msgPlayer(target, {
 				msg: 'You wield a ' + weapon.displayName + ' in your ' + slot.name.toLowerCase() + '.'
@@ -1160,7 +1160,7 @@ Character.prototype.wearShield = function(target, shield, roomObj) {
 
 			slot.item = shield.refId;
 
-			this.addStatMods(target, shield);
+			this.applyMods(target, shield.modifiers);
 
 			World.msgPlayer(target, {
 				msg: 'You begin defending yourself with a ' + shield.displayName + '.'
@@ -1183,7 +1183,7 @@ Character.prototype.wearArmor = function(target, armor, roomObj) {
 	
 	if (!armor.equipped) {
 		if (slot) {
-			armor.equipped = true;	
+			armor.equipped = true;
 
 			slot.item = armor.refId;
 		

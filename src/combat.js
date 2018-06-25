@@ -14,76 +14,65 @@ Combat = function() {
 	this.abstractNouns = ['intensity', 'force', 'strength', 'power', 'might', 'effort', 'energy'];
 };
 
-Combat.prototype.processFight = function(player, opponent, roomObj) {
+Combat.prototype.processFight = function(attacker, defender, roomObj) {
 	var combat = this,
 	battle,
-	battles = combat.getBattlesByRefId(opponent.refId), // collection of battles the opponent may be in
-	attackerInGroup = false,
-	opponentInGroup = false,
 	i = 0;
 
-	if (!player.fighting && !player.opponent
-		&& player.position !== 'resting'
-		&& player.position !== 'sleeping') {
+	// to initiate combat an Attcker must not already be engaged in combat, defenders can already be in combat
+	if (!attacker.fighting && !attacker.opponent && attacker.position !== 'resting' && attacker.position !== 'sleeping') {
+		// if a player is not currently fighting and is without an attached opponent we assume we can create a Battle Object
+		// Battle Objects are put into the World battle queue and processed on a timer
+		// the timer is defined in ticks.js and basically just hands the object over to the Combat.round() function
+		battle = combat.createBattleObject(attacker, defender, roomObj);
 
-		battle = combat.createBattleObject(player, opponent);
+		// setup the attackers position and fight requirements -- attaching opoonent and changing position
+		attacker.opponent = defender;
 
-		player.opponent = opponent;
+		attacker.fighting = true;
 
-		player.fighting = true;
+		attacker.position = 'fighting';
 
-		player.position = 'fighting';
-
-		if (player.group.length) {
+		// this puts the attackers group into the fight by outlining new Battle Objects
+		// note that they run through this same function and therefore they will not switch targets if they're currently
+		// in the middle of a fight
+		if (attacker.group.length) {
 			battle.attackerInGroup = true;
 
-			for (i; i < player.group.length; i += 1) {
-				if (!player.group[i].opponent) {
-					battle.processFight(player.group[i], opponent);
+			for (i; i < attacker.group.length; i += 1) {
+				if (!attacker.group[i].opponent) {
+					battle.processFight(attacker.group[i], defender, roomObj);
 				}
 			}
 		}
 
-		if (!opponent.opponent) {
-			opponent.opponent = player;
+		// setup the defenders position and fight requirements -- attaching opoonent and changing position
+		if (!defender.opponent) {
+			defender.opponent = attacker;
 
-			opponent.fighting = true;
+			defender.fighting = true;
 
-			opponent.position = 'fighting';
+			defender.position = 'fighting';
 		}
 
-		if (opponent.group.length) {
+		if (defender.group.length) {
 			i = 0;
 
 			battle.opponentInGroup = true;
 
-			for (i; i < opponent.group.length; i += 1) {
-				battle.processFight(opponent.group[i], player);
+			for (i; i < defender.group.length; i += 1) {
+				battle.processFight(defender.group[i], attacker, roomObj);
 			}
 		}
 
 		World.battles.push(battle);
 
-		console.log('BATLLE COUNT', World.battles.length);
-
+		// immediately go into the first round, this is the same function called on a timer found in ticks.js
 		World.combat.round(battle);
-	} else {
-		if (player.fighting && player.opponent) {
-			battle = combat.getBattleByRefId(player.refId);
-
-			if (battle) {
-				console.log('found battle!');
-
-				combat.processEndOfCombat(battleObj);
-			} else {
-				console.log('ERROR! No Battle found!');
-			}
-		}
 	}
 };
 
-
-Combat.prototype.createBattleObject = function(attacker, defender) {
+Combat.prototype.createBattleObject = function(attacker, defender, roomObj) {
 	return {
 		attacker: attacker,
 		defender: defender,
@@ -91,95 +80,141 @@ Combat.prototype.createBattleObject = function(attacker, defender) {
 		opponentInGroup: false, // attacker was a member of a group when battle started
 		round: 0,
 		roomObj: roomObj,
+		attackerSkill: false,
+		defenderSkill: false,
 		mods: {}
 	}
 };
 
+// if a round results in an opponents hp falling to zero, then combat is resolved.
+// when that happens all Battle Objects containing the loser must be removed
 Combat.prototype.round = function(battleObj) {
 	var combat = this,
 	attacker = battleObj.attacker,
 	defender = battleObj.defender,
-	roomObj = battleObj.roomObj;
+	roomObj = battleObj.roomObj,
+	preventPrompt = false,
+	oppStatus,
+	playerStatus,
+	msgToAttacker = '',
+	msgToDefender = '';
 
-	if (combat.inPhyscialVicinity(attacker, defender)) {
-		combat.attack(attacker, attacker.opponent, roomObj, function(player, opponent, roomObj, attackerAttackString, oppDefString, attackerCanSee) {
-			combat.attack(opponent, opponent.opponent, roomObj, function(opponent, player, roomObj, oppAttackString, attackerDefString, oppCanSee) {
-				var oppStatus = World.character.getStatusReport(opponent),
-				playerStatus= World.character.getStatusReport(player),
-				preventPrompt = false,
-				msgForPlayer = attackerAttackString + attackerDefString,
-				msgForOpponent = oppAttackString + oppDefString;
+	// If the two are in same room we can run the round -- further they both must have HPs
+	// the functions will drop out if these requirements are not met so ending combat must be explictly handled elsewhere
+	// generally this means mid-round -- within the checks found below
+	if (combat.inPhyscialVicinity(attacker, defender) && attacker.chp && defender.chp) {
+		// When someone uses a combat skill it is attacked to the Battle Object.
 
-				if (battleObj.attackerSpecial) {
-					msgForPlayer += attackerSpecial.msgForPlayer
-					msgForPlayer += attackerSpecial.msgForPlayer
+		// First the attacker has their skills applied
+		if (battleObj.attackerSkill) {
+			//World.character.applyMods(defender, battleObj.attackerSkill.defenderMods);
+			World.character.applyMods(attacker, battleObj.attackerSkill.attackerMods);
+
+			if (defender.chp) {
+				msgToAttacker = battleObj.attackerSkill.msgToAttacker;
+				msgToDefender = battleObj.attackerSkill.msgToDefender;
+			} else {
+				msgToAttacker = battleObj.attackerSkill.msgToAttacker;
+				msgToDefender = battleObj.attackerSkill.msgToDefender;
+			}
+		}
+		
+		if (attacker.opponent.chp > 0) {
+			combat.attack(attacker, attacker.opponent, roomObj, function(player, opponent, roomObj, attackerAttackString, oppDefString, attackerCanSee) {
+				// run defender skills
+				if (battleObj.defenderSkill) {
+					//World.character.applyMods(attacker, battleObj.defenderSkill.defenderMods);
+					//World.character.applyMods(defender, battleObj.attackerSkill.attackerMods);
+
+					if (defender.chp) {
+						msgToAttacker = battleObj.defenderSkill.msgToAttacker;
+						msgToDefender = battleObj.defenderSkill.msgToDefender;
+					} else {
+						msgToAttacker = battleObj.defenderSkill.msgToAttacker;
+						msgToDefender = battleObj.defenderSkill.msgToDefender;
+					}
 				}
 
-				if (player.isPlayer) {
-					if (opponent.chp > 0) {
-						if (!player.settings.canViewHp) {
-							msgForPlayer += '<div class="rnd-status">' + opponent.capitalShort + oppStatus.msg
-							+ '</div>';
+				combat.attack(opponent, opponent.opponent, roomObj, function(opponent, player, roomObj, oppAttackString, attackerDefString, oppCanSee) {
+					oppStatus = World.character.getStatusReport(opponent);
+
+					msgToDefender += oppAttackString + oppDefString;
+
+					playerStatus= World.character.getStatusReport(player);
+
+					msgToAttacker += attackerAttackString + attackerDefString;
+
+					if (player.isPlayer) {
+						if (opponent.chp > 0) {
+							if (!player.settings.canViewHp) {
+								msgToAttacker += '<div class="rnd-status">' + opponent.capitalShort + oppStatus.msg
+								+ '</div>';
+							} else {
+								msgToAttacker += '<div class="rnd-status">' + opponent.capitalShort + oppStatus.msg
+									+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+							}
 						} else {
-							msgForPlayer += '<div class="rnd-status">' + opponent.capitalShort + oppStatus.msg
-								+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+							msgToAttacker += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to '
+								+ opponent.short + '</strong>!</div>';
+						}
+					}
+
+					if (opponent.isPlayer) {
+						if (!opponent.canViewHp) {
+							msgToDefender += '<div class="rnd-status">' + opponent.capitalShort + playerStatus.msg
+								+ '</div>';
+						} else {
+							msgToDefender += '<div class="rnd-status">' + player.capitalShort + playerStatus.msg
+								+ ' (' + player.chp + '/' + player.hp +')</div>';
+						}
+					}
+
+					if (opponent.chp <= 0 || player.chp <= 0) {
+						preventPrompt = true;
+					}
+
+					battleObj.attackerSkill = false;
+					battleObj.defenderSkill = false;
+
+					World.addCommand({
+						cmd: 'alert',
+						msg: msgToAttacker,
+						noPrompt: preventPrompt,
+						styleClass: 'player-hit warning'
+					}, player);
+
+					World.addCommand({
+						cmd: 'alert',
+						msg: msgToDefender,
+						noPrompt: preventPrompt,
+						styleClass: 'player-hit warning'
+					}, opponent);
+
+					if (player.position !== 'fighting' || opponent.position !== 'fighting') {	
+						if (player.postion === 'fighting' && player.opponent.name === opponent.name) {
+							player.position = 'standing';
+						}
+
+						if (opponent.postion === 'fighting' && opponent.opponent.name === player.name) {
+							opponent.position = 'standing';
 						}
 					} else {
-						msgForPlayer += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to '
-							+ opponent.short + '</strong>!</div>';
+						if (opponent.chp <= 0) {
+							//combat.processEndOfCombat(player, opponent, roomObj);
+						} else if (player.chp <= 0) {
+							//combat.processEndOfCombat(opponent, player, roomObj);
+						} else {
+							World.prompt(player);
+							World.prompt(opponent);
+						}
 					}
-				}
-
-				if (opponent.isPlayer) {
-					if (!opponent.canViewHp) {
-						msgForOpponent += '<div class="rnd-status">' + opponent.capitalShort + playerStatus.msg
-							+ '</div>';
-					} else {
-						msgForOpponent += '<div class="rnd-status">' + player.capitalShort + playerStatus.msg
-							+ ' (' + player.chp + '/' + player.hp +')</div>';
-					}
-				}
-
-				if (opponent.chp <= 0 || player.chp <= 0) {
-					preventPrompt = true;
-				}
-
-				World.addCommand({
-					cmd: 'alert',
-					msg: msgForPlayer,
-					noPrompt: preventPrompt,
-					styleClass: 'player-hit warning'
-				}, player);
-
-				World.addCommand({
-					cmd: 'alert',
-					msg: msgForOpponent,
-					noPrompt: preventPrompt,
-					styleClass: 'player-hit warning'
-				}, opponent);
-
-				if (player.position !== 'fighting' || opponent.position !== 'fighting') {	
-					if (player.postion === 'fighting' && player.opponent.name === opponent.name) {
-						player.position = 'standing';
-					}
-
-					if (opponent.postion === 'fighting' && opponent.opponent.name === player.name) {
-						opponent.position = 'standing';
-					}
-				} else {
-					if (opponent.chp <= 0) {
-						combat.processEndOfCombat(player, opponent, roomObj);
-					} else if (player.chp <= 0) {
-						combat.processEndOfCombat(opponent, player, roomObj);
-					} else {
-						World.prompt(player);
-						World.prompt(opponent);
-					}
-				}
+				});
 			});
-		});
+		} else {
+			// this.processEndOfCombat(attacker, defender, roomObj)
+		}
 	} else if (defender) {
-		this.processEndOfCombat(attacker, defender, roomObj);
+		// this.processEndOfCombat(attacker, defender, roomObj);
 	}
 };
 
@@ -191,11 +226,8 @@ Combat.prototype.inPhyscialVicinity = function(attacker, defender) {
 	}
 }
 
-Combat.prototype.attack = function(battleObj, fn) {
+Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	var combat = this,
-	attacker = battleObj.attacker,
-	opponent = battleObj.opponent,
-	roomObj = battleObj.roomObj,
 	weaponSlots,
 	shieldSlots,
 	attackerMods = World.dice.getMods(attacker),
@@ -224,221 +256,225 @@ Combat.prototype.attack = function(battleObj, fn) {
 	attackerCanSee = World.character.canSee(attacker, roomObj),
 	opponentCanSee = World.character.canSee(opponent, roomObj);
 
-	if (hitRoll < 0) {
-		hitRoll = attacker.level;
-	}
+	if (attacker.chp && opponent.chp) {
+		if (hitRoll < 0) {
+			hitRoll = attacker.level;
+		}
 
-	if (damRoll < 0) {
-		damRoll = attacker.level;
-	}
+		if (damRoll < 0) {
+			damRoll = attacker.level;
+		}
 
-	if (attacker.position === 'fighting') {
-		weaponSlots = World.character.getWeaponSlots(attacker);
+		if (attacker.position === 'fighting') {
+			weaponSlots = World.character.getWeaponSlots(attacker);
 
-		if (opponent.position === 'fighting') {
-			shieldSlots = World.character.getSlotsWithShields(opponent);
+			if (opponent.position === 'fighting') {
+				shieldSlots = World.character.getSlotsWithShields(opponent);
 
-			if (shieldSlots.length > 0) {
-				shield = shieldSlots[0].item;
+				if (shieldSlots.length > 0) {
+					shield = shieldSlots[0].item;
+				}
 			}
-		}
 
-		// the weapon that is selected is random, an unshielded attacker does get the benefits of dual wielding
-		for (i; i < weaponSlots.length; i += 1) {
-			if (weaponSlots[i].item) {
-				weapon = World.character.getItemByRefId(attacker, weaponSlots[i].item);
+			// the weapon that is selected is random, an unshielded attacker does get the benefits of dual wielding
+			for (i; i < weaponSlots.length; i += 1) {
+				if (weaponSlots[i].item) {
+					weapon = World.character.getItemByRefId(attacker, weaponSlots[i].item);
 
-				break;
+					break;
+				}
 			}
-		}
 
-		// if no weapon was found we use a generated fist object
-		if (!weapon) {
-			weapon = World.character.getFist(attacker);
-		}
+			// if no weapon was found we use a generated fist object
+			if (!weapon) {
+				weapon = World.character.getFist(attacker);
+			}
 
-		i = 0;
+			i = 0;
 
-		for (i; i < weaponSlots.length; i += 1) {
-			numOfAttacks = combat.getNumberOfAttacks(attacker, weapon, attackerMods, opponentMods);
+			for (i; i < weaponSlots.length; i += 1) {
+				numOfAttacks = combat.getNumberOfAttacks(attacker, weapon, attackerMods, opponentMods);
 
-			if (numOfAttacks) {
-				j = 0;
+				if (numOfAttacks) {
+					j = 0;
 
-				for (j; j < numOfAttacks; j += 1) {
-					if (shield) {
-						if (shieldBlockSkill) {
-							acCheck += World.dice.roll(1, attacker.level);
+					for (j; j < numOfAttacks; j += 1) {
+						if (shield) {
+							if (shieldBlockSkill) {
+								acCheck += World.dice.roll(1, attacker.level);
+							}
+
+							acCheck += shieldAC;
 						}
 
-						acCheck += shieldAC;
-					}
+						if (opponent.vulnerableTo.length && opponent.vulnerableTo.toString().indexOf(weapon.attackType) !== -1) {
+							damage += World.dice.roll(1, 4 + weapon.level);
+						}
 
-					if (opponent.vulnerableTo && opponent.vulnerableTo.toString().indexOf(weapon.attackType) !== -1) {
-						damage += World.dice.roll(1, 4 + weapon.level);
-					}
+						if (opponent.resistantTo.length && opponent.resistantTo.toString().indexOf(weapon.attackType) !== -1) {
+							damage -= World.dice.roll(1, 4 + weapon.level);
+						}
 
-					if (opponent.resistantTo && opponent.resistantTo.toString().indexOf(weapon.attackType) !== -1) {
-						damage -= World.dice.roll(1, 4 + weapon.level);
-					}
+						if (acCheck < hitRoll) {
+							if (dodgeCheck < hitRoll) {
+								damage = World.dice.roll(weapon.diceNum, weapon.diceSides, attacker.damRoll + weapon.diceMod + attackerMods.str);
 
-					if (acCheck < hitRoll) {
-						if (dodgeCheck < hitRoll) {
-							damage = World.dice.roll(weapon.diceNum, weapon.diceSides, attacker.damRoll + weapon.diceMod + attackerMods.str);
+								damage += (attacker.level/2) + (attackerMods.str/4);
 
-							damage += (attacker.level/2) + (attackerMods.str/4);
+								if (attackerMods.str >= opponentMods.con) {
+									damage += damRoll/3;
+								}
 
-							if (attackerMods.str >= opponentMods.con) {
-								damage += damRoll/3;
-							}
+								damage -= opponent.ac/2;
+								damage -= opponent.meleeRes;
 
-							damage -= opponent.ac/2;
-							damage -= opponent.meleeRes;
+								if (numOfAttacks > 3 && j > 3) {
+									damage = damage/2;
+								}
 
-							if (numOfAttacks > 3 && j > 3) {
-								damage = damage/2;
-							}
+								if (World.dice.roll(1, 200) >= (200 - attacker.detection)) {
+									criticalAttack = true;
+									criticalAttackXP = World.dice.roll(1 + attacker.level, 20);
 
-							if (World.dice.roll(1, 200) >= (200 - attacker.detection)) {
-								criticalAttack = true;
-								criticalAttackXP = World.dice.roll(1 + attacker.level, 20);
+									attacker.exp += criticalAttackXP;
 
-								attacker.exp += criticalAttackXP;
+									damage = (damage * 3) + attacker.str;
+								}
 
-								damage = (damage * 3) + attacker.str;
-							}
-
-							if (damage < 0) {
-								damage = attackerMods.str;
-							} else {
-								damage = Math.round(damage);
-							}
-
-							adjective = combat.getDamageAdjective(damage);
-
-							abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
-
-							opponent.chp -= damage;
-
-							if (attacker.isPlayer) {
-								if (!criticalAttack) {
-									if (attackerCanSee) {
-										msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short
-											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
-											+ damage + ')</strong></div>';
-									} else {
-										msgForAttacker += '<div>You ' + weapon.attackType + ' <strong>something</strong> '
-											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
-											+ damage + ')</strong></div>';
-									}
+								if (damage < 0) {
+									damage = attackerMods.str;
 								} else {
-									if (attackerCanSee) {
-										msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short
-											+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
-											+ damage + ')</strong></div>'
-											+ '<div class="green">You landed a critical hit and gain '
-											+ criticalAttackXP + ' experience.</div>';
-									} else {
-										msgForAttacker += '<div>You ' + weapon.attackType
-											+ ' someone with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
-											+ damage + ')</strong></div>'
-											+ '<div class="green">You landed a critical hit and gain '
-											+ criticalAttackXP + ' experience.</div>';
-									}
+									damage = Math.round(damage);
+								}
 
-									if (attacker.onExp) {
-										attacker.onExp(criticalAttackXP);
+								adjective = combat.getDamageAdjective(damage);
+
+								abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
+
+								opponent.chp -= damage;
+
+								if (attacker.isPlayer) {
+									if (!criticalAttack) {
+										if (attackerCanSee) {
+											msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short
+												+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
+												+ damage + ')</strong></div>';
+										} else {
+											msgForAttacker += '<div>You ' + weapon.attackType + ' <strong>something</strong> '
+												+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
+												+ damage + ')</strong></div>';
+										}
+									} else {
+										if (attackerCanSee) {
+											msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short
+												+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
+												+ damage + ')</strong></div>'
+												+ '<div class="green">You landed a critical hit and gain '
+												+ criticalAttackXP + ' experience.</div>';
+										} else {
+											msgForAttacker += '<div>You ' + weapon.attackType
+												+ ' someone with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
+												+ damage + ')</strong></div>'
+												+ '<div class="green">You landed a critical hit and gain '
+												+ criticalAttackXP + ' experience.</div>';
+										}
+
+										if (attacker.onExp) {
+											attacker.onExp(criticalAttackXP);
+										}
 									}
 								}
-							}
 
-							if (opponent.isPlayer) {
-								if (!criticalAttack) {
-									if (attackerCanSee) {
-										msgForOpponent += '<div class="grey">' + attacker.possessivePronoun + ' '
-											+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
-											+ ' <span class="red">(' + damage + ')</span></div>';
+								if (opponent.isPlayer) {
+									if (!criticalAttack) {
+										if (attackerCanSee) {
+											msgForOpponent += '<div class="grey">' + attacker.possessivePronoun + ' '
+												+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
+												+ ' <span class="red">(' + damage + ')</span></div>';
+										} else {
+											msgForOpponent += '<div class="grey">Someones ' + weapon.attackType 
+												+ ' hits you with ' + adjective + ' ' + abstractNoun
+												+ ' <span class="red">(' + damage + ')</span></div>';
+										}
 									} else {
-										msgForOpponent += '<div class="grey">Someones ' + weapon.attackType 
-											+ ' hits you with ' + adjective + ' ' + abstractNoun
-											+ ' <span class="red">(' + damage + ')</span></div>';
+										if (attackerCanSee) {
+											msgForOpponent += '<div class="grey"><strong>' + attacker.possessivePronoun + ' '
+												+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
+												+ '</strong> <span class="red">(' + damage + ')</span></div>';
+										} else {
+											msgForOpponent += '<div class="grey"><strong>Someones ' + weapon.attackType 
+												+ ' hits you with ' + adjective + ' ' + abstractNoun
+												+ '</strong> <span class="red">(' + damage + ')</span></div>';
+										}
 									}
-								} else {
-									if (attackerCanSee) {
-										msgForOpponent += '<div class="grey"><strong>' + attacker.possessivePronoun + ' '
-											+ weapon.attackType + ' hits you with ' + adjective + ' ' + abstractNoun
-											+ '</strong> <span class="red">(' + damage + ')</span></div>';
+								}
+							} else {
+								if (attacker.isPlayer) {
+									if (World.dice.roll(1, 2) === 1) {
+										msgForAttacker += '<div class="red">You lunge at '
+											+ opponent.short + ' and miss!</div>';
 									} else {
-										msgForOpponent += '<div class="grey"><strong>Someones ' + weapon.attackType 
-											+ ' hits you with ' + adjective + ' ' + abstractNoun
-											+ '</strong> <span class="red">(' + damage + ')</span></div>';
+										msgForAttacker += '<div class="red">You swing at '
+											+ opponent.short + ' with <strong>' + weapon.short + '</strong> and miss!</div>';
+									}
+								}
+
+								if (opponent.isPlayer) {
+									if (World.dice.roll(1, 2) === 1) {
+										msgForAttacker += '<div class="green">' + attacker.capitalShort
+											+ ' tries to attack but you dodge at the last minute!</div>';
+									} else {
+										msgForAttacker += '<div class="green">' + attacker.capitalShort
+											+ ' lunges and you with ' + weapon.short +  ' and misses!</div>';
 									}
 								}
 							}
 						} else {
 							if (attacker.isPlayer) {
-								if (World.dice.roll(1, 2) === 1) {
-									msgForAttacker += '<div class="red">You lunge at '
-										+ opponent.short + ' and miss!</div>';
+								if (!shield) {
+									if (World.dice.roll(1, 2) === 1) {
+										msgForAttacker += '<div class="red">You try to attack ' + opponent.short
+											+ ' and they block your attack!</div>';
+									} else {
+										msgForAttacker += '<div class="red">You try to attack ' + opponent.short
+											+ ' with ' + weapon.short + ' but they narrowly avoid the attack!</div>';
+									}
 								} else {
-									msgForAttacker += '<div class="red">You swing at '
-										+ opponent.short + ' with <strong>' + weapon.short + '</strong> and miss!</div>';
+									if (World.dice.roll(1, 2) === 1) {
+										msgForAttacker += '<div class="red">You try to attack ' + opponent.short
+											+ ' and they block the incoming attack with ' + shield.short + '!</div>';
+									} else {
+										msgForAttacker += '<div class="red">You swing at ' + opponent.short
+											+ ' but they use their ' + shield.displayName + ' to defend against the attack!</div>';
+									}
 								}
 							}
 
 							if (opponent.isPlayer) {
-								if (World.dice.roll(1, 2) === 1) {
-									msgForAttacker += '<div class="green">' + attacker.capitalShort
-										+ ' tries to attack but you dodge at the last minute!</div>';
-								} else {
-									msgForAttacker += '<div class="green">' + attacker.capitalShort
-										+ ' lunges and you with ' + weapon.short +  ' and misses!</div>';
+								if (!shield) {
+									msgForOpponent += '<div class="green">' + attacker.capitalShort +
+									' swings wildy and you narrowly block their attack!</div>';
 								}
-							}
-						}
-					} else {
-						if (attacker.isPlayer) {
-							if (!shield) {
-								if (World.dice.roll(1, 2) === 1) {
-									msgForAttacker += '<div class="red">You try to attack ' + opponent.short
-										+ ' and they block your attack!</div>';
-								} else {
-									msgForAttacker += '<div class="red">You try to attack ' + opponent.short
-										+ ' with ' + weapon.short + ' but they narrowly avoid the attack!</div>';
-								}
-							} else {
-								if (World.dice.roll(1, 2) === 1) {
-									msgForAttacker += '<div class="red">You try to attack ' + opponent.short
-										+ ' and they block the incoming attack with ' + shield.short + '!</div>';
-								} else {
-									msgForAttacker += '<div class="red">You swing at ' + opponent.short
-										+ ' but they use their ' + shield.displayName + ' to defend against the attack!</div>';
-								}
-							}
-						}
-
-						if (opponent.isPlayer) {
-							if (!shield) {
-								msgForOpponent += '<div class="green">' + attacker.capitalShort +
-								' swings wildy and you narrowly block their attack!</div>';
 							}
 						}
 					}
-				}
-			} else {
-				if (attacker.isPlayer) {
-					msgForAttacker +=  '<div class="grey">Your ' + weapon.attackType + ' misses a '
-						+ opponent.displayName + '</div>';
+				} else {
+					if (attacker.isPlayer) {
+						msgForAttacker +=  '<div class="grey">Your ' + weapon.attackType + ' misses a '
+							+ opponent.displayName + '</div>';
+					}
+
+					if (opponent.isPlayer) {
+						msgForOpponent +=  '<div class="grey">' + attacker.displayName + ' tries to '
+							+ weapon.attackType + ' you and misses! </div>';
+					}
 				}
 
-				if (opponent.isPlayer) {
-					msgForOpponent +=  '<div class="grey">' + attacker.displayName + ' tries to '
-						+ weapon.attackType + ' you and misses! </div>';
-				}
+				return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent, attackerCanSee);
 			}
-
-			return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent, attackerCanSee);
 		}
+	} else {
+		return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent, attackerCanSee);
 	}
 };
 
@@ -485,6 +521,38 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon, attackerMods, o
 	return numOfAttacks;
 };
 
+// Insert a skill profile into the relevant battle object so it can be applied in round()
+Combat.prototype.processSkill = function(attacker, skillProfile) {
+	var battle = this.getBattleByRefId(attacker.refId);
+
+	if (attacker.refId === battle.attacker.refId) {
+		battle.attackerSkill = skillProfile;
+	} else if (attacker.refId === battle.defender.refId) {
+		battle.defenderSkill = skillProfile;
+	}
+}
+
+Combat.prototype.createSkillProfile = function(skillUser, skillObj, modifiers) {
+	if (!modifiers) {
+		modifiers = {
+			chp: 0,
+			cmana: 0,
+			cmv: 0,
+			wait: 0
+		};
+	}
+
+	return {
+		refId: skillUser,
+		defenderMods: modifiers,
+		attackerMods: modifiers,
+		msgToAttacker: '',
+		msgToDefender: '',
+		msgToRoom: '',
+		skillObj: skillObj
+	}
+}
+
 Combat.prototype.getDamageAdjective = function(damage) {
 	var i = 0,
 	value,
@@ -516,7 +584,7 @@ Combat.prototype.getDamageAdjective = function(damage) {
 };
 
 // TODO: ending combat message needs to be sent to all attacking players along with removing their Battle Objects
-Combat.prototype.processEndOfCombat = function(battleObj)  {
+Combat.prototype.processEndOfCombat = function(battleObj) {
 	var combat = this,
 	exp = 0,
 	corpse,
@@ -620,11 +688,11 @@ Combat.prototype.processEndOfCombat = function(battleObj)  {
 };
 
 Combat.prototype.getBattleByRefId = function(refId) {
-	let i = 0;
+	var i = 0;
 
-	for (i; i < this.battles.length; i += 1) {
-		if (this.battles[i].attacker.refId === refId || this.battles[i].defender.refId === refId) {
-			return this.battles[i];
+	for (i; i < World.battles.length; i += 1) {
+		if (World.battles[i].attacker.refId === refId || World.battles[i].defender.refId === refId) {
+			return World.battles[i];
 		}
 	}
 
@@ -632,12 +700,12 @@ Combat.prototype.getBattleByRefId = function(refId) {
 }
 
 Combat.prototype.getBattlesByRefId = function(refId) {
-	let i = 0,
+	var i = 0,
 	results = [];
 
-	for (i; i < this.battles.length; i += 1) {
-		if (this.battles[i].attacker.refId === refId || this.battles[i].defender.refId === refId) {
-			results.push(this.battles[i]);
+	for (i; i < World.battles.length; i += 1) {
+		if (World.battles[i].attacker.refId === refId || World.battles[i].defender.refId === refId) {
+			results.push(World.battles[i]);
 		}
 	}
 
