@@ -765,9 +765,6 @@ World.prototype.setupMob = function(mob, area, room, callback) {
 	var i = 0,
 	world = this;
 
-	// TODO: confirm onRoll runs for each item after world game objects
-	// have been fully loaded
-
 	world.rollMob(mob, area, room, function(err, mob) {
 		if (err) {
 			return callback(error, mob);

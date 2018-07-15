@@ -43,11 +43,11 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 		if (cmdArr.length < 4) {
 			if (cmdArr.length === 3) {
 				cmdObj.arg = cmdArr[1].toLowerCase() + ' ' + cmdArr[2].toLowerCase();
+				cmdObj.input = cmdObj.last;
 			} else if (cmdArr.length === 2) {
 				cmdObj.arg = cmdArr[1].toLowerCase();
+				cmdObj.input = '';
 			}
-
-			cmdObj.input = cmdObj.last;
 		} else {
 			cmdObj.arg = cmdArr[1].toLowerCase() + ' ' + cmdArr[2].toLowerCase(),
 			cmdObj.input = cmdArr.slice(3).join(' ')
@@ -658,7 +658,7 @@ Cmd.prototype.eat = function(target, command) {
 			if (item.itemType === 'food') {
 				World.character.removeItem(target, item);
 
-				World.character.reduceHunger(target,  World.dice.roll(item.diceNum, item.diceSides));
+				World.character.reduceHunger(target, item);
 
 				World.processEvents('onEat', item, roomObj, target);
 
@@ -714,7 +714,7 @@ Cmd.prototype.drink = function(target, command) {
 			}
 
 			if (bottle.drinks > 0) {
-				World.character.reduceThirst(target, World.dice.roll(1, 3));
+				World.character.reduceThirst(target, bottle);
 
 				World.processEvents('onDrink', bottle, roomObj, target);
 
@@ -745,7 +745,7 @@ Cmd.prototype.drink = function(target, command) {
 			} else {
 				watersource.drinks -= World.dice.roll(1, 2);
 
-				World.character.reduceThirst(target, World.dice.roll(1, 2));
+				World.character.reduceThirst(target, watersource);
 
 				World.processEvents('onDrop', watersource, roomObj, target);
 
@@ -1927,6 +1927,8 @@ Cmd.prototype.mlist = function(player, command) {
 	});
 };
 
+// TODO update brandish so items can leverage a set of spells under enhancements[]
+// that way each spell can have its own level and meta information
 Cmd.prototype.brandish = function(player, command) {
 	var scroll = World.character.getItem(player, command),
 	castCmd = 'cast ',
@@ -2079,7 +2081,8 @@ Cmd.prototype.cast = function(player, command, fn) {
 	}
 };
 
-Cmd.prototype.kill = function(player, command) {
+// We pass in a Skill Profile Object (the output of a skill) when we start combat with a combat skill
+Cmd.prototype.kill = function(player, command, skillProfile) {
 	var roomObj,
 	i = 0,
 	opponent;
@@ -2122,7 +2125,7 @@ Cmd.prototype.kill = function(player, command) {
 					playerName: player.name
 				});
 
-				World.combat.processFight(player, opponent, roomObj);
+			World.combat.processFight(player, opponent, roomObj);
 			} else {
 				World.msgPlayer(player, {
 					msg: 'There is nothing by that name here.',

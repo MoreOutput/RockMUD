@@ -8,7 +8,8 @@ Skill = function() {};
 
 // Return a mod for chance to block with shield
 Skill.prototype.shieldBlock = function(skillObj, player, roomObj, shield) {
-	var conMod = World.dice.getConMod(skillUser);
+	var conMod = World.dice.getConMod(skillUser),
+	skillOutput = this.createSkillProfile();
 
 	if (skillObj.train >= 80 && World.dice.roll(1, 100) > (98 - conMod)) {
 		skillObj.train += 1;
@@ -98,6 +99,8 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 * If the target is already on the ground dex check to fall
 * If the target is two sizes smaller do a dex check against missing, a critical fail causes the user to trip
 * Attacker does .5 more damage per size difference in target
+*
+* Since this is a combat skill it must output a Skill Profile Object
 */
 Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 	var opponent = player.opponent,

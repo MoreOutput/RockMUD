@@ -126,9 +126,10 @@ module.exports = {
 				area: 'midgaard',
 				id: '112',
 				waterSource: true,
-				drinks: 0,
-				maxDrinks: 100,
 				weight: 10000,
+				modifiers: {
+					thirst: -1
+				},
 				itemType: 'ornament'
 			}, {
 				name: 'Leather Armor',
@@ -158,7 +159,6 @@ module.exports = {
 				diceSides: 2,
 				diceMod: -5,
 				attackType: 'smash',
-				ac: -1,
 				weight: 2,
 				slot: 'hands',
 				equipped: false,
@@ -186,10 +186,12 @@ module.exports = {
 				level: 1,
 				itemType: 'shield',
 				material: 'wood', 
-				ac: 2, 
 				weight: 1,
 				slot: 'hands',
 				equipped: false,
+				modifiers: {
+					ac: 2
+				},
 				affects: [{
 					id: 'hidden',
 					affect: 'hidden',
@@ -204,9 +206,10 @@ module.exports = {
 				level: 1,
 				itemType: 'food',
 				weight: 0.5,
-				diceNum: 1,
-				diceSides: 2,
 				diceMod: 1,
+				modifiers: {
+					hunger: -3
+				},
 				decay: 3
 			}, {
 				name: 'Short Sword',
@@ -228,7 +231,8 @@ module.exports = {
 				slot: 'hands',
 				equipped: false,
 				modifiers: {
-					damroll: 1
+					damroll: 1,
+					hitroll: 1
 				}
 			}, {
 				name: 'Burlap sack',
@@ -320,13 +324,15 @@ module.exports = {
 				area: 'midgaard',
 				id: '102',
 				level: 1,
-				drinks: 6,
+				drinks: 0,
 				maxDrinks: 6,
 				itemType: 'bottle',
 				material: 'leather',
 				weight: 0,
 				value: 1,
-				equipped: false
+				modifiers: {
+					thirst: -1
+				}
 			}]
 		},
 		{

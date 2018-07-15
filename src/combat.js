@@ -505,6 +505,7 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon) {
 };
 
 // Insert a skill profile into the relevant battle object so it can be applied in round()
+// Used in Skills and Spells
 Combat.prototype.processSkill = function(attacker, defender, skillProfile) {
 	var battle = this.getBattleByRefId(attacker.refId);
 
@@ -515,6 +516,8 @@ Combat.prototype.processSkill = function(attacker, defender, skillProfile) {
 	}
 }
 
+// Skills that fire in the Battle loop, that modify the opponent state, must output a Skill Profile Object
+// This object ensures all modifiers and messages apply consistently
 Combat.prototype.createSkillProfile = function(skillUser, skillObj, mods) {
 	if (!mods) {
 		mods = {};

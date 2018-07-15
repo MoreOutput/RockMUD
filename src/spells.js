@@ -4,6 +4,8 @@ Spell = function() {};
 
 /*
 * Damage Spells
+*
+* Since these are combat spells they must return a Skill Profile Object
 */
 Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command, fn) {
 	var intMod,

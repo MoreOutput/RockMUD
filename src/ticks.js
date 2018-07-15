@@ -408,9 +408,9 @@ setInterval(function() {
 			}
 
 			if (!cmdObj.skill) {
-				console.log('TESTT', cmdObj.cmd, cmdEntity.name)
 				World.commands[cmdObj.cmd](cmdEntity, cmdObj);
 			} else {
+				console.log('Running skill directly');
 				World.skills[cmdObj.cmd](
 					cmdObj.skill,
 					cmdEntity,

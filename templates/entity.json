@@ -12,6 +12,7 @@
 	"sex": "",
 	"race": "",
 	"charClass": "",
+	"classAbbr": "",
 	"level": 1,
 	"exp": 0,
 	"expToLevel": 1000,

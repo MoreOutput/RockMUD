@@ -255,6 +255,7 @@ Character.prototype.create = function(s) {
 	World.extend(s.player, raceObj, function(err, player) {
 		World.extend(s.player, classObj, function(err, player) {
 			s.player.refId = World.createRefId(s.player);
+			s.player.charClass = classObj.name;
 			s.player.id = s.player.name;
 			s.player.chp += 30;
 			s.player.cmana += 5;
@@ -295,7 +296,7 @@ Character.prototype.create = function(s) {
 			s.player.dex = s.player.baseDex;
 			s.player.noFollow = false;
 			s.player.noGroup = false;
-		
+
 			character.generateSalt(function(salt) {
 				s.player.salt = salt;
 		
@@ -686,16 +687,16 @@ Character.prototype.thirst = function(target) {
 	}
 };
 
-Character.prototype.reduceThirst = function(player, reduction) {
-	player.thirst -= reduction;
+Character.prototype.reduceThirst = function(player, liquid) {
+	player.thirst += liquid.modifiers.thirst;
 
 	if (player.thirst < 0) {
 		player.thirst = 0;
 	}
 }
 
-Character.prototype.reduceHunger = function(player, reduction) {
-	player.hunger -= reduction;
+Character.prototype.reduceHunger = function(player, food) {
+	player.hunger += food.modifiers.hunger;
 
 	if (player.hunger < 0) {
 		player.hunger = 0;
