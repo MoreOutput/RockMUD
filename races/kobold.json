@@ -4,8 +4,6 @@
 	"playable": false,
 	"attackType": "claw",
 	"size": {"value": 1, "display": "tiny"},
-	"diceNum": 1,
-	"diceSides": 2,
 	"diceMod": 1,
 	"minStat": 6
 }

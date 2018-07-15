@@ -3,11 +3,9 @@
 	"playable": false,
 	"attackType": "claw",
 	"size": {"value": 2, "display": "small"},
-	"diceNum": 1,
-	"diceSides": 2,
-	"hitRoll": -2,
+	"hitroll": -3,
 	"ac": 0,
-	"meleeRes": 8,
+	"meleeRes": 0,
 	"handsNoun": "claw",
 	"minStat": 2
 }

@@ -11,8 +11,7 @@
 			"mod": 0,
 			"train": 70,
 			"type": "spell",
-			"wait": 2,
-			"learned": true,
+			"learned": false,
 			"prerequisites": {
 				"level": 1
 			}
@@ -22,8 +21,7 @@
 			"mod": 0,
 			"train": 70,
 			"type": "passive spell",
-			"wait": 2,
-			"learned": true,
+			"learned": false,
 			"prerequisites": {
 				"level": 1
 			}

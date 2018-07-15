@@ -55,15 +55,13 @@ server = http.createServer(function (req, res) {
 	}
 }),
 World = require('./src/world'),
-io = require('socket.io')(server, {
-	log: false,
-	transports: ['websocket']
-});
+WebSocket = require('ws'),
+io = new WebSocket.Server({ server });
 
 World.setup(io, cfg, function() {
 	server.listen(process.env.PORT || cfg.port);
 
-	io.on('connection', function (s) {
+	io.on('connection', function connection (s) {
 		var parseCmd = function(r, s) {
 			var skillObj,
 			cmdObj,
@@ -135,26 +133,28 @@ World.setup(io, cfg, function() {
 			noPrompt: true
 		});
 
-		s.on('cmd', function (r) {
+		s.on('pong', function() {
+			s.player.connected = true;
+		});
+
+		s.on('message', function (r) {
+			r = JSON.parse(r);
+
 			if (r.msg !== '' && !s.player || s.player && !s.player.logged) {
 				if (!s.player || !s.player.verifiedName) {
 					World.character.login(r, s, function (s) {
 						if (s.player) {
 							s.player.verifiedName = true;
-							s.join('mud'); // mud is one of two rooms, 'creation' being the other
-
 							World.msgPlayer(s, {
 								msg: 'Password for ' + s.player.displayName  + ': ',
 								evt: 'reqPassword',
 								noPrompt: true
 							});
 						} else {
-							s.join('creation'); // creation is one of two rooms, 'mud' being the other
-
 							s.player = JSON.parse(JSON.stringify(World.entityTemplate));
 							s.player.name = r.msg;
 							s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
-							s.player.sid = s.id;
+							s.player.connected = true;
 							s.player.socket = s;
 							s.player.creationStep = 1;
 							s.player.isPlayer = true;
@@ -188,31 +188,16 @@ World.setup(io, cfg, function() {
 			}
 		});
 
-		s.on('disconnect', function () {
+		s.on('close', function () {
 			var i = 0,
 			j = 0,
 			roomObj;
 
 			if (s.player !== undefined) {
-				for (i; i < World.players.length; i += 1) {
-					if (World.players[i].name === s.player.name) {
-						World.players.splice(i, 1);
-					}
-				}
+				s.player.connected = false;
 
-				roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-
-				if (roomObj) {
-					for (j; j < roomObj.playersInRoom.length; j += 1) {
-						if (roomObj.playersInRoom[j].name === s.player.name) {
-							roomObj.playersInRoom.splice(j, 1);
-						}
-					}
-				}
+				World.character.removePlayer(s.player);
 			}
-
-			s.leave('mud');
-			s.disconnect();
 		});
 	});
 });

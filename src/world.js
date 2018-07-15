@@ -366,23 +366,6 @@ World.prototype.getClass = function(className) {
 	return null;
 };
 
-World.prototype.getPlayerBySocket = function(socketId) {
-	var world = this,
-	arr = [],
-	player,
-	i = 0;
-
-	for (i; i < world.players.length; i += 1) {
-		player = world.players[i];
-
-		if (player.sid === socketId) {
-			return player;
-		}
-	}
-
-	return false;
-};
-
 World.prototype.getPlayerByName = function(playerName) {
 	var world = this,
 	arr = [],
@@ -838,11 +821,11 @@ World.prototype.setupItem = function(item, area, room, callback) {
 
 World.prototype.createRefId = function(gameEntity) {
 	if (gameEntity.isPlayer === true) {
-		return 'entity-' + gameEntity.sid;
+		return  Math.random().toString().replace('0.', 'player-');
 	} else if (gameEntity.itemType === 'entity') {
 		return Math.random().toString().replace('0.', 'entity-');
 	} else {
-		return 	Math.random().toString().replace('0.', 'item-');
+		return Math.random().toString().replace('0.', 'item-');
 	}
 }
 
@@ -1065,12 +1048,12 @@ World.prototype.prompt = function(target) {
 		target.cmv = 0;
 	}
 
-	prompt = '<div class="col-md-12"><div class="cprompt"><strong><' 
-		+ player.chp + '/'  + player.hp + '<span class="red">hp</span>><' 
-		+ player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' 
+	prompt = '<div class="col-md-12"><div class="cprompt"><strong><'
+		+ player.chp + '/'  + player.hp + '<span class="red">hp</span>><'
+		+ player.cmana + '/'  + player.mana + '<span class="blue">m</span>><'
 		+ player.cmv + '/'  + player.mv +'<span class="warning">mv</span>></strong>';
 
-	if (player.sid) {
+	if (this.config.allAdmin || player.role === "admin") {
 		prompt += '<' + player.wait + 'w>';
 	}
 
@@ -1111,7 +1094,7 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 	} else if (!target.area) {
 		s = target;
 	}
-	
+
 	if (!msgObj.noPrompt) {
 		prompt = this.prompt(target);
 	}
@@ -1136,6 +1119,8 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 
 	if (target) {
 		if (s) {
+			msgObj.msgType = 'msg';
+
 			if (!msgObj.onlyPrompt && typeof msgObj.msg !== 'function' && msgObj.msg) {
 				baseMsg = msgObj.msg;
 
@@ -1156,10 +1141,10 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 				if (prompt) {
 					msgObj.msg += prompt;
 				}
-					
-				s.emit('msg', msgObj);
-				
-				msgObj.msg = baseMsg; 
+
+				s.send(JSON.stringify(msgObj));
+
+				msgObj.msg = baseMsg;
 			} else if (typeof msgObj.msg === 'function') {
 				msgObj.msg(target, function(send, msg) {
 					baseMsg = msgObj.msg;
@@ -1183,19 +1168,19 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 					}
 
 					if (send) {
-						s.emit('msg', msgObj);
+						s.send('msg', msgObj);
 					}
 					
 					msgObj.msg = baseMsg;
 				}, target);
 			} else {
-				s.emit('msg', {
-					msg: prompt
-				});
+				msgObj.msg = prompt;
+
+				s.send(JSON.stringify(msgObj));
 			}
 		}
 	} else {
-		s.emit('msg', msgObj);
+		s.send('msg', msgObj);
 	}
 };
 
@@ -1275,7 +1260,7 @@ World.prototype.msgWorld = function(target, msgObj) {
 	for (i; i < world.players.length; i += 1) {
 		s = world.players[i].socket;
 
-		if (world.players[i].name !== msgObj.playerName) {
+		if (world.players[i].name !== msgObj.playerName && world.players[i].creationStep === 0) {
 			world.msgPlayer(s, msgObj);
 		}
 	}

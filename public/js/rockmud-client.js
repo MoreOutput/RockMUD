@@ -1,6 +1,6 @@
 window.onload = function() {
 	'use strict';
-	var ws = io.connect('', {transports: ['websocket']}),
+	var ws = new WebSocket("ws://localhost:3001"),
 	terminal = document.getElementById('terminal'),
 	node = document.getElementById('cmd'),
 	rowCnt = 0,
@@ -100,8 +100,6 @@ window.onload = function() {
 				terminal.scrollTop = terminal.scrollHeight - terminal.clientHeight;
 			}
 		}
-
-		return parseCmd(r);
 	},
 	checkCmdEvents = function(rowCnt) {
 		var i = 0,
@@ -133,7 +131,7 @@ window.onload = function() {
 		if (r.msg !== undefined) {
 			r.msg = r.msg.replace(/ /g, ' ').trim();
 
-			ws.emit(r.emit, r);
+			ws.send(JSON.stringify(r));
 		}
 	},
 	checkAlias = function(cmdStr, fn) { 
@@ -158,7 +156,11 @@ window.onload = function() {
 			}
 		}
 
-		return fn(cmd + ' ' + msg);
+		if (msg) {
+			return fn(cmd + ' ' + msg);
+		} else {
+			return fn(cmd);
+		}
 	},
 	send = function(e) {
 		var messageNodes = [],
@@ -173,13 +175,13 @@ window.onload = function() {
 		e.preventDefault();
 
 		if (canSend) {
-			display(msgObj);
-			
 			node.value = '';
 			node.focus();
 
 			canSend = false;
-			
+
+			ws.send(JSON.stringify(msgObj));
+
 			return false;
 		} else {
 			return false;
@@ -210,7 +212,9 @@ window.onload = function() {
 
 	node.focus();
 
-	ws.on('msg', function(r) {
+	ws.addEventListener("message", function(r) {
+		r = JSON.parse(r.data);
+
 		display(r, true);
 
 		if (r.evt && !r.evt.data) {

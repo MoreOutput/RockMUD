@@ -42,7 +42,7 @@ Character.prototype.login = function(r, s, fn) {
 								noPrompt: true
 							});
 
-							World.players[i].socket.disconnect();
+							World.players[i].socket.terminate();
 
 							s.player = World.players[i];
 
@@ -58,13 +58,13 @@ Character.prototype.login = function(r, s, fn) {
 						s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
 					}
 
-					s.player.sid = s.id;
+					s.player.connected = true;
 					s.player.socket = s;
 					s.player.refId = World.createRefId(s.player);
-
 					s.player.logged = false;
 					s.player.verifiedPassword = false;
 					s.player.verifiedName = false;
+					s.player.wait = 0;
 
 					return fn(s, true);
 				} else {
@@ -101,9 +101,8 @@ Character.prototype.load = function(name, s, fn) {
 			s.player.lastname = s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
 		}
 
-		s.player.sid = s.id;
+		s.player.connected = true;
 		s.player.socket = s;
-
 		s.player.logged = true;
 		s.player.verifiedPassword = true;
 		s.player.verifiedName = true;
@@ -137,7 +136,7 @@ Character.prototype.getPassword = function(s, command, fn) {
 	var character = this;
 
 	if (command.cmd && command.cmd.length > 7) {
-		character.hashPassword(s.player.salt, command.cmd, 1000, function(hash) {			
+		character.hashPassword(s.player.salt, command.cmd, 1000, function(hash) {
 			var roomObj,
 			areaObj;
 
@@ -202,16 +201,35 @@ Character.prototype.addPlayer = function(s) {
 
 	for (i; i < World.players.length; i += 1) {
 		if (s.player.name === World.players[i].name) {
-			World.players.splice(i, 1);
-			World.players.push(s.player);
-
-			return true;
+			this.removePlayer(s.player);
 		}
 	}
 
 	World.players.push(s.player);
 
 	return true;
+};
+
+Character.prototype.removePlayer = function(player) {
+	var i = 0,
+	j = 0,
+	roomObj;
+
+	for (i; i < World.players.length; i += 1) {
+		if (player.name === World.players[i].name) {
+			roomObj = World.getRoomObject(player.area, player.roomid);
+
+			World.players.splice(i, 1);
+
+			if (roomObj.playersInRoom.length) {
+				for (j; j < roomObj.playersInRoom.length; j += 1) {
+					if (roomObj.playersInRoom[j].name === player.name) {
+						roomObj.playersInRoom.splice(j, 1);
+					}
+				}
+			}
+		}
+	}
 };
 
 // A New Character is saved
@@ -284,9 +302,7 @@ Character.prototype.create = function(s) {
 				character.hashPassword(salt, s.player.password, 1000, function(hash) {
 					s.player.password = hash;
 					s.player.socket = null;
-		
 					s.player.personalPronoun = character.getPersonalPronoun(s.player);
-		
 					s.player.possessivePronoun = character.getPossessivePronoun(s.player);
 		
 					character.write(s.player.name, s.player, function (err) {
@@ -298,13 +314,9 @@ Character.prototype.create = function(s) {
 							}
 		
 							if (character.addPlayer(s)) {
-								s.leave('creation');
-								s.join('mud');
-		
 								World.sendMotd(s);
 		
 								roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-		
 								roomObj.playersInRoom.push(s.player);
 		
 								World.addCommand({
@@ -316,7 +328,7 @@ Character.prototype.create = function(s) {
 									msg: 'Error logging in. Reconnect and retry.'
 								});
 		
-								s.disconnect();
+								s.terminate();
 							}
 						});
 					});
@@ -838,21 +850,45 @@ Character.prototype.getStatsFromEq = function(eq, fn) {
 
 };
 
-Character.prototype.getFist = function(player) {
+Character.prototype.getHitroll = function(entity) {
+	var hitroll = entity.hitroll,
+	i = 0,
+	prop;
+
+	hitroll += Math.round(entity.level / 4) + 4;
+
+	if (hitroll > 0) {
+		return hitroll;
+	} else {
+		return 0;
+	}
+};
+
+Character.prototype.getDamroll = function(entity) {
+	var damroll = entity.damroll,
+	i = 0,
+	prop;
+
+	damroll += Math.round(entity.level / 4) + 4;
+
+	return damroll;
+};
+
+Character.prototype.getFist = function(entity) {
 	return {
 		name: 'Fighting with your bare hands!',
-		level: player.level,
-		diceNum: player.diceNum,
-		diceSides: player.diceSides,
+		level: entity.level,
+		diceNum: Math.round(entity.level / 4) + 1,
+		diceSides: Math.round(entity.level / 6) + 1,
 		itemType: 'weapon',
 		equipped: true,
-		attackType: player.attackType,
+		attackType: entity.attackType,
 		weaponType: 'fist',
 		material: 'flesh',
 		modifiers: {},
 		diceMod: 0,
 		slot: 'hands',
-		short: 'your ' + player.handsNoun + 's'
+		short: 'your ' + entity.handsNoun + 's'
 	};
 };
 
@@ -1268,10 +1304,15 @@ Character.prototype.canSee = function(player, roomObj) {
 };
 
 Character.prototype.createCorpse = function(player) {
-	var corpseDisplayStr = player.short;
+	var corpseDisplayStr = player.short,
+	i = 0;
 
 	if (!corpseDisplayStr) {
 		corpseDisplayStr = player.displayName;
+	}
+
+	for (i; i < player.eq.length; i += 1) {
+		player.eq[i].item = "";
 	}
 
 	return {

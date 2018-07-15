@@ -13,7 +13,7 @@
 		"wait": 1,
 		"learned": false,
 		"prerequisites": {
-			"skill": {"id": "shieldBlock", "prop": "train", "value": "70"},
+			"skill": {"id": "shieldBlock", "prop": "train", "value": "75"},
 			"baseStr": 15,
 			"level": 1
 		}
@@ -21,7 +21,7 @@
 		"id": "shieldBlock",
 		"display": "Shield Block",
 		"mod": 1,
-		"train": 45,
+		"train": 40,
 		"type": "passive",
 		"learned": false,
 		"prerequisites": {
@@ -41,8 +41,8 @@
 		"id": "whirlwind",
 		"display": "Whirlwind",
 		"mod": 0,
-		"train": 100,
-		"learned": true,
+		"train": 60,
+		"learned": false,
 		"type": "area melee",
 		"prerequisites": {
 			"level": 1

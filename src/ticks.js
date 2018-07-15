@@ -403,6 +403,10 @@ setInterval(function() {
 
 			cmdObj.entity = null;
 
+			if (cmdEntity.isPlayer && !cmdEntity.connected) {
+				cmdEntity.connected = true;
+			}
+
 			if (!cmdObj.skill) {
 				World.commands[cmdObj.cmd](cmdEntity, cmdObj);
 			} else {
@@ -434,15 +438,15 @@ setInterval(function() {
 
 			World.combat.round(battle);
 
-			battle.attacker.wait -= 1;
-
-			if (battle.attacker.wait < 0) {
+			if (battle.attacker.wait > 0) {
+				battle.attacker.wait -= 1;
+			} else {
 				battle.attacker.wait = 0;
 			}
 
-			battle.defender.wait -= 1;
-
-			if (battle.defender.wait < 0) {
+			if (battle.defender.wait > 0) {
+				battle.defender.wait -= 1;
+			} else {
 				battle.defender.wait = 0;
 			}
 		}
@@ -486,13 +490,11 @@ setInterval(function() {
 setInterval(function() {
 	var i = 0;
 
-	if (World.players.length) {
-		if (World.dice.roll(1, 3) <= 2) {
-			for (i; i < World.players.length; i += 1) {
-				World.character.hpRegen(World.players[i]);
-				World.character.manaRegen(World.players[i]);
-				World.character.mvRegen(World.players[i]);
-			}
+	if (World.dice.roll(1, 3) <= 2) {
+		for (i; i < World.players.length; i += 1) {
+			World.character.hpRegen(World.players[i]);
+			World.character.manaRegen(World.players[i]);
+			World.character.mvRegen(World.players[i]);
 		}
 	}
 }, 32000);
@@ -502,26 +504,27 @@ setInterval(function() {
 	var i = 0,
 	player; 
 
-	if (World.players.length > 0) {
-		for (i; i < World.players.length; i += 1) {
-			player = World.players[i];
+	for (i; i < World.players.length; i += 1) {
+		player = World.players[i];
 
-			World.character.hunger(player);
-			World.character.thirst(player);
-		}
+		World.character.hunger(player);
+		World.character.thirst(player);
 	}
 }, 242000); // 4 minutes
 
 // Saving
 setInterval(function() {
 	var i = 0,
-	player; 
+	player;
 
-	if (World.players.length > 0) {
-		for (i; i < World.players.length; i += 1) {
-			if (World.players[i].position === 'standing' && !World.players[i].opponent && World.dice.roll(1, 10) > 8) {
-				World.character.save(World.players[i]);
-			}
+	for (i; i < World.players.length; i += 1) {
+		player = World.players[i];
+
+		if (player.position.creationStep === 0
+			&& player.position === 'standing'
+			&& !player.opponent
+			&& World.dice.roll(1, 10) > 8) {
+			World.character.save(player);
 		}
 	}
 }, 2450000); // 4.5 minutes
@@ -537,11 +540,29 @@ setInterval(function() {
 	];
 
 	if (World.players.length) {
-		if (World.players.position !== 'fighting') {
+		if (World.dice.roll(1, 3) <= 2) {
 			World.msgWorld(false, {
 				msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
 					+ alerts[World.dice.roll(1, alerts.length) - 1] + '</span></span>'
 			});
 		}
 	}
-}, 500000);
+}, 64000);
+
+// Check for broken connections
+setInterval(function() {
+	var i = 0,
+	player;
+
+	for (i; i < World.players.length; i += 1) {
+		player = World.players[i];
+
+		if (!player.connected) {
+			return player.socket.terminate();
+		}
+
+		player.connected = false;
+
+		player.socket.ping();
+	}
+}, 32000);

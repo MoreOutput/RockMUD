@@ -22,7 +22,11 @@ exports.server = {
 			player: false // {driver: 'couchdb'}
 		},
 		// will prevent ticks (time based functions) from running
-		preventTicks: false
+		preventTicks: false,
+		// all characters can use admin commands
+		allAdmin: true,
+		// show opponent hp in status
+		viewHp: true
 	},
 	admins: []
 };

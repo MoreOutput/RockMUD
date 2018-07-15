@@ -12,7 +12,7 @@ Try the latest on this Heroku hobby instance: https://rockmud.herokuapp.com/. If
 * Cross-platform
 
 ### Dependencies:
-* Socket.io 1.0 or greater is required. This is the single outside dependency and is contained to the core message passing functions.
+* The latest version of the WS library is required. This is the single outside dependency and is contained to the core message passing functions.
 * Development keeps up with latest node release.
 * Default terminal loads Bootstrap from CDN.
 

@@ -66,14 +66,12 @@ module.exports = {
 					id: 9,
 					area: 'midgaard',
 					weight: 245,
-					diceNum: 2,
-					diceSides: 8,
 					diceMod: 5,
 					str: 16,
 					position: 'standing',
 					attackType: 'punch',
-					damRoll: 10,
-					hitRoll: 10,
+					damroll: 10,
+					hitroll: 10,
 					ac: 20,
 					wanderCheck: 50,
 					// this is asking if we want to run the ai behaviors when theres no players in the room with the mob
@@ -207,7 +205,7 @@ module.exports = {
 				itemType: 'food',
 				weight: 0.5,
 				diceNum: 1,
-				diceSides: 6,
+				diceSides: 2,
 				diceMod: 1,
 				decay: 3
 			}, {
@@ -230,7 +228,7 @@ module.exports = {
 				slot: 'hands',
 				equipped: false,
 				modifiers: {
-					damRoll: 1
+					damroll: 1
 				}
 			}, {
 				name: 'Burlap sack',
@@ -403,9 +401,6 @@ module.exports = {
 				race: 'animal',
 				short: 'a mean looking Alligator',
 				long: 'A large mean looking Alligator',
-				diceNum: 2,
-				diceSides: 2,
-				diceMod: 2,
 				hp: 30,
 				chp: 30,
 				kingdom: 'reptile',
@@ -442,15 +437,13 @@ module.exports = {
 					id: '9',
 					area: 'midgaard',
 					weight: 200,
-					diceNum: 2,
-					diceSides: 8,
 					diceMod: 5,
 					str: 18,
 					gold: 1000,
 					position: 'standing',
 					attackType: 'punch',
-					damRoll: 10,
-					hitRoll: 10,
+					damroll: 10,
+					hitroll: 10,
 					ac: 20,
 					merchant: true,
 					preventItemDecay: true,

@@ -6,30 +6,43 @@ Skill = function() {};
 * Passive Skills, typically called by name within commands
 */
 
-// Return a mod for AC rolls when the opponent has a shield,
+// Return a mod for chance to block with shield
 Skill.prototype.shieldBlock = function(skillObj, player, roomObj, shield) {
-	if (World.dice.roll(1, 100) <= skillObj.train) {
-		return World.dice.roll(1, skillObj.train / 10, shield.ac + skillObj.mod);
-	} else {
-		return shield.ac;
-	}
-};
+	var conMod = World.dice.getConMod(skillUser);
 
-Skill.prototype.secondAttack = function(skillObj, player, roomObj) {
-	var intMod = World.dice.getIntMod(player);
-
-	if (skillObj.train >= 80 && World.dice.roll(1, 100, intMod) > 95) {
+	if (skillObj.train >= 80 && World.dice.roll(1, 100) > (98 - conMod)) {
 		skillObj.train += 1;
 
-		World.msgPlayer(player, {
-			msg: '<strong>You skills with second attack improve!</strong>',
+		World.msgPlayer(skillUser, {
+			msg: '<strong>Your Shield Block abilities improve!</strong>',
 			styleClass: 'green',
 			noPrompt: true
 		});
 	}
 
-	if (World.dice.roll(1, 100) <= skillObj.train) {
-		return 1 + skillObj.mod;
+	if (skillObj.train >= 20) {
+		return 1 + Math.round(player.level / 8);
+	} else {
+		return 0;
+	}
+};
+
+// Returns a modifier for number of attacks per round
+Skill.prototype.secondAttack = function(skillObj, skillUser) {
+	var intMod = World.dice.getIntMod(skillUser);
+
+	if (skillObj.train >= 80 && World.dice.roll(1, 100) > (98 - intMod)) {
+		skillObj.train += 1;
+
+		World.msgPlayer(skillUser, {
+			msg: '<strong>Your ability to Second Attack has improved!</strong>',
+			styleClass: 'green',
+			noPrompt: true
+		});
+	}
+
+	if (skillObj.train >= 20) {
+		return 1;
 	} else {
 		return 0;
 	}
@@ -122,13 +135,14 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 			opponent = World.room.getMonster(roomObj, command);
 		}
 
+		skillOutput.winMsg = '<span class="red">You smash into ' + opponent.short + ' and they splatter into a thousand different pieces!</span> ';
+
 		if (opponent) {
 			shieldArr = World.character.getSlotsWithShields(player);
 
 			if (shieldArr.length) {
 				shield = shieldArr[0].item;
 			}
-
 			if (player.position === 'standing' || player.position === 'fighting') {
 				if (World.dice.roll(1, 100) <= skillObj.train) {
 					dmg = rollDamage(shield);
@@ -146,7 +160,7 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 						skillOutput.msgToDefender = 'A ' + player.displayName + ' bashes and charges at you with a '
 							+ shield.displayName + '! (' + dmg + ')';
 					}
-					
+
 					if (player.mainStat === 'str') {
 						skillOutput.attackerMods.wait += 3;
 					} else {
@@ -155,7 +169,7 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 
 					skillOutput.defenderMods.wait += 4;
 
-					World.combat.processSkill(player, skillOutput);
+					World.combat.processSkill(player, opponent, skillOutput);
 				} else {
 					skillOutput.msgToAttacker = 'You lunge forward and mistime your bash but manage to keep your footing!';
 
@@ -165,7 +179,7 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 						skillOutput.attackerMods.wait += 5;
 					}
 
-					World.combat.processSkill(player, skillOutput);
+					World.combat.processSkill(player, opponent, skillOutput);
 				}
 			}
 		} else {
