@@ -38,7 +38,7 @@ module.exports = {
 						}, mob);
 
 						if (!climbSkill) {
-							climbSkill = world.character.getSkill(mob, 'climb');
+							climbSkill = World.character.getSkill(mob, 'climb');
 
 							World.character.addSkill(player, climbSkill);
 

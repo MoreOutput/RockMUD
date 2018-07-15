@@ -1361,7 +1361,7 @@ Cmd.prototype.move = function(target, command, fn) {
 				} else {
 					if (targetRoom.size) {
 						World.msgPlayer(target, {
-							msg: 'You are too large to move there.',
+							msg: 'You are too large to fit into that space!',
 							styleClass: 'error'
 						});
 					}
@@ -1372,7 +1372,7 @@ Cmd.prototype.move = function(target, command, fn) {
 				}
 			} else {
 				World.msgPlayer(target, {
-					msg: 'You need to open a ' + exitObj.name + ' first.',
+					msg: 'You need to open the ' + exitObj.name + ' first.',
 					styleClass: 'error'
 				});
 

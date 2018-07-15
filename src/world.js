@@ -1168,7 +1168,7 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 					}
 
 					if (send) {
-						s.send('msg', msgObj);
+						s.send(JSON.stringify(msgObj));
 					}
 					
 					msgObj.msg = baseMsg;

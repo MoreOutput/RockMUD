@@ -23,7 +23,7 @@ module.exports = {
 					msg: 'looks <span class="grey">skyward</span> in thought.',
 					roomObj: roomObj
 				}, mob);
-			} else if (roll === 1 && roomObj.playersInRoom.length) {
+			} else if (true) {
 				World.addCommand({
 					cmd: 'say',
 					msg: mob.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],

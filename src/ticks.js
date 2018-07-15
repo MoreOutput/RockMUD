@@ -357,7 +357,7 @@ setInterval(function() {
 	cmdArr,
 	roomObj;
 
-	if (World.cmds.length) {
+	if (World.cmds.length || World.dice.roll(1, 2) === 1) {
 		for (i; i < World.areas.length; i += 1) {
 			if (World.dice.roll(1, 20) === 1) {
 				players = World.getAllPlayersFromArea(World.areas[i]);
@@ -408,6 +408,7 @@ setInterval(function() {
 			}
 
 			if (!cmdObj.skill) {
+				console.log('TESTT', cmdObj.cmd, cmdEntity.name)
 				World.commands[cmdObj.cmd](cmdEntity, cmdObj);
 			} else {
 				World.skills[cmdObj.cmd](
