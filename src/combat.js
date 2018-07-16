@@ -14,7 +14,7 @@ Combat = function() {
 	this.abstractNouns = ['intensity', 'force', 'strength', 'power', 'might', 'effort', 'energy'];
 };
 
-Combat.prototype.processFight = function(attacker, defender, roomObj) {
+Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfile) {
 	var combat = this,
 	battle,
 	i = 0;
@@ -67,8 +67,12 @@ Combat.prototype.processFight = function(attacker, defender, roomObj) {
 
 		World.battles.push(battle);
 
+		if (skillProfile) {
+			combat.processSkill(attacker, defender, skillProfile);
+		}
+
 		// immediately go into the first round, this is the same function called on a timer found in ticks.js
-		World.combat.round(battle);
+		World.combat.round(battle, skillProfile);
 	}
 };
 
@@ -88,7 +92,7 @@ Combat.prototype.createBattleObject = function(attacker, defender, roomObj) {
 
 // if a round results in an opponents hp falling to zero, then combat is resolved.
 // when that happens all Battle Objects containing the loser must be removed
-Combat.prototype.round = function(battleObj) {
+Combat.prototype.round = function(battleObj, skillProfile) {
 	var combat = this,
 	attacker = battleObj.attacker,
 	defender = battleObj.defender,
@@ -110,12 +114,16 @@ Combat.prototype.round = function(battleObj) {
 			World.character.applyMods(defender, battleObj.attackerSkill.defenderMods);
 			World.character.applyMods(attacker, battleObj.attackerSkill.attackerMods);
 
+			if (battleObj.round === 0) {
+				msgToAttacker = '<div>You started combat with a skill!</div>';
+			}
+
 			if (defender.chp) {
-				msgToAttacker = battleObj.attackerSkill.msgToAttacker;
-				msgToDefender = battleObj.attackerSkill.msgToDefender;
+				msgToAttacker += battleObj.attackerSkill.msgToAttacker;
+				msgToDefender += battleObj.attackerSkill.msgToDefender;
 			} else {
-				msgToAttacker = battleObj.attackerSkill.msgToAttacker;
-				msgToDefender = battleObj.attackerSkill.msgToDefender;
+				msgToAttacker += battleObj.attackerSkill.msgToAttacker;
+				msgToDefender += battleObj.attackerSkill.msgToDefender;
 			}
 		}
 
@@ -238,6 +246,20 @@ Combat.prototype.round = function(battleObj) {
 				}
 			});
 		} else {
+			World.addCommand({
+				cmd: 'alert',
+				msg: msgToAttacker,
+				noPrompt: preventPrompt,
+				styleClass: 'player-hit warning'
+			}, player);
+
+			World.addCommand({
+				cmd: 'alert',
+				msg: msgToDefender,
+				noPrompt: preventPrompt,
+				styleClass: 'player-hit warning'
+			}, opponent);
+
 			this.processEndOfCombat(battleObj, battleObj.attackerSkill);
 		}
 	} else if (defender) {
@@ -505,14 +527,18 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon) {
 };
 
 // Insert a skill profile into the relevant battle object so it can be applied in round()
-// Used in Skills and Spells
 Combat.prototype.processSkill = function(attacker, defender, skillProfile) {
 	var battle = this.getBattleByRefId(attacker.refId);
 
-	if (attacker.refId === battle.attacker.refId) {
-		battle.attackerSkill = skillProfile;
-	} else if (attacker.refId === battle.defender.refId) {
-		battle.defenderSkill = skillProfile;
+	if (battle) {
+		if (attacker.refId === battle.attacker.refId) {
+			battle.attackerSkill = skillProfile;
+		} else if (attacker.refId === battle.defender.refId) {
+			battle.defenderSkill = skillProfile;
+		}
+	} else {
+		console.log(skillProfile);
+		this.processFight(attacker, defender, World.getRoomObject(attacker.area, attacker.roomid), skillProfile);
 	}
 }
 
@@ -542,7 +568,7 @@ Combat.prototype.createSkillProfile = function(skillUser, skillObj, mods) {
 	}
 
 	return {
-		refId: skillUser,
+		refId: skillUser.refId,
 		defenderMods: mods.attackerMods,
 		attackerMods: mods.defenderMods,
 		msgToAttacker: '',

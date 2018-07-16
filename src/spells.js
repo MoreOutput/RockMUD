@@ -7,44 +7,39 @@ Spell = function() {};
 *
 * Since these are combat spells they must return a Skill Profile Object
 */
-Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command, fn) {
+Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command) {
 	var intMod,
-	cost = 2,
+	cost = 3,
+	skillOutput = World.combat.createSkillProfile(player, skillObj),
 	damage = 0;
 	
 	if (cost < player.cmana) {
 		intMod = World.dice.getIntMod(player);
 
 		if (World.dice.roll(1, 100) <= skillObj.train) {
-			player.wait += 2;
-			player.cmana -= (cost - intMod);
+			skillOutput.attackerMods.wait += 2;
+			skillOutput.attackerMods.cmana -= (cost - intMod);
 
 			damage = World.dice.roll(player.level / 2 + 1, 20 + intMod + player.mana/20, intMod);
 			damage -= opponent.magicRes;
-			damage -= opponent.ac/2;
 
-			opponent.chp -= damage;
+			skillOutput.defenderMods.chp = -damage;
 
-			World.msgPlayer(player, {
-				msg: 'You cast spark and a series of crackling '
-					+ '<span class="blue">bright blue sparks</span> burn ' + opponent.displayName 
-					+ ' with maiming intensity! (' + damage + ')',
-				noPrompt: true
-			});
+			skillOutput.msgToAttacker = 'You cast spark and a series of crackling '
+				+ '<span class="blue">bright blue sparks</span> burn ' + opponent.displayName 
+				+ ' with maiming intensity! (' + damage + ')';
 
-			World.msgPlayer(opponent, {
-				msg: player.displayName + ' casts  spark and burns you ' 
-					+ opponent.displayName + ' with maiming intensity! (' + damage + ')'
-			});
+			skillOutput.msgToDefender = player.displayName + ' casts spark and burns you '
+				+ opponent.displayName + ' with maiming intensity! (' + damage + ')';
+
+			World.combat.processSkill(player, opponent, skillOutput);
 		} else {
 			// spell failed
-			World.msgPlayer(player, {
-				msg: 'You try to channel the spell but only get '
-					+ '<span class="blue">sparks and a series of crackling sounds!</span>',
-			});
-		}
+			skillOutput.msgToAttacker = 'You try to channel the spell but only get '
+					+ '<span class="blue">sparks and a series of crackling sounds!</span>';
 
-		return fn(player, opponent, roomObj, command);
+			World.combat.processSkill(player, opponent, skillOutput);
+		}
 	} else {
 		World.msgPlayer(player, {
 			msg: 'You dont have enough mana to cast spark!',

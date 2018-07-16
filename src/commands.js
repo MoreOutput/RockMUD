@@ -1973,6 +1973,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 	mob,
 	skillObj,
 	roomObj,
+	skillProfile,
 	spellTarget;
 
 	if (command.roomObj) {
@@ -1998,51 +1999,39 @@ Cmd.prototype.cast = function(player, command, fn) {
 			if (skillObj && skillObj.id in World.spells) {
 				if (player.cmana > 0) {
 					if (player.position === 'standing' || player.position === 'fighting') {
-						if (!command.input) {
-							if (skillObj.type.indexOf('passive') === -1) {
-								if (player.opponent) {
-									spellTarget = player.opponent;
+						if (skillObj.type.indexOf('passive') === -1) {
+							// combat skills
+							if (player.opponent) {
+								skillProfile = World.spells[skillObj.id](skillObj, player, player.opponent, roomObj, command);
 
-									return World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command, function() {
-										if (!player.opponent && player.position === 'standing') {
-											cmd.kill(player, command, fn);
-										}
+								World.processEvents('onSpell', player, roomObj, skillObj);
+								World.processEvents('onSpell', player.items, roomObj, skillObj);
+								World.processEvents('onSpell', roomObj, player, skillObj);
+							} else {
+								spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg});
 
-										World.processEvents('onSpell', player, roomObj, skillObj);
-										World.processEvents('onSpell', player.items, roomObj, skillObj);
-										World.processEvents('onSpell', roomObj, player, skillObj);
-									});
+								if (spellTarget) {
+									skillProfile = World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command);
 								} else {
 									World.msgPlayer(player, {
 										msg: 'You need to specify a target!'
 									});
 								}
-							} else {
-								return World.spells[skillObj.id](skillObj, player, player, roomObj, command, function() {
-									World.processEvents('onSpell', player, roomObj, skillObj);
-									World.processEvents('onSpell', player.items, roomObj, skillObj);
-									World.processEvents('onSpell', roomObj, player, skillObj);
-								});
 							}
 						} else {
-							if (command.last === 'self' || command.last === 'me' || (skillObj.type.indexOf('passive') !== -1 && command.last === skillObj.display)) {
+							// passive skills
+							if (command.last === 'self' || command.last === 'me' || (command.last === skillObj.display)) {
 								spellTarget = player;
 							} else {
 								spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg});
 							}
 
 							if (spellTarget) {
-								return World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command, function() {
-									if (!player.opponent && player.position !== 'fighting' && skillObj.type.indexOf('passive') === -1) {
-										command.target = spellTarget;
+								World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command);
 
-										cmd.kill(player, command, fn);
-									}
-
-									World.processEvents('onSpell', player, roomObj, skillObj);
-									World.processEvents('onSpell', player.items, roomObj, skillObj);
-									World.processEvents('onSpell', roomObj, player, skillObj);
-								});
+								World.processEvents('onSpell', player, roomObj, skillObj);
+								World.processEvents('onSpell', player.items, roomObj, skillObj);
+								World.processEvents('onSpell', roomObj, player, skillObj);d.processEvents('onSpell', roomObj, player, skillObj);
 							} else {
 								World.msgPlayer(player, {
 									msg: 'You do not see anything by that name here.',
@@ -2082,7 +2071,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 };
 
 // We pass in a Skill Profile Object (the output of a skill) when we start combat with a combat skill
-Cmd.prototype.kill = function(player, command, skillProfile) {
+Cmd.prototype.kill = function(player, command) {
 	var roomObj,
 	i = 0,
 	opponent;
@@ -2125,7 +2114,7 @@ Cmd.prototype.kill = function(player, command, skillProfile) {
 					playerName: player.name
 				});
 
-			World.combat.processFight(player, opponent, roomObj);
+				World.combat.processFight(player, opponent, roomObj);
 			} else {
 				World.msgPlayer(player, {
 					msg: 'There is nothing by that name here.',
