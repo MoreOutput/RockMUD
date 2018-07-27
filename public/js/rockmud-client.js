@@ -66,7 +66,8 @@ window.onload = function() {
 		dr: 'drop',
 		j: 'quests',
 		ql: 'quests',
-		quest: 'quests'
+		quest: 'quests',
+		ww: 'whirlwind'
 	},
 	isScrolledToBottom = false,
 	playerIsLogged = null,

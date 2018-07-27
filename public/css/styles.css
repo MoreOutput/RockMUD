@@ -7,7 +7,7 @@ yellow: #ffcc00;
 html, body {
 background-color: #000;
 color: #fff;
-font-size: .9em;
+font-size: .85em;
 padding: 0;
 margin: 0;
 height: 100%;
@@ -37,7 +37,7 @@ margin-top: 0;
 font-size: 145%;
 }
 #mudwrapper {
-padding-top: 280px;
+padding-top: 265px;
 height: 850px;
 width: 980px;
 margin: 0 auto;
@@ -82,8 +82,7 @@ opacity: 0.75;
 }
 .opening-title {
 font-size: 3em;
-text-shadow: 2px 2px #ff0033;
-color: #fff;
+color: #ff0033;
 }
 .score {
 margin-bottom: .25em;
@@ -148,6 +147,9 @@ color: #ff0033;
 padding: .8em 0 0 0;
 margin: .5em 0 1em 0;
 font-weight: bold;
+}
+.cprompt {
+padding-bottom: .5em;
 }
 .room .room-title {
 color: #ffcc00;

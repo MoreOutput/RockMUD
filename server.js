@@ -52,6 +52,10 @@ server = http.createServer(function (req, res) {
 			res.write(data);
 			res.end();
 		});
+	} else if (req.url === '/favicon.ico') {
+		res.writeHead(200);
+		res.write('');
+		res.end();
 	}
 }),
 World = require('./src/world'),
@@ -124,10 +128,11 @@ World.setup(io, cfg, function() {
 					onlyPrompt: true
 				});
 			}
-		};
+		},
+		charNameStr = 'Character Name: ';
 
 		World.msgPlayer(s, {
-			msg : 'Enter your name:',
+			msg : charNameStr,
 			evt: 'reqInitialLogin',
 			styleClass: 'enter-name',
 			noPrompt: true
@@ -172,7 +177,7 @@ World.setup(io, cfg, function() {
 					});
 				} else {
 					World.msgPlayer(s, {
-						msg : 'Enter your name:',
+						msg : charNameStr,
 						noPrompt: true,
 						styleClass: 'enter-name'
 					});

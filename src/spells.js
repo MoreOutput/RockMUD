@@ -26,11 +26,11 @@ Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command) {
 			skillOutput.defenderMods.chp = -damage;
 
 			skillOutput.msgToAttacker = 'You cast spark and a series of crackling '
-				+ '<span class="blue">bright blue sparks</span> burn ' + opponent.displayName 
-				+ ' with maiming intensity! (' + damage + ')';
+				+ '<span class="blue">bright blue bolts</span> burn <span class="grey">' + opponent.short
+				+ '</span> with maiming intensity! (' + damage + ')';
 
-			skillOutput.msgToDefender = player.displayName + ' casts spark and burns you '
-				+ opponent.displayName + ' with maiming intensity! (' + damage + ')';
+			skillOutput.msgToDefender = player.displayName + ' casts spark and burns you with'
+				+ ' maiming intensity! (' + damage + ')';
 
 			World.combat.processSkill(player, opponent, skillOutput);
 		} else {

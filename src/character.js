@@ -73,7 +73,7 @@ Character.prototype.login = function(r, s, fn) {
 			});
 		} else {
 			return World.msgPlayer(s, {
-				msg : '<b>Invalid Entry</b>. Enter your name:',
+				msg : '<b>Invalid Entry</b>. Name: ',
 				styleClass: 'enter-name',
 				noPrompt: true
 			});
@@ -265,7 +265,7 @@ Character.prototype.create = function(s) {
 			s.player.created = new Date();
 			s.player.saved = null;
 			s.player.role = 'player';
-			s.player.area = 'Midgaard';
+			s.player.area = 'midgaard';
 			s.player.roomid = '1';
 			s.player.trains += 25;
 			s.player.deaths = 0;

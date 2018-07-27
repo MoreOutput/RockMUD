@@ -166,6 +166,25 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 				}
 			});
 		});
+	},
+	loadCommands = function(fn) {
+		var path = './src/commands/';
+
+		fs.readdir(path, function(err, fileNames) {
+			if (!err && fileNames.length > 1) {
+				fileNames.forEach(function(fileName, i) {
+					if (fileName !== 'commands.js') {
+						world.commands[fileName.replace('.js', '')] = require('.' + path + fileName);
+
+						if (i === fileNames.length - 1) {
+							return fn(err);
+						}
+					}
+				});
+			} else {
+				return fn(err);
+			}
+		});
 	};
 
 	world.races = []; // Race JSON definition is in memory
@@ -191,7 +210,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	// without a driver player data is saved as a flat file to the players folder
 	world.playerDriver = null;
 	world.character = require('./character');
-	world.commands = require('./commands');
+	world.commands = require('./commands/commands');
 	world.skills = require('./skills');
 	world.spells = require('./spells');
 	world.room = require('./rooms');
@@ -211,57 +230,59 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 		}
 	}
 
-	loadAreas(function(areas) {
-		loadTime(function(err, time) {
-			loadRaces(function(err, races) {
-				loadClasses(function(err, classes) {
-					loadTemplates(function(err, templates) {
-						loadAI(function() {
-							var area,
-							i = 0,
-							j = 0;
+	loadCommands(function(err) {
+		loadAreas(function(areas) {
+			loadTime(function(err, time) {
+				loadRaces(function(err, races) {
+					loadClasses(function(err, classes) {
+						loadTemplates(function(err, templates) {
+							loadAI(function() {
+								var area,
+								i = 0,
+								j = 0;
 
-							fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
-								if (err) {
-									throw err;
-								}
-
-								world.motd = '<div class="motd">' + html + '</div>';
-							});
-
-							world.areas = areas;
-							world.time = time;
-							world.races = races;
-							world.classes = classes;
-							world.templates = templates;
-
-							for (i; i < world.areas.length; i += 1) {
-								world.extend(world.areas[i], world.areaTemplate, function(err, area) {
-									if (area.quests && area.quests.length) {
-										world.quests = world.quests.concat(area.quests);
+								fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
+									if (err) {
+										throw err;
 									}
 
-									world.setupArea(area, function(err, area) {
-										area.extended = true;
-
-										if (i === world.areas.length - 1) {
-											i = 0;
-
-											for (i; i < world.areas.length; i += 1) {
-												if (world.areas[i].afterLoad && !world.areas[i].preventAfterLoad) {
-													world.areas[i].afterLoad();
-												}
-											}
-
-											if (world.config.preventTicks === false) {
-												world.ticks = require('./ticks');
-											}
-
-											return fn();
-										}
-									});
+									world.motd = '<div class="motd">' + html + '</div>';
 								});
-							}
+
+								world.areas = areas;
+								world.time = time;
+								world.races = races;
+								world.classes = classes;
+								world.templates = templates;
+
+								for (i; i < world.areas.length; i += 1) {
+									world.extend(world.areas[i], world.areaTemplate, function(err, area) {
+										if (area.quests && area.quests.length) {
+											world.quests = world.quests.concat(area.quests);
+										}
+
+										world.setupArea(area, function(err, area) {
+											area.extended = true;
+
+											if (i === world.areas.length - 1) {
+												i = 0;
+
+												for (i; i < world.areas.length; i += 1) {
+													if (world.areas[i].afterLoad && !world.areas[i].preventAfterLoad) {
+														world.areas[i].afterLoad();
+													}
+												}
+
+												if (world.config.preventTicks === false) {
+													world.ticks = require('./ticks');
+												}
+
+												return fn();
+											}
+										});
+									});
+								}
+							});
 						});
 					});
 				});

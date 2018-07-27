@@ -138,7 +138,7 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 			opponent = World.room.getMonster(roomObj, command);
 		}
 
-		skillOutput.winMsg = '<span class="red">You smash into ' + opponent.short + ' and they splatter into a thousand different pieces!</span> ';
+		skillOutput.winMsg = '<span class="red">You smash into ' + opponent.short + ' and they splatter into a thousand different pieces!</span>';
 
 		if (opponent) {
 			shieldArr = World.character.getSlotsWithShields(player);
@@ -198,6 +198,13 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 	}
 };
 
+/*
+* Melee area attack
+* Has a chance to miss some targets, based on train
+* Begins combat with all targets
+* 
+* Combat skills must output a Skill Profile Object
+*/
 Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 	var weaponSlots,
 	i = 0,
@@ -207,78 +214,55 @@ Skill.prototype.whirlwind = function(skillObj, player, roomObj, command) {
 	shield,
 	opponent,
 	noPrompt = false,
+	skillOutput,
 	rollDamage = function(opponent) {
 		var oppDexMod = World.dice.getDexMod(opponent);
 
 		if (opponent.mainStat && opponent.mainStat === 'dex' || World.dice.roll(1, 20) <= 2) {
-			return World.dice.roll(player.diceNum + 1, player.diceSides + player.size.value, strMod + player.size.value) 
+			return World.dice.roll(player.diceNum + 1, player.diceSides + player.size.value, strMod + player.size.value)
 				* (Math.round(player.level/2) + 1) - opponent.ac;
 		} else {
-			return World.dice.roll(player.diceNum + 1, player.diceSides + player.size.value, strMod + player.size.value) 
+			return World.dice.roll(player.diceNum + 1, player.diceSides + player.size.value, strMod + player.size.value)
 				* (Math.round(player.level/2) + 1) - (opponent.ac + oppDexMod);
 		}
 	};
 
 	if (roomObj.monsters.length) {
 		if (player.position === 'standing' || player.position === 'fighting') {
+			skillOutput = World.combat.createSkillProfile(player, skillObj);
+
 			if (World.dice.roll(1, 100) <= skillObj.train) {
-				if (player.position === 'standing') {
-					noPrompt = true;
-				}
-
-
-				World.msgPlayer(player, {
-					msg: 'You spin around the room slashing at everything!',
-					styleClass: 'green',
-					noPrompt: noPrompt
-				});
-
-				World.msgRoom(roomObj, {
-					msg: player.displayName + ' spins around the room slashing at everyone!',
-					styleClass: 'red',
-					playerName: player.name
-				});
-
-				player.cmv -= World.dice.roll(1, 12);
-
 				for (i; i < roomObj.monsters.length; i += 1) {
 					opponent = roomObj.monsters[i];
 
-					damage = rollDamage(opponent);
+					damage = rollDamage(opponent)
 
-					opponent.chp -= damage;
+					skillOutput = World.combat.createSkillProfile(player, skillObj);
+					skillOutput.defenderMods.chp = -1;
+					skillOutput.winMsg = '<span class="red">Won with Whirlwind!</span>';
+					skillOutput.msgToAttacker = 'You spin around the room slashing at everything! (' + damage + ')';
+					skillOutput.msgToRoom = player.displayName + ' spins around the room slashing at everyone!';
+					skillOutput.attackerMods.wait += 2;
 
-					if (!player.opponent || opponent.refId !== player.opponent.refId) {
-						World.combat.processFight(player, opponent, roomObj);
-					}
-				}
+					World.combat.processSkill(player, opponent, skillOutput);
 
-				if (player.mainStat === 'str') {
-					player.wait += 3;
-				} else {
-					player.wait += 4;
+					//skillOutput = World.combat.createSkillProfile(player, skillObj);
 				}
 			} else {
+				skillOutput.attackerMods.wait += 2;
+
 				World.msgPlayer(player, {
 					msg: 'You begin to turn and stumble. Your whirlwind attempt fails!',
 					styleClass: 'error',
 					noPrompt: noPrompt
 				});
-
-				if (!player.opponent || opponent.refId !== player.opponent.refId) {
-					World.combat.processFight(player, opponent, roomObj);
-				}
-
-				if (playerMods.dexMod > 18 || skillObj.train === 100) {
-					player.wait += 3;
-				} else {
-					player.wait += 4;
-				}
 			}
 		}
 	} else {
+		skillOutput.attackerMods.wait += 2;
+
 		World.msgPlayer(player, {
-			msg: 'No one in the room!',
+			msg: 'You spin around like an idiot. There is no one here.',
 			styleClass: 'error'
 		});
 	}

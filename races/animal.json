@@ -7,5 +7,6 @@
 	"ac": 0,
 	"meleeRes": 0,
 	"handsNoun": "claw",
-	"minStat": 2
+	"minStat": 2,
+	"damroll": -2
 }

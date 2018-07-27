@@ -8,7 +8,7 @@
 'use strict';
 var fs = require('fs'),
 util = require('util'),
-World = require('./world'),
+World = require('../world'),
 players = World.players,
 time = World.time,
 areas = World.areas,
@@ -3254,18 +3254,6 @@ Cmd.prototype.help = function(target, command) {
 			World.msgPlayer(target, {msg: 'No help file found.', noPrompt: command.noPrompt, styleClass: 'error' });
 		}
 	});
-};
-
-Cmd.prototype.xyzzy = function(target, command) {
-	var roomObj
-
-	if (target.position !== 'sleeping') {
-		roomObj = World.getRoomObject(target.area, target.roomid);
-
-		World.msgPlayer(target, {msg: 'Nothing happens. Why would it?', styleClass: 'error' });
-	} else {
-		World.msgPlayer(target, {msg: 'You dream of powerful forces.', styleClass: 'error' });
-	}
 };
 
 /**********************************************************************************************************

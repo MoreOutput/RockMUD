@@ -151,7 +151,7 @@ module.exports = {
 						short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a tan boar'],
 						long: [
 							'A boar with a number of scars on its side is here',
-							'A dark brown boar',
+							'A dark brown boar is here',
 							'A large brown boar is here'
 						],
 						inName: 'A boar',

@@ -155,8 +155,8 @@ setInterval(function() {
 		for (i; i < World.players.length; i += 1) {
 			player = World.players[i];
 
-			if (player.position === 'sleeping' || 
-				player.position === 'resting' || 
+			if (player.position === 'sleeping' ||
+				player.position === 'resting' ||
 				player.position === 'standing') {
 				if (player.wait > 0) {
 					player.wait -= 1;
@@ -423,9 +423,10 @@ setInterval(function() {
 	}
 }, 250);
 
-// Combat Ticks and random player save
+// Combat loop
 setInterval(function() {
 	var i = 0,
+	battles = [],
 	battle;
 
 	if (World.battleLock === 0 && World.battles.length) {
@@ -433,22 +434,10 @@ setInterval(function() {
 
 		for (i; i < World.battles.length; i += 1) {
 			battle = World.battles[i];
+			battles = World.combat.getBattlesByRefId(battle.attacker.refId);
 
-			battle.round += 1;
-
-			World.combat.round(battle);
-
-			if (battle.attacker.wait > 0) {
-				battle.attacker.wait -= 1;
-			} else {
-				battle.attacker.wait = 0;
-			}
-
-			if (battle.defender.wait > 0) {
-				battle.defender.wait -= 1;
-			} else {
-				battle.defender.wait = 0;
-			}
+			console.log(battles.length, World.battles.length);
+			World.combat.round(battles);
 		}
 
 		if (World.battleLock > 0) {
@@ -457,7 +446,7 @@ setInterval(function() {
 			World.battleLock = 0;
 		}
 	}
-}, 1700);
+}, 1850);
 
 setInterval(function() {
 	var i = 0,
