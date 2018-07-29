@@ -59,7 +59,7 @@
 	"area": "",
 	"originatingArea": "",
 	"roomid": "1",
-	"recall": {"roomid": "1", "area": "Midgaard"},
+	"recall": {"roomid": "1", "area": "midgaard"},
 	"description": "",
 	"reply": "",
 	"following": false,

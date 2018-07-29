@@ -1114,45 +1114,86 @@ Cmd.prototype.recall = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	if (!command.msg && target.recall.roomid && target.recall.area) {
-		if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
-			targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
+	if (target.position === 'fighting') { 
+		if (!command.msg && target.recall.roomid && target.recall.area) {
+			if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
+				targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
 
-			if (targetRoom) {
-				target.area = target.recall.area;
-				target.roomid = target.recall.roomid;
+				if (targetRoom) {
+					target.area = target.recall.area;
+					target.roomid = target.recall.roomid;
 
-				if (target.isPlayer) {
-					World.room.removePlayer(roomObj, target);
+					if (target.isPlayer) {
+						World.room.removePlayer(roomObj, target);
 
-					targetRoom.playersInRoom.push(target);
+						targetRoom.playersInRoom.push(target);
 
-					this.look(target, {roomObj: targetRoom});
-				} else {
-					World.room.removeMob(roomObj, target);
+						this.look(target, {roomObj: targetRoom});
+					} else {
+						World.room.removeMob(roomObj, target);
 
-					targetRoom.monsters.push(target);
+						targetRoom.monsters.push(target);
+					}
+
+					World.msgPlayer(target, {
+						msg: '<strong>You have recalled to ' + target.recall.area  + '!</strong>',
+						styleClass: 'green'
+					});
 				}
-
+			} else {
 				World.msgPlayer(target, {
-					msg: '<strong>You have recalled to ' + target.recall.area  + '!</strong>',
-					styleClass: 'green'
+					msg: '<strong>You are already there!</strong>',
+					styleClass: 'error'
 				});
 			}
-		} else {
+		} else if (command.msg && command.arg === 'set' && !targetRoom.preventRecall) {
+			target.recall.area = roomObj.area;
+			target.recall.roomid = roomObj.id;
+
 			World.msgPlayer(target, {
-				msg: '<strong>You are already there!</strong>',
-				styleClass: 'error'
+				msg: 'You will now recall to the current room!',
+				styleClass: 'green'
+			});
+		}		if (!command.msg && target.recall.roomid && target.recall.area) {
+			if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
+				targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
+
+				if (targetRoom) {
+					target.area = target.recall.area;
+					target.roomid = target.recall.roomid;
+
+					if (target.isPlayer) {
+						World.room.removePlayer(roomObj, target);
+
+						targetRoom.playersInRoom.push(target);
+
+						this.look(target, {roomObj: targetRoom});
+					} else {
+						World.room.removeMob(roomObj, target);
+
+						targetRoom.monsters.push(target);
+					}
+
+					World.msgPlayer(target, {
+						msg: '<strong>You have recalled to ' + target.recall.area  + '!</strong>',
+						styleClass: 'green'
+					});
+				}
+			} else {
+				World.msgPlayer(target, {
+					msg: '<strong>You are already there!</strong>',
+					styleClass: 'error'
+				});
+			}
+		} else if (command.msg && command.arg === 'set' && !targetRoom.preventRecall) {
+			target.recall.area = roomObj.area;
+			target.recall.roomid = roomObj.id;
+
+			World.msgPlayer(target, {
+				msg: 'You will now recall to the current room!',
+				styleClass: 'green'
 			});
 		}
-	} else if (command.msg && command.arg === 'set' && !targetRoom.preventRecall) {
-		target.recall.area = roomObj.area;
-		target.recall.roomid = roomObj.id;
-
-		World.msgPlayer(target, {
-			msg: 'You will now recall to the current room!',
-			styleClass: 'green'
-		});
 	}
 };
 

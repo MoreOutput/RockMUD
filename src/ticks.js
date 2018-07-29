@@ -426,25 +426,37 @@ setInterval(function() {
 // Combat loop
 setInterval(function() {
 	var i = 0,
+	j = 0,
 	battles = [],
+	uniqueMap = {},
 	battle;
+
+	console.log(World.battleLock, World.battles.length);
 
 	if (World.battleLock === 0 && World.battles.length) {
 		World.battleLock = World.battles.length;
 
 		for (i; i < World.battles.length; i += 1) {
 			battle = World.battles[i];
-			battles = World.combat.getBattlesByRefId(battle.attacker.refId);
+			
+			if (!uniqueMap[battle.id]) {
+				battles = World.combat.getBattlesByRefId(battle.attacker.refId);
 
-			console.log(battles.length, World.battles.length);
-			World.combat.round(battles);
+				for (j; j < battles.length; j += 1) {
+					uniqueMap[battles[j].id] = true;
+				}
+
+				console.log('Triggering!');
+
+				World.combat.round(battles);
+			}
+
+			
+			if (World.battleLock > 0) {
+				World.battleLock -= 1;
+			}
 		}
 
-		if (World.battleLock > 0) {
-			World.battleLock -= 1;
-		} else {
-			World.battleLock = 0;
-		}
 	}
 }, 1850);
 

@@ -1,5 +1,5 @@
 'use strict';
-var World = require('./world'),
+var World = require('../world'),
 Spell = function() {};
 
 /*
