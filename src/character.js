@@ -479,44 +479,30 @@ Character.prototype.newCharacter = function(s, command) {
 };
 
 Character.prototype.save = function(player, fn) {
-	var character = this,
-	socket = player.socket,
-	followers = player.followers,
-	group = player.group,
-	opponent = player.opponent,
-	area = World.getArea(player.area),
-	room = World.getRoomObject(player.area, player.roomid),
-	following = player.following;
+	var objToSave;
+	
+	
+	if (player.isPlayer) {
+		objToSave = Object.assign({}, player);
+		
+		objToSave.following = '';
+		objToSave.group = [];
+		objToSave.followers = [];
+		objToSave.opponent = false;
+		objToSave.fighting = false;
+		objToSave.socket = null;
+		objToSave.saved = new Date().toString();
 
-	if (player.isPlayer && area) {
-		player.saved = new Date().toString();
+		objToSave = World.sanitizeBehaviors(objToSave);
 
-		player.opponent = false;
-		player.fighting = false;
-		player.following = false;
-		player.group = [];
-		player.followers = [];
-		player.socket = null;
-
-		player = World.sanitizeBehaviors(player);
-
-		character.write(player.name.toLowerCase(), player, function (err) {
-			player.socket = socket;
-
-			player = World.setupBehaviors(player, area, room, function(err, player) {
-				player.opponent = opponent;
-				player.following = following;
-				player.followers = followers;
-				player.group = group;
-
-				if (err) {
-					return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
-				} else {
-					if (fn) {
-						return fn(player);
-					}
+		this.write(player.name.toLowerCase(), objToSave, function (err) {
+			if (err) {
+				return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
+			} else {
+				if (fn) {
+					return fn(player);
 				}
-			});
+			}
 		});
 	}
 };

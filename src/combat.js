@@ -70,6 +70,8 @@ Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfi
 	battle.attackerSkill = skillProfile;
 
 	// immediately go into the first round, this is the same function called on a timer found in ticks.js
+	//World.combat.round([battle]);
+
 	World.battles.push(battle);
 };
 
@@ -139,7 +141,7 @@ Combat.prototype.round = function(battleObjArr, skillProfile) {
 
 							if (opponent.opponent.chp > 0) {
 								oppStatus = World.character.getStatusReport(opponent);
-
+								console.log('status', opponent.name, oppStatus);
 								playerStatus = World.character.getStatusReport(player);
 
 								if (player.isPlayer) {
@@ -246,9 +248,9 @@ Combat.prototype.round = function(battleObjArr, skillProfile) {
 					}
 				});
 			} else {
-				console.log('test2')
-
 				preventPrompt = true;
+
+				console.log('test 2')
 
 				World.addCommand({
 					cmd: 'alert',
@@ -634,10 +636,6 @@ Combat.prototype.processEndOfCombat = function(battleObj, skillProfile) {
 	// if not the battle object should be removed
 	combat.removeBattle(battleObj);
 
-	console.log('removed');
-
-	return true;
-
 	if (battleObj.attacker.chp > 0) {
 		winner = battleObj.attacker;
 		loser = battleObj.defender;
@@ -659,9 +657,6 @@ Combat.prototype.processEndOfCombat = function(battleObj, skillProfile) {
 	World.processEvents('onVictory', winner, roomObj, loser);
 
 	corpse = World.character.createCorpse(loser);
-
-	console.log('winner', winner.name, winner.chp)
-	console.log('loser', loser.name, loser.chp)
 
 	if (!loser.isPlayer) {
 		World.room.removeMob(roomObj, loser);
@@ -735,6 +730,7 @@ Combat.prototype.processEndOfCombat = function(battleObj, skillProfile) {
 
 		World.character.level(winner);
 	} else {
+		console.log("********ADDING**************");
 		World.addCommand({
 			cmd: 'alert',
 			msg: endOfCombatMsg,
@@ -743,8 +739,6 @@ Combat.prototype.processEndOfCombat = function(battleObj, skillProfile) {
 
 		World.character.save(winner);
 	}
-
-	console.log('*****************TOTAL END***********************');
 };
 
 Combat.prototype.getBattleByRefIds = function(attackerRefId, defenderRefId) {

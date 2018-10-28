@@ -431,8 +431,6 @@ setInterval(function() {
 	uniqueMap = {},
 	battle;
 
-	console.log(World.battleLock, World.battles.length);
-
 	if (World.battleLock === 0 && World.battles.length) {
 		World.battleLock = World.battles.length;
 
@@ -446,12 +444,10 @@ setInterval(function() {
 					uniqueMap[battles[j].id] = true;
 				}
 
-				console.log('Triggering!');
-
 				World.combat.round(battles);
 			}
 
-			
+			console.log(World.battleLock);
 			if (World.battleLock > 0) {
 				World.battleLock -= 1;
 			}

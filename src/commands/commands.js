@@ -1114,7 +1114,7 @@ Cmd.prototype.recall = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	if (target.position === 'fighting') { 
+	if (target.position !== 'fighting') {
 		if (!command.msg && target.recall.roomid && target.recall.area) {
 			if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
 				targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);

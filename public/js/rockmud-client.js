@@ -1,6 +1,6 @@
 window.onload = function() {
 	'use strict';
-	var ws = new WebSocket("ws://localhost:3001"),
+	var ws = new WebSocket('ws://localhost:3001'),
 	terminal = document.getElementById('terminal'),
 	node = document.getElementById('cmd'),
 	rowCnt = 0,
@@ -213,7 +213,7 @@ window.onload = function() {
 
 	node.focus();
 
-	ws.addEventListener("message", function(r) {
+	ws.addEventListener('message', function(r) {
 		r = JSON.parse(r.data);
 
 		display(r, true);
