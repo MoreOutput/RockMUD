@@ -20,7 +20,8 @@ Character = function () {
 		{msg: ' is barely wounded.', percentage: 80},
 		{msg: ' is in great shape.', percentage: 90},
 		{msg: ' still seems in perfect health!', percentage: 95},
-		{msg: ' is in <span class="green">perfect health</span>!', percentage: 100}
+		{msg: ' is in <span class="green">perfect health</span>!', percentage: 100},
+		{msg: ' is in <span class="green">amazing health</span>!', percentage: 200}
 	];
 };
 
@@ -480,30 +481,37 @@ Character.prototype.newCharacter = function(s, command) {
 
 Character.prototype.save = function(player, fn) {
 	var objToSave;
-	
-	
-	if (player.isPlayer) {
+
+
+	if (player.isPlayer && !player.fighting) {
 		objToSave = Object.assign({}, player);
-		
+
 		objToSave.following = '';
 		objToSave.group = [];
 		objToSave.followers = [];
-		objToSave.opponent = false;
 		objToSave.fighting = false;
 		objToSave.socket = null;
 		objToSave.saved = new Date().toString();
 
 		objToSave = World.sanitizeBehaviors(objToSave);
 
-		this.write(player.name.toLowerCase(), objToSave, function (err) {
-			if (err) {
-				return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
-			} else {
-				if (fn) {
-					return fn(player);
+		if (Object.keys(objToSave).length) {
+			this.write(player.name.toLowerCase(), objToSave, function(err) {
+				if (err) {
+					return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
+				} else {
+					if (fn) {
+						return fn(player);
+					}
 				}
+			});
+		} {
+			console.log('Error cleaning object for saving!');
+
+			if (fn) {
+				return fn(player);
 			}
-		});
+		}
 	}
 };
 
@@ -1254,7 +1262,8 @@ Character.prototype.getEmptyWeaponSlot = function(target) {
 };
 
 Character.prototype.getStatusReport = function(player) {
-	var i = 0;
+	var i = 0,
+	percentageOfPlayerHp =  ((player.chp/player.hp) * 100);
 
 	for (i; i < this.statusReport.length; i += 1) {
 		if (this.statusReport[i].percentage >= ((player.chp/player.hp) * 100) ) {

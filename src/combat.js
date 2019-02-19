@@ -14,191 +14,222 @@ Combat = function() {
 	this.abstractNouns = ['intensity', 'force', 'strength', 'power', 'might', 'effort', 'energy'];
 };
 
-Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfile) {
+Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfile, battle) {
 	var combat = this,
 	battle,
 	i = 0;
 
-	// setup the attackers position and fight requirements -- attaching opoonent and changing position
-	if (!attacker.opponent) {
-		attacker.opponent = defender;
+	if (!battle) {
+		battle = combat.createBattleObject(attacker, defender, roomObj);
 	}
 
 	// if a player is not currently fighting and is without an attached opponent we assume we can create a Battle Object
 	// Battle Objects are put into the World battle queue and processed on a timer
 	// the timer is defined in ticks.js and basically just hands the object over to the Combat.round() function
-	battle = combat.createBattleObject(attacker, defender, roomObj);
 
 	attacker.fighting = true;
+	defender.fighting = true;
 
-	attacker.position = 'fighting';
+	battle.skills[attacker.refId] = {};
+	battle.skills[attacker.refId][defender.refId] = skillProfile;
 
 	// this puts the attackers group into the fight by outlining new Battle Objects
 	// note that they run through this same function and therefore they will not switch targets if they're currently
 	// in the middle of a fight
 	if (attacker.group.length) {
-		battle.attackerInGroup = true;
-
 		for (i; i < attacker.group.length; i += 1) {
-			if (!attacker.group[i].opponent) {
-				battle.processFight(attacker.group[i], defender, roomObj);
+			if (!attacker.group[i].fighting && attacker.group[i].position === 'standing' && attacker.group[i].chp > 0) {
+
 			}
 		}
-	}
-
-	// setup the defenders position and fight requirements -- attaching opoonent and changing position
-	if (!defender.opponent) {
-		defender.opponent = attacker;
-
-		defender.fighting = true;
-
-		defender.position = 'fighting';
 	}
 
 	if (defender.group.length) {
 		i = 0;
 
-		battle.opponentInGroup = true;
-
 		for (i; i < defender.group.length; i += 1) {
-			if (!defender.group[i].opponent) {
-				battle.processFight(defender.group[i], attacker, roomObj);
+			if (!defender.group[i].fighting && defender.group[i].position === 'standing' && defender.group[i].chp > 0) {
+
 			}
 		}
 	}
 
-	battle.attackerSkill = skillProfile;
-
-	// immediately go into the first round, this is the same function called on a timer found in ticks.js
-	//World.combat.round([battle]);
+	this.round(battle, skillProfile);
 
 	World.battles.push(battle);
 };
 
 Combat.prototype.createBattleObject = function(attacker, defender, roomObj) {
+	var battlePosition = this.createBattlePosition();
+	battlePosition.attacker = attacker;
+	battlePosition.defender = defender;
+
 	return {
-		attacker: attacker,
-		defender: defender,
-		attackerInGroup: false, // attacker was a member of a group when battle started
-		opponentInGroup: false, // attacker was a member of a group when battle started
 		round: 0,
 		roomObj: roomObj,
-		attackerSkill: false,
-		defenderSkill: false,
-		id: attacker.refId + defender.refId,
-		mods: {}
-	}
+		positions: {
+			0: battlePosition
+		},
+		skills: {},
+		attacked: [] // refid listing of entities in this battle who've attacked this round
+	};
 };
+
+Combat.prototype.createBattlePosition = function() {
+	return {
+		attacker: null,
+		defender: null
+	};
+}
+
+Combat.prototype.getNextBattlePosition = function(battle) {
+	return Object.keys(battle.positions).length;
+}
 
 // if a round results in an opponents hp falling to zero, then combat is resolved.
 // when that happens all Battle Objects containing the loser must be removed
-Combat.prototype.round = function(battleObjArr, skillProfile) {
+Combat.prototype.round = function(battle, skillProfile) {
 	var combat = this,
 	i = 0,
 	battleObj,
 	attacker,
 	defender,
-	roomObj = battleObjArr[0].roomObj,
+	numOfPositions = Object.keys(battle.positions).length,
+	roomObj = battle.roomObj,
 	preventPrompt = false,
-	oppStatus,
-	playerStatus,
+	attackerSkill,
+	defenderSkill,
+	defenderStatus,
+	attackerStatus,
+	prop,
 	msgToAttacker = '',
 	msgToDefender = '';
 
-	for (i; i < battleObjArr.length; i += 1) {
-		battleObj = battleObjArr[i];
-		attacker = battleObjArr[i].attacker;
-		defender = battleObjArr[i].defender;
+	console.log('Number of battle positions: ' + Object.keys(battle.positions).length);
+
+	for (i; i < numOfPositions; i += 1) {
+		battleObj = battle.positions[i];
+		attacker = battleObj.attacker;
+		defender = battleObj.defender;
+
+		console.log('Position ' + i + ' of ' + numOfPositions + ':', attacker.name, defender.name);
 
 		// If the two are in same room we can run the round -- further they both must have HPs
 		// the functions will drop out if these requirements are not met so ending combat must be explictly handled elsewhere
 		// generally this means mid-round -- within the checks found below
 		if (combat.inPhyscialVicinity(attacker, defender) && attacker.chp && defender.chp) {
-			if (battleObj.attackerSkill) {
-				World.character.applyMods(defender, battleObj.attackerSkill.defenderMods);
-				World.character.applyMods(attacker, battleObj.attackerSkill.attackerMods);
+			if (battle.skills[attacker.refId]) {
+				for (prop in battle.skills[attacker.refId]) {
+					var attackerSkills = battle.skills[attacker.refId];
 
-				msgToAttacker += battleObj.attackerSkill.msgToAttacker;
-				msgToDefender += battleObj.attackerSkill.msgToDefender;
+					for (prop in attackerSkills) {
+						console.log(prop);
+
+						var skillTarget = combat.getBattleTargetByRefId(battle, prop);
+
+						World.character.applyMods(defender, attackerSkills[prop].defenderMods);
+						World.character.applyMods(skillTarget, attackerSkills[prop].attackerMods);
+	
+						msgToAttacker += attackerSkills[prop].msgToAttacker;
+						msgToDefender += attackerSkills[prop].msgToDefender;
+	
+					}
+
+					battle.skills[attacker.refId] = {};
+				}
 			}
 
-			if (attacker.opponent.chp > 0) {
-				combat.attack(attacker, attacker.opponent, roomObj, function(player, opponent, roomObj, attackerAttackString, oppDefString, attackerCanSee) {
-					if (opponent.chp > 0) {
+			if (defender.chp > 0) {
+				combat.attack(attacker, defender, battle, function(attacker, defender, roomObj, attackerAttackString, defenderDefString, attackerCanSee) {
+					battle.attacked.push(attacker.refId);
+
+					console.log(attacker.name + ' Finished Attacking in Round ' + battle.round);
+
+					if (defender.chp > 0) {
 						// run defender skills
-						if (battleObj.defenderSkill) {
-							World.character.applyMods(attacker, battleObj.defenderSkill.defenderMods);
-							World.character.applyMods(defender, battleObj.attackerSkill.attackerMods);
+						if (battle.skills[defender.name]) {
+							for (prop in battle.skills[defender.name]) {
+								var skillTarget = combat.getBattleTargetByRefId(battle, prop);
+								var defenderSkill = battle.skills[defender.refId];
 
-							msgToAttacker += battleObj.attackerSkill.msgToAttacker;
-							msgToDefender += battleObj.attackerSkill.msgToDefender;
+								World.character.applyMods(defender, defenderSkill.attackerMods);
+								World.character.applyMods(skillTarget, attackerSkill.attackerMods);
+
+								msgToAttacker += defenderSkill.msgToAttacker;
+								msgToDefender += defenderSkill.msgToDefender;
+							}
 						}
+			
+						combat.attack(defender, attacker, battle, function(defender, attacker, roomObj, defenderAttackString, attackerDefString, defenderCanSee) {
+							battle.attacked.push(defender.refId);
 
-						combat.attack(defender, attacker, roomObj, function(opponent, player, roomObj, oppAttackString, attackerDefString, oppCanSee) {
-							msgToDefender += oppAttackString + oppDefString;
+							msgToDefender += defenderAttackString + defenderDefString;
 
 							msgToAttacker += attackerAttackString + attackerDefString;
 
-							if (opponent.opponent.chp > 0) {
-								oppStatus = World.character.getStatusReport(opponent);
-								console.log('status', opponent.name, oppStatus);
-								playerStatus = World.character.getStatusReport(player);
+							console.log(defender.name + ' Finished Attacking in Round ' + battle.round);
 
-								if (player.isPlayer) {
+							if (attacker.chp > 0) {
+								defenderStatus = World.character.getStatusReport(defender);
+								attackerStatus = World.character.getStatusReport(attacker);
+
+								if (attacker.isPlayer) {
 									if (!World.config.viewHp) {
-										msgToAttacker += '<div class="rnd-status">' + opponent.capitalShort + oppStatus.msg
+										msgToAttacker += '<div class="rnd-status">' + defender.capitalShort + defenderStatus.msg
 										+ '</div>';
 									} else {
-										msgToAttacker += '<div class="rnd-status">' + opponent.capitalShort + oppStatus.msg
-											+ ' (' + opponent.chp + '/' + opponent.hp +')</div>';
+										msgToAttacker += '<div class="rnd-status">(' + defender.level + ') ' + defender.capitalShort + defenderStatus.msg
+											+ ' (' + defender.chp + '/' + defender.hp +')</div>';
 									}
 								}
 
-								if (opponent.isPlayer) {
+								if (defender.isPlayer) {
 									if (!World.config.viewHp) {
-										msgToDefender += '<div class="rnd-status">' + opponent.capitalShort + playerStatus.msg
+										msgToDefender += '<div class="rnd-status">' + attacker.capitalShort + attackerStatus.msg
 											+ '</div>';
 									} else {
-										msgToDefender += '<div class="rnd-status">' + player.capitalShort + playerStatus.msg
+										msgToDefender += '<div class="rnd-status">(' + attacker.level + ') ' + attacker.capitalShort + attackerStatus.msg
 											+ ' (' + player.chp + '/' + player.hp +')</div>';
 									}
 								}
 
-								if (opponent.chp <= 0 || player.chp <= 0) {
+								if (defender.chp <= 0 || attacker.chp <= 0) {
 									preventPrompt = true;
 								}
-
-								battleObj.attackerSkill = false;
-								battleObj.defenderSkill = false;
 								
-								if (opponent.wait) {
-									opponent.wait -= 1;
+								if (defender.wait) {
+									defender.wait -= 1;
 								}
 
-								if (player.wait) {
-									player.wait -= 1;
+								if (attacker.wait) {
+									attacker.wait -= 1;
 								}
 
-								if (i === battleObjArr.length - 1) {
-									battleObj.round += 1;
+								console.log(i, numOfPositions);
 
-									msgToAttacker =  '<div>***** Round ' + battleObj.round + '*****</div>' + msgToAttacker;
+								if (i === numOfPositions - 1) {
+									battle.round += 1;
+
+									msgToAttacker =  '<div>***** Round ' + battle.round + '*****</div>' + msgToAttacker;
 
 									console.log('SENDING');
+
+									battle.attacked = [];
+									battle.skills = {};
 
 									World.addCommand({
 										cmd: 'alert',
 										msg: msgToAttacker,
 										noPrompt: preventPrompt,
 										styleClass: 'player-hit warning'
-									}, player);
+									}, attacker);
 
 									World.addCommand({
 										cmd: 'alert',
 										msg: msgToDefender,
 										noPrompt: preventPrompt,
 										styleClass: 'player-hit warning'
-									}, opponent);
+									}, defender);
 								}
 							} else {
 								World.addCommand({
@@ -206,18 +237,19 @@ Combat.prototype.round = function(battleObjArr, skillProfile) {
 									msg: msgToAttacker,
 									noPrompt: true,
 									styleClass: 'player-hit warning'
-								}, player);
+								}, attacker);
 
 								World.addCommand({
 									cmd: 'alert',
 									msg: msgToDefender,
 									noPrompt: true,
 									styleClass: 'player-hit warning'
-								}, opponent);
+								}, defender);
 
-								console.log('test');
+								battle.attacked = [];
+								battle.skills = {};
 
-								combat.processEndOfCombat(battleObj);
+								combat.processEndOfCombat(battle);
 							}
 						});
 					} else {
@@ -228,21 +260,24 @@ Combat.prototype.round = function(battleObjArr, skillProfile) {
 
 						msgToAttacker = attackerAttackString;
 						msgToAttacker += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to '
-											+ opponent.short + '</strong>!</div>';
+											+ defender.short + '</strong>!</div>';
 
 						World.addCommand({
 							cmd: 'alert',
 							msg: msgToAttacker,
 							noPrompt: preventPrompt,
 							styleClass: 'player-hit warning'
-						}, player);
+						}, attacker);
 
 						World.addCommand({
 							cmd: 'alert',
 							msg: msgToDefender,
 							noPrompt: preventPrompt,
 							styleClass: 'player-hit warning'
-						}, opponent);
+						}, defender);
+
+						battle.attacked = [];
+						battle.skills = {};
 
 						combat.processEndOfCombat(battleObj);
 					}
@@ -266,10 +301,17 @@ Combat.prototype.round = function(battleObjArr, skillProfile) {
 					styleClass: 'player-hit warning'
 				}, defender);
 
+				battle.attacked = [];
+				battle.skills = {};
+
 				this.processEndOfCombat(battleObj, battleObj.attackerSkill);
 			}
 		} else if (defender) {
 			console.log('test3');
+
+			battle.attacked = [];
+			battle.skills = {};
+
 			combat.processEndOfCombat(battleObj, skillProfile);
 		}
 	}
@@ -283,8 +325,48 @@ Combat.prototype.inPhyscialVicinity = function(attacker, defender) {
 	}
 }
 
-Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
+Combat.prototype.getBattleTargetByRefId = function(battle, refId) {
+	var i = 0,
+	j = 0,
+	numOfPositions = 1,
+	battle;
+
+	if (!refId) {
+		refId = battle;
+	}
+
+	if (!battle) {
+		for (i; i < World.battles.length; i += 1) {
+			battle = World.battles[i];
+			numOfPositions = Object.keys(battle.positions).length;
+
+			j = 0;
+
+			for (j; j < numOfPositions; j += 1) {
+				if (battle.positions[j].attacker.refId === refId) {
+					return battle.positions[j].defender;
+				} else if (battle.positions[j].defender === refId) {
+					return battle.positions[j].attacker;
+				}
+			}
+		}
+	} else {
+		numOfPositions = Object.keys(battle.positions).length;
+
+		for (i; i < numOfPositions; i += 1) {
+			if (battle.positions[i].attacker.refId === refId) {
+				return battle.positions[i].defender;
+			} else if (battle.positions[i].defender.refId === refId) {
+				return battle.positions[i].attacker;
+			}
+		}
+	}
+}
+
+
+Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 	var combat = this,
+	roomObj = battle.roomObj,
 	weaponSlots,
 	shieldSlots,
 	weapons,
@@ -313,11 +395,11 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 	attackerCanSee = World.character.canSee(attacker, roomObj),
 	opponentCanSee = World.character.canSee(opponent, roomObj);
 
-	if (attacker.opponent.refId === opponent.refId && attacker.chp && opponent.chp) {
-		if (attacker.position === 'fighting') {
+	if (attacker.chp && opponent.chp && battle.attacked.indexOf(attacker.refId) === -1) {
+		if (attacker.position === 'standing' && attacker.fighting) {
 			weaponSlots = World.character.getWeaponSlots(attacker);
 
-			if (opponent.position === 'fighting') {
+			if (opponent.position === 'standing' && opponent.fighting) {
 				shieldSlots = World.character.getSlotsWithShields(opponent);
 
 				if (shieldSlots.length) {
@@ -355,8 +437,6 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 						if (opponent.resistantTo.length && opponent.resistantTo.toString().indexOf(weapon.attackType) !== -1) {
 							damage -= World.dice.roll(1, 4 + weapon.level);
 						}
-
-						console.log(opponent.name + ' ac: ' + armorScore + ', ' + attacker.name + ' hitroll: ' + hitroll + ', damroll: ' + damroll);
 
 						if (armorScore <= hitroll) {
 							if (dodgeChance < World.dice.roll(1, 100)) {
@@ -490,7 +570,6 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							}
 						}
 
-						return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent, attackerCanSee);
 					}
 				} else {
 					if (attacker.isPlayer) {
@@ -503,13 +582,11 @@ Combat.prototype.attack = function(attacker, opponent, roomObj, fn) {
 							+ weapon.attackType + ' you and misses! </div>';
 					}
 				}
-
-				return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent, attackerCanSee);
 			}
 		}
-	} else {
-		return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent, attackerCanSee);
 	}
+
+	return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent, attackerCanSee);
 };
 
 Combat.prototype.getNumberOfAttacks = function(attacker, weapon) {
@@ -542,12 +619,21 @@ Combat.prototype.processSkill = function(attacker, defender, skillProfile) {
 	var battle = this.getBattleByRefIds(attacker.refId, defender.refId);
 
 	if (battle) {
-		if (attacker.refId === battle.attacker.refId) {
-			battle.attackerSkill = skillProfile;
-		} else {
-			battle.defenderSkill = skillProfile;
-		}
+		console.log('battle found with skill');
+		var nextPosition = this.getNextBattlePosition(battle);
+		
+		attacker.fighting = true;
+		defender.fighting = true;
+
+		battle.positions[nextPosition] = {
+			attacker: attacker,
+			defender: defender
+		};
+
+		battle.skills[attacker.refId] = {};
+		battle.skills[attacker.refId][defender.refId] = skillProfile;
 	} else {
+		console.log('battle not found when using skill');
 		this.processFight(attacker, defender, World.getRoomObject(attacker.area, attacker.roomid), skillProfile);
 	}
 }
@@ -743,28 +829,24 @@ Combat.prototype.processEndOfCombat = function(battleObj, skillProfile) {
 
 Combat.prototype.getBattleByRefIds = function(attackerRefId, defenderRefId) {
 	var i = 0,
-	results = [];
+	battle,
+	prop;
 
 	for (i; i < World.battles.length; i += 1) {
-		if (World.battles[i].attacker.refId === attackerRefId && World.battles[i].defender.refId === defenderRefId) {
-			return World.battles[i];
+		battle = World.battles[i];
+
+		for (prop in battle.positions) {
+			console.log(prop, battle.positions[prop].attacker.refId === attackerRefId, defenderRefId, battle.positions[prop].defender.refId);
+			if (
+				(battle.positions[prop].attacker.refId === attackerRefId ||
+				battle.positions[prop].defender.refId === attackerRefId) ||
+				(battle.positions[prop].attacker.refId === defenderRefId ||
+				battle.positions[prop].defender.refId === defenderRefId)
+			) {
+				return battle;
+			}
 		}
 	}
-
-	return false;
-}
-
-Combat.prototype.getBattlesByRefId = function(refId) {
-	var i = 0,
-	results = [];
-
-	for (i; i < World.battles.length; i += 1) {
-		if (World.battles[i].attacker.refId === refId || World.battles[i].defender.refId === refId) {
-			results.push(World.battles[i]);
-		}
-	}
-
-	return results;
 }
 
 Combat.prototype.removeBattle = function(battleObj) {

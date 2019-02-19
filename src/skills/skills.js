@@ -103,7 +103,7 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 * Since this is a combat skill it must output a Skill Profile Object
 */
 Skill.prototype.bash = function(skillObj, player, roomObj, command) {
-	var opponent = player.opponent,
+	var opponent = World.combat.getBattleTargetByRefId(player.refId),
 	weaponSlots,
 	i = 0,
 	strMod = World.dice.getStrMod(player),
@@ -146,7 +146,8 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 			if (shieldArr.length) {
 				shield = shieldArr[0].item;
 			}
-			if (player.position === 'standing' || player.position === 'fighting') {
+
+			if (player.position === 'standing') {
 				if (World.dice.roll(1, 100) <= skillObj.train) {
 					dmg = rollDamage(shield);
 	
@@ -205,7 +206,7 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 	dexMod = World.dice.getDexMod(player),
 	damage;
 
-	if (opponent && player.position === 'standing' && (opponent.position !== 'fighting')) {
+	if (opponent && player.position === 'standing' && !opponent.fighting) {
 		if (World.dice.roll(1, 100) <= skillObj.train) {
 			// backstab!
 			damage = World.dice.roll(1, 20 + dexMod, dexMod);

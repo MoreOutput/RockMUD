@@ -272,7 +272,7 @@ Cmd.prototype.give = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	if (target.position === 'standing' || target.position === 'fighting' || target.position === 'resting') {
+	if (target.position === 'standing' || target.position === 'resting') {
 		if (command.msg && command.msg.indexOf(' ' + World.config.coinage) === -1) {
 			if (canSee) {
 				receiver = World.room.getEntity(roomObj, {
@@ -414,7 +414,7 @@ Cmd.prototype.scan = function(target, command) {
 			});
 		}
 	} else {
-		if (target.position !== 'fighting') {
+		if (!target.fighting) {
 			World.msgPlayer(target, {
 				msg: 'You must be standing to scan the surrounding area.',
 				styleClass: 'error'
@@ -511,7 +511,7 @@ Cmd.prototype.group = function(target, command) {
 	roomObj = command.roomObj;
 
 	if (command.arg) {
-		if (target.position === 'standing' || target.position === 'resting' || target.position === 'fighting') {
+		if (target.position === 'standing' || target.position === 'resting') {
 			if (target.followers.length) {
 				entityJoiningGroup = World.room.getPlayer(roomObj, command);
 				
@@ -914,7 +914,7 @@ Cmd.prototype.open = function(target, command, fn) {
 	targetExit,
 	exitObj;
 
-	if (target.position === 'standing' || target.position === 'resting' || target.position === 'fighting') {
+	if (target.position === 'standing' || target.position === 'resting') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
 		exitObj = World.room.getExit(roomObj, command.arg);
@@ -966,8 +966,7 @@ Cmd.prototype.close = function(target, command, fn) {
 	exitObj;
 
 	if (target.position === 'standing'
-		|| target.position === 'resting'
-		|| target.position === 'fighting') {
+		|| target.position === 'resting') {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 
 		exitObj = World.room.getExit(roomObj, command.arg);
@@ -1022,8 +1021,7 @@ Cmd.prototype.unlock = function(target, command) {
 
 	if (command.msg) {
 		if (target.position === 'standing'
-			|| target.position === 'resting'
-			|| target.position === 'fighting') {
+			|| target.position === 'resting') {
 			
 			roomObj = World.getRoomObject(target.area, target.roomid);
 
@@ -1066,8 +1064,7 @@ Cmd.prototype.lock = function(target, command, fn) {
 
 	if (command.msg) {
 		if (target.position === 'standing'
-			|| target.position === 'resting'
-			|| target.position === 'fighting') {
+			|| target.position === 'resting') {
 			
 			roomObj = World.getRoomObject(target.area, target.roomid);
 			exitObj = World.room.getExit(roomObj, command.arg);
@@ -1114,7 +1111,7 @@ Cmd.prototype.recall = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	if (target.position !== 'fighting') {
+	if (!target.fighting) {
 		if (!command.msg && target.recall.roomid && target.recall.area) {
 			if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
 				targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
@@ -1232,7 +1229,7 @@ Cmd.prototype.move = function(target, command, fn) {
 
 	cost -= dexMod;
 
-	if ((target.position === 'standing' || target.position === 'fleeing') 
+	if (!target.fighting && (target.position === 'standing' || target.position === 'fleeing') 
 		&& (target.cmv > cost && target.wait === 0 && target.chp > 0)) {
 
 		if (!command.roomObj) {
@@ -1436,7 +1433,7 @@ Cmd.prototype.move = function(target, command, fn) {
 	} else {
 		if (target.cmv > cost) {
 			if (target.position !== 'standing') {
-				if (target.position !== 'fighting') {
+				if (!target.fighting) {
 					World.msgPlayer(target, {
 						msg: 'You\'re not even <strong>stand</strong>ing up!',
 						styleClass: 'error'
@@ -1879,7 +1876,7 @@ Cmd.prototype.flee = function(player, command) {
 	directions = ['north', 'east', 'west', 'south', 'down', 'up'];
 
 	if (player.opponent) {
-		if (player.position === 'fighting') {
+		if (player.fighting) {
 			chanceRoll = World.dice.roll(1, 20, World.dice.getDexMod(player));
 
 			if (player.mainStat === 'dex') {
@@ -1895,7 +1892,9 @@ Cmd.prototype.flee = function(player, command) {
 
 				cmd.move(player, command, function(moved) {
 					if (moved) {
+						player.fighting = false;
 						player.position = 'standing';
+						player.opponent.fighting = false;
 						player.opponent.position = 'standing';
 
 						if (World.dice.roll(1, 10) > 8 && player.wait < 2) {
@@ -1915,7 +1914,7 @@ Cmd.prototype.flee = function(player, command) {
 						player.opponent.opponent = false;
 						player.opponent = false;
 					} else {
-						player.position = 'fighting';
+						player.fighting = true;;
 
 						World.msgPlayer(player.opponent, {
 							msg: '<p>' + player.displayName + ' tries to flee ' + command.arg + '.</p>',
@@ -1942,8 +1941,6 @@ Cmd.prototype.flee = function(player, command) {
 				}
 			}
 		} else {
-			player.position = 'fighting';
-
 			World.msgPlayer(player, {
 				msg: 'You try to flee and fail!',
 				styleClass: 'green'
@@ -2039,10 +2036,12 @@ Cmd.prototype.cast = function(player, command, fn) {
 
 			if (skillObj && skillObj.id in World.spells) {
 				if (player.cmana > 0) {
-					if (player.position === 'standing' || player.position === 'fighting') {
+					if (player.position === 'standing') {
+						spellTarget = World.combat.getBattleTargetByRefId(player.refId);
+
 						if (skillObj.type.indexOf('passive') === -1) {
 							// combat skills
-							if (player.opponent) {
+							if (spellTarget) {
 								skillProfile = World.spells[skillObj.id](skillObj, player, player.opponent, roomObj, command);
 
 								World.processEvents('onSpell', player, roomObj, skillObj);
@@ -2530,7 +2529,7 @@ Cmd.prototype.time = function(target, command) {
 
 Cmd.prototype.quit = function(target, command) {
 	if (target.isPlayer) {
-		if (target.position !== 'fighting' && target.wait === 0) {
+		if (!target.fighting && target.wait === 0) {
 			target.logged = false;
 			target.verifiedName = false;
 			target.verifiedPassword = false;
@@ -2549,7 +2548,7 @@ Cmd.prototype.quit = function(target, command) {
 				World.character.removePlayer(target);
 			});
 		} else {
-			if (target.position === 'fighting') {
+			if (target.fighting) {
 				World.msgPlayer(target, {
 					msg: 'You are fighting! Finish up before quitting.',
 					styleClass: 'logout-msg'
@@ -2578,7 +2577,7 @@ Cmd.prototype.train = function(target, command) {
 	stats = World.getGameStatArr(),
 	canSee = World.character.canSee(target, roomObj);
 	
-	if (target.position !== 'sleeping' && target.position !== 'fighting') {
+	if (target.position !== 'sleeping' && !target.fighting) {
 		if (canSee) {
 			if (trainers.length) {
 				trainer = trainers[0];
@@ -2820,7 +2819,7 @@ Cmd.prototype.practice = function(target, command) {
 
 	canSee = World.character.canSee(target, roomObj);
 
-	if (target.position === 'standing') {
+	if (!target.fighting && target.position === 'standing') {
 		if (canSee) {
 			if (trainers.length) {
 				trainer = trainers[0];

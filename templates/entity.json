@@ -94,7 +94,6 @@
 	"lastAttackedBy": "",
 	"lastAttacked": "",
 	"creationStep": 0,
-	"opponent": false,
 	"eq": [{
 		"name": "Head",
 		"item": null,

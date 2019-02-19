@@ -16,14 +16,14 @@ module.exports = {
 	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 100);
 
-		if (mob.position === 'standing') {
+		if (mob.position === 'standing' && !mob.fighting) {
 			if (roll === 5) {
 				World.addCommand({
 					cmd: 'emote',
 					msg: 'looks <span class="grey">skyward</span> in thought.',
 					roomObj: roomObj
 				}, mob);
-			} else if (true) {
+			} else if (roll < 5) {
 				World.addCommand({
 					cmd: 'say',
 					msg: mob.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],

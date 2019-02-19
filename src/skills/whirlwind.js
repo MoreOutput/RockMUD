@@ -16,24 +16,16 @@ module.exports = function(skillObj, player, roomObj, command) {
 	opponent,
 	skillOutput,
 	rollDamage = function(opponent) {
-		var oppDexMod = World.dice.getDexMod(opponent);
-
-		if (opponent.mainStat && opponent.mainStat === 'dex' || World.dice.roll(1, 20) <= 2) {
-			return World.dice.roll(player.diceNum + 1, player.diceSides + player.size.value, strMod + player.size.value)
-				* (Math.round(player.level/2) + 1) - opponent.ac;
-		} else {
-			return World.dice.roll(player.diceNum + 1, player.diceSides + player.size.value, strMod + player.size.value)
-				* (Math.round(player.level/2) + 1) - (opponent.ac + oppDexMod);
-		}
+		return 20;
 	};
 
 	if (roomObj.monsters.length) {
-		if (player.position === 'standing' || player.position === 'fighting') {
-			skillOutput = World.combat.createSkillProfile(player, skillObj);
-
+		if (player.position === 'standing') {
 			if (World.dice.roll(1, 100) <= skillObj.train) {
 				for (i; i < roomObj.monsters.length; i += 1) {
 					opponent = roomObj.monsters[i];
+
+					skillOutput = World.combat.createSkillProfile(player, skillObj);
 
 					damage = rollDamage(opponent)
 
@@ -45,10 +37,10 @@ module.exports = function(skillObj, player, roomObj, command) {
 					skillOutput.attackerMods.wait += 2;
 
 					World.combat.processSkill(player, opponent, skillOutput);
-
-					skillOutput = World.combat.createSkillProfile(player, skillObj);
 				}
 			} else {
+				skillOutput = World.combat.createSkillProfile(player, skillObj);
+
 				skillOutput.attackerMods.wait += 2;
 				skillOutput.msgToAttacker = 'You begin to turn and stumble. Your whirlwind attempt fails!',
 

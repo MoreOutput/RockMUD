@@ -426,35 +426,20 @@ setInterval(function() {
 // Combat loop
 setInterval(function() {
 	var i = 0,
-	j = 0,
-	battles = [],
-	uniqueMap = {},
-	battle;
+	j = 0;
 
 	if (World.battleLock === 0 && World.battles.length) {
 		World.battleLock = World.battles.length;
 
 		for (i; i < World.battles.length; i += 1) {
-			battle = World.battles[i];
-			
-			if (!uniqueMap[battle.id]) {
-				battles = World.combat.getBattlesByRefId(battle.attacker.refId);
+			World.combat.round(World.battles[i]);
 
-				for (j; j < battles.length; j += 1) {
-					uniqueMap[battles[j].id] = true;
-				}
-
-				World.combat.round(battles);
-			}
-
-			console.log(World.battleLock);
 			if (World.battleLock > 0) {
 				World.battleLock -= 1;
 			}
 		}
-
 	}
-}, 1850);
+}, 1855);
 
 setInterval(function() {
 	var i = 0,
@@ -519,7 +504,7 @@ setInterval(function() {
 
 		if (player.position.creationStep === 0
 			&& player.position === 'standing'
-			&& !player.opponent
+			&& !player.fighting
 			&& World.dice.roll(1, 10) > 8) {
 			World.character.save(player);
 		}
