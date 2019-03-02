@@ -619,7 +619,7 @@ Cmd.prototype.group = function(target, command) {
 Cmd.prototype.emote = function(target, command) {
 	var roomObj;
 
-	if (target.position === 'standing' || target.position === 'resting') {
+	if (!target.fighting && target.position === 'standing' || target.position === 'resting') {
 		if (!command.roomObj) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 		} else {
@@ -630,7 +630,8 @@ Cmd.prototype.emote = function(target, command) {
 			msg: '<i>' +  target.displayName + ' ' + command.msg + '</i>',
 			darkMsg: 'You sense some movement in the area.',
 			styleClass: 'cmd-emote warning',
-			checkSight: true
+			checkSight: true,
+			playerName: target.name // pass in players to omit
 		});
 
 		World.msgPlayer(target, {
@@ -1875,81 +1876,74 @@ Cmd.prototype.flee = function(player, command) {
 	chanceRoll,
 	directions = ['north', 'east', 'west', 'south', 'down', 'up'];
 
-	if (player.opponent) {
-		if (player.fighting) {
-			chanceRoll = World.dice.roll(1, 20, World.dice.getDexMod(player));
+	console.log('FLEE ATTEMPT', player.fighting, player.name);
 
-			if (player.mainStat === 'dex') {
-				chanceRoll += 1;
+	if (player.fighting) {
+		chanceRoll = World.dice.roll(1, 20, World.dice.getDexMod(player));
+
+		if (player.mainStat === 'dex') {
+			chanceRoll += 1;
+		}
+
+		if (chanceRoll > 7 && player.wait === 0) {
+			player.position = 'fleeing';
+
+			if (!command.arg) {
+				command.arg = directions[World.dice.roll(1, directions.length) - 1];
 			}
 
-			if (chanceRoll > 7 && player.wait === 0) {
-				player.position = 'fleeing';
+			cmd.move(player, command, function(moved) {
+				if (moved) {
+					player.fighting = false;
+					player.position = 'standing';
 
-				if (!command.arg) {
-					command.arg = directions[World.dice.roll(1, directions.length) - 1];
-				}
-
-				cmd.move(player, command, function(moved) {
-					if (moved) {
-						player.fighting = false;
-						player.position = 'standing';
-						player.opponent.fighting = false;
-						player.opponent.position = 'standing';
-
-						if (World.dice.roll(1, 10) > 8 && player.wait < 2) {
-							player.wait += 1;
-						}
-
-						World.msgPlayer(player.opponent, {
-							msg: player.displayName + ' fled ' + command.arg +'!',
-							styleClass: 'grey'
-						});
-
-						World.msgPlayer(player, {
-							msg: '<strong>You fled ' + command.arg + '</strong>!',
-							styleClass: 'success'
-						});
-
-						player.opponent.opponent = false;
-						player.opponent = false;
-					} else {
-						player.fighting = true;;
-
-						World.msgPlayer(player.opponent, {
-							msg: '<p>' + player.displayName + ' tries to flee ' + command.arg + '.</p>',
-							styleClass: 'grey'
-						});
-
-						World.msgPlayer(player, {
-							msg: 'You cannot flee in that direction!',
-							styleClass: 'red'
-						});
+					if (World.dice.roll(1, 10) > 8 && player.wait < 2) {
+						player.wait += 1;
 					}
+
+					World.msgPlayer(player.opponent, {
+						msg: player.displayName + ' fled ' + command.arg +'!',
+						styleClass: 'grey'
+					});
+
+					World.msgPlayer(player, {
+						msg: '<strong>You fled ' + command.arg + '</strong>!',
+						styleClass: 'success'
+					});
+
+					player.opponent.opponent = false;
+					player.opponent = false;
+				} else {
+					player.fighting = true;;
+
+					World.msgPlayer(player.opponent, {
+						msg: '<p>' + player.displayName + ' tries to flee ' + command.arg + '.</p>',
+						styleClass: 'warning'
+					});
+
+					World.msgPlayer(player, {
+						msg: 'You cannot flee in that direction!',
+						styleClass: 'error'
+					});
+				}
+			});
+		} else {
+			if (World.dice.roll(1, 2) === 1) {
+				World.msgPlayer(player, {
+					msg: '<strong>You are in no position to flee!</strong>',
+					styleClass: 'error'
 				});
 			} else {
-				if (World.dice.roll(1, 2) === 1) {
-					World.msgPlayer(player, {
-						msg: '<strong>You are in no position to flee!</strong>',
-						styleClass: 'error'
-					});
-				} else {
-					World.msgPlayer(player, {
-						msg: '<strong>Your attempt to flee fails!</strong>',
-						styleClass: 'error'
-					});
-				}
+				World.msgPlayer(player, {
+					msg: '<strong>Your attempt to flee fails!</strong>',
+					styleClass: 'error'
+				});
 			}
-		} else {
-			World.msgPlayer(player, {
-				msg: 'You try to flee and fail!',
-				styleClass: 'green'
-			});
 		}
 	} else {
 		World.msgPlayer(player, {
-			msg: 'Flee from what? You aren\'t fighting anything...',
-			styleClass: 'green'
+			msg: 'Flee from what?',
+			styleClass: 'error'
 		});
 	}
 };
@@ -3264,7 +3258,7 @@ Cmd.prototype.score = function(target, command) {
 					'<p>You don\'t feel affected by anything.</p>' +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
-					'<li class="stat-position">You are currently <span class="green">' + target.position + '</span>.</li>' +
+					'<li class="stat-position">You are currently <span class="green">' + (!target.fighting ? target.position : target.position) + ' and fighting</span>.</li>' +
 					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' '
 						+ target.charClass + ' of ' + target.size.display + ' size with ' 
 						+ '<span class="warning">' + target.gold + ' ' + World.config.coinage  + '</span>.</li>' +

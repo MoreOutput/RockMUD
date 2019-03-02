@@ -99,7 +99,7 @@ module.exports = {
 				}, {
 					name: 'Hound Dog',
 					displayName: 'Hunting hound',
-					level: 1,
+					level: 3,
 					short: 'a healthy looking brown and white hound',
 					long: 'A large spotted brown and white hound sniffs about the area',
 					inName: 'A canine',
@@ -110,8 +110,7 @@ module.exports = {
 					position: 'standing',
 					attackType: 'bite',
 					ac: 4,
-					hp: 15,
-					chp: 15,
+					hp: 25,
 					gold: 1,
 					size: {value: 2, display: 'very small'},
 					behaviors: [{

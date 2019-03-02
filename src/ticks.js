@@ -439,7 +439,7 @@ setInterval(function() {
 			}
 		}
 	}
-}, 1855);
+}, 1850);
 
 setInterval(function() {
 	var i = 0,

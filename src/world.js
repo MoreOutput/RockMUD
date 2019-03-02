@@ -561,6 +561,29 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 
 	classObj = world.getClass(mob.charClass);
 
+	if (!mob.hp) {
+		if (mob.level > 5) {
+			mob.hp = (15 * (mob.level + 1));
+		} else {
+			mob.hp = (30 * (mob.level + 1));
+		}
+	} else {
+		mob.hp += (world.dice.roll(1, 10 * (mob.level/2)));
+	}
+
+	if (!mob.mana) {
+		mob.mana = 50 * 8 + mob.int;
+	} else {
+		mob.mana += (mob.level + world.dice.roll(1, mob.int));
+	}
+
+	if (!mob.mv) {
+		mob.mv = 50 * 9 + mob.dex;
+		mob.cmv = mob.mv;
+	} else {
+		mob.mv += (mob.level + world.dice.roll(1, mob.dex));
+	}
+
 	world.extend(mob, raceObj, function(err, mob) {
 		world.extend(mob, classObj, function(err, mob) {
 			if (Array.isArray(mob.name)) {
@@ -613,37 +636,16 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 				mob.originatingArea = mob.area;
 			}
 
-			if (!mob.hp) {
-				if (mob.level > 5) {
-					mob.hp = (15 * (mob.level + 1));
-				} else {
-					mob.hp = (30 * (mob.level + 1));
-				}
-			} else {
-				mob.hp += (mob.level + world.dice.roll(1, mob.con/4));
-			}
-
 			mob.chp = mob.hp;
-
-			if (!mob.mana) {
-				mob.mana = 50 * 8 + mob.int;
-			} else {
-				mob.mana += (mob.level + world.dice.roll(1, mob.int));
-			}
 
 			mob.cmana = mob.mana;
 
-			if (!mob.mv) {
-				mob.mv = 50 * 9 + mob.dex;
-				mob.cmv = mob.mv;
-			} else {
-				mob.mv += (mob.level + world.dice.roll(1, mob.dex));
-			}
-
 			mob.cmv = mob.mv;
 
-			if (mob.gold > 0) {
-				mob.gold += world.dice.roll(1, 8);
+			console.log(mob.level, mob.name, mob.chp);
+
+			if (!mob.gold && mob.gold !== 0) {
+				mob.gold += world.dice.roll(1, mob.level * 10);
 			}
 
 			for (prop in mob) {

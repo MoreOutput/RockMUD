@@ -30,8 +30,10 @@ Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfi
 	attacker.fighting = true;
 	defender.fighting = true;
 
-	battle.skills[attacker.refId] = {};
-	battle.skills[attacker.refId][defender.refId] = skillProfile;
+	if (skillProfile) {
+		battle.skills[attacker.refId] = {};
+		battle.skills[attacker.refId][defender.refId] = skillProfile;
+	}
 
 	// this puts the attackers group into the fight by outlining new Battle Objects
 	// note that they run through this same function and therefore they will not switch targets if they're currently
@@ -53,8 +55,6 @@ Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfi
 			}
 		}
 	}
-
-	this.round(battle, skillProfile);
 
 	World.battles.push(battle);
 };
@@ -112,8 +112,6 @@ Combat.prototype.round = function(battle, skillProfile) {
 		attacker = battleObj.attacker;
 		defender = battleObj.defender;
 
-		console.log('Position ' + i + ' of ' + numOfPositions + ':', attacker.name, defender.name);
-
 		// If the two are in same room we can run the round -- further they both must have HPs
 		// the functions will drop out if these requirements are not met so ending combat must be explictly handled elsewhere
 		// generally this means mid-round -- within the checks found below
@@ -123,16 +121,18 @@ Combat.prototype.round = function(battle, skillProfile) {
 					var attackerSkills = battle.skills[attacker.refId];
 
 					for (prop in attackerSkills) {
-						console.log(prop);
-
 						var skillTarget = combat.getBattleTargetByRefId(battle, prop);
 
-						World.character.applyMods(defender, attackerSkills[prop].defenderMods);
-						World.character.applyMods(skillTarget, attackerSkills[prop].attackerMods);
-	
-						msgToAttacker += attackerSkills[prop].msgToAttacker;
-						msgToDefender += attackerSkills[prop].msgToDefender;
-	
+						console.log(battle.skills[attacker.refId])
+
+						World.character.applyMods(skillTarget, attackerSkills[prop].defenderMods);
+
+						if (attackerSkills[prop].attackerMods) {
+							World.character.applyMods(attacker, attackerSkills[prop].attackerMods);
+						}
+
+						msgToAttacker += '<div>' + attackerSkills[prop].msgToAttacker + '</div>';
+						msgToDefender += '<div>' + attackerSkills[prop].msgToDefender + '</div>';
 					}
 
 					battle.skills[attacker.refId] = {};
@@ -159,7 +159,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 								msgToDefender += defenderSkill.msgToDefender;
 							}
 						}
-			
+
 						combat.attack(defender, attacker, battle, function(defender, attacker, roomObj, defenderAttackString, attackerDefString, defenderCanSee) {
 							battle.attacked.push(defender.refId);
 
@@ -196,7 +196,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 								if (defender.chp <= 0 || attacker.chp <= 0) {
 									preventPrompt = true;
 								}
-								
+
 								if (defender.wait) {
 									defender.wait -= 1;
 								}
@@ -205,14 +205,10 @@ Combat.prototype.round = function(battle, skillProfile) {
 									attacker.wait -= 1;
 								}
 
-								console.log(i, numOfPositions);
-
 								if (i === numOfPositions - 1) {
 									battle.round += 1;
 
 									msgToAttacker =  '<div>***** Round ' + battle.round + '*****</div>' + msgToAttacker;
-
-									console.log('SENDING');
 
 									battle.attacked = [];
 									battle.skills = {};
@@ -232,6 +228,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 									}, defender);
 								}
 							} else {
+								// ATTACKER HAS DIED
 								World.addCommand({
 									cmd: 'alert',
 									msg: msgToAttacker,
@@ -249,7 +246,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 								battle.attacked = [];
 								battle.skills = {};
 
-								combat.processEndOfCombat(battle);
+								combat.processEndOfCombat(battle, attacker, defender);
 							}
 						});
 					} else {
@@ -279,13 +276,13 @@ Combat.prototype.round = function(battle, skillProfile) {
 						battle.attacked = [];
 						battle.skills = {};
 
-						combat.processEndOfCombat(battleObj);
+						combat.processEndOfCombat(battle, attacker, defender);
 					}
 				});
 			} else {
 				preventPrompt = true;
 
-				console.log('test 2')
+				console.log('Defender has died', defender.name, defender.chp, defender.hp);
 
 				World.addCommand({
 					cmd: 'alert',
@@ -304,15 +301,15 @@ Combat.prototype.round = function(battle, skillProfile) {
 				battle.attacked = [];
 				battle.skills = {};
 
-				this.processEndOfCombat(battleObj, battleObj.attackerSkill);
+				combat.processEndOfCombat(battle, attacker, defender);
 			}
 		} else if (defender) {
-			console.log('test3');
+			console.log('test3', attacker.name, defender.name);
 
 			battle.attacked = [];
 			battle.skills = {};
 
-			combat.processEndOfCombat(battleObj, skillProfile);
+			combat.processEndOfCombat(battle, attacker, defender, skillProfile);
 		}
 	}
 };
@@ -355,9 +352,9 @@ Combat.prototype.getBattleTargetByRefId = function(battle, refId) {
 
 		for (i; i < numOfPositions; i += 1) {
 			if (battle.positions[i].attacker.refId === refId) {
-				return battle.positions[i].defender;
-			} else if (battle.positions[i].defender.refId === refId) {
 				return battle.positions[i].attacker;
+			} else if (battle.positions[i].defender.refId === refId) {
+				return battle.positions[i].defender;
 			}
 		}
 	}
@@ -569,7 +566,6 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 								}
 							}
 						}
-
 					}
 				} else {
 					if (attacker.isPlayer) {
@@ -619,21 +615,35 @@ Combat.prototype.processSkill = function(attacker, defender, skillProfile) {
 	var battle = this.getBattleByRefIds(attacker.refId, defender.refId);
 
 	if (battle) {
-		console.log('battle found with skill');
-		var nextPosition = this.getNextBattlePosition(battle);
-		
-		attacker.fighting = true;
-		defender.fighting = true;
+		var prop;
+		var inBattle = false;
 
-		battle.positions[nextPosition] = {
-			attacker: attacker,
-			defender: defender
-		};
+		for (prop in battle.positions) {
+			if (!inBattle && battle.positions[prop].defender.refId === defender.refId
+				|| battle.positions[prop].attacker.refId === defender.refId) {
+					inBattle = true;
+				}
+		}
 
-		battle.skills[attacker.refId] = {};
+		if (!inBattle) {
+			var nextPosition = this.getNextBattlePosition(battle);
+
+			attacker.fighting = true;
+			defender.fighting = true;
+
+			battle.positions[nextPosition] = {
+				attacker: attacker,
+				defender: defender
+			};
+		}
+
+		if (!battle.skills[attacker.refId]) {
+			battle.skills[attacker.refId] = {};
+		}
+
 		battle.skills[attacker.refId][defender.refId] = skillProfile;
 	} else {
-		console.log('battle not found when using skill');
+		console.log('*******INITIALIZING BATTLE VIA ' + skillProfile.skillObj.name + '********');
 		this.processFight(attacker, defender, World.getRoomObject(attacker.area, attacker.roomid), skillProfile);
 	}
 }
@@ -708,7 +718,7 @@ Combat.prototype.getDamageAdjective = function(damage) {
 };
 
 // TODO: ending combat message needs to be sent to all attacking players along with removing their Battle Objects
-Combat.prototype.processEndOfCombat = function(battleObj, skillProfile) {
+Combat.prototype.processEndOfCombat = function(battleObj, attacker, defender, skillProfile) {
 	var combat = this,
 	winner,
 	loser,
@@ -716,25 +726,37 @@ Combat.prototype.processEndOfCombat = function(battleObj, skillProfile) {
 	exp = 0,
 	corpse,
 	endOfCombatMsg = '',
+	numOfPositions = Object.keys(combat.positions).length,
+	i = 0,
+	battlePosition,
 	respawnRoom;
 
-	// we need to move on to the next target if we're being attacked
-	// if not the battle object should be removed
-	combat.removeBattle(battleObj);
-
-	if (battleObj.attacker.chp > 0) {
-		winner = battleObj.attacker;
-		loser = battleObj.defender;
+	if (attacker.chp > 0) {
+		winner = attacker;
+		loser = defender;
 	} else {
-		winner = battleObj.defender;
-		loser = battleObj.attacker;
+		winner = defender;
+		loser = attacker;
+	}
+
+	if (numOfPositions !== 1) {
+		for (i; i < numOfPositions; i += 1) {
+			battlePosition = battleObj[i];
+
+			if (battlePosition.attacker.refId === loser.refId) {
+				
+			} else if (battlePosition.defender.refId === loser.refId) {
+
+			}
+		}
+	} else {
+		combat.removeBattle(battleObj);
+
+		winner.opponent = null;
+		winner.position = 'standing';
 	}
 
 	loser.chp = 0; // cant go below zero hp
-
-	winner.opponent = null;
-	winner.position = 'standing';
-
 	loser.killedBy = winner.name;
 	loser.opponent = null;
 
@@ -807,6 +829,8 @@ Combat.prototype.processEndOfCombat = function(battleObj, skillProfile) {
 
 	winner.killed += 1;
 
+	console.log('WINNER: ' + winner.name, winner.exp, winner.expToLevel);
+
 	if (winner.exp >= winner.expToLevel) {
 		World.addCommand({
 			cmd: 'alert',
@@ -816,7 +840,6 @@ Combat.prototype.processEndOfCombat = function(battleObj, skillProfile) {
 
 		World.character.level(winner);
 	} else {
-		console.log("********ADDING**************");
 		World.addCommand({
 			cmd: 'alert',
 			msg: endOfCombatMsg,

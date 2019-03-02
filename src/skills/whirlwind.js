@@ -32,7 +32,7 @@ module.exports = function(skillObj, player, roomObj, command) {
 					skillOutput = World.combat.createSkillProfile(player, skillObj);
 					skillOutput.defenderMods.chp = -damage;
 					skillOutput.winMsg = '<span class="red">Won with Whirlwind!</span>';
-					skillOutput.msgToAttacker = 'You spin around the room slashing at everything! (' + damage + ')';
+					skillOutput.msgToAttacker = 'You spin around the room slashing at everything and hitting ' + opponent.name +'! (' + damage + ')';
 					skillOutput.msgToRoom = player.displayName + ' spins around the room slashing at everyone!';
 					skillOutput.attackerMods.wait += 2;
 

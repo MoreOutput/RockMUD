@@ -49,7 +49,7 @@
 	"detection": 0,
 	"knowledge": 0,
 	"weight": 0,
-	"gold": 0,
+	"gold": false,
 	"hunger": 0,
 	"thirst": 0,
 	"load": 0,
