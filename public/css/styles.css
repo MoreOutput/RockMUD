@@ -10,23 +10,21 @@ color: #fff;
 padding: 0;
 margin: 0;
 height: 100%;
-letter-spacing: 0.0650em;
 background-image: url('bg.jpg');
 background-repeat: no-repeat;
-background-position: center top; 
+background-position: center top;
+font-size: .9em;
+font-family: 'Courier New', Courier, monospace;
 }
 html, body a {
 color: #60f066;
 }
-.sans-serif {
-font-family: sans-serif;
-}
 h1 {
-font-family: serif;
 padding-top: 0;
 margin-top: 0;
 font-size: 155%;
 color: #ffcc00;
+font-weight: bold;
 }
 h2, h3, h4, h5, h6, .title {
 color: #ddd;

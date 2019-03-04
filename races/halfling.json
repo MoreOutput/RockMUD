@@ -7,6 +7,5 @@
 	"playable": true,
 	"attackType": "punch",
 	"size": {"value": 2, "display": "very small"},
-	"diceSides": 2,
-	"minStat": 10
+	"diceSides": 2
 }

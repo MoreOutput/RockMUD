@@ -16,7 +16,7 @@ module.exports = {
 		}
 	],
 	beforeLoad: function(fn) {
-		var x = 10,
+	var x = 10,
 		y = 10,
 		roomObj,
 		generateNorthOf = World.getRoomObject(this.name, this.defaultRoom),
@@ -33,8 +33,19 @@ module.exports = {
 					// copy the template
 					roomObj = JSON.parse(JSON.stringify(World.roomTemplate)),
 					roomObj.id = i + '-' + j;
-					roomObj.content = 'A room';
-					roomObj.title = 'Empty room ' +  i + '-' + j;
+					roomObj.content = 'A procedurally generated room. ' + (i + 1) + '-' + (j + 1);
+
+					var titleRoll = World.dice.roll(1, 3);
+
+					if (titleRoll === 1) {
+						roomObj.title = 'Vast grasslands';
+					} else if (titleRoll === 2) {
+						roomObj.title = 'Endless green plains';
+					} else {
+						roomObj.title = 'A grassy green valley';
+					}
+
+					roomObj.titleStyleClass = "green";
 
 					if (i === 0 && j === 0) {
 						roomObj.exits.push({
@@ -143,7 +154,7 @@ module.exports = {
 			i = 0;
 
 			for (i; i < this.rooms.length; i += 1) {
-				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 3) === 1) {
+				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 4) === 1) {
 					this.rooms[i].monsters.push({
 						name: 'Boar',
 						displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],

@@ -155,9 +155,9 @@ setInterval(function() {
 		for (i; i < World.players.length; i += 1) {
 			player = World.players[i];
 
-			if (player.position === 'sleeping' ||
+			if (!player.fighting && (player.position === 'sleeping' ||
 				player.position === 'resting' ||
-				player.position === 'standing') {
+				player.position === 'standing')) {
 				if (player.wait > 0) {
 					player.wait -= 1;
 				} else {
@@ -466,7 +466,7 @@ setInterval(function() {
 			}
 		}
 	}
-}, 75000);
+}, 45000);
 
 // Player Regen
 setInterval(function() {
@@ -513,12 +513,12 @@ setInterval(function() {
 
 // Random mud-wide messages
 setInterval(function() {
-	var s,
-	alerts = [
+	var alerts = [
 		'Commands are not case sensitive. Use HELP COMMANDS to see the current command list.',
 		'Use the SCAN command to get a quick look at the rooms adjacent to you.',
 		'Save your character with the <strong>save</strong> command.',
-		'Try the <strong>say</strong> command when you want to send a message to everyone in your current room.'
+		'Try the <strong>say</strong> command when you want to send a message to everyone in your current room.',
+		'You can see an items required level before picking it up!'
 	];
 
 	if (World.players.length) {

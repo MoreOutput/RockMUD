@@ -17,5 +17,6 @@
 	"preventRecall": false,
 	"preventDecay": false,
 	"behaviors": [],
-	"affects": []
+	"affects": [],
+	"titleStyleClass": ""
 }

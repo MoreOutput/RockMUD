@@ -16,7 +16,7 @@ module.exports = function(skillObj, player, roomObj, command) {
 	opponent,
 	skillOutput,
 	rollDamage = function(opponent) {
-		return 20;
+		return World.dice.roll(player.level, 10 * player.level);
 	};
 
 	if (roomObj.monsters.length) {
@@ -27,21 +27,23 @@ module.exports = function(skillObj, player, roomObj, command) {
 
 					skillOutput = World.combat.createSkillProfile(player, skillObj);
 
-					damage = rollDamage(opponent)
+					damage = rollDamage(opponent);
 
 					skillOutput = World.combat.createSkillProfile(player, skillObj);
 					skillOutput.defenderMods.chp = -damage;
 					skillOutput.winMsg = '<span class="red">Won with Whirlwind!</span>';
 					skillOutput.msgToAttacker = 'You spin around the room slashing at everything and hitting ' + opponent.name +'! (' + damage + ')';
 					skillOutput.msgToRoom = player.displayName + ' spins around the room slashing at everyone!';
-					skillOutput.attackerMods.wait += 2;
+					skillOutput.attackerMods.wait += 3;
 
 					World.combat.processSkill(player, opponent, skillOutput);
 				}
 			} else {
+				opponent = roomObj.monsters[0];
+				
 				skillOutput = World.combat.createSkillProfile(player, skillObj);
 
-				skillOutput.attackerMods.wait += 2;
+				skillOutput.attackerMods.wait += 3;
 				skillOutput.msgToAttacker = 'You begin to turn and stumble. Your whirlwind attempt fails!',
 
 				World.combat.processSkill(player, opponent, skillOutput);

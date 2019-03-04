@@ -91,10 +91,11 @@ Combat.prototype.getNextBattlePosition = function(battle) {
 Combat.prototype.round = function(battle, skillProfile) {
 	var combat = this,
 	i = 0,
+	cnt = 0,
 	battleObj,
 	attacker,
 	defender,
-	numOfPositions = Object.keys(battle.positions).length,
+	numOfPositions = combat.getNumberOfBattlepositions(battle),
 	roomObj = battle.roomObj,
 	preventPrompt = false,
 	attackerSkill,
@@ -116,53 +117,63 @@ Combat.prototype.round = function(battle, skillProfile) {
 		// the functions will drop out if these requirements are not met so ending combat must be explictly handled elsewhere
 		// generally this means mid-round -- within the checks found below
 		if (combat.inPhyscialVicinity(attacker, defender) && attacker.chp && defender.chp) {
-			if (battle.skills[attacker.refId]) {
+			if (battle.skills[attacker.refId] && battle.attacked.indexOf(attacker.refId) === -1) {
 				for (prop in battle.skills[attacker.refId]) {
 					var attackerSkills = battle.skills[attacker.refId];
 
 					for (prop in attackerSkills) {
 						var skillTarget = combat.getBattleTargetByRefId(battle, prop);
-
-						console.log(battle.skills[attacker.refId])
-
+						
 						World.character.applyMods(skillTarget, attackerSkills[prop].defenderMods);
 
-						if (attackerSkills[prop].attackerMods) {
+						if (attackerSkills[prop].attackerMods && cnt === 0) {
 							World.character.applyMods(attacker, attackerSkills[prop].attackerMods);
 						}
 
 						msgToAttacker += '<div>' + attackerSkills[prop].msgToAttacker + '</div>';
 						msgToDefender += '<div>' + attackerSkills[prop].msgToDefender + '</div>';
+
+						cnt += 1
 					}
 
 					battle.skills[attacker.refId] = {};
 				}
 			}
 
+			cnt = 0;
+
 			if (defender.chp > 0) {
 				combat.attack(attacker, defender, battle, function(attacker, defender, roomObj, attackerAttackString, defenderDefString, attackerCanSee) {
-					battle.attacked.push(attacker.refId);
-
 					console.log(attacker.name + ' Finished Attacking in Round ' + battle.round);
 
 					if (defender.chp > 0) {
 						// run defender skills
-						if (battle.skills[defender.name]) {
-							for (prop in battle.skills[defender.name]) {
-								var skillTarget = combat.getBattleTargetByRefId(battle, prop);
-								var defenderSkill = battle.skills[defender.refId];
-
-								World.character.applyMods(defender, defenderSkill.attackerMods);
-								World.character.applyMods(skillTarget, attackerSkill.attackerMods);
-
-								msgToAttacker += defenderSkill.msgToAttacker;
-								msgToDefender += defenderSkill.msgToDefender;
+						if (battle.skills[defender.refId] && battle.attacked.indexOf(defender.refId) === -1) {
+							for (prop in battle.skills[defender.refId]) {
+								var defenderSkills = battle.skills[defender.refId];
+			
+								for (prop in defenderSkills) {
+									var skillTarget = combat.getBattleTargetByRefId(battle, prop);
+									
+									World.character.applyMods(skillTarget, defenderSkills[prop].defenderMods);
+			
+									if (defenderSkills[prop].attackerMods && cnt === 0) {
+										World.character.applyMods(defender, attackerSkills[prop].attackerMods);
+									}
+			
+									msgToDefender += '<div>' + defenderSkills[prop].msgToAttacker + '</div>';
+									msgToAttacker += '<div>' + defenderSkills[prop].msgToDefender + '</div>';
+			
+									cnt += 1
+								}
+			
+								battle.skills[attacker.refId] = {};
 							}
 						}
 
-						combat.attack(defender, attacker, battle, function(defender, attacker, roomObj, defenderAttackString, attackerDefString, defenderCanSee) {
-							battle.attacked.push(defender.refId);
+						cnt = 0;
 
+						combat.attack(defender, attacker, battle, function(defender, attacker, roomObj, defenderAttackString, attackerDefString, defenderCanSee) {
 							msgToDefender += defenderAttackString + defenderDefString;
 
 							msgToAttacker += attackerAttackString + attackerDefString;
@@ -197,18 +208,20 @@ Combat.prototype.round = function(battle, skillProfile) {
 									preventPrompt = true;
 								}
 
-								if (defender.wait) {
+								// wait state reductuon is once per round
+								if (defender.wait && battle.attacked.indexOf(defender.refId) === -1) {
 									defender.wait -= 1;
 								}
 
-								if (attacker.wait) {
+								if (attacker.wait && battle.attacked.indexOf(attacker.refId) === -1) {
 									attacker.wait -= 1;
 								}
 
+								battle.attacked.push(attacker.refId);
+								battle.attacked.push(defender.refId);
+
 								if (i === numOfPositions - 1) {
 									battle.round += 1;
-
-									msgToAttacker =  '<div>***** Round ' + battle.round + '*****</div>' + msgToAttacker;
 
 									battle.attacked = [];
 									battle.skills = {};
@@ -253,7 +266,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 						console.log('DEATH BOAR');
 						preventPrompt = true;
 
-						msgToDefender = oppDefString;
+						msgToDefender = defenderDefString;
 
 						msgToAttacker = attackerAttackString;
 						msgToAttacker += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to '
@@ -312,6 +325,8 @@ Combat.prototype.round = function(battle, skillProfile) {
 			combat.processEndOfCombat(battle, attacker, defender, skillProfile);
 		}
 	}
+
+	console.log('***********************EMD ROUND:' + battle.round + '**************************');
 };
 
 Combat.prototype.inPhyscialVicinity = function(attacker, defender) {
@@ -390,7 +405,8 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 	dodgeChance = World.dice.getDodgeChance(opponent, attacker),
 	armorScore = World.dice.getRelativeArmorScore(opponent, attacker),
 	attackerCanSee = World.character.canSee(attacker, roomObj),
-	opponentCanSee = World.character.canSee(opponent, roomObj);
+	opponentCanSee = World.character.canSee(opponent, roomObj),
+	hitMsgRoll; // used in logic related to randomizing output messages
 
 	if (attacker.chp && opponent.chp && battle.attacked.indexOf(attacker.refId) === -1) {
 		if (attacker.position === 'standing' && attacker.fighting) {
@@ -409,16 +425,21 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 			for (i; i < weaponSlots.length; i += 1) {
 				if (weaponSlots[i].item) {
 					weapon = World.character.getItemByRefId(attacker, weaponSlots[i].item);
-				} else {
+				} else if (i === 0) {
 					weapon = World.character.getFist(attacker);
 				}
 
-				numOfAttacks = combat.getNumberOfAttacks(attacker, weapon, attackerMods, opponentMods);
+				if (i === 0) {
+					numOfAttacks = combat.getNumberOfAttacks(attacker, weapon, attackerMods, opponentMods);
+				} else {
+					console.log(1);
+					numOfAttacks = World.dice.roll(1, 2) - 1;
+				}
 
-				if (numOfAttacks) {
-					j = 0;
-
+				if (numOfAttacks && weapon) {
 					for (j; j < numOfAttacks; j += 1) {
+						console.log('Processing attack ' + (j + 1) + ' from ' + numOfAttacks + ' by ' + attacker.name + ' with ' + weapon.name);
+
 						if (shield) {
 							if (shieldBlockSkill) {
 								chanceToDodge += World.skills.shieldBlock(shieldBlockSkill, defender);
@@ -427,15 +448,17 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 							armorScore += shieldAC;
 						}
 
-						if (opponent.vulnerableTo.length && opponent.vulnerableTo.toString().indexOf(weapon.attackType) !== -1) {
-							damage += World.dice.roll(1, 4 + weapon.level);
-						}
+						console.log('--------------> '  + opponent.name +' Armor: ' + armorScore + ' vs ' + attacker.name +  ' HitRoll ' + hitroll);
 
-						if (opponent.resistantTo.length && opponent.resistantTo.toString().indexOf(weapon.attackType) !== -1) {
-							damage -= World.dice.roll(1, 4 + weapon.level);
-						}
+						if (armorScore < hitroll || World.dice.roll(1, 10) <= 3) {
+							if (opponent.vulnerableTo.length && opponent.vulnerableTo.toString().indexOf(weapon.attackType) !== -1) {
+								damage += World.dice.roll(1, 4 + weapon.level);
+							}
+	
+							if (opponent.resistantTo.length && opponent.resistantTo.toString().indexOf(weapon.attackType) !== -1) {
+								damage -= World.dice.roll(1, 4 + weapon.level);
+							}
 
-						if (armorScore <= hitroll) {
 							if (dodgeChance < World.dice.roll(1, 100)) {
 								damage = World.dice.roll(1 +  weapon.diceMod, damroll + World.dice.roll(damage.diceNum, weapon.diceSides) + attackerMods.str) + 1;
 
@@ -465,9 +488,21 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 								if (attacker.isPlayer) {
 									if (!criticalAttack) {
 										if (attackerCanSee) {
-											msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short
+											hitMsgRoll = World.dice.roll(1, 3);
+
+											if (hitMsgRoll === 1) {
+												msgForAttacker += '<div>Your ' + weapon.name + ' ' +  weapon.attackType + ' hits ' + opponent.short
 												+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
 												+ damage + ')</strong></div>';
+											} else if (hitMsgRoll === 2) {
+												msgForAttacker += '<div>You use a ' + weapon.short + ' to ' + weapon.attackType + ' ' + opponent.short
+												+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
+												+ damage + ')</strong></div>';
+											} else {
+												msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short
+												+ ' using ' + weapon.short + ' dealing ' + adjective + ' damage. <strong class="red">('
+												+ damage + ')</strong></div>';
+											}
 										} else {
 											msgForAttacker += '<div>You ' + weapon.attackType + ' <strong>something</strong> '
 												+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
@@ -476,15 +511,15 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 									} else {
 										if (attackerCanSee) {
 											msgForAttacker += '<div>You ' + weapon.attackType + ' ' + opponent.short
-												+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
+												+ ' using ' + weapon.short + ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
 												+ damage + ')</strong></div>'
-												+ '<div class="green">You landed a critical hit and gain '
+												+ '<div class="green">You landed a <span class="red">CRITICAL HIT</span> and gain '
 												+ criticalAttackXP + ' experience.</div>';
 										} else {
 											msgForAttacker += '<div>You ' + weapon.attackType
 												+ ' someone with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
 												+ damage + ')</strong></div>'
-												+ '<div class="green">You landed a critical hit and gain '
+												+ '<div class="green">You landed a <span class="red">critical hit</span> and gain '
 												+ criticalAttackXP + ' experience.</div>';
 										}
 
@@ -590,21 +625,29 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon) {
 	secondAttackSkill = World.character.getSkillById(attacker, 'secondAttack');
 
 	if (weapon.modifiers && weapon.modifiers.numOfAttacks) {
-		numOfAttacks += weapon.modifiers.numOfAttacks;
+		numOfAttacks += (Word.dice.roll(1, weapon.modifiers.numOfAttacks));
 	}
 
 	if (attacker.mainStat === 'dex' && World.dice.roll(1, 10) < 2) {
 		numOfAttacks += 1;
 	}
 
-	if (numOfAttacks <= 1 && World.dice.roll(1, 3) === 1) {
+	if (attacker.dex > 15 && World.dice.roll(1, 10) === 1) {
 		numOfAttacks += 1;
 	}
 
-	if (secondAttackSkill && numOfAttacks <= 1) {
-		if (World.dice.roll(1, 100) > secondAttackSkill.train) {
+	if (attacker.str > 20 && World.dice.roll(1, 10) === 1) {
+		numOfAttacks += 1;
+	}
+
+	if (secondAttackSkill && numOfAttacks === 1) {
+		if (World.dice.roll(1, 100) <= secondAttackSkill.train) {
 			numOfAttacks = World.skills.secondAttack(secondAttackSkill, attacker);
 		}
+	}
+
+	if (numOfAttacks === 1 && World.dice.roll(1, 3) === 1) {
+		numOfAttacks += 1;
 	}
 
 	return numOfAttacks;
@@ -612,6 +655,7 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon) {
 
 // Insert a skill profile into the relevant battle object so it can be applied in round()
 Combat.prototype.processSkill = function(attacker, defender, skillProfile) {
+	console.log(attacker.name, defender.name);
 	var battle = this.getBattleByRefIds(attacker.refId, defender.refId);
 
 	if (battle) {
@@ -726,9 +770,11 @@ Combat.prototype.processEndOfCombat = function(battleObj, attacker, defender, sk
 	exp = 0,
 	corpse,
 	endOfCombatMsg = '',
-	numOfPositions = Object.keys(combat.positions).length,
+	numOfPositions = combat.getNumberOfBattlepositions(battleObj),
 	i = 0,
+	battlePositionId,
 	battlePosition,
+	positionsWithDefender = [], // the battle positions involving the slain entity
 	respawnRoom;
 
 	if (attacker.chp > 0) {
@@ -740,25 +786,42 @@ Combat.prototype.processEndOfCombat = function(battleObj, attacker, defender, sk
 	}
 
 	if (numOfPositions !== 1) {
+		// processing combat objects with more than one battle position
 		for (i; i < numOfPositions; i += 1) {
-			battlePosition = battleObj[i];
+			battlePosition = battleObj.positions[i];
 
 			if (battlePosition.attacker.refId === loser.refId) {
-				
+				battleObj.positions[i] = undefined;
 			} else if (battlePosition.defender.refId === loser.refId) {
-
+				battleObj.positions[i] = undefined;
 			}
 		}
+
+		numOfPositions = combat.getNumberOfBattlepositions(battleObj);
+
+		if (!numOfPositions) {
+			combat.removeBattle(battleObj);
+
+			loser.fighting = false;
+
+			winner.fighting = false;
+		} else {
+			console.log('A COMBATANT DIED IN A BATTLE WITH MORE THAN ONE POSITION');
+
+			loser.fighting = false;
+		}
 	} else {
+		console.log('RESOLVING A BATTLE WITH A SINGLE POSITION', winner.name, loser.name);
+
 		combat.removeBattle(battleObj);
 
-		winner.opponent = null;
-		winner.position = 'standing';
+		loser.fighting = false;
+
+		winner.fighting = false;
 	}
 
 	loser.chp = 0; // cant go below zero hp
 	loser.killedBy = winner.name;
-	loser.opponent = null;
 
 	World.processEvents('onDeath', roomObj, loser, winner);
 	World.processEvents('onDeath', loser, roomObj, winner);
@@ -829,8 +892,6 @@ Combat.prototype.processEndOfCombat = function(battleObj, attacker, defender, sk
 
 	winner.killed += 1;
 
-	console.log('WINNER: ' + winner.name, winner.exp, winner.expToLevel);
-
 	if (winner.exp >= winner.expToLevel) {
 		World.addCommand({
 			cmd: 'alert',
@@ -850,6 +911,19 @@ Combat.prototype.processEndOfCombat = function(battleObj, attacker, defender, sk
 	}
 };
 
+Combat.prototype.getNumberOfBattlepositions = function(battleObj) {
+	var numOfPositions = 0,
+	battlePositionId;
+
+	for (battlePositionId in battleObj.positions) {
+		if (battleObj.positions[battlePositionId] !== undefined) {
+			numOfPositions += 1;
+		}
+	}
+
+	return numOfPositions;
+}
+
 Combat.prototype.getBattleByRefIds = function(attackerRefId, defenderRefId) {
 	var i = 0,
 	battle,
@@ -859,7 +933,6 @@ Combat.prototype.getBattleByRefIds = function(attackerRefId, defenderRefId) {
 		battle = World.battles[i];
 
 		for (prop in battle.positions) {
-			console.log(prop, battle.positions[prop].attacker.refId === attackerRefId, defenderRefId, battle.positions[prop].defender.refId);
 			if (
 				(battle.positions[prop].attacker.refId === attackerRefId ||
 				battle.positions[prop].defender.refId === attackerRefId) ||

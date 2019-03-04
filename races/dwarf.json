@@ -7,6 +7,5 @@
 	"playable": true,
 	"attackType": "punch",
 	"size": {"value": 2, "display": "small"},
-	"affects": [],
-	"minStat": 10
+	"affects": []
 }

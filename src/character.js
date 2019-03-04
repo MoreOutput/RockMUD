@@ -233,7 +233,7 @@ Character.prototype.removePlayer = function(player) {
 	}
 };
 
-// A New Character is saved
+// A New Character is rolled and saved
 Character.prototype.create = function(s) {
 	var character = this,
 	raceObj,
@@ -251,7 +251,8 @@ Character.prototype.create = function(s) {
 
 	classObj = World.getClass(s.player.charClass);
 
-	s.player.name = s.player.name.toLowerCase();
+	s.player.name = World.capitalizeFirstLetter(s.player.name);
+	s.player.gold = 0;
 
 	World.extend(s.player, raceObj, function(err, player) {
 		World.extend(s.player, classObj, function(err, player) {
@@ -270,23 +271,15 @@ Character.prototype.create = function(s) {
 			s.player.roomid = '1';
 			s.player.trains += 25;
 			s.player.deaths = 0;
-			s.player.baseStr += 12 + s.player.str;
-			s.player.baseInt += 12 + s.player.int;
-			s.player.baseWis += 12 + s.player.wis;
-			s.player.baseCon += 12 + s.player.con;
-			s.player.baseDex += 12 + s.player.dex;
-			s.player.settings = {
-				autosac: false,
-				autoloot: true,
-				autocoin: true,
-				wimpy: 0,
-				channels: {
-					blocked: ['flame']
-				}
-			};
-		
+			s.player.baseStr += 10 + s.player.str;
+			s.player.baseInt += 10 + s.player.int;
+			s.player.baseWis += 10 + s.player.wis;
+			s.player.baseCon += 10 + s.player.con;
+			s.player.baseDex += 10 + s.player.dex;
+
+
 			socket = s.player.socket;
-		
+
 			s.player.mv = s.player.cmv;
 			s.player.mana = s.player.cmana;
 			s.player.hp = s.player.chp;
@@ -505,12 +498,6 @@ Character.prototype.save = function(player, fn) {
 					}
 				}
 			});
-		} {
-			console.log('Error cleaning object for saving!');
-
-			if (fn) {
-				return fn(player);
-			}
 		}
 	}
 };
@@ -846,27 +833,11 @@ Character.prototype.getStatsFromEq = function(eq, fn) {
 };
 
 Character.prototype.getHitroll = function(entity) {
-	var hitroll = entity.hitroll,
-	i = 0,
-	prop;
-
-	hitroll += Math.round(entity.level / 4) + 4;
-
-	if (hitroll > 0) {
-		return hitroll;
-	} else {
-		return 0;
-	}
+	return World.dice.roll(1, 10 + World.dice.getDexMod(entity), entity.hitroll + (entity.level / 5))
 };
 
 Character.prototype.getDamroll = function(entity) {
-	var damroll = entity.damroll,
-	i = 0,
-	prop;
-
-	damroll += Math.round(entity.level / 4) + 4;
-
-	return damroll;
+	return World.dice.roll(1, 10 + World.dice.getStrMod(entity), entity.hitroll + (entity.level / 5))
 };
 
 Character.prototype.getFist = function(entity) {
@@ -1097,7 +1068,7 @@ Character.prototype.getLog = function(player, logId) {
 	}
 };
 
-Character.prototype.addLog = function(player, questId, logEntryId) {
+Character.prototype.addLog = function(player, questId, step, completed, meta) {
 	var i = 0,
 	len = World.quests.length,
 	prop;
@@ -1107,9 +1078,11 @@ Character.prototype.addLog = function(player, questId, logEntryId) {
 			for (prop in World.quests[i].entries) {
 				if (prop === logEntryId) {
 					player.log.push({
-						id: questId, 
-						entryId: logEntryId,
-						quest: true
+						id: questId,
+						quest: true, // of the log item is a question
+						completed: completed, // if the quest is completed
+						step: 1, // step of the quest
+						info: meta // ad-hoc quest related info
 					});
 				}
 			}
@@ -1318,7 +1291,7 @@ Character.prototype.createCorpse = function(player) {
 		capitalShort: 'The corpse of ' + corpseDisplayStr, 
 		long: 'The corpse of ' + corpseDisplayStr + ' is lying here on the ground.',
 		displayName: player.displayName,
-		decay: 1,
+		decay: 10,
 		itemType: 'corpse',
 		corpse: true,
 		chp: 0,

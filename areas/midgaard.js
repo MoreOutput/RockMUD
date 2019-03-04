@@ -118,148 +118,93 @@ module.exports = {
 					}]
 				}
 			],
-			items: [{
-				name: 'Fountain',
-				short: 'a large stone fountain',
-				long: 'A large stone fountain full of sparkling water',
-				area: 'midgaard',
-				id: '112',
-				waterSource: true,
-				weight: 10000,
-				modifiers: {
-					thirst: -1
-				},
-				itemType: 'ornament'
-			}, {
-				name: 'Leather Armor',
-				short: 'a leather chestplate',
-				long: 'Some leather armor was left here',
-				area: 'midgaard',
-				id: '111',
-				level: 1,
-				itemType: 'armor',
-				material: 'leather',
-				ac: 3,
-				weight: 1,
-				slot: 'body',
-				equipped: false,
-				value: 5
-			}, {
-				name: 'Torch',
-				short: 'a wooden torch',
-				long: 'A wooden torch rests on the ground',
-				area: 'midgaard',
-				id: '104', 
-				level: 1,
-				itemType: 'weapon',
-				material: 'wood',
-				weaponType: 'club',
-				diceNum: 1, 
-				diceSides: 2,
-				diceMod: -5,
-				attackType: 'smash',
-				weight: 2,
-				slot: 'hands',
-				equipped: false,
-				light: true,
-				lightDecay: 10,
-				flickerMsg: '',
-				extinguishMsg: '',
-				behaviors: [{
-					module: 'cursed_item'
-				}],
-				spell: {
-					id: 'spark',
-					display: 'Spark',
-					mod: 0,
-					train: 85,
-					type: 'spell',
-					wait: 2
-				}
-			}, {
-				name: 'Small Buckler', 
-				short: 'a small round buckler',
-				long: 'A small basic looking round buckler lies here' ,
-				area: 'midgaard',
-				id: '103', 
-				level: 1,
-				itemType: 'shield',
-				material: 'wood', 
-				weight: 1,
-				slot: 'hands',
-				equipped: false,
-				modifiers: {
-					ac: 2
-				},
-				affects: [{
-					id: 'hidden',
-					affect: 'hidden',
-					decay: -1
-				}]
-			}, {
-				name: 'Loaf of Bread',
-				short: 'a brown loaf of bread',
-				long: 'A rather stale looking loaf of bread is lying on the ground' ,
-				area: 'midgaard',
-				id: '7',
-				level: 1,
-				itemType: 'food',
-				weight: 0.5,
-				diceMod: 1,
-				modifiers: {
-					hunger: -3
-				},
-				decay: 3
-			}, {
-				name: 'Short Sword',
-				displayName: 'Short Sword',
-				short: 'a common looking short sword',
-				long: 'A short sword with a hilt wrapped in leather straps was left on the ground' ,
-				area: 'midgaard',
-				id: '8',
-				level: 1,
-				itemType: 'weapon',
-				weaponType: 'sword',
-				material: 'iron', 
-				diceNum: 1, 
-				diceSides: 6,
-				diceMod: 0,
-				attackType: 'slash',
-				attackElement: '',
-				weight: 4,
-				slot: 'hands',
-				equipped: false,
-				modifiers: {
-					damroll: 1,
-					hitroll: 1
-				}
-			}, {
-				name: 'Burlap sack',
-				short: 'a worn, tan, burlap sack',
-				long: 'A tan burlap sack with frizzed edges and various stains lies here',
-				area: 'midgaard',
-				id: '27',
-				level: 1,
-				itemType: 'container',
-				weight: 1,
-				items: [{
-					name: 'Sewer key', 
-					short: 'small rusty key',
-					long: 'A small rusty key made iron was left here',
+			items: [
+				{
+					name: 'Fountain',
+					short: 'a large stone fountain',
+					long: 'A large stone fountain full of sparkling water',
 					area: 'midgaard',
-					id: '101',
+					id: '112',
+					waterSource: true,
+					weight: 10000,
+					modifiers: {
+						thirst: -1
+					},
+					itemType: 'ornament'
+				}, {
+					name: 'Leather Armor',
+					short: 'a leather chestplate',
+					long: 'Some leather armor was left here',
+					area: 'midgaard',
+					id: '111',
 					level: 1,
-					itemType: 'key',
-					material: 'iron', 
-					weight: 0,
-					slot: '',
-					value: 1,
+					itemType: 'armor',
+					material: 'leather',
+					ac: 3,
+					weight: 1,
+					slot: 'body',
 					equipped: false,
-					isKey: true
-				}],
-				isOpen: true,
-				carryLimit: 50
-			}],
+					value: 5
+				}, {
+					name: 'Torch',
+					short: 'a wooden torch',
+					long: 'A wooden torch rests on the ground',
+					area: 'midgaard',
+					id: '104', 
+					level: 1,
+					itemType: 'weapon',
+					material: 'wood',
+					weaponType: 'club',
+					diceNum: 1, 
+					diceSides: 2,
+					diceMod: -5,
+					attackType: 'smash',
+					weight: 2,
+					slot: 'hands',
+					equipped: false,
+					light: true,
+					lightDecay: 10,
+					flickerMsg: '',
+					extinguishMsg: '',
+					behaviors: [{
+						module: 'cursed_item'
+					}],
+					spell: {
+						id: 'spark',
+						display: 'Spark',
+						mod: 0,
+						train: 85,
+						type: 'spell',
+						wait: 2
+					}
+				}, {
+					name: 'Burlap sack',
+					short: 'a worn, tan, burlap sack',
+					long: 'A tan burlap sack with frizzed edges and various stains lies here',
+					area: 'midgaard',
+					id: '27',
+					level: 1,
+					itemType: 'container',
+					weight: 1,
+					items: [{
+						name: 'Sewer key', 
+						short: 'small rusty key',
+						long: 'A small rusty key made iron was left here',
+						area: 'midgaard',
+						id: '101',
+						level: 1,
+						itemType: 'key',
+						material: 'iron', 
+						weight: 0,
+						slot: '',
+						value: 1,
+						equipped: false,
+						isKey: true
+					}],
+					isOpen: true,
+					carryLimit: 50
+				}
+			],
 			beforeEnter: function(roomObj, fromRoom, target) {
 				return true;
 			},
@@ -298,6 +243,29 @@ module.exports = {
 				weight: 6,
 				slot: 'hands',
 				equipped: false
+			}, {
+				name: 'Short Sword',
+				displayName: 'Short Sword',
+				short: 'a common looking short sword',
+				long: 'A short sword with a hilt wrapped in leather straps was left on the ground' ,
+				area: 'midgaard',
+				id: '8',
+				level: 1,
+				itemType: 'weapon',
+				weaponType: 'sword',
+				material: 'iron', 
+				diceNum: 1, 
+				diceSides: 6,
+				diceMod: 0,
+				attackType: 'slash',
+				attackElement: '',
+				weight: 4,
+				slot: 'hands',
+				equipped: false,
+				modifiers: {
+					damroll: 1,
+					hitroll: 1
+				}
 			}]
 		},
 		{
@@ -348,7 +316,67 @@ module.exports = {
 			],
 			playersInRoom: [],
 			monsters: [],
-			items: []
+			items: [
+				
+				{
+					name: 'Small Buckler', 
+					short: 'a small round buckler',
+					long: 'A small basic looking round buckler lies here' ,
+					area: 'midgaard',
+					id: '103', 
+					level: 1,
+					itemType: 'shield',
+					material: 'wood', 
+					weight: 1,
+					slot: 'hands',
+					equipped: false,
+					modifiers: {
+						ac: 2
+					},
+					affects: [{
+						id: 'hidden',
+						affect: 'hidden',
+						decay: -1
+					}]
+				}, {
+					name: 'Loaf of Bread',
+					short: 'a brown loaf of bread',
+					long: 'A rather stale looking loaf of bread is lying on the ground' ,
+					area: 'midgaard',
+					id: '7',
+					level: 1,
+					itemType: 'food',
+					weight: 0.5,
+					diceMod: 1,
+					modifiers: {
+						hunger: -3
+					},
+					decay: 3
+				}/*, {
+					name: 'Short Sword',
+					displayName: 'Short Sword',
+					short: 'a common looking short sword',
+					long: 'A short sword with a hilt wrapped in leather straps was left on the ground' ,
+					area: 'midgaard',
+					id: '8',
+					level: 1,
+					itemType: 'weapon',
+					weaponType: 'sword',
+					material: 'iron', 
+					diceNum: 1, 
+					diceSides: 6,
+					diceMod: 0,
+					attackType: 'slash',
+					attackElement: '',
+					weight: 4,
+					slot: 'hands',
+					equipped: false,
+					modifiers: {
+						damroll: 1,
+						hitroll: 1
+					}
+				}*/
+			]
 		},
 		{
 			id: '5',

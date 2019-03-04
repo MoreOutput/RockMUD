@@ -4,9 +4,8 @@
 	"attackType": "claw",
 	"size": {"value": 2, "display": "small"},
 	"hitroll": -3,
-	"ac": 0,
 	"meleeRes": 0,
 	"handsNoun": "claw",
-	"minStat": 2,
-	"damroll": -2
+	"damroll": -2,
+	"ac": -10
 }

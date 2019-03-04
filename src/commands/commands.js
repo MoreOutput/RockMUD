@@ -669,10 +669,17 @@ Cmd.prototype.eat = function(target, command) {
 					styleClass: 'cmd-drop warning'
 				});
 
-				World.msgPlayer(target, {
-					msg: 'You eat a ' + item.short,
-					styleClass: 'cmd-drop blue'
-				});
+				if (target.hunger !== 0) {
+					World.msgPlayer(target, {
+						msg: 'You eat a ' + item.short,
+						styleClass: 'cmd-drop success'
+					});
+				} else {
+					World.msgPlayer(target, {
+						msg: 'You eat a ' + item.short + '. You are stuffed!',
+						styleClass: 'cmd-drop success'
+					});
+				}
 			} else {
 				World.msgPlayer(target, {
 					msg: 'You can\'t eat something you dont have.',
@@ -783,9 +790,9 @@ Cmd.prototype.fill = function(target, command) {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 		}
 
-		toFillWaterSource = World.character.getBottle(target, command);
+		toFillWatersource = World.character.getBottle(target, command);
 
-		if (!toFillWaterSource) {
+		if (toFillWatersource) {
 				toEmptyWatersource = World.room.getWatersource(roomObj, command);
 
 			if (!toEmptyWatersource) {
@@ -795,11 +802,11 @@ Cmd.prototype.fill = function(target, command) {
 
 			if (toEmptyWatersource) {
 				World.msgPlayer(target, {
-					msg: 'You fill ' + watersource.short + ' to the brim.'
+					msg: 'You fill ' + toFillWatersource.short + ' to the brim.'
 				});
 			} else {
 				World.msgPlayer(target, {
-					msg: 'Theres nothing by that name around that can be used to fill ' + toFillWaterSource.short,
+					msg: 'Theres nothing by that name around that can be used to fill ' + toFillWatersource.short,
 					styleClass: 'error'
 				});
 			}
@@ -1486,7 +1493,7 @@ Cmd.prototype.who = function(target, command) {
 				str += '<tr>' +
 					'<td class="who-lvl">' + player.level + '</td>' +
 					'<td class="who-race green">' + player.race + '</td>' +
-					'<td class="who-class red">' + player.charClass + '</td>' +
+					'<td class="who-class red">' + player.classAbbr + '</td>' +
 					'<td class="who-player"><strong>' + displayName + '</strong></td>' +
 				'</tr>';
 			}
@@ -1876,8 +1883,6 @@ Cmd.prototype.flee = function(player, command) {
 	chanceRoll,
 	directions = ['north', 'east', 'west', 'south', 'down', 'up'];
 
-	console.log('FLEE ATTEMPT', player.fighting, player.name);
-
 	if (player.fighting) {
 		chanceRoll = World.dice.roll(1, 20, World.dice.getDexMod(player));
 
@@ -2110,7 +2115,7 @@ Cmd.prototype.kill = function(player, command) {
 	i = 0,
 	opponent;
 
-	if (command.arg !== player.name) {
+	if (command.arg !== player.name && !player.fighting) {
 		if (player.position === 'standing') {
 			if (command.roomObj) {
 				roomObj = command.roomObj;
@@ -2158,12 +2163,12 @@ Cmd.prototype.kill = function(player, command) {
 		} else {
 			World.msgPlayer(player, {
 				msg: 'Hard to do that from this position.',
-				styleClass: 'combat-death'
+				styleClass: 'error'
 			});
 		}
 	} else {
 		World.msgPlayer(player, {
-			msg: 'Fight yourself? Thats impossible.',
+			msg: 'That\'s impossible.',
 			styleClass: 'error'
 		});
 	}
@@ -2378,14 +2383,17 @@ Cmd.prototype.yell = function(target, command) {
 Cmd.prototype.chat = function(target, command) {
 	if (!target.mute) {
 		if (command.msg !== '') {
+			command.msg = World.capitalizeFirstLetter(command.msg);
+
 			World.msgPlayer(target, {
 				msg: '<span class="msg-name">You chat></span> ' + command.msg,
-				styleClsss: 'cmd-chat'
+				styleClass: 'cmd-chat'
 			});
 
 			World.msgWorld(target, {
-				msg: '<div class="cmd-chat"><span class="msg-name">' + target.displayName + '></span> ' + command.msg + '</div>',
-				playerName: target.name
+				msg: '<span class="msg-name">' + target.displayName + '></span> ' + command.msg,
+				playerName: target.name,
+				styleClass: 'cmd-chat'
 			});
 		} else {
 			World.msgPlayer(target, {
@@ -2570,12 +2578,12 @@ Cmd.prototype.train = function(target, command) {
 	trainer,
 	stats = World.getGameStatArr(),
 	canSee = World.character.canSee(target, roomObj);
-	
+
 	if (target.position !== 'sleeping' && !target.fighting) {
 		if (canSee) {
 			if (trainers.length) {
 				trainer = trainers[0];
-		
+
 				if (target.level > 30) {
 					cost += 3;
 				}
@@ -2587,8 +2595,8 @@ Cmd.prototype.train = function(target, command) {
 				if (command.arg) {
 					if (trainer.beforeTrain) {
 						canTrain = trainer.beforeTrain(target);
-					}	
-		
+					}
+
 					if (command.arg.indexOf('str') !== -1) {
 						stat = 'str';
 					} else if (command.arg.indexOf('int') !== -1) {
@@ -2599,8 +2607,8 @@ Cmd.prototype.train = function(target, command) {
 						stat = 'wis';
 					} else if (command.arg.indexOf('con') !== -1) {
 						stat = 'con';
-					}	
-			
+					}
+
 					if (canTrain) {
 						if (stat) {
 							if (target['base' + World.capitalizeFirstLetter(stat)] < 12) {
@@ -2677,7 +2685,7 @@ Cmd.prototype.train = function(target, command) {
 						} else if (target.mainStat === 'int' && stats[i].id === 'con') {
 							costDisplay += 1;
 						}
-						
+
 						trainDisplay += '<tr>';
 						trainDisplay += '<td>' + stats[i].display + '</td>';
 						trainDisplay += '<td>' + target['base' + World.capitalizeFirstLetter(stats[i].id)] + '</td>';
@@ -2686,7 +2694,7 @@ Cmd.prototype.train = function(target, command) {
 
 						costDisplay = cost;
 					}
-							
+
 					World.msgPlayer(target, {
 						msg: trainDisplay + '</tbody></table><p class="red"></p>'
 					});
@@ -2757,7 +2765,7 @@ Cmd.prototype.practice = function(target, command) {
 
 				if (!trainer.trainMsg) {
 					World.msgPlayer(target, {
-						msg: trainer.capitalShort + ' trains you in the art of ' 
+						msg: trainer.capitalShort + ' trains you in the art of '
 							+ skillObj.display + '.',
 						styleClass: 'green'
 					});
@@ -2802,7 +2810,7 @@ Cmd.prototype.practice = function(target, command) {
 	canPrac = true,
 	canSee,
 	intMod = World.dice.getIntMod(target);
-	
+
 	if (command.roomObj) {
 		roomObj = command.roomObj;
 	} else {
@@ -3200,7 +3208,8 @@ Cmd.prototype.quests = function(target, commands) {
 				listStr = '<h3 class="warning">' + questObj.title  + '</h3>';
 			}
 
-			listStr += '<p>' + questObj.entries[questsArr[i].entryId]  + '</p>';
+			console.log('here', questsArr[i]);
+			listStr += '<p>' + questObj.entries[questsArr[i].step]  + '</p>';
 
 			qStr += '<li class="list-inline-item">' + listStr  + '</li>';
 		}
@@ -3213,9 +3222,10 @@ Cmd.prototype.quests = function(target, commands) {
 
 Cmd.prototype.score = function(target, command) {
 	var score = '<div class="row score"><div class="col-md-12"><h1>' + 
+		'<span class="score-level"> (' + target.level + ')</span> ' +
 		'<span class="score-name">' + target.displayName + '</span> ' + 
 		'<span class="score-title">' + target.title + '</span> ' + 
-		'<span class="score-level"> (' + target.level + ')</span></h1></div>' +
+		'</h1></div>' +
 		'<div class="stats">' +
 			'<div class="col-md-12">' +
 				'<div class="row">' + 
@@ -3223,7 +3233,6 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-hp first list-inline-item"><label>HP:</label> <strong>' +  target.chp + '</strong>/' + target.hp + ' </li>' +
 					'<li class="stat-mana list-inline-item"><label>Mana:</label> <strong>' + target.cmana + '</strong>/' + target.mana + '</li>' +
 					'<li class="stat-mv list-inline-item"><label>Moves:</label> <strong>' + target.cmv + '</strong>/' + target.mv + '</li>' +
-					'<li class="stat-levl list-inline-item"><label>Level:</label> ' +  target.level + '</li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-str first"><label><strong>STR:</strong></label> ' + target.baseStr + ' <strong>(' + target.str + ')</strong></li>' +
@@ -3254,11 +3263,11 @@ Cmd.prototype.score = function(target, command) {
 					'</ul>' +
 				'</div>' +
 				'<div class="col-md-12 score-affects">' +
-					'<h6 class="sans-serif">Affected by:</h6>' +
+					'<h6>Affected by:</h6>' +
 					'<p>You don\'t feel affected by anything.</p>' +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
-					'<li class="stat-position">You are currently <span class="green">' + (!target.fighting ? target.position : target.position) + ' and fighting</span>.</li>' +
+					'<li class="stat-position">You are currently <span class="green">' + (target.fighting === false ? target.position : target.position + ' and fighting') + '</span>.</li>' +
 					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' '
 						+ target.charClass + ' of ' + target.size.display + ' size with ' 
 						+ '<span class="warning">' + target.gold + ' ' + World.config.coinage  + '</span>.</li>' +
@@ -3348,11 +3357,11 @@ Cmd.prototype.alist = function(target, command) {
 /*
 * View a string representation of the JSON behind a world object.
 * Syntax: json objectType (item, room, monster or player)
-* typing 'json' alone will give the json object for the entire current room. 
+* typing 'json' alone will give the json object for the entire current room.
 */
 Cmd.prototype.json = function(target, command) {
 	if (target.role === 'admin' && command.msg || World.config.allAdmin) {
-		World.character.checkInventory(r,s,function(fnd,item) {
+		World.character.checkInventory(r, s, function (fnd,item) {
 			if (fnd) {
 				World.msgPlayer(target, {msg: util.inspect(item, {depth: null})});
 			} else {

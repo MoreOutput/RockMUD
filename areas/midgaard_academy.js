@@ -17,7 +17,7 @@ module.exports = {
 		id: 'mud_school',
 		title: 'Midgaard Training Academy',
 		entries: {
-			0: 'You have joined the Midgaardian Academy! Climb to the top of the tower and begin training and make it official.'
+			1: 'You have joined the Midgaardian Academy! Climb to the top of the tower and begin training and make it official.'
 		}
 	}],
 	rooms: [
@@ -42,9 +42,9 @@ module.exports = {
 				name: 'Radghar',
 				displayName: 'Radghar',
 				charClass: 'fighter',
-				level: 35,
+				level: 50,
 				short: 'Lord Radghar',
-				long: '<span class="yellow">Radghar</span>, a retired Midgaardian guard captain is here training recurits',
+				long: '<span class="yellow">Radghar</span>, a retired Midgaardian guard captain is here training recruits',
 				description: '',
 				inName: 'Lord Radghar',
 				race: 'human',
@@ -94,7 +94,7 @@ module.exports = {
 				}
 			],
 			onEnter: function(roomObj, entity, incomingRoomObj, command) {
-				var climbSkill = world.character.getSkill(entity, 'climb'),
+				var climbSkill = World.character.getSkill(entity, 'climb'),
 				displayAfter = 1200,
 				msg = '';
 
@@ -103,7 +103,7 @@ module.exports = {
 				}
 
 				if (!climbSkill && entity.isPlayer && entity.level === 1) {
-					msg += '1You do not have the climb skill. Climbing further could result in a fall!';
+					msg += 'You do not have the climb skill. Climbing further could result in a fall!';
 				}
 
 				if (msg) {
@@ -130,7 +130,7 @@ module.exports = {
 				}
 			],
 			onEnter: function(roomObj, entity, incomingRoomObj, command) {
-				var climbSkill = world.character.getSkill(entity, 'climb'),
+				var climbSkill = World.character.getSkill(entity, 'climb'),
 				displayAfter = 1200,
 				msg = '';
 
@@ -166,7 +166,7 @@ module.exports = {
 				climbCheck = 5,
 				msg = '';
 
-				climbSkill = world.character.getSkill(entity, 'climb');
+				climbSkill = World.character.getSkill(entity, 'climb');
 
 				if (!climbSkill) {
 					//climbRoll = World.dice.roll(1, 3, strMod);

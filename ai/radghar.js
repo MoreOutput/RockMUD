@@ -24,7 +24,7 @@ module.exports = {
 						roomObj: roomObj
 					}, mob);
 
-					World.character.addLog(player, 'mud_school', '0');
+					World.character.addLog(player, 'mud_school');
 
 					climbSkill = World.character.getSkill(player, 'climb');
 
@@ -44,11 +44,18 @@ module.exports = {
 
 							World.msgPlayer(player, {
 								msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>. Improved Climbling increases the chance'
-									+ ' of a successful climb, and reduces and falling damage.'
+									+ ' of a successful climb, and reduces falling damage.'
 							});
 						}
 					}, 1200);
 				}
+			} else if (quest.step === 1) {
+				World.addCommand({
+					cmd: 'say',
+					msg: 'Are you joking ' + player.displayName  +  '? You\'ve already joined the Academy! Finish your studies and stop wasting my time.',
+					roomObj: roomObj
+				}, mob);
+
 			}
 		}
 	},

@@ -36,51 +36,47 @@ Roller.prototype.randomPick = function(number, upperBound) {
 };
 
 Roller.prototype.getDexMod = function(entity, mod) {
-	var sizeMod = 0;
-
 	if (!mod) {
 		mod = 0;
 	}
 
 	if (entity.mainStat === 'dex') {
-		mod += Math.round(entity.level / 8) + 1;
+		mod += 1;
 	}
 
 	if (entity.size < 3) {
-		sizeMod += entity.size;
-	} else if (entity.size > 3) {
-		sizeMod = -(entity.size - 2);
+		mod += 1;
+	} else if (entity.size > 3 && mod) {
+		mod -= 1;
 	}
 
-	if (entity.dex > 12) {
+	if (entity.dex > 15) {
 		return Math.round( (entity.dex/10) + mod + sizeMod);
-	} else {
-		return 0;
 	}
+
+	return mod;
 };
 
 Roller.prototype.getConMod = function(entity, mod) {
-	var sizeMod = 0;
-
 	if (!mod) {
 		mod = 0;
 	}
 
 	if (entity.mainStat === 'con') {
-		mod += Math.round(entity.level / 8) + 1;
+		mod += 1;
 	}
 	
-	if (entity.size < 3) {
-		sizeMod = -(entity.size - 2);
+	if (entity.size < 3 && mod) {
+		mod -= 1;
 	} else if (entity.size > 3) {
-		sizeMod += ( entity.size );
+		mod += 1;
 	}
 	
-	if (entity.con > 12) {
-		return Math.round( (entity.con/10) + mod + sizeMod);
-	} else {
-		return 0;
+	if (entity.con > 15) {
+		mod += (Math.round(entity.con / 5) - 2);
 	}
+
+	return mod;
 };
 
 Roller.prototype.getIntMod = function(entity, mod) {
@@ -89,38 +85,36 @@ Roller.prototype.getIntMod = function(entity, mod) {
 	}
 
 	if (entity.mainStat === 'int') {
-		mod += Math.round(entity.level / 8) + 1;
+		mod += 1;
 	}
 
-	if (entity.int > 12) {
-		return Math.ceil( (entity.int/10) + mod);
-	} else {
-		return 0;
+	if (entity.int > 15) {
+		mod += (Math.round(entity.int / 5) - 2);
 	}
+
+	return mod;
 };
 
 Roller.prototype.getStrMod = function(entity, mod) {
-	var sizeMod = 0;
-
 	if (!mod) {
 		mod = 0;
 	}
 
 	if (entity.mainStat === 'str') {
-		mod += Math.round(entity.level / 8) + 1;;
-	}
-	
-	if (entity.size.value < 3) {
-		sizeMod = -(entity.size.value - 2);
-	} else if (entity.size.value > 3) {
-		sizeMod += ( entity.size.value/2 );
+		mod += 1;
 	}
 
-	if (entity.str > 12) {
-		return Math.round( (entity.str/10) + mod + sizeMod);
-	} else {
-		return 0 + mod;
+	if (entity.str > 15) {
+		mod += (Math.round(entity.str / 5) - 2);
 	}
+
+	if (entity.size.value < 3 && mod) {
+		mod -= 1;
+	} else if (entity.size.value > 3) {
+		mod += 1;
+	}
+
+	return mod;
 };
 
 Roller.prototype.getWisMod = function(entity, mod) {
@@ -129,14 +123,14 @@ Roller.prototype.getWisMod = function(entity, mod) {
 	}
 
 	if (entity.mainStat === 'wis') {
-		mod += Math.round(entity.level / 8) + 1;
+		mod += 1;
 	}
 
-	if (entity.wis > 13) {
-		return Math.round( (entity.wis/10) + mod);
-	} else {
-		return 0;
+	if (entity.wis > 15) {
+		mod += (Math.round(entity.wis / 5) - 2);
 	}
+
+	return mod;
 };
 
 Roller.prototype.getDodgeChance = function(dodgingEntity, entityToDodge) {
@@ -164,13 +158,12 @@ Roller.prototype.getDodgeChance = function(dodgingEntity, entityToDodge) {
 
 // ac check is the entites current ac, level additions, and
 Roller.prototype.getRelativeArmorScore = function(defender, attacker) {
-	// theres always a 2% chance the defender will dodge, World.dice.roll(1, 100) > 98
 	var ac = defender.ac;
 
 	if (attacker.level > defender.level) {
-		ac -= Math.round(attacker.level / defender.level);
+		ac -= (Math.round(attacker.level / defender.level));
 	} else if (attacker.level < defender.level)  {
-		ac += Math.round(defender.level / attacker.level);
+		ac += (Math.round(defender.level / attacker.level));
 	}
 
 	if (defender.size.value < attacker.size.value) {
@@ -179,7 +172,7 @@ Roller.prototype.getRelativeArmorScore = function(defender, attacker) {
 		ac -= (attacker.size.value - defender.size.value);
 	}
 
-	return ac;
+	return ac;p
 };
 
 // return an object with each mod outlined
