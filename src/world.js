@@ -255,6 +255,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.combat = require('./combat')
 	world.dice = require('./dice');
 	world.battleLock = 0;
+	world.aiLock = false;
 
 	if (world.config.persistence && world.config.persistence.data) {
 		world.dataDriver = require(world.config.persistenceDriverDir + world.config.persistence.data.driver + '.js')(world.config.persistence.data);
@@ -538,7 +539,6 @@ World.prototype.rollItem = function(item, area, room, callback) {
 // Rolls values for Mobs, including their equipment
 World.prototype.rollMob = function(mob, area, room, callback) {
 	var world = this,
-	diceMod,
 	prop,
 	raceObj,
 	classObj;
@@ -624,8 +624,6 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 				mob.baseWis = mob.wis;
 				mob.baseCon = mob.con;
 			}
-
-			console.log(mob.name, mob.hp, mob.baseStr);
 
 			mob.isPlayer = false;
 			mob.roomid = room.id;
@@ -864,16 +862,33 @@ World.prototype.setupExit = function(exit, callback) {
 };
 
 World.prototype.setupItem = function(item, area, room, callback) {
-	var i = 0,
-	world = this;
+	var world = this;
 
-	world.rollItem(item, area, room, function(error, item) {
-		if (error) {
-			return callback(error, item);
-		}
 
-		callback(false, item)
-	});
+	if (!item.items || !item.items.length) {
+		world.rollItem(item, area, room, function(error, item) {
+			if (error) {
+				return callback(error, item);
+			}
+
+			console.log(item.name, item.affects)
+
+			callback(false, item)
+		});
+	} else if (item.items && item.items.length) {		
+		world.rollItem(item, area, room, function(error, item) {
+			var i = 0,
+			innerItem;
+
+			for (i; i < item.items.length; i += 1) {
+				innerItem = item.items[i];
+
+				world.extend(innerItem, world.itemTemplate, function(err, innerItem) {
+					world.setupItem(innerItem, area, room, callback);
+				});
+			}
+		});
+	}
 
 	callback(false, item);
 };
@@ -1328,7 +1343,8 @@ World.prototype.msgWorld = function(target, msgObj) {
 // convenience function for searching a given array and return an item based 
 // on on a given command object. Matches against objects name and displayName properties
 World.prototype.search = function(arr, itemType, returnArr, command) {
-	var canSearch = true,
+	var patternStr = '',
+	canSearch = true,
 	matchedIndexes = [],
 	result = false,
 	pattern,
@@ -1368,6 +1384,8 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 				}
 			}
 		} else {
+			console.log('JHERE', command.arg);
+
 			for (i; i < arr.length; i += 1) {
 				wordArr = arr[i].name.toLowerCase().split(' ');
 

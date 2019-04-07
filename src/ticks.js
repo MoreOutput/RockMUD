@@ -350,53 +350,61 @@ setInterval(function() {
 setInterval(function() {
 	var i = 0,
 	j = 0,
-	cmdObj,
-	cmdEntity,
 	players,
 	monsters,
-	cmdArr,
 	roomObj;
+	
+	if (!World.aiLock) {
+		World.aiLock = true;
 
-	if (World.cmds.length || World.dice.roll(1, 2) === 1) {
 		for (i; i < World.areas.length; i += 1) {
-			if (World.dice.roll(1, 20) === 1) {
-				players = World.getAllPlayersFromArea(World.areas[i]);
-				monsters = World.getAllMonstersFromArea(World.areas[i]);
+			players = World.getAllPlayersFromArea(World.areas[i]);
+			monsters = World.getAllMonstersFromArea(World.areas[i]);
 
-				j = 0;
+			j = 0;
 
-				for (j; j < monsters.length; j += 1) {
-					if ((World.areas[i].runOnAliveWhenEmpty || players.length)
-						|| (monsters[j].originatingArea !== World.areas[i].id)) {
+			for (j; j < monsters.length; j += 1) {
+				if ((World.areas[i].runOnAliveWhenEmpty || players.length)
+					|| (monsters[j].originatingArea !== World.areas[i].id)) {
 
-						roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
+					roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
 
-						if (monsters[j].chp >= 1 && (monsters[j].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
-							World.processEvents('onAlive', monsters[j], roomObj);
-						}
+					if (monsters[j].chp >= 1 && (monsters[j].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
+						World.processEvents('onAlive', monsters[j], roomObj);
 					}
 				}
+			}
 
-				j = 0;
+			j = 0;
 
-				for (j; j < players.length; j += 1) {
-					roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
+			for (j; j < players.length; j += 1) {
+				roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
 
-					if (players[j].chp >= 1) {
-						World.processEvents('onAlive', players[j], roomObj);
-					}
+				if (players[j].chp >= 1) {
+					World.processEvents('onAlive', players[j], roomObj);
+				}
 
-					if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
-						World.character.save(players[j]);
-					}
+				if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
+					World.character.save(players[j]);
 				}
 			}
 		}
 
+		World.aiLock = false;
+	}
+}, 2000);
+
+// Command Parsing
+setInterval(function() {
+	var cmdObj,
+	cmdEntity,
+	cmdArr;
+
+	if (World.cmds.length) {
 		cmdArr = World.cmds.slice();
 
 		World.cmds = [];
-
+		
 		while(cmdArr.length) {
 			cmdObj = cmdArr[0];
 			cmdEntity = cmdObj.entity;
@@ -522,14 +530,14 @@ setInterval(function() {
 	];
 
 	if (World.players.length) {
-		if (World.dice.roll(1, 3) <= 2) {
+		if (World.dice.roll(1, 3) === 1) {
 			World.msgWorld(false, {
 				msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
 					+ alerts[World.dice.roll(1, alerts.length) - 1] + '</span></span>'
 			});
 		}
 	}
-}, 64000);
+}, 124000);
 
 // Check for broken connections
 setInterval(function() {

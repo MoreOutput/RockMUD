@@ -4,6 +4,5 @@
 	"wis": 1,
 	"playable": true,
 	"trains": 5,
-	"attackType": "punch",
-	"diceMod": 1
+	"attackType": "punch"
 }

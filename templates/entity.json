@@ -173,5 +173,5 @@
 	"trainMsg": "",
 	"log": [],
 	"hasEvents": false,
-	"runOnAliveWhenEmpty": true
+	"runOnAliveWhenEmpty": false
 }

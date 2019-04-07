@@ -51,7 +51,7 @@ Roller.prototype.getDexMod = function(entity, mod) {
 	}
 
 	if (entity.dex > 15) {
-		return Math.round( (entity.dex/10) + mod + sizeMod);
+		return Math.round( (entity.dex/10) + mod);
 	}
 
 	return mod;
@@ -183,6 +183,14 @@ Roller.prototype.getMods = function(player, mod) {
 		mod = 0;
 	}
 
+	console.log('MODS', {
+		con: dice.getConMod(player, mod),
+		wis: dice.getWisMod(player, mod),
+		int: dice.getIntMod(player, mod),
+		str: dice.getStrMod(player, mod),
+		dex: dice.getDexMod(player, mod)
+	});
+
 	return {
 		con: dice.getConMod(player, mod),
 		wis: dice.getWisMod(player, mod),
@@ -194,24 +202,22 @@ Roller.prototype.getMods = function(player, mod) {
 
 Roller.prototype.calExp = function(player, expOpt) {
 	var dice = this,
-	exp = 0,
-	total = dice.roll(1, 4);
+	multiplier;
 
 	if (!expOpt.level) {
 		expOpt.level = 1;
 	}
 
-	if (expOpt.level >= (player.level - 6)) {
-		if (expOpt.level >= player.level) {
-			exp = ((((expOpt.level - player.level)) * total) + 1) *
-			(total * Math.abs(expOpt.level - player.level)) + dice.roll(1, 10) + 20;
+	multiplier = (Math.abs((expOpt.level + 1) - player.level) * 10) + 10;
 
-			return exp;
-		} else {
-			return dice.roll(1, 2) * 10;
+	if (expOpt.level >= (player.level - 6)) {
+		if (expOpt.level > player.level) {
+			multiplier += dice.roll(1, 4, 1);
 		}
+
+		return Math.abs(expOpt.level/player.level) * multiplier;
 	} else {
-		return exp;
+		return 0;
 	}
 };
 

@@ -1,9 +1,10 @@
 'use strict';
-var World = require('../src/world');
+var World = require('../src/world'),
+areaId = 'the_great_valley';
 
 module.exports = {
 	name : 'The Great Valley',
-	id: 'the_great_valley',
+	id: areaId,
 	defaultRoom: '1',
 	type : 'grasslands',
 	levels : 'All',
@@ -16,8 +17,8 @@ module.exports = {
 		}
 	],
 	beforeLoad: function(fn) {
-	var x = 10,
-		y = 10,
+		var x = 7,
+		y = 7,
 		roomObj,
 		generateNorthOf = World.getRoomObject(this.name, this.defaultRoom),
 		i = 0,
@@ -155,7 +156,7 @@ module.exports = {
 
 			for (i; i < this.rooms.length; i += 1) {
 				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 4) === 1) {
-					this.rooms[i].monsters.push({
+					var mob = {
 						name: 'Boar',
 						displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
 						level: 1,
@@ -163,22 +164,24 @@ module.exports = {
 						long: [
 							'A boar with a number of scars on its side is here',
 							'A dark brown boar is here',
-							'A large brown boar is here'
+							'A spotted black and brown boar is here',
+							'A large boar with protruding tusks is here'
 						],
 						inName: 'A boar',
 						race: 'animal',
 						id: '6',
-						area: 'the_great_valley',
+						area: areaId,
 						weight: 120,
 						position: 'standing',
 						attackType: 'bite',
 						ac: 4,
-						hp: 15,
+						hp: 10,
 						chp: 13,
 						gold: 1,
 						str: 3,
 						size: {value: 2, display: 'very small'},
 						onRolled: function(mob) {
+							console.log('rolling', mob.chp)
 							if (World.dice.roll(1, 3) > 1) {
 								mob.behaviors = [];
 							}
@@ -186,7 +189,26 @@ module.exports = {
 						behaviors: [{
 							module: 'wander'
 						}]
-					});
+					};
+
+					if (World.dice.roll(1, 3) === 1) {
+						mob.long = "QUEST boar";
+						mob.items = [];
+						mob.items.push({
+							name: 'Boar Tusk', 
+							short: 'a small, sharp, boars tusk',
+							long: 'A boars tusk was left here.' ,
+							area: areaId,
+							id: '100',
+							level: 1,
+							itemType: 'junk',
+							material: 'ivory',
+							weight: 0,
+							value: 10
+						});
+					}
+
+					this.rooms[i].monsters.push(mob);
 				}
 			}
 		}
@@ -207,7 +229,7 @@ module.exports = {
 				{
 					cmd: 'north',
 					id: '0-0',
-					area: 'the_great_valley'
+					area: areaId
 				}
 			],
 			playersInRoom: [],

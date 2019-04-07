@@ -199,7 +199,6 @@ World.setup(io, cfg, function() {
 			roomObj;
 
 			if (s.player !== undefined) {
-				console.log('CLOSING CONNECTION FOR: ', s.player.name);
 				s.player.connected = false;
 
 				World.character.removePlayer(s.player);

@@ -346,6 +346,20 @@ Room.prototype.getItem = function(roomObj, command) {
 	return World.search(roomObj.items, command);
 };
 
+Room.prototype.getContainer = function(roomObj, command) {
+	var i = 0;
+
+	for (i; i < roomObj.items.length; i += 1) {
+		if ((roomObj.items[i].itemType === 'container'
+			|| roomObj.items[i].itemType === 'corpse')
+			&& roomObj.items[i].name.toLowerCase().indexOf(command.input) !== -1) {
+			return roomObj.items[i];
+		}
+	}
+
+	return false;
+};
+
 Room.prototype.removeItem = function(roomObj, item) {
 	var i = 0,
 	newArr = [];

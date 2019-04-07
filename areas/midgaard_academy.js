@@ -16,6 +16,9 @@ module.exports = {
 	quests: [{
 		id: 'mud_school',
 		title: 'Midgaard Training Academy',
+		data: {
+			collectedTusks: 0
+		},
 		entries: {
 			1: 'You have joined the Midgaardian Academy! Climb to the top of the tower and begin training and make it official.'
 		}
@@ -25,7 +28,8 @@ module.exports = {
 			id: '1',
 			title: 'Academy Entrance',
 			area: 'midgaard_academy',
-			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
+			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. '
+				+ 'Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			outdoors: false,
 			light: true,
 			exits: [
@@ -51,7 +55,6 @@ module.exports = {
 				id: 2,
 				area: 'midgaard_academy',
 				weight: 195,
-				diceMod: 5,
 				str: 10,
 				dex: 8,
 				damroll: 20,
@@ -153,6 +156,11 @@ module.exports = {
 			light: true,
 			exits: [
 				{
+					cmd: 'up',
+					id: '5',
+					area: 'midgaard_academy'
+				},
+				{
 					cmd: 'down',
 					id: '3',
 					area: 'midgaard_academy'
@@ -163,29 +171,20 @@ module.exports = {
 				strMod = World.dice.getStrMod(entity),
 				success = true,
 				climbRoll,
-				climbCheck = 5,
 				msg = '';
 
 				climbSkill = World.character.getSkill(entity, 'climb');
 
-				if (!climbSkill) {
-					//climbRoll = World.dice.roll(1, 3, strMod);
-					climbRoll = 1;
+				if (climbSkill) {
+					climbRoll = World.dice.roll(1, 100);
 
-					if (climbRoll < climbCheck) {
-						msg += '<strong>You fail to climb up and slip downward!</strong>';
-
+					if (climbRoll >= climbSkill.train + strMod) {
+						msg += '<strong>You fail to climb up!</strong>';
+	
 						success = false;
 					}
 
 					if (msg && entity.isPlayer) {
-						if (success === false) {
-							Cmd.move(entity, {
-								cmd: 'move',
-								arg: 'down'
-							});
-						}
-
 						World.msgPlayer(entity, {
 							msg: msg
 						});
@@ -197,7 +196,18 @@ module.exports = {
 						}
 					}
 				} else {
-					return true;
+					msg += '<strong>You fail to climb up and fall downward!</strong>';
+
+					World.addCommand({
+						cmd: 'move',
+						arg: 'down'
+					}, entity);
+
+					World.msgPlayer(entity, {
+						msg: msg
+					});
+
+					return false;
 				}
 			}
 		}, {
@@ -228,10 +238,39 @@ module.exports = {
 				hitroll: 15,
 				ac: 20,
 				items: [],
-				trainer: true,
-				runOnAliveWhenEmpty: false
+				runOnAliveWhenEmpty: false,
+				onAlive: function(thomas, room) {
+					console.log(thomas.name, room.id);
+
+					if (room.playersInRoom.length && World.dice.roll(1, 10) === 1) {
+						World.addCommand({
+							cmd: 'emote',
+							msg: 'looks around the room.',
+							roomObj: room
+						}, thomas);
+					}
+				}
 			}],
-			exits: []
+			exits: [{
+				cmd: 'down',
+				id: '4',
+				area: 'midgaard_academy'
+			}],
+			onEnter: function(roomObj, entity, incomingRoomObj, command) {
+				var msg = 'You climb over some railing and reach the roof lantern of the Academy Tower.';
+
+				World.msgPlayer(entity, {
+					msg: '<p>' + msg + '</p>',
+					styleClass: 'success'
+				});
+			}
+		},
+		{
+			id: '6',
+			title: 'Main Guard House',
+			area: 'midgaard_academy',
+			content: '',
+			light: true
 		}
 	]
 };

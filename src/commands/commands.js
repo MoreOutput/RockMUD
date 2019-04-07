@@ -42,11 +42,11 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 
 		if (cmdArr.length < 4) {
 			if (cmdArr.length === 3) {
-				cmdObj.arg = cmdArr[1].toLowerCase() + ' ' + cmdArr[2].toLowerCase();
-				cmdObj.input = cmdObj.last;
+				cmdObj.arg = cmdArr[1].toLowerCase();
+				cmdObj.input = cmdArr[2].toLowerCase();
 			} else if (cmdArr.length === 2) {
 				cmdObj.arg = cmdArr[1].toLowerCase();
-				cmdObj.input = '';
+				cmdObj.input = cmdObj.msg;
 			}
 		} else {
 			cmdObj.arg = cmdArr[1].toLowerCase() + ' ' + cmdArr[2].toLowerCase(),
@@ -72,6 +72,8 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 			cmdObj.second = cmdObj.arg;
 		}
 	}
+
+	console.log(cmdObj);
 
 	return cmdObj;
 };
@@ -780,7 +782,7 @@ Cmd.prototype.drink = function(target, command) {
 // watersources within a players inventory can be poured into one another
 Cmd.prototype.fill = function(target, command) {
 	var roomObj,
-	toEmptyWatersource, // the item to emptied, must also be a watersource
+	toEmptyWatersource, // the item to be emptied, must also be a watersource
 	toFillWatersource; // the item to be filled
 
 	if (target.position === 'standing') {
@@ -793,7 +795,7 @@ Cmd.prototype.fill = function(target, command) {
 		toFillWatersource = World.character.getBottle(target, command);
 
 		if (toFillWatersource) {
-				toEmptyWatersource = World.room.getWatersource(roomObj, command);
+			toEmptyWatersource = World.room.getWatersource(roomObj, command);
 
 			if (!toEmptyWatersource) {
 				// if no room level item was found to fill from try the characters inventory
@@ -801,6 +803,8 @@ Cmd.prototype.fill = function(target, command) {
 			}
 
 			if (toEmptyWatersource) {
+				toFillWatersource.drinks = toFillWatersource.maxDrinks;
+
 				World.msgPlayer(target, {
 					msg: 'You fill ' + toFillWatersource.short + ' to the brim.'
 				});
@@ -1530,6 +1534,7 @@ Cmd.prototype.get = function(target, command, fn) {
 	container,
 	canGet = true,
 	itemLen = 0,
+	containerInRoom = false,
 	maxCarry = World.character.getMaxCarry(target);
 
 	if (target.position !== 'sleeping') {
@@ -1542,6 +1547,12 @@ Cmd.prototype.get = function(target, command, fn) {
 		if (command.msg !== '' && World.character.canSee(target, roomObj)) {
 			if (command.input) {
 				container = World.character.getContainer(target, command);
+			}
+
+			if (!container) {
+				container = World.room.getContainer(roomObj, command);
+
+				containerInRoom = true;
 			}
 
 			if (!container) {
@@ -1647,28 +1658,73 @@ Cmd.prototype.get = function(target, command, fn) {
 					}
 				}
 			} else {
-				item = World.character.getFromContainer(container, command);
-				
-				if (item) {
-					World.character.removeFromContainer(container, item);
+				if (command.second !== 'all') {
+					if (!containerInRoom) {
+						item = World.character.getFromContainer(container, command);
+					} else {
+						item = World.character.getFromContainer(container, command);
+					}
 
-					World.character.addItem(target, item);
+					if (item) {
+						World.character.removeFromContainer(container, item);
 
-					World.msgPlayer(target, {
-						msg: 'You remove a <strong>' + item.displayName + '</strong> from a '
-							+ container.displayName + '.', 
-						styleClass: 'green'
-					});
+						World.character.addItem(target, item);
 
-					World.processEvents('onGet', container, roomObj, item, target);
-					World.processEvents('onGet', target, roomObj, item, container);
+						World.msgPlayer(target, {
+							msg: 'You remove a <strong>' + item.displayName + '</strong> from a '
+								+ container.displayName + '.', 
+							styleClass: 'green'
+						});
 
-					World.character.save(target);
+						World.processEvents('onGet', container, roomObj, item, target);
+						World.processEvents('onGet', target, roomObj, item, container);
+
+						World.character.save(target);
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You don\'t see that in there.',
+							styleClass: 'error'
+						});
+					}
 				} else {
-					World.msgPlayer(target, {
-						msg: 'You don\'t see that in there.',
-						styleClass: 'error'
-					});
+					console.log('getting everything from', container.name);
+					itemLen = container.items.length;
+
+					if (itemLen) {
+						for (i; i < itemLen; i += 1) {
+							item = container.items[i];
+
+							if (item.weight <= maxCarry) {
+								World.character.removeFromContainer(container, item);
+
+								World.character.addItem(target, item);
+
+								i -= 1;
+
+								itemLen = container.items.length;
+							}
+						}
+
+						World.msgRoom(roomObj, {
+							msg: target.displayName + ' grabs everything they can.',
+							playerName: target.name,
+							styleClass: 'warning'
+						});
+
+						World.msgPlayer(target, {
+							msg: 'You grab everything!',
+							styleClass: 'blue'
+						});
+
+						World.processEvents('onGet', roomObj.items, roomObj, null, target);
+						World.processEvents('onGet', target, roomObj, roomObj.items);
+
+						World.character.save(target);
+
+						if (typeof fn === 'function') {
+							return fn(target, roomObj, item);
+						}
+					}
 				}
 			}
 		} else {
@@ -1920,12 +1976,12 @@ Cmd.prototype.flee = function(player, command) {
 					player.opponent = false;
 				} else {
 					player.fighting = true;;
-
+/*
 					World.msgPlayer(player.opponent, {
 						msg: '<p>' + player.displayName + ' tries to flee ' + command.arg + '.</p>',
 						styleClass: 'warning'
 					});
-
+*/
 					World.msgPlayer(player, {
 						msg: 'You cannot flee in that direction!',
 						styleClass: 'error'
@@ -2217,7 +2273,12 @@ Cmd.prototype.look = function(target, command) {
 				}
 			} else {
 				item = World.character.getItem(target, command);
-				
+
+				if (!item) {
+					console.log('SEARCHING')
+					item = World.character.getItem(roomObj, command);
+				}
+
 				if (item) {
 					if (item.description) {
 						itemDescription = item.description;
@@ -3208,7 +3269,6 @@ Cmd.prototype.quests = function(target, commands) {
 				listStr = '<h3 class="warning">' + questObj.title  + '</h3>';
 			}
 
-			console.log('here', questsArr[i]);
 			listStr += '<p>' + questObj.entries[questsArr[i].step]  + '</p>';
 
 			qStr += '<li class="list-inline-item">' + listStr  + '</li>';

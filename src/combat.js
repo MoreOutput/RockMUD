@@ -166,7 +166,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 			
 									cnt += 1
 								}
-			
+
 								battle.skills[attacker.refId] = {};
 							}
 						}
@@ -452,17 +452,15 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 
 						if (armorScore < hitroll || World.dice.roll(1, 10) <= 3) {
 							if (opponent.vulnerableTo.length && opponent.vulnerableTo.toString().indexOf(weapon.attackType) !== -1) {
-								damage += World.dice.roll(1, 4 + weapon.level);
+								damage += World.dice.roll(1, 4 + weapon.level, attacker.level);
 							}
 	
 							if (opponent.resistantTo.length && opponent.resistantTo.toString().indexOf(weapon.attackType) !== -1) {
-								damage -= World.dice.roll(1, 4 + weapon.level);
+								damage -= World.dice.roll(1, 4 + weapon.level, attacker.level);
 							}
 
 							if (dodgeChance < World.dice.roll(1, 100)) {
-								damage = World.dice.roll(1 +  weapon.diceMod, damroll + World.dice.roll(damage.diceNum, weapon.diceSides) + attackerMods.str) + 1;
-
-								damage = World.dice.roll(1, damage);
+								damage += World.dice.roll(1, damroll) + World.dice.roll(weapon.diceNum, weapon.diceSides) + attackerMods.str;
 
 								damage -= opponent.meleeRes;
 
@@ -472,7 +470,7 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 
 									attacker.exp += criticalAttackXP;
 
-									damage = (damage * 2 + weapon.diceMod) + attacker.str;
+									damage = (damage * (2 + weapon.diceMod)) + attacker.str;
 								}
 
 								if (damage <= 0) {
@@ -950,6 +948,7 @@ Combat.prototype.removeBattle = function(battleObj) {
 
 	for (i; i < World.battles.length; i += 1) {
 		if (World.battles[i] === battleObj) {
+			console.log('removing battle!');
 			World.battles.splice(0, 1);
 		}
 	}

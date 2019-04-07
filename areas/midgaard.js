@@ -59,6 +59,7 @@ module.exports = {
 					name: 'Rufus',
 					level: 15,
 					short: 'Mayor Rufus',
+					capitalShort: 'Mayor Rufus',
 					long: 'Rufus, current mayor of Midgaard, is here pacing around the room',
 					description: '',
 					inName: 'Mayor Rufus',
@@ -66,14 +67,12 @@ module.exports = {
 					id: 9,
 					area: 'midgaard',
 					weight: 245,
-					diceMod: 5,
 					str: 16,
 					position: 'standing',
 					attackType: 'punch',
 					damroll: 10,
 					hitroll: 10,
 					ac: 20,
-					wanderCheck: 50,
 					// this is asking if we want to run the ai behaviors when theres no players in the room with the mob
 					runOnAliveWhenEmpty: true,
 					items: [{
@@ -157,7 +156,6 @@ module.exports = {
 					weaponType: 'club',
 					diceNum: 1, 
 					diceSides: 2,
-					diceMod: -5,
 					attackType: 'smash',
 					weight: 2,
 					slot: 'hands',
@@ -256,7 +254,6 @@ module.exports = {
 				material: 'iron', 
 				diceNum: 1, 
 				diceSides: 6,
-				diceMod: 0,
 				attackType: 'slash',
 				attackElement: '',
 				weight: 4,
@@ -347,35 +344,11 @@ module.exports = {
 					level: 1,
 					itemType: 'food',
 					weight: 0.5,
-					diceMod: 1,
 					modifiers: {
 						hunger: -3
 					},
 					decay: 3
-				}/*, {
-					name: 'Short Sword',
-					displayName: 'Short Sword',
-					short: 'a common looking short sword',
-					long: 'A short sword with a hilt wrapped in leather straps was left on the ground' ,
-					area: 'midgaard',
-					id: '8',
-					level: 1,
-					itemType: 'weapon',
-					weaponType: 'sword',
-					material: 'iron', 
-					diceNum: 1, 
-					diceSides: 6,
-					diceMod: 0,
-					attackType: 'slash',
-					attackElement: '',
-					weight: 4,
-					slot: 'hands',
-					equipped: false,
-					modifiers: {
-						damroll: 1,
-						hitroll: 1
-					}
-				}*/
+				}
 			]
 		},
 		{
@@ -470,7 +443,6 @@ module.exports = {
 					id: '9',
 					area: 'midgaard',
 					weight: 200,
-					diceMod: 5,
 					str: 18,
 					gold: 1000,
 					position: 'standing',

@@ -155,7 +155,17 @@ Character.prototype.getPassword = function(s, command, fn) {
 
 						World.sendMotd(s);
 
-						roomObj.playersInRoom.push(s.player);
+						if (roomObj) {
+							roomObj.playersInRoom.push(s.player);
+						} else {
+							// if the players last room cannot be found just set them back at their recall
+							roomObj = World.getRoomObject(s.player.recall.area, s.player.recall.roomid);
+
+							s.player.area = s.player.recall.area;
+							s.player.roomid = s.player.recall.roomid;
+
+							roomObj.playersInRoom.push(s.player);
+						}
 	
 						fn(s);
 					});
@@ -852,7 +862,7 @@ Character.prototype.getFist = function(entity) {
 		weaponType: 'fist',
 		material: 'flesh',
 		modifiers: {},
-		diceMod: 0,
+		diceMod: -5,
 		slot: 'hands',
 		short: 'your ' + entity.handsNoun + 's'
 	};
@@ -918,7 +928,7 @@ Character.prototype.getBottle = function(player, command) {
 	i = 0;
 
 	for (i; i < containers.length; i += 1) {
-		if (containers[i].name.indexOf(command.input) !== -1) {
+		if (containers[i].name.indexOf(command.msg) !== -1) {
 			return containers[i];
 		}
 	}
