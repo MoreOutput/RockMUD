@@ -345,11 +345,14 @@ Combat.prototype.getBattleTargetByRefId = function(battle, refId) {
 
 	if (!refId) {
 		refId = battle;
+
+		battle = false;
 	}
 
 	if (!battle) {
 		for (i; i < World.battles.length; i += 1) {
 			battle = World.battles[i];
+
 			numOfPositions = Object.keys(battle.positions).length;
 
 			j = 0;

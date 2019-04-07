@@ -17,6 +17,7 @@ module.exports = {
 	],
 	respawnOn: 8,
 	persistence: false,
+	runOnAliveWhenEmpty: true,
 	rooms: [
 		{
 			id: '1',

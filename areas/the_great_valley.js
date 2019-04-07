@@ -191,7 +191,7 @@ module.exports = {
 						}]
 					};
 
-					if (World.dice.roll(1, 3) === 1) {
+					if (World.dice.roll(1, 4) === 1) {
 						mob.long = "QUEST boar";
 						mob.items = [];
 						mob.items.push({

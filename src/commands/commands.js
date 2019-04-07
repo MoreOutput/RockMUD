@@ -1123,7 +1123,7 @@ Cmd.prototype.recall = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	if (!target.fighting) {
+	if (!target.fighting && !roomObj.preventRecall) {
 		if (!command.msg && target.recall.roomid && target.recall.area) {
 			if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
 				targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
@@ -1155,7 +1155,7 @@ Cmd.prototype.recall = function(target, command) {
 					styleClass: 'error'
 				});
 			}
-		} else if (command.msg && command.arg === 'set' && !targetRoom.preventRecall) {
+		} else if (command.msg && command.second === 'set' && !targetRoom.preventRecall) {
 			target.recall.area = roomObj.area;
 			target.recall.roomid = roomObj.id;
 
@@ -1163,7 +1163,7 @@ Cmd.prototype.recall = function(target, command) {
 				msg: 'You will now recall to the current room!',
 				styleClass: 'green'
 			});
-		}		if (!command.msg && target.recall.roomid && target.recall.area) {
+		} else if (!command.msg && target.recall.roomid && target.recall.area) {
 			if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
 				targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
 
@@ -1194,7 +1194,7 @@ Cmd.prototype.recall = function(target, command) {
 					styleClass: 'error'
 				});
 			}
-		} else if (command.msg && command.arg === 'set' && !targetRoom.preventRecall) {
+		} else if (command.msg && command.second === 'set' && !targetRoom.preventRecall) {
 			target.recall.area = roomObj.area;
 			target.recall.roomid = roomObj.id;
 
@@ -1203,6 +1203,11 @@ Cmd.prototype.recall = function(target, command) {
 				styleClass: 'green'
 			});
 		}
+	} else {
+		World.msgPlayer(target, {
+			msg: 'You can\'t recall!',
+			styleClass: 'warning'
+		});
 	}
 };
 
@@ -2083,16 +2088,14 @@ Cmd.prototype.cast = function(player, command, fn) {
 		if (command.arg || skillObj) {
 			if (!skillObj) {
 				skillObj = World.character.getSkill(player, command.arg);
-
-				if (!skillObj) {
-					skillObj = World.character.getSkill(player, command.second);
-				}
 			}
 
 			if (skillObj && skillObj.id in World.spells) {
 				if (player.cmana > 0) {
 					if (player.position === 'standing') {
 						spellTarget = World.combat.getBattleTargetByRefId(player.refId);
+
+						console.log(skillObj);
 
 						if (skillObj.type.indexOf('passive') === -1) {
 							// combat skills
@@ -2126,7 +2129,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 
 								World.processEvents('onSpell', player, roomObj, skillObj);
 								World.processEvents('onSpell', player.items, roomObj, skillObj);
-								World.processEvents('onSpell', roomObj, player, skillObj);d.processEvents('onSpell', roomObj, player, skillObj);
+								World.processEvents('onSpell', roomObj, player, skillObj);
 							} else {
 								World.msgPlayer(player, {
 									msg: 'You do not see anything by that name here.',

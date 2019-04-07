@@ -266,10 +266,11 @@ Character.prototype.create = function(s) {
 
 	World.extend(s.player, raceObj, function(err, player) {
 		World.extend(s.player, classObj, function(err, player) {
+
 			s.player.refId = World.createRefId(s.player);
 			s.player.charClass = classObj.name;
 			s.player.id = s.player.name;
-			s.player.chp += 30;
+			s.player.hp += 30;
 			s.player.cmana += 5;
 			s.player.cmv += 100;
 			s.player.isPlayer = true;
@@ -286,13 +287,9 @@ Character.prototype.create = function(s) {
 			s.player.baseWis += 10 + s.player.wis;
 			s.player.baseCon += 10 + s.player.con;
 			s.player.baseDex += 10 + s.player.dex;
-
-
-			socket = s.player.socket;
-
 			s.player.mv = s.player.cmv;
 			s.player.mana = s.player.cmana;
-			s.player.hp = s.player.chp;
+			s.player.chp = s.player.hp;
 			s.player.str = s.player.baseStr;
 			s.player.int = s.player.baseInt;
 			s.player.wis = s.player.baseWis;
@@ -300,6 +297,8 @@ Character.prototype.create = function(s) {
 			s.player.dex = s.player.baseDex;
 			s.player.noFollow = false;
 			s.player.noGroup = false;
+
+			socket = s.player.socket;
 
 			character.generateSalt(function(salt) {
 				s.player.salt = salt;
@@ -957,7 +956,7 @@ Character.prototype.getSkill = function(player, skillName) {
 	var i = 0;
 
 	for (i; i < player.skills.length; i += 1) {
-		if (player.skills[i].id === skillName || player.skills[i].display.toLowerCase().indexOf(skillName) === 0) {
+		if (player.skills[i].id === skillName || player.skills[i].display.toLowerCase() === skillName) {
 			return player.skills[i];
 		}
 	}
@@ -1086,15 +1085,13 @@ Character.prototype.addLog = function(player, questId, step, completed, meta) {
 	for (i; i < len; i += 1) {
 		if (World.quests[i].id === questId) {
 			for (prop in World.quests[i].entries) {
-				if (prop === logEntryId) {
-					player.log.push({
-						id: questId,
-						quest: true, // of the log item is a question
-						completed: completed, // if the quest is completed
-						step: 1, // step of the quest
-						info: meta // ad-hoc quest related info
-					});
-				}
+				player.log.push({
+					id: questId,
+					quest: true, // of the log item is a question
+					completed: completed, // if the quest is completed
+					step: 1, // step of the quest
+					info: meta // ad-hoc quest related info
+				});
 			}
 		}
 	}

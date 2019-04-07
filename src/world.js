@@ -871,8 +871,6 @@ World.prototype.setupItem = function(item, area, room, callback) {
 				return callback(error, item);
 			}
 
-			console.log(item.name, item.affects)
-
 			callback(false, item)
 		});
 	} else if (item.items && item.items.length) {		
@@ -1384,8 +1382,6 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 				}
 			}
 		} else {
-			console.log('JHERE', command.arg);
-
 			for (i; i < arr.length; i += 1) {
 				wordArr = arr[i].name.toLowerCase().split(' ');
 
