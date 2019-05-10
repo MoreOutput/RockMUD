@@ -1058,7 +1058,7 @@ Character.prototype.getQuests = function(player) {
 	len = player.log.length;
 
 	for (i; i < len; i += 1) {
-		if (player.log[i].quest === true) {
+		if (player.log[i].type === 'quest') {
 			result.push(player.log[i]);
 		}
 	}
@@ -1077,20 +1077,20 @@ Character.prototype.getLog = function(player, logId) {
 	}
 };
 
-Character.prototype.addLog = function(player, questId, step, completed, meta) {
+Character.prototype.addLog = function(player, questId, step, completed, data) {
 	var i = 0,
 	len = World.quests.length,
 	prop;
 
 	for (i; i < len; i += 1) {
 		if (World.quests[i].id === questId) {
-			for (prop in World.quests[i].entries) {
+			for (prop in World.quests[i].steps) {
 				player.log.push({
 					id: questId,
-					quest: true, // of the log item is a question
+					type: 'quest', // log item reprents a quest
 					completed: completed, // if the quest is completed
 					step: 1, // step of the quest
-					info: meta // ad-hoc quest related info
+					data: World.quests[i].data // ad-hoc quest related info
 				});
 			}
 		}

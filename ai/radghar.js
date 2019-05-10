@@ -1,61 +1,73 @@
 'use strict';
-var World = require('../src/world');
+var World = require('../src/world'),
+towerQuestKey = 'tower_access',
+isElkAntler = function(item) {
+	if (item.area === 'the_great_valley' && item.id === '100') {
+		return true;
+	}
+
+	return false;
+};
 
 /*
 	Fighter Guildmaster and Midgaard Academy guide.
 */
 module.exports = {
 	exclimations: [
-		'The Midgaardian Academy isn\'t much but its better than venturing out with no experience.',
-		'You can <strong>practice</strong> and learn new skills along with <strong>train</strong>ing stats.'
+		'No one has ever reached the top of The Tower.',
+		'Theres a lot of money to be made rummaging around in the Tower. If you make it out.'
 	],
+	onNewItem: function(mob, roomObj, item, player) {
+		var quest =  World.character.getLog(player, towerQuestKey),
+
+		if (!quest.data.permission && isElkAntler(item)) {
+			quest.data.permission = true;
+
+			World.addCommand({
+				cmd: 'say',
+				msg: 'Very nice ' + player.displayName  + ' you have surprised me. You may climb the tower.',
+				roomObj: roomObj
+			}, mob);
+
+			if (!climbSkill) {
+				climbSkill = World.character.getSkill(mob, 'climb');
+
+				World.character.addSkill(player, climbSkill);
+
+				World.msgPlayer(player, {
+					msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>. Improved Climbling increases the chance'
+						+ ' of a successful climb. Type <span class="warning">HELP SKILLS</span> to learn more about using and acquiring skills.'
+						+ '<span class="warning">Each class begins with a set of skills but skills can also be obtained through questing.</span>.'
+				});
+			}
+		}
+	},
 	onSay: function(mob, roomObj, player, command) {
 		var quest,
 		climbSkill;
 
 		if (player.isPlayer && command) {
-			quest = World.character.getLog(player, 'mud_school');
+			quest = World.character.getLog(player, towerQuestKey);
 
 			if (!quest) {
 				if (command.msg.toLowerCase().indexOf('yes') !== -1) {
 					World.addCommand({
 						cmd: 'say',
-						msg: 'Thats great to hear ' + player.displayName  +  '! Let me get you signed up. Just a second...',
+						msg: 'Thats great to hear ' + player.displayName
+							+  ', but everyone has to pay the fee. Give me some ivory and you can climb. If you can\'t try hunting for some Elf antlers of camp.',
 						roomObj: roomObj
 					}, mob);
 
-					World.character.addLog(player, 'mud_school');
+					World.character.addLog(player, towerQuestKey);
 
 					climbSkill = World.character.getSkill(player, 'climb');
-
-					setTimeout(function() {
-						World.addCommand({
-							cmd: 'say',
-							msg: '"Alright, ' + player.name  + ', time for the enterance exam. You see this rope?'
-								+ ' Climb up to the top floor of the Academy Tower. A solider will meet you there." <i class="grey">He points at a rope running up to a window in the tower above. ' 
-								+ 'It is very high.</a> [<strong class="grey">Hint: Move up to continue</strong>]',
-							roomObj: roomObj
-						}, mob);
-
-						if (!climbSkill) {
-							climbSkill = World.character.getSkill(mob, 'climb');
-
-							World.character.addSkill(player, climbSkill);
-
-							World.msgPlayer(player, {
-								msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>. Improved Climbling increases the chance'
-									+ ' of a successful climb, and reduces falling damage.'
-							});
-						}
-					}, 1200);
 				}
-			} else if (quest.step === 1) {
+			} else if (!quest.data.permission) {
 				World.addCommand({
 					cmd: 'say',
-					msg: 'Are you joking ' + player.displayName  +  '? You\'ve already joined the Academy! Finish your studies and stop wasting my time.',
+					msg: 'If you want in, give me some ivory.',
 					roomObj: roomObj
 				}, mob);
-
 			}
 		}
 	},
@@ -63,20 +75,20 @@ module.exports = {
 		var quest;
 
 		if (player.level <= 2) {
-			quest = World.character.getLog(player, 'mud_school');
+			quest = World.character.getLog(player, towerQuestKey);
 
 			if (!quest) {
 				World.addCommand({
 					cmd: 'say',
-					msg: 'Greetings ' + player.displayName + ' are you here to train at the '
-						+ '<strong class="red">Midgaardian Academy</strong>?',
+					msg: player.displayName + ' are you here to climb the '
+						+ '<strong class="red">The Tower</strong>?',
 					roomObj: roomObj
 				}, mob);
-			} else if (quest.entryId === '0') {
+			} else if (!quest.data.permission) {
 				if (World.dice.roll(1, 2) === 1) {
 					World.addCommand({
 						cmd: 'say',
-						msg: 'You\'ve not climbed this damn rope yet ' + player.displayName  + '? I hope you\'re taking this seriously.',
+						msg: 'Can\'t find any ivory ' + player.displayName  + '?',
 						roomObj: roomObj
 					}, mob);
 				}

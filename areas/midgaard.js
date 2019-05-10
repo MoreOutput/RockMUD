@@ -271,8 +271,7 @@ module.exports = {
 			title: 'East of Town Square',
 			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
-			terrain: 'stone-road',
-			terrainMod: 1,
+			terrain: ['stone', 'road'],
 			outdoors: true,
 			exits: [
 				{
@@ -373,7 +372,7 @@ module.exports = {
 				short: 'a leather helmet',
 				long: 'A simple leather helmet was left here' ,
 				area: 'midgaard',
-				id: '3', 
+				id: '3', 	
 				level: 1,
 				itemType: 'armor',
 				material: 'wood', 

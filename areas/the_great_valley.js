@@ -10,10 +10,10 @@ module.exports = {
 	levels : 'All',
 	description : 'The second area.',
 	reloads: 0,
-	author: 'Rocky',
+	author: 'RockMUD',
 	messages: [
 		{
-			msg: 'A warm breeze blows southward toward Midgaard.'
+			msg: 'A warm breeze blows southward toward camp.'
 		}
 	],
 	beforeLoad: function(fn) {
@@ -34,7 +34,7 @@ module.exports = {
 					// copy the template
 					roomObj = JSON.parse(JSON.stringify(World.roomTemplate)),
 					roomObj.id = i + '-' + j;
-					roomObj.content = 'A procedurally generated room. ' + (i + 1) + '-' + (j + 1);
+					roomObj.content = 'Grass covered plains.';
 
 					var titleRoll = World.dice.roll(1, 3);
 
@@ -192,10 +192,10 @@ module.exports = {
 					};
 
 					if (World.dice.roll(1, 4) === 1) {
-						mob.long = "QUEST boar";
+						mob.long = "A large elk with striking white antlers";
 						mob.items = [];
 						mob.items.push({
-							name: 'Boar Tusk', 
+							name: 'Ivory Antlers', 
 							short: 'a small, sharp, boars tusk',
 							long: 'A boars tusk was left here.' ,
 							area: areaId,

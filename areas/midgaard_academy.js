@@ -3,30 +3,31 @@
 var World = require('../src/world');
 
 module.exports = {
-	name: 'Midgaard Academy',
+	name: 'The Tower',
 	id: 'midgaard_academy',
 	type: 'building',
 	levels: 'All',
-	description: 'Famous for preparing new adventuers for the world of ' + World.config.name + '.',
+	description: 'An endless tower. No one knows what\'s at the top.',
 	reloads: 0,
 	author: 'Rocky',
 	messages: [{
 		msg: '<span class=\'grey\'>The sounds of sparring apprentices can be heard from somewhere in the Academy.</span>'
 	}],
 	quests: [{
-		id: 'mud_school',
-		title: 'Midgaard Training Academy',
+		id: 'tower_access',
+		title: 'Tower Entrance',
 		data: {
-			collectedTusks: 0
+			permission: false // player must have towns permission to enter the tower
 		},
-		entries: {
-			1: 'You have joined the Midgaardian Academy! Climb to the top of the tower and begin training and make it official.'
+		steps: {
+			1: 'You need to offer up some ivory to gain acces to The Tower.'
+				+ ' Use the give command to hand Radghar the ivory. Ex: give rad antler. This quest must be done each session.'
 		}
 	}],
 	rooms: [
 		{
 			id: '1',
-			title: 'Academy Entrance',
+			title: 'The Tower',
 			area: 'midgaard_academy',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. '
 				+ 'Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
@@ -48,7 +49,7 @@ module.exports = {
 				charClass: 'fighter',
 				level: 50,
 				short: 'Lord Radghar',
-				long: '<span class="yellow">Radghar</span>, a retired Midgaardian guard captain is here training recruits',
+				long: '<span class="yellow">Radghar</span>, a retired the camp captain is here training recruits',
 				description: '',
 				inName: 'Lord Radghar',
 				race: 'human',

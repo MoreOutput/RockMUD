@@ -307,6 +307,10 @@ Cmd.prototype.give = function(target, command) {
 							styleClass: 'grey',
 							playerName: [receiver.name, target.name]
 						});
+						
+						if (receiver.onNewItem) {
+							World.processEvents('onNewItem', receiver, roomObj, item, target);
+						}
 					} else {
 						World.msgPlayer(target, {
 							msg: 'You don\'t have an item by that name.',
@@ -1603,9 +1607,9 @@ Cmd.prototype.get = function(target, command, fn) {
 								});
 							}
 
-							World.processEvents('onGet', roomObj, target, item);
-							World.processEvents('onGet', item, roomObj, target);
-							World.processEvents('onGet', target, roomObj, item);
+							World.processEvents('onGet', roomObj, target, item); // when the player enters get in the room
+							World.processEvents('onGet', item, roomObj, target); // when the item has get acted on it
+							World.processEvents('onGet', target, roomObj, item); // when the player issues a get command
 
 							World.character.save(target);
 						}
@@ -3272,7 +3276,7 @@ Cmd.prototype.quests = function(target, commands) {
 				listStr = '<h3 class="warning">' + questObj.title  + '</h3>';
 			}
 
-			listStr += '<p>' + questObj.entries[questsArr[i].step]  + '</p>';
+			listStr += '<p>' + questObj.steps[questsArr[i].step]  + '</p>';
 
 			qStr += '<li class="list-inline-item">' + listStr  + '</li>';
 		}
