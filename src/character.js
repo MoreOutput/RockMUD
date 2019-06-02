@@ -539,12 +539,12 @@ Character.prototype.hpRegen = function(target) {
 };
 
 Character.prototype.manaRegen = function(target) {
-	var intMod = World.dice.getIntMod(target) + 1,
-	chanceMod = World.dice.roll(1, 10),
+	var intMod = World.dice.getIntMod(target),
+	chanceMod = World.dice.roll(1, 5),
 	total;
 
 	if (target.cmana < target.mana && target.thirst < 8 && target.hunger < 9) {
-		if (target.mainStat === 'int' || chanceMod > 2) {
+		if (target.mainStat === 'int' || chanceMod > 1) {
 			if (target.position === 'sleeping') {
 				intMod += 2;
 			}
@@ -552,17 +552,17 @@ Character.prototype.manaRegen = function(target) {
 			if (target.thirst >= 3 || target.hunger >= 3) {
 				intMod -= 1;
 			}
-
-			if (!intMod) {
-				intMod = World.dice.roll(1, 2) - 1;
-			}
 			
-			total = World.dice.roll(intMod, 8, target.level/3);
+			if (intMod && World.dice.roll(1, 4) === 1) {
+				total = World.dice.roll(1, 2) + 1;
+			} else {
+				total = 1;
+			}
 
 			target.cmana += total;
 
 			if (target.cmana > target.mana ) {
-				target.cmana = target.mana ;
+				target.cmana = target.mana;
 			}
 		}
 	}
@@ -1084,15 +1084,13 @@ Character.prototype.addLog = function(player, questId, step, completed, data) {
 
 	for (i; i < len; i += 1) {
 		if (World.quests[i].id === questId) {
-			for (prop in World.quests[i].steps) {
-				player.log.push({
-					id: questId,
-					type: 'quest', // log item reprents a quest
-					completed: completed, // if the quest is completed
-					step: 1, // step of the quest
-					data: World.quests[i].data // ad-hoc quest related info
-				});
-			}
+			player.log.push({
+				id: questId,
+				type: 'quest', // log item reprents a quest
+				completed: false, // if the quest is completed
+				step: 1, // step of the quest
+				data: World.quests[i].data // ad-hoc quest related info
+			});
 		}
 	}
 };

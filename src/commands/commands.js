@@ -275,105 +275,111 @@ Cmd.prototype.give = function(target, command) {
 	}
 
 	if (target.position === 'standing' || target.position === 'resting') {
-		if (command.msg && command.msg.indexOf(' ' + World.config.coinage) === -1) {
-			if (canSee) {
-				receiver = World.room.getEntity(roomObj, {
-					arg: command.input,
-					input: command.arg
-				});
+		if (command.msg) {
+			if (command.msg.indexOf(' ' + World.config.coinage) === -1) {
+				if (canSee) {
+					receiver = World.room.getEntity(roomObj, {
+						arg: command.input,
+						input: command.arg
+					});
 
-				if (receiver) {
-					item = World.character.getItem(target, command);
+					if (receiver) {
+						item = World.character.getItem(target, command);
 
-					if (item) {
-						World.character.removeItem(target, item);
+						if (item) {
+							World.character.removeItem(target, item);
 
-						World.character.addItem(receiver, item);
+							World.character.addItem(receiver, item);
 
-						World.msgPlayer(target, {
-							msg: 'You give ' + item.short + ' to ' + receiver.displayName + '.',
-							styleClass: 'green'
-						});
-
-						if (receiver.isPlayer) {
-							World.msgPlayer(receiver, {
-								msg: target.displayName + ' gives you ' + item.short + '.',
+							World.msgPlayer(target, {
+								msg: 'You give ' + item.short + ' to ' + receiver.displayName + '.',
 								styleClass: 'green'
 							});
-						}
 
-						World.msgRoom(roomObj, {
-							msg: 'roomMsg',
-							styleClass: 'grey',
-							playerName: [receiver.name, target.name]
-						});
-						
-						if (receiver.onNewItem) {
-							World.processEvents('onNewItem', receiver, roomObj, item, target);
+							if (receiver.isPlayer) {
+								World.msgPlayer(receiver, {
+									msg: target.displayName + ' gives you ' + item.short + '.',
+									styleClass: 'green'
+								});
+							}
+
+							World.msgRoom(roomObj, {
+								msg: 'roomMsg',
+								styleClass: 'grey',
+								playerName: [receiver.name, target.name]
+							});
+							
+							if (receiver.onNewItem) {
+								World.processEvents('onNewItem', receiver, roomObj, item, target);
+							}
+						} else {
+							World.msgPlayer(target, {
+								msg: 'You don\'t have an item by that name.',
+								styleClass: 'error'
+							});
 						}
 					} else {
 						World.msgPlayer(target, {
-							msg: 'You don\'t have an item by that name.',
+							msg: 'You don\'t see anyone by that name.',
+							styleClass: 'error'
+						});
+					}
+				}
+			} else if (!Number.isNaN(parseInt(command.second)) && (command.arg.indexOf(World.config.coinage) !== -1 || command.arg.indexOf('coin') !== -1)) {
+				if (command.arg !== 'all') {
+					goldToTransfer = parseInt(command.second);
+				} else {
+					goldToTransfer = target.gold;
+				}
+
+				if (goldToTransfer) {
+					if (goldToTransfer <= target.gold) {
+						if (command.input.indexOf('to') === -1) {
+							command.input = command.input.replace(World.config.coinage, '').replace(/ /g, '');
+						} else {
+							command.input = command.input.replace(World.config.coinage + ' to', '').replace(/ /g, '');
+						}
+
+						receiver = World.room.getEntity(roomObj, {
+							arg: command.input
+						});
+
+						if (receiver) {
+							target.gold -= goldToTransfer;
+							receiver.gold += goldToTransfer;
+
+							World.msgPlayer(target,  {
+								msg: 'You give ' + receiver.displayName + ' some ' + World.config.coinage + '.',
+								styleClass: 'warning'
+							});
+
+							World.msgPlayer(receiver,  {
+								msg: target.displayName + ' gives you ' + goldToTransfer + ' ' + World.config.coinage + 's.',
+								styleClass: 'green'
+							});
+
+							if (receiver.onGoldReceived) {
+								World.processEvents('onGoldReceived', receiver, roomObj, goldToTransfer, target);
+							}
+						}
+					} else {
+						World.msgPlayer(target,  {
+							msg: 'That\'s more ' + World.config.coinage + ' than you have.',
 							styleClass: 'error'
 						});
 					}
 				} else {
-					World.msgPlayer(target, {
-						msg: 'You don\'t see anyone by that name.',
-						styleClass: 'error'
-					});
-				}
-			}
-		} else if (command.msg && command.input.indexOf(World.config.coinage) !== -1) {
-			if (command.arg !== 'all') {
-				goldToTransfer = parseInt(command.arg);
-			} else {
-				goldToTransfer = target.gold;
-			}
-
-			if (goldToTransfer) {
-				if (goldToTransfer >= target.gold) {
-					if (command.input.indexOf('to') === -1) {
-						command.input = command.input.replace(World.config.coinage, '').replace(/ /g, '');
-					} else {
-						command.input = command.input.replace(World.config.coinage + ' to', '').replace(/ /g, '');
-					}
-
-					receiver = World.room.getEntity(roomObj, {
-						arg: command.input
-					});
-
-					if (receiver) {
-						target.gold -= goldToTransfer;
-						receiver.gold += goldToTransfer;
-
-						World.msgPlayer(target,  {
-							msg: 'You give ' + receiver.displayName + ' some ' + World.config.coinage + '.',
-							styleClass: 'warning'
-						});
-
-						World.msgPlayer(receiver,  {
-							msg: target.displayName + ' gives you ' + goldToTransfer + ' ' + World.config.coinage + 's.',
-							styleClass: 'green'
-						});
-					}
-				} else {
 					World.msgPlayer(target,  {
-						msg: 'That\'s more ' + World.config.coinage + ' than you have.',
+						msg: 'Not a valid number of ' + World.config.coinage  + '.',
 						styleClass: 'error'
 					});
 				}
 			} else {
-				World.msgPlayer(target,  {
-					msg: 'Not a valid number of ' + World.config.coinage  + '.',
+				World.msgPlayer(target, {
+					msg: 'Give what? Example: <strong>give sword elf</strong> OR <strong>give 100 coins elf</strong>',
 					styleClass: 'error'
 				});
 			}
-		} else {
-			World.msgPlayer(target, {
-				msg: 'Give what? Example: <strong>give sword elf</strong>',
-				styleClass: 'error'
-			});
 		}
 	} else {
 	
@@ -1696,7 +1702,6 @@ Cmd.prototype.get = function(target, command, fn) {
 						});
 					}
 				} else {
-					console.log('getting everything from', container.name);
 					itemLen = container.items.length;
 
 					if (itemLen) {
@@ -2099,8 +2104,6 @@ Cmd.prototype.cast = function(player, command, fn) {
 					if (player.position === 'standing') {
 						spellTarget = World.combat.getBattleTargetByRefId(player.refId);
 
-						console.log(skillObj);
-
 						if (skillObj.type.indexOf('passive') === -1) {
 							// combat skills
 							if (spellTarget) {
@@ -2282,7 +2285,6 @@ Cmd.prototype.look = function(target, command) {
 				item = World.character.getItem(target, command);
 
 				if (!item) {
-					console.log('SEARCHING')
 					item = World.character.getItem(roomObj, command);
 				}
 
@@ -3276,9 +3278,13 @@ Cmd.prototype.quests = function(target, commands) {
 				listStr = '<h3 class="warning">' + questObj.title  + '</h3>';
 			}
 
-			listStr += '<p>' + questObj.steps[questsArr[i].step]  + '</p>';
+			listStr += questObj.steps[questsArr[i].step];
 
-			qStr += '<li class="list-inline-item">' + listStr  + '</li>';
+			if (questsArr[i].completed) {
+				listStr += ' <strong class="green">(Complete)</strong>';
+			}
+
+			qStr += '<li class="list-inline-item"><p>' + listStr  + '</p></li>';
 		}
 	}
 

@@ -2,7 +2,7 @@
 	"name": "Cleric",
 	"classAbbr": "Cle",
 	"playable": true,
-	"mana": 20,
+	"mana": 1,
 	"mainStat": "wis",
 	"skills": [
 		{

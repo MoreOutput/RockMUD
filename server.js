@@ -206,3 +206,5 @@ World.setup(io, cfg, function() {
 		});
 	});
 });
+
+module.exports = World;

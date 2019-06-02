@@ -181,7 +181,6 @@ module.exports = {
 						str: 3,
 						size: {value: 2, display: 'very small'},
 						onRolled: function(mob) {
-							console.log('rolling', mob.chp)
 							if (World.dice.roll(1, 3) > 1) {
 								mob.behaviors = [];
 							}

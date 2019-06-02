@@ -3,31 +3,32 @@
 var World = require('../src/world');
 
 module.exports = {
-	name: 'The Tower',
+	name: 'The Hole',
 	id: 'midgaard_academy',
 	type: 'building',
 	levels: 'All',
-	description: 'An endless tower. No one knows what\'s at the top.',
+	description: 'An large mine. It\'s origins are unknown and no one has ever reached the bottom',
 	reloads: 0,
 	author: 'Rocky',
 	messages: [{
-		msg: '<span class=\'grey\'>The sounds of sparring apprentices can be heard from somewhere in the Academy.</span>'
+		msg: '<span class=\'grey\'>A cold northern gust makes its way through the area.</span>'
 	}],
 	quests: [{
-		id: 'tower_access',
-		title: 'Tower Entrance',
+		id: 'mine_access',
+		title: 'Going Deep',
 		data: {
-			permission: false // player must have towns permission to enter the tower
+			// the player must give Radhghar 1 gold to enter the mines.
+			permission: false
 		},
 		steps: {
-			1: 'You need to offer up some ivory to gain acces to The Tower.'
-				+ ' Use the give command to hand Radghar the ivory. Ex: give rad antler. This quest must be done each session.'
+			1: 'The Northern Mine is a largley undiscovered hole in the ground with unknown origins. Give Radghar a gold coin to gain access to the mine.'
+				+ ' Example: give 1 gold rad'
 		}
 	}],
 	rooms: [
 		{
 			id: '1',
-			title: 'The Tower',
+			title: 'Entrance to the Mine',
 			area: 'midgaard_academy',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. '
 				+ 'Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
@@ -241,8 +242,6 @@ module.exports = {
 				items: [],
 				runOnAliveWhenEmpty: false,
 				onAlive: function(thomas, room) {
-					console.log(thomas.name, room.id);
-
 					if (room.playersInRoom.length && World.dice.roll(1, 10) === 1) {
 						World.addCommand({
 							cmd: 'emote',

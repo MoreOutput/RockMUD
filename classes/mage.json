@@ -2,7 +2,7 @@
 	"name": "Mage",
 	"classAbbr": "Mag",
 	"playable": true,
-	"mana": 30,
+	"mana": 2,
 	"mainStat": "int",
 	"skills": [
 		{

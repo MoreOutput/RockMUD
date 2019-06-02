@@ -1,45 +1,41 @@
 'use strict';
 var World = require('../src/world'),
-towerQuestKey = 'tower_access',
-isElkAntler = function(item) {
-	if (item.area === 'the_great_valley' && item.id === '100') {
-		return true;
-	}
+towerQuestKey = 'mine_access';
 
-	return false;
-};
-
-/*
-	Fighter Guildmaster and Midgaard Academy guide.
-*/
 module.exports = {
 	exclimations: [
-		'No one has ever reached the top of The Tower.',
-		'Theres a lot of money to be made rummaging around in the Tower. If you make it out.'
+		'No one has ever reached the bottom of the Northern Mine.',
+		'Theres a lot of money to be made rummaging around down there.'
 	],
-	onNewItem: function(mob, roomObj, item, player) {
-		var quest =  World.character.getLog(player, towerQuestKey),
+	onGoldReceived: function(mob, roomObj, gold, player) {
+		var quest =  World.character.getLog(player, towerQuestKey);
 
-		if (!quest.data.permission && isElkAntler(item)) {
+		console.log('gotten gold', gold, quest);
+		
+		if (quest) {
+			if (!quest.data.permission && gold) {
+				quest.data.permission = true;
+				quest.completed = true;
+
+				World.addCommand({
+					cmd: 'say',
+					msg: 'Very nice ' + player.displayName  + '. Im sure you\'ll earn this back in no time. You can head in.',
+					roomObj: roomObj
+				}, mob);
+			}
+		} else {
+			World.character.addLog(player, towerQuestKey);
+
+			quest = World.character.getLog(player, towerQuestKey);
+			
+			quest.completed = true;
 			quest.data.permission = true;
 
 			World.addCommand({
 				cmd: 'say',
-				msg: 'Very nice ' + player.displayName  + ' you have surprised me. You may climb the tower.',
+				msg: 'Your fee is paid. You may enter the mine.',
 				roomObj: roomObj
 			}, mob);
-
-			if (!climbSkill) {
-				climbSkill = World.character.getSkill(mob, 'climb');
-
-				World.character.addSkill(player, climbSkill);
-
-				World.msgPlayer(player, {
-					msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>. Improved Climbling increases the chance'
-						+ ' of a successful climb. Type <span class="warning">HELP SKILLS</span> to learn more about using and acquiring skills.'
-						+ '<span class="warning">Each class begins with a set of skills but skills can also be obtained through questing.</span>.'
-				});
-			}
 		}
 	},
 	onSay: function(mob, roomObj, player, command) {
@@ -54,18 +50,16 @@ module.exports = {
 					World.addCommand({
 						cmd: 'say',
 						msg: 'Thats great to hear ' + player.displayName
-							+  ', but everyone has to pay the fee. Give me some ivory and you can climb. If you can\'t try hunting for some Elf antlers of camp.',
+							+  ', but everyone has to pay the fee. Give me some gold and you can go in.',
 						roomObj: roomObj
 					}, mob);
 
 					World.character.addLog(player, towerQuestKey);
-
-					climbSkill = World.character.getSkill(player, 'climb');
 				}
 			} else if (!quest.data.permission) {
 				World.addCommand({
 					cmd: 'say',
-					msg: 'If you want in, give me some ivory.',
+					msg: 'If you want to go down today you need to give me some gold.',
 					roomObj: roomObj
 				}, mob);
 			}
@@ -80,15 +74,14 @@ module.exports = {
 			if (!quest) {
 				World.addCommand({
 					cmd: 'say',
-					msg: player.displayName + ' are you here to climb the '
-						+ '<strong class="red">The Tower</strong>?',
+					msg: player.displayName + ', we were told you were coming. Are you seeking access to <strong class="red">the Mine</strong>?',
 					roomObj: roomObj
 				}, mob);
 			} else if (!quest.data.permission) {
 				if (World.dice.roll(1, 2) === 1) {
 					World.addCommand({
 						cmd: 'say',
-						msg: 'Can\'t find any ivory ' + player.displayName  + '?',
+						msg: 'Can\'t find any gold ' + player.displayName  + '?',
 						roomObj: roomObj
 					}, mob);
 				}
