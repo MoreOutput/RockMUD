@@ -3341,8 +3341,8 @@ Cmd.prototype.score = function(target, command) {
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
 					'<li class="stat-position">You are currently <span class="green">' + (target.fighting === false ? target.position : target.position + ' and fighting') + '</span>.</li>' +
-					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' '
-						+ target.charClass + ' of ' + target.size.display + ' size with ' 
+					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' <string class="red">'
+						+ target.charClass + '</strong> of ' + target.size.display + ' size with ' 
 						+ '<span class="warning">' + target.gold + ' ' + World.config.coinage  + '</span>.</li>' +
 					'<li class="stat-carry">You are carrying ' 
 						+ target.weight + '/' + World.character.getMaxCarry(target) + ' pounds.</li>' +

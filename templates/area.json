@@ -29,5 +29,6 @@
 	"preventRespawn": false,
 	"persistence": false,
 	"wasSaved": false,
-	"affects": []
+	"affects": [],
+	"titleStyleClass": ""
 }

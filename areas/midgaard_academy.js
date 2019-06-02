@@ -21,14 +21,14 @@ module.exports = {
 			permission: false
 		},
 		steps: {
-			1: 'The Northern Mine is a largley undiscovered hole in the ground with unknown origins. Give Radghar a gold coin to gain access to the mine.'
+			1: 'The Southern Mine is the main source of gold. Give Radghar a gold coin to gain access to the mine.'
 				+ ' Example: give 1 gold rad'
 		}
 	}],
 	rooms: [
 		{
 			id: '1',
-			title: 'Entrance to the Mine',
+			title: 'Just outside of the the Mine',
 			area: 'midgaard_academy',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. '
 				+ 'Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
@@ -36,11 +36,11 @@ module.exports = {
 			light: true,
 			exits: [
 				{
-					cmd: 'down',
-					id: '1',
+					cmd: 'north',
+					id: '4',
 					area: 'midgaard'
 				}, {
-					cmd: 'up',
+					cmd: 'down',
 					id: '2'
 				}
 			],

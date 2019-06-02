@@ -666,6 +666,10 @@ World.prototype.setupArea = function(area, callback) {
 	setup = function() {
 		for (i; i < area.rooms.length; i += 1) {
 			world.extend(area.rooms[i], world.roomTemplate, function(err, room) {
+				if (area.titleStyleClass) {
+					room.titleStyleClass = area.titleStyleClass;
+				}
+				
 				world.setupRoom(area, room, function(error, area, room) {
 					room.extended = true;
 
@@ -1094,6 +1098,7 @@ World.prototype.getAllPlayerItemsFromArea = function(areaId) {
 World.prototype.sendMotd = function(s) {
 	this.msgPlayer(s, {
 		msg : this.motd,
+		noPrompt: true,
 		evt: 'onLogged'
 	});
 };

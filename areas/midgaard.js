@@ -6,7 +6,7 @@ module.exports = {
 	id: 'midgaard',
 	type: 'city',
 	levels: 'All',
-	description: 'The first city.',
+	description: 'Base camp for the Southern Mine across the sea.',
 	reloads: 0,
 	created: '',
 	saved: '',
@@ -21,10 +21,10 @@ module.exports = {
 	rooms: [
 		{
 			id: '1',
-			title: 'Midgaard Town Square',
+			title: 'Center of Camp',
 			light: true,
 			area: 'midgaard',
-			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
+			content: 'An open space at the intersection of rows upon rows of fur draped tents. A large fire warms the area.',
 			outdoors: true,
 			exits: [
 				{
@@ -39,10 +39,6 @@ module.exports = {
 				}, {
 					cmd: 'west',
 					id: '5'
-				}, {
-					cmd: 'up',
-					id: '1',
-					area: 'midgaard_academy'
 				}, {
 					cmd: 'down',
 					id: '6',
@@ -309,6 +305,11 @@ module.exports = {
 				{
 					cmd: 'north',
 					id: '1'
+				},
+				{
+					cmd: 'south',
+					id: '1',
+					area: 'midgaard_academy'
 				}
 			],
 			playersInRoom: [],

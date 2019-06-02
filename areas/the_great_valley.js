@@ -13,7 +13,8 @@ module.exports = {
 	author: 'RockMUD',
 	messages: [
 		{
-			msg: 'A warm breeze blows southward toward camp.'
+			msg: 'A cold breeze blows southward toward camp.',
+			msg: 'Light bounces off of the snow and nearly blinds you for a moment.'
 		}
 	],
 	beforeLoad: function(fn) {

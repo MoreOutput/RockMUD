@@ -141,8 +141,7 @@ color: purple;
 border-top: 1px dashed #ffcc00;
 border-bottom: 1px dashed #ffcc00;
 color: #ff0033;
-padding: .8em 0 0 0;
-margin: .5em 0 1em 0;
+padding: 1em 1em .25em 1em;
 font-weight: bold;
 }
 .cprompt {
