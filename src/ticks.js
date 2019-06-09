@@ -2,7 +2,7 @@
 var fs = require('fs'),
 World = require('./world');
 
-// time, saved to time.json every 12 hours
+// time
 setInterval(function() {
 	var i = 0,
 	areaMsg,
@@ -182,10 +182,8 @@ setInterval(function() {
 		area = World.areas[i];
 		playersInArea = World.getPlayersByArea(World.areas[i].id);
 		
-		if (playersInArea.length) {
-			refresh = false;
-		} else if (!area.preventRespawn) {
-			if (World.dice.roll(1, 4) > 1) {
+		if (!playersInArea.length && !area.preventRespawn) {
+			if (World.dice.roll(1, 4) > 1) { // 25% chance of incrementing respawnTick 
 				if (area.respawnOn > area.respawnTick) {
 					area.respawnTick += 1;
 				}
@@ -484,9 +482,19 @@ setInterval(function() {
 
 	if (World.dice.roll(1, 3) <= 2) {
 		for (i; i < World.players.length; i += 1) {
-			World.character.hpRegen(World.players[i]);
-			World.character.manaRegen(World.players[i]);
-			World.character.mvRegen(World.players[i]);
+			if (!World.players[i].fighting) {
+				World.character.hpRegen(World.players[i]);
+				World.character.manaRegen(World.players[i]);
+				World.character.mvRegen(World.players[i]);
+			}
+
+			if (World.players[i].hunger >= 10) {
+				World.character.hunger(World.players[i]);
+			}
+			
+			if (World.players[i].thirst >= 10) {
+				World.character.thirst(World.players[i]);
+			}
 		}
 	}
 }, 32000);

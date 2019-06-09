@@ -12,8 +12,8 @@ module.exports = {
 	saved: '',
 	author: 'Rocky',
 	messages: [
-		{msg: 'A cool breeze blows through the streets of Midgaard.'},
-		{msg: 'The bustle of the city can be distracting. Keep an eye out for thieves.'}
+		{msg: 'A cold breeze blows through the camp.'},
+		{msg: 'A strong southern gust tests the tents.'}
 	],
 	respawnOn: 8,
 	persistence: false,
@@ -21,10 +21,10 @@ module.exports = {
 	rooms: [
 		{
 			id: '1',
-			title: 'Center of Camp',
+			title: 'Center of the Southern Mine Encampment',
 			light: true,
 			area: 'midgaard',
-			content: 'An open space at the intersection of rows upon rows of fur draped tents. A large fire warms the area.',
+			content: 'An open space at the intersection of rows upon rows of snow covered tents. A large fire warms the area.',
 			outdoors: true,
 			exits: [
 				{
@@ -53,13 +53,13 @@ module.exports = {
 			playersInRoom: [],
 			monsters: [
 				{
-					name: 'Rufus',
+					name: 'Expedition Leader William',
+					lastName: 'Green',
 					level: 15,
-					short: 'Mayor Rufus',
-					capitalShort: 'Mayor Rufus',
-					long: 'Rufus, current mayor of Midgaard, is here pacing around the room',
+					short: 'Expedition Leader William Green',
+					long: 'William Green the leader of the current mine expedition is here overseeing camp activities',
 					description: '',
-					inName: 'Mayor Rufus',
+					inName: 'Expedition Leader William',
 					race: 'human',
 					id: 9,
 					area: 'midgaard',
@@ -70,55 +70,93 @@ module.exports = {
 					damroll: 10,
 					hitroll: 10,
 					ac: 20,
-					// this is asking if we want to run the ai behaviors when theres no players in the room with the mob
 					runOnAliveWhenEmpty: true,
-					items: [{
-						name: 'Midgaard city key',
-						short: 'a thin gold key',
-						long: 'A thin gold key with a ruby embbeded to the end lies here',
-						area: 'midgaard',
-						id: '10',
-						level: 1,
-						itemType: 'key',
-						material: 'gold',
-						weight: 0,
-						slot: '',
-						value: 1000,
-						equipped: false,
-						isKey: true
-					}],
+					items: [
+						{
+							name: 'Leather Armor',
+							short: 'a leather chestplate',
+							long: 'Some leather armor was left here',
+							area: 'midgaard',
+							id: '111',
+							level: 1,
+							itemType: 'armor',
+							material: 'leather',
+							ac: 3,
+							weight: 1,
+							slot: 'body',
+							equipped: false,
+							value: 5
+						}, {
+							name: 'Torch',
+							short: 'a wooden torch',
+							long: 'A wooden torch rests on the ground',
+							area: 'midgaard',
+							id: '104', 
+							level: 1,
+							itemType: 'weapon',
+							material: 'wood',
+							weaponType: 'club',
+							diceNum: 1, 
+							diceSides: 2,
+							attackType: 'smash',
+							weight: 2,
+							slot: 'hands',
+							equipped: false,
+							light: true,
+							lightDecay: 10,
+							flickerMsg: '',
+							extinguishMsg: '',
+							behaviors: [{
+								module: 'cursed_item'
+							}],
+							spell: {
+								id: 'spark',
+								display: 'Spark',
+								mod: 0,
+								train: 85,
+								type: 'spell',
+								wait: 2
+							}
+						}, {
+							name: 'Burlap sack',
+							short: 'a worn, tan, burlap sack',
+							long: 'A tan burlap sack with frizzed edges and various stains lies here',
+							area: 'midgaard',
+							id: '27',
+							level: 1,
+							itemType: 'container',
+							weight: 1,
+							items: [{
+								name: 'Sewer key', 
+								short: 'small rusty key',
+								long: 'A small rusty key made iron was left here',
+								area: 'midgaard',
+								id: '101',
+								level: 1,
+								itemType: 'key',
+								material: 'iron', 
+								weight: 0,
+								slot: '',
+								value: 1,
+								equipped: false,
+								isKey: true
+							}],
+							isOpen: true,
+							carryLimit: 50
+						}
+					],
 					behaviors: [{
 						module: 'mayor'
 					}, {
-						module: 'wander'
-					}]
-				}, {
-					name: 'Hound Dog',
-					displayName: 'Hunting hound',
-					level: 3,
-					short: 'a healthy looking brown and white hound',
-					long: 'A large spotted brown and white hound sniffs about the area',
-					inName: 'A canine',
-					race: 'animal',
-					id: '6',
-					area: 'midgaard',
-					weight: 120,
-					position: 'standing',
-					attackType: 'bite',
-					ac: 4,
-					hp: 25,
-					gold: 1,
-					size: {value: 2, display: 'very small'},
-					behaviors: [{
 						module: 'wander'
 					}]
 				}
 			],
 			items: [
 				{
-					name: 'Fountain',
-					short: 'a large stone fountain',
-					long: 'A large stone fountain full of sparkling water',
+					name: 'Water Barrel',
+					short: 'a barrel of fresh water',
+					long: 'A large wooden barrel filled with water',
 					area: 'midgaard',
 					id: '112',
 					waterSource: true,
@@ -127,77 +165,6 @@ module.exports = {
 						thirst: -1
 					},
 					itemType: 'ornament'
-				}, {
-					name: 'Leather Armor',
-					short: 'a leather chestplate',
-					long: 'Some leather armor was left here',
-					area: 'midgaard',
-					id: '111',
-					level: 1,
-					itemType: 'armor',
-					material: 'leather',
-					ac: 3,
-					weight: 1,
-					slot: 'body',
-					equipped: false,
-					value: 5
-				}, {
-					name: 'Torch',
-					short: 'a wooden torch',
-					long: 'A wooden torch rests on the ground',
-					area: 'midgaard',
-					id: '104', 
-					level: 1,
-					itemType: 'weapon',
-					material: 'wood',
-					weaponType: 'club',
-					diceNum: 1, 
-					diceSides: 2,
-					attackType: 'smash',
-					weight: 2,
-					slot: 'hands',
-					equipped: false,
-					light: true,
-					lightDecay: 10,
-					flickerMsg: '',
-					extinguishMsg: '',
-					behaviors: [{
-						module: 'cursed_item'
-					}],
-					spell: {
-						id: 'spark',
-						display: 'Spark',
-						mod: 0,
-						train: 85,
-						type: 'spell',
-						wait: 2
-					}
-				}, {
-					name: 'Burlap sack',
-					short: 'a worn, tan, burlap sack',
-					long: 'A tan burlap sack with frizzed edges and various stains lies here',
-					area: 'midgaard',
-					id: '27',
-					level: 1,
-					itemType: 'container',
-					weight: 1,
-					items: [{
-						name: 'Sewer key', 
-						short: 'small rusty key',
-						long: 'A small rusty key made iron was left here',
-						area: 'midgaard',
-						id: '101',
-						level: 1,
-						itemType: 'key',
-						material: 'iron', 
-						weight: 0,
-						slot: '',
-						value: 1,
-						equipped: false,
-						isKey: true
-					}],
-					isOpen: true,
-					carryLimit: 50
 				}
 			],
 			beforeEnter: function(roomObj, fromRoom, target) {
@@ -209,9 +176,9 @@ module.exports = {
 		},
 		{
 			id: '2',
-			title: 'North of Town Square',
+			title: 'North of Camp Center',
 			area: 'midgaard',
-			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
+			content: 'A couple of large stained tents are here shuttering in the wind. Wood cutting blocks reside in front of both settlements but little else can be found.',
 			outdoors: true,
 			exits: [
 				{
@@ -264,10 +231,11 @@ module.exports = {
 		},
 		{
 			id: '3',
-			title: 'East of Town Square',
+			title: 'East of Camp Center',
 			area: 'midgaard',
-			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
-			terrain: ['stone', 'road'],
+			content: 'A distance away from camp center the snow is about a foot deeper and is carved with the tracks of people traveling to and from the eastern forest.',
+			terrain: ['snow', 'road'],
+			moveMod: 2,
 			outdoors: true,
 			exits: [
 				{
@@ -276,7 +244,25 @@ module.exports = {
 				}
 			],
 			playersInRoom: [],
-			monsters: [],
+			monsters: [{
+				name: 'Skipp',
+				displayName: 'Skipp',
+				level: 3,
+				short: 'Skipp, an enormous mastiff with brown and white spots',
+				long: 'Skipp, William Green\'s large spotted mastiff sniffs about the area',
+				inName: 'A canine',
+				race: 'animal',
+				id: '6',
+				area: 'midgaard',
+				weight: 120,
+				position: 'standing',
+				attackType: 'bite',
+				hp: 25,
+				size: {value: 3, display: 'medium'},
+				behaviors: [{
+					module: 'wander'
+				}]
+			}],
 			items: [{
 				name: 'Brown waterskin', 
 				short: 'a light brown waterskin',
@@ -297,9 +283,9 @@ module.exports = {
 		},
 		{
 			id: '4',
-			title: 'South of Town Square',
+			title: 'South of Camp Center',
 			area: 'midgaard',
-			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
+			content: 'The southern trail from camp is well traveled. The smithing tent is just east of here and the bustle of the mine can be seen to the south.',
 			outdoors: true,
 			exits: [
 				{
@@ -354,9 +340,9 @@ module.exports = {
 		},
 		{
 			id: '5',
-			title: 'West of Town Square',
+			title: 'West of Camp Center',
 			area: 'midgaard',
-			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
+			content: 'Toward the docks.',
 			exits: [
 				{
 					cmd: 'west',
@@ -422,7 +408,7 @@ module.exports = {
 		},
 		{
 			id: '8',
-			title: 'The General Store',
+			title: 'Tom\'s General Goods and Supplies',
 			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			outdoors: false,
@@ -436,9 +422,11 @@ module.exports = {
 			monsters: [
 				{
 					name: 'Thomas',
+					lastName: 'Kerr',
+					displayName: 'Thomas Kerr',
 					level: 15,
-					short: 'Thomas, the dwarven shopkeep',
-					long: 'Thomas the dwarven shopkeeper is here',
+					short: 'Thomas the Storekeeper',
+					long: 'Thomas Kerr the Dwarven Storekeeper is here',
 					description: '',
 					race: 'dwarf',
 					id: '9',

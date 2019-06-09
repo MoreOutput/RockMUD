@@ -5,6 +5,7 @@ window.onload = function() {
 	node = document.getElementById('cmd'),
 	rowCnt = 0,
 	canSend = true,
+	logged = false,
 	aliases = {
 		n: 'move north',
 		e: 'move east',
@@ -26,9 +27,9 @@ window.onload = function() {
 		sca: 'scan',
 		i: 'inventory',
 		sc: 'score',
+		stats: 'score',
 		o: 'open',
 		op: 'open',
-		stats: 'score',
 		eq: 'equipment',
 		equip: 'wear',
 		we: 'wear',
@@ -64,6 +65,7 @@ window.onload = function() {
 		gi: 'give',
 		wield: 'wear',
 		dr: 'drop',
+		dri: 'drink',
 		j: 'quests',
 		ql: 'quests',
 		quest: 'quests',
@@ -128,13 +130,6 @@ window.onload = function() {
 			}(nodes[i], i));
 		}
 	},
-	parseCmd = function(r) {
-		if (r.msg !== undefined) {
-			r.msg = r.msg.replace(/ /g, ' ').trim();
-
-			ws.send(JSON.stringify(r));
-		}
-	},
 	checkAlias = function(cmdStr, fn) { 
 		var keys = Object.keys(aliases),
 		i = 0,
@@ -163,31 +158,41 @@ window.onload = function() {
 			return fn(cmd);
 		}
 	},
-	send = function(e) {
-		var messageNodes = [],
-		msg = node.value.trim(),
+	send = function(e, addToLog = true) {
+		var msg = node.value.trim(),
 		msgObj = {
 			msg: checkAlias(msg, function(cmd) {
 				return cmd;
 			}),
+			addToLog: addToLog,
 			emit: 'cmd'
 		};
 
 		e.preventDefault();
 
 		if (canSend) {
-			node.value = '';
-			node.focus();
-
 			canSend = false;
 
 			ws.send(JSON.stringify(msgObj));
 
+			if (logged && msgObj.msg && addToLog) {
+				var onSendEvt = new CustomEvent('onSend');
+				
+				onSendEvt.data = msgObj;
+
+				document.dispatchEvent(onSendEvt);
+			}
+
+			node.value = '';
+			node.focus();
+		
 			return false;
 		} else {
 			return false;
 		}
-	};
+	},
+	// variables related to command log ui
+	maxCommandMemory = 6;
 
 	document.onclick = function() {
 		node.focus();
@@ -203,8 +208,40 @@ window.onload = function() {
 	document.addEventListener('onLogged', function(e) {
 		e.preventDefault();
 
+		logged = true;
+
 		node.type = 'text';
-		node.placeholder = 'Enter a Command -- type \'help commands\' for a list of basic commands';
+		node.placeholder = 'Enter a Command -- type \'help commands\' for a list of common commands';
+	}, false);
+
+	// when a command has been sent to the server
+	document.addEventListener('onSend', function(e) {
+		var parentNode = document.getElementById('prev-cmd-list');
+
+		e.preventDefault();
+
+		if (e.data.msg.trim().length > 3) {
+			var currentCmds = document.querySelectorAll('.prev-cmd');
+
+			if (currentCmds.length >= maxCommandMemory) {
+				parentNode.removeChild(currentCmds[currentCmds.length - 1].parentElement);
+			}			
+			
+			var newListItem = document.createElement('li');
+			var newButton = document.createElement('button');
+			newButton.type = 'button';
+			newButton.innerHTML = e.data.msg;
+			newButton.classList = 'prev-cmd link-btn';
+
+			newButton.onclick = function(e) {
+				node.value = newButton.innerHTML;
+
+				send(e, false);
+			};
+
+			newListItem.append(newButton);
+			parentNode.prepend(newListItem);
+		}
 	}, false);
 
 	document.getElementById('console').onsubmit = function (e) {
@@ -228,6 +265,7 @@ window.onload = function() {
 			document.dispatchEvent(r.evt);
 		}
 	});
+
 
 	setInterval(function() {
 		canSend = true;

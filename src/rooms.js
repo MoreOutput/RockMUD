@@ -130,7 +130,6 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 };
 
 // Get an exit from a room by direction; 
-// empty direction results in an array of all exit objects
 Room.prototype.getExit = function(roomObj, direction) { 
 	var i = 0;
 
@@ -139,6 +138,22 @@ Room.prototype.getExit = function(roomObj, direction) {
 			if (direction === roomObj.exits[i].cmd) {
 				return roomObj.exits[i];
 			} else if (roomObj.exits[i].door && roomObj.exits[i].name === direction) {
+				return roomObj.exits[i];
+			}
+		}
+
+		return false
+	} else {
+		return false;
+	}
+};
+
+Room.prototype.getExitById = function(roomObj, id) { 
+	var i = 0;
+
+	if (roomObj.exits.length > 0) {
+		for (i; i < roomObj.exits.length; i += 1) {
+			if (id === roomObj.exits[i].id) {
 				return roomObj.exits[i];
 			}
 		}
@@ -233,7 +248,7 @@ Room.prototype.getBrief = function(roomObj, options) {
 
 		displayHTML += '</ul>';
 	} else {
-		displayHTML += '<p>Nothing you can see.</p>';
+		displayHTML += '<p>You don\'t see anything.</p>';
 	}
 
 	displayHTML = '<div class="room"><strong class="room-title">' + roomObj.title + '</strong>' + displayHTML;

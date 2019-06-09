@@ -183,14 +183,6 @@ Roller.prototype.getMods = function(player, mod) {
 		mod = 0;
 	}
 
-	console.log('MODS', {
-		con: dice.getConMod(player, mod),
-		wis: dice.getWisMod(player, mod),
-		int: dice.getIntMod(player, mod),
-		str: dice.getStrMod(player, mod),
-		dex: dice.getDexMod(player, mod)
-	});
-
 	return {
 		con: dice.getConMod(player, mod),
 		wis: dice.getWisMod(player, mod),

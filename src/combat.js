@@ -200,7 +200,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 											+ '</div>';
 									} else {
 										msgToDefender += '<div class="rnd-status">(' + attacker.level + ') ' + attacker.capitalShort + attackerStatus.msg
-											+ ' (' + player.chp + '/' + player.hp +')</div>';
+											+ ' (' + attacker.chp + '/' + attacker.hp +')</div>';
 									}
 								}
 

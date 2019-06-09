@@ -4,13 +4,12 @@ towerQuestKey = 'mine_access';
 
 module.exports = {
 	exclimations: [
-		'No one has ever reached the bottom of the Northern Mine.',
-		'Theres a lot of money to be made rummaging around down there.'
+		'No one has ever reached the bottom.',
+		'Theres a lot of money to be made rummaging around down there.',
+		'I\'ve been working this hole for over forty years.'
 	],
 	onGoldReceived: function(mob, roomObj, gold, player) {
 		var quest =  World.character.getLog(player, towerQuestKey);
-
-		console.log('gotten gold', gold, quest);
 		
 		if (quest) {
 			if (!quest.data.permission && gold) {
@@ -46,7 +45,7 @@ module.exports = {
 			quest = World.character.getLog(player, towerQuestKey);
 
 			if (!quest) {
-				if (command.msg.toLowerCase().indexOf('yes') !== -1) {
+				if (command.msg.toLowerCase().indexOf('ye') !== -1) {
 					World.addCommand({
 						cmd: 'say',
 						msg: 'Thats great to hear ' + player.displayName

@@ -3,11 +3,11 @@
 var World = require('../src/world');
 
 module.exports = {
-	name: 'The Hole',
+	name: 'The Southern Mine',
 	id: 'midgaard_academy',
 	type: 'building',
 	levels: 'All',
-	description: 'An large mine. It\'s origins are unknown and no one has ever reached the bottom',
+	description: 'It is a large, seemingly endless, network of caves and corridors whos original creators are now forgotten.',
 	reloads: 0,
 	author: 'Rocky',
 	messages: [{
@@ -21,17 +21,17 @@ module.exports = {
 			permission: false
 		},
 		steps: {
-			1: 'The Southern Mine is the main source of gold. Give Radghar a gold coin to gain access to the mine.'
-				+ ' Example: give 1 gold rad'
+			1: 'The Southern Mine is the worlds main source of both gold. It is a large, seemingly endless, network of caves and corridors whos original creators are now forgotten.' 
+			+ ' Give Charles a gold coin to gain access to the mine. Example: give 1 gold charles'
 		}
 	}],
 	rooms: [
 		{
 			id: '1',
-			title: 'Just outside of the the Mine',
+			title: 'Just outside of the Mine',
 			area: 'midgaard_academy',
-			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. '
-				+ 'Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
+			content: 'This is the main entrance to the Southern Mine. A hole about fifty yards across is decorated with ropes and pullies powering a series of elevators. '
+				+ 'There are  sporadically placed fires and stations bustling with the activity of miners and camp workers.',
 			outdoors: false,
 			light: true,
 			exits: [
@@ -45,14 +45,16 @@ module.exports = {
 				}
 			],
 			monsters: [{
-				name: 'Radghar',
-				displayName: 'Radghar',
+				name: 'Foreman Charles Stephenson',
+				lastName: 'Stephenson',
+				age: 59,
+				displayName: 'Charles',
 				charClass: 'fighter',
 				level: 50,
-				short: 'Lord Radghar',
-				long: '<span class="yellow">Radghar</span>, a retired the camp captain is here training recruits',
+				short: 'Mine Foreman Charles Stephenson',
+				long: '<span class="yellow">Charles Stephenson</span> the mine Foreman is here',
 				description: '',
-				inName: 'Lord Radghar',
+				inName: 'Mine Foreman Charles Stephenson',
 				race: 'human',
 				id: 2,
 				area: 'midgaard_academy',

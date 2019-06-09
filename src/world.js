@@ -297,7 +297,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 										world.templates = templates;
 
 										for (i; i < world.areas.length; i += 1) {
-											world.extend(world.areas[i], world.areaTemplate, function(err, area) {
+											world.extend(world.areas[i], JSON.parse(JSON.stringify(world.areaTemplate)), function(err, area) {
 												if (area.quests && area.quests.length) {
 													world.quests = world.quests.concat(area.quests);
 												}
@@ -575,8 +575,8 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 		mob.mv += (mob.level + world.dice.roll(1, mob.dex));
 	}
 
-	world.extend(mob, raceObj, function(err, mob) {
-		world.extend(mob, classObj, function(err, mob) {
+	world.extend(mob, JSON.parse(JSON.stringify(raceObj)), function(err, mob) {
+		world.extend(mob, JSON.parse(JSON.stringify(classObj)), function(err, mob) {
 			if (Array.isArray(mob.name)) {
 				mob.name = mob.name[world.dice.roll(1, mob.name.length) - 1];
 			}
@@ -665,7 +665,7 @@ World.prototype.setupArea = function(area, callback) {
 	world = this,
 	setup = function() {
 		for (i; i < area.rooms.length; i += 1) {
-			world.extend(area.rooms[i], world.roomTemplate, function(err, room) {
+			world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)), function(err, room) {
 				if (area.titleStyleClass) {
 					room.titleStyleClass = area.titleStyleClass;
 				}
@@ -708,7 +708,7 @@ World.prototype.setupRoom = function(area, room, callback) {
 
 	if (room.monsters.length) {
 		for (i; i < room.monsters.length; i += 1) {
-			world.extend(room.monsters[i], world.entityTemplate, function(err, mob) {
+			world.extend(room.monsters[i], JSON.parse(JSON.stringify(world.entityTemplate)), function(err, mob) {
 				mob.area = area.id;
 
 				world.setupMob(mob, area, room, function(err, mob) {
@@ -723,7 +723,7 @@ World.prototype.setupRoom = function(area, room, callback) {
 
 						if (room.items.length) {
 							for (i; i < room.items.length; i += 1) {
-								world.extend(room.items[i], world.itemTemplate, function(err, item) {
+								world.extend(room.items[i], JSON.parse(JSON.stringify(world.itemTemplate)), function(err, item) {
 									item.area  = area.id;
 
 									world.setupItem(item, area, room, function(err, item) {
@@ -734,7 +734,7 @@ World.prototype.setupRoom = function(area, room, callback) {
 
 											if (room.exits.length) {
 												for (i; i < room.exits.length; i += 1) {
-													world.extend(room.exits[i], world.exitTemplate, function(err, exit) {
+													world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate)), function(err, exit) {
 														if (!exit.area) {
 															exit.area = room.area;
 														}
@@ -755,7 +755,7 @@ World.prototype.setupRoom = function(area, room, callback) {
 							i = 0;
 							if (room.exits.length) {
 								for (i; i < room.exits.length; i += 1) {
-									world.extend(room.exits[i], world.exitTemplate, function(err, exit) {
+									world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate)), function(err, exit) {
 										if (!exit.area) {
 											exit.area = room.area;
 										}
@@ -776,7 +776,7 @@ World.prototype.setupRoom = function(area, room, callback) {
 	} else {
 		if (room.items.length) {
 			for (i; i < room.items.length; i += 1) {
-				world.extend(room.items[i], world.itemTemplate, function(err, item) {
+				world.extend(room.items[i], JSON.parse(JSON.stringify(world.itemTemplate)), function(err, item) {
 					item.area = area.id;
 
 					world.setupItem(item, area, room, function(err, item) {
@@ -787,7 +787,7 @@ World.prototype.setupRoom = function(area, room, callback) {
 
 							if (room.exits.length) {
 								for (i; i < room.exits.length; i += 1) {
-									world.extend(room.exits[i], world.exitTemplate, function(err, exit) {
+									world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate)), function(err, exit) {
 										if (!exit.area) {
 											exit.area = room.area;
 										}
@@ -808,7 +808,7 @@ World.prototype.setupRoom = function(area, room, callback) {
 			i = 0;
 			if (room.exits.length) {
 				for (i; i < room.exits.length; i += 1) {
-					world.extend(room.exits[i], world.exitTemplate, function(err, exit) {
+					world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate)), function(err, exit) {
 						if (!exit.area) {
 							exit.area = room.area;
 						}
@@ -836,7 +836,7 @@ World.prototype.setupMob = function(mob, area, room, callback) {
 
 		if (mob.items.length) {
 			for (i; i < mob.items.length; i += 1) {
-				world.extend(mob.items[i], world.itemTemplate, function(err, item) {
+				world.extend(mob.items[i], JSON.parse(JSON.stringify(world.itemTemplate)), function(err, item) {
 					item.area = mob.area;
 	
 					world.setupItem(item, area, room, function(err, item) {
@@ -885,7 +885,7 @@ World.prototype.setupItem = function(item, area, room, callback) {
 			for (i; i < item.items.length; i += 1) {
 				innerItem = item.items[i];
 
-				world.extend(innerItem, world.itemTemplate, function(err, innerItem) {
+				world.extend(innerItem, JSON.parse(JSON.stringify(world.itemTemplate)), function(err, innerItem) {
 					world.setupItem(innerItem, area, room, callback);
 				});
 			}
@@ -925,7 +925,7 @@ World.prototype.reloadArea = function(area) {
 
 	newArea = require('../areas/' + area.id  + '.js');
 
-	world.extend(newArea, world.areaTemplate, function(err, newArea) {
+	world.extend(newArea, JSON.parse(JSON.stringify(world.areaTemplate)), function(err, newArea) {
 		world.setupArea(newArea, function(err, newArea) {
 			var i = 0;
 
@@ -1180,14 +1180,6 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 		msgObj.styleClass = '';
 	}
 
-	if (msgObj.appendName) {
-		appendName = true;
-	}
-
-	if (msgObj.prependName) {
-		prependName = true;
-	}
-
 	if (!msgObj.name) {
 		name = target.displayName;
 	} else {
@@ -1203,14 +1195,6 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 
 				if (!canSee && msgObj.darkMsg) {
 					msgObj.msg = msgObj.darkMsg
-				} else {
-					if (prependName) {
-						msgObj.msg = name + ' ' + msgObj.msg;
-					}
-
-					if (appendName) {
-						msgObj.msg += ' ' + name;
-					}
 				}
 
 				msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msgObj.msg + '</div>';
@@ -1228,14 +1212,6 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 
 					if (!canSee && msgObj.darkMsg) {
 						msgObj.msg = msgObj.darkMsg;
-					}
-
-					if (prependName) {
-						msgObj.msg = name + ' ' + msgObj.msg;
-					}
-
-					if (prependName) {
-						msgObj.msg += ' ' + name;
 					}
 
 					msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msg + '</div>';
@@ -1520,7 +1496,7 @@ World.prototype.getGameStatArr = function() {
 };
 
 World.prototype.capitalizeFirstLetter = function(str) {
-	return str[0].toUpperCase() + str.slice(1).toLowerCase();
+	return str[0].toUpperCase() + str.slice(1);
 };
 
 World.prototype.lowerCaseFirstLetter = function(str) {
@@ -1581,7 +1557,7 @@ World.prototype.extend = function(extendObj, readObj, callback) {
 					}
 				} else if (typeof extendObj[prop] === 'string'
 					&& typeof readObj[prop] === 'string'
-					&& typeof readObj[prop] !== '' && extendObj[prop] === '') {
+					&& readObj[prop] !== '' && extendObj[prop] === '') {
 					extendObj[prop] = readObj[prop];
 				}
 			} else {

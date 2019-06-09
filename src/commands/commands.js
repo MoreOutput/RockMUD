@@ -73,8 +73,6 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 		}
 	}
 
-	console.log(cmdObj);
-
 	return cmdObj;
 };
 
@@ -391,7 +389,13 @@ Cmd.prototype.scan = function(target, command) {
 	rooms,
 	i = 0,
 	canSee = true,
-	scanStr = '';
+	scanStr = '<table class="table">'
+		+ '<thead>'
+			+ '<tr>'
+				+ '<th>Direction</th>'
+				+ '<th>Visible</th>'
+			+ '</tr>'
+		+ '</thead>';
 
 	if (target.position === 'standing') {
 		if (command.roomObj) {
@@ -406,11 +410,11 @@ Cmd.prototype.scan = function(target, command) {
 			rooms = World.room.getAdjacent(roomObj);
 
 			for (i; i < rooms.length; i += 1) {
-				scanStr += '<h4>' + rooms[i].direction.cmd + '</h4> ' + World.room.getBrief(rooms[i].room);
+				scanStr += '<tr><td>' + rooms[i].direction.cmd + '</td><td>' + World.room.getBrief(rooms[i].room) + '</td></tr>';
 			}
 
 			World.msgPlayer(target, {
-				msg: scanStr
+				msg: scanStr + '</table>'
 			});
 
 			if (World.dice.roll(1, 10) < 4) {
@@ -1133,7 +1137,7 @@ Cmd.prototype.recall = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	if (!target.fighting && !roomObj.preventRecall) {
+	if (!target.fighting && !roomObj.preventRecall && target.cmv) {
 		if (!command.msg && target.recall.roomid && target.recall.area) {
 			if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
 				targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
@@ -1141,6 +1145,8 @@ Cmd.prototype.recall = function(target, command) {
 				if (targetRoom) {
 					target.area = target.recall.area;
 					target.roomid = target.recall.roomid;
+					target.wait += 1;
+					target.cmv = 1;
 
 					if (target.isPlayer) {
 						World.room.removePlayer(roomObj, target);
@@ -1155,7 +1161,7 @@ Cmd.prototype.recall = function(target, command) {
 					}
 
 					World.msgPlayer(target, {
-						msg: '<strong>You have recalled to ' + target.recall.area  + '!</strong>',
+						msg: '<strong>You have recalled to ' + targetRoom.title + '!</strong>',
 						styleClass: 'green'
 					});
 				}
@@ -1165,7 +1171,7 @@ Cmd.prototype.recall = function(target, command) {
 					styleClass: 'error'
 				});
 			}
-		} else if (command.msg && command.second === 'set' && !targetRoom.preventRecall) {
+		} else if (command.msg && command.second === 'set' && !roomObj.preventRecall) {
 			target.recall.area = roomObj.area;
 			target.recall.roomid = roomObj.id;
 
@@ -1337,36 +1343,38 @@ Cmd.prototype.move = function(target, command, fn) {
 
 						World.msgRoom(targetRoom, {
 							msg: function(receiver, fn2) {
-								var msg = '';
-
+								var msg = '',
+								targetExitObj = World.room.getExitById(targetRoom, roomObj.id);
+								
 								if (!sneakAff) {
 									if (World.character.canSee(receiver, targetRoom)) {
+
 										if (!target.inName) {
 											if (target.short) {
 												msg = '<strong>' + target.capitalizeShort
 													+ '</strong> walks in from '
-													+ parseMovementMsg(exitObj) + '.';
+													+ parseMovementMsg(targetExitObj) + '.';
 											} else {
 												msg = '<strong>' + target.displayName
 													+ '</strong> walks in from '
-													+ parseMovementMsg(exitObj) + '.';
+													+ parseMovementMsg(targetExitObj) + '.';
 											}	
 										} else if (target.inName && !target.inMessage) {
 											msg = '<strong>' + target.inName
 												+ '</strong> enters from '
-												+ parseMovementMsg(exitObj) + '.';
+												+ parseMovementMsg(targetExitObj) + '.';
 										} else {
 											msg = '<strong>' + target.inName
 												+ '</strong> ' + target.inMessage  + ' '
-												+ parseMovementMsg(exitObj) + '.';
+												+ parseMovementMsg(targetExitObj) + '.';
 										}
 									} else if (receiver.hearing) {
 										if (World.dice.roll(1, 2) === 1) {
 											msg = '<strong>Something</strong> enters from '
-												+ parseMovementMsg(exitObj) + '.';
+												+ parseMovementMsg(targetExitObj) + '.';
 										} else {
 											msg = '<strong>Something</strong> comes in from '
-												+ parseMovementMsg(exitObj) + '.';
+												+ parseMovementMsg(targetExitObj) + '.';
 										}
 									}
 								}
@@ -3006,7 +3014,7 @@ Cmd.prototype.save = function(target, command) {
 	if (target.isPlayer) {
 		if (target.position === 'standing' && target.wait === 0) {
 			World.character.save(target, function() {
-				target.wait += 1;
+				target.wait += 4;
 
 				World.msgPlayer(target, {
 					msg: target.displayName + ' was saved. Whew!',
@@ -3295,7 +3303,6 @@ Cmd.prototype.quests = function(target, commands) {
 
 Cmd.prototype.score = function(target, command) {
 	var score = '<div class="row score"><div class="col-md-12"><h1>' + 
-		'<span class="score-level"> (' + target.level + ')</span> ' +
 		'<span class="score-name">' + target.displayName + '</span> ' + 
 		'<span class="score-title">' + target.title + '</span> ' + 
 		'</h1></div>' +
@@ -3303,16 +3310,17 @@ Cmd.prototype.score = function(target, command) {
 			'<div class="col-md-12">' +
 				'<div class="row">' + 
 				'<ul class="col-md-12 score-info list-inline">' +
-					'<li class="stat-hp first list-inline-item"><label>HP:</label> <strong>' +  target.chp + '</strong>/' + target.hp + ' </li>' +
+					'<li class="stat-level first list-inline-item"><label>Level:</label> <strong>' + target.level + '</strong></li>' +
+					'<li class="stat-hp list-inline-item"><label>HP:</label> <strong>' +  target.chp + '</strong>/' + target.hp + ' </li>' +
 					'<li class="stat-mana list-inline-item"><label>Mana:</label> <strong>' + target.cmana + '</strong>/' + target.mana + '</li>' +
-					'<li class="stat-mv list-inline-item"><label>Moves:</label> <strong>' + target.cmv + '</strong>/' + target.mv + '</li>' +
+					'<li class="stat-mv last list-inline-item"><label>Moves:</label> <strong>' + target.cmv + '</strong>/' + target.mv + '</li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-str first"><label><strong>STR:</strong></label> ' + target.baseStr + ' <strong>(' + target.str + ')</strong></li>' +
 					'<li class="stat-wis"><label><strong>WIS:</strong></label> ' + target.baseWis + ' <strong>(' + target.wis + ')</strong></li>' +
 					'<li class="stat-int"><label><strong>INT:</strong></label> ' + target.baseInt + ' <strong>(' + target.int + ')</strong></li>' +
 					'<li class="stat-dex"><label><strong>DEX:</strong></label> ' + target.baseDex + ' <strong>(' + target.dex + ')</strong></li>' +
-					'<li class="stat-con"><label><strong>CON:</strong></label> ' + target.baseCon + ' <strong>(' + target.con + ')</strong></li>' +
+					'<li class="stat-con last"><label><strong>CON:</strong></label> ' + target.baseCon + ' <strong>(' + target.con + ')</strong></li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label><strong>Armor:</strong></label> ' + target.ac + '</li>' +
@@ -3341,7 +3349,7 @@ Cmd.prototype.score = function(target, command) {
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
 					'<li class="stat-position">You are currently <span class="green">' + (target.fighting === false ? target.position : target.position + ' and fighting') + '</span>.</li>' +
-					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' <string class="red">'
+					'<li class="stat-level">You are a level ' + target.level + ' ' + target.sex + ' ' + target.race + ' <strong class="red">'
 						+ target.charClass + '</strong> of ' + target.size.display + ' size with ' 
 						+ '<span class="warning">' + target.gold + ' ' + World.config.coinage  + '</span>.</li>' +
 					'<li class="stat-carry">You are carrying ' 

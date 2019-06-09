@@ -1,12 +1,67 @@
 <div class="col-md-12">
-	<h2 class="green">Command Help</h2>
-	<p>Overview of RockMUD current commands. No command is case sensitive.</p>
+	<h2 class="green">Common Command Listing</h2>
+	<p>Overview of the most common commands. No command is case sensitive.</p>
 </div>
-<div class="col-md-6">
+<div class="col-md-12">
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Command</th>
+				<th>Use</th>
+				<th>Aliases</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td class="yellow" style="width: 15%">look [target]</td>
+				<td style="width: 68%">
+					<p>Obtain the description of something. If you do not give a target the room description is returned.</p>
+				</td>
+				<td>l</td>
+			</tr>
+			<tr>
+				<td class="yellow" style="width: 15%">score</td>
+				<td style="width: 68%"">
+					<p>Your character stats and current condition.</p>
+				</td>
+				<td>sc, stats</td>
+			</tr>
+			<tr>
+				<td class="yellow" style="width: 15%">inventory</td>
+				<td style="width: 68%"">
+					<p>Listing of items on your person.</p>
+				</td>
+				<td>i</td>
+			</tr>
+			<tr>
+				<td class="yellow" style="width: 15%">north, east, south, west, down, up</td>
+				<td style="width: 68%"">
+					<p>General movement commands.</p>
+				</td>
+				<td>n, e, s, w, d, u</td>
+			</tr>
+			<tr>
+				<td class="yellow" style="width: 15%">equipment</td>
+				<td style="width: 68%"">
+					<p>View worn equipment and open item slots. A worn item is still reflected in your inventory.</p>
+				</td>
+				<td>eq</td>
+			</tr>
+			<tr>
+				<td class="yellow" style="width: 15%">kill [target]</td>
+				<td style="width: 68%"">
+					<p>Begin combat with a target.</p>
+				</td>
+				<td>k, adv, murder, attack</td>
+			</tr>
+		</tbody>
+	</table>
+	<!--
 	<dl>
-		<dt>North, East, South, West, Up, Down</dt>
-		<dd>General movement directions. All possible directions map to the move command.</dd>
-		<dd>Aliases: n, r, s, w, u, d respectively.</dd>
+		<dt>Move</dt>
+		<dd>General movement command. Aliases of n, e, s, w, u, d use this underlying command.</dd>
+		<dd>Aliases: n, e, s, w, u, d</dd>
+		<dd>Ex: move east, move west, move southeast</dd>
 
 		<dt>Look [target]</dt>
 		<dd>Look closely at something. If you do not give a target the current room is selected.</dd>
@@ -117,4 +172,5 @@
 		<dt>Scan</dt>
 		<dd>Glance at adjacent rooms.</dd>
 	</dl>
+	-->
 </div>

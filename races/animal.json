@@ -7,5 +7,6 @@
 	"meleeRes": 0,
 	"handsNoun": "claw",
 	"damroll": -2,
-	"ac": -10
+	"ac": -10,
+	"maxHunger": -2
 }
