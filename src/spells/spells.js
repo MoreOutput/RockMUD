@@ -1,49 +1,45 @@
 'use strict';
-var World = require('./world'),
-Character = require('./character'),
+var World = require('../world'),
 Spell = function() {};
 
 /*
 * Damage Spells
+*
+* Since these are combat spells they must return a Skill Profile Object
 */
-Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command, fn) {
+Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command) {
 	var intMod,
-	cost = 2,
+	cost = 3,
+	skillOutput = World.combat.createSkillProfile(player, skillObj),
 	damage = 0;
 	
 	if (cost < player.cmana) {
 		intMod = World.dice.getIntMod(player);
 
 		if (World.dice.roll(1, 100) <= skillObj.train) {
-			player.wait += 2;
-			player.cmana -= (cost - intMod);
+			skillOutput.attackerMods.wait += 2;
+			skillOutput.attackerMods.cmana -= (cost - intMod);
 
 			damage = World.dice.roll(player.level / 2 + 1, 20 + intMod + player.mana/20, intMod);
 			damage -= opponent.magicRes;
-			damage -= opponent.ac/2;
 
-			opponent.chp -= damage;
+			skillOutput.defenderMods.chp = -damage;
 
-			World.msgPlayer(player, {
-				msg: 'You cast spark and a series of crackling '
-					+ '<span class="blue">bright blue sparks</span> burn ' + opponent.displayName 
-					+ ' with maiming intensity! (' + damage + ')',
-				noPrompt: true
-			});
+			skillOutput.msgToAttacker = 'You cast spark and a series of crackling '
+				+ '<span class="blue">bright blue bolts</span> burn <span class="grey">' + opponent.short
+				+ '</span> with maiming intensity! (' + damage + ')';
 
-			World.msgPlayer(opponent, {
-				msg: player.displayName + ' casts  spark and burns you ' 
-					+ opponent.displayName + ' with maiming intensity! (' + damage + ')'
-			});
+			skillOutput.msgToDefender = player.displayName + ' casts spark and burns you with'
+				+ ' maiming intensity! (' + damage + ')';
+
+			World.combat.processSkill(player, opponent, skillOutput);
 		} else {
 			// spell failed
-			World.msgPlayer(player, {
-				msg: 'You try to channel the spell but only get '
-					+ '<span class="blue">sparks and a series of crackling sounds!</span>',
-			});
-		}
+			skillOutput.msgToAttacker = 'You try to channel the spell but only get '
+					+ '<span class="blue">sparks and a series of crackling sounds!</span>';
 
-		return fn(player, opponent, roomObj, command);
+			World.combat.processSkill(player, opponent, skillOutput);
+		}
 	} else {
 		World.msgPlayer(player, {
 			msg: 'You dont have enough mana to cast spark!',
@@ -80,7 +76,7 @@ Spell.prototype.detectHidden = function(skillObj, player, roomObj, command, fn) 
 	roomMsg =  player.possessivePronoun + ' eyes shine bright blue as you become more aware of your surroundings!',
 	oppSuccessMsg = player.displayName + ' tries to cast a spell and fails.',
 	alreadyAffectedMsg = 'You are already experiencing increased awareness.',
-	currentlyAffected = Character.getAffect(player, 'detectHidden'),
+	currentlyAffected = World.character.getAffect(player, 'detectHidden'),
 	timer = 1,
 	cost = 1;
 
@@ -172,8 +168,8 @@ Spell.prototype.cureLight = function(skillObj, player, opponent, roomObj, comman
 			if (opponent.refId === player.refId) {
 				successMsg = 'Your eyes shine as you channel your powers to make yourself feel a bit better!';
 			} else {
-				successMsg = 'You channel your powers into your own body by placing your hand on your '
-				+ ' forehead. You feel a bit better.';
+				successMsg = 'You channel your powers into your own body by placing your hand on your'
+				+ ' chest. You feel a bit better.';
 			}
 
 			roomMsg = player.possessivePronoun + ' eyes become clouded as they as they lay their ' + player.handsNoun

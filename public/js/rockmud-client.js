@@ -1,10 +1,11 @@
 window.onload = function() {
 	'use strict';
-	var ws = io.connect('', {transports: ['websocket']}),
+	var ws = new WebSocket('ws://localhost:3001'),
 	terminal = document.getElementById('terminal'),
 	node = document.getElementById('cmd'),
 	rowCnt = 0,
 	canSend = true,
+	logged = false,
 	aliases = {
 		n: 'move north',
 		e: 'move east',
@@ -26,9 +27,9 @@ window.onload = function() {
 		sca: 'scan',
 		i: 'inventory',
 		sc: 'score',
+		stats: 'score',
 		o: 'open',
 		op: 'open',
-		stats: 'score',
 		eq: 'equipment',
 		equip: 'wear',
 		we: 'wear',
@@ -64,9 +65,11 @@ window.onload = function() {
 		gi: 'give',
 		wield: 'wear',
 		dr: 'drop',
+		dri: 'drink',
 		j: 'quests',
 		ql: 'quests',
-		quest: 'quests'
+		quest: 'quests',
+		ww: 'whirlwind'
 	},
 	isScrolledToBottom = false,
 	playerIsLogged = null,
@@ -100,37 +103,31 @@ window.onload = function() {
 				terminal.scrollTop = terminal.scrollHeight - terminal.clientHeight;
 			}
 		}
-
-		return parseCmd(r);
 	},
 	checkCmdEvents = function(rowCnt) {
 		var i = 0,
-		processCmdClick = function(evt, nodeRef) {
+		processCmdClick = function(evt) {
 			evt.preventDefault();
 
 			node.value = this.getAttribute('data-cmd-value');
 
-
 			send(evt);
+
+			this.setAttribute('data-cmd-value', '');
 		},
 		nodes = document.querySelectorAll('[data-cmd="true"]');
 
 		for (i; i < nodes.length; i += 1) {
 			(function(nodeRef, index) {
+				nodeRef.fn = processCmdClick;
+
 				if (nodeRef.getAttribute('data-cmd')) {
 					nodeRef.setAttribute('data-cmd', false);
-					nodeRef.addEventListener('click', processCmdClick, false);
+					nodeRef.addEventListener('click', nodeRef.fn, true);
 				} else {
-					nodeRef.removeEventListener('click', processCmdClick, true);
+					nodeRef.removeEventListener('click', nodeRef.fn, false);
 				}
 			}(nodes[i], i));
-		}
-	},
-	parseCmd = function(r) {
-		if (r.msg !== undefined) {
-			r.msg = r.msg.replace(/ /g, ' ').trim();
-
-			ws.emit(r.emit, r);
 		}
 	},
 	checkAlias = function(cmdStr, fn) { 
@@ -155,33 +152,47 @@ window.onload = function() {
 			}
 		}
 
-		return fn(cmd + ' ' + msg);
+		if (msg) {
+			return fn(cmd + ' ' + msg);
+		} else {
+			return fn(cmd);
+		}
 	},
-	send = function(e) {
-		var messageNodes = [],
-		msg = node.value.trim(),
+	send = function(e, addToLog = true) {
+		var msg = node.value.trim(),
 		msgObj = {
 			msg: checkAlias(msg, function(cmd) {
 				return cmd;
 			}),
+			addToLog: addToLog,
 			emit: 'cmd'
 		};
 
 		e.preventDefault();
 
 		if (canSend) {
-			display(msgObj);
-			
+			canSend = false;
+
+			ws.send(JSON.stringify(msgObj));
+
+			if (logged && msgObj.msg && addToLog) {
+				var onSendEvt = new CustomEvent('onSend');
+				
+				onSendEvt.data = msgObj;
+
+				document.dispatchEvent(onSendEvt);
+			}
+
 			node.value = '';
 			node.focus();
-
-			canSend = false;
-			
+		
 			return false;
 		} else {
 			return false;
 		}
-	};
+	},
+	// variables related to command log ui
+	maxCommandMemory = 6;
 
 	document.onclick = function() {
 		node.focus();
@@ -197,8 +208,40 @@ window.onload = function() {
 	document.addEventListener('onLogged', function(e) {
 		e.preventDefault();
 
+		logged = true;
+
 		node.type = 'text';
-		node.placeholder = 'Enter a Command -- type \'help commands\' for a list of basic commands';
+		node.placeholder = 'Enter a Command -- type \'help commands\' for a list of common commands';
+	}, false);
+
+	// when a command has been sent to the server
+	document.addEventListener('onSend', function(e) {
+		var parentNode = document.getElementById('prev-cmd-list');
+
+		e.preventDefault();
+
+		if (e.data.msg.trim().length > 3) {
+			var currentCmds = document.querySelectorAll('.prev-cmd');
+
+			if (currentCmds.length >= maxCommandMemory) {
+				parentNode.removeChild(currentCmds[currentCmds.length - 1].parentElement);
+			}			
+			
+			var newListItem = document.createElement('li');
+			var newButton = document.createElement('button');
+			newButton.type = 'button';
+			newButton.innerHTML = e.data.msg;
+			newButton.classList = 'prev-cmd link-btn';
+
+			newButton.onclick = function(e) {
+				node.value = newButton.innerHTML;
+
+				send(e, false);
+			};
+
+			newListItem.append(newButton);
+			parentNode.prepend(newListItem);
+		}
 	}, false);
 
 	document.getElementById('console').onsubmit = function (e) {
@@ -207,7 +250,9 @@ window.onload = function() {
 
 	node.focus();
 
-	ws.on('msg', function(r) {
+	ws.addEventListener('message', function(r) {
+		r = JSON.parse(r.data);
+
 		display(r, true);
 
 		if (r.evt && !r.evt.data) {
@@ -220,6 +265,7 @@ window.onload = function() {
 			document.dispatchEvent(r.evt);
 		}
 	});
+
 
 	setInterval(function() {
 		canSend = true;

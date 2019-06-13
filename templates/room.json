@@ -4,7 +4,7 @@
 	"area": "",
 	"light": false,
 	"content": "",
-	"terrain": "",
+	"terrain": [],
 	"outdoors": true,
 	"waitMod": 0,
 	"moveMod": 0,
@@ -16,5 +16,7 @@
 	"hasEvents": false,
 	"preventRecall": false,
 	"preventDecay": false,
-	"behaviors": []
+	"behaviors": [],
+	"affects": [],
+	"titleStyleClass": ""
 }

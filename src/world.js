@@ -3,12 +3,7 @@
 */
 'use strict';
 var fs = require('fs'),
-World = function() {},
-Character,
-Cmds,
-Skills,
-Spells,
-Room;
+World = function() {};
 
 World.prototype.setup = function(socketIO, cfg, fn) {
 	var world = this,
@@ -119,13 +114,11 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 		fs.readdir(path, function(err, fileNames) {
 			fileNames.forEach(function(fileName, i) {
-				fs.readFile(path + fileName, function (err, messageTmp) {
-					tmpArr.push(JSON.parse(messageTmp));
+				tmpArr.push(JSON.parse(fs.readFileSync(path + fileName)));
 
-					if (i === fileNames.length - 1) {
-						return fn(err, tmpArr);
-					}
-				});
+				if (i === fileNames.length - 1) {
+					return fn(err, tmpArr);
+				}
 			});
 		});
 	},
@@ -135,13 +128,11 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	
 		fs.readdir(path, function(err, fileNames) {
 			fileNames.forEach(function(fileName, i) {
-				fs.readFile(path + fileName, function (err, messageTmp) {
-					tmpArr.push(JSON.parse(messageTmp));
+				tmpArr.push(JSON.parse(fs.readFileSync(path + fileName)));
 
-					if (i === fileNames.length - 1) {
-						return fn(err, tmpArr);
-					}
-				});
+				if (i === fileNames.length - 1) {
+					return fn(err, tmpArr);
+				}
 			});
 		});
 	},
@@ -151,17 +142,15 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 		fs.readdir(path, function(err, fileNames) {
 			fileNames.forEach(function(fileName, i) {
-				fs.readFile(path + fileName, function (err, tmp) {
-				var tmp = JSON.parse(tmp);
+				var tmp = JSON.parse(fs.readFileSync(path + fileName));
 
-					tmp.template = fileName.replace(/.json/g, '');
+				tmp.template = fileName.replace(/.json/g, '');
 				
-					tmpArr.push(tmp);
+				world[tmp.template + 'Template'] = tmp;
 
-					if (i === fileNames.length - 1) {
-						return fn(err, tmpArr);
-					}
-				});
+				if (i === fileNames.length - 1) {
+					return fn(err, tmpArr);
+				}
 			});
 		});
 	},
@@ -177,18 +166,77 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 				}
 			});
 		});
+	},
+	loadCommands = function(fn) {
+		var path = './src/commands/';
+
+		fs.readdir(path, function(err, fileNames) {
+			if (!err && fileNames.length > 1) {
+				fileNames.forEach(function(fileName, i) {
+					if (fileName !== 'commands.js') {
+						world.commands[fileName.replace('.js', '')] = require('.' + path + fileName);
+
+						if (i === fileNames.length - 1) {
+							return fn(err);
+						}
+					}
+				});
+			} else {
+				return fn(err);
+			}
+		});
+	},
+	loadSpells = function(fn) {
+		var path = './src/spells/';
+
+		fs.readdir(path, function(err, fileNames) {
+			if (!err && fileNames.length > 1) {
+				fileNames.forEach(function(fileName, i) {
+					if (fileName !== 'spells.js') {
+						world.spells[fileName.replace('.js', '')] = require('.' + path + fileName);
+
+						if (i === fileNames.length - 1) {
+							return fn(err);
+						}
+					}
+				});
+			} else {
+				return fn(err);
+			}
+		});
+	},
+	loadSkills = function(fn) {
+		var path = './src/skills/';
+
+		fs.readdir(path, function(err, fileNames) {
+			if (!err && fileNames.length > 1) {
+				fileNames.forEach(function(fileName, i) {
+					if (fileName !== 'skills.js') {
+						world.skills[fileName.replace('.js', '')] = require('.' + path + fileName);
+
+						if (i === fileNames.length - 1) {
+							return fn(err);
+						}
+					}
+				});
+			} else {
+				return fn(err);
+			}
+		});
 	};
 
-	world.dice = require('./dice');
 	world.races = []; // Race JSON definition is in memory
 	world.classes = []; // Class JSON definition is in memory
 	world.areas = []; // Loaded areas
 	world.players = []; // Loaded players
+	world.cmds = []; // current command queue, processed in ticks module
+	world.battles = [] // current battle queue -- each item here is the meta data for upcoming combat messages
 	world.time = null; // Current Time data
-	world.itemTemplate = {};
-	world.mobTemplate = {};
-	world.roomTemplate = {};
-	world.areaTemplate = {};
+	world.itemTemplate;
+	world.entityTemplate;
+	world.roomTemplate;
+	world.areaTemplate;
+	world.exitTemplate;
 	world.ai = {};
 	world.motd = '';
 	world.quests = []; // array of all game quests built from loaded areas
@@ -199,6 +247,15 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.dataDriver = null; 
 	// without a driver player data is saved as a flat file to the players folder
 	world.playerDriver = null;
+	world.character = require('./character');
+	world.commands = require('./commands/commands');
+	world.skills = require('./skills/skills');
+	world.spells = require('./spells/spells');
+	world.room = require('./rooms');
+	world.combat = require('./combat')
+	world.dice = require('./dice');
+	world.battleLock = 0;
+	world.aiLock = false;
 
 	if (world.config.persistence && world.config.persistence.data) {
 		world.dataDriver = require(world.config.persistenceDriverDir + world.config.persistence.data.driver + '.js')(world.config.persistence.data);
@@ -212,94 +269,69 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 		}
 	}
 
-	loadAreas(function(areas) {
-		loadTime(function(err, time) {
-			loadRaces(function(err, races) {
-				loadClasses(function(err, classes) {
-					loadTemplates(function(err, templates) {
-						loadAI(function() {
-							var area,
-							i = 0,
-							j = 0;
+	loadCommands(function(err) {
+		loadSpells(function(err) {
+			loadSkills(function(err) {
+				loadAreas(function(areas) {
+					loadTime(function(err, time) {
+						loadRaces(function(err, races) {
+							loadClasses(function(err, classes) {
+								loadTemplates(function(err, templates) {
+									loadAI(function() {
+										var area,
+										i = 0,
+										j = 0;
 
-							fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
-								if (err) {
-									throw err;
-								}
-
-								world.motd = '<div class="motd">' + html + '</div>';
-							});
-
-							world.areas = areas;
-							world.time = time;
-							world.races = races;
-							world.classes = classes;
-							world.templates = templates;
-							world.areaTemplate = world.getTemplate('area');
-							world.itemTemplate = world.getTemplate('item');
-							world.mobTemplate = world.getTemplate('entity');
-							world.roomTemplate = world.getTemplate('room');
-
-							Character = require('./character');
-							Cmds = require('./commands');
-							Skills = require('./skills');
-							Spells = require('./spells');
-							Room = require('./rooms');
-
-							for (i; i < world.areas.length; i += 1) {
-								(function(area, index) {
-									if (area.quests) {
-										for (j; j < area.quests.length; j += 1) {
-											area.quests[j].quest = true;
-										}
-
-										world.quests = world.quests.concat(area.quests);
-									}
-
-									(function(setupIndex) {
-										world.setupArea(area, function(area) {
-											var j;
-
-											if (setupIndex === world.areas.length - 1) {
-												j = 0;
-
-												for (j; j < world.areas.length; j += 1) {
-													(function(area, postIndex) {
-														if (area.afterLoad && !area.preventAfterLoad) {
-															area.afterLoad();
-														}
-
-														if (postIndex === world.areas.length - 1) {
-															world.ticks = require('./ticks');
-
-															return fn(Character, Cmds, Skills);
-														}
-													}(world.areas[j], j));
-												}
+										fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
+											if (err) {
+												throw err;
 											}
+
+											world.motd = '<div class="motd">' + html + '</div>';
 										});
-									}(index));
-								}(world.areas[i], i));
-							}
+
+										world.areas = areas;
+										world.time = time;
+										world.races = races;
+										world.classes = classes;
+										world.templates = templates;
+
+										for (i; i < world.areas.length; i += 1) {
+											world.extend(world.areas[i], JSON.parse(JSON.stringify(world.areaTemplate)), function(err, area) {
+												if (area.quests && area.quests.length) {
+													world.quests = world.quests.concat(area.quests);
+												}
+
+												world.setupArea(area, function(err, area) {
+													area.extended = true;
+
+													if (i === world.areas.length - 1) {
+														i = 0;
+
+														for (i; i < world.areas.length; i += 1) {
+															if (world.areas[i].afterLoad && !world.areas[i].preventAfterLoad) {
+																world.areas[i].afterLoad();
+															}
+														}
+
+														if (world.config.preventTicks === false) {
+															world.ticks = require('./ticks');
+														}
+
+														return fn();
+													}
+												});
+											});
+										}
+									});
+								});
+							});
 						});
 					});
 				});
 			});
 		});
 	});
-};
-
-World.prototype.getTemplate = function(fileName) {
-	var i = 0,
-	j;
-
-	for (i; i < this.templates.length; i += 1) {
-		if (this.templates[i].template === fileName) {
-			return this.templates[i];
-		}
-	}
-
-	return false;
 };
 
 World.prototype.getPlayableRaces = function() {
@@ -398,23 +430,6 @@ World.prototype.getClass = function(className) {
 	return null;
 };
 
-World.prototype.getPlayerBySocket = function(socketId) {
-	var world = this,
-	arr = [],
-	player,
-	i = 0;
-
-	for (i; i < world.players.length; i += 1) {
-		player = world.players[i];
-
-		if (player.sid === socketId) {
-			return player;
-		}
-	}
-
-	return false;
-};
-
 World.prototype.getPlayerByName = function(playerName) {
 	var world = this,
 	arr = [],
@@ -457,128 +472,111 @@ World.prototype.getPlayersByArea = function(areaId) {
 * Area and item setup on boot
 */
 
-World.prototype.rollItems = function(itemArr, roomid, area) {
+World.prototype.rollItem = function(item, area, room, callback) {
 	var world = this,
 	diceMod,
+	chanceRoll = world.dice.roll(1, 20),
+	prop,
 	i = 0;
 
-	for (i; i < itemArr.length; i += 1) {
-		if (itemArr[i].spawn && itemArr[i].spawn > 1 ) {
-			itemArr[i].spawn -= 1;
-			itemArr.push(JSON.parse(JSON.stringify(itemArr[i])));
+	item.refId = world.createRefId(item);
+
+	if (!item.id) {
+		item.id = item.refId;
+	}
+
+	if (Array.isArray(item.name)) {
+		item.name = item.name[world.dice.roll(1, item.name.length) - 1];
+	}
+	
+	if (!item.displayName) {
+		item.displayName = item.name[0].toUpperCase() + item.name.slice(1);
+	} else if (Array.isArray(item.displayName)) {
+		item.displayName = item.displayName[world.dice.roll(1, item.displayName.length) - 1];
+	}
+
+	if (Array.isArray(item.short)) {
+		item.short = item.short[world.dice.roll(1, item.short.length) - 1];
+	}
+
+	if (Array.isArray(item.long)) {
+		item.long = item.long[world.dice.roll(1, item.long.length) - 1];
+	}
+
+	if (chanceRoll === 20) {
+		item.diceNum += 1;
+		item.diceSides += 1;
+		item.diceMod += 1;
+	} else if (chanceRoll > 18) {
+		item.diceNum += 1;
+	} else if (chanceRoll === 1 && item.diceNum > 1) {
+		item.diceNum -= 1
+		item.weight += 2;
+	}
+
+	item.area = area.id;
+	item.roomid = room.id;
+
+	if (!item.originatingArea) {
+		item.originatingArea = area.id;
+	}
+
+	for (prop in item) {
+		if (item[prop] === 'function' && !item.hasEvents) {
+			item.hasEvents = true;
 		}
+	}
 
-		(function(item, index) {
-			var chanceRoll = world.dice.roll(1, 20),
-			prop;
-
-			item = world.extend(item, JSON.parse(JSON.stringify(world.itemTemplate)));
-
-			item.refId = world.createRefId(item) + '-' + index;
-
-			if (Array.isArray(item.name)) {
-				item.name = item.name[world.dice.roll(1, item.name.length) - 1];
-			}
-			
-			if (!item.displayName) {
-				item.displayName = item.name[0].toUpperCase() + item.name.slice(1);
-			} else if (Array.isArray(item.displayName)) {
-				item.displayName = item.displayName[world.dice.roll(1, item.displayName.length) - 1];
-			}
-
-			if (Array.isArray(item.short)) {
-				item.short = item.short[world.dice.roll(1, item.short.length) - 1];
-			}
-
-			if (Array.isArray(item.long)) {
-				item.long = item.long[world.dice.roll(1, item.long.length) - 1];
-			}
-
-			if (chanceRoll === 20) {
-				item.diceNum += 1;
-				item.diceSides += 1;
-				item.diceMod += 1;
-			} else if (chanceRoll > 18) {
-				item.diceNum += 1;
-			} else if (chanceRoll === 1 && item.diceNum > 1) {
-				item.diceNum -= 1
-				item.weight += 2;
-			}
-
-			item.area = area.id;
-			item.roomid = roomid;
-
-			if (!item.originatingArea) {
-				item.originatingArea = area.id;
-			}
-
-			if (item.behaviors && item.behaviors.length > 0) {
-				item = world.setupBehaviors(item);
-
-				itemArr[index] = item;
-			} else {
-				itemArr[index] = item;
-			}
-
-			if (item.items) {
-				world.rollItems(item.items, roomid, area);
-			}
-
-			for (prop in item) {
-				if (item[prop] === 'function' && !item.hasEvents) {
-					item.hasEvents = true;
-				}
-			}
-
-			if (!item.id) {
-				item.id = item.refId;
-			}
-
-			if (item.onRolled) {
-				item.onRolled(item);
-			}
-		}(itemArr[i], i));
+	if (item.behaviors) {
+		world.setupBehaviors(item, area, room, function(err, item) {
+			return callback(err, item);
+		});
+	} else {
+		return callback(false, item);
 	}
 };
 
 // Rolls values for Mobs, including their equipment
-World.prototype.rollMobs = function(mobArr, roomid, area, fn) {
+World.prototype.rollMob = function(mob, area, room, callback) {
 	var world = this,
-	diceMod,
-	i = 0;
+	prop,
+	raceObj,
+	classObj;
 
-	for (i; i < mobArr.length; i += 1) {
-		if (mobArr[i].spawn && mobArr[i].spawn > 1) {
-			mobArr[i].spawn -= 1;
-			mobArr.push(JSON.parse(JSON.stringify(mobArr[i])));
-		}
+	mob.refId = world.createRefId(mob);
 
-		(function(mob, index) {
-			var raceObj,
-			j = 0,
-			prop,
-			classObj;
+	if (!mob.id) {
+		mob.id = mob.refId;
+	}
 
-			mob = world.extend(mob, JSON.parse(JSON.stringify(world.mobTemplate)));
+	if (!mob.race) {
+		mob.race = 'animal';
+	}
 
-			mob.refId = world.createRefId(mob) + '-' + index;
+	if (!mob.charClass) {
+		mob.charClass = 'fighter';
+	}
 
-			if (mob.race) {
-				raceObj = world.getRace(mob.race);
+	raceObj = world.getRace(mob.race);
 
-				mob = world.extend(mob, JSON.parse(JSON.stringify(raceObj)));
-			}
+	classObj = world.getClass(mob.charClass);
 
-			if (mob.charClass) {
-				classObj = world.getClass(mob.charClass);
+	mob.hp += (10 * (mob.level + 1)) + world.dice.roll(mob.level, mob.level);
 
-				mob = world.extend(mob, JSON.parse(JSON.stringify(classObj)));
-			}
+	if (!mob.mana) {
+		mob.mana = 50 * 8 + mob.int;
+	} else {
+		mob.mana += (mob.level + world.dice.roll(1, mob.int));
+	}
 
-			if (!mob.id) {
-				mob.id = mob.refId;
-			}
+	if (!mob.mv) {
+		mob.mv = 50 * 9 + mob.dex;
+	} else {
+		mob.mv += (mob.level + world.dice.roll(1, mob.dex));
+	}
 
+	world.extend(mob, JSON.parse(JSON.stringify(raceObj)), function(err, mob) {
+		world.extend(mob, JSON.parse(JSON.stringify(classObj)), function(err, mob) {
 			if (Array.isArray(mob.name)) {
 				mob.name = mob.name[world.dice.roll(1, mob.name.length) - 1];
 			}
@@ -592,11 +590,11 @@ World.prototype.rollMobs = function(mobArr, roomid, area, fn) {
 			} else if (Array.isArray(mob.displayName)) {
 				mob.displayName = mob.displayName[world.dice.roll(1, mob.displayName.length) - 1];
 			}
-		
+
 			if (Array.isArray(mob.short)) {
 				mob.short = mob.short[world.dice.roll(1, mob.short.length) - 1];
 			}
-		
+
 			if (Array.isArray(mob.long)) {
 				mob.long = mob.long[world.dice.roll(1, mob.long.length) - 1];
 			}
@@ -606,72 +604,43 @@ World.prototype.rollMobs = function(mobArr, roomid, area, fn) {
 			}
 
 			if (!mob.possessivePronoun) {
-				mob.possessivePronoun = Character.getPossessivePronoun(mob);
+				mob.possessivePronoun = world.character.getPossessivePronoun(mob);
 			}
 
 			if (!mob.personalPronoun) {
-				mob.personalPronoun = Character.getPersonalPronoun(mob);
+				mob.personalPronoun = world.character.getPersonalPronoun(mob);
 			}
 
 			if (mob.rollStats) {
-				mob.baseStr = mob.str + mob.minStat;
-				mob.baseDex = mob.dex + mob.minStat;
-				mob.baseInt = mob.int + mob.minStat;
-				mob.baseWis = mob.wis + mob.minStat;
-				mob.baseCon = mob.con + mob.minStat;
+				mob.str += 10;
+				mob.int += 10;
+				mob.wis += 10;
+				mob.dex += 10;
+				mob.con += 10;
+	
+				mob.baseStr = mob.str;
+				mob.baseDex = mob.dex;
+				mob.baseInt = mob.int;
+				mob.baseWis = mob.wis;
+				mob.baseCon = mob.con;
 			}
 
 			mob.isPlayer = false;
-			mob.roomid = roomid;
+			mob.roomid = room.id;
 			mob.area = area.id;
 
 			if (!mob.originatingArea) {
 				mob.originatingArea = mob.area;
 			}
 
-			if (!mob.hp) {
-				if (mob.level > 5) {
-					mob.hp = (15 * (mob.level + 1));
-				} else {
-					mob.hp = (30 * (mob.level + 1));
-				}
-			} else {
-				mob.hp += (mob.level + world.dice.roll(1, mob.con/4));
-			}
-			
 			mob.chp = mob.hp;
-
-			if (!mob.mana) {
-				mob.mana = 50 * 8 + mob.int;
-			} else {
-				mob.mana += (mob.level + world.dice.roll(1, mob.int));
-			}
 
 			mob.cmana = mob.mana;
 
-			if (!mob.mv) {
-				mob.mv = 50 * 9 + mob.dex;
-				mob.cmv = mob.mv;
-			} else {
-				mob.mv += (mob.level + world.dice.roll(1, mob.dex));
-			}
-
 			mob.cmv = mob.mv;
 
-			if (mob.gold > 0) {
-				mob.gold += world.dice.roll(1, 8);
-			}
-
-			if (mob.items) {
-				world.rollItems(mob.items, roomid, area);
-			}
-
-			if (mob.behaviors) {
-				mob = world.setupBehaviors(mob);
-
-				mobArr[index] = mob;
-			} else {
-				mobArr[index] = mob;
+			if (!mob.gold && mob.gold !== 0) {
+				mob.gold += world.dice.roll(1, mob.level * 10);
 			}
 
 			for (prop in mob) {
@@ -680,21 +649,37 @@ World.prototype.rollMobs = function(mobArr, roomid, area, fn) {
 				}
 			}
 
-			if (mob.onRolled) {
-				mob.onRolled(mob);
+			if (mob.behaviors) {
+			world.setupBehaviors(mob, area, room, function(err, mob) {
+					return callback(err, mob);
+				});
+			} else {
+				return callback(false, mob);
 			}
-		}(mobArr[i], i));
-	}
+		});
+	});
 };
 
-World.prototype.setupArea = function(area, fn) {
-	var world = this,
-	exitObj,
-	i = 0;
+World.prototype.setupArea = function(area, callback) {
+	var i = 0,
+	world = this,
+	setup = function() {
+		for (i; i < area.rooms.length; i += 1) {
+			world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)), function(err, room) {
+				if (area.titleStyleClass) {
+					room.titleStyleClass = area.titleStyleClass;
+				}
+				
+				world.setupRoom(area, room, function(error, area, room) {
+					room.extended = true;
 
-	if (!area.wasExtended) {
-		area = world.extend(area, JSON.parse(JSON.stringify(world.areaTemplate)));
-	}
+					if (i === area.rooms.length - 1) {
+						callback(false, area);
+					}
+				});
+			});
+		}
+	};
 
 	for (i; i < area.messages.length; i += 1) {
 		if (!area.messages[i].random && area.messages[i].random !== false) {
@@ -702,81 +687,221 @@ World.prototype.setupArea = function(area, fn) {
 		}
 	}
 
-	if (typeof area.beforeLoad === 'function' && !area.preventBeforeLoad) {
+	i = 0;
+
+	if (!area.beforeLoad || area.preventBeforeLoad) {
+		setup();
+	} else if (typeof area.beforeLoad === 'function' && !area.preventBeforeLoad) {
 		area.beforeLoad(function(err) {
 			if (!err) {
-				return world.setupRooms(area, fn);
+				setup();
 			}
 		});
+	}
+}
+
+World.prototype.setupRoom = function(area, room, callback) {
+	var i = 0,
+	world = this;
+
+	room.area = area.id;
+
+	if (room.monsters.length) {
+		for (i; i < room.monsters.length; i += 1) {
+			world.extend(room.monsters[i], JSON.parse(JSON.stringify(world.entityTemplate)), function(err, mob) {
+				mob.area = area.id;
+
+				world.setupMob(mob, area, room, function(err, mob) {
+					mob.extended = true;
+
+					if (err) {
+						return callback(err, mob);
+					}
+
+					if (i === room.monsters.length - 1) {
+						i = 0;
+
+						if (room.items.length) {
+							for (i; i < room.items.length; i += 1) {
+								world.extend(room.items[i], JSON.parse(JSON.stringify(world.itemTemplate)), function(err, item) {
+									item.area  = area.id;
+
+									world.setupItem(item, area, room, function(err, item) {
+										item.extended = true;
+
+										if (i ===  room.items.length - 1) {
+											i = 0;
+
+											if (room.exits.length) {
+												for (i; i < room.exits.length; i += 1) {
+													world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate)), function(err, exit) {
+														if (!exit.area) {
+															exit.area = room.area;
+														}
+
+														if (i === room.exits.length - 1) {
+															callback(false, area, room);
+														}
+													});
+												}
+											} else {
+												callback(false, area, room);
+											}
+										}
+									});
+								});
+							}
+						} else {
+							i = 0;
+							if (room.exits.length) {
+								for (i; i < room.exits.length; i += 1) {
+									world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate)), function(err, exit) {
+										if (!exit.area) {
+											exit.area = room.area;
+										}
+
+										if (i === room.exits.length - 1) {
+											callback(false, area, room);
+										}
+									});
+								}
+							} else {
+								callback(false, area, room);
+							}
+						}
+					}
+				});
+			});
+		}
 	} else {
-		return world.setupRooms(area, fn);
+		if (room.items.length) {
+			for (i; i < room.items.length; i += 1) {
+				world.extend(room.items[i], JSON.parse(JSON.stringify(world.itemTemplate)), function(err, item) {
+					item.area = area.id;
+
+					world.setupItem(item, area, room, function(err, item) {
+						item.extended = true;
+
+						if (i ===  room.items.length - 1) {
+							i = 0;
+
+							if (room.exits.length) {
+								for (i; i < room.exits.length; i += 1) {
+									world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate)), function(err, exit) {
+										if (!exit.area) {
+											exit.area = room.area;
+										}
+
+										if (i === room.exits.length - 1) {
+											callback(false, area, room);
+										}
+									});
+								}
+							} else {
+								callback(false, area, room);
+							}
+						}
+					});
+				});
+			}
+		} else {
+			i = 0;
+			if (room.exits.length) {
+				for (i; i < room.exits.length; i += 1) {
+					world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate)), function(err, exit) {
+						if (!exit.area) {
+							exit.area = room.area;
+						}
+
+						if (i === room.exits.length - 1) {
+							callback(false, area, room);
+						}
+					});
+				}
+			} else {
+				callback(false, area, room);
+			}
+		}
 	}
 };
 
-World.prototype.setupRooms = function(area, fn) {
-	var world = this,
-	i = 0,
-	j = 0,
-	exitObj;
+World.prototype.setupMob = function(mob, area, room, callback) {
+	var i = 0,
+	world = this;
 
-	for (i; i < area.rooms.length; i += 1) {
-		if (!area.wasExtended) {
-			area.rooms[i] = world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)));
+	world.rollMob(mob, area, room, function(err, mob) {
+		if (err) {
+			return callback(error, mob);
+		}
 
-			if (!area.rooms[i].area) {
-				area.rooms[i].area = area.id;
+		if (mob.items.length) {
+			for (i; i < mob.items.length; i += 1) {
+				world.extend(mob.items[i], JSON.parse(JSON.stringify(world.itemTemplate)), function(err, item) {
+					item.area = mob.area;
+	
+					world.setupItem(item, area, room, function(err, item) {
+						item.extended = true;
+
+						if (err) {
+							return callback(err, item);
+						}
+
+						if (i ===  mob.items.length - 1) {
+							return callback(false, mob);
+						}
+					});
+				});
 			}
+		} else {
+			callback(false, mob);
 		}
+	});
+};
 
-		if (area.rooms[i].monsters) {
-			area.monsters = world.shuffle(area.rooms[i].monsters);
-		}
+World.prototype.setupExit = function(exit, callback) {
+	var i = 0,
+	world = this;
 
-		area.rooms[i].area = area.id;
+	callback(false, exit);
+};
 
-		j = 0;
+World.prototype.setupItem = function(item, area, room, callback) {
+	var world = this;
 
-		for (j; j < area.rooms[i].exits.length; j += 1) {
-			exitObj = area.rooms[i].exits[j];
 
-			if (!exitObj.area || exitObj.area === area.name) {
-				exitObj.area = area.id;
+	if (!item.items || !item.items.length) {
+		world.rollItem(item, area, room, function(error, item) {
+			if (error) {
+				return callback(error, item);
 			}
 
-			exitObj.affects = [];
-		}
+			callback(false, item)
+		});
+	} else if (item.items && item.items.length) {		
+		world.rollItem(item, area, room, function(error, item) {
+			var i = 0,
+			innerItem;
+
+			for (i; i < item.items.length; i += 1) {
+				innerItem = item.items[i];
+
+				world.extend(innerItem, JSON.parse(JSON.stringify(world.itemTemplate)), function(err, innerItem) {
+					world.setupItem(innerItem, area, room, callback);
+				});
+			}
+		});
 	}
 
-	area.wasExtended = true;
-
-	i = 0;
-
-	for (i; i < area.rooms.length; i += 1) {
-		(function(room, index) {
-			if (room.monsters.length > 0) {
-				world.rollMobs(room.monsters, room.id, area);
-			}
-
-			if (room.items.length > 0) {
-				world.rollItems(room.items, room.id, area);
-			}
-
-			if (area.rooms.length - 1 === index) {
-				if (typeof fn === 'function') {
-					return fn(area);
-				}
-			}
-		}(area.rooms[i], i));
-	}
+	callback(false, item);
 };
 
 World.prototype.createRefId = function(gameEntity) {
 	if (gameEntity.isPlayer === true) {
-		return 'entity-' + gameEntity.sid;
+		return  Math.random().toString().replace('0.', 'player-');
 	} else if (gameEntity.itemType === 'entity') {
 		return Math.random().toString().replace('0.', 'entity-');
 	} else {
-		return 	Math.random().toString().replace('0.', 'item-');
+		return Math.random().toString().replace('0.', 'item-');
 	}
 }
 
@@ -800,16 +925,20 @@ World.prototype.reloadArea = function(area) {
 
 	newArea = require('../areas/' + area.id  + '.js');
 
-	world.setupArea(newArea, function(newArea) {
-		var i = 0;
-		newArea.id = area.id;
+	world.extend(newArea, JSON.parse(JSON.stringify(world.areaTemplate)), function(err, newArea) {
+		world.setupArea(newArea, function(err, newArea) {
+			var i = 0;
 
-		for (i; i < world.areas.length; i += 1) {
-			if (world.areas[i].id === newArea.id) {
+			newArea.id = area.id;
+			newArea.extended = true;
 
-				world.areas[i] = newArea;
+			for (i; i < world.areas.length; i += 1) {
+				if (world.areas[i].id === newArea.id) {
+
+					world.areas[i] = newArea;
+				}
 			}
-		}
+		});
 	});
 };
 
@@ -969,6 +1098,7 @@ World.prototype.getAllPlayerItemsFromArea = function(areaId) {
 World.prototype.sendMotd = function(s) {
 	this.msgPlayer(s, {
 		msg : this.motd,
+		noPrompt: true,
 		evt: 'onLogged'
 	});
 };
@@ -995,12 +1125,12 @@ World.prototype.prompt = function(target) {
 		target.cmv = 0;
 	}
 
-	prompt = '<div class="col-md-12"><div class="cprompt"><strong><' 
-		+ player.chp + '/'  + player.hp + '<span class="red">hp</span>><' 
-		+ player.cmana + '/'  + player.mana + '<span class="blue">m</span>><' 
+	prompt = '<div class="col-md-12"><div class="cprompt"><strong><'
+		+ player.chp + '/'  + player.hp + '<span class="red">hp</span>><'
+		+ player.cmana + '/'  + player.mana + '<span class="blue">m</span>><'
 		+ player.cmv + '/'  + player.mv +'<span class="warning">mv</span>></strong>';
 
-	if (player.sid) {
+	if (this.config.allAdmin || player.role === "admin") {
 		prompt += '<' + player.wait + 'w>';
 	}
 
@@ -1041,21 +1171,13 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 	} else if (!target.area) {
 		s = target;
 	}
-	
+
 	if (!msgObj.noPrompt) {
 		prompt = this.prompt(target);
 	}
 
 	if (!msgObj.styleClass) {
 		msgObj.styleClass = '';
-	}
-
-	if (msgObj.appendName) {
-		appendName = true;
-	}
-
-	if (msgObj.prependName) {
-		prependName = true;
 	}
 
 	if (!msgObj.name) {
@@ -1065,20 +1187,14 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 	}
 
 	if (target) {
-		if (s) {
+		if (s && s.readyState === 1) {
+			msgObj.msgType = 'msg';
+
 			if (!msgObj.onlyPrompt && typeof msgObj.msg !== 'function' && msgObj.msg) {
-				baseMsg = msgObj.msg;	
+				baseMsg = msgObj.msg;
 
 				if (!canSee && msgObj.darkMsg) {
 					msgObj.msg = msgObj.darkMsg
-				} else {
-					if (prependName) {
-						msgObj.msg = name + ' ' + msgObj.msg;
-					}
-
-					if (appendName) {
-						msgObj.msg += ' ' + name;
-					}
 				}
 
 				msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msgObj.msg + '</div>';
@@ -1086,24 +1202,16 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 				if (prompt) {
 					msgObj.msg += prompt;
 				}
-					
-				s.emit('msg', msgObj);
-				
-				msgObj.msg = baseMsg; 
+
+				s.send(JSON.stringify(msgObj));
+
+				msgObj.msg = baseMsg;
 			} else if (typeof msgObj.msg === 'function') {
 				msgObj.msg(target, function(send, msg) {
 					baseMsg = msgObj.msg;
 
 					if (!canSee && msgObj.darkMsg) {
 						msgObj.msg = msgObj.darkMsg;
-					}
-
-					if (prependName) {
-						msgObj.msg = name + ' ' + msgObj.msg;
-					}
-
-					if (prependName) {
-						msgObj.msg += ' ' + name;
 					}
 
 					msgObj.msg = '<div class="col-md-12 ' + msgObj.styleClass  + '">' + msg + '</div>';
@@ -1113,19 +1221,19 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 					}
 
 					if (send) {
-						s.emit('msg', msgObj);
+						s.send(JSON.stringify(msgObj));
 					}
 					
 					msgObj.msg = baseMsg;
 				}, target);
 			} else {
-				s.emit('msg', {
-					msg: prompt
-				});
+				msgObj.msg = prompt;
+
+				s.send(JSON.stringify(msgObj));
 			}
 		}
 	} else {
-		s.emit('msg', msgObj);
+		s.send('msg', msgObj);
 	}
 };
 
@@ -1143,7 +1251,7 @@ World.prototype.msgRoom = function(roomObj, msgObj) {
 			s = roomObj.playersInRoom[i].socket;
 
 			if (msgObj.checkSight) {
-				canSee = Character.canSee(s.player, roomObj);
+				canSee = world.character.canSee(s.player, roomObj);
 			}
 
 			if (s && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id 
@@ -1157,7 +1265,7 @@ World.prototype.msgRoom = function(roomObj, msgObj) {
 			s = roomObj.playersInRoom[i].socket;
 
 			if (msgObj.checkSight) {
-				canSee = Character.canSee(s.player, roomObj);
+				canSee = world.character.canSee(s.player, roomObj);
 			}
 
 			if (s && s.player.roomid === roomObj.id && s.player.area === roomObj.area) {
@@ -1205,7 +1313,7 @@ World.prototype.msgWorld = function(target, msgObj) {
 	for (i; i < world.players.length; i += 1) {
 		s = world.players[i].socket;
 
-		if (world.players[i].name !== msgObj.playerName) {
+		if (world.players[i].name !== msgObj.playerName && world.players[i].creationStep === 0) {
 			world.msgPlayer(s, msgObj);
 		}
 	}
@@ -1214,7 +1322,8 @@ World.prototype.msgWorld = function(target, msgObj) {
 // convenience function for searching a given array and return an item based 
 // on on a given command object. Matches against objects name and displayName properties
 World.prototype.search = function(arr, itemType, returnArr, command) {
-	var canSearch = true,
+	var patternStr = '',
+	canSearch = true,
 	matchedIndexes = [],
 	result = false,
 	pattern,
@@ -1287,7 +1396,7 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 				} else {
 					result = arr[matchedIndexes[0]];
 				}
-			} else {
+		} else {
 				result = [];
 
 				i = 0;
@@ -1302,54 +1411,22 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 	return result;
 };
 
-World.prototype.setupBehaviors = function(gameEntity) {
-	var prop,
+World.prototype.setupBehaviors = function(gameEntity, area, room, callback) {
+	var world = this,
+	prop,
 	behavior,
 	behaviorObj,
-	i = 0,
-	j = 0;
-
-	if (gameEntity.behaviors) {		
-		for (i; i < gameEntity.behaviors.length; i += 1) {
-			behavior = this.getAI(gameEntity.behaviors[i]),
-			behaviorObj = {};
-
-			for (prop in behavior) {
-				if (typeof behavior[prop] !== 'function' && !gameEntity[prop]) {
-					 behaviorObj[prop] = behavior[prop]; 
-				}
-			}
-
-			if (behaviorObj) {
-				gameEntity = this.extend(gameEntity, behaviorObj);
-			}
-		}
-	}
-
 	i = 0;
 
-	if (gameEntity.items) {
-		for (j; j < gameEntity.items; j =+ 1) {
-			if (gameEntitiy.items[j].behaviors) {
-				for (i; i < gameEnitity.items[j].behaviors.length; i += 1) {
-					behavior = this.getAI(gameEntity.items[j].behaviors[i]);
-					behaviorObj = {};
-
-					for (prop in behavior) {
-						if (typeof behavior[prop] !== 'function' && !gameEntity.items[j][prop]) {
-							 behaviorObj[prop] = behavior[prop]; 
-						}
-					}
-
-					if (behaviorObj) {
-						gameEntity.items[j] = this.extend(gameEntity.items[j], behaviorObj);
-					}
-				}
-			}	
+	if (gameEntity.behaviors.length) {
+		for (i; i < gameEntity.behaviors.length; i += 1) {
+			world.extend(gameEntity, world.getAI(gameEntity.behaviors[i]), function(err, gameEntity) {
+				return callback(false, gameEntity);
+			});
 		}
+	} else {
+		return callback(false, gameEntity);
 	}
-
-	return gameEntity;
 };
 
 World.prototype.sanitizeBehaviors = function(gameEntity) {
@@ -1451,18 +1528,17 @@ World.prototype.saveArea = function(areaId) {
 	}
 };
 
-World.prototype.extend = function(extendObj, readObj, fn) {
-	var prop,
-	propCnt,
+World.prototype.extend = function(extendObj, readObj, callback) {
+	var propCnt,
+	cnt = 0,
+	prop,
 	prop2;
 
-	if (readObj) { // refactor, shouldn't need this check
-		propCnt = Object.keys(readObj).length;
-	}
+	propCnt = Object.keys(readObj).length;
 
-	if (arguments.length === 2 && propCnt) {
+	if (extendObj && readObj && propCnt) {
 		for (prop in readObj) {
-			if (extendObj[prop] !== undefined) {
+			if (extendObj.hasOwnProperty(prop)) {
 				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
 					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
 				} else if (typeof extendObj[prop] !== 'string'
@@ -1481,16 +1557,22 @@ World.prototype.extend = function(extendObj, readObj, fn) {
 					}
 				} else if (typeof extendObj[prop] === 'string'
 					&& typeof readObj[prop] === 'string'
-					&& typeof readObj[prop] !== '' && extendObj[prop] === '') {
+					&& readObj[prop] !== '' && extendObj[prop] === '') {
 					extendObj[prop] = readObj[prop];
 				}
 			} else {
 				extendObj[prop] = readObj[prop];
 			}
-		}
-	}
 
-	return extendObj;
+			cnt += 1;
+
+			if (cnt === propCnt) {
+				return callback(false, extendObj);
+			}
+		}
+	} else {
+		return callback(false, extendObj);
+	}
 };
 
 // Shuffle an array
@@ -1565,8 +1647,14 @@ World.prototype.removeAffect = function(obj, affectName) {
 
 World.prototype.addAffect = function(obj, affect) {
 	obj.affects.push(affect);
-	
-	return true;;
+
+	return true;
+};
+
+World.prototype.addCommand = function(cmdObj, entity) {
+	cmdObj.entity = entity;
+
+	this.cmds.push(cmdObj);
 };
 
 World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, param2) {
@@ -1574,7 +1662,7 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 	j = 0,
 	allTrue = true,
 	gameEntities = [];
-	
+
 	if (gameEntity) {
 		if (!Array.isArray(gameEntity)) {
 			gameEntities = [gameEntity];
@@ -1587,18 +1675,10 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 		}
 
 		for (i; i < gameEntities.length; i += 1) {
-			gameEntity = gameEntities[i];	
-			
-			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)] || gameEntity.behaviors.length === 0) {
-				 if (gameEntity[evtName]) {
+			gameEntity = gameEntities[i];
+			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)] && gameEntity[evtName]) {
+				if (gameEntity[evtName]) {
 					allTrue = gameEntity[evtName](gameEntity, roomObj, param, param2);
-				}
-
-				for (j; j < gameEntity.behaviors.length; j += 1) {
-					if (this.ai[gameEntity.behaviors[j].module][evtName] && 
-						(!gameEntity.behaviors[j].random || World.dice.roll(1, 2) === 1)) {
-						allTrue = this.ai[gameEntity.behaviors[j].module][evtName](gameEntity, roomObj, param, param2);
-					}
 				}
 			}
 
@@ -1607,7 +1687,7 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 			}
 		}
 	}
-	
+
 	return allTrue;
 };
 

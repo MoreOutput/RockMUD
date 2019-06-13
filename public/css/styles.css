@@ -7,27 +7,24 @@ yellow: #ffcc00;
 html, body {
 background-color: #000;
 color: #fff;
-font-size: .9em;
 padding: 0;
 margin: 0;
 height: 100%;
-letter-spacing: 0.0650em;
 background-image: url('bg.jpg');
 background-repeat: no-repeat;
-background-position: center top; 
+background-position: center top;
+font-size: .9em;
+font-family: 'Courier New', Courier, monospace;
 }
 html, body a {
 color: #60f066;
 }
-.sans-serif {
-font-family: sans-serif;
-}
 h1 {
-font-family: serif;
 padding-top: 0;
 margin-top: 0;
 font-size: 155%;
 color: #ffcc00;
+font-weight: bold;
 }
 h2, h3, h4, h5, h6, .title {
 color: #ddd;
@@ -37,7 +34,7 @@ margin-top: 0;
 font-size: 145%;
 }
 #mudwrapper {
-padding-top: 280px;
+padding-top: 265px;
 height: 850px;
 width: 980px;
 margin: 0 auto;
@@ -82,8 +79,7 @@ opacity: 0.75;
 }
 .opening-title {
 font-size: 3em;
-text-shadow: 2px 2px #ff0033;
-color: #fff;
+color: #ff0033;
 }
 .score {
 margin-bottom: .25em;
@@ -104,14 +100,14 @@ list-style-type: square;
 .score .stat-gold {
 color: #ffcc00;
 }
-#score .stat-hp {
+.score .stat-hp {
 color: #ff0033;
 }
 .score .stat-mana {
 color: #0066ff;
 }
 .score .stat-mv {
-color: #60f066;
+color: #ffcc00;
 }
 .cmd {
 color: #888;
@@ -145,9 +141,11 @@ color: purple;
 border-top: 1px dashed #ffcc00;
 border-bottom: 1px dashed #ffcc00;
 color: #ff0033;
-padding: .8em 0 0 0;
-margin: .5em 0 1em 0;
+padding: 1em 1em .25em 1em;
 font-weight: bold;
+}
+.cprompt {
+padding-bottom: .5em;
 }
 .room .room-title {
 color: #ffcc00;
@@ -197,4 +195,24 @@ background: none !important;
 border: none;
 text-decoration: underline;
 cursor: pointer;
+}
+#prev-cmd-list {
+    display: inline-block;
+    padding: 0;
+    margin: 0;
+}
+#prev-cmd-list li {
+    padding: 0;
+    margin: 0;
+    display: inline-block;
+}
+.prev-cmd {
+    color: #ffcc00;
+}
+.hunger {
+    color: red;
+}
+.quest-complete {
+    font-weight: bold;
+    font-size: 200%;
 }

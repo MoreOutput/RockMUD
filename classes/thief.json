@@ -16,7 +16,8 @@
 			"wait": 3,
 			"learned": false,
 			"prerequisites": {
-				"level": 2
+				"level": 2,
+				"charClass": "thief"
 			}
 		}, {
 			"id": "sneak",

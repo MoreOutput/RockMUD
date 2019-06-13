@@ -1,20 +1,20 @@
 'use strict';
-var Cmd = require('../src/commands'),
-Room = require('../src/rooms'),
-World = require('../src/world');
+var World = require('../src/world'),
+areaId = 'the_great_valley';
 
 module.exports = {
 	name : 'The Great Valley',
-	id: 'the_great_valley',
+	id: areaId,
 	defaultRoom: '1',
 	type : 'grasslands',
 	levels : 'All',
 	description : 'The second area.',
 	reloads: 0,
-	author: 'Rocky',
+	author: 'RockMUD',
 	messages: [
 		{
-			msg: 'A warm breeze blows southward toward Midgaard.'
+			msg: 'A cold breeze blows southward toward camp.',
+			msg: 'Light bounces off of the snow and nearly blinds you for a moment.'
 		}
 	],
 	beforeLoad: function(fn) {
@@ -23,19 +23,31 @@ module.exports = {
 		roomObj,
 		generateNorthOf = World.getRoomObject(this.name, this.defaultRoom),
 		i = 0,
-		enteranceRoomId = '4-0',
-		startingRoom,
-		j = 0;
+		j = 0,
+		enteranceRoomId = '0-0',
+		startingRoom;
 
 		if (this.rooms.length === 1) {
 			for (i; i < x; i += 1) {
 				j = 0;
 
 				for (j; j < y; j += 1) {
+					// copy the template
 					roomObj = JSON.parse(JSON.stringify(World.roomTemplate)),
 					roomObj.id = i + '-' + j;
-					roomObj.content = 'A room';
-					roomObj.title = 'Empty room ' +  i + '-' + j;
+					roomObj.content = 'Grass covered plains.';
+
+					var titleRoll = World.dice.roll(1, 3);
+
+					if (titleRoll === 1) {
+						roomObj.title = 'Vast grasslands';
+					} else if (titleRoll === 2) {
+						roomObj.title = 'Endless green plains';
+					} else {
+						roomObj.title = 'A grassy green valley';
+					}
+
+					roomObj.titleStyleClass = "green";
 
 					if (i === 0 && j === 0) {
 						roomObj.exits.push({
@@ -144,26 +156,27 @@ module.exports = {
 			i = 0;
 
 			for (i; i < this.rooms.length; i += 1) {
-				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 3) === 1) {
-					this.rooms[i].monsters.push({
+				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 4) === 1) {
+					var mob = {
 						name: 'Boar',
 						displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
 						level: 1,
 						short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a tan boar'],
 						long: [
 							'A boar with a number of scars on its side is here',
-							'A dark brown boar',
-							'A large brown boar is here'
+							'A dark brown boar is here',
+							'A spotted black and brown boar is here',
+							'A large boar with protruding tusks is here'
 						],
 						inName: 'A boar',
 						race: 'animal',
 						id: '6',
-						area: 'the_great_valley',
+						area: areaId,
 						weight: 120,
 						position: 'standing',
 						attackType: 'bite',
 						ac: 4,
-						hp: 15,
+						hp: 10,
 						chp: 13,
 						gold: 1,
 						str: 3,
@@ -176,7 +189,26 @@ module.exports = {
 						behaviors: [{
 							module: 'wander'
 						}]
-					});
+					};
+
+					if (World.dice.roll(1, 4) === 1) {
+						mob.long = "A large elk with striking white antlers";
+						mob.items = [];
+						mob.items.push({
+							name: 'Ivory Antlers', 
+							short: 'a small, sharp, boars tusk',
+							long: 'A boars tusk was left here.' ,
+							area: areaId,
+							id: '100',
+							level: 1,
+							itemType: 'junk',
+							material: 'ivory',
+							weight: 0,
+							value: 10
+						});
+					}
+
+					this.rooms[i].monsters.push(mob);
 				}
 			}
 		}
@@ -196,8 +228,8 @@ module.exports = {
 				},
 				{
 					cmd: 'north',
-					id: '4-0',
-					area: 'the_great_valley'
+					id: '0-0',
+					area: areaId
 				}
 			],
 			playersInRoom: [],

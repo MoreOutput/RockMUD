@@ -1,7 +1,6 @@
 'use strict';
 var fs = require('fs'),
 World = require('./world'),
-Character = require('./character'),
 io = World.io,
 players = World.players,
 time = World.time,
@@ -18,8 +17,8 @@ Room.prototype.getAdjacentExit = function(targetRoom, exitObj, player) {
 
 	for (i; i < targetRoom.exits.length; i += 1) {
 		if (exitObj.id === targetRoom.id && targetRoom.exits[i].door) {
-			if (targetRoom.exits[i].door.name === exitObj.door.name || targetRoom.exits[i].door.id
-				&& exitObj.door.id && targetRoom.exits[i].door.id === exitObj.door.id) {
+			if (targetRoom.exits[i].name === exitObj.name || targetRoom.exits[i].id
+				&& exitObj.id && targetRoom.exits[i].id === exitObj.id) {
 				targetExit = targetRoom.exits[i];
 			}
 		}
@@ -43,10 +42,6 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 	titleHtmlTag = 'h2',
 	items = roomObj.items;
 
-	if (!Object.keys(Character).length) {
-		Character = require('./character');
-	}
-
 	if (roomObj.titleHtmlTag) {
 		titleHtmlTag = roomObj.titleHtmlTag;
 	}
@@ -59,10 +54,10 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 		displayHTML += '<ul class="room-exits list-inline"><li class="list-label list-inline-item"><strong>Visible Exits: </strong></li>';
 
 		for (i; i < exits.length; i += 1) {
-			if (Character.canSeeObject(player, exits[i])) {
+			if (World.character.canSeeObject(player, exits[i])) {
 				if (!exits[i].door) {
 					displayHTML += '<li class="list-inline-item"><button class="link-btn red" data-cmd="true" data-cmd-value="move ' + exits[i].cmd + '">' + exits[i].cmd + '</button></li>';
-				} else if (exits[i].door && !exits[i].door.isOpen) {
+				} else if (exits[i].door && !exits[i].isOpen) {
 					displayHTML += '<li class="list-inline-item"><button class="link-btn grey" data-cmd="true" data-cmd-value="move ' + exits[i].cmd + '">' +  exits[i].cmd + '</button></li>';
 				} else {
 					displayHTML += '<li class="list-inline-item"><button class="link-btn yellow" data-cmd="true" data-cmd-value="move ' + exits[i].cmd + '">' + exits[i].cmd + '</button></li>';
@@ -81,11 +76,19 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 
 	if (items.length > 0) {
 		for (i; i < items.length; i += 1) {
-			if (Character.canSeeObject(player, items[i])) {
-				if (items[i].long) {
-					displayHTML += '<li class="room-item">' + items[i].long + ' (' + items[i].level + ')</li>';
+			if (World.character.canSeeObject(player, items[i])) {
+				if (items[i].level && items[i].itemType !== 'corpse' && items[i].itemType !== 'ornament') {
+					if (items[i].long) {
+						displayHTML += '<li class="room-item">' + items[i].long + ' (' + items[i].level + ')</li>';
+					} else {
+						displayHTML += '<li class="room-item">A ' + items[i].name + ' (' + items[i].level + ')</li>';
+					}
 				} else {
-					displayHTML += '<li class="room-item">A ' + items[i].name + ' (' + items[i].level + ')</li>';
+					if (items[i].long) {
+						displayHTML += '<li class="room-item">' + items[i].long + '</li>';
+					} else {
+						displayHTML += '<li class="room-item">A ' + items[i].name + '</li>';
+					}
 				}
 			}
 		}
@@ -95,21 +98,21 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 
 	if (monsters.length > 0 || playersInRoom.length > 0) {
 		for (i; i < monsters.length; i += 1) {
-			if (Character.canSeeObject(player, monsters[i])) {
+			if (World.character.canSeeObject(player, monsters[i])) {
 				if (monsters[i].long) {
 					displayHTML += '<li class="room-monster grey">' + monsters[i].long + '</li>';
 				} else {
-					displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is ' 
+					displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is '
 						+ monsters[i].position + ' here.</li>';
 				}
 			}
 		}
 
 		i = 0;
-	
+
 		for (i; i < playersInRoom.length; i += 1) {
 			if (playersInRoom[i] !== player) {
-				if (Character.canSeeObject(player, playersInRoom[i])) {
+				if (World.character.canSeeObject(player, playersInRoom[i])) {
 					displayHTML += '<li class="room-player">' + playersInRoom[i].name 
 						+ ' the ' + playersInRoom[i].race + ' is ' + playersInRoom[i].position + ' here.</li>';
 				}
@@ -127,7 +130,6 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 };
 
 // Get an exit from a room by direction; 
-// empty direction results in an array of all exit objects
 Room.prototype.getExit = function(roomObj, direction) { 
 	var i = 0;
 
@@ -135,7 +137,23 @@ Room.prototype.getExit = function(roomObj, direction) {
 		for (i; i < roomObj.exits.length; i += 1) {
 			if (direction === roomObj.exits[i].cmd) {
 				return roomObj.exits[i];
-			} else if (roomObj.exits[i].door && roomObj.exits[i].door.name === direction) {
+			} else if (roomObj.exits[i].door && roomObj.exits[i].name === direction) {
+				return roomObj.exits[i];
+			}
+		}
+
+		return false
+	} else {
+		return false;
+	}
+};
+
+Room.prototype.getExitById = function(roomObj, id) { 
+	var i = 0;
+
+	if (roomObj.exits.length > 0) {
+		for (i; i < roomObj.exits.length; i += 1) {
+			if (id === roomObj.exits[i].id) {
 				return roomObj.exits[i];
 			}
 		}
@@ -153,7 +171,7 @@ Room.prototype.getAdjacent = function(roomObj) {
 	roomArr = [];
 
 	for (i; i < roomObj.exits.length; i += 1) {
-		if (!roomObj.exits[i].door || roomObj.exits[i].door.isOpen) {
+		if (!roomObj.exits[i].door || roomObj.exits[i].isOpen) {
 			roomArr.push({
 				room: World.getRoomObject(roomObj.exits[i].area, roomObj.exits[i].id),
 				direction: roomObj.exits[i]
@@ -206,7 +224,7 @@ Room.prototype.getBrief = function(roomObj, options) {
 	playersInRoom = roomObj.playersInRoom,
 	monsters = roomObj.monsters;
 
-	if (monsters.length > 0 || playersInRoom.length > 0) {
+	if (roomObj && (monsters.length > 0 || playersInRoom.length > 0)) {
 		displayHTML += '<ul class="room-here list-inline">';
 		
 		for (i; i < monsters.length; i += 1) {
@@ -230,7 +248,7 @@ Room.prototype.getBrief = function(roomObj, options) {
 
 		displayHTML += '</ul>';
 	} else {
-		displayHTML += '<p>Nothing you can see.</p>';
+		displayHTML += '<p>You don\'t see anything.</p>';
 	}
 
 	displayHTML = '<div class="room"><strong class="room-title">' + roomObj.title + '</strong>' + displayHTML;
@@ -341,6 +359,20 @@ Room.prototype.addItems = function(roomObj, items) {
 
 Room.prototype.getItem = function(roomObj, command) {
 	return World.search(roomObj.items, command);
+};
+
+Room.prototype.getContainer = function(roomObj, command) {
+	var i = 0;
+
+	for (i; i < roomObj.items.length; i += 1) {
+		if ((roomObj.items[i].itemType === 'container'
+			|| roomObj.items[i].itemType === 'corpse')
+			&& roomObj.items[i].name.toLowerCase().indexOf(command.input) !== -1) {
+			return roomObj.items[i];
+		}
+	}
+
+	return false;
 };
 
 Room.prototype.removeItem = function(roomObj, item) {

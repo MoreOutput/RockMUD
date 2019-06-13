@@ -25,8 +25,11 @@
 	"wasExtended": false,
 	"itemType": "area",
 	"hasEvents": false,
-	"runOnAliveWhenEmpty": true,
+	"runOnAliveWhenEmpty": false,
 	"preventRespawn": false,
 	"persistence": false,
-	"wasSaved": false
+	"wasSaved": false,
+	"affects": [],
+	"titleStyleClass": "",
+	"log": []
 }

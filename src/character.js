@@ -6,10 +6,7 @@
 'use strict';
 var fs = require('fs'),
 crypto = require('crypto'),
-Room = require('./rooms'),
 World = require('./world'),
-Skills = require('./skills'),
-Cmds,
 Character = function () {
 	this.statusReport = [
 		{msg: ' is <span class="red">bleeding all over the place</span> and looks <strong>nearly dead!</strong>', percentage: 0},
@@ -23,18 +20,14 @@ Character = function () {
 		{msg: ' is barely wounded.', percentage: 80},
 		{msg: ' is in great shape.', percentage: 90},
 		{msg: ' still seems in perfect health!', percentage: 95},
-		{msg: ' is in <span class="green">perfect health</span>!', percentage: 100}
+		{msg: ' is in <span class="green">perfect health</span>!', percentage: 100},
+		{msg: ' is in <span class="green">amazing health</span>!', percentage: 200}
 	];
 };
 
 Character.prototype.login = function(r, s, fn) {
 	var character = this,
 	name = r.msg.replace(/_.*/,'').toLowerCase();
-
-		if (!Cmds) {
-		// this can be refactored and look can be called iniitally in server.js
-		Cmds = require('./commands');
-	}
 
 	if (r.msg.length > 2) {
 		if  (/^[a-z]+$/g.test(r.msg) === true && /[`~@#$%^&*()-+={}[]|]+$/g.test(r.msg) === false) {
@@ -50,7 +43,7 @@ Character.prototype.login = function(r, s, fn) {
 								noPrompt: true
 							});
 
-							World.players[i].socket.disconnect();
+							World.players[i].socket.terminate();
 
 							s.player = World.players[i];
 
@@ -58,9 +51,7 @@ Character.prototype.login = function(r, s, fn) {
 						}
 					}
 
-					if (!s.player) {
-						s.player = r;
-					}
+					s.player = r;
 
 					s.player.displayName = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
 
@@ -68,13 +59,13 @@ Character.prototype.login = function(r, s, fn) {
 						s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
 					}
 
-					s.player.sid = s.id;
+					s.player.connected = true;
 					s.player.socket = s;
 					s.player.refId = World.createRefId(s.player);
-
 					s.player.logged = false;
 					s.player.verifiedPassword = false;
 					s.player.verifiedName = false;
+					s.player.wait = 0;
 
 					return fn(s, true);
 				} else {
@@ -83,7 +74,7 @@ Character.prototype.login = function(r, s, fn) {
 			});
 		} else {
 			return World.msgPlayer(s, {
-				msg : '<b>Invalid Entry</b>. Enter your name:',
+				msg : '<b>Invalid Entry</b>. Name: ',
 				styleClass: 'enter-name',
 				noPrompt: true
 			});
@@ -102,7 +93,7 @@ Character.prototype.load = function(name, s, fn) {
 		if (err) {
 			throw err;
 		}
-		
+
 		s.player = r;
 
 		s.player.displayName = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
@@ -111,9 +102,8 @@ Character.prototype.load = function(name, s, fn) {
 			s.player.lastname = s.player.lastname = s.player.lastname.charAt(0).toUpperCase() + s.player.lastname.slice(1);
 		}
 
-		s.player.sid = s.id;
+		s.player.connected = true;
 		s.player.socket = s;
-
 		s.player.logged = true;
 		s.player.verifiedPassword = true;
 		s.player.verifiedName = true;
@@ -148,19 +138,37 @@ Character.prototype.getPassword = function(s, command, fn) {
 
 	if (command.cmd && command.cmd.length > 7) {
 		character.hashPassword(s.player.salt, command.cmd, 1000, function(hash) {
-			var roomObj;
+			var roomObj,
+			areaObj;
 
 			if (s.player.password === hash) {
 				if (character.addPlayer(s)) {
-					s.player = World.setupBehaviors(s.player);
-
-					World.sendMotd(s);
-
 					roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+					areaObj = World.getArea(s.player.area);
 
-					roomObj.playersInRoom.push(s.player);
+					World.setupBehaviors(s.player, areaObj, roomObj, function(err, player) {
+						if (err) {
+							return fn(err, player);
+						}
 
-					fn(s);
+						s.player = player;
+
+						World.sendMotd(s);
+
+						if (roomObj) {
+							roomObj.playersInRoom.push(s.player);
+						} else {
+							// if the players last room cannot be found just set them back at their recall
+							roomObj = World.getRoomObject(s.player.recall.area, s.player.recall.roomid);
+
+							s.player.area = s.player.recall.area;
+							s.player.roomid = s.player.recall.roomid;
+
+							roomObj.playersInRoom.push(s.player);
+						}
+	
+						fn(s);
+					});
 				} else {
 					if (r.msg === undefined) {
 						World.msgPlayer(s, {
@@ -204,10 +212,7 @@ Character.prototype.addPlayer = function(s) {
 
 	for (i; i < World.players.length; i += 1) {
 		if (s.player.name === World.players[i].name) {
-			World.players.splice(i, 1);
-			World.players.push(s.player);
-
-			return true;
+			this.removePlayer(s.player);
 		}
 	}
 
@@ -216,7 +221,29 @@ Character.prototype.addPlayer = function(s) {
 	return true;
 };
 
-// A New Character is saved
+Character.prototype.removePlayer = function(player) {
+	var i = 0,
+	j = 0,
+	roomObj;
+
+	for (i; i < World.players.length; i += 1) {
+		if (player.name === World.players[i].name) {
+			roomObj = World.getRoomObject(player.area, player.roomid);
+
+			World.players.splice(i, 1);
+
+			if (roomObj.playersInRoom.length) {
+				for (j; j < roomObj.playersInRoom.length; j += 1) {
+					if (roomObj.playersInRoom[j].name === player.name) {
+						roomObj.playersInRoom.splice(j, 1);
+					}
+				}
+			}
+		}
+	}
+};
+
+// A New Character is rolled and saved
 Character.prototype.create = function(s) {
 	var character = this,
 	raceObj,
@@ -234,99 +261,87 @@ Character.prototype.create = function(s) {
 
 	classObj = World.getClass(s.player.charClass);
 
-	s.player.name = s.player.name.toLowerCase();
+	s.player.name = World.capitalizeFirstLetter(s.player.name);
+	s.player.gold = 0;
 
-	s.player = World.extend(s.player, JSON.parse(JSON.stringify(raceObj)));
-	s.player = World.extend(s.player, JSON.parse(JSON.stringify(classObj)));
+	World.extend(s.player, raceObj, function(err, player) {
+		World.extend(s.player, classObj, function(err, player) {
 
-	s.player.refId = World.createRefId(s.player);
-	s.player.id = s.player.name;
-	s.player.chp += 30;
-	s.player.cmana += 5;
-	s.player.cmv += 100;
-	s.player.isPlayer = true;
-	s.player.salt = '';
-	s.player.created = new Date();
-	s.player.saved = null;
-	s.player.role = 'player';
-	s.player.area = 'Midgaard';
-	s.player.roomid = '1';
-	s.player.trains += 25;
-	s.player.deaths = 0;
-	s.player.baseStr += 12 + s.player.str;
-	s.player.baseInt += 12 + s.player.int;
-	s.player.baseWis += 12 + s.player.wis;
-	s.player.baseCon += 12 + s.player.con;
-	s.player.baseDex += 12 + s.player.dex;
-	s.player.settings = {
-		autosac: false,
-		autoloot: true,
-		autocoin: true,
-		wimpy: 0,
-		channels: {
-			blocked: ['flame']
-		}
-	};
+			s.player.refId = World.createRefId(s.player);
+			s.player.charClass = classObj.name;
+			s.player.id = s.player.name;
+			s.player.hp += 30;
+			s.player.cmana += 5;
+			s.player.cmv += 100;
+			s.player.isPlayer = true;
+			s.player.salt = '';
+			s.player.created = new Date();
+			s.player.saved = null;
+			s.player.role = 'player';
+			s.player.area = 'midgaard';
+			s.player.roomid = '1';
+			s.player.trains += 25;
+			s.player.deaths = 0;
+			s.player.baseStr += 10 + s.player.str;
+			s.player.baseInt += 10 + s.player.int;
+			s.player.baseWis += 10 + s.player.wis;
+			s.player.baseCon += 10 + s.player.con;
+			s.player.baseDex += 10 + s.player.dex;
+			s.player.mv = s.player.cmv;
+			s.player.mana = s.player.cmana;
+			s.player.chp = s.player.hp;
+			s.player.str = s.player.baseStr;
+			s.player.int = s.player.baseInt;
+			s.player.wis = s.player.baseWis;
+			s.player.con = s.player.baseCon;
+			s.player.dex = s.player.baseDex;
+			s.player.noFollow = false;
+			s.player.noGroup = false;
 
-	socket = s.player.socket;
+			socket = s.player.socket;
 
-	s.player.mv = s.player.cmv;
-	s.player.mana = s.player.cmana;
-	s.player.hp = s.player.chp;
-	s.player.str = s.player.baseStr;
-	s.player.int = s.player.baseInt;
-	s.player.wis = s.player.baseWis;
-	s.player.con = s.player.baseCon;
-	s.player.dex = s.player.baseDex;
-	s.player.noFollow = false;
-	s.player.noGroup = false;
-
-	character.generateSalt(function(salt) {
-		s.player.salt = salt;
-
-		character.hashPassword(salt, s.player.password, 1000, function(hash) {
-			s.player.password = hash;
-			s.player.socket = null;
-
-			s.player.personalPronoun = character.getPersonalPronoun(s.player);
-
-			s.player.possessivePronoun = character.getPossessivePronoun(s.player);
-
-			character.write(s.player.name, s.player, function (err) {
-				character.load(s.player.name, s, function(s) {
-					var roomObj;
-
-					if (err) {
-						throw err;
-					}
-
-					if (character.addPlayer(s)) {
-						s.leave('creation');
-						s.join('mud');
-
-						World.sendMotd(s);
-
-						roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-
-						roomObj.playersInRoom.push(s.player);
-
-						Cmds.look(s.player, {
-							roomObj: roomObj
+			character.generateSalt(function(salt) {
+				s.player.salt = salt;
+		
+				character.hashPassword(salt, s.player.password, 1000, function(hash) {
+					s.player.password = hash;
+					s.player.socket = null;
+					s.player.personalPronoun = character.getPersonalPronoun(s.player);
+					s.player.possessivePronoun = character.getPossessivePronoun(s.player);
+		
+					character.write(s.player.name, s.player, function (err) {
+						character.load(s.player.name, s, function(s) {
+							var roomObj;
+		
+							if (err) {
+								throw err;
+							}
+		
+							if (character.addPlayer(s)) {
+								World.sendMotd(s);
+		
+								roomObj = World.getRoomObject(s.player.area, s.player.roomid);
+								roomObj.playersInRoom.push(s.player);
+		
+								World.addCommand({
+									cmd: 'look',
+									roomObj: roomObj
+								}, s.player);
+							} else {
+								World.msgPlayer(s, {
+									msg: 'Error logging in. Reconnect and retry.'
+								});
+		
+								s.terminate();
+							}
 						});
-					} else {
-						World.msgPlayer(s, {
-							msg: 'Error logging in. Reconnect and retry.'
-						});
-
-						s.disconnect();
-					}
+					});
 				});
 			});
 		});
 	});
 };
 
-// recursive function fired in server.js, checked when a new character is being made
 Character.prototype.newCharacter = function(s, command) {
 	var character = this,
 	i = 0;
@@ -339,7 +354,7 @@ Character.prototype.newCharacter = function(s, command) {
 			noPrompt: true
 		});
 
-		Cmds.help(s.player, {
+		World.commands.help(s.player, {
 			msg: 'races',
 			noPrompt: true
 		});
@@ -363,7 +378,7 @@ Character.prototype.newCharacter = function(s, command) {
 						noPrompt: true
 					});
 
-					Cmds.help(s.player, {
+					World.commands.help(s.player, {
 						msg: 'classes',
 						noPrompt: true
 					});
@@ -375,7 +390,7 @@ Character.prototype.newCharacter = function(s, command) {
 							noPrompt: true
 						});
 					} else {
-						Cmds.help(s, {
+						World.commands.help(s, {
 							msg: command.msg,
 							noPrompt: true
 						});
@@ -404,9 +419,9 @@ Character.prototype.newCharacter = function(s, command) {
 						noPrompt: true
 					});
 				} else {
-					Cmds.help(s, {
+					World.commands.help(s, {
 						msg: command.msg,
-						noPrompt: true
+					noPrompt: true
 					});
 				}
 			}
@@ -437,7 +452,7 @@ Character.prototype.newCharacter = function(s, command) {
 						noPrompt: true
 					});
 				} else {
-					Cmds.help(s, {
+					World.commands.help(s, {
 						msg: command.msg,
 						noPrompt: true
 					});
@@ -467,42 +482,32 @@ Character.prototype.newCharacter = function(s, command) {
 };
 
 Character.prototype.save = function(player, fn) {
-	var character = this,
-	socket = player.socket,
-	followers = player.followers,
-	group = player.group,
-	opponent = player.opponent,
-	area = World.getArea(player.area),
-	following = player.following;
+	var objToSave;
 
-	if (player.isPlayer && area) {
-		player.saved = new Date().toString();
 
-		player.opponent = false;
-		player.following = false;
-		player.group = [];
-		player.followers = [];
-		player.socket = null;
+	if (player.isPlayer && !player.fighting) {
+		objToSave = Object.assign({}, player);
 
-		player = World.sanitizeBehaviors(player);
+		objToSave.following = '';
+		objToSave.group = [];
+		objToSave.followers = [];
+		objToSave.fighting = false;
+		objToSave.socket = null;
+		objToSave.saved = new Date().toString();
 
-		character.write(player.name.toLowerCase(), player, function (err) {
-			player.socket = socket;
+		objToSave = World.sanitizeBehaviors(objToSave);
 
-			player = World.setupBehaviors(player);
-			player.opponent = opponent;
-			player.following = following;
-			player.followers = followers;
-			player.group = group;
-
-			if (err) {
-				return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
-			} else {
-				if (fn) {
-					return fn(player);
+		if (Object.keys(objToSave).length) {
+			this.write(player.name.toLowerCase(), objToSave, function(err) {
+				if (err) {
+					return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
+				} else {
+					if (fn) {
+						return fn(player);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 };
 
@@ -534,12 +539,12 @@ Character.prototype.hpRegen = function(target) {
 };
 
 Character.prototype.manaRegen = function(target) {
-	var intMod = World.dice.getIntMod(target) + 1,
-	chanceMod = World.dice.roll(1, 10),
+	var intMod = World.dice.getIntMod(target),
+	chanceMod = World.dice.roll(1, 5),
 	total;
 
 	if (target.cmana < target.mana && target.thirst < 8 && target.hunger < 9) {
-		if (target.mainStat === 'int' || chanceMod > 2) {
+		if (target.mainStat === 'int' || chanceMod > 1) {
 			if (target.position === 'sleeping') {
 				intMod += 2;
 			}
@@ -547,17 +552,17 @@ Character.prototype.manaRegen = function(target) {
 			if (target.thirst >= 3 || target.hunger >= 3) {
 				intMod -= 1;
 			}
-
-			if (!intMod) {
-				intMod = World.dice.roll(1, 2) - 1;
-			}
 			
-			total = World.dice.roll(intMod, 8, target.level/3);
+			if (intMod && World.dice.roll(1, 4) === 1) {
+				total = World.dice.roll(1, 2) + 1;
+			} else {
+				total = 1;
+			}
 
 			target.cmana += total;
 
 			if (target.cmana > target.mana ) {
-				target.cmana = target.mana ;
+				target.cmana = target.mana;
 			}
 		}
 	}
@@ -672,16 +677,16 @@ Character.prototype.thirst = function(target) {
 	}
 };
 
-Character.prototype.reduceThirst = function(player, reduction) {
-	player.thirst -= reduction;
+Character.prototype.reduceThirst = function(player, liquid) {
+	player.thirst += liquid.modifiers.thirst;
 
 	if (player.thirst < 0) {
 		player.thirst = 0;
 	}
 }
 
-Character.prototype.reduceHunger = function(player, reduction) {
-	player.hunger -= reduction;
+Character.prototype.reduceHunger = function(player, food) {
+	player.hunger += food.modifiers.hunger;
 
 	if (player.hunger < 0) {
 		player.hunger = 0;
@@ -754,12 +759,16 @@ Character.prototype.getEmptyWeaponSlot = function(player) {
 
 Character.prototype.getSlotsWithShields = function(player) {
 	var i = 0,
+	item,
 	shields = [];
 
 	for (i; i < player.eq.length; i += 1) {
-		if (player.eq[i].slot === 'hands' && player.eq[i].item 
-			&& player.eq[i].item.itemType === 'shield') {
-			shields.push(player.eq[i]);
+		if (player.eq[i].slot === 'hands' && player.eq[i].item) {
+			item = this.getItemByRefId(player, player.eq[i].item);
+
+			if (item.itemType === 'shield') {
+				shields.push(item);
+			} 
 		}
 	}
 
@@ -807,7 +816,7 @@ Character.prototype.getKeys = function(player) {
 };
 
 // if a character has a specific key
-// keyId is the id found on exitObj.door.id
+// keyId is the id found on exitObj.door
 Character.prototype.getKey = function(player, keyId) {
 	var i = 0,
 	key;
@@ -836,21 +845,29 @@ Character.prototype.getStatsFromEq = function(eq, fn) {
 
 };
 
-Character.prototype.getFist = function(player) {
+Character.prototype.getHitroll = function(entity) {
+	return World.dice.roll(1, 10 + World.dice.getDexMod(entity), entity.hitroll + (entity.level / 5))
+};
+
+Character.prototype.getDamroll = function(entity) {
+	return World.dice.roll(1, 10 + World.dice.getStrMod(entity), entity.hitroll + (entity.level / 5))
+};
+
+Character.prototype.getFist = function(entity) {
 	return {
 		name: 'Fighting with your bare hands!',
-		level: player.level,
-		diceNum: player.diceNum,
-		diceSides: player.diceSides,
+		level: entity.level,
+		diceNum: Math.round(entity.level / 4) + 1,
+		diceSides: Math.round(entity.level / 6) + 1,
 		itemType: 'weapon',
 		equipped: true,
-		attackType: player.attackType,
+		attackType: entity.attackType,
 		weaponType: 'fist',
 		material: 'flesh',
 		modifiers: {},
-		diceMod: 0,
+		diceMod: -5,
 		slot: 'hands',
-		short: 'your ' + player.handsNoun + 's'
+		short: 'your ' + entity.handsNoun + 's'
 	};
 };
 
@@ -914,7 +931,7 @@ Character.prototype.getBottle = function(player, command) {
 	i = 0;
 
 	for (i; i < containers.length; i += 1) {
-		if (containers[i].name.indexOf(command.input) !== -1) {
+		if (containers[i].name.indexOf(command.msg) !== -1) {
 			return containers[i];
 		}
 	}
@@ -943,7 +960,7 @@ Character.prototype.getSkill = function(player, skillName) {
 	var i = 0;
 
 	for (i; i < player.skills.length; i += 1) {
-		if (player.skills[i].id === skillName || player.skills[i].display.toLowerCase().indexOf(skillName) === 0) {
+		if (player.skills[i].id === skillName || player.skills[i].display.toLowerCase() === skillName) {
 			return player.skills[i];
 		}
 	}
@@ -1024,7 +1041,7 @@ Character.prototype.removeEq = function(player, item) {
 		}
 	}
 	
-	this.removeStatMods(player, item);
+	this.removeMods(player, item.modifiers);
 
 	World.msgPlayer(player, {
 		msg: 'You stopped using ' + item.short + '.'
@@ -1045,7 +1062,7 @@ Character.prototype.getQuests = function(player) {
 	len = player.log.length;
 
 	for (i; i < len; i += 1) {
-		if (player.log[i].quest === true) {
+		if (player.log[i].type === 'quest') {
 			result.push(player.log[i]);
 		}
 	}
@@ -1064,22 +1081,20 @@ Character.prototype.getLog = function(player, logId) {
 	}
 };
 
-Character.prototype.addLog = function(player, questId, logEntryId) {
+Character.prototype.addLog = function(player, questId, step, completed, data) {
 	var i = 0,
 	len = World.quests.length,
 	prop;
 
 	for (i; i < len; i += 1) {
 		if (World.quests[i].id === questId) {
-			for (prop in World.quests[i].entries) {
-				if (prop === logEntryId) {
-					player.log.push({
-						id: questId, 
-						entryId: logEntryId,
-						quest: World.quests[i].quest
-					});
-				}
-			}
+			player.log.push({
+				id: questId,
+				type: 'quest', // log item reprents a quest
+				completed: false, // if the quest is completed
+				step: 1, // step of the quest
+				data: World.quests[i].data // ad-hoc quest related info
+			});
 		}
 	}
 };
@@ -1102,36 +1117,36 @@ Character.prototype.getPossessivePronoun = function(player) {
 	}
 };
 
-Character.prototype.addStatMods = function(player, item) {
+Character.prototype.applyMods = function(player, mods) {
 	var prop;
 
-	for (prop in item.modifiers) {
-		if (player[prop]) {
-			player[prop] += item.modifiers[prop];
+	for (prop in mods) {
+		if (player[prop] !== undefined) {
+			player[prop] += mods[prop];
 		}
 	}
 };
 
-Character.prototype.removeStatMods = function(player, item) {
+Character.prototype.removeMods = function(player, mods) {
 	var prop;
 
-	for (prop in item.modifiers) {
-		if (player[prop]) {
-			player[prop] -= item.modifiers[prop];
+	for (prop in mods) {
+		if (player[prop] !== undefined) {
+			player[prop] -= mods[prop];
 		}
 	}
-}
+};
 
 Character.prototype.wearWeapon = function(target, weapon, roomObj) {
 	var slot = this.getEmptyWeaponSlot(target);
-	
+
 	if (!weapon.equipped) {
 		if (slot) {
 			weapon.equipped = true;
 
 			slot.item = weapon.refId;
 
-			this.addStatMods(target, weapon);
+			this.applyMods(target, weapon.modifiers);
 
 			World.msgPlayer(target, {
 				msg: 'You wield a ' + weapon.displayName + ' in your ' + slot.name.toLowerCase() + '.'
@@ -1158,7 +1173,7 @@ Character.prototype.wearShield = function(target, shield, roomObj) {
 
 			slot.item = shield.refId;
 
-			this.addStatMods(target, shield);
+			this.applyMods(target, shield.modifiers);
 
 			World.msgPlayer(target, {
 				msg: 'You begin defending yourself with a ' + shield.displayName + '.'
@@ -1181,7 +1196,7 @@ Character.prototype.wearArmor = function(target, armor, roomObj) {
 	
 	if (!armor.equipped) {
 		if (slot) {
-			armor.equipped = true;	
+			armor.equipped = true;
 
 			slot.item = armor.refId;
 		
@@ -1229,7 +1244,8 @@ Character.prototype.getEmptyWeaponSlot = function(target) {
 };
 
 Character.prototype.getStatusReport = function(player) {
-	var i = 0;
+	var i = 0,
+	percentageOfPlayerHp =  ((player.chp/player.hp) * 100);
 
 	for (i; i < this.statusReport.length; i += 1) {
 		if (this.statusReport[i].percentage >= ((player.chp/player.hp) * 100) ) {
@@ -1266,10 +1282,15 @@ Character.prototype.canSee = function(player, roomObj) {
 };
 
 Character.prototype.createCorpse = function(player) {
-	var corpseDisplayStr = player.short;
+	var corpseDisplayStr = player.short,
+	i = 0;
 
 	if (!corpseDisplayStr) {
 		corpseDisplayStr = player.displayName;
+	}
+
+	for (i; i < player.eq.length; i += 1) {
+		player.eq[i].item = "";
 	}
 
 	return {
@@ -1279,7 +1300,7 @@ Character.prototype.createCorpse = function(player) {
 		capitalShort: 'The corpse of ' + corpseDisplayStr, 
 		long: 'The corpse of ' + corpseDisplayStr + ' is lying here on the ground.',
 		displayName: player.displayName,
-		decay: 1,
+		decay: 10,
 		itemType: 'corpse',
 		corpse: true,
 		chp: 0,
@@ -1386,7 +1407,7 @@ Character.prototype.level = function(player) {
 	this.save(player);
 };
 
-// Add in gear modifiers and return the updated object
+// Adjust the core character stats from the worn gear
 Character.prototype.calculateGear = function() {
 
 };

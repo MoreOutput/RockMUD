@@ -4,8 +4,6 @@
 	"con": -2,
 	"playable": true,
 	"attackType": "punch",
-	"diceNum": 1,
 	"diceSides": 4,
-	"affects": [],
-	"minStat": 10
+	"affects": []
 }

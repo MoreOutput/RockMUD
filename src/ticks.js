@@ -1,9 +1,8 @@
 'use strict';
 var fs = require('fs'),
-Character = require('./character'),
 World = require('./world');
 
-// time, saved to time.json every 12 hours
+// time
 setInterval(function() {
 	var i = 0,
 	areaMsg,
@@ -54,6 +53,10 @@ setInterval(function() {
 				(function(area, areaIndex) {
 					World.processEvents('onDay', area);
 
+					if (area.dayTrainsitionMsg) {
+						areaMsg = area.dayTrainsitionMsg;
+					}
+
 					World.msgArea(area.id, {
 						msg: areaMsg
 					});
@@ -95,6 +98,10 @@ setInterval(function() {
 			for (i; i < World.areas.length; i += 1) {
 				(function(area, areaIndex) {
 					World.processEvents('onNight', area);
+
+					if (area.nightTransitionMsg) {
+						areaMsg = area.nightTransitionMsg;
+					}
 
 					World.msgArea(area.id, {
 						msg: areaMsg
@@ -156,9 +163,9 @@ setInterval(function() {
 		for (i; i < World.players.length; i += 1) {
 			player = World.players[i];
 
-			if (player.position === 'sleeping' || 
-				player.position === 'resting' || 
-				player.position === 'standing') {
+			if (!player.fighting && (player.position === 'sleeping' ||
+				player.position === 'resting' ||
+				player.position === 'standing')) {
 				if (player.wait > 0) {
 					player.wait -= 1;
 				} else {
@@ -167,7 +174,7 @@ setInterval(function() {
 			}
 		}
 	}
-}, 1900);
+}, 2000);
 
 // Area respawn. If the area is not empty the respawnTick property on the area object increments by one
 // areas with players 'in' them respawn every X ticks; where X is the value of
@@ -183,10 +190,8 @@ setInterval(function() {
 		area = World.areas[i];
 		playersInArea = World.getPlayersByArea(World.areas[i].id);
 		
-		if (playersInArea.length) {
-			refresh = false;
-		} else if (!area.preventRespawn) {
-			if (World.dice.roll(1, 4) > 1) {
+		if (!playersInArea.length && !area.preventRespawn) {
+			if (World.dice.roll(1, 4) > 1) { // 25% chance of incrementing respawnTick 
 				if (area.respawnOn > area.respawnTick) {
 					area.respawnTick += 1;
 				}
@@ -205,7 +210,7 @@ setInterval(function() {
 			}
 		}
 	}
-}, 120000); // 2 minutes
+}, 121234);
 
 // decay timer, affects all items with decay, decayLight
 // if an item with decay (not decayLight) reaches zero it goes away
@@ -218,6 +223,7 @@ setInterval(function() {
 	j,
 	mobs,
 	rooms,
+	roomCnt,
 	processItemDecay = function(obj) {
 		var j = 0,
 		decayMsg,
@@ -297,7 +303,7 @@ setInterval(function() {
 	if (World.dice.roll(1, 20) < 15) {
 		if (World.players.length > 0) {
 			for (i; i < World.players.length; i += 1) {
-				if (World.players[i].items) {
+				if (World.players[i].items.length) {
 					processItemDecay(World.players[i]);
 				}
 			}
@@ -309,21 +315,20 @@ setInterval(function() {
 		i = 0;
 
 		for (i; i < World.areas.length; i += 1) {
-			rooms = World.areas[i].rooms;
+			roomCnt = World.areas[i].rooms.length;
 
-			if (rooms) {
+			if (roomCnt) {
 				j = 0;
 
-				for (j; j < rooms.length; j += 1) {
-					if (!rooms[j].preventDecay && rooms[j].items) {
-						processItemDecay(rooms[j]);
+				for (j; j < roomCnt; j += 1) {
+					if (!World.areas[i].rooms[j].preventDecay && World.areas[i].rooms[j].items.length) {
+						processItemDecay(World.areas[i].rooms[j]);
 					}
 				}
 			} 
 		}
 	}
 
-	/*
 	// decay mob items
 	if (World.dice.roll(1, 20) < 10) {
 		if (World.players.length > 0) {
@@ -344,8 +349,7 @@ setInterval(function() {
 			}
 		}
 	}
-	*/
-}, 245000); // 4.5 minutes
+ }, 245000); // 4.5 minutes
 
 // AI Ticks and random player save
 setInterval(function() {
@@ -354,42 +358,103 @@ setInterval(function() {
 	players,
 	monsters,
 	roomObj;
+	
+	if (!World.aiLock) {
+		World.aiLock = true;
 
-	for (i; i < World.areas.length; i += 1) {
-		if (World.dice.roll(1, 2) === 1) {
+		for (i; i < World.areas.length; i += 1) {
 			players = World.getAllPlayersFromArea(World.areas[i]);
 			monsters = World.getAllMonstersFromArea(World.areas[i]);
 
-			j = 0;
+			if (players.length || World.areas[i].runOnAliveWhenEmpty) {
+				j = 0;
 
-			for (j; j < monsters.length; j += 1) {
-				if ((World.areas[i].runOnAliveWhenEmpty || players.length)
-					|| (monsters[j].originatingArea !== World.areas[i].id)) {
-					
-					roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
+				for (j; j < monsters.length; j += 1) {
+					if ((World.areas[i].runOnAliveWhenEmpty || players.length)
+						|| (monsters[j].originatingArea !== World.areas[i].id)) {
 
-					if (monsters[j].chp >= 1 && (monsters[j].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
-						World.processEvents('onAlive', monsters[j], roomObj);
+						roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
+
+						if (monsters[j].chp >= 1 && (monsters[j].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
+							World.processEvents('onAlive', monsters[j], roomObj);
+						}
+					}
+				}
+
+				j = 0;
+
+				for (j; j < players.length; j += 1) {
+					roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
+
+					if (players[j].chp >= 1) {
+						World.processEvents('onAlive', players[j], roomObj);
+					}
+
+					if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
+						World.character.save(players[j]);
 					}
 				}
 			}
+		}
 
-			j = 0;
+		World.aiLock = false;
+	}
+}, 2000);
 
-			for (j; j < players.length; j += 1) {
-				roomObj = World.getRoomObject(World.areas[i], players[j].roomid);
-			
-				if (players[j].chp >= 1) {
-					World.processEvents('onAlive', players[j], roomObj);
-				}
+// Command Parsing
+setInterval(function() {
+	var cmdObj,
+	cmdEntity,
+	cmdArr;
 
-				if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
-					Character.save(players[j]);
-				}
+	if (World.cmds.length) {
+		cmdArr = World.cmds.slice();
+
+		World.cmds = [];
+		
+		while(cmdArr.length) {
+			cmdObj = cmdArr[0];
+			cmdEntity = cmdObj.entity;
+
+			cmdObj.entity = null;
+
+			if (cmdEntity.isPlayer && !cmdEntity.connected) {
+				cmdEntity.connected = true;
+			}
+
+			if (!cmdObj.skill) {
+				World.commands[cmdObj.cmd](cmdEntity, cmdObj);
+			} else {
+				World.skills[cmdObj.cmd](
+					cmdObj.skill,
+					cmdEntity,
+					cmdObj.roomObj,
+					cmdObj
+				);
+			}
+
+			cmdArr.splice(0, 1);
+		}
+	}
+}, 255);
+
+// Combat loop
+setInterval(function() {
+	var i = 0,
+	j = 0;
+
+	if (World.battleLock === 0 && World.battles.length) {
+		World.battleLock = World.battles.length;
+
+		for (i; i < World.battles.length; i += 1) {
+			World.combat.round(World.battles[i]);
+
+			if (World.battleLock > 0) {
+				World.battleLock -= 1;
 			}
 		}
 	}
-}, 1000);
+}, 1850);
 
 setInterval(function() {
 	var i = 0,
@@ -416,18 +481,26 @@ setInterval(function() {
 			}
 		}
 	}
-}, 75000);
+}, 45000);
 
 // Player Regen
 setInterval(function() {
 	var i = 0;
 
-	if (World.players.length) {
-		if (World.dice.roll(1, 3) <= 2) {
-			for (i; i < World.players.length; i += 1) {
-				Character.hpRegen(World.players[i]);
-				Character.manaRegen(World.players[i]);
-				Character.mvRegen(World.players[i]);
+	if (World.dice.roll(1, 3) <= 2) {
+		for (i; i < World.players.length; i += 1) {
+			if (!World.players[i].fighting) {
+				World.character.hpRegen(World.players[i]);
+				World.character.manaRegen(World.players[i]);
+				World.character.mvRegen(World.players[i]);
+			}
+
+			if (World.players[i].hunger >= 10) {
+				World.character.hunger(World.players[i]);
+			}
+			
+			if (World.players[i].thirst >= 10) {
+				World.character.thirst(World.players[i]);
 			}
 		}
 	}
@@ -438,46 +511,65 @@ setInterval(function() {
 	var i = 0,
 	player; 
 
-	if (World.players.length > 0) {
-		for (i; i < World.players.length; i += 1) {
-			player = World.players[i];
+	for (i; i < World.players.length; i += 1) {
+		player = World.players[i];
 
-			Character.hunger(player);
-			Character.thirst(player);
-		}
+		World.character.hunger(player);
+		World.character.thirst(player);
 	}
-}, 242000); // 4 minutes
+}, 242020);
 
-// Saving
+// 20% chance of random save
 setInterval(function() {
 	var i = 0,
-	player; 
+	player;
 
-	if (World.players.length > 0) {
-		for (i; i < World.players.length; i += 1) {
-			if (World.players[i].position === 'standing' && !World.players[i].opponent && World.dice.roll(1, 10) > 8) {
-				Character.save(World.players[i]);
-			}
+	for (i; i < World.players.length; i += 1) {
+		player = World.players[i];
+
+		if (player.position.creationStep === 0
+			&& player.position === 'standing'
+			&& !player.fighting
+			&& World.dice.roll(1, 10) > 8) {
+			World.character.save(player);
 		}
 	}
-}, 2450000); // 4.5 minutes
+}, 2450040); // 4.5 minutes-ish
 
 // Random mud-wide messages
 setInterval(function() {
-	var s,
-	alerts = [
+	var alerts = [
 		'Commands are not case sensitive. Use HELP COMMANDS to see the current command list.',
 		'Use the SCAN command to get a quick look at the rooms adjacent to you.',
 		'Save your character with the <strong>save</strong> command.',
-		'Try the <strong>say</strong> command when you want to send a message to everyone in your current room.'
+		'Try the <strong>say</strong> command when you want to send a message to everyone in your current room.',
+		'You can see an items required level before picking it up!'
 	];
 
 	if (World.players.length) {
-		if (World.players.position !== 'fighting') {
+		if (World.dice.roll(1, 3) === 1) {
 			World.msgWorld(false, {
 				msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
 					+ alerts[World.dice.roll(1, alerts.length) - 1] + '</span></span>'
 			});
 		}
 	}
-}, 500000);
+}, 123999);
+
+// Check for broken connections
+setInterval(function() {
+	var i = 0,
+	player;
+
+	for (i; i < World.players.length; i += 1) {
+		player = World.players[i];
+
+		if (!player.connected) {
+			return player.socket.terminate();
+		}
+
+		player.connected = false;
+
+		player.socket.ping();
+	}
+}, 31050);

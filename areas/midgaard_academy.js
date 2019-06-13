@@ -1,66 +1,69 @@
 
 'use strict';
-var Cmd = require('../src/commands'),
-Room = require('../src/rooms'),
-Character = require('../src/character'),
-World = require('../src/world');
+var World = require('../src/world'),
+towerQuestKey = 'mine_access';
 
 module.exports = {
-	name: 'Midgaard Academy',
+	name: 'The Southern Mine',
 	id: 'midgaard_academy',
 	type: 'building',
 	levels: 'All',
-	description: 'Famous for preparing new adventuers for the world of ' + World.config.name + '.',
+	description: 'A large, seemingly endless, gold mine whos original founders are now forgotten.',
 	reloads: 0,
 	author: 'Rocky',
 	messages: [{
-		msg: '<span class=\'grey\'>The sounds of sparring apprentices can be heard from somewhere in the Academy.</span>'
+		msg: '<span class=\'grey\'>A cold northern gust makes its way through the area.</span>'
 	}],
 	quests: [{
-		id: 'mud_school',
-		title: 'Midgaard Training Academy',
-		entries: {
-			0: 'You have joined the Midgaardian Academy! Climb to the top of the tower and begin training and make it official.'
+		id: towerQuestKey,
+		title: 'Going Deep',
+		data: {
+			// the player must give Radhghar 1 gold to enter the mines.
+			permission: false
+		},
+		steps: {
+			1: 'The Southern Mine is the worlds main source of both gold and coal. It is a large, seemingly endless, network of caves and corridors whos original creators are now forgotten.' 
+			+ ' Give Charles a gold coin to gain access to the mine. Example: give 1 gold charles'
 		}
 	}],
 	rooms: [
 		{
 			id: '1',
-			title: 'Academy Entrance',
+			title: 'Just outside of the Mine',
 			area: 'midgaard_academy',
-			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
+			content: 'This is the main entrance to the Southern Mine. A hole about fifty yards across is decorated with ropes and pullies powering a series of elevators. '
+				+ 'There are fires and stations bustling with the activity of miners and camp workers.',
 			outdoors: false,
 			light: true,
 			exits: [
 				{
-					cmd: 'down',
-					id: '1',
+					cmd: 'north',
+					id: '4',
 					area: 'midgaard'
 				}, {
-					cmd: 'up',
+					cmd: 'down',
 					id: '2'
 				}
 			],
 			monsters: [{
-				name: 'Radghar',
-				displayName: 'Radghar',
+				name: 'Foreman Charles Stephenson',
+				lastName: 'Stephenson',
+				age: 59,
+				displayName: 'Charles',
 				charClass: 'fighter',
-				level: 35,
-				short: 'Lord Radghar',
-				long: '<span class="yellow">Radghar</span>, a retired Midgaardian guard captain is here training recurits',
+				level: 50,
+				short: 'Mine Foreman Charles Stephenson',
+				long: '<span class="yellow">Charles Stephenson</span> the mine Foreman is here',
 				description: '',
-				inName: 'Lord Radghar',
+				inName: 'Mine Foreman Charles Stephenson',
 				race: 'human',
 				id: 2,
 				area: 'midgaard_academy',
 				weight: 195,
-				diceNum: 3,
-				diceSides: 10,
-				diceMod: 5,
 				str: 10,
 				dex: 8,
-				damRoll: 20,
-				hitRoll: 15,
+				damroll: 20,
+				hitroll: 15,
 				ac: 20,
 				items: [],
 				trainer: true,
@@ -80,7 +83,25 @@ module.exports = {
 					module: 'radghar'
 				}]
 			}],
-			items : []
+			items : [],
+			// targetRoom the character cant travel into the mine without having
+			// completed the quest
+			beforeMove: function(roomObj, player, targetRoom, cmd) {
+				var quest = World.character.getLog(player, towerQuestKey);
+
+				if (cmd.msg === 'down') {
+					if (quest.data.permission) {
+						return true;
+					} else {
+						World.msgPlayer(player, {
+							msg: '<strong>You don\'t have permission to enter the Mine.</strong>',
+							styleClass: 'warning'
+						});
+
+						return false;
+					}
+				}
+			}
 		}, {
 			id: '2',
 			title: 'Climbing the side of the Academy Tower',
@@ -99,7 +120,7 @@ module.exports = {
 				}
 			],
 			onEnter: function(roomObj, entity, incomingRoomObj, command) {
-				var climbSkill = Character.getSkill(entity, 'climb'),
+				var climbSkill = World.character.getSkill(entity, 'climb'),
 				displayAfter = 1200,
 				msg = '';
 
@@ -108,7 +129,7 @@ module.exports = {
 				}
 
 				if (!climbSkill && entity.isPlayer && entity.level === 1) {
-					msg += '1You do not have the climb skill. Climbing further could result in a fall!';
+					msg += 'You do not have the climb skill. Climbing further could result in a fall!';
 				}
 
 				if (msg) {
@@ -135,8 +156,7 @@ module.exports = {
 				}
 			],
 			onEnter: function(roomObj, entity, incomingRoomObj, command) {
-				var climbSkill = Character.getSkill(entity, 'climb'),
-				displayAfter = 1200,
+				var climbSkill = World.character.getSkill(entity, 'climb'),
 				msg = '';
 
 				if (!climbSkill && entity.isPlayer && entity.level === 1) {
@@ -158,6 +178,11 @@ module.exports = {
 			light: true,
 			exits: [
 				{
+					cmd: 'up',
+					id: '5',
+					area: 'midgaard_academy'
+				},
+				{
 					cmd: 'down',
 					id: '3',
 					area: 'midgaard_academy'
@@ -168,29 +193,20 @@ module.exports = {
 				strMod = World.dice.getStrMod(entity),
 				success = true,
 				climbRoll,
-				climbCheck = 5,
 				msg = '';
 
-				climbSkill = Character.getSkill(entity, 'climb');
+				climbSkill = World.character.getSkill(entity, 'climb');
 
-				if (!climbSkill) {
-					//climbRoll = World.dice.roll(1, 3, strMod);
-					climbRoll = 1;
+				if (climbSkill) {
+					climbRoll = World.dice.roll(1, 100);
 
-					if (climbRoll < climbCheck) {
-						msg += '<strong>You fail to climb up and slip downward!</strong>';
-
+					if (climbRoll >= climbSkill.train + strMod) {
+						msg += '<strong>You fail to climb up!</strong>';
+	
 						success = false;
 					}
 
 					if (msg && entity.isPlayer) {
-						if (success === false) {
-							Cmd.move(entity, {
-								cmd: 'move',
-								arg: 'down'
-							});
-						}
-
 						World.msgPlayer(entity, {
 							msg: msg
 						});
@@ -202,7 +218,18 @@ module.exports = {
 						}
 					}
 				} else {
-					return true;
+					msg += '<strong>You fail to climb up and fall downward!</strong>';
+
+					World.addCommand({
+						cmd: 'move',
+						arg: 'down'
+					}, entity);
+
+					World.msgPlayer(entity, {
+						msg: msg
+					});
+
+					return false;
 				}
 			}
 		}, {
@@ -224,21 +251,46 @@ module.exports = {
 				id: 3,
 				area: 'midgaard_academy',
 				weight: 155,
-				diceNum: 2,
-				diceSides: 10,
 				diceMod: 5,
 				str: 20,
 				dex: 18,
 				position: 'standing',
 				attackType: 'punch',
-				damRoll: 20,
-				hitRoll: 15,
+				damroll: 20,
+				hitroll: 15,
 				ac: 20,
 				items: [],
-				trainer: true,
-				runOnAliveWhenEmpty: false
+				runOnAliveWhenEmpty: false,
+				onAlive: function(thomas, room) {
+					if (room.playersInRoom.length && World.dice.roll(1, 10) === 1) {
+						World.addCommand({
+							cmd: 'emote',
+							msg: 'looks around the room.',
+							roomObj: room
+						}, thomas);
+					}
+				}
 			}],
-			exits: []
+			exits: [{
+				cmd: 'down',
+				id: '4',
+				area: 'midgaard_academy'
+			}],
+			onEnter: function(roomObj, entity, incomingRoomObj, command) {
+				var msg = 'You climb over some railing and reach the roof lantern of the Academy Tower.';
+
+				World.msgPlayer(entity, {
+					msg: '<p>' + msg + '</p>',
+					styleClass: 'success'
+				});
+			}
+		},
+		{
+			id: '6',
+			title: 'Main Guard House',
+			area: 'midgaard_academy',
+			content: '',
+			light: true
 		}
 	]
 };

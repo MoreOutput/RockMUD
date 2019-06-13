@@ -39,5 +39,7 @@
 	"extinguishMsg": "",
 	"spell": {},
 	"spellLevel": 0,
-	"spellCharges": 0
+	"spellCharges": 0,
+	"maxDrinks": 0,
+	"drinks": 0
 }

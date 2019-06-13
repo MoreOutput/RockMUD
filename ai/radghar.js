@@ -1,54 +1,59 @@
 'use strict';
-var Cmd = require('../src/commands'),
-Character = require('../src/character'),
-Room = require('../src/rooms'),
-World = require('../src/world');
+var World = require('../src/world'),
+towerQuestKey = 'mine_access';
 
-/*
-	Fighter Guildmaster and Midgaard Academy guide.
-*/
 module.exports = {
 	exclimations: [
-		'The Midgaardian Academy isn\'t much but its better than venturing out with no experience.',
-		'You can <strong>practice</strong> and learn new skills along with <strong>train</strong>ing stats.'
+		'No one has ever reached the bottom.',
+		'Theres a lot of money to be made rummaging around down there.',
+		'I\'ve been working this hole for over forty years.'
 	],
+	onGoldReceived: function(mob, roomObj, gold, player) {
+		var quest =  World.character.getLog(player, towerQuestKey);
+		
+		if (quest) {
+			if (!quest.data.permission && gold) {
+				quest.data.permission = true;
+				quest.completed = true;
+
+				World.addCommand({
+					cmd: 'say',
+					msg: 'Very nice ' + player.displayName  + '. Im sure you\'ll earn this back in no time. You can head in.'
+						+ '<p class="quest-complete yellow">You completed the Quest! You earn 500 experience.</p>',
+					roomObj: roomObj
+				}, mob);
+			}
+		} else {
+			World.character.addLog(player, towerQuestKey);
+
+			quest = World.character.getLog(player, towerQuestKey);
+			
+			quest.completed = true;
+			quest.data.permission = true;
+
+			World.addCommand({
+				cmd: 'say',
+				msg: 'Your fee is paid. You may enter the mine.',
+				roomObj: roomObj
+			}, mob);
+		}
+	},
 	onSay: function(mob, roomObj, player, command) {
-		var quest,
-		climbSkill;
+		var quest;
 
 		if (player.isPlayer && command) {
-			quest = Character.getLog(player, 'mud_school');
+			quest = World.character.getLog(player, towerQuestKey);
 
 			if (!quest) {
-				if (command.msg.toLowerCase().indexOf('yes') !== -1) {
-					Cmd.say(mob, {
-						msg: 'Thats great to hear ' + player.displayName  +  '! Let me get you signed up. Just a second...',
+				if (command.msg.toLowerCase().indexOf('ye') !== -1) {
+					World.addCommand({
+						cmd: 'say',
+						msg: 'Thats great to hear ' + player.displayName
+							+  ', but everyone has to pay the fee. Give me some gold and you can go in.',
 						roomObj: roomObj
-					});
+					}, mob);
 
-					Character.addLog(player, 'mud_school', '0');
-
-					climbSkill = Character.getSkill(player, 'climb');
-
-					setTimeout(function() {
-						Cmd.say(mob, {
-							msg: '"Alright, ' + player.name  + ', time for the enterance exam. You see this rope?'
-								+ ' Climb up to the top floor of the Academy Tower. A solider will meet you there." <i class="grey">He points at a rope running up to a window in the tower above. ' 
-								+ 'It is very high.</a> [<strong class="grey">Hint: Move up to continue</strong>]',
-							roomObj: roomObj
-						});
-
-						if (!climbSkill) {
-							climbSkill = Character.getSkill(mob, 'climb');
-
-							Character.addSkill(player, climbSkill);
-
-							World.msgPlayer(player, {
-								msg: '<strong>You obtain a new skill from ' + mob.displayName + ': <span class="yellow">Improved Climbing</span></strong>. Improved Climbling increases the chance of a successful climb, and reduces and falling damage.',
-								styleClass: 'success'
-							});
-						}
-					}, 1200);
+					World.character.addLog(player, towerQuestKey);
 				}
 			}
 		}
@@ -57,32 +62,34 @@ module.exports = {
 		var quest;
 
 		if (player.level <= 2) {
-			quest = Character.getLog(player, 'mud_school');
+			quest = World.character.getLog(player, towerQuestKey);
 
 			if (!quest) {
-				Cmd.say(mob, {
-					msg: 'Greetings ' + player.displayName + ' are you here to train at the '
-						+ '<strong class="red">Midgaardian Academy</strong>?',
+				World.addCommand({
+					cmd: 'say',
+					msg: player.displayName + ', we were told you were coming. Are you seeking access to <strong class="red">the Mine</strong>?',
 					roomObj: roomObj
-				});
-			} else if (quest.entryId === '0') {
+				}, mob);
+			} else if (!quest.data.permission) {
 				if (World.dice.roll(1, 2) === 1) {
-					Cmd.say(mob, {
-						msg: 'You\'ve not climbed this damn rope yet ' + player.displayName  + '? I hope you\'re taking this seriously.',
+					World.addCommand({
+						cmd: 'say',
+						msg: 'Can\'t find any gold ' + player.displayName  + '?',
 						roomObj: roomObj
-					});
+					}, mob);
 				}
 			}
 		}
 	},
 	onAlive: function(mob, roomObj) {
 		var roll = World.dice.roll(1, 200);
-		
+
 		if (roll === 1) {
-			Cmd.say(mob, {
+			World.addCommand({
+				cmd: 'say',
 				msg: mob.exclimations[parseInt(Math.random() * ((mob.exclimations.length)))],
 				roomObj: roomObj
-			});
+			}, mob);
 		}
 	}
 };

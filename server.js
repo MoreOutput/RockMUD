@@ -52,52 +52,45 @@ server = http.createServer(function (req, res) {
 			res.write(data);
 			res.end();
 		});
+	} else if (req.url === '/favicon.ico') {
+		res.writeHead(200);
+		res.write('');
+		res.end();
 	}
 }),
 World = require('./src/world'),
-io = require('socket.io')(server, {
-	log: false,
-	transports: ['websocket']
-});
+WebSocket = require('ws'),
+io = new WebSocket.Server({ server });
 
-World.setup(io, cfg, function(Character, Cmds, Skills) {
+World.setup(io, cfg, function() {
 	server.listen(process.env.PORT || cfg.port);
 
-	io.on('connection', function (s) {
+	io.on('connection', function connection (s) {
 		var parseCmd = function(r, s) {
 			var skillObj,
 			cmdObj,
+			battle,
 			valid = false;
 
 			if (r.msg) {
-			 cmdObj = Cmds.createCommandObject(r);
-
-				valid = World.isSafeCommand(cmdObj);
+				cmdObj = World.commands.createCommandObject(r);
 
 				if (!s.player.creationStep) {
+					valid = World.isSafeCommand(cmdObj);
+
 					if (valid) {
 						if (cmdObj.cmd) {
 							cmdObj.roomObj = World.getRoomObject(s.player.area, s.player.roomid);
 
-							if (cmdObj.cmd in Cmds) {
-								Cmds[cmdObj.cmd](s.player, cmdObj);
-
-								World.processEvents('onCommand', s.player, cmdObj.roomObj, cmdObj);
-								World.processEvents('onCommand', s.player.items, cmdObj.roomObj, cmdObj);
-							} else if (cmdObj.cmd in Skills) {
-								skillObj = Character.getSkill(s.player, cmdObj.cmd);
+							if (cmdObj.cmd in World.commands) {
+								World.addCommand(cmdObj, s.player);
+							} else if (cmdObj.cmd in World.skills) {
+								skillObj = World.character.getSkill(s.player, cmdObj.cmd);
 
 								if (skillObj && s.player.wait === 0) {
-									Skills[cmdObj.cmd](
-										skillObj,
-										s.player,
-										cmdObj.roomObj,
-										cmdObj
-									);
+									cmdObj.skill = skillObj;
 
-									World.processEvents('onSkill', s.player, cmdObj.roomObj, skillObj);
-									World.processEvents('onSkill', s.player.items, cmdObj.roomObj, skillObj);
-									World.processEvents('onSkill', cmdObj.roomObj, s.player, skillObj);
+									World.addCommand(cmdObj, s.player);
 								} else {
 									if (!skillObj) {
 										World.msgPlayer(s, {
@@ -128,42 +121,45 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 						});
 					}
 				} else {
-					Character.newCharacter(s, cmdObj);
+					World.character.newCharacter(s, cmdObj);
 				}
 			} else {
 				return World.msgPlayer(s, {
 					onlyPrompt: true
 				});
 			}
-		};
+		},
+		charNameStr = 'Character Name: ';
 
 		World.msgPlayer(s, {
-			msg : 'Enter your name:', 
-			evt: 'reqInitialLogin', 
+			msg : charNameStr,
+			evt: 'reqInitialLogin',
 			styleClass: 'enter-name',
 			noPrompt: true
 		});
 
-		s.on('cmd', function (r) {
+		s.on('pong', function() {
+			s.player.connected = true;
+		});
+
+		s.on('message', function (r) {
+			r = JSON.parse(r);
+
 			if (r.msg !== '' && !s.player || s.player && !s.player.logged) {
 				if (!s.player || !s.player.verifiedName) {
-					Character.login(r, s, function (s) {
+					World.character.login(r, s, function (s) {
 						if (s.player) {
 							s.player.verifiedName = true;
-							s.join('mud'); // mud is one of two rooms, 'creation' being the other
-
 							World.msgPlayer(s, {
 								msg: 'Password for ' + s.player.displayName  + ': ',
 								evt: 'reqPassword',
 								noPrompt: true
 							});
 						} else {
-							s.join('creation'); // creation is one of two rooms, 'mud' being the other
-
-							s.player = JSON.parse(JSON.stringify(World.mobTemplate));
+							s.player = JSON.parse(JSON.stringify(World.entityTemplate));
 							s.player.name = r.msg;
 							s.player.displayName = s.player.name[0].toUpperCase() + s.player.name.slice(1);
-							s.player.sid = s.id;
+							s.player.connected = true;
 							s.player.socket = s;
 							s.player.creationStep = 1;
 							s.player.isPlayer = true;
@@ -171,17 +167,17 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 
 							parseCmd(r, s);
 						}
-					})			
+					})
 				} else if (r.msg && s.player && !s.player.verifiedPassword) {
-					Character.getPassword(s, Cmds.createCommandObject(r), function(s) {
+					World.character.getPassword(s, World.commands.createCommandObject(r), function(s) {
 						s.player.verifiedPassword = true;
 						s.player.logged = true;
 
-						Cmds.look(s.player); // we auto fire the look command on login
+						World.commands.look(s.player); // we auto fire the look command on login
 					});
 				} else {
 					World.msgPlayer(s, {
-						msg : 'Enter your name:',
+						msg : charNameStr,
 						noPrompt: true,
 						styleClass: 'enter-name'
 					});
@@ -197,31 +193,18 @@ World.setup(io, cfg, function(Character, Cmds, Skills) {
 			}
 		});
 
-		s.on('disconnect', function () {
+		s.on('close', function () {
 			var i = 0,
 			j = 0,
 			roomObj;
 
 			if (s.player !== undefined) {
-				for (i; i < World.players.length; i += 1) {
-					if (World.players[i].name === s.player.name) {
-						World.players.splice(i, 1);
-					}
-				}
+				s.player.connected = false;
 
-				roomObj = World.getRoomObject(s.player.area, s.player.roomid);
-
-				if (roomObj) {
-					for (j; j < roomObj.playersInRoom.length; j += 1) {
-						if (roomObj.playersInRoom[j].name === s.player.name) {
-							roomObj.playersInRoom.splice(j, 1);
-						}
-					}
-				}
+				World.character.removePlayer(s.player);
 			}
-
-			s.leave('mud');
-			s.disconnect();
 		});
 	});
 });
+
+module.exports = World;
