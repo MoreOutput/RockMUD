@@ -30,5 +30,6 @@
 	"persistence": false,
 	"wasSaved": false,
 	"affects": [],
-	"titleStyleClass": ""
+	"titleStyleClass": "",
+	"log": []
 }

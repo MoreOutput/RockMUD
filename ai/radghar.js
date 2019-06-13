@@ -18,7 +18,8 @@ module.exports = {
 
 				World.addCommand({
 					cmd: 'say',
-					msg: 'Very nice ' + player.displayName  + '. Im sure you\'ll earn this back in no time. You can head in.',
+					msg: 'Very nice ' + player.displayName  + '. Im sure you\'ll earn this back in no time. You can head in.'
+						+ '<p class="quest-complete yellow">You completed the Quest! You earn 500 experience.</p>',
 					roomObj: roomObj
 				}, mob);
 			}
@@ -38,8 +39,7 @@ module.exports = {
 		}
 	},
 	onSay: function(mob, roomObj, player, command) {
-		var quest,
-		climbSkill;
+		var quest;
 
 		if (player.isPlayer && command) {
 			quest = World.character.getLog(player, towerQuestKey);
@@ -55,12 +55,6 @@ module.exports = {
 
 					World.character.addLog(player, towerQuestKey);
 				}
-			} else if (!quest.data.permission) {
-				World.addCommand({
-					cmd: 'say',
-					msg: 'If you want to go down today you need to give me some gold.',
-					roomObj: roomObj
-				}, mob);
 			}
 		}
 	},

@@ -1,27 +1,28 @@
 
 'use strict';
-var World = require('../src/world');
+var World = require('../src/world'),
+towerQuestKey = 'mine_access';
 
 module.exports = {
 	name: 'The Southern Mine',
 	id: 'midgaard_academy',
 	type: 'building',
 	levels: 'All',
-	description: 'It is a large, seemingly endless, network of caves and corridors whos original creators are now forgotten.',
+	description: 'A large, seemingly endless, gold mine whos original founders are now forgotten.',
 	reloads: 0,
 	author: 'Rocky',
 	messages: [{
 		msg: '<span class=\'grey\'>A cold northern gust makes its way through the area.</span>'
 	}],
 	quests: [{
-		id: 'mine_access',
+		id: towerQuestKey,
 		title: 'Going Deep',
 		data: {
 			// the player must give Radhghar 1 gold to enter the mines.
 			permission: false
 		},
 		steps: {
-			1: 'The Southern Mine is the worlds main source of both gold. It is a large, seemingly endless, network of caves and corridors whos original creators are now forgotten.' 
+			1: 'The Southern Mine is the worlds main source of both gold and coal. It is a large, seemingly endless, network of caves and corridors whos original creators are now forgotten.' 
 			+ ' Give Charles a gold coin to gain access to the mine. Example: give 1 gold charles'
 		}
 	}],
@@ -31,7 +32,7 @@ module.exports = {
 			title: 'Just outside of the Mine',
 			area: 'midgaard_academy',
 			content: 'This is the main entrance to the Southern Mine. A hole about fifty yards across is decorated with ropes and pullies powering a series of elevators. '
-				+ 'There are  sporadically placed fires and stations bustling with the activity of miners and camp workers.',
+				+ 'There are fires and stations bustling with the activity of miners and camp workers.',
 			outdoors: false,
 			light: true,
 			exits: [
@@ -82,7 +83,25 @@ module.exports = {
 					module: 'radghar'
 				}]
 			}],
-			items : []
+			items : [],
+			// targetRoom the character cant travel into the mine without having
+			// completed the quest
+			beforeMove: function(roomObj, player, targetRoom, cmd) {
+				var quest = World.character.getLog(player, towerQuestKey);
+
+				if (cmd.msg === 'down') {
+					if (quest.data.permission) {
+						return true;
+					} else {
+						World.msgPlayer(player, {
+							msg: '<strong>You don\'t have permission to enter the Mine.</strong>',
+							styleClass: 'warning'
+						});
+
+						return false;
+					}
+				}
+			}
 		}, {
 			id: '2',
 			title: 'Climbing the side of the Academy Tower',
@@ -138,7 +157,6 @@ module.exports = {
 			],
 			onEnter: function(roomObj, entity, incomingRoomObj, command) {
 				var climbSkill = World.character.getSkill(entity, 'climb'),
-				displayAfter = 1200,
 				msg = '';
 
 				if (!climbSkill && entity.isPlayer && entity.level === 1) {

@@ -212,3 +212,7 @@ cursor: pointer;
 .hunger {
     color: red;
 }
+.quest-complete {
+    font-weight: bold;
+    font-size: 200%;
+}

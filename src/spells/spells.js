@@ -168,8 +168,8 @@ Spell.prototype.cureLight = function(skillObj, player, opponent, roomObj, comman
 			if (opponent.refId === player.refId) {
 				successMsg = 'Your eyes shine as you channel your powers to make yourself feel a bit better!';
 			} else {
-				successMsg = 'You channel your powers into your own body by placing your hand on your '
-				+ ' forehead. You feel a bit better.';
+				successMsg = 'You channel your powers into your own body by placing your hand on your'
+				+ ' chest. You feel a bit better.';
 			}
 
 			roomMsg = player.possessivePronoun + ' eyes become clouded as they as they lay their ' + player.handsNoun

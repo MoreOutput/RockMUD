@@ -759,12 +759,16 @@ Character.prototype.getEmptyWeaponSlot = function(player) {
 
 Character.prototype.getSlotsWithShields = function(player) {
 	var i = 0,
+	item,
 	shields = [];
 
 	for (i; i < player.eq.length; i += 1) {
-		if (player.eq[i].slot === 'hands' && player.eq[i].item 
-			&& player.eq[i].item.itemType === 'shield') {
-			shields.push(player.eq[i]);
+		if (player.eq[i].slot === 'hands' && player.eq[i].item) {
+			item = this.getItemByRefId(player, player.eq[i].item);
+
+			if (item.itemType === 'shield') {
+				shields.push(item);
+			} 
 		}
 	}
 

@@ -10,8 +10,8 @@ module.exports = {
 	exclimations: [
 		'Dont take more than you need from the camp, we don\'t know long it will be before we can resupply.',
 		'Get your asses back into camp before nightfall!',
-		'Foreman Stephenson tells me we\'re close to finding the way into the next level of the cave.',
-		'The cave is just outside of camp to the South.',
+		'Foreman Stephenson tells me we\'re close to finding the way into the next level of the mine.',
+		'The mine is just outside of camp to the South.',
 		'If you need to exchange some gold or materials you find for coins talk to Thomas on the west side of camp.'
 	],
 	runOnAliveWhenEmpty: true,

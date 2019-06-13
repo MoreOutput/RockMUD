@@ -53,6 +53,10 @@ setInterval(function() {
 				(function(area, areaIndex) {
 					World.processEvents('onDay', area);
 
+					if (area.dayTrainsitionMsg) {
+						areaMsg = area.dayTrainsitionMsg;
+					}
+
 					World.msgArea(area.id, {
 						msg: areaMsg
 					});
@@ -94,6 +98,10 @@ setInterval(function() {
 			for (i; i < World.areas.length; i += 1) {
 				(function(area, areaIndex) {
 					World.processEvents('onNight', area);
+
+					if (area.nightTransitionMsg) {
+						areaMsg = area.nightTransitionMsg;
+					}
 
 					World.msgArea(area.id, {
 						msg: areaMsg
@@ -144,7 +152,7 @@ setInterval(function() {
 	if (World.time.month.day > World.time.month.days) {
 		World.time.month = World.time.months[0];
 	}
-}, 1275);
+}, 1250);
 
 // wait-state removal
 setInterval(function() {
@@ -202,7 +210,7 @@ setInterval(function() {
 			}
 		}
 	}
-}, 120000); // 2 minutes
+}, 121234);
 
 // decay timer, affects all items with decay, decayLight
 // if an item with decay (not decayLight) reaches zero it goes away
@@ -215,6 +223,7 @@ setInterval(function() {
 	j,
 	mobs,
 	rooms,
+	roomCnt,
 	processItemDecay = function(obj) {
 		var j = 0,
 		decayMsg,
@@ -294,7 +303,7 @@ setInterval(function() {
 	if (World.dice.roll(1, 20) < 15) {
 		if (World.players.length > 0) {
 			for (i; i < World.players.length; i += 1) {
-				if (World.players[i].items) {
+				if (World.players[i].items.length) {
 					processItemDecay(World.players[i]);
 				}
 			}
@@ -306,21 +315,20 @@ setInterval(function() {
 		i = 0;
 
 		for (i; i < World.areas.length; i += 1) {
-			rooms = World.areas[i].rooms;
+			roomCnt = World.areas[i].rooms.length;
 
-			if (rooms) {
+			if (roomCnt) {
 				j = 0;
 
-				for (j; j < rooms.length; j += 1) {
-					if (!rooms[j].preventDecay && rooms[j].items) {
-						processItemDecay(rooms[j]);
+				for (j; j < roomCnt; j += 1) {
+					if (!World.areas[i].rooms[j].preventDecay && World.areas[i].rooms[j].items.length) {
+						processItemDecay(World.areas[i].rooms[j]);
 					}
 				}
 			} 
 		}
 	}
 
-	/*
 	// decay mob items
 	if (World.dice.roll(1, 20) < 10) {
 		if (World.players.length > 0) {
@@ -341,8 +349,7 @@ setInterval(function() {
 			}
 		}
 	}
-	*/
-}, 245000); // 4.5 minutes
+ }, 245000); // 4.5 minutes
 
 // AI Ticks and random player save
 setInterval(function() {
@@ -510,9 +517,9 @@ setInterval(function() {
 		World.character.hunger(player);
 		World.character.thirst(player);
 	}
-}, 242000); // 4 minutes
+}, 242020);
 
-// Saving
+// 20% chance of random save
 setInterval(function() {
 	var i = 0,
 	player;
@@ -527,7 +534,7 @@ setInterval(function() {
 			World.character.save(player);
 		}
 	}
-}, 2450000); // 4.5 minutes
+}, 2450040); // 4.5 minutes-ish
 
 // Random mud-wide messages
 setInterval(function() {
@@ -547,7 +554,7 @@ setInterval(function() {
 			});
 		}
 	}
-}, 124000);
+}, 123999);
 
 // Check for broken connections
 setInterval(function() {
@@ -565,4 +572,4 @@ setInterval(function() {
 
 		player.socket.ping();
 	}
-}, 32000);
+}, 31050);

@@ -106,8 +106,6 @@ Combat.prototype.round = function(battle, skillProfile) {
 	msgToAttacker = '',
 	msgToDefender = '';
 
-	console.log('Number of battle positions: ' + Object.keys(battle.positions).length);
-
 	for (i; i < numOfPositions; i += 1) {
 		battleObj = battle.positions[i];
 		attacker = battleObj.attacker;
@@ -144,8 +142,6 @@ Combat.prototype.round = function(battle, skillProfile) {
 
 			if (defender.chp > 0) {
 				combat.attack(attacker, defender, battle, function(attacker, defender, roomObj, attackerAttackString, defenderDefString, attackerCanSee) {
-					console.log(attacker.name + ' Finished Attacking in Round ' + battle.round);
-
 					if (defender.chp > 0) {
 						// run defender skills
 						if (battle.skills[defender.refId] && battle.attacked.indexOf(defender.refId) === -1) {
@@ -177,8 +173,6 @@ Combat.prototype.round = function(battle, skillProfile) {
 							msgToDefender += defenderAttackString + defenderDefString;
 
 							msgToAttacker += attackerAttackString + attackerDefString;
-
-							console.log(defender.name + ' Finished Attacking in Round ' + battle.round);
 
 							if (attacker.chp > 0) {
 								defenderStatus = World.character.getStatusReport(defender);
@@ -263,7 +257,6 @@ Combat.prototype.round = function(battle, skillProfile) {
 							}
 						});
 					} else {
-						console.log('DEATH BOAR');
 						preventPrompt = true;
 
 						msgToDefender = defenderDefString;
@@ -295,8 +288,6 @@ Combat.prototype.round = function(battle, skillProfile) {
 			} else {
 				preventPrompt = true;
 
-				console.log('Defender has died', defender.name, defender.chp, defender.hp);
-
 				World.addCommand({
 					cmd: 'alert',
 					msg: msgToAttacker,
@@ -317,16 +308,12 @@ Combat.prototype.round = function(battle, skillProfile) {
 				combat.processEndOfCombat(battle, attacker, defender);
 			}
 		} else if (defender) {
-			console.log('test3', attacker.name, defender.name);
-
 			battle.attacked = [];
 			battle.skills = {};
 
 			combat.processEndOfCombat(battle, attacker, defender, skillProfile);
 		}
 	}
-
-	console.log('***********************EMD ROUND:' + battle.round + '**************************');
 };
 
 Combat.prototype.inPhyscialVicinity = function(attacker, defender) {
@@ -418,7 +405,7 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 			if (opponent.position === 'standing' && opponent.fighting) {
 				shieldSlots = World.character.getSlotsWithShields(opponent);
 
-				if (shieldSlots.length) {
+				if (shieldSlots.length > 0) {
 					shield = shieldSlots[0].item;
 				}
 			}
@@ -435,14 +422,11 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 				if (i === 0) {
 					numOfAttacks = combat.getNumberOfAttacks(attacker, weapon, attackerMods, opponentMods);
 				} else {
-					console.log(1);
 					numOfAttacks = World.dice.roll(1, 2) - 1;
 				}
 
 				if (numOfAttacks && weapon) {
 					for (j; j < numOfAttacks; j += 1) {
-						console.log('Processing attack ' + (j + 1) + ' from ' + numOfAttacks + ' by ' + attacker.name + ' with ' + weapon.name);
-
 						if (shield) {
 							if (shieldBlockSkill) {
 								chanceToDodge += World.skills.shieldBlock(shieldBlockSkill, defender);
@@ -450,8 +434,6 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 
 							armorScore += shieldAC;
 						}
-
-						console.log('--------------> '  + opponent.name +' Armor: ' + armorScore + ' vs ' + attacker.name +  ' HitRoll ' + hitroll);
 
 						if (armorScore < hitroll || World.dice.roll(1, 10) <= 3) {
 							if (opponent.vulnerableTo.length && opponent.vulnerableTo.toString().indexOf(weapon.attackType) !== -1) {
@@ -656,7 +638,6 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon) {
 
 // Insert a skill profile into the relevant battle object so it can be applied in round()
 Combat.prototype.processSkill = function(attacker, defender, skillProfile) {
-	console.log(attacker.name, defender.name);
 	var battle = this.getBattleByRefIds(attacker.refId, defender.refId);
 
 	if (battle) {
@@ -688,7 +669,6 @@ Combat.prototype.processSkill = function(attacker, defender, skillProfile) {
 
 		battle.skills[attacker.refId][defender.refId] = skillProfile;
 	} else {
-		console.log('*******INITIALIZING BATTLE VIA ' + skillProfile.skillObj.name + '********');
 		this.processFight(attacker, defender, World.getRoomObject(attacker.area, attacker.roomid), skillProfile);
 	}
 }
@@ -807,13 +787,9 @@ Combat.prototype.processEndOfCombat = function(battleObj, attacker, defender, sk
 
 			winner.fighting = false;
 		} else {
-			console.log('A COMBATANT DIED IN A BATTLE WITH MORE THAN ONE POSITION');
-
 			loser.fighting = false;
 		}
 	} else {
-		console.log('RESOLVING A BATTLE WITH A SINGLE POSITION', winner.name, loser.name);
-
 		combat.removeBattle(battleObj);
 
 		loser.fighting = false;
@@ -951,7 +927,6 @@ Combat.prototype.removeBattle = function(battleObj) {
 
 	for (i; i < World.battles.length; i += 1) {
 		if (World.battles[i] === battleObj) {
-			console.log('removing battle!');
 			World.battles.splice(0, 1);
 		}
 	}
