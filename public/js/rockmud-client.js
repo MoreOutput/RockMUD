@@ -1,6 +1,21 @@
 window.onload = function() {
 	'use strict';
-	var ws = new WebSocket('ws://localhost:3001'),
+	var getWsURL = function() {
+		var uri;
+
+		if (window.location.protocol === 'https:') {
+			uri = 'wss:';
+		} else {
+			uri = 'ws:';
+		}
+		
+		uri += '//' + window.location.host;
+		
+		uri += window.location.pathname;
+
+		return uri;
+	},
+	ws = new WebSocket(getWsURL()),
 	terminal = document.getElementById('terminal'),
 	node = document.getElementById('cmd'),
 	rowCnt = 0,
