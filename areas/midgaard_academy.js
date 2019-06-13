@@ -83,25 +83,7 @@ module.exports = {
 					module: 'radghar'
 				}]
 			}],
-			items : [],
-			// targetRoom the character cant travel into the mine without having
-			// completed the quest
-			beforeMove: function(roomObj, player, targetRoom, cmd) {
-				var quest = World.character.getLog(player, towerQuestKey);
-
-				if (cmd.msg === 'down') {
-					if (quest.data.permission) {
-						return true;
-					} else {
-						World.msgPlayer(player, {
-							msg: '<strong>You don\'t have permission to enter the Mine.</strong>',
-							styleClass: 'warning'
-						});
-
-						return false;
-					}
-				}
-			}
+			items : []
 		}, {
 			id: '2',
 			title: 'Climbing the side of the Academy Tower',
@@ -119,6 +101,26 @@ module.exports = {
 					id: '3'
 				}
 			],
+			// roomObj is this room, targetRoom is the room the entity is moving from
+			// before you enter this room the quest should be complete
+			beforeEnter: function(roomObj, player, targetRoom, cmd) {
+				var quest = World.character.getLog(player, towerQuestKey);
+
+				console.log(roomObj.title, targetRoom.title);
+
+				if (cmd.msg === 'down') {
+					if (quest.data.permission) {
+						return true;
+					} else {
+						World.msgPlayer(player, {
+							msg: '<strong>You don\'t have permission to enter the Mine.</strong>',
+							styleClass: 'warning'
+						});
+
+						return false;
+					}
+				}
+			},
 			onEnter: function(roomObj, entity, incomingRoomObj, command) {
 				var climbSkill = World.character.getSkill(entity, 'climb'),
 				displayAfter = 1200,

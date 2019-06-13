@@ -1291,7 +1291,7 @@ Cmd.prototype.move = function(target, command, fn) {
 					canEnter = World.processEvents('beforeEnter', targetRoom, target, roomObj, command);
 
 					if (canEnter) {
-						canEnter = World.processEvents('beforeMove', roomObj, target, targetRoom, command);
+						canEnter = World.processEvents('beforeMove', target, targetRoom, roomObj, command);
 					}
 
 					if (canEnter) {
@@ -1323,7 +1323,6 @@ Cmd.prototype.move = function(target, command, fn) {
 						target.roomid = targetRoom.id;
 
 						World.processEvents('onExit', roomObj, target, targetRoom, command);
-						World.processEvents('onMove', roomObj, target, targetRoom, command);
 
 						if (roomObj.waitMod) {
 							target.wait += roomObj.waitMod;
