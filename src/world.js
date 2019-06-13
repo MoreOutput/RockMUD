@@ -921,7 +921,7 @@ World.prototype.reloadArea = function(area) {
 	var world = this,
 	newArea;
 
-	require.cache[require.resolve('../areas/' + area.id)] = null;
+	delete require.cache[require.resolve('../areas/' + area.id)];
 
 	newArea = require('../areas/' + area.id  + '.js');
 
