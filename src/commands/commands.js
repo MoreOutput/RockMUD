@@ -16,14 +16,15 @@ areas = World.areas,
 Cmd = function () {};
 
 /*
+	// cast detect hidden rok
 	command object = {
-		cmd: cmdArr[0].toLowerCase(), // {cast} detect hidden player
-		msg: cmdArr.slice(1).join(' '), // cast {detect hidden player}
-		arg: cmdArr[1].toLowerCase(), // cast {detect hidden} player
-		input: cmdArr.slice(2).join(' '), // cast detect hidden {player}
-		last: // cast detect hidden {player} -- always the last word
-		second: command.arg.split(' ')[0] // the second word // cast {{ detect }} hidden player
-		number: 1, // argument target -- cast detect hidden 2.player
+		cmd: 'cast', 
+		msg: 'detect hidden rok',
+		arg: 'detect hidden',
+		input: 'rok',
+		last: 'rok',
+		second: 'detect',
+		number: 1
 	};
 */
 Cmd.prototype.createCommandObject = function(resFromClient) {

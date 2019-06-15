@@ -123,7 +123,7 @@ World.setup(io, cfg, function() {
 				} else {
 					World.character.newCharacter(s, cmdObj);
 				}
-			} else {
+			} else if (!s.player.creationStep) {
 				return World.msgPlayer(s, {
 					onlyPrompt: true
 				});

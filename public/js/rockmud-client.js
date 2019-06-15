@@ -179,8 +179,7 @@ window.onload = function() {
 			msg: checkAlias(msg, function(cmd) {
 				return cmd;
 			}),
-			addToLog: addToLog,
-			emit: 'cmd'
+			addToLog: addToLog
 		};
 
 		e.preventDefault();
