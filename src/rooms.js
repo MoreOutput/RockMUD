@@ -333,7 +333,7 @@ Room.prototype.getWatersources = function(roomObj) {
 Room.prototype.getWatersource = function(roomObj, command) {
 	var i = 0,
 	waterSource = false,
-	pattern = new RegExp('^' + command.arg),
+	pattern = new RegExp(command.arg),
 	len = roomObj.items.length;
 	
 	for (i; i < len; i += 1) {
