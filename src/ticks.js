@@ -137,18 +137,6 @@ setInterval(function() {
 		}
 	}
 
-	i = 0;
-
-	if (areaMsg) {
-		for (i; i < World.areas.length; i += 1) {
-			if (World.areas[i].messages.length) {
-				World.msgArea(World.areas[i].name, {
-					msg: areaMsg
-				});
-			}
-		}
-	}
-
 	if (World.time.month.day > World.time.month.days) {
 		World.time.month = World.time.months[0];
 	}
@@ -481,7 +469,7 @@ setInterval(function() {
 			}
 		}
 	}
-}, 45000);
+}, 44000);
 
 // Player Regen
 setInterval(function() {
@@ -539,11 +527,12 @@ setInterval(function() {
 // Random mud-wide messages
 setInterval(function() {
 	var alerts = [
-		'Commands are not case sensitive. Use HELP COMMANDS to see the current command list.',
+		'Use HELP COMMANDS to see a list of the most common commands.',
 		'Use the SCAN command to get a quick look at the rooms adjacent to you.',
 		'Save your character with the <strong>save</strong> command.',
-		'Try the <strong>say</strong> command when you want to send a message to everyone in your current room.',
-		'You can see an items required level before picking it up!'
+		'The <strong>say</strong> command is used when you want to send a message to everyone in your current room.',
+		'You can see an items required level before picking it up!',
+		'RockMUD skills are dynamic. You can obtain and use skills beyond those of your core class.'
 	];
 
 	if (World.players.length) {

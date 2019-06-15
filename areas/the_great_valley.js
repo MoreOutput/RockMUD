@@ -3,18 +3,18 @@ var World = require('../src/world'),
 areaId = 'the_great_valley';
 
 module.exports = {
-	name : 'The Great Valley',
+	name : 'The Winter Plain',
 	id: areaId,
 	defaultRoom: '1',
-	type : 'grasslands',
+	type : 'snow',
 	levels : 'All',
 	description : 'The second area.',
 	reloads: 0,
 	author: 'RockMUD',
 	messages: [
 		{
-			msg: 'A cold breeze blows southward toward camp.',
-			msg: 'Light bounces off of the snow and nearly blinds you for a moment.'
+			msg: 'A cold breeze blows southward toward the camp.',
+			msg: 'A light snow begins to fall.'
 		}
 	],
 	beforeLoad: function(fn) {
@@ -35,19 +35,22 @@ module.exports = {
 					// copy the template
 					roomObj = JSON.parse(JSON.stringify(World.roomTemplate)),
 					roomObj.id = i + '-' + j;
-					roomObj.content = 'Grass covered plains.';
+					roomObj.moveMod = 2;
 
 					var titleRoll = World.dice.roll(1, 3);
 
 					if (titleRoll === 1) {
-						roomObj.title = 'Vast grasslands';
+						roomObj.title = 'Vast sheet of untouched snow';
+						roomObj.content = 'Nothing but white snow in all directions. The snow is several feet deep and makes movement difficult.';
 					} else if (titleRoll === 2) {
-						roomObj.title = 'Endless green plains';
+						roomObj.title = 'Endless white plains';
+						roomObj.content = 'The quiet snowy clearing continues to strech in all directions. A persistent cold wind heads southward toward camp.';
 					} else {
-						roomObj.title = 'A grassy green valley';
+						roomObj.title = 'A snowy incline';
+						roomObj.content = 'The quiet snowy clearing continues to strech in all directions.';
 					}
 
-					roomObj.titleStyleClass = "green";
+					roomObj.titleStyleClass = 'blue';
 
 					if (i === 0 && j === 0) {
 						roomObj.exits.push({
@@ -178,7 +181,6 @@ module.exports = {
 						ac: 4,
 						hp: 10,
 						chp: 13,
-						gold: 1,
 						str: 3,
 						size: {value: 2, display: 'very small'},
 						onRolled: function(mob) {

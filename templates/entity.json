@@ -51,7 +51,7 @@
 	"detection": 0,
 	"knowledge": 0,
 	"weight": 0,
-	"gold": false,
+	"gold": 0,
 	"hunger": 0,
 	"maxHunger": 10,
 	"thirst": 0,
@@ -103,11 +103,7 @@
 		"item": null,
 		"slot": "head"
 	}, {
-		"name": "Necklace 1",
-		"item": null,
-		"slot": "head"
-	}, {
-		"name": "Necklace 2",
+		"name": "Necklace",
 		"item": null,
 		"slot": "head"
 	}, {
@@ -115,19 +111,11 @@
 		"item": null,
 		"slot": "body"
 	}, {
-		"name": "Chest",
-		"item": null,
-		"slot": "body"
-	}, {
 		"name": "About Body",
 		"item": null,
 		"slot": "body"
 	}, {
-		"name": "Right Arm",
-		"item": null,
-		"slot": "arms"
-	}, {
-		"name": "Left Arm",
+		"name": "Arms",
 		"item": null,
 		"slot": "arms"
 	}, {
@@ -149,11 +137,7 @@
 		"item": null,
 		"slot": "fingers"
 	}, {
-		"name": "Right Leg",
-		"item": null,
-		"slot": "legs"
-	}, {
-		"name": "Left Leg",
+		"name": "Legs",
 		"item": null,
 		"slot": "legs"
 	}, {
