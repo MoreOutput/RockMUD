@@ -280,6 +280,11 @@ window.onload = function() {
 		}
 	});
 
+	ws.addEventListener('close', function(r) {
+		display({
+			msg: '<div class="col-md-12 error">Server disconnected. Refresh the page to retry.</div>'
+		}, true);
+	});
 
 	setInterval(function() {
 		canSend = true;
