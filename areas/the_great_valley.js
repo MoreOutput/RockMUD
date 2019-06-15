@@ -161,17 +161,15 @@ module.exports = {
 			for (i; i < this.rooms.length; i += 1) {
 				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 4) === 1) {
 					var mob = {
-						name: 'Boar',
-						displayName: ['Brown boar', 'Light brown boar', 'Scarred boar'],
+						name: 'Elk',
+						displayName: ['Brown elk', 'Light brown elk', 'Large scarred elk'],
 						level: 1,
-						short: ['a brown boar', 'a large scarred boar', 'a scarred boar', 'a boar', 'a tan boar'],
+						short: ['a brown elk', 'a large elk', 'a elk'],
 						long: [
-							'A boar with a number of scars on its side is here',
-							'A dark brown boar is here',
-							'A spotted black and brown boar is here',
-							'A large boar with protruding tusks is here'
+							'An elk with a number of scars on its side is here',
+							'A brown elk is here'
 						],
-						inName: 'A boar',
+						inName: 'An elk',
 						race: 'animal',
 						id: '6',
 						area: areaId,
@@ -179,9 +177,6 @@ module.exports = {
 						position: 'standing',
 						attackType: 'bite',
 						ac: 4,
-						hp: 10,
-						chp: 13,
-						str: 3,
 						size: {value: 2, display: 'very small'},
 						onRolled: function(mob) {
 							if (World.dice.roll(1, 3) > 1) {
@@ -194,12 +189,12 @@ module.exports = {
 					};
 
 					if (World.dice.roll(1, 4) === 1) {
-						mob.long = "A large elk with striking white antlers";
+						mob.long = 'A large elk with striking white antlers';
 						mob.items = [];
 						mob.items.push({
 							name: 'Ivory Antlers', 
-							short: 'a small, sharp, boars tusk',
-							long: 'A boars tusk was left here.' ,
+							short: 'a set of large white antlers',
+							long: 'Gleaming ivory antlers were left here.' ,
 							area: areaId,
 							id: '100',
 							level: 1,
@@ -220,8 +215,8 @@ module.exports = {
 	rooms: [
 		{
 			id: '1',
-			title: 'Just outside the northern exit',
-			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
+			title: 'Just outside camp',
+			content: 'The first northwards steps outside of camp. An endless sheet of snow seems to stretch forever northward.',
 			exits : [
 				{
 					cmd: 'south',
