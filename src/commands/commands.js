@@ -3349,7 +3349,6 @@ Cmd.prototype.score = function(target, command) {
 					'</ul>' +
 				'</div>' +
 				'<div class="col-md-12 score-affects">' +
-					'<h6>Affected by:</h6>' +
 					'<p>You don\'t feel affected by anything.</p>' +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
