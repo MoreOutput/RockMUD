@@ -264,6 +264,15 @@ window.onload = function() {
 
 	node.focus();
 
+
+	document.addEventListener('keydown', function(e) {
+		if (e.key === 'Tab') {
+ 			e.preventDefault();
+
+			node.focus();
+		}
+	}, false);
+
 	ws.addEventListener('message', function(r) {
 		r = JSON.parse(r.data);
 

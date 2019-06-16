@@ -10,10 +10,7 @@ color: #fff;
 padding: 0;
 margin: 0;
 height: 100%;
-background-image: url('bg.jpg');
-background-repeat: no-repeat;
-background-position: center top;
-font-size: .9em;
+font-size: 1em;
 font-family: 'Courier New', Courier, monospace;
 }
 html, body a {
@@ -34,10 +31,8 @@ margin-top: 0;
 font-size: 145%;
 }
 #mudwrapper {
-padding-top: 265px;
-height: 850px;
-width: 980px;
-margin: 0 auto;
+min-width: 100%;
+float: left;
 }
 .error {
 color: #ff0033;
@@ -59,8 +54,11 @@ margin-bottom: .3em;
 }
 #terminal {
 width: 100%;
-height: 565px;
+height: 720px;
 overflow: auto;
+}
+#terminal::-webkit-scrollbar {
+background: transparent;
 }
 #terminal .subtext {
 font-style: italic;
@@ -69,8 +67,10 @@ font-style: italic;
 width: 99%;
 }
 #inputwrapper {
-width: 980px;
-padding-top: 5px;
+float: left;
+clear: both;
+min-width: 100%;
+padding: 5px 0;
 }
 #cmd {
 border: none;
@@ -197,22 +197,24 @@ text-decoration: underline;
 cursor: pointer;
 }
 #prev-cmd-list {
-    display: inline-block;
-    padding: 0;
-    margin: 0;
+width: 100%;
+display: inline-block;
+padding: 0;
+margin: 0 auto;
+text-align: center;
 }
 #prev-cmd-list li {
-    padding: 0;
-    margin: 0;
-    display: inline-block;
+padding: 0;
+margin: 0;
+display: inline-block;
 }
 .prev-cmd {
-    color: #ffcc00;
+color: #ffcc00;
 }
 .hunger {
-    color: red;
+color: red;
 }
 .quest-complete {
-    font-weight: bold;
-    font-size: 200%;
+font-weight: bold;
+font-size: 200%;
 }

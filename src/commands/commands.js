@@ -3231,7 +3231,12 @@ Cmd.prototype.inventory = function(player, command) {
 
 		for (i; i < player.items.length; i += 1) {
 			if (World.character.canSeeObject(player, player.items[i]) || player.items[i].equipped) {
-				iStr += '<td class="i-name">' + player.items[i].name + '</td>';
+				if (player.items[i].displayName) {
+					iStr += '<td class="i-name">' + player.items[i].displayName + '</td>';
+				} else {
+					iStr += '<td class="i-name">' + player.items[i].name + '</td>';
+				}
+
 				iStr += '<td class="i-level">' + player.items[i].level + '</td>';
 
 				if (!player.items[i].equipped) {

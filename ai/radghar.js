@@ -49,7 +49,7 @@ module.exports = {
 					World.addCommand({
 						cmd: 'say',
 						msg: 'Thats great to hear ' + player.displayName
-							+  ', but everyone has to pay the fee. Give me some gold and you can go in.',
+							+  ', but everyone has to pay the fee. Give me a gold coin and you can go in.',
 						roomObj: roomObj
 					}, mob);
 

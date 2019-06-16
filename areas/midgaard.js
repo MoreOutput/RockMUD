@@ -193,7 +193,8 @@ module.exports = {
 			playersInRoom: [],
 			monsters: [],
 			items: [{
-				name: 'Tattered Buckler', 
+				name: 'Tattered Buckler Shield',
+				displayName: 'Tattered Buckler',
 				short: 'a tattered buckler',
 				long: 'A round buckler that looks like its seen heavy use is lying here' ,
 				area: 'midgaard',
@@ -408,7 +409,7 @@ module.exports = {
 		},
 		{
 			id: '8',
-			title: 'Tom\'s General Goods and Supplies',
+			title: 'Tom Kerr\'s Tent',
 			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			outdoors: false,
@@ -457,6 +458,33 @@ module.exports = {
 						spawn: 4
 					}],
 					behaviors: [],
+					onVisit: function(merchant, roomObj, target, incomingRoomObj, command) {
+						if (target.race !== 'ogre') {
+
+							if (World.dice.roll(1, 3) == 1 || target.level === 1) {
+								World.addCommand({
+									cmd: 'say',
+									msg: 'Welcome. Something worth trading?',
+									roomObj: roomObj
+								}, merchant);
+
+								setTimeout(function() {
+									World.addCommand({
+										cmd: 'say',
+										msg: 'I\'m buying up all the furs I can. I\'ll give you a good price.',
+										roomObj: roomObj
+									}, merchant);	
+								}, 2600);
+							}
+						} else {
+							World.addCommand({
+								cmd: 'say',
+								msg: target.displayName + ' you can turn around and leave. I don\'t trade with ogres,'
+									+ ' I don\t care what you think you\'ve found. Go on, get out!',
+								roomObj: roomObj
+							}, merchant);
+						}
+					},
 					beforeSell: function(merchant, roomObj, buyer) {
 						if (buyer.race === 'ogre') {
 							World.addCommand({

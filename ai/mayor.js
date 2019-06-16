@@ -12,7 +12,7 @@ module.exports = {
 		'Get your asses back into camp before nightfall!',
 		'Foreman Stephenson tells me we\'re close to finding the way into the next level of the mine.',
 		'The mine is just outside of camp to the South.',
-		'If you need to exchange some gold or materials you find for coins talk to Thomas on the west side of camp.'
+		'If you need to trade in your finds talk to Thomas on the west side of camp.'
 	],
 	runOnAliveWhenEmpty: true,
 	moveDirections: ['north', 'east', 'west', 'south'],
