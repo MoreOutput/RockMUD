@@ -154,7 +154,7 @@ module.exports = {
 			],
 			items: [
 				{
-					name: 'Water Barrel',
+					name: 'Wooden water barrel',
 					short: 'a barrel of fresh water',
 					long: 'A large wooden barrel filled with water',
 					area: 'midgaard',
@@ -458,9 +458,8 @@ module.exports = {
 						spawn: 4
 					}],
 					behaviors: [],
-					onVisit: function(merchant, roomObj, target, incomingRoomObj, command) {
+					onVisit: function(merchant, roomObj, incomingRoomObj, target, command) {
 						if (target.race !== 'ogre') {
-
 							if (World.dice.roll(1, 3) == 1 || target.level === 1) {
 								World.addCommand({
 									cmd: 'say',
@@ -478,11 +477,19 @@ module.exports = {
 							}
 						} else {
 							World.addCommand({
-								cmd: 'say',
-								msg: target.displayName + ' you can turn around and leave. I don\'t trade with ogres,'
-									+ ' I don\t care what you think you\'ve found. Go on, get out!',
+								cmd: 'emote',
+								msg: 'looks sternly at ' + target.displayName,
 								roomObj: roomObj
 							}, merchant);
+
+							setTimeout(function() {
+								World.addCommand({
+									cmd: 'say',
+									msg: 'You can turn around and leave. I don\'t trade with ogres,'
+										+ ' I don\t care what you think you\'ve found. Go on, get out!',
+									roomObj: roomObj
+								}, merchant);
+							}, 280);
 						}
 					},
 					beforeSell: function(merchant, roomObj, buyer) {

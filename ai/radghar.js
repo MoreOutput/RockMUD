@@ -61,6 +61,9 @@ module.exports = {
 	onVisit: function(mob, roomObj, incomingRoomObj, player, command) {
 		var quest;
 
+
+		console.log(incomingRoomObj)
+
 		if (player.level <= 2) {
 			quest = World.character.getLog(player, towerQuestKey);
 
