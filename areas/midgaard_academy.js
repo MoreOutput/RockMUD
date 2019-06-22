@@ -23,7 +23,7 @@ module.exports = {
 		},
 		steps: {
 			1: 'The Southern Mine is the worlds main source of both gold and coal. It is a large, seemingly endless, network of caves and corridors whos original creators are now forgotten.' 
-			+ ' Give Charles a gold coin to gain access to the mine. Example: give 1 gold charles'
+			+ ' Give Charles a gold coin to gain access to the mine. Example: <strong class="warning">give 1 gold charles</strong>'
 		}
 	}],
 	rooms: [
@@ -101,51 +101,30 @@ module.exports = {
 					id: '3'
 				}
 			],
-			// roomObj is this room, targetRoom is the room the entity is moving from
-			// before you enter this room the quest should be complete
-			beforeEnter: function(roomObj, player, targetRoom, cmd) {
-				var quest = World.character.getLog(player, towerQuestKey);
-
-				console.log(roomObj.title, targetRoom.title);
-
-				if (cmd.msg === 'down') {
-					if (quest.data.permission) {
-						return true;
-					} else {
-						World.msgPlayer(player, {
-							msg: '<strong>You don\'t have permission to enter the Mine.</strong>',
-							styleClass: 'warning'
-						});
-
-						return false;
+			behaviors: [{
+				module: 'quest_check_room_enter',
+				questId: towerQuestKey, 
+				questCheck: function(quest, player, cmd) {
+					if (cmd.msg === 'down') {
+						if (quest.data.permission) {
+							return true;
+						} else {
+							World.msgPlayer(player, {
+								msg: '<strong>You don\'t have permission to enter the Mine.</strong>',
+								styleClass: 'warning'
+							});
+		
+							return false;
+						}
 					}
 				}
-			},
-			onEnter: function(roomObj, entity, incomingRoomObj, command) {
-				var climbSkill = World.character.getSkill(entity, 'climb'),
-				displayAfter = 1200,
-				msg = '';
-
-				if (World.dice.roll(1, 3) === 1) {
-					msg += '<strong class="grey">A strong wind causes you to sway against the Tower.</strong> ';
-				}
-
-				if (!climbSkill && entity.isPlayer && entity.level === 1) {
-					msg += 'You do not have the climb skill. Climbing further could result in a fall!';
-				}
-
-				if (msg) {
-					World.msgPlayer(entity, {
-						msg: '<p>' + msg + '</p>'
-					});
-				}
-			}
+			}]
 		}, {
 			id: '3',
 			title: 'Climbing up the south side of the Academy Tower',
 			area: 'midgaard_academy',
 			moveMod: 2,
-			content: '',
+			content: '', 
 			light: true,
 			exits: [
 				{
@@ -156,21 +135,7 @@ module.exports = {
 					cmd: 'up',
 					id: '4'
 				}
-			],
-			onEnter: function(roomObj, entity, incomingRoomObj, command) {
-				var climbSkill = World.character.getSkill(entity, 'climb'),
-				msg = '';
-
-				if (!climbSkill && entity.isPlayer && entity.level === 1) {
-					msg += 'You do not have the climb skill. Be careful!!';
-				}	
-	
-				if (msg) {
-					World.msgPlayer(entity, {
-						msg: '<p>' + msg + '</p>'
-					});
-				}
-			}
+			]
 		}, {
 			id: '4',
 			title: 'Further up the side of Midgaard Academy Tower',
@@ -189,51 +154,7 @@ module.exports = {
 					id: '3',
 					area: 'midgaard_academy'
 				}
-			],
-			beforeEnter: function(roomObj, entity, incomingRoomObj, command) {
-				var climbSkill,
-				strMod = World.dice.getStrMod(entity),
-				success = true,
-				climbRoll,
-				msg = '';
-
-				climbSkill = World.character.getSkill(entity, 'climb');
-
-				if (climbSkill) {
-					climbRoll = World.dice.roll(1, 100);
-
-					if (climbRoll >= climbSkill.train + strMod) {
-						msg += '<strong>You fail to climb up!</strong>';
-	
-						success = false;
-					}
-
-					if (msg && entity.isPlayer) {
-						World.msgPlayer(entity, {
-							msg: msg
-						});
-
-						if (success) {
-							return true;
-						} else {
-							return false;
-						}
-					}
-				} else {
-					msg += '<strong>You fail to climb up and fall downward!</strong>';
-
-					World.addCommand({
-						cmd: 'move',
-						arg: 'down'
-					}, entity);
-
-					World.msgPlayer(entity, {
-						msg: msg
-					});
-
-					return false;
-				}
-			}
+			]
 		}, {
 			id: '5',
 			title: 'Room at the top of the Academy Tower',
@@ -263,29 +184,13 @@ module.exports = {
 				ac: 20,
 				items: [],
 				runOnAliveWhenEmpty: false,
-				onAlive: function(thomas, room) {
-					if (room.playersInRoom.length && World.dice.roll(1, 10) === 1) {
-						World.addCommand({
-							cmd: 'emote',
-							msg: 'looks around the room.',
-							roomObj: room
-						}, thomas);
-					}
-				}
+				behaviors: []
 			}],
 			exits: [{
 				cmd: 'down',
 				id: '4',
 				area: 'midgaard_academy'
-			}],
-			onEnter: function(roomObj, entity, incomingRoomObj, command) {
-				var msg = 'You climb over some railing and reach the roof lantern of the Academy Tower.';
-
-				World.msgPlayer(entity, {
-					msg: '<p>' + msg + '</p>',
-					styleClass: 'success'
-				});
-			}
+			}]
 		},
 		{
 			id: '6',

@@ -235,26 +235,35 @@ window.onload = function() {
 		e.preventDefault();
 
 		if (e.data.msg.trim().length > 3) {
-			var currentCmds = document.querySelectorAll('.prev-cmd');
+			var currentCmds = document.querySelectorAll('.prev-cmd'),
+			duplicate = false; // duplicate of previous command
 
-			if (currentCmds.length >= maxCommandMemory) {
-				parentNode.removeChild(currentCmds[currentCmds.length - 1].parentElement);
-			}			
-			
-			var newListItem = document.createElement('li');
-			var newButton = document.createElement('button');
-			newButton.type = 'button';
-			newButton.innerHTML = e.data.msg;
-			newButton.classList = 'prev-cmd link-btn';
+			if (currentCmds.length) {
+				if (currentCmds[0].innerText === e.data.msg) {
+					duplicate = true;
+				}
+			}
 
-			newButton.onclick = function(e) {
-				node.value = newButton.innerHTML;
+			if (!duplicate) {
+				if (currentCmds.length >= maxCommandMemory) {
+					parentNode.removeChild(currentCmds[currentCmds.length - 1].parentElement);
+				}			
+				
+				var newListItem = document.createElement('li');
+				var newButton = document.createElement('button');
+				newButton.type = 'button';
+				newButton.innerHTML = e.data.msg;
+				newButton.classList = 'prev-cmd link-btn';
 
-				send(e, false);
-			};
+				newButton.onclick = function(e) {
+					node.value = newButton.innerHTML;
 
-			newListItem.append(newButton);
-			parentNode.prepend(newListItem);
+					send(e, false);
+				};
+
+				newListItem.append(newButton);
+				parentNode.prepend(newListItem);
+			}
 		}
 	}, false);
 

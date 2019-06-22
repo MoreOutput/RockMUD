@@ -646,6 +646,7 @@ Cmd.prototype.emote = function(target, command) {
 		World.msgRoom(roomObj, {
 			msg: '<i>' +  target.displayName + ' ' + command.msg + '</i>',
 			darkMsg: 'You sense some movement in the area.',
+			noPrompt: true,
 			styleClass: 'cmd-emote warning',
 			checkSight: true,
 			playerName: target.name // pass in players to omit
@@ -653,7 +654,8 @@ Cmd.prototype.emote = function(target, command) {
 
 		World.msgPlayer(target, {
 			msg: '<i>' +  target.displayName + ' ' + command.msg + '</i>',
-			styleClass: 'cmd-emote'
+			styleClass: 'cmd-emote',
+			noPrompt: true
 		});
 	} else {
 		World.msgPlayer(target, {
@@ -2383,7 +2385,8 @@ Cmd.prototype.say = function(target, command) {
 		if (target.position !== 'sleeping') {
 			if (command.msg !== '') {
 				World.msgPlayer(target, {
-					msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>'
+					msg: '<div class="cmd-say"><span class="msg-name">You say></span> ' + command.msg + '</div>',
+					noPrompt: true
 				});
 
 				if (!command.roomObj) {
@@ -2405,7 +2408,8 @@ Cmd.prototype.say = function(target, command) {
 
 						return fn(true, msg);
 					},
-					playerName: target.name
+					playerName: target.name,
+					noPrompt: true
 				});
 
 				World.processEvents('onSay', target, roomObj, command);
@@ -2465,13 +2469,15 @@ Cmd.prototype.chat = function(target, command) {
 
 			World.msgPlayer(target, {
 				msg: '<span class="msg-name">You chat></span> ' + command.msg,
-				styleClass: 'cmd-chat'
+				styleClass: 'cmd-chat',
+				noPrompt: true
 			});
 
 			World.msgWorld(target, {
 				msg: '<span class="msg-name">' + target.displayName + '></span> ' + command.msg,
 				playerName: target.name,
-				styleClass: 'cmd-chat'
+				styleClass: 'cmd-chat',
+				noPrompt: true
 			});
 		} else {
 			World.msgPlayer(target, {

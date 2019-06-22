@@ -8,7 +8,7 @@ module.exports = {
 		'Theres a lot of money to be made rummaging around down there.',
 		'I\'ve been working this hole for over forty years.'
 	],
-	onGoldReceived: function(mob, roomObj, gold, player) {
+	onGoldReceived: function(behavior, mob, roomObj, gold, player) {
 		var quest =  World.character.getLog(player, towerQuestKey);
 		
 		if (quest) {
@@ -38,7 +38,7 @@ module.exports = {
 			}, mob);
 		}
 	},
-	onSay: function(mob, roomObj, player, command) {
+	onSay: function(behavior, mob, roomObj, player, command) {
 		var quest;
 
 		if (player.isPlayer && command) {
@@ -58,11 +58,8 @@ module.exports = {
 			}
 		}
 	},
-	onVisit: function(mob, roomObj, incomingRoomObj, player, command) {
+	onVisit: function(behavior, mob, roomObj, incomingRoomObj, player, command) {
 		var quest;
-
-
-		console.log(incomingRoomObj)
 
 		if (player.level <= 2) {
 			quest = World.character.getLog(player, towerQuestKey);
@@ -84,13 +81,13 @@ module.exports = {
 			}
 		}
 	},
-	onAlive: function(mob, roomObj) {
+	onAlive: function(behavior, mob, roomObj) {
 		var roll = World.dice.roll(1, 200);
 
 		if (roll === 1) {
 			World.addCommand({
 				cmd: 'say',
-				msg: mob.exclimations[parseInt(Math.random() * ((mob.exclimations.length)))],
+				msg: behavior.exclimations[parseInt(Math.random() * ((behavior.exclimations.length)))],
 				roomObj: roomObj
 			}, mob);
 		}

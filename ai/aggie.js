@@ -23,29 +23,29 @@ module.exports = {
 	onlyAttackSmaller: false,
 	onlyAttackSleeping: false,
 	revenge: false,
-	onVisit: function(mob, roomObj, target, incomingRoomObj, command) {	
+	onVisit: function(behavioer, mob, roomObj, target, incomingRoomObj, command) {	
 		var target;
 
-		if (roomObj.playersInRoom.length && mob.playerAggressive) {
+		if (roomObj.playersInRoom.length && behavior.playerAggressive) {
 			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
-		} else if (roomObj.monsters.length && mob.mobAggressive) {
+		} else if (roomObj.monsters.length && behavior.mobAggressive) {
 			target = roomObj.monsters[World.dice.roll(1, roomObj.monsters.length) - 1];
 		}
 
-		if (mob.onlyAttackLarger && mob.size.value >= target.size.value) {
+		if (behavior.onlyAttackLarger && mob.size.value >= target.size.value) {
 			target = false;
-		} else if (mob.onlyAttackSmaller && mob.size.value <= target.size.value) {
+		} else if (behavior.onlyAttackSmaller && mob.size.value <= target.size.value) {
 			target = false;
 		}
 
-		if (target && mob.attackOnVisit && mob.position === 'standing' && target.roomid === mob.roomid) {
+		if (target && behavior.attackOnVisit && mob.position === 'standing' && target.roomid === mob.roomid) {
 			if (!mob.revenge) {
 				World.addCommand({
 					cmd: 'kill',
 					arg: target.name,
 					roomObj: roomObj
 				}, mob);
-			} else if (target.refId === mob.lastAttackedBy) {
+			} else if (target.refId === behavior.lastAttackedBy) {
 				World.addCommand({
 					cmd: 'kill',
 					arg: target.name,
@@ -54,33 +54,33 @@ module.exports = {
 			}
 		}
 	},
-	onAlive: function(mob, roomObj) {
+	onAlive: function(behavior, mob, roomObj) {
 		var target;
 
-		if (roomObj.playersInRoom.length && mob.playerAggressive) {
+		if (roomObj.playersInRoom.length && behavior.playerAggressive) {
 			target = roomObj.playersInRoom[World.dice.roll(1, roomObj.playersInRoom.length) - 1];
-		} else if (roomObj.monsters.length && mob.mobAggressive) {
+		} else if (roomObj.monsters.length && behavior.mobAggressive) {
 			target = roomObj.monsters[World.dice.roll(1, roomObj.monsters.length) - 1];
 		}
 
-		if (mob.onlyAttackLarger && mob.size.value >= target.size.value) {
+		if (behavior.onlyAttackLarger && mob.size.value >= target.size.value) {
 			target = false;
-		} else if (mob.onlyAttackSmaller && mob.size.value <= target.size.value) {
-			target = false;
-		}
-
-		if (mob.onlyAttackSleeping === true && target.position !== 'sleeping') {
+		} else if (behavior.onlyAttackSmaller && mob.size.value <= target.size.value) {
 			target = false;
 		}
 
-		if (target && mob.attackOnAlive && mob.position === 'standing' && target.roomid === mob.roomid) {
+		if (behavior.onlyAttackSleeping === true && target.position !== 'sleeping') {
+			target = false;
+		}
+
+		if (target && behavior.attackOnAlive && mob.position === 'standing' && target.roomid === mob.roomid) {
 			if (!mob.revenge) {
 				World.addCommand({
 					cmd: 'kill',
 					arg: target.name,
 					roomObj: roomObj
 				}, mob);
-			} else if (target.refId === mob.lastAttackedBy) {
+			} else if (target.refId === behavior.lastAttackedBy) {
 				World.addCommand({
 					cmd: 'kill',
 					arg: target.name,

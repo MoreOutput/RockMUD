@@ -10,17 +10,17 @@ module.exports = {
 	stayInArea: true,
 	wanderCheck: 95,
 	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'], // default directions
-	onAlive: function(mob, roomObj) {
+	onAlive: function(behavior, mob, roomObj) {
 		var roll = World.dice.roll(1, 100),
 		exitObj,
 		direction;
 
-		if (mob && mob.wanderCheck && roll > mob.wanderCheck && mob.position === 'standing') {
-			direction = mob.moveDirections[World.dice.roll(1, mob.moveDirections.length) - 1];
+		if (mob && behavior.wanderCheck && roll > behavior.wanderCheck && mob.position === 'standing') {
+			direction = behavior.moveDirections[World.dice.roll(1, behavior.moveDirections.length) - 1];
 
 			exitObj = World.room.getExit(roomObj, direction);
 			
-			if (exitObj && ((mob.stayInArea === false) || (mob.stayInArea === true && mob.area === exitObj.area))) {
+			if (exitObj && ((behavior.stayInArea === false) || (behavior.stayInArea === true && mob.area === exitObj.area))) {
 				World.addCommand({
 					cmd: 'move',
 					arg: direction,

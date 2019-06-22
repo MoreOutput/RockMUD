@@ -86,38 +86,8 @@ module.exports = {
 							slot: 'body',
 							equipped: false,
 							value: 5
-						}, {
-							name: 'Torch',
-							short: 'a wooden torch',
-							long: 'A wooden torch rests on the ground',
-							area: 'midgaard',
-							id: '104', 
-							level: 1,
-							itemType: 'weapon',
-							material: 'wood',
-							weaponType: 'club',
-							diceNum: 1, 
-							diceSides: 2,
-							attackType: 'smash',
-							weight: 2,
-							slot: 'hands',
-							equipped: false,
-							light: true,
-							lightDecay: 10,
-							flickerMsg: '',
-							extinguishMsg: '',
-							behaviors: [{
-								module: 'cursed_item'
-							}],
-							spell: {
-								id: 'spark',
-								display: 'Spark',
-								mod: 0,
-								train: 85,
-								type: 'spell',
-								wait: 2
-							}
-						}, {
+						},
+						{
 							name: 'Burlap sack',
 							short: 'a worn, tan, burlap sack',
 							long: 'A tan burlap sack with frizzed edges and various stains lies here',
@@ -146,9 +116,10 @@ module.exports = {
 						}
 					],
 					behaviors: [{
-						module: 'mayor'
+						module: 'william_green'
 					}, {
-						module: 'wander'
+						module: 'wander',
+						moveDirections: ['north', 'east', 'west', 'south']
 					}]
 				}
 			],
@@ -165,14 +136,40 @@ module.exports = {
 						thirst: -1
 					},
 					itemType: 'ornament'
+				},
+				{
+					name: 'Torch',
+					short: 'a wooden torch',
+					long: 'A wooden torch rests on the ground',
+					area: 'midgaard',
+					id: '104', 
+					level: 1,
+					itemType: 'weapon',
+					material: 'wood',
+					weaponType: 'club',
+					diceNum: 1, 
+					diceSides: 2,
+					attackType: 'smash',
+					weight: 2,
+					slot: 'hands',
+					equipped: false,
+					light: true,
+					lightDecay: 10,
+					flickerMsg: '',
+					extinguishMsg: '',
+					behaviors: [{
+						module: 'cursed_item'
+					}],
+					spell: {
+						id: 'spark',
+						display: 'Spark',
+						mod: 0,
+						train: 85,
+						type: 'spell',
+						wait: 2
+					}
 				}
-			],
-			beforeEnter: function(roomObj, fromRoom, target) {
-				return true;
-			},
-			onEnter: function(roomObj, target) {
-				
-			}
+			]
 		},
 		{
 			id: '2',
@@ -246,7 +243,7 @@ module.exports = {
 			],
 			playersInRoom: [],
 			monsters: [{
-				name: 'Skipp',
+				name: 'Skipp Mastiff Dog',
 				displayName: 'Skipp',
 				level: 3,
 				short: 'Skipp, an enormous mastiff with brown and white spots',
@@ -260,9 +257,7 @@ module.exports = {
 				attackType: 'bite',
 				hp: 25,
 				size: {value: 3, display: 'medium'},
-				behaviors: [{
-					module: 'wander'
-				}]
+				behaviors: []
 			}],
 			items: [{
 				name: 'Brown waterskin', 
@@ -387,25 +382,7 @@ module.exports = {
 					locked: true,
 					key: '101'
 				}
-			],
-			playersInRoom: [],
-			monsters: [{
-				name: 'Large Alligator',
-				level: 3,
-				race: 'animal',
-				short: 'a mean looking Alligator',
-				long: 'A large mean looking Alligator',
-				hp: 30,
-				chp: 30,
-				kingdom: 'reptile',
-				gold: 3,
-				size: {value: 3, display: 'medium'},
-				attackOnVisit: true,
-				behaviors: [{
-					module: 'aggie'
-				}]
-			}],
-			items: []
+			]
 		},
 		{
 			id: '8',
@@ -457,53 +434,56 @@ module.exports = {
 						equipped: false,
 						spawn: 4
 					}],
-					behaviors: [],
-					onVisit: function(merchant, roomObj, incomingRoomObj, target, command) {
-						if (target.race !== 'ogre') {
-							if (World.dice.roll(1, 3) == 1 || target.level === 1) {
+					behaviors: [{
+						module: 'thomas_kerr',
+						onVisit: function(behavior, merchant, roomObj, incomingRoomObj, target, command) {
+							if (target.race !== 'ogre') {
+								if (World.dice.roll(1, 3) == 1 || target.level === 1) {
+									World.addCommand({
+										cmd: 'say',
+										msg: 'Welcome. Something worth trading?',
+										roomObj: roomObj
+									}, merchant);
+	
+									setTimeout(function() {
+										World.addCommand({
+											cmd: 'say',
+											msg: 'I\'m buying up all the furs I can. I\'ll give you a good price.',
+											roomObj: roomObj
+										}, merchant);	
+									}, 2600);
+								}
+							} else {
 								World.addCommand({
-									cmd: 'say',
-									msg: 'Welcome. Something worth trading?',
-									roomObj: roomObj
+									cmd: 'emote',
+									msg: 'looks sternly at ' + target.displayName,
+									roomObj: roomObj,
+									prompt: false
 								}, merchant);
-
+	
 								setTimeout(function() {
 									World.addCommand({
 										cmd: 'say',
-										msg: 'I\'m buying up all the furs I can. I\'ll give you a good price.',
+										msg: 'You can turn around and leave. I don\'t trade with Ogres,'
+											+ ' I don\t care what you think you\'ve found. Go on, get out!',
 										roomObj: roomObj
-									}, merchant);	
-								}, 2600);
+									}, merchant);
+								}, 280);
 							}
-						} else {
-							World.addCommand({
-								cmd: 'emote',
-								msg: 'looks sternly at ' + target.displayName,
-								roomObj: roomObj
-							}, merchant);
-
-							setTimeout(function() {
+						},
+						beforeSell: function(behavior, merchant, roomObj, buyer) {
+							if (buyer.race === 'ogre') {
 								World.addCommand({
 									cmd: 'say',
-									msg: 'You can turn around and leave. I don\'t trade with ogres,'
-										+ ' I don\t care what you think you\'ve found. Go on, get out!',
+									msg: 'Sell to an Ogre? Are you insane?',
 									roomObj: roomObj
 								}, merchant);
-							}, 280);
+								return false;
+							} else {
+								return true;
+							}
 						}
-					},
-					beforeSell: function(merchant, roomObj, buyer) {
-						if (buyer.race === 'ogre') {
-							World.addCommand({
-								cmd: 'say',
-								msg: 'Sell to an Ogre? Are you insane?',
-								roomObj: roomObj
-							}, merchant);
-							return false;
-						} else {
-							return true;
-						}
-					}
+					}]
 				}
 			],
 			items: []

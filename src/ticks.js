@@ -387,7 +387,7 @@ setInterval(function() {
 
 		World.aiLock = false;
 	}
-}, 2000);
+}, 2400);
 
 // Command Parsing
 setInterval(function() {

@@ -1,6 +1,5 @@
 'use strict';
-var World = require('../src/world'),
-wanderBehavior = require('./wander');
+var World = require('../src/world');
 
 /*
 	The mayor walks aroud midgaard acting as a crier and greeting the masses.
@@ -15,8 +14,7 @@ module.exports = {
 		'If you need to trade in your finds talk to Thomas on the west side of camp.'
 	],
 	runOnAliveWhenEmpty: true,
-	moveDirections: ['north', 'east', 'west', 'south'],
-	onAlive: function(mob, roomObj) {
+	onAlive: function(behavior, mob, roomObj) {
 		var roll = World.dice.roll(1, 100);
 
 		if (mob.position === 'standing' && !mob.fighting) {
@@ -29,11 +27,9 @@ module.exports = {
 			} else if (roll >= 97) {
 				World.addCommand({
 					cmd: 'say',
-					msg: mob.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],
+					msg: behavior.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],
 					roomObj: roomObj
 				}, mob);
-			} else {
-				wanderBehavior.onAlive(mob, roomObj);
 			}
 		}
 	}

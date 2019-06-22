@@ -396,7 +396,7 @@ World.prototype.getAI = function(aiObj) {
 	if (!aiObj.module) {
 		aiObj = {module: aiObj};
 	}
-	
+
 	if (world.ai[aiObj.module]) {
 		return world.ai[aiObj.module];
 	} else {
@@ -650,7 +650,7 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 			}
 
 			if (mob.behaviors) {
-			world.setupBehaviors(mob, area, room, function(err, mob) {
+				world.setupBehaviors(mob, area, room, function(err, mob) {
 					return callback(err, mob);
 				});
 			} else {
@@ -740,12 +740,24 @@ World.prototype.setupRoom = function(area, room, callback) {
 														}
 
 														if (i === room.exits.length - 1) {
-															callback(false, area, room);
+															if (room.behaviors.length) {
+																world.setupBehaviors(room, area, room, function(err, room) {
+																	return callback(false, area, room);
+																});
+															} else {
+																return callback(false, area, room);
+															}
 														}
 													});
 												}
 											} else {
-												callback(false, area, room);
+												if (room.behaviors.length) {
+													world.setupBehaviors(room, area, room, function(err, room) {
+														return callback(false, area, room);
+													});
+												} else {
+													return callback(false, area, room);
+												}
 											}
 										}
 									});
@@ -753,6 +765,7 @@ World.prototype.setupRoom = function(area, room, callback) {
 							}
 						} else {
 							i = 0;
+							 
 							if (room.exits.length) {
 								for (i; i < room.exits.length; i += 1) {
 									world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate)), function(err, exit) {
@@ -761,12 +774,24 @@ World.prototype.setupRoom = function(area, room, callback) {
 										}
 
 										if (i === room.exits.length - 1) {
-											callback(false, area, room);
+											if (room.behaviors.length) {
+												world.setupBehaviors(room, area, room, function(err, room) {
+													return callback(false, area, room);
+												});
+											} else {
+												return callback(false, area, room);
+											}
 										}
 									});
 								}
 							} else {
-								callback(false, area, room);
+								if (room.behaviors) {
+									world.setupBehaviors(room, area, room, function(err, room) {
+										return callback(false, area, room);
+									});
+								} else {
+									return callback(false, area, room);
+								}
 							}
 						}
 					}
@@ -806,6 +831,7 @@ World.prototype.setupRoom = function(area, room, callback) {
 			}
 		} else {
 			i = 0;
+
 			if (room.exits.length) {
 				for (i; i < room.exits.length; i += 1) {
 					world.extend(room.exits[i], JSON.parse(JSON.stringify(world.exitTemplate)), function(err, exit) {
@@ -814,12 +840,24 @@ World.prototype.setupRoom = function(area, room, callback) {
 						}
 
 						if (i === room.exits.length - 1) {
-							callback(false, area, room);
+							if (room.behaviors.length) {
+								world.setupBehaviors(room, area, room, function(err, room) {
+									return callback(false, area, room);
+								});
+							} else {
+								return callback(false, area, room);
+							}
 						}
 					});
 				}
 			} else {
-				callback(false, area, room);
+				if (room.behaviors.length) {
+					world.setupBehaviors(room, area, room, function(err, room) {
+						return callback(false, area, room);
+					});
+				} else {
+					return callback(false, area, room);
+				}
 			}
 		}
 	}
@@ -1413,14 +1451,12 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 
 World.prototype.setupBehaviors = function(gameEntity, area, room, callback) {
 	var world = this,
-	prop,
-	behavior,
-	behaviorObj,
+	len = gameEntity.behaviors.length,
 	i = 0;
 
 	if (gameEntity.behaviors.length) {
-		for (i; i < gameEntity.behaviors.length; i += 1) {
-			world.extend(gameEntity, world.getAI(gameEntity.behaviors[i]), function(err, gameEntity) {
+		for (i; i < len; i += 1) {
+			world.extend(gameEntity.behaviors[i], world.getAI(gameEntity.behaviors[i]), function(err, extendedBehavior) {
 				return callback(false, gameEntity);
 			});
 		}
@@ -1437,12 +1473,12 @@ World.prototype.sanitizeBehaviors = function(gameEntity) {
 
 	if (gameEntity.behaviors) {
 		for (i; i < gameEntity.behaviors.length; i += 1) {
-			behavior = this.getAI(gameEntity.behaviors[i]);
+			behavior = gameEntity.behaviors[i];
 
 			if (behavior) {
 				for (prop in behavior) {
-					if (gameEntity[prop]) {
-						delete gameEntity[prop];
+					if (prop !== 'module') {
+						delete behavior[prop];
 					}
 				}
 			}
@@ -1450,28 +1486,23 @@ World.prototype.sanitizeBehaviors = function(gameEntity) {
 	}
 
 	i = 0;
-
+	j = 0;
+	
 	if (gameEntity.items) {
 		for (j; j < gameEntity.items; j =+ 1) {
 			if (gameEntity.items[j].behaviors) {
 				for (i; i < gameEntity.items[j].behaviors.length; i += 1) {
-					behavior = this.getAI(gameEntity.items[j].behaviors[i]);
+					behavior = gameEntity.items[j].behaviors[i];
 
 					if (behavior) {
 						for (prop in behavior) {
-							if (gameEntity.items[j][prop]) {
-								delete gameEntity.items[j][prop];
+							if (prop !== 'module') {
+								delete behavior[prop];
 							}
 						}
 					}
 				}
 			}	
-		}
-	}
-
-	for (prop in gameEntity) {
-		if (typeof gameEntity[prop] === 'function') {
-			delete gameEntity[prop];	
 		}
 	}
 
@@ -1540,7 +1571,7 @@ World.prototype.extend = function(extendObj, readObj, callback) {
 		for (prop in readObj) {
 			if (extendObj.hasOwnProperty(prop)) {
 				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
-					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
+					extendObj[prop] = extendObj[prop];
 				} else if (typeof extendObj[prop] !== 'string'
 					&& !isNaN(extendObj[prop])
 					&& !isNaN(readObj[prop])
@@ -1661,7 +1692,9 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 	var i = 0,
 	j = 0,
 	allTrue = true,
+	behavior,
 	gameEntities = [];
+
 
 	if (gameEntity) {
 		if (!Array.isArray(gameEntity)) {
@@ -1676,14 +1709,18 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 
 		for (i; i < gameEntities.length; i += 1) {
 			gameEntity = gameEntities[i];
-			if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)] && gameEntity[evtName]) {
-				if (gameEntity[evtName]) {
-					allTrue = gameEntity[evtName](gameEntity, roomObj, param, param2);
-				}
-			}
 
-			if (allTrue !== false) {
-				allTrue = true;
+			if (gameEntity.behaviors.length) {
+				for (j; j < gameEntity.behaviors.length; j += 1) {
+					behavior = gameEntity.behaviors[j];
+
+					if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)]
+						&& !behavior['prevent' + this.capitalizeFirstLetter(evtName)]) {
+						if (behavior[evtName]) {
+							allTrue = behavior[evtName](behavior, gameEntity, roomObj, param, param2);
+						}
+					}
+				}
 			}
 		}
 	}

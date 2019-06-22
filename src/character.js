@@ -830,6 +830,19 @@ Character.prototype.getKey = function(player, keyId) {
 	return false;
 };
 
+Character.prototype.getBehavior = function(player, moduleName) {
+	var i = 0,
+	len = player.behaviors.length;
+
+	for (i; i < len; i += 1) {
+		if (player.behaviors[i].module === moduleName) {
+			return player.behaviors[i];
+		}
+	}
+
+	return false;
+}
+
 Character.prototype.getStatsFromItems = function(items, fn) {
 	var character = this,
 	itemMods = {};
