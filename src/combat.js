@@ -1,17 +1,14 @@
 'use strict';
 var World = require('./world'),
 Combat = function() {
-	this.adjective = [
-		{value: ['weak', 'hardly any'], damage: 5},
-		{value: 'some', damage: 10},
-		{value: 'directed', damage: 15},
-		{value: 'maiming', damage: 20},
-		{value: 'great', damage: 40},
-		{value: 'demolishing', damage: 50},
-		{value: '<span class="green">~~***<strong class="red">DEVASTATING</strong>***~~</span>', damage: 60}
+	this.damage = [
+		{value: ['maim', 'harm'], damage: 5},
+		{value: 'demolish', damage: 12},
+		{value: 'massacre', damage: 15},
+		{value: 'devestate', damage: 20},
+		{value: 'destroy', damage: 40},
+		{value: 'annihilate', damage: 50}
 	];
-
-	this.abstractNouns = ['intensity', 'force', 'strength', 'power', 'might', 'effort', 'energy'];
 };
 
 Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfile, battle) {
@@ -262,8 +259,13 @@ Combat.prototype.round = function(battle, skillProfile) {
 						msgToDefender = defenderDefString;
 
 						msgToAttacker = attackerAttackString;
-						msgToAttacker += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to '
-											+ defender.short + '</strong>!</div>';
+
+						if (World.dice.roll(1, 2) === 1) {
+							msgToAttacker += '<div class="rnd-status">You deliver a powerful <strong class="red">final blow to '
+								+ defender.short + '</strong>!</div>';
+						} else {
+							msgToAttacker += '<div class="rnd-status">The '+ defender.displayName.toLowerCase()  + ' falls dead!</div>';
+						}
 
 						World.addCommand({
 							cmd: 'alert',
@@ -378,16 +380,19 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 	shieldBlockSkill = World.character.getSkillById(opponent, 'shieldBlock'),
 	i = 0,
 	j = 0,
+	attackerName = combat.getCombatName(attacker),
+	defenderName = combat.getCombatName(opponent),
 	msgForAttacker = '',
 	msgForOpponent = '',
 	roomRoundTxt = '',
 	damage = 0,
 	dodged = false,
 	blocked = false,
-	adjective,
-	abstractNoun,
+	damageText = '',
 	weapon,
+	weaponName,
 	shield,
+	shieldName,
 	hitroll = World.character.getHitroll(attacker),
 	damroll	= World.character.getDamroll(attacker),
 	criticalAttackXP,
@@ -407,6 +412,8 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 
 				if (shieldSlots.length > 0) {
 					shield = shieldSlots[0].item;
+
+					shieldName = this.getCombatName(shield);
 				}
 			}
 
@@ -418,6 +425,8 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 				} else if (i === 0) {
 					weapon = World.character.getFist(attacker);
 				}
+
+				weaponName = this.getCombatName(weapon);
 
 				if (i === 0) {
 					numOfAttacks = combat.getNumberOfAttacks(attacker, weapon, attackerMods, opponentMods);
@@ -462,9 +471,7 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 									damage = attackerMods.str;
 								}
 
-								adjective = combat.getDamageAdjective(damage);
-
-								abstractNoun = combat.abstractNouns[World.dice.roll(1, combat.abstractNouns.length) - 1];
+								damageText = combat.getDamageText(damage);
 
 								opponent.chp -= damage;
 
@@ -474,7 +481,7 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 											hitMsgRoll = World.dice.roll(1, 3);
 
 											if (hitMsgRoll === 1) {
-												msgForAttacker += '<div>Your ' + weapon.name + ' ' +  weapon.attackType + ' hits ' + opponent.short
+												msgForAttacker += '<div>Using your ' + weaponName + ' you ' + damageText + ' the ' + opponent.displayName
 												+ ' with ' + adjective + ' ' + abstractNoun + ' <strong class="red">('
 												+ damage + ')</strong></div>';
 											} else if (hitMsgRoll === 2) {
@@ -603,6 +610,14 @@ Combat.prototype.attack = function(attacker, opponent, battle, fn) {
 	return fn(attacker, opponent, roomObj, msgForAttacker, msgForOpponent, attackerCanSee);
 };
 
+Combat.prototype.getCombatName = function(player) {
+	if (player.combatName) {
+		return player.combatName;
+	} else {
+		return player.displayName;
+	}
+};
+
 Combat.prototype.getNumberOfAttacks = function(attacker, weapon) {
 	var numOfAttacks = 1,
 	secondAttackSkill = World.character.getSkillById(attacker, 'secondAttack');
@@ -712,11 +727,12 @@ Combat.prototype.createSkillProfile = function(skillUser, skillObj, mods) {
 	}
 }
 
-Combat.prototype.getDamageAdjective = function(damage) {
+Combat.prototype.getDamageText = function(damage) {
 	var i = 0,
-	value,
-	damLevel = damage / this.adjective[i].damage * 100;
+	value;
 
+	// ((damage/player.hp) * 100)
+	
 	for (i; i < this.adjective.length; i += 1) {
 		if (this.adjective[i].damage >= damage) {
 			if (!Array.isArray(this.adjective[i].value)) {
@@ -725,17 +741,7 @@ Combat.prototype.getDamageAdjective = function(damage) {
 				value = this.adjective[i].value[World.dice.roll(1, this.adjective[i].value.length) - 1];
 			}
 
-			if (damage > 10) {
-				if (damLevel === 100) {
-					return '**' + value.toUpperCase() + '**';
-				} else if (damLevel >= 80) {
-					return value.toUpperCase();
-				} else {
-					return value;
-				}
-			} else {
-				return value;
-			}
+			return value;
 		}
 	}
 

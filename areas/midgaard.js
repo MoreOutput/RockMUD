@@ -116,7 +116,7 @@ module.exports = {
 						}
 					],
 					behaviors: [{
-						module: 'william_green'
+						module: 'expedition_leader'
 					}, {
 						module: 'wander',
 						moveDirections: ['north', 'east', 'west', 'south']

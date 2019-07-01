@@ -19,11 +19,12 @@ module.exports = {
 		title: 'Going Deep',
 		data: {
 			// the player must give Radhghar 1 gold to enter the mines.
-			permission: false
+			permission: false,
+			level: 100
 		},
 		steps: {
-			1: 'The Southern Mine is the worlds main source of both gold and coal. It is a large, seemingly endless, network of caves and corridors whos original creators are now forgotten.' 
-			+ ' Give Charles a gold coin to gain access to the mine. Example: <strong class="warning">give 1 gold charles</strong>'
+			1: 'The Southern Mine is the worlds main source of both gold and coal.' 
+			+ ' Give Charles a gold coin to gain access to the current level of the mine. Example: <strong class="warning">give 1 gold charles</strong>'
 		}
 	}],
 	rooms: [
@@ -80,7 +81,7 @@ module.exports = {
 					}
 				}],
 				behaviors: [{
-					module: 'radghar'
+					module: 'mine_foreman'
 				}]
 			}],
 			items : []
@@ -91,16 +92,8 @@ module.exports = {
 			moveMod: 2,
 			content: '',
 			light: true,
-			exits: [
-				{
-					cmd: 'down',
-					id: '1',
-					area: 'midgaard_academy'
-				}, {
-					cmd: 'up',
-					id: '3'
-				}
-			],
+			// the mine shaft will automatically drop off the player in the current active level
+			exits: [],
 			behaviors: [{
 				module: 'quest_check_room_enter',
 				questId: towerQuestKey, 
@@ -119,85 +112,6 @@ module.exports = {
 					}
 				}
 			}]
-		}, {
-			id: '3',
-			title: 'Climbing up the south side of the Academy Tower',
-			area: 'midgaard_academy',
-			moveMod: 2,
-			content: '', 
-			light: true,
-			exits: [
-				{
-					cmd: 'down',
-					id: '2',
-					area: 'midgaard_academy'
-				}, {
-					cmd: 'up',
-					id: '4'
-				}
-			]
-		}, {
-			id: '4',
-			title: 'Further up the side of Midgaard Academy Tower',
-			area: 'midgaard_academy',
-			moveMod: 2,
-			content: '',
-			light: true,
-			exits: [
-				{
-					cmd: 'up',
-					id: '5',
-					area: 'midgaard_academy'
-				},
-				{
-					cmd: 'down',
-					id: '3',
-					area: 'midgaard_academy'
-				}
-			]
-		}, {
-			id: '5',
-			title: 'Room at the top of the Academy Tower',
-			area: 'midgaard_academy',
-			content: '',
-			light: true,
-			monsters: [{
-				name: 'Thomas',
-				displayName: 'Thomas',
-				charClass: 'fighter',
-				level: 25,
-				short: 'Squire Thomas',
-				long: '<span class="yellow">Thomas a tall thin squire of Captain Radghar</span> is here standing next to the twower window',
-				description: '',
-				inName: 'Thomas',
-				race: 'human',
-				id: 3,
-				area: 'midgaard_academy',
-				weight: 155,
-				diceMod: 5,
-				str: 20,
-				dex: 18,
-				position: 'standing',
-				attackType: 'punch',
-				damroll: 20,
-				hitroll: 15,
-				ac: 20,
-				items: [],
-				runOnAliveWhenEmpty: false,
-				behaviors: []
-			}],
-			exits: [{
-				cmd: 'down',
-				id: '4',
-				area: 'midgaard_academy'
-			}]
-		},
-		{
-			id: '6',
-			title: 'Main Guard House',
-			area: 'midgaard_academy',
-			content: '',
-			light: true
 		}
 	]
 };

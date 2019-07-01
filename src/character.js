@@ -1261,7 +1261,7 @@ Character.prototype.getStatusReport = function(player) {
 	percentageOfPlayerHp =  ((player.chp/player.hp) * 100);
 
 	for (i; i < this.statusReport.length; i += 1) {
-		if (this.statusReport[i].percentage >= ((player.chp/player.hp) * 100) ) {
+		if (this.statusReport[i].percentage >= percentageOfPlayerHp) {
 			return this.statusReport[i];
 		}
 	}

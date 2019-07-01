@@ -18,8 +18,8 @@ module.exports = {
 		}
 	],
 	beforeLoad: function(fn) {
-		var x = 10,
-		y = 10,
+		var x = 7,
+		y = 7,
 		roomObj,
 		generateNorthOf = World.getRoomObject(this.name, this.defaultRoom),
 		i = 0,

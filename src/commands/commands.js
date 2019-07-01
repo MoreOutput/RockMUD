@@ -2211,20 +2211,20 @@ Cmd.prototype.kill = function(player, command) {
 
 			if (opponent && opponent.roomid === player.roomid) {
 				World.msgPlayer(player, {
-					msg: '<strong class="grey">You scream and charge at a '
-						+ opponent.name + '! (Level: ' + opponent.level + ')</strong>',
+					msg: '<strong class="grey">You approach the '
+						+ opponent.displayName.toLowerCase() + ' (Level: ' + opponent.level + ')</strong>',
 					noPrompt: true
 				});
 
 				World.msgPlayer(opponent, {
-					msg: '<strong class="red">A ' + player.displayName 
-						+ ' screams and charges at you!</strong>',
+					msg: '<strong class="red">' + player.displayName 
+						+ ' approaches you</strong>',
 					noPrompt: true
 				});
 
 				World.msgRoom(roomObj, {
-					msg: '<strong class="red">A ' + player.displayName 
-						+ ' screams and charges at ' + opponent.long + '</strong>',
+					msg: '<strong class="red">' + player.displayName 
+						+ ' begins to circle ' + opponent.long + '</strong>',
 					noPrompt: true,
 					playerName: player.name
 				});
