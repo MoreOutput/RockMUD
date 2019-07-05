@@ -138,7 +138,7 @@ module.exports = {
 					itemType: 'ornament'
 				},
 				{
-					name: 'Torch',
+					name: 'Wooden Torch',
 					short: 'a wooden torch',
 					long: 'A wooden torch rests on the ground',
 					area: 'midgaard',

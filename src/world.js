@@ -474,7 +474,6 @@ World.prototype.getPlayersByArea = function(areaId) {
 
 World.prototype.rollItem = function(item, area, room, callback) {
 	var world = this,
-	diceMod,
 	chanceRoll = world.dice.roll(1, 20),
 	prop,
 	i = 0;
@@ -488,7 +487,8 @@ World.prototype.rollItem = function(item, area, room, callback) {
 	if (Array.isArray(item.name)) {
 		item.name = item.name[world.dice.roll(1, item.name.length) - 1];
 	}
-	
+
+
 	if (!item.displayName) {
 		item.displayName = item.name[0].toUpperCase() + item.name.slice(1);
 	} else if (Array.isArray(item.displayName)) {
@@ -589,6 +589,10 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 				mob.displayName = mob.name[0].toUpperCase() + mob.name.slice(1);
 			} else if (Array.isArray(mob.displayName)) {
 				mob.displayName = mob.displayName[world.dice.roll(1, mob.displayName.length) - 1];
+			}
+
+			if (!mob.combatName) {
+				mob.combatName = 'the ' + mob.displayName;
 			}
 
 			if (Array.isArray(mob.short)) {

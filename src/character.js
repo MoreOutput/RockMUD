@@ -868,7 +868,8 @@ Character.prototype.getDamroll = function(entity) {
 
 Character.prototype.getFist = function(entity) {
 	return {
-		name: 'Fighting with your bare hands!',
+		name: 'Fighting unarmed!',
+		displayName: entity.unarmedType,
 		level: entity.level,
 		diceNum: Math.round(entity.level / 4) + 1,
 		diceSides: Math.round(entity.level / 6) + 1,

@@ -60,7 +60,7 @@
 	"load": 0,
 	"handsNoun": "hand",
 	"visible": true,
-	"attackType":"punch",
+	"attackType":"strike",
 	"area": "",
 	"originatingArea": "",
 	"roomid": "1",
@@ -88,6 +88,7 @@
 	"mute": false,
 	"size": {"value": 3, "display": "medium"},
 	"kingdom": "mammal",
+	"material": "flesh",
 	"itemType": "entity",
 	"preventItemDecay": false,
 	"preventOnAlive": false,
@@ -145,10 +146,6 @@
 		"name": "Feet",
 		"item": null,
 		"slot": "feet"
-	}, {
-		"name": "Floating",
-		"item": null,
-		"slot": "floating"
 	}],
 	"items": [],
 	"affects": [],
@@ -161,5 +158,6 @@
 	"trainMsg": "",
 	"log": [],
 	"hasEvents": false,
-	"runOnAliveWhenEmpty": false
+	"runOnAliveWhenEmpty": false,
+	"unarmedType": "fists"
 }

@@ -161,13 +161,13 @@ module.exports = {
 			for (i; i < this.rooms.length; i += 1) {
 				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 4) === 1) {
 					var mob = {
-						name: 'Elk',
-						displayName: ['Brown elk', 'Light brown elk', 'Large scarred elk'],
+						name: 'Dark Brown Elk',
+						displayName: 'Dark Brown Elk',
+						combatName: 'the dark brown elk',
 						level: 1,
-						short: ['a brown elk', 'a large elk', 'a elk'],
+						short: ['a dark brown elk', 'a large elk'],
 						long: [
-							'An elk with a number of scars on its side is here',
-							'A brown elk is here'
+							'An elk with a thick dark brown coat is here'
 						],
 						inName: 'An elk',
 						race: 'animal',
@@ -175,9 +175,10 @@ module.exports = {
 						area: areaId,
 						weight: 120,
 						position: 'standing',
-						attackType: 'bite',
+						attackType: 'stab',
+						unarmedType: 'horns',
 						ac: 4,
-						size: {value: 2, display: 'very small'},
+						size: {value: 3, display: 'medium'},
 						onRolled: function(mob) {
 							if (World.dice.roll(1, 3) > 1) {
 								mob.behaviors = [];

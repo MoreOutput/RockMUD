@@ -3513,7 +3513,7 @@ Cmd.prototype.restore = function(admin, command) {
 			player.wait = 0;
 		}
 
-		World.msgWorld(admin, {msg: 'You feel refreshed!'});
+		World.msgWorld(admin, {msg: 'You feel refreshed!', noPrompt: true});
 	} else {
 		World.msgPlayer(admin, {msg: 'You do not possess that kind of power.', styleClass: 'error' });
 	}
