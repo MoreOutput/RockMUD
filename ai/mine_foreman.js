@@ -10,7 +10,7 @@ module.exports = {
 	],
 	onGoldReceived: function(behavior, mob, roomObj, gold, player) {
 		var quest =  World.character.getLog(player, towerQuestKey);
-		
+
 		if (quest) {
 			if (!quest.data.permission && gold) {
 				quest.data.permission = true;
@@ -18,10 +18,12 @@ module.exports = {
 
 				World.addCommand({
 					cmd: 'say',
-					msg: 'Very nice ' + player.displayName  + '. Im sure you\'ll earn this back in no time. You can head in.'
+					msg: 'Very good ' + player.displayName  + '. Im sure you\'ll earn this back in no time. You can head in.'
 						+ '<p class="quest-complete yellow">You completed the Quest! You earn 500 experience.</p>',
 					roomObj: roomObj
 				}, mob);
+
+				World.character.addExp(player, 500);
 			}
 		} else {
 			World.character.addLog(player, towerQuestKey);
@@ -49,7 +51,8 @@ module.exports = {
 					World.addCommand({
 						cmd: 'say',
 						msg: 'Thats great to hear ' + player.displayName
-							+  ', but everyone has to pay the fee. Give me a gold coin and you can go in.',
+							+  ', but everyone has to pay the fee. <strong class="warning">Give me a gold coin and you can go in</strong>. I know Tom\'s'
+							+ ' buying furs if you don\'t have it. <strong class="red">NEWBIE:</strong> You have accepted a Quest! To see a list of your open quests use the <strong>Quest</strong> command (<strong class="green">Alias: j</strong>).',
 						roomObj: roomObj
 					}, mob);
 
@@ -67,7 +70,7 @@ module.exports = {
 			if (!quest) {
 				World.addCommand({
 					cmd: 'say',
-					msg: player.displayName + ', we were told you were coming. Are you seeking access to <strong class="red">the Mine</strong>?',
+					msg: player.displayName + ', I had heard you arrived! <strong class="warning">Are you seeking access to the Mine</strong>?',
 					roomObj: roomObj
 				}, mob);
 			} else if (!quest.data.permission) {

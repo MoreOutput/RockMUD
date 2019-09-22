@@ -3,6 +3,7 @@
 	"classAbbr": "Fig",
 	"playable": true,
 	"hp": 10,
+	"str": 1,
 	"mainStat": "str",
 	"skills": [{
 		"id": "bash",

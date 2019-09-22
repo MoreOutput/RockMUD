@@ -4,11 +4,10 @@ RockMUD
 **RockMUD (0.4.0) is a WebSockets MUD server**. Try the latest on this Heroku hobby instance: https://rockmud.herokuapp.com/. If you connect to the demo server type 'help commands' to get a full(ish) list of the current commands.
 
 ### Goals:
-* Full featured MUD experience from within the browser.
-* Enable quick development.
-* Empower client side scripting for GUI.
-* DB agnostic persistence.
-* Cross-platform
+* Full featured MUD experience from within the browser
+* Quick development
+* Client side scripting for GUIs
+* DB agnostic persistence
 
 ### Dependencies:
 * The latest version of the WS library is required. This is the single outside dependency and is contained to the core message passing functions.
@@ -26,5 +25,5 @@ https://gitter.im/rockmud/Lobby?utm_source=share-link&utm_medium=link&utm_campai
 * Install Node, npm, and Git
 * Clone the repo
 * cd RockMUD (to enter cloned repo)
-* npm install (to install socket.io)
-* npm start or node server.js to start the server (defaults to http://127.0.0.1:3000)
+* npm install (to install WS)
+* npm start or node server.js to start the server (defaults to http://127.0.0.1:3001)

@@ -2,7 +2,7 @@
 	"name" : "A new area",
 	"displayName": "Unamed Area",
 	"id" : "",
-	"type" : "forest",
+	"type" : [],
 	"levels" : "All",
 	"defaultRoom": "1",
 	"description" : "",

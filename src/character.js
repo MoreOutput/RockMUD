@@ -264,9 +264,8 @@ Character.prototype.create = function(s) {
 	s.player.name = World.capitalizeFirstLetter(s.player.name);
 	s.player.gold = 0;
 
-	World.extend(s.player, raceObj, function(err, player) {
-		World.extend(s.player, classObj, function(err, player) {
-
+	World.extend(s.player, JSON.parse(JSON.stringify(raceObj)), function(err, player) {
+		World.extend(s.player, JSON.parse(JSON.stringify(classObj)), function(err, player) {
 			s.player.refId = World.createRefId(s.player);
 			s.player.charClass = classObj.name;
 			s.player.id = s.player.name;
@@ -297,6 +296,9 @@ Character.prototype.create = function(s) {
 			s.player.dex = s.player.baseDex;
 			s.player.noFollow = false;
 			s.player.noGroup = false;
+
+			console.log('dex', s.player.baseDex, s.player.ac);
+			s.player.ac = World.dice.getAC(s.player);
 
 			socket = s.player.socket;
 
@@ -483,7 +485,6 @@ Character.prototype.newCharacter = function(s, command) {
 
 Character.prototype.save = function(player, fn) {
 	var objToSave;
-
 
 	if (player.isPlayer && !player.fighting) {
 		objToSave = Object.assign({}, player);
@@ -843,6 +844,19 @@ Character.prototype.getBehavior = function(player, moduleName) {
 	return false;
 }
 
+Character.prototype.hasBehaviorEvent = function(player, eventName) {
+	var i = 0,
+	len = player.behaviors.length;
+
+	for (i; i < len; i += 1) {
+		if (player.behaviors[i][eventName]) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 Character.prototype.getStatsFromItems = function(items, fn) {
 	var character = this,
 	itemMods = {};
@@ -864,25 +878,6 @@ Character.prototype.getHitroll = function(entity) {
 
 Character.prototype.getDamroll = function(entity) {
 	return World.dice.roll(1, 10 + World.dice.getStrMod(entity), entity.hitroll + (entity.level / 5))
-};
-
-Character.prototype.getFist = function(entity) {
-	return {
-		name: 'Fighting unarmed!',
-		displayName: entity.unarmedType,
-		level: entity.level,
-		diceNum: Math.round(entity.level / 4) + 1,
-		diceSides: Math.round(entity.level / 6) + 1,
-		itemType: 'weapon',
-		equipped: true,
-		attackType: entity.attackType,
-		weaponType: 'fist',
-		material: 'flesh',
-		modifiers: {},
-		diceMod: -5,
-		slot: 'hands',
-		short: 'your ' + entity.handsNoun + 's'
-	};
 };
 
 Character.prototype.getContainer = function(player, command) {
@@ -1111,6 +1106,8 @@ Character.prototype.addLog = function(player, questId, step, completed, data) {
 			});
 		}
 	}
+
+	this.save(player);
 };
 
 Character.prototype.getPersonalPronoun = function(player) {
@@ -1213,7 +1210,9 @@ Character.prototype.wearArmor = function(target, armor, roomObj) {
 			armor.equipped = true;
 
 			slot.item = armor.refId;
-		
+
+			this.applyMods(target, armor.modifiers);
+
 			World.msgPlayer(target, {
 				msg: 'You wear a ' + armor.short + ' on your ' + slot.name.toLowerCase() + '.'
 			});
@@ -1226,10 +1225,6 @@ Character.prototype.wearArmor = function(target, armor, roomObj) {
 			styleClass: 'error'
 		});
 	}
-};
-
-Character.prototype.removeWeapon = function() {
-
 };
 
 Character.prototype.getSlot = function(target, slotName) {
@@ -1325,7 +1320,11 @@ Character.prototype.createCorpse = function(player) {
 		mv: player.mv,
 		killedBy: player.killedBy,
 		items: player.items,
-		affects: []
+		race: player.race,
+		class: player.charClass,
+		refId: player.refId,
+		affects: [],
+		behaviors: []
 	};
 };
 
@@ -1420,6 +1419,10 @@ Character.prototype.level = function(player) {
 
 	this.save(player);
 };
+
+Character.prototype.addExp = function(character, exp) {
+	character.exp += exp;
+}
 
 // Adjust the core character stats from the worn gear
 Character.prototype.calculateGear = function() {

@@ -18,6 +18,7 @@ pids
 logs
 results
 
+.vscode/
 areas/persistence
 node_modules
 npm-debug.log

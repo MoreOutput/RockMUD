@@ -6,6 +6,7 @@
 	"detection": 2,
 	"gold": 100,
 	"mainStat": "dex",
+	"dex": 1,
 	"skills": [
 		{
 			"id": "backstab",

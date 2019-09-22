@@ -4,7 +4,7 @@ exports.server = {
 		name: 'RockMUD',
 		version: '0.4.0',
 		website: 'https://github.com/MoreOutput/RockMUD',
-		description: 'Websockets MUD Engine Demo',
+		description: 'WebSockets MUD Engine Demo',
 		// Name of world currency -- referenced in game
 		coinage: 'gold',
 		// Area the player starts in -- can be an array.

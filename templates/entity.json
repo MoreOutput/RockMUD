@@ -159,5 +159,19 @@
 	"log": [],
 	"hasEvents": false,
 	"runOnAliveWhenEmpty": false,
-	"unarmedType": "fists"
+	"fist" : {
+		"name": "Fighting unarmed!",
+		"displayName": "fists",
+		"level": 1,
+		"diceNum": 2,
+		"diceSides": 2,
+		"itemType": "weapon",
+		"attackType": "strike",
+		"weaponType": "unarmed",
+		"material": "flesh",
+		"modifiers": {},
+		"diceMod": -5,
+		"slot": "hands",
+		"short": "your hands"
+	}
 }

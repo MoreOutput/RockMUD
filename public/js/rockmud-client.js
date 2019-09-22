@@ -55,6 +55,7 @@ window.onload = function() {
 		adv: 'kill',
 		attack: 'kill',
 		murder: 'kill',
+		slay: 'kill',
 		res: 'rest',
 		sl: 'sleep',
 		h: 'help',

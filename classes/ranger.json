@@ -4,6 +4,7 @@
 	"playable": true,
 	"hp": 10,
 	"mainStat": "con",
+	"con": 1,
 	"skills": [
 		{
 			"id": "spikeTrap",
@@ -13,6 +14,18 @@
 			"type": "skill",
 			"wait": 4,
 			"learned": false,
+			"prerequisites": {
+				"level": 1
+			}
+		},
+		{
+			"id": "skin",
+			"display": "Skin",
+			"mod": 1,
+			"train": 100,
+			"type": "skill",
+			"wait": 3,
+			"learned": true,
 			"prerequisites": {
 				"level": 1
 			}

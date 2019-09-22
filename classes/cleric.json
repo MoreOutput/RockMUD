@@ -3,6 +3,7 @@
 	"classAbbr": "Cle",
 	"playable": true,
 	"mana": 1,
+	"wis": 1,
 	"mainStat": "wis",
 	"skills": [
 		{

@@ -3,14 +3,16 @@ var World = require('./world'),
 Combat = function() {
 	this.damage = [
 		{value: ['nick'], damage: 1},
-		{value: ['hurt'], damage: 2},
+		{value: ['hurt'], damage: 3},
 		{value: ['maim', 'harm'], damage: 5},
 		{value: 'demolish', damage: 10},
 		{value: 'DEMOLISH', damage: 11},
 		{value: 'massacre', damage: 15},
 		{value: 'MASSACRE', damage: 15},
 		{value: 'devastate', damage: 20},
-		{value: ['destroy', 'ruin'], damage: 40},
+		{value: 'DEVASTATE', damage: 20},
+		{value: 'ravage', damage: 30},
+		{value: 'RAVAGE', damage: 40},
 		{value: 'annihilate', damage: 50}
 	];
 };
@@ -96,7 +98,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 	battleObj,
 	attacker,
 	defender,
-	numOfPositions = combat.getNumberOfBattlepositions(battle),
+	numOfPositions = combat.getNumberOfBattlePositions(battle),
 	roomObj = battle.roomObj,
 	preventPrompt = false,
 	attackerName,
@@ -255,6 +257,8 @@ Combat.prototype.round = function(battle, skillProfile) {
 								battle.attacked = [];
 								battle.skills = {};
 
+								console.log('calling end', 4);
+
 								combat.processEndOfCombat(battle, attacker, defender);
 							}
 						});
@@ -289,6 +293,8 @@ Combat.prototype.round = function(battle, skillProfile) {
 						battle.attacked = [];
 						battle.skills = {};
 
+						console.log('calling end', 3);
+
 						combat.processEndOfCombat(battle, attacker, defender);
 					}
 				});
@@ -312,11 +318,15 @@ Combat.prototype.round = function(battle, skillProfile) {
 				battle.attacked = [];
 				battle.skills = {};
 
+				console.log('calling end', 2);
+				
 				combat.processEndOfCombat(battle, attacker, defender);
 			}
 		} else if (defender) {
 			battle.attacked = [];
 			battle.skills = {};
+
+			console.log('calling end', 1);
 
 			combat.processEndOfCombat(battle, attacker, defender, skillProfile);
 		}
@@ -429,13 +439,13 @@ Combat.prototype.attack = function(attacker, defender, battle, fn) {
 				if (weaponSlots[i].item) {
 					weapon = World.character.getItemByRefId(attacker, weaponSlots[i].item);
 				} else if (i === 0) {
-					weapon = World.character.getFist(attacker);
+					weapon = attacker.fist;
 				}
 
 				weaponName = this.getCombatName(weapon);
 
 				if (i === 0) {
-					numOfAttacks = combat.getNumberOfAttacks(attacker, weapon, attackerMods, defenderMods);
+					numOfAttacks = combat.getNumberOfAttacks(attacker, defender, weapon, attackerMods, defenderMods);
 				} else {
 					numOfAttacks = World.dice.roll(1, 2) - 1;
 				}
@@ -488,13 +498,13 @@ Combat.prototype.attack = function(attacker, defender, battle, fn) {
 
 										if (hitMsgRoll <= 2) {
 											msgForAttacker += '<div>You ' + damageText + ' ' + defenderName + ' with a ' + weapon.attackType
-												+ ' of your ' + weapon.displayName + ' <strong class="red">('+ damage + ')</strong></div>';
+												+ ' from your ' + weapon.displayName + ' <strong class="red">('+ damage + ')</strong></div>';
 
 											msgForDefender += '<div>' + attackerNameCF + ' ' + damageText + 's you with a ' + weapon.attackType
-												+ ' of their ' + weapon.displayName + ' <strong class="red">('+ damage + ')</strong></div>';
-										} else if (hitMsgRoll <= 4 && weapon.weaponType !== 'fist') {
-											msgForAttacker += '<div>The ' + weapon.attackType + ' of your ' + weapon.displayName + ' '
-												+ damageText + 's ' + defenderName + ' <strong class="red">(' + damage + ')</strong></div>';
+												+ ' from their ' + weapon.displayName + ' <strong class="red">('+ damage + ')</strong></div>';
+										} else if (hitMsgRoll <= 4) {
+											msgForAttacker += '<div>You ' + weapon.attackType + ' with your ' + weapon.displayName + ' '
+												+ damageText + ' ' + defenderName + ' <strong class="red">(' + damage + ')</strong></div>';
 
 											msgForDefender += '<div>' + attackerNameCF + 's ' + weapon.attackType + ' ' + damageText
 											 + 's you <strong class="red">(' + damage + ')</strong></div>';
@@ -553,10 +563,10 @@ Combat.prototype.attack = function(attacker, defender, battle, fn) {
 						}
 					}
 				} else {
-					msgForAttacker +=  '<div class="grey">Your ' + weapon.attackType + ' misses '
+					msgForAttacker += '<div class="grey">Your ' + weapon.attackType + ' misses '
 						+ defenderName + '</div>';
 
-					msgForDefender +=  '<div class="grey">' + attackerNameCF + ' tries to '
+					msgForDefender += '<div class="grey">' + attackerNameCF + ' tries to '
 						+ weapon.attackType + ' you and misses! </div>';
 				}
 			}
@@ -574,7 +584,7 @@ Combat.prototype.getCombatName = function(gameObject) {
 	}
 };
 
-Combat.prototype.getNumberOfAttacks = function(attacker, weapon) {
+Combat.prototype.getNumberOfAttacks = function(attacker, defender, weapon) {
 	var numOfAttacks = 1,
 	secondAttackSkill = World.character.getSkillById(attacker, 'secondAttack');
 
@@ -582,7 +592,7 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon) {
 		numOfAttacks += (Word.dice.roll(1, weapon.modifiers.numOfAttacks));
 	}
 
-	if (attacker.mainStat === 'dex' && World.dice.roll(1, 10) < 2) {
+	if (attacker.mainStat === 'dex' && World.dice.roll(1, 10) <= 2) {
 		numOfAttacks += 1;
 	}
 
@@ -602,6 +612,12 @@ Combat.prototype.getNumberOfAttacks = function(attacker, weapon) {
 
 	if (numOfAttacks === 1 && World.dice.roll(1, 3) === 1) {
 		numOfAttacks += 1;
+	}
+
+	if (numOfAttacks > 1 && defender.level > attacker.level) {
+		if (World.dice.roll(1, 2) === 1) {
+			numOfAttacks -= 1;
+		}
 	}
 
 	return numOfAttacks;
@@ -712,144 +728,158 @@ Combat.prototype.processEndOfCombat = function(battleObj, attacker, defender, sk
 	exp = 0,
 	corpse,
 	endOfCombatMsg = '',
-	numOfPositions = combat.getNumberOfBattlepositions(battleObj),
+	numOfPositions = combat.getNumberOfBattlePositions(battleObj),
 	i = 0,
 	battlePositionId,
 	battlePosition,
 	positionsWithDefender = [], // the battle positions involving the slain entity
 	respawnRoom;
 
-	if (attacker.chp > 0) {
-		winner = attacker;
-		loser = defender;
-	} else {
-		winner = defender;
-		loser = attacker;
-	}
-
-	if (numOfPositions !== 1) {
-		// processing combat objects with more than one battle position
-		for (i; i < numOfPositions; i += 1) {
-			battlePosition = battleObj.positions[i];
-
-			if (battlePosition.attacker.refId === loser.refId) {
-				battleObj.positions[i] = undefined;
-			} else if (battlePosition.defender.refId === loser.refId) {
-				battleObj.positions[i] = undefined;
-			}
+	if (attacker.chp <= 0 || defender.chp <= 0) {
+				
+		if (attacker.chp > 0) {
+			winner = attacker;
+			loser = defender;
+		} else {
+			winner = defender;
+			loser = attacker;
 		}
 
-		numOfPositions = combat.getNumberOfBattlepositions(battleObj);
+		if (numOfPositions !== 1) {
+			// processing combat objects with more than one battle position
+			for (i; i < numOfPositions; i += 1) {
+				battlePosition = battleObj.positions[i];
 
-		if (!numOfPositions) {
+				if (battlePosition.attacker.refId === loser.refId) {
+					battleObj.positions[i] = undefined;
+				} else if (battlePosition.defender.refId === loser.refId) {
+					battleObj.positions[i] = undefined;
+				}
+			}
+
+			numOfPositions = combat.getNumberOfBattlePositions(battleObj);
+
+			if (!numOfPositions) {
+				combat.removeBattle(battleObj);
+
+				loser.fighting = false;
+
+				winner.fighting = false;
+			} else {
+				loser.fighting = false;
+			}
+		} else {
 			combat.removeBattle(battleObj);
 
 			loser.fighting = false;
 
 			winner.fighting = false;
+		}
+
+		loser.chp = 0; // cant go below zero hp
+		loser.killedBy = winner.name;
+
+		World.processEvents('onDeath', roomObj, loser, winner);
+		World.processEvents('onDeath', loser, roomObj, winner);
+		World.processEvents('onVictory', winner, roomObj, loser);
+
+		corpse = World.character.createCorpse(loser);
+
+		if (!loser.isPlayer) {
+			World.room.removeMob(roomObj, loser);
 		} else {
-			loser.fighting = false;
+			respawnRoom = World.getRoomObject(loser.recall.area, loser.recall.roomid);
+
+			World.room.removePlayer(roomObj, loser);
+
+			loser.items = [];
+			loser.position = 'standing';
+
+			respawnRoom.playersInRoom.push(loser);
+
+			loser.roomid = respawnRoom.id;
+			loser.area = respawnRoom.area;
+			loser.chp = 1;
+			loser.cmana = 1;
+			loser.cmv = 7;
+			loser.exp = 0;
+
+			World.addCommand({
+				cmd: 'alert',
+				msg: '<strong>You died! Make it back to your corpse before it rots to get your gear!</strong>',
+				styleClass: 'error'
+			}, loser);
+
+			World.character.save(loser);
+		}
+
+		exp = World.dice.calExp(winner, loser);
+
+		World.room.addItem(roomObj, corpse);
+
+		if (skillProfile && skillProfile.winMsg) {
+			endOfCombatMsg = skillProfile.winMsg + ' ';
+		}
+
+		if (exp > 0) {
+			winner.exp += exp;
+
+			if (World.dice.roll(1, 2) === 1) {
+				endOfCombatMsg += 'You won the fight! You gain <strong>'
+					+ exp + ' experience points!</strong>.';
+			} else {
+				endOfCombatMsg += '<strong>You are victorious! You earn <span class="red">'
+					+ exp + '</span> experience points!';
+			}
+		} else {
+			if (World.dice.roll(1, 2) === 1) {
+				endOfCombatMsg += 'You won but learned nothing.';
+			} else {
+				endOfCombatMsg += 'You did not learn anything from the fight.';
+			}
+		}
+
+		if (loser.gold) {
+			winner.gold += loser.gold;
+
+			endOfCombatMsg += ' <span class="yellow">You find ' + loser.gold
+				+ ' ' + World.config.coinage  + ' on the corpse.</span>';
+		}
+
+		winner.killed += 1;
+
+		if (winner.exp >= winner.expToLevel) {
+			World.addCommand({
+				cmd: 'alert',
+				msg: endOfCombatMsg,
+				styleClass: 'victory'
+			}, winner);
+
+			World.character.level(winner);
+		} else {
+			World.addCommand({
+				cmd: 'alert',
+				msg: endOfCombatMsg,
+				styleClass: 'victory'
+			}, winner);
+
+			World.character.save(winner);
 		}
 	} else {
-		combat.removeBattle(battleObj);
+		if (numOfPositions !== 1) {
+			console.log('TODO: ending an unfinished battle with multiple positions');
+			combat.removeBattle(battleObj);
 
-		loser.fighting = false;
-
-		winner.fighting = false;
-	}
-
-	loser.chp = 0; // cant go below zero hp
-	loser.killedBy = winner.name;
-
-	World.processEvents('onDeath', roomObj, loser, winner);
-	World.processEvents('onDeath', loser, roomObj, winner);
-	World.processEvents('onVictory', winner, roomObj, loser);
-
-	corpse = World.character.createCorpse(loser);
-
-	if (!loser.isPlayer) {
-		World.room.removeMob(roomObj, loser);
-	} else {
-		respawnRoom = World.getRoomObject(loser.recall.area, loser.recall.roomid);
-
-		World.room.removePlayer(roomObj, loser);
-
-		loser.items = [];
-		loser.position = 'standing';
-
-		respawnRoom.playersInRoom.push(loser);
-
-		loser.roomid = respawnRoom.id;
-		loser.area = respawnRoom.area;
-		loser.chp = 1;
-		loser.cmana = 1;
-		loser.cmv = 7;
-		loser.exp = 0;
-
-		World.addCommand({
-			cmd: 'alert',
-			msg: '<strong>You died! Make it back to your corpse before it rots to get your gear!</strong>',
-			styleClass: 'error'
-		}, loser);
-
-		World.character.save(loser);
-	}
-
-	exp = World.dice.calExp(winner, loser);
-
-	World.room.addItem(roomObj, corpse);
-
-	if (skillProfile && skillProfile.winMsg) {
-		endOfCombatMsg = skillProfile.winMsg + ' ';
-	}
-
-	if (exp > 0) {
-		winner.exp += exp;
-
-		if (World.dice.roll(1, 2) === 1) {
-			endOfCombatMsg += 'You won the fight! You gain <strong>'
-				+ exp + ' experience points!</strong>.';
+			attacker.fighting = false;
 		} else {
-			endOfCombatMsg += '<strong>You are victorious! You earn <span class="red">'
-				+ exp + '</span> experience points!';
+			combat.removeBattle(battleObj);
+			battleObj.positions[0].defender.fighting = false;
+			battleObj.positions[0].attacker.fighting = false;
 		}
-	} else {
-		if (World.dice.roll(1, 2) === 1) {
-			endOfCombatMsg += 'You won but learned nothing.';
-		} else {
-			endOfCombatMsg += 'You did not learn anything from the fight.';
-		}
-	}
-
-	if (loser.gold) {
-		winner.gold += loser.gold;
-
-		endOfCombatMsg += ' <span class="yellow">You find ' + loser.gold
-			+ ' ' + World.config.coinage  + ' on the corpse.</span>';
-	}
-
-	winner.killed += 1;
-
-	if (winner.exp >= winner.expToLevel) {
-		World.addCommand({
-			cmd: 'alert',
-			msg: endOfCombatMsg,
-			styleClass: 'victory'
-		}, winner);
-
-		World.character.level(winner);
-	} else {
-		World.addCommand({
-			cmd: 'alert',
-			msg: endOfCombatMsg,
-			styleClass: 'victory'
-		}, winner);
-
-		World.character.save(winner);
 	}
 };
 
-Combat.prototype.getNumberOfBattlepositions = function(battleObj) {
+Combat.prototype.getNumberOfBattlePositions = function(battleObj) {
 	var numOfPositions = 0,
 	battlePositionId;
 
@@ -860,6 +890,23 @@ Combat.prototype.getNumberOfBattlepositions = function(battleObj) {
 	}
 
 	return numOfPositions;
+}
+
+Combat.prototype.getBattleByRefId = function(refId) {
+	var i = 0,
+	battle,
+	prop;
+
+	for (i; i < World.battles.length; i += 1) {
+		battle = World.battles[i];
+
+		for (prop in battle.positions) {
+			if (battle.positions[prop].attacker.refId === refId ||
+				battle.positions[prop].defender.refId === refId) {
+				return battle;
+			}
+		}
+	}
 }
 
 Combat.prototype.getBattleByRefIds = function(attackerRefId, defenderRefId) {

@@ -442,7 +442,7 @@ setInterval(function() {
 			}
 		}
 	}
-}, 1850);
+}, 1900);
 
 setInterval(function() {
 	var i = 0,
@@ -529,21 +529,23 @@ setInterval(function() {
 	var alerts = [
 		'Use HELP COMMANDS to see a list of the most common commands.',
 		'Use the SCAN command to get a quick look at the rooms adjacent to you.',
+		'If you need to make some money try selling some furs and venison from the elks north of camp. You will need to learn how to SKIN animals first.',
 		'Save your character with the <strong>save</strong> command.',
 		'The <strong>say</strong> command is used when you want to send a message to everyone in your current room.',
 		'You can see an items required level before picking it up!',
+		'Use the QUEST command to see your current quests.',
 		'RockMUD skills are dynamic. You can obtain and use skills beyond those of your core class.'
 	];
 
 	if (World.players.length) {
-		if (World.dice.roll(1, 3) === 1) {
+		if (World.dice.roll(1, 2) === 1) {
 			World.msgWorld(false, {
 				msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
 					+ alerts[World.dice.roll(1, alerts.length) - 1] + '</span></span>'
 			});
 		}
 	}
-}, 123999);
+}, 111111);
 
 // Check for broken connections
 setInterval(function() {

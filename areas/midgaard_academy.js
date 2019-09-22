@@ -6,7 +6,7 @@ towerQuestKey = 'mine_access';
 module.exports = {
 	name: 'The Southern Mine',
 	id: 'midgaard_academy',
-	type: 'building',
+	type: ['mine', 'subterranean'],
 	levels: 'All',
 	description: 'A large, seemingly endless, gold mine whos original founders are now forgotten.',
 	reloads: 0,
@@ -24,7 +24,7 @@ module.exports = {
 		},
 		steps: {
 			1: 'The Southern Mine is the worlds main source of both gold and coal.' 
-			+ ' Give Charles a gold coin to gain access to the current level of the mine. Example: <strong class="warning">give 1 gold charles</strong>'
+			+ ' Give Charles a gold coin to gain access to the current level of the mine. <strong>You can sell furs to Tom Kerr for gold</strong>. Example: <strong class="warning">give 1 gold charles</strong>'
 		}
 	}],
 	rooms: [
@@ -50,7 +50,7 @@ module.exports = {
 				name: 'Foreman Charles Stephenson',
 				lastName: 'Stephenson',
 				age: 59,
-				displayName: 'Charles',
+				displayName: 'Charles the Mine Foreman',
 				charClass: 'fighter',
 				level: 50,
 				short: 'Mine Foreman Charles Stephenson',
@@ -68,7 +68,6 @@ module.exports = {
 				ac: 20,
 				items: [],
 				trainer: true,
-				runOnAliveWhenEmpty: false,
 				skills: [{
 					id: 'climb',
 					display: 'Improved Climbing',

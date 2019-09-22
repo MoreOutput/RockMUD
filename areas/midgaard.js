@@ -4,7 +4,7 @@ var World = require('../src/world');
 module.exports = {
 	name: 'Midgaard',
 	id: 'midgaard',
-	type: 'city',
+	type: ['camp'],
 	levels: 'All',
 	description: 'Base camp for the Southern Mine across the sea.',
 	reloads: 0,
@@ -257,7 +257,11 @@ module.exports = {
 				attackType: 'bite',
 				hp: 25,
 				size: {value: 3, display: 'medium'},
-				behaviors: []
+				runOnAliveWhenEmpty: true,
+				behaviors: [{
+					module: 'wander',
+					moveDirections: ['north', 'east', 'west', 'south']
+				}]
 			}],
 			items: [{
 				name: 'Brown waterskin', 
@@ -362,7 +366,10 @@ module.exports = {
 				ac: 1, 
 				weight: 1,
 				slot: 'head',
-				equipped: false
+				equipped: false,
+				modifiers: {
+					ac: 1
+				}
 			}]
 		},
 		{
@@ -390,6 +397,7 @@ module.exports = {
 			area: 'midgaard',
 			content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent congue sagittis efficitur. Vivamus dapibus sem ac mauris pharetra dapibus. Nunc id ex orci. Quisque fringilla dictum orci molestie condimentum. Duis volutpat porttitor ipsum. Sed ac aliquet leo. Nulla at facilisis orci, eu suscipit nibh. ',
 			outdoors: false,
+			light: true,
 			exits: [
 				{
 					cmd: 'east',
@@ -478,6 +486,20 @@ module.exports = {
 									msg: 'Sell to an Ogre? Are you insane?',
 									roomObj: roomObj
 								}, merchant);
+
+								return false;
+							} else {
+								return true;
+							}
+						},
+						beforeBuy: function(behavior, merchant, roomObj, buyer) {
+							if (buyer.race === 'ogre') {
+								World.addCommand({
+									cmd: 'say',
+									msg: 'I\'ll freeze before buying from an Ogre!',
+									roomObj: roomObj
+								}, merchant);
+
 								return false;
 							} else {
 								return true;

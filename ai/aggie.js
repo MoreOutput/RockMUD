@@ -23,7 +23,7 @@ module.exports = {
 	onlyAttackSmaller: false,
 	onlyAttackSleeping: false,
 	revenge: false,
-	onVisit: function(behavioer, mob, roomObj, target, incomingRoomObj, command) {	
+	onVisit: function(behavior, mob, roomObj, target, incomingRoomObj, command) {	
 		var target;
 
 		if (roomObj.playersInRoom.length && behavior.playerAggressive) {
@@ -43,13 +43,15 @@ module.exports = {
 				World.addCommand({
 					cmd: 'kill',
 					arg: target.name,
-					roomObj: roomObj
+					roomObj: roomObj,
+					target: target
 				}, mob);
 			} else if (target.refId === behavior.lastAttackedBy) {
 				World.addCommand({
 					cmd: 'kill',
 					arg: target.name,
-					roomObj: roomObj
+					roomObj: roomObj,
+					target: target
 				}, mob);
 			}
 		}
@@ -78,13 +80,15 @@ module.exports = {
 				World.addCommand({
 					cmd: 'kill',
 					arg: target.name,
-					roomObj: roomObj
+					roomObj: roomObj,
+					target: target
 				}, mob);
 			} else if (target.refId === behavior.lastAttackedBy) {
 				World.addCommand({
 					cmd: 'kill',
 					arg: target.name,
-					roomObj: roomObj
+					roomObj: roomObj,
+					target: target
 				}, mob);
 			}
 		}

@@ -156,9 +156,16 @@ Roller.prototype.getDodgeChance = function(dodgingEntity, entityToDodge) {
 	return chanceToDodge;
 };
 
+Roller.prototype.getAC = function(entity) {
+	// ac is aggregate of things that add AC
+	// it is reduced when items and affects are removed
+	// and increased when items and affects are applied
+	return entity.ac + this.getDexMod(entity);
+}
+
 // ac check is the entites current ac, level additions, and
 Roller.prototype.getRelativeArmorScore = function(defender, attacker) {
-	var ac = defender.ac;
+	var ac = this.getAC(defender);
 
 	if (attacker.level > defender.level) {
 		ac -= (Math.round(attacker.level / defender.level));
@@ -172,7 +179,7 @@ Roller.prototype.getRelativeArmorScore = function(defender, attacker) {
 		ac -= (attacker.size.value - defender.size.value);
 	}
 
-	return ac;p
+	return ac;
 };
 
 // return an object with each mod outlined

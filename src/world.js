@@ -471,7 +471,6 @@ World.prototype.getPlayersByArea = function(areaId) {
 /*
 * Area and item setup on boot
 */
-
 World.prototype.rollItem = function(item, area, room, callback) {
 	var world = this,
 	chanceRoll = world.dice.roll(1, 20),
@@ -487,7 +486,6 @@ World.prototype.rollItem = function(item, area, room, callback) {
 	if (Array.isArray(item.name)) {
 		item.name = item.name[world.dice.roll(1, item.name.length) - 1];
 	}
-
 
 	if (!item.displayName) {
 		item.displayName = item.name[0].toUpperCase() + item.name.slice(1);
@@ -536,6 +534,13 @@ World.prototype.rollItem = function(item, area, room, callback) {
 	}
 };
 
+World.prototype.createItem = function() {
+	var item = JSON.parse(JSON.stringify(this.itemTemplate));
+	item.refId = this.createRefId(item);
+
+	return item;
+};
+
 // Rolls values for Mobs, including their equipment
 World.prototype.rollMob = function(mob, area, room, callback) {
 	var world = this,
@@ -553,13 +558,13 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 		mob.race = 'animal';
 	}
 
-	if (!mob.charClass) {
-		mob.charClass = 'fighter';
-	}
-
 	raceObj = world.getRace(mob.race);
 
-	classObj = world.getClass(mob.charClass);
+	if (mob.charClass) {
+		classObj = world.getClass(mob.charClass);
+	} else {
+		classObj = {};
+	}
 
 	mob.hp += (10 * (mob.level + 1)) + world.dice.roll(mob.level, mob.level);
 
@@ -643,8 +648,10 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 
 			mob.cmv = mob.mv;
 
+			mob.ac = world.dice.getAC(mob);
+			
 			if (!mob.gold && mob.gold !== 0) {
-				mob.gold += world.dice.roll(1, mob.level * 10);
+				mob.gold = world.dice.roll(1, mob.level + 1);
 			}
 
 			for (prop in mob) {
@@ -668,6 +675,7 @@ World.prototype.setupArea = function(area, callback) {
 	var i = 0,
 	world = this,
 	setup = function() {
+		
 		for (i; i < area.rooms.length; i += 1) {
 			world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)), function(err, room) {
 				if (area.titleStyleClass) {
@@ -938,13 +946,7 @@ World.prototype.setupItem = function(item, area, room, callback) {
 };
 
 World.prototype.createRefId = function(gameEntity) {
-	if (gameEntity.isPlayer === true) {
-		return  Math.random().toString().replace('0.', 'player-');
-	} else if (gameEntity.itemType === 'entity') {
-		return Math.random().toString().replace('0.', 'entity-');
-	} else {
-		return Math.random().toString().replace('0.', 'item-');
-	}
+	return  Math.random().toString().replace('0.', gameEntity.itemType + '-');
 }
 
 World.prototype.getArea = function(areaId) {
@@ -1574,8 +1576,8 @@ World.prototype.extend = function(extendObj, readObj, callback) {
 	if (extendObj && readObj && propCnt) {
 		for (prop in readObj) {
 			if (extendObj.hasOwnProperty(prop)) {
-				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop])) {
-					extendObj[prop] = extendObj[prop];
+				if (Array.isArray(extendObj[prop]) && Array.isArray(readObj[prop]) && extendObj[prop].length === 0) {
+					extendObj[prop] = extendObj[prop].concat(readObj[prop]);
 				} else if (typeof extendObj[prop] !== 'string'
 					&& !isNaN(extendObj[prop])
 					&& !isNaN(readObj[prop])
@@ -1699,7 +1701,6 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 	behavior,
 	gameEntities = [];
 
-
 	if (gameEntity) {
 		if (!Array.isArray(gameEntity)) {
 			gameEntities = [gameEntity];
@@ -1718,11 +1719,10 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 				for (j; j < gameEntity.behaviors.length; j += 1) {
 					behavior = gameEntity.behaviors[j];
 
-					if (!gameEntity['prevent' + this.capitalizeFirstLetter(evtName)]
+					if (behavior[evtName]
+						&& !gameEntity['prevent' + this.capitalizeFirstLetter(evtName)]
 						&& !behavior['prevent' + this.capitalizeFirstLetter(evtName)]) {
-						if (behavior[evtName]) {
-							allTrue = behavior[evtName](behavior, gameEntity, roomObj, param, param2);
-						}
+						allTrue = behavior[evtName](behavior, gameEntity, roomObj, param, param2);
 					}
 				}
 			}

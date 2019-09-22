@@ -8,5 +8,20 @@
 	"handsNoun": "claw",
 	"damroll": -2,
 	"ac": -10,
-	"maxHunger": -2
+	"maxHunger": -2,
+	"fist" : {
+		"name": "Fighting unarmed!",
+		"displayName": "claws",
+		"level": 1,
+		"diceNum": 3,
+		"diceSides": 4,
+		"itemType": "weapon",
+		"attackType": "claw",
+		"weaponType": "unarmed",
+		"material": "flesh",
+		"modifiers": {},
+		"diceMod": -5,
+		"slot": "hands",
+		"short": "your claws"
+	}
 }

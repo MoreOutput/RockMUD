@@ -3,6 +3,7 @@
 	"classAbbr": "Mag",
 	"playable": true,
 	"mana": 2,
+	"int": 1,
 	"mainStat": "int",
 	"skills": [
 		{

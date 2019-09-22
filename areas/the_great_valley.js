@@ -6,7 +6,7 @@ module.exports = {
 	name : 'The Winter Plain',
 	id: areaId,
 	defaultRoom: '1',
-	type : 'snow',
+	type : ['snow', 'plain'],
 	levels : 'All',
 	description : 'The second area.',
 	reloads: 0,
@@ -161,6 +161,7 @@ module.exports = {
 			for (i; i < this.rooms.length; i += 1) {
 				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 4) === 1) {
 					var mob = {
+						hp: 42,
 						name: 'Dark Brown Elk',
 						displayName: 'Dark Brown Elk',
 						combatName: 'the dark brown elk',
@@ -177,8 +178,24 @@ module.exports = {
 						position: 'standing',
 						attackType: 'stab',
 						unarmedType: 'horns',
+						runOnAliveWhenEmpty: true,
 						ac: 4,
 						size: {value: 3, display: 'medium'},
+						fist: {
+							name: "Fighting unarmed!",
+							displayName: "horns",
+							level: 1,
+							diceNum: 2,
+							diceSides: 2,
+							itemType: "weapon",
+							attackType: "stab",
+							weaponType: "unarmed",
+							material: "flesh",
+							modifiers: {},
+							diceMod: -5,
+							slot: "hands",
+							short: "your hands"
+						},
 						onRolled: function(mob) {
 							if (World.dice.roll(1, 3) > 1) {
 								mob.behaviors = [];

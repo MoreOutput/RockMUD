@@ -105,11 +105,9 @@ Cmd.prototype.buy = function(target, command) {
 		merchant = World.room.getMerchants(roomObj)[0];
 
 		if (merchant) {
-			if (merchant.beforeSell) {
-				canBuy = World.processEvents('beforeSell', merchant, roomObj, target);
-			}
+			canSell = World.processEvents('beforeSell', merchant, roomObj, target);
 
-			if (canBuy) {
+			if (canSell) {
 				item =  World.character.getItem(merchant, command);
 
 				if (item) {
@@ -161,6 +159,7 @@ Cmd.prototype.sell = function(target, command) {
 	var i = 0,
 	roomObj,
 	item,
+	canBuy = true,
 	merchant;
 
 	if (command.roomObj) {
@@ -173,35 +172,39 @@ Cmd.prototype.sell = function(target, command) {
 		merchant = World.room.getMerchants(roomObj)[0];
 		
 		if (merchant) {
-			item =  World.character.getItem(target, command);
+			canBuy = World.processEvents('beforeBuy', merchant, roomObj, target);
 
-			if (item) {
-				if (item.value <= merchant.gold) {
-					merchant.gold -= item.value - 5;
-					target.gold += item.value - 5;
+			if (canBuy) {
+				item =  World.character.getItem(target, command);
 
-					World.character.removeItem(target, item);
+				if (item) {
+					if (item.value <= merchant.gold) {
+						merchant.gold -= item.value - 5;
+						target.gold += item.value - 5;
 
-					World.character.addItem(merchant, item);
-					
-					World.msgPlayer(target, {
-						msg: 'You sell ' + item.short,
-						styleClass: 'green'
-					});
+						World.character.removeItem(target, item);
 
-					World.processEvents('onSell', target, roomObj, merchant);
-					World.processEvents('onBuy', merchant, roomObj, target);
+						World.character.addItem(merchant, item);
+						
+						World.msgPlayer(target, {
+							msg: 'You sell ' + item.short,
+							styleClass: 'green'
+						});
+
+						World.processEvents('onSell', target, roomObj, merchant);
+						World.processEvents('onBuy', merchant, roomObj, target);
+					} else {
+						World.msgPlayer(target, {
+							msg: 'They can\'t afford to buy ' + item.short,
+							styleClass: 'yellow'
+						});
+					}
 				} else {
 					World.msgPlayer(target, {
-						msg: 'They can\'t afford to buy ' + item.short,
-						styleClass: 'yellow'
+						msg: marchant.displayName + ' doesn\'t seem to recognize the name.',
+						styleClass: 'error'
 					});
 				}
-			} else {
-				World.msgPlayer(target, {
-					msg: marchant.displayName + ' doesn\'t seem to recognize the name.',
-					styleClass: 'error'
-				});
 			}
 		} else {
 			World.msgPlayer(target, {
@@ -357,9 +360,7 @@ Cmd.prototype.give = function(target, command) {
 								styleClass: 'green'
 							});
 
-							if (receiver.onGoldReceived) {
-								World.processEvents('onGoldReceived', receiver, roomObj, goldToTransfer, target);
-							}
+							World.processEvents('onGoldReceived', receiver, roomObj, goldToTransfer, target);
 						}
 					} else {
 						World.msgPlayer(target,  {
@@ -916,7 +917,7 @@ Cmd.prototype.rest = function(target, command) {
 
 Cmd.prototype.stand = function(target, command) {
 	var roomObj;
-
+	
 	if (target.position === 'sleeping' || target.position === 'resting') {
 		target.position = 'standing';
 
@@ -1265,7 +1266,7 @@ Cmd.prototype.move = function(target, command, fn) {
 
 	cost -= dexMod;
 
-	if (!target.fighting && (target.position === 'standing' || target.position === 'fleeing') 
+	if ((!target.fighting && target.position === 'standing') || (target.position === 'fleeing') 
 		&& (target.cmv > cost && target.wait === 0 && target.chp > 0)) {
 
 		if (!command.roomObj) {
@@ -1473,11 +1474,6 @@ Cmd.prototype.move = function(target, command, fn) {
 				if (!target.fighting) {
 					World.msgPlayer(target, {
 						msg: 'You\'re not even <strong>stand</strong>ing up!',
-						styleClass: 'error'
-					});
-				} else {
-					World.msgPlayer(target, {
-						msg: 'You can\'t do that right now! Try fleeing combat first!',
 						styleClass: 'error'
 					});
 				}
@@ -1952,7 +1948,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You are sleeping at the moment.',
+			msg: 'You can\'t drop items while asleep!',
 			styleClass: 'error'
 		});
 	}
@@ -1961,69 +1957,109 @@ Cmd.prototype.drop = function(target, command, fn) {
 Cmd.prototype.flee = function(player, command) {
 	var cmd = this,
 	chanceRoll,
+	attacker, // the entity that the player is fleeing from
+	battle, // a player could be in combat with a number of different entities
+	numOfPositions,
+	i = 0,
+	check = (7 + player.level),
 	directions = ['north', 'east', 'west', 'south', 'down', 'up'];
 
 	if (player.fighting) {
-		chanceRoll = World.dice.roll(1, 20, World.dice.getDexMod(player));
+		if (player.position === 'standing') {
+			chanceRoll = World.dice.roll(1, 20 + player.level, World.dice.getDexMod(player));
 
-		if (player.mainStat === 'dex') {
-			chanceRoll += 1;
-		}
+			battle = World.combat.getBattleByRefId(player.refId);
 
-		if (chanceRoll > 7 && player.wait === 0) {
-			player.position = 'fleeing';
+			numOfPositions = World.combat.getNumberOfBattlePositions(battle);
 
-			if (!command.arg) {
-				command.arg = directions[World.dice.roll(1, directions.length) - 1];
+			if (player.mainStat === 'dex') {
+				chanceRoll += 1;
 			}
 
-			cmd.move(player, command, function(moved) {
-				if (moved) {
-					player.fighting = false;
-					player.position = 'standing';
+			if (chanceRoll > (check && numOfPositions > 1)) {
+				chanceRoll -= numOfPositions;
+			}
 
-					if (World.dice.roll(1, 10) > 8 && player.wait < 2) {
-						player.wait += 1;
+			if (chanceRoll > check && player.wait === 0) {
+				if (battle) {
+					player.position = 'fleeing';
+					
+					if (!command.arg) {
+						command.arg = directions[World.dice.roll(1, directions.length) - 1];
 					}
 
-					World.msgPlayer(player.opponent, {
-						msg: player.displayName + ' fled ' + command.arg +'!',
-						styleClass: 'grey'
-					});
+					cmd.move(player, command, function(moved) {
+						player.position = 'standing';
 
-					World.msgPlayer(player, {
-						msg: '<strong>You fled ' + command.arg + '</strong>!',
-						styleClass: 'success'
-					});
+						if (moved) {
+							for (i; i < numOfPositions; i += 1) {
+								let position = battle.positions[i];
+								let attacker = position.attacker;
+								let defender = position.defender;
 
-					player.opponent.opponent = false;
-					player.opponent = false;
+								if (attacker.refId !== player.refId) {
+									World.msgPlayer(attacker, {
+										msg: player.displayName + ' fled ' + command.arg +'!',
+										styleClass: 'grey'
+									});
+								}
+
+								if (defender.refId !== player.refId) {
+									World.msgPlayer(defender, {
+										msg: player.displayName + ' fled ' + command.arg +'!',
+										styleClass: 'grey'
+									});
+								}
+							}
+
+							player.fighting = false;
+
+							if (player.mainStat === 'dex' || player.mainStat === 'wis') {
+								player.wait += 1;
+							} else {
+								player.wait += 2;
+							}
+
+							World.msgPlayer(player, {
+								msg: '<strong>You fled ' + command.arg + '</strong>!',
+								styleClass: 'success'
+							});
+						} else {
+							player.position = 'standing';
+							player.fighting = true;;
+
+							World.msgPlayer(player, {
+								msg: 'You cannot flee in that direction!',
+								styleClass: 'error'
+							});
+						}
+					});
 				} else {
-					player.fighting = true;;
-/*
-					World.msgPlayer(player.opponent, {
-						msg: '<p>' + player.displayName + ' tries to flee ' + command.arg + '.</p>',
+					World.msgPlayer(player, {
+						msg: 'You\'re not fighting anything.',
 						styleClass: 'warning'
 					});
-*/
+				}
+			} else {
+				player.wait += 2;
+
+				if (World.dice.roll(1, 2) === 1) {
 					World.msgPlayer(player, {
-						msg: 'You cannot flee in that direction!',
+						msg: '<strong>You try to flee and fail!</strong>',
+						styleClass: 'error'
+					});
+				} else {
+					World.msgPlayer(player, {
+						msg: '<strong>Your attempt to flee fails!</strong>',
 						styleClass: 'error'
 					});
 				}
-			});
-		} else {
-			if (World.dice.roll(1, 2) === 1) {
-				World.msgPlayer(player, {
-					msg: '<strong>You are in no position to flee!</strong>',
-					styleClass: 'error'
-				});
-			} else {
-				World.msgPlayer(player, {
-					msg: '<strong>Your attempt to flee fails!</strong>',
-					styleClass: 'error'
-				});
 			}
+		} else {
+			World.msgPlayer(player, {
+				msg: 'You must be standing to flee!',
+				styleClass: 'error'
+			});
 		}
 	} else {
 		World.msgPlayer(player, {
@@ -2188,7 +2224,6 @@ Cmd.prototype.cast = function(player, command, fn) {
 // We pass in a Skill Profile Object (the output of a skill) when we start combat with a combat skill
 Cmd.prototype.kill = function(player, command) {
 	var roomObj,
-	i = 0,
 	opponent;
 
 	if (command.arg !== player.name && !player.fighting) {
@@ -2649,7 +2684,6 @@ Cmd.prototype.quit = function(target, command) {
 	}
 };
 
-/** Related to Saving and character adjustment/interaction **/
 Cmd.prototype.train = function(target, command) {
 	var roomObj = World.getRoomObject(target.area, target.roomid),
 	trainDisplay = '',
@@ -3334,7 +3368,7 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-con last"><label><strong>CON:</strong></label> ' + target.baseCon + ' <strong>(' + target.con + ')</strong></li>' +
 				'</ul>' +
 				'<ul class="col-md-2 score-stats list-unstyled">' +
-					'<li class="stat-armor"><label><strong>Armor:</strong></label> ' + target.ac + '</li>' +
+					'<li class="stat-armor"><label><strong>Armor:</strong></label> ' + World.dice.getAC(target) + '</li>' +
 					'<li class="stat-hunger"><label><strong>Hunger:</strong></label> ' + target.hunger +'</li>' +
 					'<li class="stat-thirst"><label><strong>Thirst:</strong></label> ' + target.thirst +'</li>' +
 					'<li class="stat-trains last"><label><strong>Trains:</strong></label> ' + target.trains + '</li>' +
@@ -3441,6 +3475,15 @@ Cmd.prototype.alist = function(target, command) {
 	World.msgPlayer(target, {
 		msg: '<h3>Loaded Areas: ' + World.areas.length + '</h3>'
 			+ '<ul>' + str + '</ul>',
+		styleClass: 'warning'
+	});
+};
+
+Cmd.prototype.setpos = function(target, command) {
+	target.position = 'standing';
+	
+	World.msgPlayer(target, {
+		msg: 'You are now standing',
 		styleClass: 'warning'
 	});
 };
