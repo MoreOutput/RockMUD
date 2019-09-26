@@ -7,7 +7,8 @@ WebSocket = require('ws'),
 RockMUD = function() {
 	this.server = null;
 	this.world = null;
-};
+},
+server;
 
 RockMUD.prototype.setupServer = function() {
 	const mud = this;
@@ -217,4 +218,8 @@ RockMUD.prototype.setupServer = function() {
 	});
 }
 
-module.exports = new RockMUD().setupServer();
+server = new RockMUD();
+
+server.setupServer();
+
+module.exports = server;
