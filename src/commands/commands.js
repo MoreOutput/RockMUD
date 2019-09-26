@@ -866,7 +866,7 @@ Cmd.prototype.sleep = function(target, command) {
 			});
 
 			if (World.dice.roll(1, 4) === 1) {
-				Character.save(target);
+				World.character.save(target);
 			}
 		} else {
 			World.msgPlayer(target, {

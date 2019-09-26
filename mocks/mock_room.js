@@ -1,0 +1,22 @@
+module.exports = {
+    "id": "mock-room-id",
+    "title": "Mock Room Title",
+    "area": "mock-area",
+    "light": false,
+    "content": "Mock room content",
+    "terrain": [],
+    "outdoors": true,
+    "waitMod": 0,
+    "moveMod": 0,
+    "exits": [],
+    "playersInRoom": [],
+    "monsters": [],
+    "items": [],
+    "itemType": "room",
+    "hasEvents": false,
+    "preventRecall": false,
+    "preventDecay": false,
+    "behaviors": [],
+    "affects": [],
+    "titleStyleClass": ""
+};

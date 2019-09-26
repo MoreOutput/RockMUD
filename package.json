@@ -26,5 +26,13 @@
   "bugs": {
     "url": "https://github.com/MoreOutput/RockMUD/issues"
   },
-  "homepage": "https://github.com/MoreOutput/RockMUD"
+  "homepage": "https://github.com/MoreOutput/RockMUD",
+  "devDependencies": {
+    "istanbul": "^0.4.5",
+    "jasmine": "^3.5.0",
+    "request": "^2.88.0"
+  },
+  "scripts": {
+    "test": "npx istanbul cover node_modules\\jasmine\\bin\\jasmine.js"
+  }
 }

@@ -10,7 +10,7 @@ RockMUD
 * DB agnostic persistence
 
 ### Dependencies:
-* The latest version of the WS library is required. This is the single outside dependency and is contained to the core message passing functions.
+* The latest version of the WS library is required. This is the single outside dependency for the server and is contained to the core message passing functions. Istanbul, Jasmine, and Request are development dependencies used in writing tests.
 * Development keeps up with latest node release.
 * Default terminal loads Bootstrap from CDN.
 
