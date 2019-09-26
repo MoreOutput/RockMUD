@@ -870,12 +870,14 @@ Cmd.prototype.sleep = function(target, command) {
 			}
 		} else {
 			World.msgPlayer(target, {
-				msg: 'You can\'t go to sleep in this position.'
+				msg: 'You can\'t go to sleep right now.',
+				styleClass: 'warning'
 			});
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You are already asleep...'
+			msg: 'You are already asleep...',
+			styleClass: 'warning'
 		});
 	}
 };
