@@ -1220,10 +1220,6 @@ World.prototype.msgPlayer = function(target, msgObj, canSee) {
 		prompt = this.prompt(target);
 	}
 
-	if (!msgObj.styleClass) {
-		msgObj.styleClass = '';
-	}
-
 	if (!msgObj.name) {
 		name = target.displayName;
 	} else {

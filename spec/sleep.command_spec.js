@@ -60,7 +60,6 @@ describe('Testing Skill: SLEEP', () => {
         expect(saveSpy).not.toHaveBeenCalled();
     });
     
-
     it('should give the entity a message telling them they are already asleep', () => {
         const msgPlayerSpy = spyOn(server.world, 'msgPlayer').and.callThrough();
         

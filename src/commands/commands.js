@@ -886,7 +886,7 @@ Cmd.prototype.rest = function(target, command) {
 	var roomObj;
 
 	if (target.position !== 'resting') {
-		if (target.position === 'standing' || target.position === 'sleeping') {
+		if (!target.fighting && (target.position === 'standing' || target.position === 'sleeping')) {
 			target.position = 'resting';
 
 			World.msgPlayer(target, {
@@ -903,7 +903,7 @@ Cmd.prototype.rest = function(target, command) {
 			World.msgRoom(roomObj, {
 				msg: target.displayName + ' begins to rest.',
 				playerName: target.name,
-				styleClass: 'cmd-sleep'
+				styleClass: 'cmd-rest'
 			});
 		} else {
 			World.msgPlayer(target, {
