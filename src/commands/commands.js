@@ -2510,7 +2510,7 @@ Cmd.prototype.chat = function(target, command) {
 				noPrompt: true
 			});
 
-			World.msgWorld(target, {
+			World.msgWorld({
 				msg: '<span class="msg-name">' + target.displayName + '></span> ' + command.msg,
 				playerName: target.name,
 				styleClass: 'cmd-chat',
@@ -2606,7 +2606,7 @@ Cmd.prototype.achat = function(target, command) {
 			msg: '<div class="cmd-chat"><span class="msg-name">You chat></span> ' + command.msg + '</div>'
 		});
 
-		World.msgWorld(target, {
+		World.msgWorld({
 			msg: '<div class="cmd-chat"><span class="msg-name">' + target.name + '></span> ' + command.msg + '</div>',
 			playerName: target.name
 		});
@@ -3431,7 +3431,7 @@ Cmd.prototype.help = function(target, command) {
 ************************************************************************************************************/
 
 // List file names found in /players
-Cmd.prototype.plist = function(target, command) {
+Cmd.prototype.plist = function(player, command) {
 	if (player.role === 'admin' || World.config.allAdmin) {
 		fs.readdir('./players/', function(err, playerNames) {
 			var i = 0;
@@ -3444,7 +3444,7 @@ Cmd.prototype.plist = function(target, command) {
 				playerNames[i] = playerNames[i].replace('.json', '');
 			}
 
-			World.msgPlayer(target, {
+			World.msgPlayer(player, {
 				msg: '<h3>Created Players: ' + playerNames.length + '</h3>'
 					+ '<p>' + playerNames.toString() + '</p>',
 				styleClass: 'warning'
@@ -3481,13 +3481,19 @@ Cmd.prototype.alist = function(target, command) {
 	});
 };
 
-Cmd.prototype.setpos = function(target, command) {
-	target.position = 'standing';
-	
-	World.msgPlayer(target, {
-		msg: 'You are now standing',
-		styleClass: 'warning'
-	});
+Cmd.prototype.setpos = function(player, command) {
+	if (player.role === 'admin' || World.config.allAdmin) {
+		if (command.msg) {
+			player.position = command.msg;
+		} else {
+			player.position = 'standing';
+		}
+
+		World.msgPlayer(player, {
+			msg: 'You are now ' + player.position,
+			styleClass: 'warning'
+		});
+	}
 };
 
 /*
@@ -3558,7 +3564,7 @@ Cmd.prototype.restore = function(admin, command) {
 			player.wait = 0;
 		}
 
-		World.msgWorld(admin, {msg: 'You feel refreshed!', noPrompt: true});
+		World.msgWorld({msg: 'You feel refreshed!', noPrompt: true});
 	} else {
 		World.msgPlayer(admin, {msg: 'You do not possess that kind of power.', styleClass: 'error' });
 	}

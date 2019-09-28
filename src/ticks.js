@@ -539,7 +539,7 @@ setInterval(function() {
 
 	if (World.players.length) {
 		if (World.dice.roll(1, 2) === 1) {
-			World.msgWorld(false, {
+			World.msgWorld({
 				msg: '<span><label class="red">Tip</label>: <span class="alertmsg"> ' 
 					+ alerts[World.dice.roll(1, alerts.length) - 1] + '</span></span>'
 			});

@@ -1344,8 +1344,8 @@ World.prototype.msgArea = function(areaId, msgObj) {
 	}
 };
 
-// Emit a message to all the players in the
-World.prototype.msgWorld = function(target, msgObj) {
+// Emit a message to all the players in the game
+World.prototype.msgWorld = function(msgObj) {
 	var world = this,
 	i = 0,
 	s;
