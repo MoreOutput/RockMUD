@@ -15,7 +15,9 @@ class MockServer {
         server.world.time = JSON.parse(JSON.stringify(MOCK_TIME));
         server.world.players = [];
         server.world.areas = [];
-
+        server.world.battles = [];
+        server.world.cmds = [];
+        
         this.entity = this.getNewEntity();
         this.area = JSON.parse(JSON.stringify(MOCK_AREA));
         this.room = JSON.parse(JSON.stringify(MOCK_ROOM));

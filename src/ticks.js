@@ -427,8 +427,7 @@ ticks.cmds = setInterval(function() {
 	}
 }, 255);
 
-// Combat loop
-ticks.combat = setInterval(function() {
+ticks.handleCombatLoop = function() {
 	var i = 0,
 	j = 0;
 
@@ -443,6 +442,10 @@ ticks.combat = setInterval(function() {
 			}
 		}
 	}
+}
+// Combat loop
+ticks.combat = setInterval(function() {
+	ticks.handleCombatLoop();
 }, 1900);
 
 ticks.areaMessages = setInterval(function() {
