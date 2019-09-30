@@ -12,10 +12,14 @@ class MockServer {
     } 
 
     setup(server) {
-        this.entity = Object.assign({}, MOCK_ENTITY);
-        this.area = Object.assign({}, MOCK_AREA);
-        this.room = Object.assign({}, MOCK_ROOM);
+        server.world.time = JSON.parse(JSON.stringify(MOCK_TIME));
+        server.world.players = [];
+        server.world.areas = [];
 
+        this.entity = this.getNewEntity();
+        this.area = JSON.parse(JSON.stringify(MOCK_AREA));
+        this.room = JSON.parse(JSON.stringify(MOCK_ROOM));
+        
         this.entity.isPlayer = true;
         this.entity.redId = 'unit-test-player'
         this.entity.socket = {
@@ -23,23 +27,15 @@ class MockServer {
         }
 
         this.area.rooms.push(this.room);
+
         this.room.playersInRoom.push(this.entity);
         
-        server.world.time = Object.assign({}, MOCK_TIME);
         server.world.areas.push(this.area);
         server.world.players.push(this.entity);
     }
 
-    getNewArea() {
-        return Object.assign({}, MOCK_AREA);
-    }
-
-    getNewRoom() {
-        return Object.assign({}, MOCK_ROOM);
-    }
-
     getNewEntity() {
-        return Object.assign({}, MOCK_ENTITY);
+        return JSON.parse(JSON.stringify(MOCK_ENTITY));
     }
 }
 

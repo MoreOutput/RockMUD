@@ -1,17 +1,17 @@
 const server = require('../server');
 const MOCK_SERVER = require('../mocks/mock_server');
 
-describe('Testing Skill: REST', () => {
-    let mockEntity;
-    let mockEntityRoom;
-    let mockEntityArea;
+describe('Testing Command: REST', () => {
+    let mockPlayer;
+    let mockPlayerRoom;
+    let mockPlayerArea;
 
     beforeEach(() => {
         MOCK_SERVER.setup(server);
 
-        mockEntity = MOCK_SERVER.entity;
-        mockEntityRoom = MOCK_SERVER.room;
-        mockEntityArea = MOCK_SERVER.area;
+        mockPlayer = MOCK_SERVER.entity;
+        mockPlayerRoom = MOCK_SERVER.room;
+        mockPlayerArea = MOCK_SERVER.area;
     });
 
     it('should move the entity into the resting position', () => {
@@ -21,20 +21,20 @@ describe('Testing Skill: REST', () => {
 
         expect(server.world.commands.rest).toBeTruthy();
 
-        mockEntity.name = 'test-name';
-        mockEntity.displayName = 'TEST';
+        mockPlayer.name = 'test-name';
+        mockPlayer.displayName = 'TEST';
 
-        server.world.commands.rest(mockEntity, {
+        server.world.commands.rest(mockPlayer, {
             cmd: 'rest'
         });
 
-        expect(mockEntity.position).toBe('resting');
-        expect(msgPlayerSpy).toHaveBeenCalledWith(mockEntity, {
+        expect(mockPlayer.position).toBe('resting');
+        expect(msgPlayerSpy).toHaveBeenCalledWith(mockPlayer, {
             msg: 'You try to make yourself comfortable and begin resting.',
             styleClass: 'cmd-rest'
         });
-        expect(getRoomSpy).toHaveBeenCalledWith(mockEntity.area, mockEntity.roomid);
-        expect(msgRoomSpy).toHaveBeenCalledWith(mockEntityRoom, {
+        expect(getRoomSpy).toHaveBeenCalledWith(mockPlayer.area, mockPlayer.roomid);
+        expect(msgRoomSpy).toHaveBeenCalledWith(mockPlayerRoom, {
             msg: 'TEST begins to rest.',
             playerName: 'test-name',
             styleClass: 'cmd-rest'
@@ -44,16 +44,16 @@ describe('Testing Skill: REST', () => {
     it('should alert the entity if they are already resting', () => {
         const msgPlayerSpy = spyOn(server.world, 'msgPlayer').and.callThrough();
 
-        mockEntity.name = 'test-name';
-        mockEntity.displayName = 'TEST';
-        mockEntity.position = 'resting'; // already resting
+        mockPlayer.name = 'test-name';
+        mockPlayer.displayName = 'TEST';
+        mockPlayer.position = 'resting'; // already resting
 
-        server.world.commands.rest(mockEntity, {
+        server.world.commands.rest(mockPlayer, {
             cmd: 'rest',
-            roomObj: mockEntityRoom
+            roomObj: mockPlayerRoom
         });
         
-        expect(msgPlayerSpy).toHaveBeenCalledWith(mockEntity, {
+        expect(msgPlayerSpy).toHaveBeenCalledWith(mockPlayer, {
             msg: 'You are resting now...do you expect to rest harder?'
         });
     });
@@ -61,16 +61,16 @@ describe('Testing Skill: REST', () => {
     it('should prevent the entity from resting if they are fighting', () => {
         const msgPlayerSpy = spyOn(server.world, 'msgPlayer').and.callThrough();
 
-        mockEntity.name = 'test-name';
-        mockEntity.displayName = 'TEST';
-        mockEntity.fighting = true;
+        mockPlayer.name = 'test-name';
+        mockPlayer.displayName = 'TEST';
+        mockPlayer.fighting = true;
 
-        server.world.commands.rest(mockEntity, {
+        server.world.commands.rest(mockPlayer, {
             cmd: 'rest',
-            roomObj: mockEntityRoom
+            roomObj: mockPlayerRoom
         });
 
-        expect(msgPlayerSpy).toHaveBeenCalledWith(mockEntity, {
+        expect(msgPlayerSpy).toHaveBeenCalledWith(mockPlayer, {
             msg: 'You can\'t rest right now.'
         });
     });

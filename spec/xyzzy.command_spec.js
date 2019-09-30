@@ -1,15 +1,21 @@
 const server = require('../server');
 const MOCK_SERVER = require('../mocks/mock_server');
 
-describe('Testing Skill: XYZZY', () => {
-    let mockEntity;
+describe('Testing Command: XYZZY', () => {
+    let mockPlayer;
     let mockRoom;
+    let cmd;
 
     beforeEach(() => {
         MOCK_SERVER.setup(server);
         
-        mockEntity = MOCK_SERVER.entity;
-        mockEntityRoom = MOCK_SERVER.room;
+        mockPlayer = MOCK_SERVER.entity;
+        mockPlayerRoom = MOCK_SERVER.room;
+    
+        cmd = {
+            cmd: 'XYZZY',
+            roomObj: mockRoom
+        };
     });
 
     it('should print "Nothing happens. Why would it?" to the user', () => {
@@ -17,12 +23,9 @@ describe('Testing Skill: XYZZY', () => {
 
         expect(server.world.commands.xyzzy).toBeTruthy();
 
-        server.world.commands.xyzzy(mockEntity, {
-            cmd: 'XYZZY',
-            roomObj: mockRoom
-        });
+        server.world.commands.xyzzy(mockPlayer, cmd);
 
-        expect(spy).toHaveBeenCalledWith(mockEntity, {
+        expect(spy).toHaveBeenCalledWith(mockPlayer, {
             msg: 'Nothing happens. Why would it?',
             styleClass: 'error'
         });
@@ -33,14 +36,11 @@ describe('Testing Skill: XYZZY', () => {
 
         expect(server.world.commands.xyzzy).toBeTruthy();
 
-        mockEntity.position = 'sleeping';
+        mockPlayer.position = 'sleeping';
 
-        server.world.commands.xyzzy(mockEntity, {
-            cmd: 'XYZZY',
-            roomObj: mockRoom
-        });
+        server.world.commands.xyzzy(mockPlayer, cmd);
 
-        expect(spy).toHaveBeenCalledWith(mockEntity, {
+        expect(spy).toHaveBeenCalledWith(mockPlayer, {
             msg: 'You dream of powerful forces.',
             styleClass: 'error'
         });

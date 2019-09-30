@@ -1,9 +1,10 @@
 'use strict';
 var fs = require('fs'),
-World = require('./world');
+World = require('./world'),
+ticks = {};
 
 // time
-setInterval(function() {
+ticks.time = setInterval(function() {
 	var i = 0,
 	areaMsg,
 	players,
@@ -143,7 +144,7 @@ setInterval(function() {
 }, 1250);
 
 // wait-state removal
-setInterval(function() {
+ticks.wait = setInterval(function() {
 	var i = 0,
 	player;
 
@@ -168,7 +169,7 @@ setInterval(function() {
 // areas with players 'in' them respawn every X ticks; where X is the value of
 // area.respawnOn (default is 3 -- 12 minutes). A respawnOn value of 0 prevents respawn.
 // areas do not update if someone is fighting
-setInterval(function() {
+ticks.respawn = setInterval(function() {
 	var playersInArea,
 	area,
 	i = 0,
@@ -206,7 +207,7 @@ setInterval(function() {
 // if onDestroy is found then the programmer should return a message
 // fires onDecay, onDecayLight, onDestroy
 // simple msg override in the form of decayMsg, decayLightMsg and lightFlickerMsg -- so you can avoid unneeded onDestroy
-setInterval(function() {
+ticks.decay = setInterval(function() {
 	var i = 0,
 	j,
 	mobs,
@@ -340,7 +341,7 @@ setInterval(function() {
  }, 245000); // 4.5 minutes
 
 // AI Ticks and random player save
-setInterval(function() {
+ticks.ai = setInterval(function() {
 	var i = 0,
 	j = 0,
 	players,
@@ -390,7 +391,7 @@ setInterval(function() {
 }, 2400);
 
 // Command Parsing
-setInterval(function() {
+ticks.cmds = setInterval(function() {
 	var cmdObj,
 	cmdEntity,
 	cmdArr;
@@ -427,7 +428,7 @@ setInterval(function() {
 }, 255);
 
 // Combat loop
-setInterval(function() {
+ticks.combat = setInterval(function() {
 	var i = 0,
 	j = 0;
 
@@ -444,7 +445,7 @@ setInterval(function() {
 	}
 }, 1900);
 
-setInterval(function() {
+ticks.areaMessages = setInterval(function() {
 	var i = 0,
 	msgObj;
 
@@ -472,7 +473,7 @@ setInterval(function() {
 }, 44000);
 
 // Player Regen
-setInterval(function() {
+ticks.regen = setInterval(function() {
 	var i = 0;
 
 	if (World.dice.roll(1, 3) <= 2) {
@@ -495,7 +496,7 @@ setInterval(function() {
 }, 32000);
 
 // Hunger and Thirst Tick
-setInterval(function() { 
+ticks.hungerThirst = setInterval(function() { 
 	var i = 0,
 	player; 
 
@@ -508,7 +509,7 @@ setInterval(function() {
 }, 242020);
 
 // 20% chance of random save
-setInterval(function() {
+ticks.save = setInterval(function() {
 	var i = 0,
 	player;
 
@@ -525,7 +526,7 @@ setInterval(function() {
 }, 2450040); // 4.5 minutes-ish
 
 // Random mud-wide messages
-setInterval(function() {
+ticks.alerts = setInterval(function() {
 	var alerts = [
 		'Use HELP COMMANDS to see a list of the most common commands.',
 		'Use the SCAN command to get a quick look at the rooms adjacent to you.',
@@ -548,7 +549,7 @@ setInterval(function() {
 }, 111111);
 
 // Check for broken connections
-setInterval(function() {
+ticks.disconnect = setInterval(function() {
 	var i = 0,
 	player;
 
@@ -564,3 +565,5 @@ setInterval(function() {
 		player.socket.ping();
 	}
 }, 31050);
+
+module.exports = ticks;
