@@ -36,8 +36,44 @@ describe('Testing core module: COMBAT', () => {
         expect(battleObj.attacked.length).toBe(0);
     });
 
+    it('should return the total position in a given battle object', () => {
+        let battleObj = server.world.combat.createBattleObject(mockPlayer, mockMob, mockPlayerRoom);
+        let posCnt = server.world.combat.getNextBattlePosition(battleObj);
+
+        expect(posCnt).toBe(1);
+
+        battleObj.positions['1'] = {};
+
+        posCnt = server.world.combat.getNextBattlePosition(battleObj);
+
+        expect(posCnt).toBe(2);
+    });
+
     it('should create a Battle Position', () => {
-        // todo here
+        const battlePos = server.world.combat.createBattlePosition();
+
+        expect(Object.keys(battlePos).length).toBe(2);
+        expect(battlePos.attacker).toBe(null);
+        expect(battlePos.defender).toBe(null);
+    });
+
+    it('should detect if two given entities are in the same room', () => {
+        let sameRoom = server.world.combat.inPhysicalVicinity(mockPlayer, mockMob);
+        
+        expect(sameRoom).toBe(true);
+    
+        mockMob.area = 'new-area';
+
+        sameRoom = server.world.combat.inPhysicalVicinity(mockPlayer, mockMob);
+
+        expect(sameRoom).toBe(false);
+
+        mockMob.area = mockPlayer.area;
+        mockMob.roomid = 'test-room-id';
+
+        sameRoom = server.world.combat.inPhysicalVicinity(mockPlayer, mockMob);
+
+        expect(sameRoom).toBe(false);
     });
 
     it('should add a new Battle Object into the combat queue', () => {

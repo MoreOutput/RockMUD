@@ -122,7 +122,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 		// If the two are in same room we can run the round -- further they both must have HPs
 		// the functions will drop out if these requirements are not met so ending combat must be explictly handled elsewhere
 		// generally this means mid-round -- within the checks found below
-		if (combat.inPhyscialVicinity(attacker, defender) && attacker.chp && defender.chp) {
+		if (combat.inPhysicalVicinity(attacker, defender) && attacker.chp && defender.chp) {
 			if (battle.skills[attacker.refId] && battle.attacked.indexOf(attacker.refId) === -1) {
 				for (prop in battle.skills[attacker.refId]) {
 					var attackerSkills = battle.skills[attacker.refId];
@@ -333,7 +333,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 	}
 };
 
-Combat.prototype.inPhyscialVicinity = function(attacker, defender) {
+Combat.prototype.inPhysicalVicinity = function(attacker, defender) {
 	if (attacker && defender && attacker.area === defender.area && attacker.roomid === defender.roomid) {
 		return true;
 	} else {
