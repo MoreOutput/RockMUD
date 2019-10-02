@@ -23,7 +23,7 @@ class MockServer {
         this.room = JSON.parse(JSON.stringify(MOCK_ROOM));
         
         this.entity.isPlayer = true;
-        this.entity.redId = 'unit-test-player'
+        this.entity.refId = 'unit-test-player'
         this.entity.socket = {
             player: this.entity
         }

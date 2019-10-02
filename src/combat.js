@@ -23,6 +23,23 @@ Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfi
 	i = 0;
 
 	if (!battle) {
+		// find any battle the defender may currently be in
+		battle = combat.getBattleByRefIds(attacker.refId, defender.refId);
+
+		if (battle) {
+			var nextPosition = this.getNextBattlePosition(battle);
+
+			attacker.fighting = true;
+			defender.fighting = true;
+
+			battle.positions[nextPosition] = {
+				attacker: attacker,
+				defender: defender
+			};
+		}
+	}
+
+	if (!battle) {
 		battle = combat.createBattleObject(attacker, defender, roomObj);
 	}
 
@@ -111,6 +128,7 @@ Combat.prototype.round = function(battle, skillProfile) {
 	msgToAttacker = '',
 	msgToDefender = '';
 
+
 	for (i; i < numOfPositions; i += 1) {
 		battleObj = battle.positions[i];
 		attacker = battleObj.attacker;
@@ -150,6 +168,9 @@ Combat.prototype.round = function(battle, skillProfile) {
 
 			if (defender.chp > 0) {
 				combat.attack(attacker, defender, battle, function(attacker, defender, roomObj, attackerAttackString, defenderDefString, attackerCanSee) {
+					console.log('*************************************');
+					console.log(attacker.name, defender.name);
+					console.log('************************************* - 1');
 					if (defender.chp > 0) {
 						// run defender skills
 						if (battle.skills[defender.refId] && battle.attacked.indexOf(defender.refId) === -1) {
