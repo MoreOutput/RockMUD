@@ -86,7 +86,7 @@ module.exports = {
 			items : []
 		}, {
 			id: '2',
-			title: 'Climbing the side of the Academy Tower',
+			title: 'Enterance to the Southern Mine',
 			area: 'midgaard_academy',
 			moveMod: 2,
 			content: '',

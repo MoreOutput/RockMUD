@@ -23,9 +23,7 @@ module.exports = {
 		roomObj,
 		generateNorthOf = World.getRoomObject(this.name, this.defaultRoom),
 		i = 0,
-		j = 0,
-		enteranceRoomId = '0-0',
-		startingRoom;
+		j = 0;
 
 		if (this.rooms.length === 1) {
 			for (i; i < x; i += 1) {
@@ -148,13 +146,13 @@ module.exports = {
 				}
 			}
 
-			startingRoom = World.getRoomObject(this.name, enteranceRoomId);
-
-			startingRoom.exits.push({
-				cmd: 'south',
-				id: this.defaultRoom,
-				area: this.id
-			});
+			if (this.rooms[1].exits.length < 3) {
+				this.rooms[1].exits.push({
+					cmd: 'south',
+					id: this.defaultRoom,
+					area: this.id
+				});
+			}
 
 			i = 0;
 

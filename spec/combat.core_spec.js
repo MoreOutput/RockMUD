@@ -96,10 +96,6 @@ describe('Testing core module: COMBAT', () => {
 
     // if an attacker or defender in any position matches the refId the battle is returned
     fit('should find a battle by refId', () => {
-
-    });
-
-    fit('should process a combat round for each Battle Object position', () => {
         secondMob = MOCK_SERVER.getNewEntity();
         secondMob.isPlayer = false;
         secondMob.name = 'goblin';
@@ -111,20 +107,71 @@ describe('Testing core module: COMBAT', () => {
         server.world.combat.processFight(mockPlayer, mockMob, mockPlayerRoom, null, null);
         server.world.combat.processFight(mockPlayer, secondMob, mockPlayerRoom, null, null);
 
-        const attackSpy = spyOn(server.world.combat, 'attack').and.callThrough();
         const battleObj = server.world.combat.getBattleByRefId(mockPlayer.refId);
 
-        expect(server.world.combat.getNextBattlePosition(battleObj)).toBe(2);
+        expect(server.world.combat.getBattleByRefId(null)).toBeFalsy();
+        expect(Object.keys(battleObj.positions).length).toBe(2);
+        expect(server.world.combat.getBattleByRefId(mockPlayer.refId)).toEqual(battleObj);
+        expect(server.world.combat.getBattleByRefId(mockMob.refId)).toEqual(battleObj);
+        expect(server.world.combat.getBattleByRefId(secondMob.refId)).toEqual(battleObj);
+    });
 
-        server.world.combat.round(battleObj, null);
+    describe('combat rounds', () => {
+        it('should process a combat round for each Battle Object position', () => {
+            secondMob = MOCK_SERVER.getNewEntity();
+            secondMob.isPlayer = false;
+            secondMob.name = 'goblin';
+            secondMob.displayName = 'Test Goblin';
+            secondMob.refId = 'goblin-refid';
+    
+            mockPlayerRoom.monsters.push(secondMob);
+    
+            server.world.combat.processFight(mockPlayer, mockMob, mockPlayerRoom, null, null);
+            server.world.combat.processFight(mockPlayer, secondMob, mockPlayerRoom, null, null);
+    
+            const attackSpy = spyOn(server.world.combat, 'attack').and.callThrough();
+            const endOfCombatSpy = spyOn(server.world.combat, 'processEndOfCombat').and.callThrough();
+            const battleObj = server.world.combat.getBattleByRefId(mockPlayer.refId);
+            const vicinityCheckSpy = spyOn(server.world.combat, 'inPhysicalVicinity').and.callThrough();
+            const battlePosSpy = spyOn(server.world.combat, 'getNumberOfBattlePositions').and.callThrough();
+    
+            // round one
+            server.world.combat.round(battleObj, null);
+    
+            expect(attackSpy).toHaveBeenCalledWith(mockPlayer, mockMob, battleObj, jasmine.any(Function));
+            expect(attackSpy).toHaveBeenCalledWith(mockMob, mockPlayer, battleObj, jasmine.any(Function));
+            expect(attackSpy).toHaveBeenCalledWith(secondMob, mockPlayer, battleObj, jasmine.any(Function));
+            expect(attackSpy).toHaveBeenCalledWith(mockPlayer, secondMob, battleObj, jasmine.any(Function));
+            expect(battleObj.attacked.length).toBe(0);
+            expect(battleObj.round).toBe(1);
+    
+            // round two
+            server.world.combat.round(battleObj, null);
+    
+            expect(attackSpy).toHaveBeenCalledWith(mockPlayer, mockMob, battleObj, jasmine.any(Function));
+            expect(attackSpy).toHaveBeenCalledWith(mockMob, mockPlayer, battleObj, jasmine.any(Function));
+            expect(attackSpy).toHaveBeenCalledWith(secondMob, mockPlayer, battleObj, jasmine.any(Function));
+            expect(attackSpy).toHaveBeenCalledWith(mockPlayer, secondMob, battleObj, jasmine.any(Function));
+            
+            expect(battleObj.attacked.length).toBe(0);
+            expect(battleObj.round).toBe(2);
+    
+            // rounds 3 -- kill mockMob
+            mockMob.chp = 0;
+            
+            server.world.combat.round(battleObj, null);
 
-        expect(attackSpy).toHaveBeenCalledWith(mockPlayer, mockMob, battleObj, jasmine.any(Function));
-        expect(attackSpy).toHaveBeenCalledWith(mockMob, mockPlayer, battleObj, jasmine.any(Function));
-        expect(attackSpy).toHaveBeenCalledWith(secondMob, mockPlayer, battleObj, jasmine.any(Function));
-        // this attack wont run any combat logic because mockPlayer has already attacked someone
-        expect(attackSpy).toHaveBeenCalledWith(mockPlayer, secondMob, battleObj, jasmine.any(Function));
-        
-        expect(battleObj.attacked.length).toBe(0);
-        expect(battleObj.round).toBe(1);
+            expect(endOfCombatSpy).toHaveBeenCalledWith(battleObj, mockPlayer, mockMob, null);
+            expect(mockPlayer.exp).toBeGreaterThan(0);
+    
+             // round 4 -- down to mockPlayer vs secondMob
+            secondMob.chp = 0;
+            server.world.combat.round(battleObj, null);
+
+            expect(battlePosSpy).toHaveBeenCalledWith(battleObj)
+            expect(vicinityCheckSpy).toHaveBeenCalledTimes(7);
+            expect(mockPlayer.exp).toBeGreaterThan(0);
+            expect(battleObj.round).toBe(4);
+        });
     });
 });
