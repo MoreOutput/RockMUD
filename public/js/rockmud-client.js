@@ -39,6 +39,8 @@ window.onload = function() {
 		uf: 'unfollow',
 		gr: 'group',
 		l: 'look',
+		exam: 'look',
+		inv: 'look',
 		sca: 'scan',
 		i: 'inventory',
 		sc: 'score',

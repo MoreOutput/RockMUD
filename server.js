@@ -79,7 +79,6 @@ RockMUD.prototype.setupServer = function() {
 			var parseCmd = function(r, s) {
 				var skillObj,
 				cmdObj,
-				battle,
 				valid = false;
 	
 				if (r.msg) {

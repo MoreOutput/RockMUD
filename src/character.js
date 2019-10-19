@@ -989,7 +989,7 @@ Character.prototype.getSkillById = function(player, skillId) {
 	return false;
 };
 
-Character.prototype.meetsSkillPrepreqs = function(player, skillObj) {
+Character.prototype.meetsSkillPrereq = function(player, skillObj) {
 	var prop,
 	requiredSkillObj;
 	

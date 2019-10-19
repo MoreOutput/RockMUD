@@ -390,7 +390,7 @@ ticks.ai = setInterval(function() {
 	}
 }, 2400);
 
-// Command Parsing
+// Command Loop
 ticks.cmds = setInterval(function() {
 	var cmdObj,
 	cmdEntity,
@@ -425,13 +425,13 @@ ticks.cmds = setInterval(function() {
 			cmdArr.splice(0, 1);
 		}
 	}
-}, 255);
+}, 280);
 
-ticks.handleCombatLoop = function() {
+ticks.combatLoop = function() {
 	var i = 0,
 	j = 0;
 
-	if (World.battleLock === 0 && World.battles.length) {
+	if (World.battleLock === 0 && World.battles.length && !World.cmds.length) {
 		World.battleLock = World.battles.length;
 
 		for (i; i < World.battles.length; i += 1) {
@@ -443,9 +443,10 @@ ticks.handleCombatLoop = function() {
 		}
 	}
 }
+
 // Combat loop
 ticks.combat = setInterval(function() {
-	ticks.handleCombatLoop();
+	ticks.combatLoop();
 }, 1900);
 
 ticks.areaMessages = setInterval(function() {
@@ -549,7 +550,7 @@ ticks.alerts = setInterval(function() {
 			});
 		}
 	}
-}, 111111);
+}, 411111);
 
 // Check for broken connections
 ticks.disconnect = setInterval(function() {

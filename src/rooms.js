@@ -10,8 +10,8 @@ Room = function() {
 
 };
 
-// Given a room object and
-Room.prototype.getAdjacentExit = function(targetRoom, exitObj, player) {
+// get the connecting exit object from @targetRoom
+Room.prototype.getAdjacentExit = function(targetRoom, exitObj) {
 	var i = 0,
 	targetExit = false;
 
@@ -25,10 +25,6 @@ Room.prototype.getAdjacentExit = function(targetRoom, exitObj, player) {
 	}
 
 	return targetExit;
-};
-
-Room.prototype.checkEntranceCriteria = function(roomObj, exitObj, player) {
-	return true;
 };
 
 Room.prototype.getDisplayHTML = function(roomObj, player) {
@@ -129,7 +125,7 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 	return displayHTML;
 };
 
-// Get an exit from a room by direction; 
+// Get an exit from a room by direction
 Room.prototype.getExit = function(roomObj, direction) { 
 	var i = 0;
 
@@ -142,7 +138,7 @@ Room.prototype.getExit = function(roomObj, direction) {
 			}
 		}
 
-		return false
+		return false;
 	} else {
 		return false;
 	}
@@ -158,13 +154,13 @@ Room.prototype.getExitById = function(roomObj, id) {
 			}
 		}
 
-		return false
+		return false;
 	} else {
 		return false;
 	}
 };
 
-//return an array ofall the rooms connected to the passed room
+// return an array of all the rooms connected to @roomObj
 Room.prototype.getAdjacent = function(roomObj) {
 	var i = 0,
 	fndRoom,
@@ -416,6 +412,8 @@ Room.prototype.removePlayer = function(roomObj, player) {
 		}
 	}
 
+	player = null;
+
 	roomObj.playersInRoom = newArr;
 };
 
@@ -430,11 +428,6 @@ Room.prototype.removeMob = function(roomObj, mob) {
 	}
 
 	roomObj.monsters = newArr;
-};
-
-// returns an array of valid exit commands for the room
-Room.prototype.getExitCommands = function(roomObj) {
-
 };
 
 module.exports = new Room();

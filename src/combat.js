@@ -369,6 +369,7 @@ Combat.prototype.inPhysicalVicinity = function(attacker, defender) {
 	}
 }
 
+// todo this function is doing too much
 Combat.prototype.getBattleTargetByRefId = function(battle, refId) {
 	var i = 0,
 	j = 0,

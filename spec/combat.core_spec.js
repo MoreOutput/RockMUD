@@ -95,7 +95,7 @@ describe('Testing core module: COMBAT', () => {
     });
 
     // if an attacker or defender in any position matches the refId the battle is returned
-    fit('should find a battle by refId', () => {
+    it('should find a battle by refId', () => {
         secondMob = MOCK_SERVER.getNewEntity();
         secondMob.isPlayer = false;
         secondMob.name = 'goblin';
@@ -114,6 +114,11 @@ describe('Testing core module: COMBAT', () => {
         expect(server.world.combat.getBattleByRefId(mockPlayer.refId)).toEqual(battleObj);
         expect(server.world.combat.getBattleByRefId(mockMob.refId)).toEqual(battleObj);
         expect(server.world.combat.getBattleByRefId(secondMob.refId)).toEqual(battleObj);
+    });
+
+
+    it('should find a battle by refId', () => {
+        
     });
 
     describe('combat rounds', () => {

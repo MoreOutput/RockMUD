@@ -2960,7 +2960,7 @@ Cmd.prototype.practice = function(target, command) {
 							pracSkill();
 						} else {
 							if (skillObj) {
-								if (trainerSkillObj && World.character.meetsSkillPrepreqs(target, skillObj)) {
+								if (trainerSkillObj && World.character.meetsSkillPrereq(target, skillObj)) {
 									pracSkill();
 								} else {
 									if (trainerSkillObj) {
@@ -3004,7 +3004,7 @@ Cmd.prototype.practice = function(target, command) {
 							if (!skillObj) {
 								practiceDisplay += '<td class="prac-known blue">Not Trainable</td>';
 							} else {
-								if (!World.character.meetsSkillPrepreqs(target, skillObj)) {
+								if (!World.character.meetsSkillPrereq(target, skillObj)) {
 									practiceDisplay += '<td class="prac-known red">Unmet prerequisites</td>';
 								} else {
 									if (trainer.skills[i].train >= skillObj.train || trainer.maxTrain) {
