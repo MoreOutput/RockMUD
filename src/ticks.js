@@ -379,7 +379,7 @@ ticks.ai = setInterval(function() {
 						World.processEvents('onAlive', players[j], roomObj);
 					}
 
-					if (players[j].position === 'standing' && !players[j].opponent && World.dice.roll(1, 100) >= 99) {
+					if (players[j].position === 'standing' && !players[j].fighting && World.dice.roll(1, 100) >= 99) {
 						World.character.save(players[j]);
 					}
 				}

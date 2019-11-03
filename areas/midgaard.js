@@ -120,6 +120,9 @@ module.exports = {
 					}, {
 						module: 'wander',
 						moveDirections: ['north', 'east', 'west', 'south']
+					}, {
+						module: 'hunt',
+						
 					}]
 				}
 			],
@@ -452,14 +455,16 @@ module.exports = {
 										msg: 'Welcome. Something worth trading?',
 										roomObj: roomObj
 									}, merchant);
-	
-									setTimeout(function() {
-										World.addCommand({
-											cmd: 'say',
-											msg: 'I\'m buying up all the furs I can. I\'ll give you a good price.',
-											roomObj: roomObj
-										}, merchant);	
-									}, 2600);
+
+									if (World.dice.roll(1, 3) === 1) {
+										setTimeout(function() {
+											World.addCommand({
+												cmd: 'say',
+												msg: 'I\'m buying up all the furs I can. I\'ll give you a good price.',
+												roomObj: roomObj
+											}, merchant);	
+										}, 2600);
+									}
 								}
 							} else {
 								World.addCommand({

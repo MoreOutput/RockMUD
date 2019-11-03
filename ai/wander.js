@@ -15,7 +15,7 @@ module.exports = {
 		exitObj,
 		direction;
 
-		if (mob && behavior.wanderCheck && roll > behavior.wanderCheck && mob.position === 'standing') {
+		if (roll > behavior.wanderCheck && mob.position === 'standing') {
 			direction = behavior.moveDirections[World.dice.roll(1, behavior.moveDirections.length) - 1];
 
 			exitObj = World.room.getExit(roomObj, direction);

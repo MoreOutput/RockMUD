@@ -384,6 +384,18 @@ Room.prototype.removeItem = function(roomObj, item) {
 	roomObj.items = newArr;
 };
 
+Room.prototype.getClosestExit = function(roomObj, targetRoomObj) {
+	var i = 0,
+	closestExit = null;
+
+	for (i; i < roomObj.exits.length; i += 1) {
+		var exit = roomObj.exits[i];
+
+	}
+
+	return closestExit;
+}
+
 Room.prototype.getMonster = function(roomObj, command) {
 	return World.search(roomObj.monsters, command);
 };

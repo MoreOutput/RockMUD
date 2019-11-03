@@ -1008,6 +1008,31 @@ World.prototype.getRoomObject = function(areaId, roomId) {
 	return false;
 };
 
+World.prototype.getEntityByRefId = function(refId) {
+	var world = this,
+	i = 0;
+
+	for (i; world.areas.length; i += 1) {
+		var area = world.areas[i];
+		var j = 0;
+
+		for (j; area.rooms.length; j += 1) {
+			var room = area.rooms[j];
+			var k = 0;
+
+			for (k; k < room.monsters.length; k += 1) {
+				var mob = room.monsters[k];
+
+				if (mob.refId === refId) {
+					return mob;
+				}
+			}
+		}
+	}
+
+	return null;
+};
+
 World.prototype.getAllItemsFromArea = function(areaId) {
 	var world = this,
 	area,

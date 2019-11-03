@@ -5,28 +5,52 @@ var World = require('../src/world');
     RockMUD A* move the entity toward a given ref ID
 
     @stayInArea boolean can be toggled to keep the entity from searching outside of its current area. 
-    @stayInOriginatingArea boolean can be toggled to only allow search when
+
+    @getTarget function returns the target the entity is searching for 
 */
 module.exports = {
+	getTarget: function(behavior, mob, roomObj) {
+		var target = null;
+
+		if (behavior.targetRefId) {
+			target = World.getEntityByRefId(behavior.targetRefId);
+		}
+		
+		
+		return target;
+	},
 	stayInArea: true,
 	check: 1, // 1 out 10 chance to fire this onAlive event
-	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'], // default directions
+	targetRefId: '',
 	onAlive: function(behavior, mob, roomObj) {
 		var roll = World.dice.roll(1, 10),
-		exitObj,
+		target,
+		targetRoomObj,
+		exitObj, 
 		direction;
 
-		if (mob && behavior.check && roll > behavior.check && mob.position === 'standing') {
-			direction = behavior.moveDirections[World.dice.roll(1, behavior.moveDirections.length) - 1];
+		behavior.targetRefId = mob.refId;
 
-			exitObj = World.room.getExit(roomObj, direction);
+		if (!mob.fighting && roll > behavior.check && mob.position === 'standing') {
+			target = behavior.getTarget(behavior, mob, roomObj);
 			
-			if (exitObj && ((behavior.stayInArea === false) || (behavior.stayInArea === true && mob.area === exitObj.area))) {
-				World.addCommand({
-					cmd: 'move',
-					arg: direction,
-					roomObj: roomObj
-				}, mob);
+			if (target) {
+				targetRoomObj = World.getRoomObject(target.area, target.roomid);
+				direction = World.room.getClosestExit(roomObj, targetRoomObj);
+				/*	
+				exitObj = World.room.getExit(roomObj, direction);
+				
+				if (exitObj && ((behavior.stayInArea === false)
+					|| (behavior.stayInArea === true && mob.area === exitObj.area))) {
+					World.addCommand({
+						cmd: 'move',
+						arg: direction,
+						roomObj: roomObj
+					}, mob);
+				}
+				*/
+			} else {
+				console.log('could not find target');
 			}
 		}
 	}
