@@ -297,7 +297,6 @@ Character.prototype.create = function(s) {
 			s.player.noFollow = false;
 			s.player.noGroup = false;
 
-			console.log('dex', s.player.baseDex, s.player.ac);
 			s.player.ac = World.dice.getAC(s.player);
 
 			socket = s.player.socket;

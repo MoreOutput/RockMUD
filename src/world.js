@@ -1005,7 +1005,7 @@ World.prototype.getRoomObject = function(areaId, roomId) {
 		}
 	}
 
-	return false;
+	return null;
 };
 
 World.prototype.getEntityByRefId = function(refId) {
@@ -1309,36 +1309,39 @@ World.prototype.msgRoom = function(roomObj, msgObj) {
 	j = 0,
 	canSee = true,
 	omitMatch = false,
+	player,
 	s;
 
 	if (!Array.isArray(msgObj.playerName)) {
 		for (i; i < roomObj.playersInRoom.length; i += 1) {
+			player = roomObj.playersInRoom[i];
 			s = roomObj.playersInRoom[i].socket;
 
 			if (msgObj.checkSight) {
-				canSee = world.character.canSee(s.player, roomObj);
+				canSee = world.character.canSee(player, roomObj);
 			}
 
-			if (s && s.player.name !== msgObj.playerName && s.player.roomid === roomObj.id 
-				&& s.player.area === roomObj.area) {
+			if (s && player.name !== msgObj.playerName && player.roomid === roomObj.id 
+				&& player.area === roomObj.area) {
 				
 				world.msgPlayer(s, msgObj, canSee);
 			}
 		}
 	} else {
 		for (i; i < roomObj.playersInRoom.length; i += 1) {
+			player = roomObj.playersInRoom[i];
 			s = roomObj.playersInRoom[i].socket;
 
 			if (msgObj.checkSight) {
-				canSee = world.character.canSee(s.player, roomObj);
+				canSee = world.character.canSee(player, roomObj);
 			}
 
-			if (s && s.player.roomid === roomObj.id && s.player.area === roomObj.area) {
+			if (s && player.roomid === roomObj.id && player.area === roomObj.area) {
 				j = 0;
 				omitMatch = false;
 			
 				for (j; j < msgObj.playerName.length; j += 1) {
-					if (msgObj.playerName[j] === s.player.name) {
+					if (msgObj.playerName[j] === player.name) {
 						omitMatch = true;
 					}
 				}

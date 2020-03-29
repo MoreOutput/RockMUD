@@ -76,7 +76,14 @@ opacity: 0.75;
 .opening-title {
 font-size: 3em;
 color: #ff0033;
-font-family: 'Courier New', monospace;
+-webkit-transition: text-shadow 0.2s linear;
+-moz-transition: text-shadow 0.2s linear;
+-ms-transition: text-shadow 0.2s linear;
+-o-transition: text-shadow 0.2s linear;
+transition: text-shadow 0.2s linear;
+}
+.opening-title:hover {
+    text-shadow: 0 0 5px #60f066;
 }
 .score {
 margin-bottom: .25em;

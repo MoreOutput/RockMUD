@@ -1,16 +1,20 @@
-const server = require('../server');
 const MOCK_SERVER = require('../mocks/mock_server');
 
 describe('Testing Command: XYZZY', () => {
     let mockPlayer;
     let mockRoom;
+    let server;
     let cmd;
 
-    beforeEach(() => {
-        MOCK_SERVER.setup(server);
-        
-        mockPlayer = MOCK_SERVER.entity;
-        mockPlayerRoom = MOCK_SERVER.room;
+    beforeEach((done) => {
+        MOCK_SERVER.setup(() => {
+            mockPlayer = MOCK_SERVER.player;
+            mockPlayerRoom = MOCK_SERVER.room;
+    
+            server = MOCK_SERVER.server;
+
+            done();
+        });
     
         cmd = {
             cmd: 'XYZZY',

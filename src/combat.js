@@ -348,8 +348,6 @@ Combat.prototype.round = function(battle, skillProfile) {
 					combat.processEndOfCombat(battle, attacker, defender);
 				}
 			} else if (defender) {
-				console.log('1243');
-
 				battle.attacked = [];
 				battle.skills = {};
 
@@ -519,7 +517,7 @@ Combat.prototype.attack = function(attacker, defender, battle, fn) {
 								damageText = combat.getDamageText(damage, defender.hp);
 
   								defender.chp -= damage;
-								
+
 								// if the attacker is a player we need to give a display string for reading
 								if (!criticalAttack) {
 									if (attackerCanSee) {
@@ -931,6 +929,8 @@ Combat.prototype.getBattleByRefId = function(refId) {
 			}
 		}
 	}
+
+	return null;
 }
 
 Combat.prototype.removeBattle = function(battleObj) {

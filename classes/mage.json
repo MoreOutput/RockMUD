@@ -10,9 +10,9 @@
 			"id": "spark",
 			"display": "Spark",
 			"mod": 0,
-			"train": 70,
+			"train": 100,
 			"type": "spell",
-			"learned": false,
+			"learned": true,
 			"prerequisites": {
 				"level": 1
 			}

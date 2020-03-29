@@ -1,17 +1,19 @@
-const server = require('../server');
 const MOCK_SERVER = require('../mocks/mock_server');
 
 describe('Testing Command: EMOTE', () => {
     let mockPlayer;
     let mockPlayerRoom;
-    let mockPlayerArea;
+    let server;
 
-    beforeEach(() => {
-        MOCK_SERVER.setup(server);
-        
-        mockPlayer = MOCK_SERVER.entity;
-        mockPlayerRoom = MOCK_SERVER.room;
-        mockPlayerArea = MOCK_SERVER.area;
+    beforeEach((done) => {
+        MOCK_SERVER.setup(() => {
+            mockPlayer = MOCK_SERVER.player;
+            mockPlayerRoom = MOCK_SERVER.room;
+    
+            server = MOCK_SERVER.server;
+
+            done();
+        });
     });
 
     it('should find the players room if it is not provided on the command', () => {

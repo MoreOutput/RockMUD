@@ -1,4 +1,3 @@
-const server = require('../server');
 const MOCK_SERVER = require('../mocks/mock_server');
 
 describe('Testing Command: KILL', () => {
@@ -7,28 +6,34 @@ describe('Testing Command: KILL', () => {
     let mockPlayerRoom;
     let mockPlayerArea;
 
-    beforeEach(() => {
-        MOCK_SERVER.setup(server);
+    beforeEach((done) => {
+        MOCK_SERVER.setup(() => {
+            mockPlayer = MOCK_SERVER.player;
+            mockPlayerRoom = MOCK_SERVER.room;
+            mockPlayerArea = MOCK_SERVER.area;
         
-        mockPlayer = MOCK_SERVER.entity;
-        mockPlayerRoom = MOCK_SERVER.room;
-        mockPlayerArea = MOCK_SERVER.area;
+            mockPlayer = MOCK_SERVER.player;
+            mockPlayerRoom = MOCK_SERVER.room;
+            mockPlayerArea = MOCK_SERVER.area;
 
-        mockMob = MOCK_SERVER.getNewEntity();
-        mockMob.id = 'test-dragon';
-        mockMob.refId = 'test-dragon-ref-id';
-        mockMob.isPlayer = false;
-        mockMob.name = 'dragon';
-        mockMob.displayName = 'Test Drago2n';
-        mockMob.fighting = false;
+            mockMob = MOCK_SERVER.getNewEntity();
+            mockMob.id = 'test-dragon';
+            mockMob.refId = 'test-dragon-ref-id';
+            mockMob.isPlayer = false;
+            mockMob.name = 'dragon';
+            mockMob.displayName = 'Test Drago2n';
+            mockMob.fighting = false;
 
-        mockPlayerRoom.monsters.push(mockMob);
+            mockPlayerRoom.monsters.push(mockMob);
+
+            done();
+        });
     });
 
     it('should initiate combat with the first valid entity in the room', () => {
-        const roomSpy = spyOn(server.world, 'getRoomObject').and.callThrough();
-        const searchSpy = spyOn(server.world, 'search').and.callThrough();
-        const processFightSpy = spyOn(server.world.combat, 'processFight').and.callThrough();
+        const roomSpy = spyOn(MOCK_SERVER.server.world, 'getRoomObject').and.callThrough();
+        const searchSpy = spyOn(MOCK_SERVER.server.world, 'search').and.callThrough();
+        const processFightSpy = spyOn(MOCK_SERVER.server.world.combat, 'processFight').and.callThrough();
         const cmd = {
             cmd: 'kill',
             msg: 'dragon',
@@ -36,9 +41,9 @@ describe('Testing Command: KILL', () => {
             roomObj: mockPlayerRoom
         };
 
-        expect(server.world.commands.kill).toBeTruthy();
+        expect(MOCK_SERVER.server.world.commands.kill).toBeTruthy();
 
-        server.world.commands.kill(mockPlayer, cmd);
+        MOCK_SERVER.server.world.commands.kill(mockPlayer, cmd);
 
         expect(searchSpy).toHaveBeenCalledWith(mockPlayerRoom.monsters, cmd);
         expect(processFightSpy).toHaveBeenCalledWith(mockPlayer, mockMob, mockPlayerRoom);

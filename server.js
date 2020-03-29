@@ -7,10 +7,11 @@ WebSocket = require('ws'),
 RockMUD = function() {
 	this.server = null;
 	this.world = null;
+	this.running = false;
 },
 server;
 
-RockMUD.prototype.setupServer = function() {
+RockMUD.prototype.setup = function(callback) {
 	const mud = this;
 
 	mud.server = http.createServer(function (req, res) {
@@ -30,6 +31,16 @@ RockMUD.prototype.setupServer = function() {
 			});
 		} else if (req.url === '/styles.css') {
 			fs.readFile('./public/css/styles.css', function (err, data) {
+				if (err) {
+					throw err;
+				}
+	
+				res.writeHead(200, {'Content-Type': 'text/css'});
+				res.write(data);
+				res.end();
+			});
+		} else if (req.url === '/bootstrap.css') {
+			fs.readFile('./public/css/bootstrap.min.css', function (err, data) {
 				if (err) {
 					throw err;
 				}
@@ -73,8 +84,12 @@ RockMUD.prototype.setupServer = function() {
 	mud.world = World;
 
 	World.setup(new WebSocket.Server({ server: this.server }), cfg, function() {
-		mud.server.listen(process.env.PORT || cfg.port);
-	
+		if (!callback) {
+			mud.server.listen(process.env.PORT || cfg.port);
+		}
+
+		mud.running = true;
+
 		mud.world.io.on('connection', function connection (s) {
 			var parseCmd = function(r, s) {
 				var skillObj,
@@ -214,11 +229,15 @@ RockMUD.prototype.setupServer = function() {
 				}
 			});
 		});
+
+		if (callback && typeof callback === 'function') {
+			callback();
+		}
 	});
 }
 
 server = new RockMUD();
 
-server.setupServer();
+server.setup();
 
 module.exports = server;

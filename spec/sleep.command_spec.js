@@ -1,4 +1,3 @@
-const server = require('../server');
 const MOCK_SERVER = require('../mocks/mock_server');
 
 describe('Testing Command: SLEEP', () => {
@@ -6,12 +5,16 @@ describe('Testing Command: SLEEP', () => {
     let mockPlayerRoom;
     let mockPlayerArea;
 
-    beforeEach(() => {
-        MOCK_SERVER.setup(server);
+    beforeEach((done) => {
+        MOCK_SERVER.setup(() => {
+            mockPlayer = MOCK_SERVER.player;
+            mockPlayerRoom = MOCK_SERVER.room;
+            mockPlayerArea = MOCK_SERVER.area;
+    
+            server = MOCK_SERVER.server;
 
-        mockPlayer = MOCK_SERVER.entity;
-        mockPlayerRoom = MOCK_SERVER.room;
-        mockPlayerArea = MOCK_SERVER.area;
+            done();
+        });
     });
 
     it('should move the entity into the sleeping position', () => {

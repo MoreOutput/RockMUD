@@ -228,7 +228,7 @@ window.onload = function() {
 		logged = true;
 
 		node.type = 'text';
-		node.placeholder = 'Enter a Command -- type \'help commands\' for a list of common commands';
+		node.placeholder = '';
 	}, false);
 
 	// when a command has been sent to the server

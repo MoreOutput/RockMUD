@@ -1,39 +1,59 @@
-const MOCK_ENTITY = require('./mock_entity');
+const MOCK_ENTITY = require('./mock_entity'); // add a player by default
 const MOCK_AREA = require('./mock_area');
 const MOCK_ROOM = require('./mock_room');
-const MOCK_TIME = require('./mock_time');
+const server = require('../server');
 
 class MockServer {
     constructor() {
-        this.entity;
+        this.server = server;
+        this.player;
         this.area;
         this.room;
-        this.time;
     } 
 
-    setup(server) {
-        server.world.time = JSON.parse(JSON.stringify(MOCK_TIME));
-        server.world.players = [];
-        server.world.areas = [];
-        server.world.battles = [];
-        server.world.cmds = [];
-        
-        this.entity = this.getNewEntity();
-        this.area = JSON.parse(JSON.stringify(MOCK_AREA));
-        this.room = JSON.parse(JSON.stringify(MOCK_ROOM));
-        
-        this.entity.isPlayer = true;
-        this.entity.refId = 'unit-test-player'
-        this.entity.socket = {
-            player: this.entity
-        }
+    setup(callback) {
+        server.setup(() => {
+            this.server.world.config.preventTicks = true;
+            this.server.world.ticks = null;
+            this.server.world.players = [];
+            this.server.world.areas = [];
+            this.server.world.battles = [];
+            this.server.world.cmds = [];
+    
+            let entity = this.getNewEntity();
+            let area = JSON.parse(JSON.stringify(MOCK_AREA));
+            let room = JSON.parse(JSON.stringify(MOCK_ROOM));
+            
+            entity.isPlayer = true;
+            entity.refId = 'unit-test-player'
+            entity.level = 1;
+            entity.name = 'Mockplayer';
+            entity.displayName = 'Mockplayer';
+            entity.combatName = 'Mockplayer';
+            entity.connected = true;
+            entity.originatingArea = area.id;
+            entity.area = area.id;
+            entity.roomid = room.id;
+            entity.title = 'UNIT TEST PLAYER';
 
-        this.area.rooms.push(this.room);
+            entity.socket = {
+                player: this.entity
+            }
+    
+            area.rooms.push(room);
+    
+            room.playersInRoom.push(entity);
+            
+            this.server.world.areas.push(area);
+    
+            this.server.world.players.push(entity);
+    
+            this.player = entity;
+            this.area = area;
+            this.room = room;
 
-        this.room.playersInRoom.push(this.entity);
-        
-        server.world.areas.push(this.area);
-        server.world.players.push(this.entity);
+            callback()
+        });
     }
 
     getNewEntity() {

@@ -1,4 +1,3 @@
-const server = require('../server');
 const MOCK_SERVER = require('../mocks/mock_server');
 
 describe('Testing core module: COMBAT', () => {
@@ -6,21 +5,26 @@ describe('Testing core module: COMBAT', () => {
     let mockPlayerRoom;
     let mockPlayerArea;
     let mockMob;
+    let server;
 
-    beforeEach(() => {
-        MOCK_SERVER.setup(server);
+    beforeEach((done) => {
+        MOCK_SERVER.setup(() => {
+            server = MOCK_SERVER.server;
+
+            mockPlayer = MOCK_SERVER.player;
+            mockPlayerRoom = MOCK_SERVER.room;
+            mockPlayerArea = MOCK_SERVER.area;
+
+            mockMob = MOCK_SERVER.getNewEntity();
+            mockMob.isPlayer = false;
+            mockMob.name = 'dragon';
+            mockMob.displayName = 'Test Dragon';
+            mockMob.refId = 'dragon-refid';
+
+            mockPlayerRoom.monsters.push(mockMob);
         
-        mockPlayer = MOCK_SERVER.entity;
-        mockPlayerRoom = MOCK_SERVER.room;
-        mockPlayerArea = MOCK_SERVER.area;
-
-        mockMob = MOCK_SERVER.getNewEntity();
-        mockMob.isPlayer = false;
-        mockMob.name = 'dragon';
-        mockMob.displayName = 'Test Dragon';
-        mockMob.refId = 'dragon-refid';
-
-        mockPlayerRoom.monsters.push(mockMob);
+            done();
+        });
     });
 
     it('should create a Battle Object', () => {
@@ -38,8 +42,6 @@ describe('Testing core module: COMBAT', () => {
     });
 
     it('should return the total positions in a given battle object', () => {
-        // getting the battle positions results in a count from 1 -- since
-        // we order positions starting from 0 a count can be used as the next position
         let battleObj = server.world.combat.createBattleObject(mockPlayer, mockMob, mockPlayerRoom);
         let posCnt = server.world.combat.getNextBattlePosition(battleObj);
 
@@ -116,13 +118,8 @@ describe('Testing core module: COMBAT', () => {
         expect(server.world.combat.getBattleByRefId(secondMob.refId)).toEqual(battleObj);
     });
 
-
-    it('should find a battle by refId', () => {
-        
-    });
-
-    describe('combat rounds', () => {
-        it('should process a combat round for each Battle Object position', () => {
+    describe('Combat simulation', () => {
+        it('should simulate player initiating combat with two entites. Player kills the dragon in round three and the goblin in round five.', () => {
             secondMob = MOCK_SERVER.getNewEntity();
             secondMob.isPlayer = false;
             secondMob.name = 'goblin';
@@ -139,20 +136,22 @@ describe('Testing core module: COMBAT', () => {
             const battleObj = server.world.combat.getBattleByRefId(mockPlayer.refId);
             const vicinityCheckSpy = spyOn(server.world.combat, 'inPhysicalVicinity').and.callThrough();
             const battlePosSpy = spyOn(server.world.combat, 'getNumberOfBattlePositions').and.callThrough();
-    
+
             // round one
             server.world.combat.round(battleObj, null);
-    
+           
+            expect(battlePosSpy).toHaveBeenCalledWith(battleObj)
             expect(attackSpy).toHaveBeenCalledWith(mockPlayer, mockMob, battleObj, jasmine.any(Function));
             expect(attackSpy).toHaveBeenCalledWith(mockMob, mockPlayer, battleObj, jasmine.any(Function));
             expect(attackSpy).toHaveBeenCalledWith(secondMob, mockPlayer, battleObj, jasmine.any(Function));
             expect(attackSpy).toHaveBeenCalledWith(mockPlayer, secondMob, battleObj, jasmine.any(Function));
             expect(battleObj.attacked.length).toBe(0);
             expect(battleObj.round).toBe(1);
-    
+
             // round two
             server.world.combat.round(battleObj, null);
-    
+          
+            expect(battlePosSpy).toHaveBeenCalledWith(battleObj)
             expect(attackSpy).toHaveBeenCalledWith(mockPlayer, mockMob, battleObj, jasmine.any(Function));
             expect(attackSpy).toHaveBeenCalledWith(mockMob, mockPlayer, battleObj, jasmine.any(Function));
             expect(attackSpy).toHaveBeenCalledWith(secondMob, mockPlayer, battleObj, jasmine.any(Function));
@@ -165,18 +164,30 @@ describe('Testing core module: COMBAT', () => {
             mockMob.chp = 0;
             
             server.world.combat.round(battleObj, null);
-
+           
+            expect(battlePosSpy).toHaveBeenCalledWith(battleObj)
             expect(endOfCombatSpy).toHaveBeenCalledWith(battleObj, mockPlayer, mockMob, null);
             expect(mockPlayer.exp).toBeGreaterThan(0);
+            expect(battleObj.round).toBe(3);
     
-             // round 4 -- down to mockPlayer vs secondMob
+            // round four
+            server.world.combat.round(battleObj, null);
+                    
+            expect(battlePosSpy).toHaveBeenCalledWith(battleObj)
+            expect(attackSpy).toHaveBeenCalledWith(secondMob, mockPlayer, battleObj, jasmine.any(Function));
+            expect(attackSpy).toHaveBeenCalledWith(mockPlayer, secondMob, battleObj, jasmine.any(Function));
+            
+            expect(battleObj.attacked.length).toBe(0);
+            expect(battleObj.round).toBe(4);
+
+             // round 5 -- down to mockPlayer vs secondMob
             secondMob.chp = 0;
             server.world.combat.round(battleObj, null);
-
+           
             expect(battlePosSpy).toHaveBeenCalledWith(battleObj)
-            expect(vicinityCheckSpy).toHaveBeenCalledTimes(7);
+            expect(vicinityCheckSpy).toHaveBeenCalledTimes(8);
             expect(mockPlayer.exp).toBeGreaterThan(0);
-            expect(battleObj.round).toBe(4);
+            expect(battleObj.round).toBe(5);
         });
     });
 });

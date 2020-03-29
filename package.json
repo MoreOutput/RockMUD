@@ -2,7 +2,7 @@
   "name": "rockmud",
   "subdomain": "rockmud.heroku",
   "dependencies": {
-    "ws": "^5.2.2"
+    "ws": "^7.2.3"
   },
   "version": "0.4.0",
   "engines": {
@@ -30,7 +30,7 @@
   "devDependencies": {
     "istanbul": "^0.4.5",
     "jasmine": "^3.5.0",
-    "request": "^2.88.0"
+    "request": "^2.88.2"
   },
   "scripts": {
     "test": "npx istanbul cover node_modules\\jasmine\\bin\\jasmine.js"
