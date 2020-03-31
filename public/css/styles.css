@@ -6,11 +6,14 @@ yellow: #ffcc00;
 */
 html, body {
 background-color: #000;
-color: #fff;
 padding: 1em;
 margin: 0;
 height: 100%;
+color: #fff !important;
 font-family: 'Karla', sans-serif;
+}
+table {
+    color: #fff !important;
 }
 html, body a {
 color: #60f066;
