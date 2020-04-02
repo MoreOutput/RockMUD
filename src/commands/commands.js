@@ -93,6 +93,7 @@ Cmd.prototype.buy = function(target, command) {
 	roomObj,
 	item,
 	canBuy = true,
+	canSell = false,
 	merchant;
 
 	if (command.roomObj) {
