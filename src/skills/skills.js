@@ -92,7 +92,7 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 /*
 * Melee Skills, called by a game entity
 */
-
+ 
 /*
 * Can only work on standing opponents
 * Chance of knocking the target down; chances increased with a shield
@@ -138,9 +138,9 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 			opponent = World.room.getMonster(roomObj, command);
 		}
 
-		skillOutput.winMsg = '<span class="red">You smash into ' + opponent.short + ' and they splatter into a thousand different pieces!</span>';
+		skillOutput.winMsg = '<span class="red">You smash into ' + opponent.displayName + ' and they splatter into a thousand different pieces!</span>';
 
-		if (opponent) {
+		if (opponent) { 
 			shieldArr = World.character.getSlotsWithShields(player);
 
 			if (shieldArr.length) {
@@ -175,7 +175,7 @@ Skill.prototype.bash = function(skillObj, player, roomObj, command) {
 
 					World.combat.processSkill(player, opponent, skillOutput);
 				} else {
-					skillOutput.msgToAttacker = 'You lunge forward and mistime your bash but manage to keep your footing!';
+					skillOutput.msgToAttacker = 'You lunge forward and miss your bash but manage to keep your footing!';
 
 					if (World.dice.roll(1, 20, player.knowledge) >= (10 + player.level)) {
 						skillOutput.attackerMods.wait += 3;

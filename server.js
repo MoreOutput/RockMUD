@@ -11,7 +11,7 @@ RockMUD = function() {
 },
 server;
 
-RockMUD.prototype.setup = function(callback) {
+RockMUD.prototype.setup = function(cfg, callback) {
 	const mud = this;
 
 	mud.server = http.createServer(function (req, res) {
@@ -238,6 +238,6 @@ RockMUD.prototype.setup = function(callback) {
 
 server = new RockMUD();
 
-server.setup();
+server.setup(cfg);
 
 module.exports = server;

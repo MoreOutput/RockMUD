@@ -12,7 +12,7 @@ Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command) {
 	cost = 3,
 	skillOutput = World.combat.createSkillProfile(player, skillObj),
 	damage = 0;
-	
+
 	if (cost < player.cmana) {
 		intMod = World.dice.getIntMod(player);
 

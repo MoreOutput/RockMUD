@@ -2,62 +2,89 @@ const MOCK_ENTITY = require('./mock_entity'); // add a player by default
 const MOCK_AREA = require('./mock_area');
 const MOCK_ROOM = require('./mock_room');
 const server = require('../server');
+const config = require('../config');
 
 class MockServer {
-    constructor() {
+    constructor(port = 3002) {
         this.server = server;
         this.player;
         this.area;
         this.room;
+
+        config.server.game.port = port;
+        config.server.game.oneAttackPerRound = true;
     } 
 
-    setup(callback) {
-        server.setup(() => {
-            this.server.world.config.preventTicks = true;
-            this.server.world.ticks = null;
+    setup(callback, preventTicks = true, addMockArea = true) {
+        config.server.game.preventTicks = preventTicks;
+
+        server.setup(config.server.game, () => {
+            if (preventTicks) {
+                this.server.world.ticks = null;
+            }
+
             this.server.world.players = [];
-            this.server.world.areas = [];
             this.server.world.battles = [];
             this.server.world.cmds = [];
-    
-            let entity = this.getNewEntity();
-            let area = JSON.parse(JSON.stringify(MOCK_AREA));
-            let room = JSON.parse(JSON.stringify(MOCK_ROOM));
             
-            entity.isPlayer = true;
-            entity.refId = 'unit-test-player'
-            entity.level = 1;
-            entity.name = 'Mockplayer';
-            entity.displayName = 'Mockplayer';
-            entity.combatName = 'Mockplayer';
-            entity.connected = true;
-            entity.originatingArea = area.id;
-            entity.area = area.id;
-            entity.roomid = room.id;
-            entity.title = 'UNIT TEST PLAYER';
+            if (addMockArea) {
+                let entity = this.getNewEntity();
+                let area = JSON.parse(JSON.stringify(MOCK_AREA));
+                let room = JSON.parse(JSON.stringify(MOCK_ROOM));
+                
+                entity.isPlayer = true;
+                entity.refId = 'unit-test-player'
+                entity.level = 1;
+                entity.name = 'Mockplayer';
+                entity.displayName = 'Mockplayer';
+                entity.combatName = 'Mockplayer';
+                entity.connected = true;
+                entity.originatingArea = area.id;
+                entity.area = area.id;
+                entity.roomid = room.id;
+                entity.title = 'UNIT TEST PLAYER';
+                entity.damroll = 10;
 
-            entity.socket = {
-                player: this.entity
+                entity.socket = {
+                    player: this.entity
+                }
+        
+                area.rooms.push(room);
+        
+                room.playersInRoom.push(entity);
+                this.server.world.areas.push(area);
+        
+                this.server.world.players.push(entity);
+           
+                this.player = entity;
+                this.area = area;
+                this.room = room;
             }
-    
-            area.rooms.push(room);
-    
-            room.playersInRoom.push(entity);
             
-            this.server.world.areas.push(area);
-    
-            this.server.world.players.push(entity);
-    
-            this.player = entity;
-            this.area = area;
-            this.room = room;
-
             callback()
         });
     }
 
     getNewEntity() {
         return JSON.parse(JSON.stringify(MOCK_ENTITY));
+    }
+
+    getNewPlayerEntity() {
+        let entity = this.getNewEntity();
+
+        entity.isPlayer = true;
+        entity.refId = 'unit-test-player'
+        entity.level = 1;
+        entity.name = 'Mockplayer';
+        entity.displayName = 'Mockplayer';
+        entity.combatName = 'Mockplayer';
+        entity.connected = true;
+        entity.originatingArea = '';
+        entity.area = '';
+        entity.roomid = '';
+        entity.title = 'UNIT TEST PLAYER';
+
+        return entity;
     }
 }
 

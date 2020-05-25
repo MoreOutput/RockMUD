@@ -390,8 +390,8 @@ ticks.ai = setInterval(function() {
 	}
 }, 2400);
 
-// Command Loop
-ticks.cmds = setInterval(function() {
+
+ticks.cmdLoop = function() {
 	var cmdObj,
 	cmdEntity,
 	cmdArr;
@@ -401,7 +401,7 @@ ticks.cmds = setInterval(function() {
 
 		World.cmds = [];
 		
-		while(cmdArr.length) {
+		while (cmdArr.length) {
 			cmdObj = cmdArr[0];
 			cmdEntity = cmdObj.entity;
 
@@ -425,6 +425,11 @@ ticks.cmds = setInterval(function() {
 			cmdArr.splice(0, 1);
 		}
 	}
+}
+
+// Command Loop
+ticks.cmds = setInterval(function() {
+	ticks.cmdLoop();
 }, 280);
 
 ticks.combatLoop = function() {
@@ -435,7 +440,11 @@ ticks.combatLoop = function() {
 		World.battleLock = World.battles.length;
 
 		for (i; i < World.battles.length; i += 1) {
-			World.combat.round(World.battles[i]);
+			if (World.combat.getNumberOfOpenBattlePositions(World.battles[i]) > 0) {
+				World.combat.round(World.battles[i]);
+			} else {
+				World.combat.removeBattle(World.battles[i]);
+			}
 
 			if (World.battleLock > 0) {
 				World.battleLock -= 1;
@@ -443,6 +452,17 @@ ticks.combatLoop = function() {
 		}
 	}
 }
+
+/*
+	for (i; i < World.battles.length; i += 1) {
+			World.combat.round(World.battles[i]);
+
+			if (World.battleLock > 0) {
+				World.battleLock -= 1;
+			}
+		}
+*/
+
 
 // Combat loop
 ticks.combat = setInterval(function() {

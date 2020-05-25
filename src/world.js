@@ -363,8 +363,7 @@ World.prototype.getPlayableClasses = function() {
 };
 
 World.prototype.isPlayableRace = function(raceName) {
-	var world = this,
-	playableRaces = this.getPlayableRaces(),
+	var playableRaces = this.getPlayableRaces(),
 	i = 0;
 
 	for (i; i < playableRaces.length; i += 1) {
@@ -377,8 +376,7 @@ World.prototype.isPlayableRace = function(raceName) {
 };
 
 World.prototype.isPlayableClass = function(className) {
-	var world = this,
-	playableClasses = this.getPlayableClasses(),
+	var playableClasses = this.getPlayableClasses(),
 	i = 0;
 
 	for (i; i < playableClasses.length; i += 1) {
@@ -1008,6 +1006,7 @@ World.prototype.getRoomObject = function(areaId, roomId) {
 	return null;
 };
 
+/*
 World.prototype.getEntityByRefId = function(refId) {
 	var world = this,
 	i = 0;
@@ -1016,7 +1015,7 @@ World.prototype.getEntityByRefId = function(refId) {
 		var area = world.areas[i];
 		var j = 0;
 
-		for (j; area.rooms.length; j += 1) {
+		for (j; j < area.rooms.length; j += 1) {
 			var room = area.rooms[j];
 			var k = 0;
 
@@ -1027,7 +1026,64 @@ World.prototype.getEntityByRefId = function(refId) {
 					return mob;
 				}
 			}
+
+			k = 0
+
+			for (k; k < room.playersInRoom.length; k += 1) {
+				var player = room.playersInRoom[k];
+
+				if (player.refId === refId) {
+					return player;
+				}
+			}
 		}
+	}
+
+	return null;
+};
+ */
+
+ World.prototype.getEntityByRefId = function(refId, areaId) {
+	var world = this,
+	searchEntities = function(area) {
+		var j = 0;
+
+		for (j; j < area.rooms.length; j += 1) {
+			var room = area.rooms[j];
+			var k = 0;
+
+			for (k; k < room.monsters.length; k += 1) {
+				var mob = room.monsters[k];
+
+				if (mob.refId === refId) {
+					return mob;
+				}
+			}
+
+			k = 0
+
+			for (k; k < room.playersInRoom.length; k += 1) {
+				var player = room.playersInRoom[k];
+
+				if (player.refId === refId) {
+					return player;
+				}
+			}
+		}
+	},
+	i = 0;
+
+	if (!areaId) {
+		for (i; world.areas.length; i += 1) {
+			var area = world.areas[i];
+			var entity = searchEntities(area);
+
+			if (entity) {
+				return entity;
+			}
+		}
+	} else {
+		return searchEntities(world.getArea(areaId));
 	}
 
 	return null;

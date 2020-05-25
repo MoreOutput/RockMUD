@@ -1983,7 +1983,7 @@ Cmd.prototype.flee = function(player, command) {
 				chanceRoll -= numOfPositions;
 			}
 
-			if (chanceRoll > check && player.wait === 0) {
+			if ((chanceRoll > check || player.level === 1) && player.wait === 0) {
 				if (battle) {
 					player.position = 'fleeing';
 					
@@ -2012,6 +2012,25 @@ Cmd.prototype.flee = function(player, command) {
 										msg: player.displayName + ' fled ' + command.arg +'!',
 										styleClass: 'grey'
 									});
+								}
+							}
+
+							i = 0;
+							
+							// set applicable battle positions to null
+							// shuffle out?
+							for (i; i < numOfPositions; i += 1) {
+								let position = battle.positions[i];
+								let attacker = position.attacker;
+								let defender = position.defender;
+
+								if (attacker.refId === player.refId || defender.refId === player.refId) {
+									battle.positions[i] = null;
+								}
+
+								if (numOfPositions === 1) {
+									attacker.fighting = false;
+									defender.fighting = false;
 								}
 							}
 
@@ -2151,12 +2170,13 @@ Cmd.prototype.cast = function(player, command, fn) {
 			if (skillObj && skillObj.id in World.spells) {
 				if (player.cmana > 0) {
 					if (player.position === 'standing') {
+
 						spellTarget = World.combat.getBattleTargetByRefId(player.refId);
 
 						if (skillObj.type.indexOf('passive') === -1) {
 							// combat skills
 							if (spellTarget) {
-								skillProfile = World.spells[skillObj.id](skillObj, player, player.opponent, roomObj, command);
+								skillProfile = World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command);
 
 								World.processEvents('onSpell', player, roomObj, skillObj);
 								World.processEvents('onSpell', player.items, roomObj, skillObj);

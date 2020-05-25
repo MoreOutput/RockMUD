@@ -872,11 +872,11 @@ Character.prototype.getStatsFromEq = function(eq, fn) {
 };
 
 Character.prototype.getHitroll = function(entity) {
-	return World.dice.roll(1, 10 + World.dice.getDexMod(entity), entity.hitroll + (entity.level / 5))
+	return Math.round(entity.hitroll + World.dice.getDexMod(entity) + entity.level/5);
 };
 
 Character.prototype.getDamroll = function(entity) {
-	return World.dice.roll(1, 10 + World.dice.getStrMod(entity), entity.hitroll + (entity.level / 5))
+	return Math.round(entity.damroll + World.dice.getStrMod(entity) + entity.level/5);
 };
 
 Character.prototype.getContainer = function(player, command) {
@@ -1408,7 +1408,6 @@ Character.prototype.level = function(player) {
 	player.mv += mvBonus;
 	player.trains += newTrains;
 	player.expToLevel = 1000 * player.level;
-	player.exp = 0;
 
 	World.msgPlayer(player, {
 		msg: 'You have reached level ' + player.level + '. Your efforts result in ' 
