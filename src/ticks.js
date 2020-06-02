@@ -425,10 +425,11 @@ ticks.cmdLoop = function() {
 			cmdArr.splice(0, 1);
 		}
 	}
-}
+};
 
 // Command Loop
 ticks.cmds = setInterval(function() {
+	console.log(123);
 	ticks.cmdLoop();
 }, 280);
 
@@ -451,18 +452,7 @@ ticks.combatLoop = function() {
 			}
 		}
 	}
-}
-
-/*
-	for (i; i < World.battles.length; i += 1) {
-			World.combat.round(World.battles[i]);
-
-			if (World.battleLock > 0) {
-				World.battleLock -= 1;
-			}
-		}
-*/
-
+};
 
 // Combat loop
 ticks.combat = setInterval(function() {

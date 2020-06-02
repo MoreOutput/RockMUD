@@ -3227,13 +3227,20 @@ Cmd.prototype.wear = function(target, command) {
 			item = World.character.getItem(target, command);
 
 			if (item) {
-				if (World.character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)]) {
-					World.character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)](target, item, roomObj);
+				if (item.level <= target.level) {
+					if (World.character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)]) {
+						World.character['wear' + item.itemType.charAt(0).toUpperCase() + item.itemType.slice(1)](target, item, roomObj);
 
-					World.character.save(target);
+						World.character.save(target);
+					} else {
+						World.msgPlayer(target, {
+							msg: 'You can\'t figure out how to wear a ' + item.short,
+							styleClass: 'error'
+						});
+					}
 				} else {
 					World.msgPlayer(target, {
-						msg: 'You can\'t figure out how to wear a ' + item.short,
+						msg: 'Your level is too low to equip ' + item.short + '.',
 						styleClass: 'error'
 					});
 				}

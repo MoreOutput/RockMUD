@@ -1,6 +1,6 @@
 const MOCK_SERVER = require('../mocks/mock_server');
 
-describe('Testing core module: COMBAT', () => {
+describe('Testing Feature: COMBAT', () => {
     let mockPlayer;
     let mockPlayerRoom;
     let mockPlayerArea;
@@ -344,7 +344,7 @@ describe('Testing: COMBAT LOOP', () => {
             mockPlayer.originatingArea = mockPlayer.area;
             mockPlayer.roomid = '1';
           
-            mockPlayerArea = server.world.getArea('midgaard');
+            mockPlayerArea = server.world.getArea(mockPlayer.area);
 
             mockPlayerRoom = server.world.getRoomObject(mockPlayer.area, mockPlayer.roomid);
 
