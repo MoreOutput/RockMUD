@@ -1149,6 +1149,7 @@ Character.prototype.removeMods = function(player, mods) {
 
 Character.prototype.wearWeapon = function(target, weapon, roomObj) {
 	var slot = this.getEmptyWeaponSlot(target);
+	
 	if (!weapon.equipped) {
 		if (slot) {
 			weapon.equipped = true;

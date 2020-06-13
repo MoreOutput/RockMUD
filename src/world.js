@@ -2,9 +2,6 @@
 * Working with game-wide data. Areas, races, classes and game time
 */
 'use strict';
-
-const { ConsoleReporter } = require('jasmine');
-
 var fs = require('fs'),
 World = function() {};
 
