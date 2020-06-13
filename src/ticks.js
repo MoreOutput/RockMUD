@@ -48,94 +48,10 @@ ticks.time = setInterval(function() {
 		World.time.isDay = true;
 
 		areaMsg = 'The sun appears over the horizon.';
-
-		if (World.areas.length) {
-			for (i; i < World.areas.length; i += 1) {
-				(function(area, areaIndex) {
-					World.processEvents('onDay', area);
-
-					if (area.dayTrainsitionMsg) {
-						areaMsg = area.dayTrainsitionMsg;
-					}
-
-					World.msgArea(area.id, {
-						msg: areaMsg
-					});
-
-					monsters = World.getAllMonstersFromArea(area);
-
-					monsters.forEach(function(monster, i) {
-						var roomObj = World.getRoomObject(area, monster.roomid);
-
-						if (monster.chp >= 1) {
-							World.processEvents('onDay', monster, roomObj);
-							World.processEvents('onDay', monster.items, roomObj);
-
-							processAffectDecay(monster);
-						}
-					});
-
-					players = World.getAllPlayersFromArea(area);
-
-					players.forEach(function(player, i) {
-						var roomObj = World.getRoomObject(area, player.roomid);
-
-						if (player.chp >= 1) {
-							World.processEvents('onDay', player, roomObj);
-							World.processEvents('onDay', player.items, roomObj);
-
-							processAffectDecay(player);
-						}
-					});
-				}(World.areas[i], i));
-			}	
-		}
 	} else if (World.time.hour === World.time.month.hourOfNight && World.time.minute === 1) {
 		World.time.isDay = false;
 
 		areaMsg = 'The sun fades fully from view as night falls.';
-
-		if (World.areas.length) {
-			for (i; i < World.areas.length; i += 1) {
-				(function(area, areaIndex) {
-					World.processEvents('onNight', area);
-
-					if (area.nightTransitionMsg) {
-						areaMsg = area.nightTransitionMsg;
-					}
-
-					World.msgArea(area.id, {
-						msg: areaMsg
-					});
-
-					monsters = World.getAllMonstersFromArea(area);
-
-					monsters.forEach(function(monster, i) {
-						var roomObj = World.getRoomObject(area, monster.roomid);
-
-						if (monster.chp >= 1) {
-							World.processEvents('onNight', monster, roomObj);
-							World.processEvents('onNight', monster.items, roomObj);
-
-							processAffectDecay(monster);
-						}
-					});
-
-					players = World.getAllPlayersFromArea(area);
-
-					players.forEach(function(player, i) {
-						var roomObj = World.getRoomObject(area, player.roomid);
-
-						if (player.chp >= 1) {
-							World.processEvents('onNight', player, roomObj);
-							World.processEvents('onNight', player.items, roomObj);
-
-							processAffectDecay(player);
-						}
-					});
-				}(World.areas[i], i));
-			}
-		}
 	}
 
 	if (World.time.month.day > World.time.month.days) {
@@ -344,28 +260,36 @@ ticks.decay = setInterval(function() {
 ticks.ai = setInterval(function() {
 	var i = 0,
 	j = 0,
+	k = 0,
+	area,
 	players,
 	monsters,
+	room,
 	roomObj;
-	
+
 	if (!World.aiLock) {
 		World.aiLock = true;
 
 		for (i; i < World.areas.length; i += 1) {
-			players = World.getAllPlayersFromArea(World.areas[i]);
-			monsters = World.getAllMonstersFromArea(World.areas[i]);
+			area = World.areas[i];
+			players = World.getAllPlayersFromArea(area);
 
-			if (players.length || World.areas[i].runOnAliveWhenEmpty) {
+			if (players.length || area.runOnAliveWhenEmpty) {
 				j = 0;
 
-				for (j; j < monsters.length; j += 1) {
-					if ((World.areas[i].runOnAliveWhenEmpty || players.length)
-						|| (monsters[j].originatingArea !== World.areas[i].id)) {
+				for (j; j < area.rooms.length; j += 1) {
+					roomObj = area.rooms[j];
 
-						roomObj = World.getRoomObject(World.areas[i], monsters[j].roomid);
+					k = 0;
 
-						if (monsters[j].chp >= 1 && (monsters[j].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
-							World.processEvents('onAlive', monsters[j], roomObj);
+					for (k; k < roomObj.monsters.length; k += 1) {
+						if ((area.runOnAliveWhenEmpty || players.length)
+							|| (roomObj.monsters[k].originatingArea !== area.id)) {
+							
+
+							if (roomObj.monsters[k].chp >= 1 && (roomObj.monsters[k].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
+								World.processEvents('onAlive', roomObj.monsters[k], roomObj);
+							}
 						}
 					}
 				}

@@ -1171,6 +1171,8 @@ Cmd.prototype.recall = function(target, command) {
 						msg: '<strong>You have recalled to ' + targetRoom.title + '!</strong>',
 						styleClass: 'green'
 					});
+
+					World.character.save(target);
 				}
 			} else {
 				World.msgPlayer(target, {
@@ -3553,26 +3555,6 @@ Cmd.prototype.json = function(target, command) {
 		} else {
 			World.msgPlayer(target, {msg: 'Nothing found.', styleClass: 'error' });
 		}
-	} else {
-		World.msgPlayer(target, {msg: 'No.', styleClass: 'error' });
-	}
-};
-
-/*
-* An in game reboot. 
-* Stops all combat and reloads all core game modules.
-* does not force area respawn.
-*/
-Cmd.prototype.reboot = function(target, command) {
-	if (target.role === 'admin' || World.config.allAdmin) {
-		require.cache[require.resolve('../src/rooms')] = null;
-		require.cache[require.resolve('../src/ticks')] = null;
-		require.cache[require.resolve('../src/dice')] = null;
-		
-		World.ticks = require('./ticks');
-		World.dice = require('./dice');
-
-		Room = require('./rooms');
 	} else {
 		World.msgPlayer(target, {msg: 'No.', styleClass: 'error' });
 	}

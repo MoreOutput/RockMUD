@@ -157,7 +157,7 @@ module.exports = {
 			i = 0;
 
 			for (i; i < this.rooms.length; i += 1) {
-				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 4) === 1) {
+				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 10) >= 2) {
 					var mob = {
 						hp: 42,
 						name: 'Dark Brown Elk',
