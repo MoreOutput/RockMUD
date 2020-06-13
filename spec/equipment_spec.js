@@ -1,6 +1,6 @@
 const MOCK_SERVER = require('../mocks/mock_server');
 
-fdescribe('Testing Feature: Wearing Equipment', () => {
+describe('Testing Feature: Wearing Equipment', () => {
     let mockPlayer;
     let mockPlayerRoom;
     let server;
@@ -122,7 +122,7 @@ fdescribe('Testing Feature: Wearing Equipment', () => {
         });
     });
 
-    fit('should pick up the Staff and equip it', () => {
+    it('should pick up the Staff and equip it', () => {
         setInterval(function() {
             server.world.ticks.cmdLoop();
         }, 280);
