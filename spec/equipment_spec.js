@@ -10,7 +10,7 @@ fdescribe('Testing Feature: Wearing Equipment', () => {
         displayName: 'Short Sword',
         short: 'a common looking dagger',
         area: 'midgaard',
-        id: '2',
+        id: '2', 
         level: 2,
         itemType: 'weapon',
         weaponType: 'dagger',
@@ -146,14 +146,19 @@ fdescribe('Testing Feature: Wearing Equipment', () => {
         cmd = server.world.commands.createCommandObject({
             msg: 'wear staff'
         });
+        
         let wearSpy = spyOn(server.world.commands, 'wear').and.callThrough();
+        let wearWeaponSpy = spyOn(server.world.character, 'wearWeapon').and.callThrough();
         let msgPlayerSpy = spyOn(server.world, 'msgPlayer').and.callThrough();
+        let saveSpy = spyOn(server.world.character, 'save').and.callThrough();
 
         server.world.addCommand(cmd, mockPlayer);
     
         jasmine.clock().tick(280);
     
         expect(wearSpy).toHaveBeenCalledTimes(1);
+        expect(wearWeaponSpy).toHaveBeenCalledTimes(1);
+        expect(saveSpy).toHaveBeenCalledTimes(1);
         expect(msgPlayerSpy).toHaveBeenCalledTimes(1);
     }); 
 });

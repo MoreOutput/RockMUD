@@ -429,7 +429,6 @@ ticks.cmdLoop = function() {
 
 // Command Loop
 ticks.cmds = setInterval(function() {
-	console.log(123);
 	ticks.cmdLoop();
 }, 280);
 

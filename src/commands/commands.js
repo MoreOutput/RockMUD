@@ -3166,8 +3166,7 @@ Cmd.prototype.skills = function(target, command) {
 	learnedStatus,
 	i = 0,
 	skillLevel = 1,
-	trainedLevel,
-	skillId;
+	trainedLevel;
 
 	if (target.skills) {
 		for (i; i < target.skills.length; i += 1) {
@@ -3262,8 +3261,7 @@ Cmd.prototype.wear = function(target, command) {
 };
 
 Cmd.prototype.remove = function(target, command) {
-	var item,
-	removed;
+	var item;
 
 	if (target.position !== 'sleeping' && target.position !== 'resting') {
 		if (command.msg !== '') {
@@ -3530,29 +3528,33 @@ Cmd.prototype.setpos = function(player, command) {
 * typing 'json' alone will give the json object for the entire current room.
 */
 Cmd.prototype.json = function(target, command) {
-	if (target.role === 'admin' && command.msg || World.config.allAdmin) {
-		World.character.checkInventory(r, s, function (fnd,item) {
-			if (fnd) {
-				World.msgPlayer(target, {msg: util.inspect(item, {depth: null})});
-			} else {
-				World.room.checkItem(r, s, function (fnd, item) {
-					if (fnd) {
-						World.msgPlayer(target, {msg: util.inspect(item, {depth: null})});
-					} else {
-						World.room.checkMonster(r, s, function (fnd, monster) {
-								if (fnd) {
-									World.msgPlayer(target, {msg: util.inspect(monster, {depth: null})});
-								} else {
-									World.msgPlayer(target, {msg: 'Target not found.', styleClass: 'error' });
-								}
-							}
-						);
-					}
-				});
-			}
-		});
+	var item,
+	roomObj;
+
+	if (target.role === 'admin' || World.config.allAdmin) {
+		if (!command.roomObj) {
+			roomObj = World.getRoomObject(target.area, target.roomid);
+		} else {
+			roomObj = command.roomObj;
+		}
+
+		item = World.character.getItem(target, command);
+
+		if (!item) {
+			item = World.character.getItem(roomObj, command);
+		}
+
+		if (!item) {
+			item = World.room.getMonster(roomObj, command);
+		}
+
+		if (item) {
+			World.msgPlayer(target, {msg: '<pre>' + JSON.stringify(item) + '</pre>', styleClass: 'success' });
+		} else {
+			World.msgPlayer(target, {msg: 'Nothing found.', styleClass: 'error' });
+		}
 	} else {
-		World.msgPlayer(target, {msg: 'Jason who?', styleClass: 'error' });
+		World.msgPlayer(target, {msg: 'No.', styleClass: 'error' });
 	}
 };
 
