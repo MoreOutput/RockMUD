@@ -2,6 +2,9 @@
 * Working with game-wide data. Areas, races, classes and game time
 */
 'use strict';
+
+const { ConsoleReporter } = require('jasmine');
+
 var fs = require('fs'),
 World = function() {};
 
@@ -279,8 +282,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 								loadTemplates(function(err, templates) {
 									loadAI(function() {
 										var area,
-										i = 0,
-										j = 0;
+										i = 0;
 
 										fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
 											if (err) {
@@ -304,8 +306,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 
 												world.setupArea(area, function(err, area) {
 													area.extended = true;
-
-													if (i === world.areas.length - 1) {
+													if (i === world.areas.length - 1) {	
 														i = 0;
 
 														for (i; i < world.areas.length; i += 1) {
@@ -673,7 +674,6 @@ World.prototype.setupArea = function(area, callback) {
 	var i = 0,
 	world = this,
 	setup = function() {
-		
 		for (i; i < area.rooms.length; i += 1) {
 			world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)), function(err, room) {
 				if (area.titleStyleClass) {

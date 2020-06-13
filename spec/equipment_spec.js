@@ -10,6 +10,7 @@ fdescribe('Testing Feature: Wearing Equipment', () => {
         displayName: 'Short Sword',
         short: 'a common looking dagger',
         area: 'midgaard',
+        refId: '1',
         id: '2', 
         level: 2,
         itemType: 'weapon',
@@ -33,6 +34,7 @@ fdescribe('Testing Feature: Wearing Equipment', () => {
         displayName: 'Large Staff',
         short: 'a common looking wooden staff',
         area: 'midgaard',
+        refId: '2',
         id: '3',
         level: 1,
         itemType: 'weapon',
@@ -120,7 +122,7 @@ fdescribe('Testing Feature: Wearing Equipment', () => {
         });
     });
 
-    it('should pick up the Staff and equip it', () => {
+    fit('should pick up the Staff and equip it', () => {
         setInterval(function() {
             server.world.ticks.cmdLoop();
         }, 280);
@@ -160,5 +162,6 @@ fdescribe('Testing Feature: Wearing Equipment', () => {
         expect(wearWeaponSpy).toHaveBeenCalledTimes(1);
         expect(saveSpy).toHaveBeenCalledTimes(1);
         expect(msgPlayerSpy).toHaveBeenCalledTimes(1);
+        expect(server.world.character.getSlot(mockPlayer, 'hands').item).toBe(mockStaff.refId);
     }); 
 });

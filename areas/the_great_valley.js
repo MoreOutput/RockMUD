@@ -21,7 +21,6 @@ module.exports = {
 		var x = 7,
 		y = 7,
 		roomObj,
-		generateNorthOf = World.getRoomObject(this.name, this.defaultRoom),
 		i = 0,
 		j = 0;
 
@@ -204,7 +203,7 @@ module.exports = {
 						}]
 					};
 
-					if (World.dice.roll(1, 4) === 1) {
+					if (World.dice.roll(1, 20) === 1) {
 						mob.long = 'A large elk with striking white antlers';
 						mob.items = [];
 						mob.items.push({
