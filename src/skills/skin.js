@@ -9,6 +9,11 @@ module.exports = function(skillObj, entity, roomObj, command) {
     var fur;
     var food;
     var rndChance = 3; // must be highr than given value on 1d10
+	var wait = 2;
+
+	if (skillObj.wait) {
+		wait = skillObj.wait;
+	}
 
     if (command.second) {
         if (entity.position === 'standing' && !entity.fighting) {
@@ -41,14 +46,14 @@ module.exports = function(skillObj, entity, roomObj, command) {
 
                               //  World.room.addItem(roomObj, fur);
                             }
-
-                            entity.wait += skillObj.wait;
+							
+                            entity.wait += wait;
 
                             World.msgPlayer(entity, {msg: 'You skin the ' + corpse.displayName});
                         } else {
                             World.msgPlayer(entity, {msg: 'You fail to butcher the corpse'});
 
-                            entity.wait += skillObj.wait;
+                            entity.wait += wait;
                         }
                     } else {
                         World.msgPlayer(entity, {msg: 'You can only skin animals'});

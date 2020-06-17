@@ -147,7 +147,7 @@ Spell.prototype.invisibility = function(skillObj, player, roomObj, command, fn) 
 /*
 * Healing Spells
 */
-Spell.prototype.cureLight = function(skillObj, player, opponent, roomObj, command, fn) {
+Spell.prototype.cureLight = function(skillObj, player, roomObj, command) {
 	var intMod,
 	wisMod,
 	cost = 2,
@@ -157,12 +157,13 @@ Spell.prototype.cureLight = function(skillObj, player, opponent, roomObj, comman
 	failMsg = 'Your eyes flicker blue as you <strong>fail to cast ' + skillObj.display + '</strong>.',
 	successMsg = '',
 	roomMsg =  '',
+	skillOutput = World.combat.createSkillProfile(player, skillObj),
 	wait = 2;
 
 	if (skillObj.wait) {
 		wait = skillObj.wait;
 	}
-	
+
 	if (cost < player.cmana) {
 		if (World.dice.roll(1, 100) <= skillObj.train && chanceRoll > 2) {
 			if (opponent.refId === player.refId) {

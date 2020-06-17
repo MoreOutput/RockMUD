@@ -1,6 +1,6 @@
 const MOCK_SERVER = require('../mocks/mock_server');
 
-describe('Testing Feature: COMBAT', () => {
+describe('Testing Core: COMBAT', () => {
     let mockPlayer;
     let mockPlayerRoom;
     let mockPlayerArea;

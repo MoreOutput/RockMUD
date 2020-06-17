@@ -2104,46 +2104,6 @@ Cmd.prototype.mlist = function(player, command) {
 	});
 };
 
-// TODO update brandish so items can leverage a set of spells under enhancements[]
-// that way each spell can have its own level and meta information
-Cmd.prototype.brandish = function(player, command) {
-	var scroll = World.character.getItem(player, command),
-	castCmd = 'cast ',
-	playerLevel = player.level;
-
-	if (player.mainStat !== 'int') {
-		playerLevel -= 5;
-	}
-
-	if (playerLevel < 0) {
-		playerLevel = 0;
-	}
-
-	if (scroll && scroll.spell) {
-		if (!scroll.spellLevel || scroll.spellLevel <= playerLevel) {
-			if (scroll.spell.type.indexOf('passive') === -1) {
-				if (command.msg === command.arg) {
-
-				}
-			} else {
-				if (command.msg === command.arg) {
-
-				}
-			}
-
-			castCmd = this.createCommandObject({msg: castCmd});
-
-			castCmd.skillObj = scroll.spell;
-
-			this.cast(player, castCmd);
-		} else {
-
-		}
-	} else {
-		
-	}
-};
-
 // triggering spell skills
 Cmd.prototype.cast = function(player, command, fn) {
 	var cmd = this,
@@ -2174,7 +2134,6 @@ Cmd.prototype.cast = function(player, command, fn) {
 					if (player.position === 'standing') {
 
 						spellTarget = World.combat.getBattleTargetByRefId(player.refId);
-
 						if (skillObj.type.indexOf('passive') === -1) {
 							// combat skills
 							if (spellTarget) {
