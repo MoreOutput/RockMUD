@@ -1083,10 +1083,11 @@ Character.prototype.addToBottle = function(container, item) {
 };
 
 Character.prototype.getSkill = function(player, skillName) {
-	var i = 0;
+	var i = 0,
+	regex = new RegExp('^' + skillName, 'i');
 
 	for (i; i < player.skills.length; i += 1) {
-		if (player.skills[i].id === skillName || player.skills[i].display.toLowerCase() === skillName) {
+		if (regex.test(player.skills[i].id) || regex.test(player.skills[i].display)) {
 			return player.skills[i];
 		}
 	}

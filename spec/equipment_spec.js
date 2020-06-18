@@ -55,6 +55,7 @@ describe('Testing Behavior: Item Interactions', () => {
         },
         affects: [],
         behaviors: [],
+        spellCharges: 1,
         spell: {
 			id: 'cureLight',
 			display: 'Cure Light',
@@ -93,7 +94,6 @@ describe('Testing Behavior: Item Interactions', () => {
                     }
                 }
             ];
-
             mockPlayerArea = server.world.getArea(mockPlayer.area);
             mockPlayerRoom = server.world.getRoomObject(mockPlayer.area, mockPlayer.roomid);
 
