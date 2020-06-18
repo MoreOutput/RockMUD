@@ -51,6 +51,9 @@ Character.prototype.login = function(r, s, fn) {
 						}
 					}
 
+					// TODO: the socket/player references are intentional
+					// TODO: but it may be better to remove the player reference from the socket
+					// TODO: could just keep the ID and do a socket lookup?
 					s.player = r;
 
 					s.player.displayName = s.player.name.charAt(0).toUpperCase() + s.player.name.slice(1);
@@ -486,7 +489,15 @@ Character.prototype.save = function(player, fn) {
 	var objToSave;
 
 	if (player.isPlayer && !player.fighting) {
-		objToSave = Object.assign({}, player);
+		if (player.socket && player.socket.player) {
+			player.socket.player = null;
+		}
+
+		objToSave = JSON.parse(JSON.stringify(player));
+
+		if (player.socket) {
+			player.socket.player = player;
+		}
 
 		objToSave.following = '';
 		objToSave.group = [];
@@ -494,11 +505,10 @@ Character.prototype.save = function(player, fn) {
 		objToSave.fighting = false;
 		objToSave.socket = null;
 		objToSave.saved = new Date().toString();
-
 		objToSave = World.sanitizeBehaviors(objToSave);
 
 		if (Object.keys(objToSave).length) {
-			this.write(player.name.toLowerCase(), objToSave, function(err) {
+			this.write(objToSave.name.toLowerCase(), objToSave, function(err) {
 				if (err) {
 					return World.msgPlayer(player, {msg: 'Error saving character. Please let the staff know.'});
 				} else {

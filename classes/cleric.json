@@ -28,6 +28,17 @@
 			"prerequisites": {
 				"level": 4
 			}
+		}, {
+			"id": "healingSurge",
+			"display": "Healing Surge - Heal Above Max Health",
+			"mod": 1,
+			"train": 20,
+			"type": "passive spell",
+			"wait": 3,
+			"learned": true,
+			"prerequisites": {
+				"level": 4
+			}
 		}
 	]
 }

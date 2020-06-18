@@ -1799,6 +1799,7 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 					if (behavior[evtName]
 						&& !gameEntity['prevent' + this.capitalizeFirstLetter(evtName)]
 						&& !behavior['prevent' + this.capitalizeFirstLetter(evtName)]) {
+
 						allTrue = behavior[evtName](behavior, gameEntity, roomObj, param, param2);
 					}
 				}

@@ -236,11 +236,13 @@ Cmd.prototype.list = function(target, command) {
 				if (merchant.items.length > 0) {
 					for (i; i < merchant.items.length; i += 1) {
 						storeDisplay += '<li>' + merchant.items[i].name  +
-						' <span class="warning">(' + merchant.items[i].value + 'gp)</span></li>';
+						' <span>(Level ' + merchant.items[i].level + ')</span>' +
+						' <span class="warning">(' + merchant.items[i].value + 'gp)</span>' +
+						'</li>';
 					}
 
 					World.msgPlayer(target, {
-						msg: '<h4>' + merchant.short + ' item list</h4><ul class="list">' + storeDisplay  + '</ul>'
+						msg: '<h4>' + merchant.short + ' Items for sale</h4><ul class="list">' + storeDisplay  + '</ul>'
 					});
 				} else {
 
@@ -1440,7 +1442,7 @@ Cmd.prototype.move = function(target, command, fn) {
 						}
 					}
 				} else {
-					if (targetRoom.size) {
+					if (targetRoom && targetRoom.size) {
 						World.msgPlayer(target, {
 							msg: 'You are too large to fit into that space!',
 							styleClass: 'error'
@@ -2280,7 +2282,7 @@ Cmd.prototype.look = function(target, command) {
 	var roomObj,
 	displayHTML,
 	monster,
-	itemDescription,
+	itemDescription = '',
 	item,
 	i = 0;
 	
@@ -2344,8 +2346,12 @@ Cmd.prototype.look = function(target, command) {
 					if (monster) {
 						if (monster.description) {
 							itemDescription = monster.description;
-						} else if (monster.long) {
-							itemDescription = monster.long + ' is ' + monster.position + ' ' + ' here.';
+						}
+						
+						if (!itemDescription && monster.short) {
+							itemDescription += '<p>' + monster.short + ' is ' + monster.position + ' ' + ' here.</p>';
+						} else if (monster.short) {
+							itemDescription = monster.short + ' is ' + monster.position + ' ' + ' here.';
 						}
 						
 						World.msgPlayer(target, {

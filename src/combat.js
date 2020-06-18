@@ -672,7 +672,9 @@ Combat.prototype.getNumberOfAttacks = function(attacker, defender, weapon) {
 
 // Insert a skill profile into the relevant battle object so it can be applied in round()
 Combat.prototype.processSkill = function(attacker, defender, skillProfile, battle) {
-	battle;
+	var prop,
+	inBattle = false,
+	nextPosition;
 
 	if (!battle) {
 		battle = this.getBattleByRefId(attacker.refId);
@@ -683,9 +685,6 @@ Combat.prototype.processSkill = function(attacker, defender, skillProfile, battl
 	}
 
 	if (battle) {
-		var prop;
-		var inBattle = false;
-
 		for (prop in battle.positions) {
 			if (!inBattle && battle.positions[prop] && (battle.positions[prop].defender.refId === defender.refId
 				|| battle.positions[prop].attacker.refId === defender.refId)) {
@@ -694,7 +693,7 @@ Combat.prototype.processSkill = function(attacker, defender, skillProfile, battl
 		}
 
 		if (!inBattle) {
-			var nextPosition = this.getNextBattlePosition(battle);
+			nextPosition = this.getNextBattlePosition(battle);
 
 			attacker.fighting = true;
 			defender.fighting = true;
@@ -712,7 +711,12 @@ Combat.prototype.processSkill = function(attacker, defender, skillProfile, battl
 		// TODO: Move defender.refId to target in skillProfile? Allow for array based skills for flexibility?
 		battle.skills[attacker.refId][defender.refId] = skillProfile;
 	} else {
-		this.processFight(attacker, defender, World.getRoomObject(attacker.area, attacker.roomid), skillProfile);
+		if (attacker.refId === defender.refId) {
+			World.processEvents('onSpell', attacker, null, skillProfile.skillObj);
+			World.character.applyMods(attacker, skillProfile.defenderMods);
+		} else {
+			this.processFight(attacker, defender, World.getRoomObject(attacker.area, attacker.roomid), skillProfile);
+		}
 	}
 }
 

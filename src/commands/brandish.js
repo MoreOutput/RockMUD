@@ -17,7 +17,7 @@ module.exports = function(entity, command) {
 		level = 0;
 	}
 
-	if (scroll && scroll.spell) {
+	if (scroll && scroll.spell && (scroll.itemType === 'scroll' || scroll.equipped === true)) {
 		if (!scroll.spellLevel || scroll.spellLevel <= level) {
 			if (scroll.spell.type.indexOf('passive') === -1) {
 				if (command.msg === command.arg) {

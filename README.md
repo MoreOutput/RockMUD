@@ -6,13 +6,10 @@ RockMUD
 ### Goals:
 * Full featured MUD experience from within the browser
 * Quick development
-* Client side scripting for GUIs
-* DB agnostic persistence
 
 ### Dependencies:
 * The latest version of the WS library is required. This is the single outside dependency for the server and is contained to the core message passing functions. Istanbul, Jasmine, and Request are development dependencies used in writing tests.
 * Development keeps up with latest node release.
-* Default terminal loads Bootstrap from CDN.
 
 ## 10000 feet:
 All design/data elements of RockMUD must be either valid JSON or .js files. Please look at the current code and make an effort to match the current style if you plan to submit a pull request. Documentation has started -- see the github wiki.
@@ -24,6 +21,5 @@ https://gitter.im/rockmud/Lobby?utm_source=share-link&utm_medium=link&utm_campai
 ### Installation
 * Install Node, npm, and Git
 * Clone the repo
-* cd RockMUD (to enter cloned repo)
-* npm install (to install WS)
-* npm start or node server.js to start the server (defaults to http://127.0.0.1:3001)
+* npm install
+* npm start (defaults to http://127.0.0.1:3001)

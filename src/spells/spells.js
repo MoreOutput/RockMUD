@@ -147,110 +147,60 @@ Spell.prototype.invisibility = function(skillObj, player, roomObj, command, fn) 
 /*
 * Healing Spells
 */
-Spell.prototype.cureLight = function(skillObj, player, roomObj, command) {
+Spell.prototype.cureLight = function(skillObj, entity, opponent, roomObj, command) {
 	var intMod,
 	wisMod,
 	cost = 2,
 	healing = 0,
-	chanceRoll = World.dice.roll(1, 100),
 	manaFailMsg = 'Not enough mana to cast ' + skillObj.display,
 	failMsg = 'Your eyes flicker blue as you <strong>fail to cast ' + skillObj.display + '</strong>.',
-	successMsg = '',
 	roomMsg =  '',
-	skillOutput = World.combat.createSkillProfile(player, skillObj),
+	skillOutput = World.combat.createSkillProfile(entity, skillObj),
 	wait = 2;
 
 	if (skillObj.wait) {
 		wait = skillObj.wait;
 	}
 
-	if (cost < player.cmana) {
-		if (World.dice.roll(1, 100) <= skillObj.train && chanceRoll > 2) {
-			if (opponent.refId === player.refId) {
-				successMsg = 'Your eyes shine as you channel your powers to make yourself feel a bit better!';
+	if (cost < entity.cmana) {
+		intMod = World.dice.getIntMod(entity);
+		wisMod = World.dice.getWisMod(entity);
+
+		// consistent 2% failure rate induced by the chanceRoll check
+		if (World.dice.roll(1, 100) <= skillObj.train) {
+			skillOutput.attackerMods.wait += wait;
+			skillOutput.attackerMods.cmana -= (cost - intMod);	
+
+			healing = World.dice.roll(Math.floor(entity.level / 3) + 1, 10 + wisMod, intMod);
+
+			if (entity.mainStat === 'wis') {
+				healing += World.dice.roll(1, Math.floor(entity.level / 2) + 1);
+			}
+
+			if (opponent.refId === entity.refId) {
+				skillOutput.msgToAttacker = 'You channel your powers into your own body and lightly heal your wounds.';
+				
+				roomMsg = entity.possessivePronoun + ' eyes turn a cloudy white.';
 			} else {
-				successMsg = 'You channel your powers into your own body by placing your hand on your'
-				+ ' chest. You feel a bit better.';
+				skillOutput.msgToAttacker = 'You channel your powers into ' + opponent.displayName + '.';
+				
+				skillOutput.msgToDefender = 'heals you';
+				
+				roomMsg = entity.possessivePronoun + ' eyes turn a cloudy white as he places his '
+					+ player.handsNoun +  's on ' + opponent.displayName + '.'
 			}
 
-			roomMsg = player.possessivePronoun + ' eyes become clouded as they as they lay their ' + player.handsNoun
-				+ 's upon ' + opponent.displayName + '.';
+			skillOutput.defenderMods.chp = healing;
 
-			if (opponent.refId !== player.refId) {
-				roomMsg = player.possessivePronoun + ' eyes turn a cloudy white as he places his '
-					+ player.handsNoun +  's on ' + opponent.displayName + '.';
-			} else {
-				roomMsg = player.possessivePronoun + ' reaches for their head whole their eyes turn a cloudy white. They seem reinvigorated.';
-			}
-
-			if (player.mainStat === 'wis') {
-				healing = World.dice.roll(1, player.level, skillObj.mod);
-
-				if (chanceRoll > 75) {
-					cost -= 1;
-				}
-			} else if (player.mainStat === 'str') {
-				cost += 1;
-				wait += 2;
-			}
-
-			intMod = World.dice.getIntMod(player);
-			
-			wisMod = World.dice.getWisMod(player);
-
-			if (skillObj.mod) {
-				wisMod += World.dice.roll(1, skillObj.mod);
-
-				intMod += World.dice.roll(1, skillObj.mod);
-			}
-
-			player.wait += wait;
-			player.cmana -= cost;
-
-			if (opponent.chp > opponent.hp) {
-				opponent.chp = opponent.hp;
-			}
-
-			if (chanceRoll === 100) {
-				healing += World.dice.roll(1, healing/3);
-			}
-
-			healing = World.dice.roll(player.level / 2 + 1, 20 + intMod + player.mana / 40, wisMod) + skillObj.mod;
-
-			opponent.chp += healing;
-
-			if (opponent.chp > opponent.hp) {
-				opponent.chp = opponent.hp;
-			}
-
-			World.msgPlayer(player, {
-				msg: successMsg
-			});
-
-			if (roomMsg) {
-				World.msgRoom(roomObj, {
-					msg: roomMsg,
-					playerName: player.name
-				});
-			}
+			World.combat.processSkill(entity, opponent, skillOutput);
 		} else {
-			World.msgPlayer(player, {
-				msg: failMsg
-			});
-		}
-
-		if (fn) {
-			return fn(player, opponent, roomObj, command);
+			// fail
 		}
 	} else {
-		World.msgPlayer(player, {
-			msg: manaFailMsg,
+		World.msgPlayer(entity, {
+			msg: 'You dont have enough mana to cure something!',
 			styleClass: 'error'
 		});
-
-		if (fn) {
-			return fn(player, opponent, roomObj, command);
-		}
 	}
 };
 

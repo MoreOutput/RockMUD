@@ -225,10 +225,10 @@ Room.prototype.getBrief = function(roomObj, options) {
 		
 		for (i; i < monsters.length; i += 1) {
 			if (!monsters[i].short) {
-				displayHTML += '<li class="room-monster yellow">' + monsters[i].displayName + ' is ' 
+				displayHTML += '<li class="room-monster">' + monsters[i].displayName + ' is ' 
 					+ monsters[i].position + ' there.</li>';
 			} else {
-				displayHTML += '<li class="room-monster yellow">' + monsters[i].short + ' is ' 
+				displayHTML += '<li class="room-monster">' + monsters[i].short + ' is ' 
 				 + monsters[i].position + ' there.</li>';
 			}
 		}

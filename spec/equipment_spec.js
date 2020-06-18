@@ -1,6 +1,9 @@
 const MOCK_SERVER = require('../mocks/mock_server');
+const world = require('../src/world');
 
 describe('Testing Behavior: Item Interactions', () => {
+    const mockCurrentHealth = 10;
+    const mockMaxHealth = 100;
     let mockPlayer;
     let mockPlayerRoom;
     let server;
@@ -80,6 +83,16 @@ describe('Testing Behavior: Item Interactions', () => {
             mockPlayer.hitroll = 0;
             mockPlayer.mana = 100;
             mockPlayer.cmana = 100;
+            mockPlayer.hp = mockMaxHealth;
+            mockPlayer.chp = mockCurrentHealth;
+            mockPlayer.behaviors = [
+                {
+                    module: 'test',
+                    onSpell: () => {
+                        
+                    }
+                }
+            ];
 
             mockPlayerArea = server.world.getArea(mockPlayer.area);
             mockPlayerRoom = server.world.getRoomObject(mockPlayer.area, mockPlayer.roomid);
@@ -268,6 +281,25 @@ describe('Testing Behavior: Item Interactions', () => {
         expect(mockPlayer.items[0].equipped).toBe(true);
         expect(mockPlayer.damroll).toBe(1);
         expect(mockPlayer.hitroll).toBe(1);
+
+        cmd = server.world.commands.createCommandObject({
+            msg: 'brandish staff',
+            last: 'me'
+        });
+    
+        server.world.addCommand(cmd, mockPlayer);
+
+        jasmine.clock().tick(280);
+
+        expect(mockPlayer.chp).toBeGreaterThan(mockCurrentHealth);
+
+        cmd = server.world.commands.createCommandObject({
+            msg: 'remove staff'
+        });
+        
+        server.world.addCommand(cmd, mockPlayer);
+    
+        jasmine.clock().tick(280);
 
         cmd = server.world.commands.createCommandObject({
             msg: 'brandish staff',

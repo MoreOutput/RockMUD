@@ -119,7 +119,7 @@ describe('Testing Core: COMBAT', () => {
         expect(server.world.combat.getBattleByRefId(goblin.refId)).toEqual(battleObj);
     });
 
-    describe('Rounds', () => {
+    xdescribe('Rounds', () => {
         it('should simulate player initiating combat with three entites. ' +
             'Player kills the dragon in round three, the goblin uses Bash in round four, ' +
             'the goblin is killed in round six, player casts Spark in round seven ' + 
