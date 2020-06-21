@@ -166,7 +166,6 @@ Spell.prototype.cureLight = function(skillObj, entity, opponent, roomObj, comman
 		intMod = World.dice.getIntMod(entity);
 		wisMod = World.dice.getWisMod(entity);
 
-		// consistent 2% failure rate induced by the chanceRoll check
 		if (World.dice.roll(1, 100) <= skillObj.train) {
 			skillOutput.attackerMods.wait += wait;
 			skillOutput.attackerMods.cmana -= (cost - intMod);	

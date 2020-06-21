@@ -1752,7 +1752,13 @@ World.prototype.removeAffect = function(obj, affectName) {
 
 	for (i; i < obj.affects.length; i += 1) {
 		if (obj.affects[i].id === affectName) {
-			return obj.affects[i];
+			if (Object.keys(obj.affects[i].modifiers).length) {
+				this.character.removeMods(obj, obj.affects[i].modifiers);
+			}
+			
+			obj.affects.splice(i, 1);
+
+			return true;
 		}
 	}
 
@@ -1760,6 +1766,10 @@ World.prototype.removeAffect = function(obj, affectName) {
 };
 
 World.prototype.addAffect = function(obj, affect) {
+	if (Object.keys(affect.modifiers).length) {
+		this.character.applyMods(obj, affect.modifiers);
+	}
+	
 	obj.affects.push(affect);
 
 	return true;

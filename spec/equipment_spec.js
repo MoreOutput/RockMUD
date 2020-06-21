@@ -90,12 +90,13 @@ describe('Testing Behavior: Item Interactions', () => {
                 {
                     module: 'test',
                     onSpell: () => {
-                        
                     }
                 }
             ];
             mockPlayerArea = server.world.getArea(mockPlayer.area);
             mockPlayerRoom = server.world.getRoomObject(mockPlayer.area, mockPlayer.roomid);
+            
+            mockPlayerRoom.items = [];
 
             mockPlayerRoom.items.push(mockDagger);
             mockPlayerRoom.items.push(mockStaff);
@@ -108,8 +109,7 @@ describe('Testing Behavior: Item Interactions', () => {
         jasmine.clock().uninstall();
     });
 
-    
-    it('should pick up every item in the room', () => {
+    it('should pick up every item in the room and them drop them all', () => {
         setInterval(function() {
             server.world.ticks.cmdLoop();
         }, 280);
@@ -117,7 +117,7 @@ describe('Testing Behavior: Item Interactions', () => {
         expect(mockPlayer.items.length).toBe(0);
 
         let cmd = server.world.commands.createCommandObject({
-            msg: 'get dagger'
+            msg: 'get all'
         });
         let getSpy = spyOn(server.world.commands, 'get').and.callThrough();
 
@@ -128,26 +128,21 @@ describe('Testing Behavior: Item Interactions', () => {
         expect(cmdLoop).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledTimes(1);
 
-        expect(mockPlayer.items.length).toBe(1);
-    
-        expect(mockPlayer.items[0].name).toBe('Small Dagger');
+        expect(mockPlayer.items.length).toBe(2);
+        expect(mockPlayerRoom.items.length).toBe(0);
 
         cmd = server.world.commands.createCommandObject({
-            msg: 'wear dagger'
+            msg: 'drop all'
         });
-        let wearSpy = spyOn(server.world.commands, 'wear').and.callThrough();
-        let msgPlayerSpy = spyOn(server.world, 'msgPlayer').and.callThrough();
+        let dropSpy = spyOn(server.world.commands, 'drop').and.callThrough();
 
         server.world.addCommand(cmd, mockPlayer);
-    
+
         jasmine.clock().tick(280);
-    
-        expect(wearSpy).toHaveBeenCalledTimes(1);
-        expect(msgPlayerSpy).toHaveBeenCalledTimes(1);
-        expect(msgPlayerSpy).toHaveBeenCalledWith(mockPlayer, {
-            msg: 'Your level is too low to equip a common looking dagger.',
-            styleClass: 'error'
-        });
+        expect(dropSpy).toHaveBeenCalledTimes(1);
+
+        expect(mockPlayer.items.length).toBe(0);
+        expect(mockPlayerRoom.items.length).toBe(2);
     });
 
     it('should pick up the Dagger and fail to equip it due to being a lower level', () => {
@@ -282,6 +277,9 @@ describe('Testing Behavior: Item Interactions', () => {
         expect(mockPlayer.damroll).toBe(1);
         expect(mockPlayer.hitroll).toBe(1);
 
+        const cureSpy = spyOn(server.world.spells, 'cureLight').and.callThrough();
+        const onSpellEventSpy = spyOn(mockPlayer.behaviors[0], 'onSpell').and.callThrough();
+
         cmd = server.world.commands.createCommandObject({
             msg: 'brandish staff',
             last: 'me'
@@ -292,6 +290,8 @@ describe('Testing Behavior: Item Interactions', () => {
         jasmine.clock().tick(280);
 
         expect(mockPlayer.chp).toBeGreaterThan(mockCurrentHealth);
+        expect(cureSpy).toHaveBeenCalledTimes(1);
+        expect(onSpellEventSpy).toHaveBeenCalledTimes(1);
 
         cmd = server.world.commands.createCommandObject({
             msg: 'remove staff'
@@ -301,6 +301,10 @@ describe('Testing Behavior: Item Interactions', () => {
     
         jasmine.clock().tick(280);
 
+        expect(mockPlayer.items.length).toBe(1);
+        expect(mockPlayer.items[0].equipped).toBe(false);
+
+        // confirm items that are not equipped cannot be brandished
         cmd = server.world.commands.createCommandObject({
             msg: 'brandish staff',
             last: 'me'
@@ -309,5 +313,7 @@ describe('Testing Behavior: Item Interactions', () => {
         server.world.addCommand(cmd, mockPlayer);
 
         jasmine.clock().tick(280);
-    }); 
+
+        expect(cureSpy).toHaveBeenCalledTimes(1);
+    });
 });

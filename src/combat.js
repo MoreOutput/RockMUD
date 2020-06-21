@@ -712,7 +712,6 @@ Combat.prototype.processSkill = function(attacker, defender, skillProfile, battl
 		battle.skills[attacker.refId][defender.refId] = skillProfile;
 	} else {
 		if (attacker.refId === defender.refId) {
-			World.processEvents('onSpell', attacker, null, skillProfile.skillObj);
 			World.character.applyMods(attacker, skillProfile.defenderMods);
 		} else {
 			this.processFight(attacker, defender, World.getRoomObject(attacker.area, attacker.roomid), skillProfile);
