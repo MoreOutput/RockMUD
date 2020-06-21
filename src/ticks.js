@@ -5,31 +5,7 @@ ticks = {};
 
 // time
 ticks.time = setInterval(function() {
-	var i = 0,
-	areaMsg,
-	players,
-	monsters,
-	processAffectDecay = function(entity) {
-		var i = 0,
-		affLen = entity.affects.length,
-		affect;
-
-		for (i; i < affLen; i += 1) {
-			affect = entity.affects[i];
-			
-			if (affect.decay !== -1) {
-				if (affect.decay > 0) {
-					affect.decay -= 1;
-				} else {
-					if (affect.decayMsg) {
-						World.msgPlayer(entity, {msg: affect.decayMsg});
-					}
-
-					World.removeAffect(entity, affect.id);
-				}
-			}
-		}
-	};
+	var areaMsg;
 
 	World.time.minute += 1;
 
@@ -254,7 +230,64 @@ ticks.decay = setInterval(function() {
 			}
 		}
 	}
- }, 245000); // 4.5 minutes
+
+	// affect decay
+	if (World.players.length > 0) {
+		i = 0;
+
+		for (i; i < World.players.length; i += 1) {
+			if (World.players[i].affects.length) {
+				var affect;
+				
+				j = 0;
+
+				for (j; j < World.players[i].affects.length; j += 1) {
+					affect = World.players[i].affects[j];
+					
+					if (affect.decay !== -1) {
+						if (affect.decay > 0) {
+							affect.decay -= 1;
+						} else {
+							if (affect.decayMsg) {
+								World.msgPlayer(World.players[i], {msg: affect.decayMsg});
+							}
+
+							World.removeAffect(World.players[i], affect.id);
+						}
+					}
+				}
+			}
+		}
+		
+		i = 0;
+
+		for (i; i < World.areas.length; i += 1) {
+			mobs = World.getAllMonstersFromArea(World.areas[i]);
+
+			if (mobs) {
+				j = 0;
+
+				for (j; j < mobs.length; j += 1) {
+					if (mobs[j].affects.length) {
+						var affect;
+						var k = 0;
+						
+						for (k; k <  mobs[i].affects.length; k += 1) {
+							affect = mobs[k].affects[i];
+							if (affect.decay !== -1) {
+								if (affect.decay > 0) {
+									affect.decay -= 1;
+								} else {
+									World.removeAffect(mobs[i], affect.id);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}, 245000); // 4.5 minutes
 
 // AI Ticks and random player save
 ticks.ai = setInterval(function() {
