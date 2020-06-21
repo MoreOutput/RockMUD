@@ -4,6 +4,9 @@
 * see: save().
 */
 'use strict';
+
+const { isPlayableRace } = require('./world');
+
 var fs = require('fs'),
 crypto = require('crypto'),
 World = require('./world'),
@@ -508,7 +511,6 @@ Character.prototype.save = function(player, fn) {
 		objToSave.long = player.long;
 		objToSave.description = player.description;
 		objToSave.title = player.title;
-		objToSave.affects = [];
 		objToSave.eq = player.eq;
 		objToSave.creationStep = 0;
 		objToSave.items = player.items;
@@ -614,6 +616,11 @@ Character.prototype.save = function(player, fn) {
 		objToSave.deaths = player.deaths;
 		objToSave.verifiedPassword = player.verifiedPassword;
 		objToSave.verifiedName = player.verifiedName;
+		objToSave.affects = player.affects;
+		
+		this.removeAllMods(objToSave);
+		
+		objToSave.affects = [];
 
 		if (Object.keys(objToSave).length) {
 			this.write(objToSave.name.toLowerCase(), objToSave, function(err) {
@@ -1266,6 +1273,19 @@ Character.prototype.removeMods = function(player, mods) {
 	}
 };
 
+
+Character.prototype.removeAllMods = function(player) {
+	var i = 0;
+	var affect;
+
+	for (i; i < player.affects.length; i += 1) {
+		affect = player.affects[i];
+		if (affect.modifiers) {
+			this.removeMods(player, affect.modifiers);
+		}
+	}
+};
+
 Character.prototype.wearWeapon = function(target, weapon, roomObj) {
 	var slot = this.getEmptyWeaponSlot(target);
 	
@@ -1486,6 +1506,32 @@ Character.prototype.ungroup = function(player, entity) {
 	player.group.splice(player.group.indexOf(entity), 1);
 	entity.group.splice(entity.group.indexOf(player), 1);
 };
+
+Character.prototype.changeHp = function(entity, amount) {
+	var newTotal;
+
+	if (amount === 0) {
+		return;
+	}
+
+	if (amount > 0) {
+		newTotal = (entity.chp + amount);
+
+		if (newTotal > entity.hp) {
+			newTotal = entity.hp;
+		}
+
+		entity.chp = newTotal;
+	} else if (amount < 0) {
+		newTotal = (entity.chp - amount);
+
+		if (newTotal < 0) {
+			newTotal = 0;
+		}
+
+		entity.chp = 0;
+	}
+}
 
 Character.prototype.level = function(player) {
 	var mods = World.dice.getMods(player, 0),
