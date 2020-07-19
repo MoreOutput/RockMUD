@@ -281,10 +281,9 @@ describe('Testing Behavior: Item Interactions', () => {
         const onSpellEventSpy = spyOn(mockPlayer.behaviors[0], 'onSpell').and.callThrough();
 
         cmd = server.world.commands.createCommandObject({
-            msg: 'brandish staff',
-            last: 'me'
+            msg: 'brandish staff me'
         });
-    
+
         server.world.addCommand(cmd, mockPlayer);
 
         jasmine.clock().tick(280);
@@ -306,8 +305,7 @@ describe('Testing Behavior: Item Interactions', () => {
 
         // confirm items that are not equipped cannot be brandished
         cmd = server.world.commands.createCommandObject({
-            msg: 'brandish staff',
-            last: 'me'
+            msg: 'brandish staff me'
         });
     
         server.world.addCommand(cmd, mockPlayer);

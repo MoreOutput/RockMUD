@@ -1,7 +1,7 @@
 'use strict';
 var World = require('../src/world');
 
-module.exports = {
+exports = {
     questId: '', // id of the quest
     questCheck: null, // callback for custom logic
     beforeEnter: function(behavior, roomObj, player, targetRoom, cmd) {

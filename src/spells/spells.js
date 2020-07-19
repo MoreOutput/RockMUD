@@ -78,7 +78,7 @@ Spell.prototype.detectHidden = function(skillObj, player, roomObj, command, fn) 
 	alreadyAffectedMsg = 'You are already experiencing increased awareness.',
 	currentlyAffected = World.character.getAffect(player, 'detectHidden'),
 	timer = 1,
-	cost = 1;
+	cost = -1;
 
 	if (!currentlyAffected) {
 		if (World.dice.roll(1, 100) <= skillObj.train && chanceRoll > 2) {
@@ -102,6 +102,8 @@ Spell.prototype.detectHidden = function(skillObj, player, roomObj, command, fn) 
 				modifiers: null,
 				decay: timer
 			});
+
+			World.character.changeMana(player, cost);
 
 			World.msgPlayer(player, {
 				msg: successMsg

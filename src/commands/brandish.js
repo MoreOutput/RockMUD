@@ -25,7 +25,7 @@ module.exports = function(entity, command) {
 				}
 			} else {
 				if (command.msg === command.arg) {
-					command.last = 'self';
+					command.input = 'self';
 				}
 			}
 

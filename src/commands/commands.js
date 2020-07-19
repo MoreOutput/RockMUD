@@ -1,10 +1,3 @@
-/*
-* All non-combat commands that one would consider 'general' to a all
-* users (like get, look, and movement). Anything combat (even potentially) related is in skills.js
-* the actual combat loop is in combat.js.
-* 
-* Events fired on particular commands are also triggered here; for example onEnter, onLeave
-*/
 'use strict';
 var fs = require('fs'),
 util = require('util'),
@@ -15,21 +8,14 @@ areas = World.areas,
 
 Cmd = function () {};
 
-/*
-	// cast detect hidden rok
-	command object = {
-		cmd: 'cast', 
-		msg: 'detect hidden rok',
-		arg: 'detect hidden',
-		input: 'rok',
-		last: 'rok',
-		second: 'detect',
-		number: 1
-	};
-*/
-Cmd.prototype.createCommandObject = function(resFromClient) {
-	var cmdArr = resFromClient.msg.split(' '),
-	cmdObj = {};
+Cmd.prototype.createCommandObject = function(resFromClient, entity) {
+	var result;
+	var argStr = '';
+	var resultPos = '';
+	var i = 0;
+	var cmdArr = resFromClient.msg.split(' ');
+	var num;
+	var cmdObj = {};
 
 	if (cmdArr.length === 1) {
 		cmdArr[1] = '';
@@ -50,15 +36,43 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 				cmdObj.input = cmdObj.msg;
 			}
 		} else {
-			cmdObj.arg = cmdArr[1].toLowerCase() + ' ' + cmdArr[2].toLowerCase(),
-			cmdObj.input = cmdArr.slice(3).join(' ')
+			cmdObj.input = cmdArr.slice(cmdArr.length - 1).join(' ');
+			cmdObj.arg = cmdObj.msg.replace(cmdObj.input, '').trim();
+		}
+
+		if (entity) {
+			for (i; i < cmdArr.length; i += 1) {
+				if (i > 0 && !result) {
+					if (!result) {
+						if (!argStr) {
+							argStr += cmdArr[(i)];
+						} else {
+							argStr += ' ' + cmdArr[(i)];
+						}
+					}
+					resultPos = (i + 1); // adding two to account for starting at index 2
+					result = World.character.getSkill(entity, argStr);
+				}
+			}
+		}
+
+		if (result) {
+			cmdObj.input = cmdArr.slice(resultPos).join(' ');
+			// TODO: build from array
+			cmdObj.arg = result.display.toLowerCase();
 		}
 
 		if (cmdObj.input && !isNaN(parseInt(cmdObj.input[0]))
 			|| (!cmdObj.input && !isNaN(parseInt(cmdObj.msg[0]))) ) {
 
 			cmdObj.arg = cmdObj.arg.replace(/.*[.]/g, '');
-			cmdObj.number = parseInt(cmdObj.last[0]);
+			 
+			num = parseInt(cmdObj.input.replace(/[.][a-z].*/ig, ''));
+
+			if (num) {
+				cmdObj.number = num;
+				cmdObj.input = cmdObj.input.replace(num + '.', '');
+			}
 
 			if (!cmdObj.input) {
 				cmdObj.msg = cmdObj.msg.replace(/^[0-9][.]/, '');
@@ -67,10 +81,18 @@ Cmd.prototype.createCommandObject = function(resFromClient) {
 			}
 		}
 
+		cmdObj.msg = cmdObj.msg.replace(cmdObj.number + '.', '');
+
 		if (cmdObj.arg.indexOf(' ') !== -1) {
 			cmdObj.second = cmdObj.arg.split(' ')[0];
 		} else {
 			cmdObj.second = cmdObj.arg;
+		}
+		
+		if (!cmdObj.second) {
+			cmdObj.last = cmdObj.cmd;
+		} else {
+			cmdObj.last = cmdObj.last.replace(cmdObj.number + '.', '');
 		}
 	}
 

@@ -97,7 +97,7 @@ RockMUD.prototype.setup = function(cfg, callback) {
 				valid = false;
 	
 				if (r.msg) {
-					cmdObj = World.commands.createCommandObject(r);
+					cmdObj = World.commands.createCommandObject(r, s.player);
 	
 					if (!s.player.creationStep) {
 						valid = World.isSafeCommand(cmdObj);

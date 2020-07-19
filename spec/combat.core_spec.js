@@ -121,9 +121,9 @@ describe('Testing Core: COMBAT', () => {
 
     xdescribe('Rounds', () => {
         it('should simulate player initiating combat with three entites. ' +
-            'Player kills the dragon in round three, the goblin uses Bash in round four, ' +
-            'the goblin is killed in round six, player casts Spark in round seven ' + 
-            ', the ogre in round eight and then the player levels.', () => {
+            'Player kills the dragon, the goblin uses Bash, ' +
+            'the goblin is killed, player casts Spark ' + 
+            ', the ogre is slain and then the player levels.', () => {
             const bashSkill = {
                 "id": "bash",
                 "display": "Bash",
@@ -209,7 +209,9 @@ describe('Testing Core: COMBAT', () => {
             // rounds 3 -- kill dragon in the next round
             dragon.chp = 1;
             
-            server.world.combat.round(battleObj, null);
+            if (dragon.chp === 1) {
+                server.world.combat.round(battleObj, null);
+            }
                       
             expect(battlePosSpy).toHaveBeenCalledWith(battleObj);
             expect(attackSpy).toHaveBeenCalledWith(mockPlayer, dragon, battleObj, jasmine.any(Function));
@@ -261,7 +263,10 @@ describe('Testing Core: COMBAT', () => {
             attackSpy.calls.reset();
 
             goblin.chp = 1;
-            server.world.combat.round(battleObj, null);
+
+            while(goblin.chp === 1) {
+                server.world.combat.round(battleObj, null);
+            }
              
             expect(battlePosSpy).toHaveBeenCalledWith(battleObj);
             expect(attackSpy).toHaveBeenCalledWith(mockPlayer, goblin, battleObj, jasmine.any(Function));
@@ -302,8 +307,10 @@ describe('Testing Core: COMBAT', () => {
 
             ogre.chp = 1;
 
-            server.world.combat.round(battleObj, null);
-        
+            while (ogre.chp > 0) {
+                server.world.combat.round(battleObj, null);
+            }
+
             expect(battlePosSpy).toHaveBeenCalledWith(battleObj);
             expect(attackSpy).toHaveBeenCalledWith(mockPlayer, ogre, battleObj, jasmine.any(Function));
             expect(attackSpy).toHaveBeenCalledTimes(1); // ogre didnt get to attack because it was killed
@@ -360,6 +367,57 @@ describe('Testing: COMBAT LOOP', () => {
         jasmine.clock().uninstall();
     });
 
+    it('should simulate player initiating combat with a deer and the deer being killed.', () => {
+        const endOfCombatSpy = spyOn(server.world.combat, 'processEndOfCombat').and.callThrough();
+        const createCorpseSpy = spyOn(server.world.character, 'createCorpse').and.callThrough();
+        let deer = MOCK_SERVER.getNewEntity();
+        deer.level = 1;
+        deer.isPlayer = false;
+        deer.name = 'deer';
+        deer.displayName = 'Brown Deer';
+        deer.refId = 'deer-refid';
+        deer.area = mockPlayer.area;
+        deer.originatingArea = mockPlayer.area;
+        deer.roomid = mockPlayer.roomid;
+        deer.cmv = 100;
+        deer.mv = 100;
+        deer.hp = 100;
+        deer.chp = 1;
+        mockPlayer.hitroll = 20; // beats the default entity AC of 10 so we always hit
+
+        mockPlayerRoom.monsters = [];
+        mockPlayerRoom.monsters.push(deer);
+        
+        setInterval(function() {
+            server.world.ticks.cmdLoop();
+        }, 280);
+
+        setInterval(function() {
+            server.world.ticks.combatLoop();
+        }, 1900);
+
+        expect(combatLoop).not.toHaveBeenCalled();
+
+        let cmd = server.world.commands.createCommandObject({
+            msg: 'kill deer'
+        });
+
+        server.world.addCommand(cmd, mockPlayer);
+
+        jasmine.clock().tick(280);
+
+        let battleObj = server.world.combat.getBattleByRefId(mockPlayer.refId);
+
+        while (deer.chp > 0) {
+            jasmine.clock().tick(1900); // trigger combat loop
+        }
+
+        expect(battleObj).toBeTruthy();
+        expect(combatLoop).toHaveBeenCalled();
+        expect(endOfCombatSpy).toHaveBeenCalledWith(battleObj, mockPlayer, deer)
+        expect(createCorpseSpy).toHaveBeenCalledWith(deer);
+    });
+
     it('should simulate player initiating combat with a deer and the deer fleeing.', () => {
         let deer = MOCK_SERVER.getNewEntity();
         deer.level = 1;
@@ -390,7 +448,7 @@ describe('Testing: COMBAT LOOP', () => {
 
         expect(cmdLoop).not.toHaveBeenCalled();
         expect(combatLoop).not.toHaveBeenCalled();
-      
+
         jasmine.clock().tick(280);
        
         expect(cmdLoop).toHaveBeenCalledTimes(1);
@@ -416,7 +474,7 @@ describe('Testing: COMBAT LOOP', () => {
         let roundSpy = spyOn(server.world.combat, 'round').and.callThrough();
         const attackSpy = spyOn(server.world.combat, 'attack').and.callThrough();
 
-        jasmine.clock().tick(1060); // 1900, combat loop triggers
+        jasmine.clock().tick(1060); // trigger combat loop
 
         let battleObj = server.world.combat.getBattleByRefId(mockPlayer.refId);
 
@@ -441,7 +499,7 @@ describe('Testing: COMBAT LOOP', () => {
         expect(fleeSpy).toHaveBeenCalled();
         expect(server.world.cmds.length).toBe(0);
 
-        jasmine.clock().tick(1620); // combat loop triggers
+        jasmine.clock().tick(1620); // trigger combat loop
 
         expect(combatLoop).toHaveBeenCalledTimes(2);
         expect(roundSpy).toHaveBeenCalledTimes(1);
@@ -459,7 +517,7 @@ describe('Testing: COMBAT LOOP', () => {
 
         attackSpy.calls.reset();
         
-        jasmine.clock().tick(1900); // combat loop triggers
+        jasmine.clock().tick(1900); // trigger combat loop
         
         cmd = server.world.commands.createCommandObject({
             msg: 'move east'
@@ -482,8 +540,8 @@ describe('Testing: COMBAT LOOP', () => {
 
         expect(battleObj.round).toBe(0); // round has not yet occured
 
-        jasmine.clock().tick(1620); // combat loop triggers
-
+        jasmine.clock().tick(1620); // trigger combat loop
+        
         expect(server.world.cmds.length).toBe(0);
         expect(battleObj.round).toBe(1);
         expect(attackSpy).toHaveBeenCalledTimes(2);

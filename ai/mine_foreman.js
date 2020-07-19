@@ -5,7 +5,7 @@ towerQuestKey = 'mine_access';
 module.exports = {
 	exclimations: [
 		'No one has ever reached the bottom.',
-		'Theres a lot of money to be made rummaging around down there.',
+		'There is a lot of money to be made rummaging around down there.',
 		'I\'ve been working this hole for over forty years.'
 	],
 	onGoldReceived: function(behavior, mob, roomObj, gold, player) {

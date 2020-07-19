@@ -1090,11 +1090,10 @@ Character.prototype.addToBottle = function(container, item) {
 };
 
 Character.prototype.getSkill = function(player, skillName) {
-	var i = 0,
-	regex = new RegExp('^' + skillName, 'i');
+	var i = 0;
 
 	for (i; i < player.skills.length; i += 1) {
-		if (regex.test(player.skills[i].id) || regex.test(player.skills[i].display)) {
+		if (skillName.toLowerCase() === player.skills[i].id.toLowerCase() || skillName.toLowerCase() === player.skills[i].display.toLowerCase()) {
 			return player.skills[i];
 		}
 	}
@@ -1530,6 +1529,58 @@ Character.prototype.changeHp = function(entity, amount) {
 		}
 
 		entity.chp = 0;
+	}
+}
+
+Character.prototype.changeMana = function(entity, amount) {
+	var newTotal;
+
+	if (amount === 0) {
+		return;
+	}
+
+	if (amount > 0) {
+		newTotal = (entity.cmana + amount);
+
+		if (newTotal > entity.mana) {
+			newTotal = entity.mana;
+		}
+
+		entity.cmana = newTotal;
+	} else if (amount < 0) {
+		newTotal = (entity.cmana - amount);
+
+		if (newTotal < 0) {
+			newTotal = 0;
+		}
+
+		entity.cmana = 0;
+	}
+}
+
+Character.prototype.changeMove = function(entity, amount) {
+	var newTotal;
+
+	if (amount === 0) {
+		return;
+	}
+
+	if (amount > 0) {
+		newTotal = (entity.cmv + amount);
+
+		if (newTotal > entity.mv) {
+			newTotal = entity.mv;
+		}
+
+		entity.cmv = newTotal;
+	} else if (amount < 0) {
+		newTotal = (entity.cmv - amount);
+
+		if (newTotal < 0) {
+			newTotal = 0;
+		}
+
+		entity.cmv = 0;
 	}
 }
 
