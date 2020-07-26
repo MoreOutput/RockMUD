@@ -22,9 +22,6 @@ exports.server = {
 			player: false // {driver: 'couchdb'}
 		},
 		combat: 'hybrid', // automated, hybrid, manual 
-		// when this is set to true each round an entity always gets one automated attack
-		// this can be helpful in some test situations
-		oneAttackPerRound: false,
 		// will prevent ticks (time based functions) from running
 		preventTicks: false,
 		// all characters can use admin commands

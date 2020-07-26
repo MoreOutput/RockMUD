@@ -12,7 +12,6 @@ class MockServer {
         this.room;
 
         config.server.game.port = port;
-        config.server.game.oneAttackPerRound = true;
     } 
 
     setup(callback, preventTicks = true, addMockArea = true) {
@@ -61,7 +60,7 @@ class MockServer {
                 this.room = room;
             }
             
-            callback()
+            callback(this.server)
         });
     }
 

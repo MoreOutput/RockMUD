@@ -2158,17 +2158,16 @@ Cmd.prototype.cast = function(player, command, fn) {
 					if (player.position === 'standing') {
 
 						spellTarget = World.combat.getBattleTargetByRefId(player.refId);
+
 						if (skillObj.type.indexOf('passive') === -1) {
 							// combat skills
 							if (spellTarget) {
 								skillProfile = World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command);
-
 								World.processEvents('onSpell', player, roomObj, skillObj);
 								World.processEvents('onSpell', player.items, roomObj, skillObj);
 								World.processEvents('onSpell', roomObj, player, skillObj);
 							} else {
-								spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg});
-
+								spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg, number: command.number});
 								if (spellTarget) {
 									skillProfile = World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command);
 								} else {

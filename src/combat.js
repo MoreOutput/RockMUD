@@ -297,7 +297,6 @@ Combat.prototype.round = function(battle, skillProfile) {
 
 										//	battle.attacked = [];
 											battle.skills = {};
-
 											combat.processEndOfCombat(battle, attacker, defender);
 										}
 									});
@@ -487,14 +486,10 @@ Combat.prototype.attack = function(attacker, defender, battle, fn) {
 
 				weaponName = this.getCombatName(weapon);
 
-				if (!World.config.oneAttackPerRound) {
-					if (i === 0) {
-						numOfAttacks = combat.getNumberOfAttacks(attacker, defender, weapon, attackerMods, defenderMods);
-					} else {
-						numOfAttacks = World.dice.roll(1, 2, -1);
-					}
+				if (i === 0) {
+					numOfAttacks = combat.getNumberOfAttacks(attacker, defender, weapon, attackerMods, defenderMods);
 				} else {
-					numOfAttacks = 1;
+					numOfAttacks = World.dice.roll(1, 2, -1);
 				}
 
 				if (numOfAttacks && weapon) {

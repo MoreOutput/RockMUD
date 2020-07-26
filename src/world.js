@@ -1473,10 +1473,10 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 				fnd = false;
 
 				for (j; j < wordArr.length; j += 1) {
-					pattern = new RegExp('^' + command.arg);
+					pattern = new RegExp(command.arg);
 
 					if (fnd === false && pattern.test(wordArr[j]) 
-					|| pattern.test(arr[i].displayName.toLowerCase())) {
+					|| pattern.test(arr[i].displayName.toLowerCase()) && matchedIndexes.indexOf(i) === -1) {
 						fnd = true;
 
 						matchedIndexes.push(i);
@@ -1495,7 +1495,7 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 					pattern = new RegExp('^' + command.arg);
 
 					if (fnd === false && arr[i].itemType === itemType && pattern.test(wordArr[j]) 
-					|| pattern.test(arr[i].displayName.toLowerCase())) {
+					|| pattern.test(arr[i].displayName.toLowerCase()) && matchedIndexes.indexOf(i) === -1) {
 						fnd = true;
 
 						matchedIndexes.push(i);
