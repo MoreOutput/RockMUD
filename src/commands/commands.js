@@ -1,7 +1,5 @@
 'use strict';
 
-const { ConsoleReporter } = require('jasmine');
-
 var fs = require('fs'),
 util = require('util'),
 World = require('../world'),
