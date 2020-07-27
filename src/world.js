@@ -1003,44 +1003,7 @@ World.prototype.getRoomObject = function(areaId, roomId) {
 	return null;
 };
 
-/*
-World.prototype.getEntityByRefId = function(refId) {
-	var world = this,
-	i = 0;
-
-	for (i; world.areas.length; i += 1) {
-		var area = world.areas[i];
-		var j = 0;
-
-		for (j; j < area.rooms.length; j += 1) {
-			var room = area.rooms[j];
-			var k = 0;
-
-			for (k; k < room.monsters.length; k += 1) {
-				var mob = room.monsters[k];
-
-				if (mob.refId === refId) {
-					return mob;
-				}
-			}
-
-			k = 0
-
-			for (k; k < room.playersInRoom.length; k += 1) {
-				var player = room.playersInRoom[k];
-
-				if (player.refId === refId) {
-					return player;
-				}
-			}
-		}
-	}
-
-	return null;
-};
- */
-
- World.prototype.getEntityByRefId = function(refId, areaId) {
+World.prototype.getEntityByRefId = function(refId, areaId) {
 	var world = this,
 	searchEntities = function(area) {
 		var j = 0;
