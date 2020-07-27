@@ -16,17 +16,17 @@ describe('Testing Command: AFFECTS', () => {
         });
     });
 
-    it('should print a table of all the things the player is affected with', () => {
+    it('should send a table of all the things the player is affected with', () => {
        
     });
 
     
-    it('should print an unknown message when the player is affected with something of which they arent fully aware', () => {
+    it('should send an unknown message when the player is affected with something of which they arent fully aware', () => {
        
     });
 
     
-    it('should print the remaing time the user will be affected when the player is above level 20', () => {
+    it('should send the remaing time the user will be affected when the player is above level 20', () => {
        
     });
 });

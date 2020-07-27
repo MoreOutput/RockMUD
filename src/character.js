@@ -1181,8 +1181,8 @@ Character.prototype.removeEq = function(player, item) {
 	});
 };
 
-Character.prototype.getItem = function(player, command) {
-	return World.search(player.items, command);
+Character.prototype.getItem = function(entity, command) {
+	return World.search(entity.items, command);
 };
 
 Character.prototype.getItems = function(player, command) {

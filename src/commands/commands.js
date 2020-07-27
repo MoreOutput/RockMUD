@@ -1,4 +1,7 @@
 'use strict';
+
+const { ConsoleReporter } = require('jasmine');
+
 var fs = require('fs'),
 util = require('util'),
 World = require('../world'),
@@ -312,7 +315,6 @@ Cmd.prototype.give = function(target, command) {
 
 					if (receiver) {
 						item = World.character.getItem(target, command);
-
 						if (item) {
 							World.character.removeItem(target, item);
 
