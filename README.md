@@ -18,4 +18,4 @@ Current commands include, but are not limited to, kill (and round based combat),
 * npm start (defaults to http://127.0.0.1:3001)
 
 
-[Get started adding commands](https://github.com/MoreOutput/RockMUD/wiki/Implementing-A-New-Command
+Get started adding commands: https://github.com/MoreOutput/RockMUD/wiki/Implementing-A-New-Command
