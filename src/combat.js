@@ -489,7 +489,8 @@ Combat.prototype.attack = function(attacker, defender, battle, fn) {
 				if (i === 0) {
 					numOfAttacks = combat.getNumberOfAttacks(attacker, defender, weapon, attackerMods, defenderMods);
 				} else {
-					numOfAttacks = World.dice.roll(1, 2, -1);
+					// secondary weapons
+					numOfAttacks = 1;
 				}
 
 				if (numOfAttacks && weapon) {
@@ -628,7 +629,8 @@ Combat.prototype.getCombatName = function(gameObject) {
 
 Combat.prototype.getNumberOfAttacks = function(attacker, defender, weapon) {
 	var numOfAttacks = 1,
-	secondAttackSkill = World.character.getSkillById(attacker, 'secondAttack');
+	secondAttackSkill = World.character.getSkillById(attacker, 'secondAttack'),
+	thirdAttackSkill = World.character.getSkillById(attacker, 'thirdAttack');
 
 	if (weapon.modifiers && weapon.modifiers.numOfAttacks) {
 		numOfAttacks += (Word.dice.roll(1, weapon.modifiers.numOfAttacks));
@@ -638,22 +640,24 @@ Combat.prototype.getNumberOfAttacks = function(attacker, defender, weapon) {
 		numOfAttacks += 1;
 	}
 
-	if (attacker.dex > 15 && World.dice.roll(1, 10) === 1) {
+	if (attacker.dex > 20 && World.dice.roll(1, 10) === 1) {
 		numOfAttacks += 1;
 	}
 
-	if (attacker.str > 20 && World.dice.roll(1, 10) === 1) {
-		numOfAttacks += 1;
-	}
-
-	if (secondAttackSkill && numOfAttacks === 1) {
+	if (secondAttackSkill && numOfAttacks <= 1) {
 		if (World.dice.roll(1, 100) <= secondAttackSkill.train) {
-			numOfAttacks = World.skills.secondAttack(secondAttackSkill, attacker);
+			numOfAttacks = 2;
+		}
+	}
+
+	if (thirdAttackSkill && numOfAttacks <= 2) {
+		if (World.dice.roll(1, 100) <= thirdAttackSkill.train) {
+			numOfAttacks = 3;
 		}
 	}
 
 	if (numOfAttacks === 1 && World.dice.roll(1, 3) === 1) {
-		numOfAttacks += 1;
+		numOfAttacks = 2;
 	}
 
 	if (numOfAttacks > 1 && defender.level > attacker.level) {

@@ -2,7 +2,7 @@
 var World = require('../src/world');
 
 /*
-    RockMUD A* move the entity toward a given ref ID
+    RockMUD move an entity toward a given refID
 
     @stayInArea boolean can be toggled to keep the entity from searching outside of its current area. 
 

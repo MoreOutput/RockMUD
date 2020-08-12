@@ -294,6 +294,7 @@ Cmd.prototype.give = function(target, command) {
 	item,
 	canSee = true,
 	goldToTransfer = 0,
+	canGive,
 	receiver;
 
 	if (command.roomObj) {
@@ -314,30 +315,31 @@ Cmd.prototype.give = function(target, command) {
 					if (receiver) {
 						item = World.character.getItem(target, command);
 						if (item) {
-							World.character.removeItem(target, item);
+							canGive = World.processEvents('beforeItemRemove', item, roomObj, target);
+							
+							if (canGive) {
+								World.character.removeItem(target, item);
+								World.character.addItem(receiver, item);
 
-							World.character.addItem(receiver, item);
-
-							World.msgPlayer(target, {
-								msg: 'You give ' + item.short + ' to ' + receiver.displayName + '.',
-								styleClass: 'green'
-							});
-
-							if (receiver.isPlayer) {
-								World.msgPlayer(receiver, {
-									msg: target.displayName + ' gives you ' + item.short + '.',
+								World.msgPlayer(target, {
+									msg: 'You give ' + item.short + ' to ' + receiver.displayName + '.',
 									styleClass: 'green'
 								});
-							}
 
-							World.msgRoom(roomObj, {
-								msg: 'roomMsg',
-								styleClass: 'grey',
-								playerName: [receiver.name, target.name]
-							});
-							
-							if (receiver.onNewItem) {
-								World.processEvents('onNewItem', receiver, roomObj, item, target);
+								if (receiver.isPlayer) {
+									World.msgPlayer(receiver, {
+										msg: target.displayName + ' gives you ' + item.short + '.',
+										styleClass: 'green'
+									});
+								}
+
+								World.msgRoom(roomObj, {
+									msg: 'roomMsg',
+									styleClass: 'grey',
+									playerName: [receiver.name, target.name]
+								});
+								
+								World.processEvents('onReceive', receiver, roomObj, item, target);
 							}
 						} else {
 							World.msgPlayer(target, {
@@ -1874,7 +1876,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 				}
 
 				if (item && !item.equipped) {
-					canDrop = World.processEvents('beforeDrop', item, roomObj, target);
+					canDrop = World.processEvents('beforeItemRemove', item, roomObj, target);
 
 					if (canDrop) {
 						World.character.removeItem(target, item);
@@ -1924,7 +1926,7 @@ Cmd.prototype.drop = function(target, command, fn) {
 					for (i; i < itemLen; i += 1) {
 						item = itemArr[i];
 
-						canDrop = World.processEvents('beforeDrop', item, roomObj, target);
+						canDrop = World.processEvents('beforeItemRemove', item, roomObj, target);
 
 						if (canDrop) {
 							if (!item.equipped) {

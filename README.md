@@ -3,25 +3,19 @@ RockMUD
 
 **RockMUD (0.4.0) is a WebSockets MUD server**. Try the latest on this Heroku hobby instance: https://rockmud.herokuapp.com/.
 
-Current commands include, but are not limited to: kill (and round based combat), eat, drink, inventory, score, give, get, movement (any direction), drop, remove, wear, affects, say, yell, tell, chat, buy, sell, list, practice, train, fill, rest, sleep, stand, xyzzy, brandish, follow, unfollow, group, emote, look, scan, cast, open, close, unlock, lock, recall, flee, who, put, worth, where, reply, time, save, quit, title, equipment, skills, quests, help, and restore.
+
+Current commands include, but are not limited to, kill (and round based combat), eat, drink, inventory, score, give, get, movement (any direction), drop, remove, wear, affects, say, yell, tell, chat, buy, sell, list, practice, train, fill, rest, sleep, stand, xyzzy, brandish, follow, unfollow, group, emote, look, scan, cast, open, close, unlock, lock, recall, flee, who, put, worth, where, reply, time, save, quit, title, equipment, skills, quests, help, and restore.
 
 ### Goals:
 * Full featured MUD experience from within the browser
 * Quick development
 
-### Dependencies:
-* The latest version of the WS library is required. This is the single outside dependency for the server and is contained to the core message passing functions. Istanbul, Jasmine, and Request are development dependencies used in writing tests.
-* Development keeps up with latest node release.
-
-## 10000 feet:
-All design/data elements of RockMUD must be either valid JSON or .js files. Please look at the current code and make an effort to match the current style if you plan to submit a pull request. Documentation has started -- see the github wiki.
-
-### RockMUD development chat through gitter:
-
-https://gitter.im/rockmud/Lobby?utm_source=share-link&utm_medium=link&utm_campaign=share-link
 
 ### Installation
 * Install Node, npm, and Git
 * Clone the repo
 * npm install
 * npm start (defaults to http://127.0.0.1:3001)
+
+
+[Get started adding commands](https://github.com/MoreOutput/RockMUD/wiki/Implementing-A-New-Command

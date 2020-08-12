@@ -25,7 +25,7 @@ class MockServer {
             this.server.world.players = [];
             this.server.world.battles = [];
             this.server.world.cmds = [];
-            
+
             if (addMockArea) {
                 let entity = this.getNewEntity();
                 let area = JSON.parse(JSON.stringify(MOCK_AREA));

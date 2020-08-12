@@ -4,12 +4,11 @@ exports.server = {
 		name: 'RockMUD',
 		version: '0.4.0',
 		website: 'https://github.com/MoreOutput/RockMUD',
-		description: 'WebSockets MUD Engine Demo',
+		description: 'RockMUD Configuration',
 		// Name of world currency -- referenced in game
 		coinage: 'gold',
 		// Area the player starts in -- can be an array.
 		// if its an array the selection is randomized.
-		// used in Character.create()
 		startingArea: {
 			area: 'midgaard',
 			roomid: '1'
@@ -28,6 +27,5 @@ exports.server = {
 		allAdmin: true,
 		// show opponent hp in status
 		viewHp: true
-	},
-	admins: []
+	}
 };
