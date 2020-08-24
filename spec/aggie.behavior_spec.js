@@ -1,6 +1,6 @@
 const MOCK_SERVER = require('../mocks/mock_server');
 
-fdescribe('Testing: AGGIE BEHAVIOR', () => {
+describe('Testing: AGGIE BEHAVIOR', () => {
     let combatLoop;
     let cmdLoop;
     let mockPlayer;
@@ -54,6 +54,8 @@ fdescribe('Testing: AGGIE BEHAVIOR', () => {
 
                     wolfRoom = server.world.getRoomObject(wolf.area, wolf.roomid);
 
+                    wolfRoom.monsters = [];
+
                     server.world.players.push(mockPlayer);
 
                     done();
@@ -96,10 +98,21 @@ fdescribe('Testing: AGGIE BEHAVIOR', () => {
 
         jasmine.clock().tick(280); // 560
 
-        jasmine.clock().tick(280);
+        jasmine.clock().tick(280); // onVisit issues kill command
 
         jasmine.clock().tick(1060); // trigger combat loop
         
         expect(combatLoop).toHaveBeenCalled();
+
+        // defeat the wolf
+
+        wolf.chp = 1;
+
+        while (wolf.chp) {
+            jasmine.clock().tick(1900); // trigger combat loop
+        }
+
+        expect(wolf.chp).toBe(0);
+        expect(wolfRoom.monsters.length).toBe(0);
     });
 });
