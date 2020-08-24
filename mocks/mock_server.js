@@ -3,6 +3,7 @@ const MOCK_AREA = require('./mock_area');
 const MOCK_ROOM = require('./mock_room');
 const server = require('../server');
 const config = require('../config');
+const world = require('../src/world');
 
 class MockServer {
     constructor(port = 3002) {
@@ -68,7 +69,23 @@ class MockServer {
         return JSON.parse(JSON.stringify(MOCK_ENTITY));
     }
 
-    getNewPlayerEntity() {
+    createNewEntity(callback, behaviors) {
+        let entity = this.getNewEntity();
+
+        if (behaviors) {
+            entity.behaviors = behaviors;
+        }
+        
+        world.rollMob(entity, {id: ''}, {id: ''}, (err, entity) => {
+            entity.originatingArea = '';
+            entity.area = '';
+            entity.roomid = '';
+
+            return callback(entity);
+        });
+    }
+
+    getNewPlayerEntity(callback) {
         let entity = this.getNewEntity();
 
         entity.isPlayer = true;

@@ -184,7 +184,7 @@ describe('Testing Command: GIVE', () => {
         expect(mockPlayer2.gold).toBe(0);
     });
     
-    it('should only give if beforeItemRemove behaviors return false', () => {
+    it('should only give away an item if beforeItemRemove return true', () => {
         sword.behaviors = [
             {
                 beforeItemRemove: function() {

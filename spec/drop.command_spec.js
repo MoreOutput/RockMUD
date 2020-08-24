@@ -101,6 +101,19 @@ describe('Testing Command: DROP', () => {
     });
 
     it('should drop the sword and dagger', () => {
+        dagger.behaviors = [
+            {
+                beforeItemRemove: function() {
+                    return true;
+                }
+            },
+            {
+                beforeItemRemove: function() {
+                    return true;
+                }
+            }
+        ];
+
         mockPlayer.items.push(sword);
         mockPlayer.items.push(dagger);
 

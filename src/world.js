@@ -1439,7 +1439,7 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 					pattern = new RegExp(command.arg);
 
 					if (fnd === false && pattern.test(wordArr[j]) 
-					|| pattern.test(arr[i].displayName.toLowerCase()) && matchedIndexes.indexOf(i) === -1) {
+					|| (pattern.test(arr[i].displayName.toLowerCase()) || pattern.test(arr[i].name.toLowerCase()) )  && matchedIndexes.indexOf(i) === -1) {
 						fnd = true;
 
 						matchedIndexes.push(i);
@@ -1458,7 +1458,7 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 					pattern = new RegExp('^' + command.arg);
 
 					if (fnd === false && arr[i].itemType === itemType && pattern.test(wordArr[j]) 
-					|| pattern.test(arr[i].displayName.toLowerCase()) && matchedIndexes.indexOf(i) === -1) {
+					|| (pattern.test(arr[i].displayName.toLowerCase()) || pattern.test(arr[i].name.toLowerCase())) && matchedIndexes.indexOf(i) === -1) {
 						fnd = true;
 
 						matchedIndexes.push(i);
@@ -1766,13 +1766,14 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 			gameEntity = gameEntities[i];
 
 			if (gameEntity.behaviors.length) {
+				j = 0;
+				
 				for (j; j < gameEntity.behaviors.length; j += 1) {
 					behavior = gameEntity.behaviors[j];
 
 					if (behavior[evtName]
 						&& !gameEntity['prevent' + this.capitalizeFirstLetter(evtName)]
 						&& !behavior['prevent' + this.capitalizeFirstLetter(evtName)]) {
-
 						allTrue = behavior[evtName](behavior, gameEntity, roomObj, param, param2);
 					}
 				}

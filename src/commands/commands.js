@@ -316,7 +316,7 @@ Cmd.prototype.give = function(target, command) {
 						item = World.character.getItem(target, command);
 						if (item) {
 							canGive = World.processEvents('beforeItemRemove', item, roomObj, target);
-							
+
 							if (canGive) {
 								World.character.removeItem(target, item);
 								World.character.addItem(receiver, item);

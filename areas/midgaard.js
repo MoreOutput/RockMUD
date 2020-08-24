@@ -365,7 +365,7 @@ module.exports = {
 				id: '3', 	
 				level: 1,
 				itemType: 'armor',
-				material: 'wood', 
+				material: 'leather', 
 				ac: 1, 
 				weight: 1,
 				slot: 'head',

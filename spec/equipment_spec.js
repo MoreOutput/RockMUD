@@ -8,6 +8,27 @@ describe('Testing Behavior: Item Interactions', () => {
     let mockPlayerRoom;
     let server;
     let cmdLoop;
+    let helmet = {
+        name: 'Leather Helmet',
+        displayName: 'Leather Helmet',
+        short: 'a leather helmet',
+        long: 'A simple leather helmet was left here',
+        area: 'midgaard',
+        id: '3', 	
+        refId: 'item-3',
+        level: 1,
+        itemType: 'armor',
+        material: 'leather', 
+        ac: 1, 
+        weight: 1,
+        slot: 'head',
+        equipped: false,
+        modifiers: {
+            ac: 1
+        },
+        affects: [],
+        behaviors: []
+    };
     let mockDagger = {
         name: 'Small Dagger',
         displayName: 'Short Sword',
@@ -313,5 +334,31 @@ describe('Testing Behavior: Item Interactions', () => {
         jasmine.clock().tick(280);
 
         expect(cureSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should pick up the helmet and wear it', () => {
+        mockPlayerRoom.items.push(helmet);
+
+        setInterval(function() {
+            server.world.ticks.cmdLoop();
+        }, 280);
+
+        mockPlayer.ac = 0;
+
+        expect(mockPlayer.items.length).toBe(0);
+
+        let cmd = server.world.commands.createCommandObject({
+            msg: 'get helmet'
+        });
+        let getSpy = spyOn(server.world.commands, 'get').and.callThrough();
+
+        server.world.addCommand(cmd, mockPlayer);
+
+        jasmine.clock().tick(280);
+
+        expect(cmdLoop).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledTimes(1);
+
+        expect(mockPlayer.items.length).toBe(1);
     });
 });
