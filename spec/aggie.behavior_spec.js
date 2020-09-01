@@ -19,7 +19,7 @@ describe('Testing: AGGIE BEHAVIOR', () => {
 
             jasmine.clock().install();
 
-            mockPlayer = MOCK_SERVER.createNewEntity((playerModel) => {
+            MOCK_SERVER.createNewEntity((playerModel) => {
                 MOCK_SERVER.createNewEntity((wolfModel) => {
                     mockPlayer = playerModel;
                     mockPlayer.refId = 'unit-test-player'

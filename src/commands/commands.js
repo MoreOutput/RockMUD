@@ -478,9 +478,13 @@ Cmd.prototype.follow = function(target, command) {
 	entityToFollow,
 	roomObj,
 	canSee = World.character.canSee(target, roomObj);
-
-	roomObj = command.roomObj;
-
+	
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
+	
 	if (target.position === 'standing' && !target.following) {
 		if (canSee) {
 			entityToFollow = World.room.getPlayer(roomObj, command);
@@ -552,14 +556,18 @@ Cmd.prototype.group = function(target, command) {
 	groupListStr = '',
 	groupMemberIsInSameRoom = true,
 	canSee = World.character.canSee(target, roomObj);
-
-	roomObj = command.roomObj;
-
+	
+	if (command.roomObj) {
+		roomObj = command.roomObj;
+	} else {
+		roomObj = World.getRoomObject(target.area, target.roomid);
+	}
+	
 	if (command.arg) {
 		if (target.position === 'standing' || target.position === 'resting') {
 			if (target.followers.length) {
 				entityJoiningGroup = World.room.getPlayer(roomObj, command);
-				
+
 				if (target.group.indexOf(entityJoiningGroup) === -1) {
 					if (target.followers.indexOf(entityJoiningGroup) !== -1) {
 						if (target.group.length < leadMax) {

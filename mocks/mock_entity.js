@@ -71,7 +71,7 @@ module.exports = {
     "followers": [],
     "noFollow": false,
     "group": [],
-    "noGroup": true,
+    "noGroup": false,
     "capitalShort": "",
     "possessivePronoun": "",
     "personalPronoun": "",
