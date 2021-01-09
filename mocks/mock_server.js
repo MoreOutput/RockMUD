@@ -1,43 +1,28 @@
 const MOCK_ENTITY = require('./mock_entity'); // add a player by default
 const MOCK_AREA = require('./mock_area');
 const MOCK_ROOM = require('./mock_room');
-const server = require('../server');
+const mud = require('../rockmud');
 const config = require('../config');
-const world = require('../src/world');
 
 class MockServer {
-    constructor(port = 3002) {
-        this.server = server;
-        this.player;
-        this.area;
-        this.room;
+    constructor(callback, preventTicks = true, addMockArea = true) {
+        this.port = config.server.port;
 
-        config.server.game.port = port;
-    } 
+        config.server.preventTicks = true;
+        config.server.game.allowedAreas = ['midgaard'];
 
-    setup(callback, preventTicks = true, addMockArea = true) {
-        config.server.game.preventTicks = preventTicks;
-
-        server.setup(config.server.game, () => {
-            if (preventTicks) {
-                this.server.world.ticks = null;
-            }
-
-            this.server.world.players = [];
-            this.server.world.battles = [];
-            this.server.world.cmds = [];
-
+        this.server = new mud(this.port, config.server.game, () => {
             if (addMockArea) {
                 let entity = this.getNewEntity();
                 let area = JSON.parse(JSON.stringify(MOCK_AREA));
                 let room = JSON.parse(JSON.stringify(MOCK_ROOM));
-                
+
                 entity.isPlayer = true;
                 entity.refId = 'unit-test-player'
                 entity.level = 1;
-                entity.name = 'Mockplayer';
-                entity.displayName = 'Mockplayer';
-                entity.combatName = 'Mockplayer';
+                entity.name = 'Mockplayer1';
+                entity.displayName = 'Mockplayer1';
+                entity.combatName = 'Mockplayer1';
                 entity.connected = true;
                 entity.originatingArea = area.id;
                 entity.area = area.id;
@@ -46,7 +31,9 @@ class MockServer {
                 entity.damroll = 10;
 
                 entity.socket = {
-                    player: this.entity
+                    player: this.entity,
+                    ping: function () {},
+                    terminate: function () {}
                 }
         
                 area.rooms.push(room);
@@ -60,8 +47,7 @@ class MockServer {
                 this.area = area;
                 this.room = room;
             }
-            
-            callback(this.server)
+            callback()
         });
     }
 
@@ -75,11 +61,19 @@ class MockServer {
         if (behaviors) {
             entity.behaviors = behaviors;
         }
-        
-        world.rollMob(entity, {id: ''}, {id: ''}, (err, entity) => {
+
+        this.server.world.rollMob(entity, {id: ''}, {id: ''}, (err, entity) => {
             entity.originatingArea = '';
             entity.area = '';
             entity.roomid = '';
+            entity.recall = {"roomid": "1", "area": "midgaard"};
+            entity.name = 'MOCK NAME';
+            entity.socket = {
+                player: entity,
+                id: 'mock-id',
+                ping: function () {},
+                terminate: function () {}
+            };
 
             return callback(entity);
         });
@@ -99,9 +93,15 @@ class MockServer {
         entity.area = '';
         entity.roomid = '';
         entity.title = 'UNIT TEST PLAYER';
+        entity.socket = {
+            player: entity,
+            id: 'mock-id',
+            ping: function () {},
+            terminate: function () {}
+        };
 
         return entity;
     }
 }
 
-module.exports = new MockServer();
+module.exports = MockServer;

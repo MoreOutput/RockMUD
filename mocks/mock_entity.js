@@ -92,7 +92,6 @@ module.exports = {
     "itemType": "entity",
     "preventItemDecay": false,
     "preventOnAlive": false,
-    "rollStats": true,
     "vulnerableTo": [],
     "resistantTo": [],
     "killed": 0,
@@ -159,6 +158,7 @@ module.exports = {
     "log": [],
     "hasEvents": false,
     "runOnAliveWhenEmpty": false,
+    "isPlayer": false,
     "fist" : {
         "name": "Fighting unarmed!",
         "displayName": "fists",

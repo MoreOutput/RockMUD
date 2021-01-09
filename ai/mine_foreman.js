@@ -1,6 +1,5 @@
 'use strict';
-var World = require('../src/world'),
-towerQuestKey = 'mine_access';
+var towerQuestKey = 'mine_access';
 
 module.exports = {
 	exclimations: [
@@ -8,7 +7,7 @@ module.exports = {
 		'There is a lot of money to be made rummaging around down there.',
 		'I\'ve been working this hole for over forty years.'
 	],
-	onGoldReceived: function(behavior, mob, roomObj, gold, player) {
+	onGoldReceived: function(World, behavior, mob, roomObj, gold, player) {
 		var quest =  World.character.getLog(player, towerQuestKey);
 
 		if (quest) {
@@ -40,7 +39,7 @@ module.exports = {
 			}, mob);
 		}
 	},
-	onSay: function(behavior, mob, roomObj, player, command) {
+	onSay: function(World, behavior, mob, roomObj, player, command) {
 		var quest;
 
 		if (player.isPlayer && command) {
@@ -61,7 +60,7 @@ module.exports = {
 			}
 		}
 	},
-	onVisit: function(behavior, mob, roomObj, incomingRoomObj, player, command) {
+	onVisit: function(World, behavior, mob, roomObj, incomingRoomObj, player, command) {
 		var quest;
 
 		if (player.level <= 2) {
@@ -84,7 +83,7 @@ module.exports = {
 			}
 		}
 	},
-	onAlive: function(behavior, mob, roomObj) {
+	onAlive: function(World, behavior, mob, roomObj) {
 		var roll = World.dice.roll(1, 200);
 
 		if (roll === 1) {

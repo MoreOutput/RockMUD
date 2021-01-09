@@ -1,10 +1,13 @@
 exports.server = {
+	port: 3001,
 	game: {
-		port: 3001,
 		name: 'RockMUD',
 		version: '0.4.0',
 		website: 'https://github.com/MoreOutput/RockMUD',
 		description: 'RockMUD Configuration',
+		// central time, in milliseconds, of a game minute
+		// which is the basis of the main game loop defiend in ticks.js
+		mudMinute: 280,
 		// Name of world currency -- referenced in game
 		coinage: 'gold',
 		// Area the player starts in -- can be an array.
@@ -20,12 +23,13 @@ exports.server = {
 			data: false, // {driver: 'flat'}
 			player: false // {driver: 'couchdb'}
 		},
-		combat: 'hybrid', // automated, hybrid, manual 
 		// will prevent ticks (time based functions) from running
 		preventTicks: false,
 		// all characters can use admin commands
 		allAdmin: true,
 		// show opponent hp in status
-		viewHp: true
+		viewHp: true,
+		// whitelist areas -- aids in testing -- only these areas will be loaded
+		allowedAreas: []
 	}
 };

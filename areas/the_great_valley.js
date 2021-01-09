@@ -1,6 +1,5 @@
 'use strict';
-var World = require('../src/world'),
-areaId = 'the_great_valley';
+var areaId = 'the_great_valley';
 
 module.exports = {
 	name : 'The Winter Plain',
@@ -17,7 +16,7 @@ module.exports = {
 			msg: 'A light snow begins to fall.'
 		}
 	],
-	beforeLoad: function(fn) {
+	beforeLoad: function(World, fn) {
 		var x = 7,
 		y = 7,
 		roomObj,
@@ -156,9 +155,8 @@ module.exports = {
 			i = 0;
 
 			for (i; i < this.rooms.length; i += 1) {
-				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 10) <= 2) {
+				if (this.rooms[i].monsters.length === 0 && World.dice.roll(1, 10) <= 5) {
 					var mob = {
-						hp: 42,
 						name: 'Dark Brown Elk',
 						displayName: 'Dark Brown Elk',
 						combatName: 'the dark brown elk',
@@ -176,14 +174,13 @@ module.exports = {
 						attackType: 'stab',
 						unarmedType: 'horns',
 						runOnAliveWhenEmpty: true,
-						ac: 4,
 						size: {value: 3, display: 'medium'},
 						fist: {
 							name: "Fighting unarmed!",
 							displayName: "horns",
 							level: 1,
 							diceNum: 2,
-							diceSides: 2,
+							diceSides: 5,
 							itemType: "weapon",
 							attackType: "stab",
 							weaponType: "unarmed",
@@ -192,15 +189,79 @@ module.exports = {
 							diceMod: -5,
 							slot: "hands",
 							short: "your hands"
-						},
-						onRolled: function(mob) {
-							if (World.dice.roll(1, 3) > 1) {
-								mob.behaviors = [];
-							}
-						},
-						behaviors: [{
-							module: 'wander'
-						}]
+						}
+					};
+
+					var mob2 = {
+						name: 'Dark Red Elk',
+						displayName: 'Dark Red Elk',
+						combatName: 'the dark red elk',
+						level: 1,
+						short: ['a dark red elk', 'a large red elk'],
+						long: [
+							'An elk with a thick dark red coat is here'
+						],
+						inName: 'An elk',
+						race: 'animal',
+						id: '6',
+						area: areaId,
+						weight: 120,
+						position: 'standing',
+						attackType: 'stab',
+						unarmedType: 'horns',
+						runOnAliveWhenEmpty: true,
+						size: {value: 3, display: 'medium'},
+						fist: {
+							name: "Fighting unarmed!",
+							displayName: "horns",
+							level: 1,
+							diceNum: 2,
+							diceSides: 5,
+							itemType: "weapon",
+							attackType: "stab",
+							weaponType: "unarmed",
+							material: "flesh",
+							modifiers: {},
+							diceMod: -5,
+							slot: "hands",
+							short: "your hands"
+						}
+					};
+
+					var mob3 = {
+						name: 'Yellow Elk',
+						displayName: 'Yellow Elk',
+						combatName: 'the yellow elk',
+						level: 1,
+						short: 'a yellow elk',
+						long: [
+							'An elk with a thick dark yellow coat is here'
+						],
+						inName: 'An elk',
+						race: 'animal',
+						id: '6',
+						area: areaId,
+						weight: 120,
+						position: 'standing',
+						attackType: 'stab',
+						unarmedType: 'horns',
+						runOnAliveWhenEmpty: true,
+						size: {value: 3, display: 'medium'},
+						fist: {
+							name: "Fighting unarmed!",
+							displayName: "horns",
+							level: 1,
+							diceNum: 2,
+							diceSides: 5,
+							itemType: "weapon",
+							attackType: "stab",
+							weaponType: "unarmed",
+							material: "flesh",
+							modifiers: {},
+							diceMod: -5,
+							slot: "hands",
+							short: "your hands"
+						}
 					};
 
 					if (World.dice.roll(1, 20) === 1) {
@@ -221,6 +282,8 @@ module.exports = {
 					}
 
 					this.rooms[i].monsters.push(mob);
+					this.rooms[i].monsters.push(mob3);
+					this.rooms[i].monsters.push(mob2);
 				}
 			}
 		}

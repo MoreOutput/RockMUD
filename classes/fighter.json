@@ -2,8 +2,8 @@
 	"name": "Fighter",
 	"classAbbr": "Fig",
 	"playable": true,
-	"hp": 10,
-	"str": 1,
+	"hp": 5,
+	"baseStr": 1,
 	"mainStat": "str",
 	"skills": [
 		{
@@ -57,7 +57,7 @@
 			"id": "whirlwind",
 			"display": "Whirlwind",
 			"mod": 0,
-			"train": 60,
+			"train": 100,
 			"learned": false,
 			"type": "area melee",
 			"prerequisites": {

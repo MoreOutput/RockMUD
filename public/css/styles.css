@@ -3,6 +3,7 @@ red: #ff0033;
 green: #60f066;
 blue: #0066ff;
 yellow: #ffcc00;
+gray:  #d3d3d3
 */
 
 html, body {
@@ -12,6 +13,7 @@ margin: 0;
 height: 100%;
 color: #fff !important;
 font-family: monospace;
+font-size: 105%;
 }
 table {
     color: #fff !important;
@@ -196,7 +198,7 @@ color: #0066ff;
 color: #ffcc00;
 }
 .grey {
-color: #ddd;
+color: #d3d3d3;
 }
 .large {
 font-size: 1.5em;
@@ -228,7 +230,19 @@ color: red;
 }
 .quest-complete {
 font-weight: bold;
-font-size: 200%;
+font-size: 120%;
+}
+.player-death-msg {
+font-weight: bold;
+text-decoration: underline;
+}
+.victory {
+font-weight: bold;
+text-decoration: underline;
+}
+.rnd-status {
+    font-weight: bold;
+    color:  #ffcc00;
 }
 
 

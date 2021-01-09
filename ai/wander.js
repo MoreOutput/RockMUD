@@ -1,17 +1,15 @@
 'use strict';
-var World = require('../src/world');
-
 /*
 	Wander behavior. Mob will walk about selecting a random move direction from mob.moveDirections.
 	If the mob.stayinArea property is set to false the mob can wander outside of its starting area.
 	Adding a mob.wanderCheck value provides a check against 1d100; movement only occurs if the roll beats the given wanderCheck value.
 */
-module.exports = {
+module.exports = { 
 	stayInArea: true,
-	wanderCheck: 95,
+	wanderCheck: 85,
 	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'], // default directions
-	onAlive: function(behavior, mob, roomObj) {
-		var roll = World.dice.roll(1, 100),
+	onAlive: function(World, behavior, mob, roomObj) {
+		var roll = World.dice.roll(2, 50),
 		exitObj,
 		direction;
 

@@ -1,6 +1,4 @@
 'use strict';
-var World = require('../src/world');
-
 /*
 	The mayor walks aroud midgaard acting as a crier and greeting the masses.
 	He puts down the northern gate every mornining and closes up the city at midnight.
@@ -14,8 +12,8 @@ module.exports = {
 		'If you need to trade in your finds talk to Thomas on the west side of camp.'
 	],
 	runOnAliveWhenEmpty: true,
-	onAlive: function(behavior, mob, roomObj) {
-		var roll = World.dice.roll(1, 100);
+	onAlive: function(World, behavior, mob, roomObj) {
+		var roll = World.dice.roll(2, 50);
 
 		if (mob.position === 'standing' && !mob.fighting) {
 			if (roll === 100) {

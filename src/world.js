@@ -3,11 +3,382 @@
 */
 'use strict';
 var fs = require('fs'),
-World = function() {};
+World = function(socketIO, cfg, callback) {
+	var world = this;
+	//this.setup = function(world, socketIO, cfg, fn) {
+		var loadAreas = function(fn) {
+			var path = './areas/',
+			areas = [];
+	
+			if (!world.dataDriver || !world.dataDriver.loadAreas) {
+				fs.readdir(path, function(err, areaNames) {
+					areaNames.forEach(function(areaName, i) {
+						var area,
+						areaId;
+	
+						if (areaName[0] !== '.'
+							&& areaName.indexOf('#') === -1
+							&& areaName.indexOf('omit_') === -1) {
+							areaId = areaName.toLowerCase().replace(/ /g, '_').replace('.js', '');
+							
+							if (!cfg.allowedAreas.length || cfg.allowedAreas.indexOf(areaId) !== -1) {
+								delete require.cache[require.resolve('.' + path + areaId + '.js')]
 
-World.prototype.setup = function(socketIO, cfg, fn) {
-	var world = this,
-	loadAreas = function(fn) {
+								area = require('.' + path + areaId + '.js');
+								area.id = areaId;
+								area.itemType = 'area';
+	
+								areas.push(area);
+							}
+						}
+					});
+	
+					return fn(areas);
+				});
+			} else {
+				fs.readdir(path, function(err, areaFileNames) {
+					var areaIds = [];
+	
+					if (!err) {
+						areaFileNames.forEach(function(fileName, i) {
+							if (fileName.indexOf('.js') !== -1
+								&& fileName[0] !== '.'
+								&& fileName.indexOf('#') === -1
+								&& fileName.indexOf('omit_') === -1) {
+								areaIds.push(fileName.replace('.js', ''));
+							}
+						});
+					}
+	
+					world.dataDriver.loadAreas(function(areas) {
+						var unsavedAreas = [];
+	
+						if (areas.length) {
+							areas.forEach(function(area, i) {
+								var foundMatch = false;
+	
+								if (areaIds.indexOf(area.id) !== -1) {
+									foundMatch = true;
+								}
+	
+								if (!foundMatch) {
+									unsavedAreas.push(area.id);
+								}
+							});
+						} else {
+							unsavedAreas = areaIds;
+						}
+	
+						areas.forEach(function(area, i) {
+							var newArea = require('.' + path + area.id + '.js'),
+							prop;
+	
+							for (prop in newArea) {
+								if (area[prop] === undefined || typeof newArea[prop] === 'function') {
+									area[prop] = area[prop];
+								}
+							}
+						});
+	
+						if (unsavedAreas.length) {
+							unsavedAreas.forEach(function(unsavedAreaId, i) {
+								var area = require('.' + path + unsavedAreaId + '.js');
+	
+								if (area.persistence === true) {
+									area.id = unsavedAreaId;
+									area.itemType = 'area';
+	
+									if (world.dataDriver && world.dataDriver.saveArea) {
+										world.dataDriver.saveArea(area, function(savedArea) {
+											if (savedArea) {
+												areas.push(savedArea);
+											}
+										});
+									}
+								} else {
+									areas.push(area);
+								}
+							});
+						}
+	
+						return fn(areas);
+					});
+				});
+			}
+		},
+		loadTime = function (fn) {
+			fs.readFile('./templates/time.json', function (err, r) {
+				return fn(err, JSON.parse(r));
+			});
+		},
+		loadRaces = function (fn) {
+			var tmpArr = [],
+			path = './races/';
+	
+			fs.readdir(path, function(err, fileNames) {
+				fileNames.forEach(function(fileName, i) {
+					tmpArr.push(JSON.parse(fs.readFileSync(path + fileName)));
+	
+					if (i === fileNames.length - 1) {
+						return fn(err, tmpArr);
+					}
+				});
+			});
+		},
+		loadClasses = function (fn) {
+			var tmpArr = [],
+			path = './classes/';
+		
+			fs.readdir(path, function(err, fileNames) {
+				fileNames.forEach(function(fileName, i) {
+					tmpArr.push(JSON.parse(fs.readFileSync(path + fileName)));
+	
+					if (i === fileNames.length - 1) {
+						return fn(err, tmpArr);
+					}
+				});
+			});
+		},
+		loadTemplates = function (fn) {
+			var tmpArr = [],
+			path = './templates/';
+	
+			fs.readdir(path, function(err, fileNames) {
+				fileNames.forEach(function(fileName, i) {
+					var tmp = JSON.parse(fs.readFileSync(path + fileName));
+	
+					tmp.template = fileName.replace(/.json/g, '');
+					
+					world[tmp.template + 'Template'] = tmp;
+	
+					if (i === fileNames.length - 1) {
+						return fn(err, tmpArr);
+					}
+				});
+			});
+		},
+		loadAI = function(fn) {
+			var path = './ai/';
+	
+			fs.readdir(path, function(err, fileNames) {
+				fileNames.forEach(function(fileName, i) {
+					world.ai[fileName.replace('.js', '')] = require('.' + path + fileName);
+	
+					if (i === fileNames.length - 1) {
+						return fn(err);
+					}
+				});
+			});
+		},
+		loadCommands = function(fn) {
+			var path = './src/commands/';
+	
+			fs.readdir(path, function(err, fileNames) {
+				if (!err && fileNames.length > 1) {
+					fileNames.forEach(function(fileName, i) {
+						if (fileName !== 'commands.js') {
+							world.commands[fileName.replace('.js', '')] = require('.' + path + fileName);
+	
+							if (i === fileNames.length - 1) {
+								return fn(err);
+							}
+						}
+					});
+				} else {
+					return fn(err);
+				}
+			});
+		},
+		loadSpells = function(fn) {
+			var path = './src/spells/';
+	
+			fs.readdir(path, function(err, fileNames) {
+				if (!err && fileNames.length > 1) {
+					fileNames.forEach(function(fileName, i) {
+						if (fileName !== 'spells.js') {
+							world.spells[fileName.replace('.js', '')] = require('.' + path + fileName);
+						}
+
+						
+						if (i === fileNames.length - 1) {
+							return fn(err);
+						}
+					});
+				} else {
+					return fn(err);
+				}
+			});
+		},
+		loadSkills = function(fn) {
+			var path = './src/skills/';
+	
+			fs.readdir(path, function(err, fileNames) {
+				if (!err && fileNames.length > 1) {
+					fileNames.forEach(function(fileName, i) {
+						if (fileName !== 'skills.js') {
+							world.skills[fileName.replace('.js', '')] = require('.' + path + fileName);
+	
+							if (i === fileNames.length - 1) {
+								return fn(err);
+							}
+						}
+					});
+				} else {
+					return fn(err);
+				}
+			});
+		};
+	
+		world.races = []; // Race JSON definition is in memory
+		world.classes = []; // Class JSON definition is in memory
+		world.areas = []; // Loaded areas
+		world.players = []; // Loaded players
+		world.cmds = []; // current command queue, processed in ticks module
+		world.battles = [] // current battle queue -- each item here is the meta data for upcoming combat messages
+		world.time = null; // Current Time data
+		world.itemTemplate;
+		world.entityTemplate;
+		world.roomTemplate;
+		world.areaTemplate;
+		world.exitTemplate;
+		world.ai = {};
+		world.motd = '';
+		world.quests = []; // array of all game quests built from loaded areas
+		world.persistenceDriver;
+		world.io = socketIO;
+		world.config = cfg;
+		// without a driver game data is persisted in memory only.
+		world.dataDriver = null; 
+		// without a driver player data is saved as a flat file to the players folder
+		world.playerDriver = null;
+		/*
+		world.character = require('./character');
+		world.commands = require('./commands/commands');
+		world.skills = require('./skills/skills');
+		world.spells = require('./spells/spells');
+		world.room = require('./rooms');
+		world.combat = require('./combat')
+		world.dice = require('./dice');
+
+		delete require.cache[require.resolve('./character')];
+		delete require.cache[require.resolve('./commands/commands')];
+		delete require.cache[require.resolve('./skills/skills')];
+		delete require.cache[require.resolve('./spells/spells')];
+		delete require.cache[require.resolve('./rooms')];
+		delete require.cache[require.resolve('./combat')];
+		delete require.cache[require.resolve('./dice')];
+		*/
+		world.battleLock = 0;
+		world.aiLock = false;
+
+		delete require.cache[require.resolve('./character')];
+		delete require.cache[require.resolve('./commands/commands')];
+		delete require.cache[require.resolve('./skills/skills')];
+		delete require.cache[require.resolve('./spells/spells')];
+		delete require.cache[require.resolve('./rooms')];
+		delete require.cache[require.resolve('./combat')];
+		delete require.cache[require.resolve('./dice')];
+	
+		var character = require('./character');
+		var commands = require('./commands/commands');
+		var skills = require('./skills/skills');
+		var spells = require('./spells/spells');
+		var room = require('./rooms');
+		var combat = require('./combat')
+		var dice = require('./dice');
+	
+		world.character = new character(world);
+		world.commands = new commands(world);
+		world.skills = new skills(world);
+		world.spells = new spells(world);
+		world.room = new room(world);
+		world.combat = new combat(world);
+		world.dice  = new dice(world);
+	
+		if (world.config.persistence && world.config.persistence.data) {
+			world.dataDriver = require(world.config.persistenceDriverDir + world.config.persistence.data.driver + '.js')(world.config.persistence.data);
+		}
+	
+		if (world.config.persistence && world.config.persistence.player) {
+			if (world.dataDriver && world.config.persistence.player === world.config.persistence.data) {
+				world.playerDriver = world.dataDriver;
+			} else {
+				world.playerDriver = require(world.config.persistenceDriverDir + world.config.persistence.player.driver + '.js')(world.config.persistence.player);
+			}
+		}
+	
+		loadCommands(function(err) {
+			loadSpells(function(err) {
+				loadSkills(function(err) {
+					loadAreas(function(areas) {
+						loadTime(function(err, time) {
+							loadRaces(function(err, races) {
+								loadClasses(function(err, classes) {
+									loadTemplates(function(err, templates) {
+										loadAI(function() {
+											var area,
+											i = 0;
+	
+											fs.readFile('./help/motd.html', 'utf-8', function (err, html) {
+												if (err) {
+													throw err;
+												}
+	
+												world.motd = '<div class="motd">' + html + '</div>';
+											});
+	
+											world.areas = areas;
+											world.time = time;
+											world.races = races;
+											world.classes = classes;
+											world.templates = templates;
+
+											for (i; i < world.areas.length; i += 1) {
+												world.extend(world.areas[i], JSON.parse(JSON.stringify(world.areaTemplate)), function(err, area) {
+													
+													if (area.quests && area.quests.length) {
+														world.quests = world.quests.concat(area.quests);
+													}
+
+
+													world.setupArea(area, function(err, area) {4
+														area.extended = true;
+														if (i === world.areas.length - 1) {	
+															i = 0;
+	
+															for (i; i < world.areas.length; i += 1) {
+																if (world.areas[i].afterLoad && !world.areas[i].preventAfterLoad) {
+																	world.areas[i].afterLoad();
+																}
+															}
+
+															if (world.config.preventTicks === false) {
+																var ticks =  require('./ticks');
+																world.ticks = new ticks(world);
+															}
+															
+
+															return callback(world);
+														}
+													});
+												});
+											}
+										});
+									});
+								});
+							});
+						});
+					});
+				});
+			});
+		});
+	//};
+
+	//callback(this);
+};
+
+World.prototype.setup = function(world, socketIO, cfg, fn) {
+	var loadAreas = function(fn) {
 		var path = './areas/',
 		areas = [];
 
@@ -247,6 +618,7 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.dataDriver = null; 
 	// without a driver player data is saved as a flat file to the players folder
 	world.playerDriver = null;
+	/*
 	world.character = require('./character');
 	world.commands = require('./commands/commands');
 	world.skills = require('./skills/skills');
@@ -254,8 +626,18 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 	world.room = require('./rooms');
 	world.combat = require('./combat')
 	world.dice = require('./dice');
+	*/
 	world.battleLock = 0;
 	world.aiLock = false;
+
+	var character = require('./character');
+	var commands = require('./commands/commands');
+	var skills = require('./skills/skills');
+	var spells = require('./spells/spells');
+	var room = require('./rooms');
+	var combat = require('./combat')
+	var dice = require('./dice');
+
 
 	if (world.config.persistence && world.config.persistence.data) {
 		world.dataDriver = require(world.config.persistenceDriverDir + world.config.persistence.data.driver + '.js')(world.config.persistence.data);
@@ -289,6 +671,14 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 											world.motd = '<div class="motd">' + html + '</div>';
 										});
 
+										world.character = new character(world);
+										world.commands = new commands(world);
+										world.skills = new skills(world);
+										world.spells = new spells(world);
+										world.room = new room(world);
+										world.combat = new combat(world);
+										world.dice  = new dice(world);
+
 										world.areas = areas;
 										world.time = time;
 										world.races = races;
@@ -313,10 +703,11 @@ World.prototype.setup = function(socketIO, cfg, fn) {
 														}
 
 														if (world.config.preventTicks === false) {
-															world.ticks = require('./ticks');
+															var ticks =  require('./ticks');
+															world.ticks = new ticks(world);
 														}
 
-														return fn();
+														return fn(world);
 													}
 												});
 											});
@@ -414,11 +805,11 @@ World.prototype.getRace = function(raceName) {
 };
 
 World.prototype.getClass = function(className) {
-	var world = this,
-	i = 0;
+	var world = this;
+	var i = 0;
 
 	for (i; i < world.classes.length; i += 1) {
-		if (world.classes[i].name.toLowerCase() === className) {
+		if (world.classes[i].name.toLowerCase() === className.toLowerCase()) {
 			return world.classes[i];
 		}
 	}
@@ -428,7 +819,6 @@ World.prototype.getClass = function(className) {
 
 World.prototype.getPlayerByName = function(playerName) {
 	var world = this,
-	arr = [],
 	player,
 	i = 0;
 
@@ -436,6 +826,23 @@ World.prototype.getPlayerByName = function(playerName) {
 		player = world.players[i];
 
 		if (player.name.toLowerCase() === playerName.toLowerCase()) {
+			return player;
+		}
+	}
+
+	return false;
+};
+
+World.prototype.getPlayerByRefId = function(refId) {
+	var world = this,
+	arr = [],
+	player,
+	i = 0;
+
+	for (i; i < world.players.length; i += 1) {
+		player = world.players[i];
+
+		if (player.refId === refId) {
 			return player;
 		}
 	}
@@ -539,10 +946,10 @@ World.prototype.createItem = function() {
 
 // Rolls values for Mobs, including their equipment
 World.prototype.rollMob = function(mob, area, room, callback) {
-	var world = this,
-	prop,
-	raceObj,
-	classObj;
+	var world = this;
+	var prop;
+	var raceObj = {};
+	var classObj = {};
 
 	mob.refId = world.createRefId(mob);
 
@@ -558,26 +965,14 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 
 	if (mob.charClass) {
 		classObj = world.getClass(mob.charClass);
-	} else {
-		classObj = {};
 	}
 
-	mob.hp += (10 * (mob.level + 1)) + world.dice.roll(mob.level, mob.level);
-
-	if (!mob.mana) {
-		mob.mana = 50 * 8 + mob.int;
-	} else {
-		mob.mana += (mob.level + world.dice.roll(1, mob.int));
-	}
-
-	if (!mob.mv) {
-		mob.mv = 50 * 9 + mob.dex;
-	} else {
-		mob.mv += (mob.level + world.dice.roll(1, mob.dex));
+	if (!mob.level) {
+		mob.level = 1;
 	}
 
 	world.extend(mob, JSON.parse(JSON.stringify(raceObj)), function(err, mob) {
-		world.extend(mob, JSON.parse(JSON.stringify(classObj)), function(err, mob) {
+		world.extend(mob, JSON.parse(JSON.stringify(classObj)), function(err, mob) {	
 			if (Array.isArray(mob.name)) {
 				mob.name = mob.name[world.dice.roll(1, mob.name.length) - 1];
 			}
@@ -616,38 +1011,52 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 				mob.personalPronoun = world.character.getPersonalPronoun(mob);
 			}
 
-			if (mob.rollStats) {
-				mob.str += 10;
-				mob.int += 10;
-				mob.wis += 10;
-				mob.dex += 10;
-				mob.con += 10;
-	
-				mob.baseStr = mob.str;
-				mob.baseDex = mob.dex;
-				mob.baseInt = mob.int;
-				mob.baseWis = mob.wis;
-				mob.baseCon = mob.con;
-			}
+			mob.baseStr += 10;
+			mob.baseDex += 10;
+			mob.baseInt += 10;
+			mob.baseWis += 10;
+			mob.baseCon += 10;
+
+			mob.str = mob.baseStr;
+			mob.int = mob.baseInt;
+			mob.wis = mob.baseWis;
+			mob.dex = mob.baseDex;
+			mob.con = mob.baseCon;
 
 			mob.isPlayer = false;
 			mob.roomid = room.id;
 			mob.area = area.id;
 
+			mob.trains += (5 * mob.level);
+
 			if (!mob.originatingArea) {
 				mob.originatingArea = mob.area;
 			}
 
+			mob.hp += 10 + (world.dice.roll((1 * mob.size.value), 10, world.dice.getConMod(mob)) * mob.level);
 			mob.chp = mob.hp;
 
-			mob.cmana = mob.mana;
+			if (mob.race === 'animal') {
+				mob.mana = 0;
+				mob.cmana = mob.mana;
+			} else {
+				mob.mana += world.dice.roll(1, 4);
+				mob.cmana = mob.mana;
+	
+			}
+			
+			mob.mv = 100;
+
+			if (mob.mainStat === 'dex' || mob.race === 'animal') {
+				mob.mv += 20;
+			}
 
 			mob.cmv = mob.mv;
 
 			mob.ac = world.dice.getAC(mob);
-			
+
 			if (!mob.gold && mob.gold !== 0) {
-				mob.gold = world.dice.roll(1, mob.level + 1);
+				mob.gold = world.dice.roll(1, mob.level, 2);
 			}
 
 			for (prop in mob) {
@@ -656,6 +1065,27 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 				}
 			}
 
+			/* 
+			if (mob.area === 'midgaard') {
+				console.table([
+					{
+						name: mob.name,
+						level: mob.level,
+						hp: mob.hp + '/' + mob.chp,
+						mana: mob.mana + '/' + mob.cmana,
+						moves: mob.mv + '/' + mob.cmv,
+						str: mob.str,
+						int: mob.int,
+						wis: mob.wis,
+						dex: mob.dex,
+						con: mob.con,
+						trains: mob.trains,
+						mods: JSON.stringify(world.dice.getMods(mob))
+					}
+				]);
+			}
+			*/
+			
 			if (mob.behaviors) {
 				world.setupBehaviors(mob, area, room, function(err, mob) {
 					return callback(err, mob);
@@ -670,8 +1100,10 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 World.prototype.setupArea = function(area, callback) {
 	var i = 0,
 	world = this,
-	setup = function() {
+	setup = function(area) {
 		for (i; i < area.rooms.length; i += 1) {
+			// TODO used for testing, i think it can be factored out and called within the test code
+			area.rooms[i].playersInRoom = [];
 			world.extend(area.rooms[i], JSON.parse(JSON.stringify(world.roomTemplate)), function(err, room) {
 				if (area.titleStyleClass) {
 					room.titleStyleClass = area.titleStyleClass;
@@ -679,7 +1111,6 @@ World.prototype.setupArea = function(area, callback) {
 				
 				world.setupRoom(area, room, function(error, area, room) {
 					room.extended = true;
-
 					if (i === area.rooms.length - 1) {
 						callback(false, area);
 					}
@@ -697,11 +1128,11 @@ World.prototype.setupArea = function(area, callback) {
 	i = 0;
 
 	if (!area.beforeLoad || area.preventBeforeLoad) {
-		setup();
+		setup(area);
 	} else if (typeof area.beforeLoad === 'function' && !area.preventBeforeLoad) {
-		area.beforeLoad(function(err) {
+		area.beforeLoad(world, function(err) {
 			if (!err) {
-				setup();
+				setup(area);
 			}
 		});
 	}
@@ -957,24 +1388,28 @@ World.prototype.getArea = function(areaId) {
 };
 
 World.prototype.reloadArea = function(area) {
-	var world = this,
-	newArea;
-
-	delete require.cache[require.resolve('../areas/' + area.id)];
+	var world = this;
+	var newArea;
 
 	newArea = require('../areas/' + area.id  + '.js');
 
 	world.extend(newArea, JSON.parse(JSON.stringify(world.areaTemplate)), function(err, newArea) {
 		world.setupArea(newArea, function(err, newArea) {
 			var i = 0;
+			var playersInArea;
 
 			newArea.id = area.id;
 			newArea.extended = true;
-
+			
 			for (i; i < world.areas.length; i += 1) {
-				if (world.areas[i].id === newArea.id) {
 
-					world.areas[i] = newArea;
+				if (world.areas[i].id === newArea.id) {
+					playersInArea = playersInArea = world.getPlayersByArea(area.id);
+					
+					if (!playersInArea.length) {
+						delete require.cache[require.resolve('../areas/' + area.id)];
+						world.areas[i] = newArea;
+					}
 				}
 			}
 		});
@@ -1117,7 +1552,6 @@ World.prototype.getAllRoomItemsFromArea = function(areaId) {
 	area,
 	i = 0,
 	itemArr = [];
-
 
 	if (areaId.name) {
 		area = areaId;
@@ -1426,7 +1860,7 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 		itemType = false;
 	}
 
-	if (command.arg) {
+	if (command.input) {
 		if (!itemType) {
 			for (i; i < arr.length; i += 1) {
 				wordArr = arr[i].name.toLowerCase().split(' ');
@@ -1436,7 +1870,7 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 				fnd = false;
 
 				for (j; j < wordArr.length; j += 1) {
-					pattern = new RegExp(command.arg);
+					pattern = new RegExp(command.input);
 
 					if (fnd === false && pattern.test(wordArr[j]) 
 					|| (pattern.test(arr[i].displayName.toLowerCase()) || pattern.test(arr[i].name.toLowerCase()) )  && matchedIndexes.indexOf(i) === -1) {
@@ -1455,7 +1889,7 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 				fnd = false;
 			
 				for (j; j < wordArr.length; j += 1) {
-					pattern = new RegExp('^' + command.arg);
+					pattern = new RegExp('^' + command.input);
 
 					if (fnd === false && arr[i].itemType === itemType && pattern.test(wordArr[j]) 
 					|| (pattern.test(arr[i].displayName.toLowerCase()) || pattern.test(arr[i].name.toLowerCase())) && matchedIndexes.indexOf(i) === -1) {
@@ -1520,7 +1954,7 @@ World.prototype.sanitizeBehaviors = function(gameEntity) {
 	if (gameEntity.behaviors) {
 		for (i; i < gameEntity.behaviors.length; i += 1) {
 			behavior = gameEntity.behaviors[i];
-
+ 
 			if (behavior) {
 				for (prop in behavior) {
 					if (prop !== 'module') {
@@ -1606,12 +2040,10 @@ World.prototype.saveArea = function(areaId) {
 };
 
 World.prototype.extend = function(extendObj, readObj, callback) {
-	var propCnt,
+	var propCnt = Object.keys(readObj).length,
 	cnt = 0,
 	prop,
 	prop2;
-
-	propCnt = Object.keys(readObj).length;
 
 	if (extendObj && readObj && propCnt) {
 		for (prop in readObj) {
@@ -1622,7 +2054,7 @@ World.prototype.extend = function(extendObj, readObj, callback) {
 					&& !isNaN(extendObj[prop])
 					&& !isNaN(readObj[prop])
 					&& typeof extendObj[prop] !== 'boolean') {
-					extendObj[prop] += readObj[prop];
+						extendObj[prop] += readObj[prop];
 				} else if (prop === 'size' || prop === 'recall') {
 					extendObj[prop] = readObj[prop];
 				} else if (typeof extendObj[prop] === 'object'
@@ -1715,7 +2147,7 @@ World.prototype.removeAffect = function(obj, affectName) {
 
 	for (i; i < obj.affects.length; i += 1) {
 		if (obj.affects[i].id === affectName) {
-			if (Object.keys(obj.affects[i].modifiers).length) {
+			if (obj.affects[i].modifiers && Object.keys(obj.affects[i].modifiers).length) {
 				this.character.removeMods(obj, obj.affects[i].modifiers);
 			}
 			
@@ -1729,7 +2161,7 @@ World.prototype.removeAffect = function(obj, affectName) {
 };
 
 World.prototype.addAffect = function(obj, affect) {
-	if (Object.keys(affect.modifiers).length) {
+	if (affect.modifiers && Object.keys(affect.modifiers).length) {
 		this.character.applyMods(obj, affect.modifiers);
 	}
 	
@@ -1744,8 +2176,10 @@ World.prototype.addCommand = function(cmdObj, entity) {
 	this.cmds.push(cmdObj);
 };
 
+// TODO: gameEntity could be a room or whatever, this name could be better
 World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, param2) {
-	var i = 0,
+	var world = this,
+	i = 0,
 	j = 0,
 	allTrue = true,
 	behavior,
@@ -1774,7 +2208,8 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 					if (behavior[evtName]
 						&& !gameEntity['prevent' + this.capitalizeFirstLetter(evtName)]
 						&& !behavior['prevent' + this.capitalizeFirstLetter(evtName)]) {
-						allTrue = behavior[evtName](behavior, gameEntity, roomObj, param, param2);
+
+						allTrue = behavior[evtName](world, behavior, gameEntity, roomObj, param, param2);
 					}
 				}
 			}
@@ -1784,4 +2219,4 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 	return allTrue;
 };
 
-module.exports = new World();
+module.exports = World;

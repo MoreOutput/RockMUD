@@ -3,7 +3,7 @@
 	"classAbbr": "Mag",
 	"playable": true,
 	"mana": 2,
-	"int": 1,
+	"baseInt": 1,
 	"mainStat": "int",
 	"skills": [
 		{
@@ -11,7 +11,7 @@
 			"display": "Spark",
 			"mod": 0,
 			"train": 100,
-			"type": "spell",
+			"type": "combat spell",
 			"learned": true,
 			"prerequisites": {
 				"level": 1
@@ -20,7 +20,7 @@
 			"id": "detectHidden",
 			"display": "Detect Hidden",
 			"mod": 0,
-			"train": 70,
+			"train": 100,
 			"type": "passive spell",
 			"learned": false,
 			"prerequisites": {

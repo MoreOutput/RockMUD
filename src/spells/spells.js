@@ -1,6 +1,8 @@
 'use strict';
-var World = require('../world'),
-Spell = function() {};
+var World;
+var Spell = function(newWorld) {
+	World = newWorld;
+};
 
 /*
 * Damage Spells
@@ -21,13 +23,17 @@ Spell.prototype.spark = function(skillObj, player, opponent, roomObj, command) {
 			skillOutput.attackerMods.cmana -= (cost - intMod);
 
 			damage = World.dice.roll(player.level / 2 + 1, 20 + intMod + player.mana/20, intMod);
-			damage -= opponent.magicRes;
 
 			skillOutput.defenderMods.chp = -damage;
-
+			skillOutput.defenderRefId = opponent.refId;
+			
 			skillOutput.msgToAttacker = 'You cast spark and a series of crackling '
 				+ '<span class="blue">bright blue bolts</span> burn <span class="grey">' + opponent.short
 				+ '</span> with maiming intensity! (' + damage + ')';
+
+			skillOutput.winMsg = 'Your spark hits '
+				+ opponent.short + ' <span class="red">burning</span> their flesh!'
+				+ ' (' + damage + ')';
 
 			skillOutput.msgToDefender = player.displayName + ' casts spark and burns you with'
 				+ ' maiming intensity! (' + damage + ')';
@@ -146,63 +152,4 @@ Spell.prototype.invisibility = function(skillObj, player, roomObj, command, fn) 
 	}
 };
 
-/*
-* Healing Spells
-*/
-Spell.prototype.cureLight = function(skillObj, entity, opponent, roomObj, command) {
-	var intMod,
-	wisMod,
-	cost = 2,
-	healing = 0,
-	manaFailMsg = 'Not enough mana to cast ' + skillObj.display,
-	failMsg = 'Your eyes flicker blue as you <strong>fail to cast ' + skillObj.display + '</strong>.',
-	roomMsg =  '',
-	skillOutput = World.combat.createSkillProfile(entity, skillObj),
-	wait = 2;
-
-	if (skillObj.wait) {
-		wait = skillObj.wait;
-	}
-
-	if (cost < entity.cmana) {
-		intMod = World.dice.getIntMod(entity);
-		wisMod = World.dice.getWisMod(entity);
-
-		if (World.dice.roll(1, 100) <= skillObj.train) {
-			skillOutput.attackerMods.wait += wait;
-			skillOutput.attackerMods.cmana -= (cost - intMod);	
-
-			healing = World.dice.roll(Math.floor(entity.level / 3) + 1, 10 + wisMod, intMod);
-
-			if (entity.mainStat === 'wis') {
-				healing += World.dice.roll(1, Math.floor(entity.level / 2) + 1);
-			}
-
-			if (opponent.refId === entity.refId) {
-				skillOutput.msgToAttacker = 'You channel your powers into your own body and lightly heal your wounds.';
-				
-				roomMsg = entity.possessivePronoun + ' eyes turn a cloudy white.';
-			} else {
-				skillOutput.msgToAttacker = 'You channel your powers into ' + opponent.displayName + '.';
-				
-				skillOutput.msgToDefender = 'heals you';
-				
-				roomMsg = entity.possessivePronoun + ' eyes turn a cloudy white as he places his '
-					+ player.handsNoun +  's on ' + opponent.displayName + '.'
-			}
-
-			skillOutput.defenderMods.chp = healing;
-
-			World.combat.processSkill(entity, opponent, skillOutput);
-		} else {
-			// fail
-		}
-	} else {
-		World.msgPlayer(entity, {
-			msg: 'You dont have enough mana to cure something!',
-			styleClass: 'error'
-		});
-	}
-};
-
-module.exports = new Spell();;
+module.exports = Spell;

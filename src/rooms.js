@@ -1,13 +1,17 @@
 'use strict';
 var fs = require('fs'),
-World = require('./world'),
-io = World.io,
-players = World.players,
-time = World.time,
-areas = World.areas,
+World,
+io,
+players,
+time,
+areas,
+Room = function(newWorld) {
+	World = newWorld;
 
-Room = function() {
-
+	io = World.io;
+	players = World.players;
+	time = World.time;
+	areas = World.areas;
 };
 
 // get the connecting exit object from @targetRoom
@@ -95,11 +99,15 @@ Room.prototype.getDisplayHTML = function(roomObj, player) {
 	if (monsters.length > 0 || playersInRoom.length > 0) {
 		for (i; i < monsters.length; i += 1) {
 			if (World.character.canSeeObject(player, monsters[i])) {
-				if (monsters[i].long) {
-					displayHTML += '<li class="room-monster grey">' + monsters[i].long + '</li>';
+				if (!monsters[i].fighting) {
+					if (monsters[i].long) {
+						displayHTML += '<li class="room-monster grey">' + monsters[i].long + '</li>';
+					} else {
+						displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is '
+							+ monsters[i].position + ' here.</li>';
+					}
 				} else {
-					displayHTML += '<li class="room-monster grey">' + monsters[i].displayName + ' is '
-						+ monsters[i].position + ' here.</li>';
+					displayHTML += '<li class="room-monster grey">' + monsters[i].short + ' is here FIGHTING!</li>';
 				}
 			}
 		}
@@ -442,4 +450,4 @@ Room.prototype.removeMob = function(roomObj, mob) {
 	roomObj.monsters = newArr;
 };
 
-module.exports = new Room();
+module.exports = Room;

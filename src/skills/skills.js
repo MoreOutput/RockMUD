@@ -1,6 +1,11 @@
 'use strict';
-var World = require('../world'),
-Skill = function() {};
+
+const { Collector } = require("istanbul");
+
+var World,
+Skill = function(newWorld) {
+	World = newWorld;
+};
 
 /*
 * Passive Skills, typically called by name within commands
@@ -52,9 +57,9 @@ Skill.prototype.secondAttack = function(skillObj, skillUser) {
 /*
 * Non combat skills, typically checked by a game entity
 */
-Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
-	var skillAff = World.getAffect(player, 'sneak'),
-	affObj;
+Skill.prototype.sneak = function(skillObj, player, roomObj, command, World) {
+	var skillAff = World.getAffect(player, 'sneak');
+	var affObj;
 
 	if (!skillAff) {
 		if (player.position === 'standing') {
@@ -63,7 +68,8 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 				affObj = {
 					id: skillObj.id,
 					affect: 'sneak',
-					display: false,
+					display: 'Sneaking',
+					decayMsg: 'You are no longer sneaking',
 					decay: World.dice.roll(1 + player.level/2, 10, (player.detection + player.knowledge/2) + skillObj.train/5)
 				};
 
@@ -75,6 +81,7 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 					player.wait += 1;
 				}
 			}
+
 			// Players never know if they're successfully sneaking
 			World.msgPlayer(player, {
 				msg: 'You begin sneaking.'
@@ -85,7 +92,12 @@ Skill.prototype.sneak = function(skillObj, player, roomObj, command) {
 			});
 		}
 	} else {
-		// already sneaking
+		// quit sneaking
+		World.character.removeAffect(player, 'sneak');
+
+		World.msgPlayer(player, {
+			msg: 'You are no longer sneaking.'
+		});
 	}
 };
 
@@ -236,4 +248,4 @@ Skill.prototype.backstab = function(skillObj, player, roomObj, command) {
 	}
 };
 
-module.exports = new Skill();
+module.exports = Skill;

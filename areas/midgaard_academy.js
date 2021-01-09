@@ -1,7 +1,6 @@
 
 'use strict';
-var World = require('../src/world'),
-towerQuestKey = 'mine_access';
+var towerQuestKey = 'mine_access';
 
 module.exports = {
 	name: 'The Southern Mine',
@@ -96,7 +95,7 @@ module.exports = {
 			behaviors: [{
 				module: 'quest_check_room_enter',
 				questId: towerQuestKey, 
-				questCheck: function(quest, player, cmd) {
+				questCheck: function(World, quest, player, cmd) {
 					if (cmd.msg === 'down') {
 						if (quest.data.permission) {
 							return true;

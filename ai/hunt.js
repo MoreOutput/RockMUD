@@ -1,6 +1,4 @@
 'use strict';
-var World = require('../src/world');
-
 /*
     RockMUD move an entity toward a given refID
 
@@ -9,7 +7,7 @@ var World = require('../src/world');
     @getTarget function returns the target the entity is searching for 
 */
 module.exports = {
-	getTarget: function(behavior, mob, roomObj) {
+	getTarget: function(World, behavior, mob, roomObj) {
 		var target = null;
 
 		if (behavior.targetRefId) {
@@ -22,7 +20,7 @@ module.exports = {
 	stayInArea: true,
 	check: 1, // 1 out 10 chance to fire this onAlive event
 	targetRefId: '',
-	onAlive: function(behavior, mob, roomObj) {
+	onAlive: function(World, behavior, mob, roomObj) {
 		var roll = World.dice.roll(1, 10),
 		target,
 		targetRoomObj,

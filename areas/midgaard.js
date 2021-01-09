@@ -1,6 +1,4 @@
 'use strict';
-var World = require('../src/world');
-
 module.exports = {
 	name: 'Midgaard',
 	id: 'midgaard',
@@ -61,10 +59,11 @@ module.exports = {
 					description: '',
 					inName: 'Expedition Leader William',
 					race: 'human',
+					charClass: "Fighter",
 					id: 9,
 					area: 'midgaard',
 					weight: 245,
-					str: 16,
+					baseStr: 1,
 					position: 'standing',
 					attackType: 'punch',
 					damroll: 10,
@@ -119,10 +118,8 @@ module.exports = {
 						module: 'expedition_leader'
 					}, {
 						module: 'wander',
+						wanderCheck: 90,
 						moveDirections: ['north', 'east', 'west', 'south']
-					}, {
-						module: 'hunt',
-						
 					}]
 				}
 			],
@@ -151,7 +148,7 @@ module.exports = {
 					material: 'wood',
 					weaponType: 'club',
 					diceNum: 1, 
-					diceSides: 2,
+					diceSides: 3,
 					attackType: 'smash',
 					weight: 2,
 					slot: 'hands',
@@ -258,7 +255,7 @@ module.exports = {
 				weight: 120,
 				position: 'standing',
 				attackType: 'bite',
-				hp: 25,
+				baseStr: 3,
 				size: {value: 3, display: 'medium'},
 				runOnAliveWhenEmpty: true,
 				behaviors: [{
@@ -421,7 +418,7 @@ module.exports = {
 					id: '9',
 					area: 'midgaard',
 					weight: 200,
-					str: 18,
+					baseStr: 10,
 					gold: 1000,
 					position: 'standing',
 					attackType: 'punch',
@@ -447,7 +444,7 @@ module.exports = {
 					}],
 					behaviors: [{
 						module: 'thomas_kerr',
-						onVisit: function(behavior, merchant, roomObj, incomingRoomObj, target, command) {
+						onVisit: function(World, behavior, merchant, roomObj, incomingRoomObj, target, command) {
 							if (target.race !== 'ogre') {
 								if (World.dice.roll(1, 3) == 1 || target.level === 1) {
 									World.addCommand({
@@ -484,7 +481,7 @@ module.exports = {
 								}, 280);
 							}
 						},
-						beforeSell: function(behavior, merchant, roomObj, buyer) {
+						beforeSell: function(World, behavior, merchant, roomObj, buyer) {
 							if (buyer.race === 'ogre') {
 								World.addCommand({
 									cmd: 'say',
@@ -497,7 +494,7 @@ module.exports = {
 								return true;
 							}
 						},
-						beforeBuy: function(behavior, merchant, roomObj, buyer) {
+						beforeBuy: function(World, behavior, merchant, roomObj, buyer) {
 							if (buyer.race === 'ogre') {
 								World.addCommand({
 									cmd: 'say',

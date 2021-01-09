@@ -59,6 +59,8 @@ window.onload = function() {
 		q: 'quaff',
 		qu: 'quaff',
 		c: 'cast',
+		cas: 'cast',
+		ca: 'cast',
 		k: 'kill',
 		adv: 'kill',
 		attack: 'kill',
@@ -75,8 +77,10 @@ window.onload = function() {
 		ooc: 'chat',
 		shout: 'chat',
 		sh: 'chat',
+		sk: 'skills',
 		slist: 'skills',
 		skill: 'skills',
+		spells: 'skills',
 		desc: 'description',
 		r: 'recall',
 		wake: 'stand',
@@ -95,7 +99,8 @@ window.onload = function() {
 		j: 'quests',
 		ql: 'quests',
 		quest: 'quests',
-		ww: 'whirlwind'
+		ww: 'whirlwind',
+		cmh: 'cast mass heal'
 	},
 	isScrolledToBottom = false,
 	playerIsLogged = null,
@@ -311,7 +316,7 @@ window.onload = function() {
 
 	ws.addEventListener('close', function(r) {
 		display({
-			msg: '<div class="col-md-12 error">Server disconnected. Refresh the page to retry.</div>'
+			msg: '<div class="col-md-12 error">Server disconnected. Refresh the page to reconnect.</div>'
 		}, true);
 	});
 

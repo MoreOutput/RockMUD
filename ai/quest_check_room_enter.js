@@ -1,10 +1,9 @@
 'use strict';
-var World = require('../src/world');
 
 exports = {
     questId: '', // id of the quest
     questCheck: null, // callback for custom logic
-    beforeEnter: function(behavior, roomObj, player, targetRoom, cmd) {
+    beforeEnter: function(World, behavior, roomObj, player, targetRoom, cmd) {
         var quest;
 
         if (behavior.questCheck && behavior.questId) {

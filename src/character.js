@@ -5,12 +5,15 @@
 */
 'use strict';
 
+const { throws } = require('assert');
 const { isPlayableRace } = require('./world');
 
 var fs = require('fs'),
 crypto = require('crypto'),
-World = require('./world'),
-Character = function () {
+World,
+Character = function (newWorld) {
+	World = newWorld;
+
 	this.statusReport = [
 		{msg: ' is <span class="red">bleeding all over the place</span> and looks <strong>nearly dead!</strong>', percentage: 0},
 		{msg: ' is <span class="red">bleeding</span> profusely.', percentage: 10},
@@ -72,6 +75,10 @@ Character.prototype.login = function(r, s, fn) {
 					s.player.verifiedPassword = false;
 					s.player.verifiedName = false;
 					s.player.wait = 0;
+
+					if (s.player.chp <= 0) {
+						s.player.chp = 1;
+					}
 
 					return fn(s, true);
 				} else {
@@ -564,7 +571,6 @@ Character.prototype.save = function(player, fn) {
 		objToSave.load = player.load;
 		objToSave.handsNoun = player.handsNoun;
 		objToSave.visible = player.visible;
-		objToSave.attackType = player.attackType;
 		objToSave.area = player.area;
 		objToSave.originatingArea = player.originatingArea;
 		objToSave.roomid = player.roomid;
@@ -594,7 +600,6 @@ Character.prototype.save = function(player, fn) {
 		objToSave.itemType = player.itemType;
 		objToSave.preventItemDecay = player.preventItemDecay;
 		objToSave.preventOnAlive = player.preventOnAlive;
-		objToSave.rollStats = player.rollStats;
 		objToSave.vulnerableTo = player.vulnerableTo;
 		objToSave.resistantTo = player.resistantTo;
 		objToSave.killed = player.killed;
@@ -637,36 +642,36 @@ Character.prototype.save = function(player, fn) {
 };
 
 Character.prototype.hpRegen = function(target) {
-	var conMod = World.dice.getConMod(target) + 1,
-	total;
+	var conMod = World.dice.getConMod(target);
+	var total;
 
 	if (target.chp < target.hp && target.thirst < 8 && target.hunger < 9) {
 		if (target.position === 'sleeping') {
-			conMod += 3;
+			conMod += 2;
 		}
 
 		if (target.thirst >= 3 || target.hunger >= 3) {
 			conMod -= 1;
 		}
 
-		if (!conMod) {
-			conMod = 1;
+		if (World.dice.roll(2, 10) === 20) {
+			conMod += 1;
 		}
 
-		total = World.dice.roll(conMod, 4) + target.level;
-
-		target.chp += total;
-
-		if (target.chp > target.hp) {
-			target.chp = target.hp;
+		if (conMod > -1) {
+			total = World.dice.roll(1, 10) + conMod;
+		} else {
+			total = 0;
 		}
+
+		this.changeHp(target, total);
 	}
 };
 
 Character.prototype.manaRegen = function(target) {
-	var intMod = World.dice.getIntMod(target),
-	chanceMod = World.dice.roll(1, 5),
-	total;
+	var intMod = World.dice.getIntMod(target);
+	var chanceMod = World.dice.roll(1, 5);
+	var total;
 
 	if (target.cmana < target.mana && target.thirst < 8 && target.hunger < 9) {
 		if (target.mainStat === 'int' || chanceMod > 1) {
@@ -723,24 +728,17 @@ Character.prototype.mvRegen = function(target) {
 };
 
 Character.prototype.hunger = function(target) {
-	var character = this,
-	conMod = World.dice.getConMod(target),
+	var conMod = World.dice.getConMod(target),
 	total;
 
-	if (target.hunger < 10) {
+	if (target.hunger < target.maxHunger) {
 		total = World.dice.roll(1, 12 + conMod);
 
-		if (total > 9) {
+		if (total > 9 || target.hunger === (target.maxHunger - 1)) {
 			target.hunger += 1;
 		}
 
 		if (target.hunger > 5) {
-			target.chp -= Math.round(World.dice.roll(1, 5 + target.hunger) + (target.level - conMod));
-
-			if (target.chp < target.hp) {
-				target.chp = 0;
-			}
-
 			if (World.dice.roll(1, 2) === 1) {
 				World.msgPlayer(target, {msg: 'You feel hungry.', styleClass: 'hunger'});
 			} else {
@@ -748,39 +746,24 @@ Character.prototype.hunger = function(target) {
 			}
 		}
 	} else {
-		/*
-		Need death before this can be completed
-
-		target.chp -= (World.dice.roll(1, 5 + target.hunger) - conMod) * 2;
-
-		if (target.chp < target.hp) {
-			target.chp = 0;
-		}
-		*/
-
+		this.changeHp(target, -((World.dice.roll(1, target.level * 2) - conMod) + target.size.value));
+		
 		World.msgPlayer(target, {msg: 'You are dying of hunger.', styleClass: 'hunger'});
 	}
 };
 
 Character.prototype.thirst = function(target) {
-	var character = this,
-	total,
-	dexMod = World.dice.getDexMod(target);
+	var total,
+	conMod = World.dice.getConMod(target);
 
-	if (target.thirst < 10) {
-		total = World.dice.roll(1, 12 + dexMod);
+	if (target.thirst < target.maxThirst) {
+		total = World.dice.roll(1, 12 + conMod);
 
-		if (total > 10) {
+		if (total > 9 || target.thirst === (target.maxThirst - 1)) {
 			target.thirst += 1;
 		}
 
 		if (target.thirst > 5) {
-			target.chp -= Math.round(World.dice.roll(1, 5 + target.thirst) + (target.level - dexMod));
-
-			if (target.chp < target.hp) {
-				target.chp = 0;
-			}
-
 			if (World.dice.roll(1, 2) === 1) {
 				World.msgPlayer(target, {msg: 'You are thirsty.', styleClass: 'thirst'});
 			} else {
@@ -788,15 +771,7 @@ Character.prototype.thirst = function(target) {
 			}
 		}
 	} else {
-		/*
-		Need death before this can be completed
-
-		target.chp -= (World.dice.roll(1, 5 + target.hunger) - conMod) * 2;
-
-		if (target.chp < target.hp) {
-			target.chp = 0;
-		}
-		*/
+		this.changeHp(target, -((World.dice.roll(1, target.thirst) - conMod) + target.size.value));
 
 		World.msgPlayer(target, {msg: 'You are dying of thirst.', styleClass: 'thirst'});
 	}
@@ -826,7 +801,7 @@ Character.prototype.addItem = function(player, item) {
 Character.prototype.getItemByRefId = function(player, refId) {
 	var i = 0;
 
-	for (i; i < player.items.length; i += 1) {
+	for (i; i < player.items.length; i += 1) {i
 		if (player.items[i].refId === refId) {
 			return player.items[i]
 		}
@@ -997,11 +972,11 @@ Character.prototype.getStatsFromEq = function(eq, fn) {
 };
 
 Character.prototype.getHitroll = function(entity) {
-	return Math.round(entity.hitroll + World.dice.getDexMod(entity) + entity.level/5);
+	return entity.hitroll;
 };
 
 Character.prototype.getDamroll = function(entity) {
-	return Math.round(entity.damroll + World.dice.getStrMod(entity) + entity.level/5);
+	return entity.damroll;
 };
 
 Character.prototype.getContainer = function(player, command) {
@@ -1093,12 +1068,29 @@ Character.prototype.getSkill = function(player, skillName) {
 	var i = 0;
 
 	for (i; i < player.skills.length; i += 1) {
-		if (skillName.toLowerCase() === player.skills[i].id.toLowerCase() || skillName.toLowerCase() === player.skills[i].display.toLowerCase()) {
+		if (skillName.toLowerCase() === player.skills[i].id.toLowerCase() 
+			|| skillName.toLowerCase() === player.skills[i].display.toLowerCase()) {
 			return player.skills[i];
 		}
 	}
 
 	return false;
+};
+
+Character.prototype.findSkill = function(player, skillPattern) {
+	var i = 0;
+	var pattern = new RegExp('^' + skillPattern);
+	var skill;
+
+	for (i; i < player.skills.length; i += 1) {
+		skill = player.skills[i];
+
+		if (pattern.test(skill.display.toLowerCase())) {
+			return player.skills[i];
+		}
+	}
+
+	return null;
 };
 
 Character.prototype.getSkillById = function(player, skillId) {
@@ -1113,37 +1105,33 @@ Character.prototype.getSkillById = function(player, skillId) {
 	return false;
 };
 
-Character.prototype.meetsSkillPrereq = function(player, skillObj) {
-	var prop,
-	requiredSkillObj;
-	
-	if (skillObj.prerequisites) {
-		for (prop in skillObj.prerequisites) {
-			if (prop !== 'skill') {
-				if (!player[prop]) {
-					return false;
-				} else if (skillObj.prerequisites[prop].toString().indexOf(player[prop]) === -1) {
-					return false;
-				}
+Character.prototype.meetsSkillPrereq = function(player, prerequisites) {
+	var prop;
+	var requiredSkillObj;
+
+	for (prop in prerequisites) {
+		if (prop !== 'skill') {
+			if (!player[prop] && player[prop] !== 0) {
+				return false;
+			} else if (prerequisites[prop] > player[prop]) {
+				return false;
+			}
+		} else {
+			requiredSkillObj = this.getSkillById(player, prerequisites.skill.id);
+			
+			if (!requiredSkillObj) {
+				return false
 			} else {
-				requiredSkillObj = this.getSkillById(player, skillObj.prerequisites.skill.id);
-				
-				if (!requiredSkillObj) {
-					return false
-				} else {
-					if (skillObj.prerequisites.skill.prop) {
-						if (requiredSkillObj[skillObj.prerequisites.skill.prop] >= skillObj.prerequisites.skill.value) {
-							return false;
-						}
+				if (prerequisites.skill.prop) {
+					if (requiredSkillObj[prerequisites.skill.prop] < prerequisites.skill.value) {
+						return false;
 					}
 				}
 			}
 		}
-		
-		return true;
-	} else {
-		return true;
 	}
+	
+	return true;
 };
 
 Character.prototype.addSkill = function(player, skillObj) {
@@ -1180,6 +1168,21 @@ Character.prototype.removeEq = function(player, item) {
 		msg: 'You stopped using ' + item.short + '.'
 	});
 };
+
+Character.prototype.getItemByName = function(entity, name) {
+	var i = 0;
+	var item;
+
+	for (i; i < entity.items.length; i += 1) {
+		item = entity.items[i];
+
+		if (item.displayName.toLowerCase().includes(name)) {
+			return item;
+		}	
+	}	
+
+	return null;
+}
 
 Character.prototype.getItem = function(entity, command) {
 	return World.search(entity.items, command);
@@ -1256,8 +1259,30 @@ Character.prototype.applyMods = function(player, mods) {
 	var prop;
 
 	for (prop in mods) {
-		if (player[prop] !== undefined) {
-			player[prop] += mods[prop];
+		player[prop] += mods[prop];
+
+		if (prop === 'chp') {
+			if (player.chp > player.hp) {
+				player.chp = player.hp;
+			} else if (player.chp < 0) {
+				player.chp = 0;
+			}
+		}
+
+		if (prop === 'cmana') {
+			if (player.cmana > player.mana) {
+				player.cmana = player.mana;
+			} else if (player.cmana < 0) {
+				player.cmana = 0;
+			}
+		}
+
+		if (prop === 'cmv') {
+			if (player.cmv > player.mv) {
+				player.cmv = player.mv;
+			} else if (player.cmv < 0) {
+				player.cmv = 0;
+			}
 		}
 	}
 };
@@ -1404,9 +1429,9 @@ Character.prototype.getStatusReport = function(player) {
 // if the room is dark, if the player has needed vision skills
 // and if its currently dark outside
 Character.prototype.canSee = function(player, roomObj) {
-	var canSee = player.sight,
-	light,
-	hasDarkvision;
+	var canSee = player.sight;
+	var light;
+	var hasDarkvision;
 
 	if (canSee && !roomObj.light && !World.time.isDay) {
 		hasDarkvision = World.getAffect(player, 'darkvision');
@@ -1506,6 +1531,18 @@ Character.prototype.ungroup = function(player, entity) {
 	entity.group.splice(entity.group.indexOf(player), 1);
 };
 
+Character.prototype.checkGrouped = function(entity1, entity2) {
+	var result = false;
+
+	entity1.group.forEach(groupMate => {
+		if (groupMate.refId === entity2.refId) {
+			result = true;
+		}
+	});
+
+	return result;
+};
+
 Character.prototype.changeHp = function(entity, amount) {
 	var newTotal;
 
@@ -1522,13 +1559,17 @@ Character.prototype.changeHp = function(entity, amount) {
 
 		entity.chp = newTotal;
 	} else if (amount < 0) {
-		newTotal = (entity.chp - amount);
+		newTotal = (entity.chp + amount);
 
 		if (newTotal < 0) {
 			newTotal = 0;
 		}
 
-		entity.chp = 0;
+		entity.chp = newTotal;
+	}
+
+	if (entity.chp > entity.hp) {
+		entity.chp = entity.hp;
 	}
 }
 
@@ -1556,6 +1597,10 @@ Character.prototype.changeMana = function(entity, amount) {
 
 		entity.cmana = 0;
 	}
+
+	if (entity.cmana > entity.mana) {
+		entity.cmana = entity.mana;
+	}
 }
 
 Character.prototype.changeMove = function(entity, amount) {
@@ -1582,6 +1627,20 @@ Character.prototype.changeMove = function(entity, amount) {
 
 		entity.cmv = 0;
 	}
+
+	if (entity.cmv > entity.mv) {
+		entity.cmv = entity.mv;
+	}
+}
+
+Character.prototype.changeWait = function(entity, amount) {
+	var newTotal = (entity.wait + amount);
+
+	if (newTotal < 0) {
+		newTotal = 0;
+	} 
+	
+	entity.wait = newTotal;
 }
 
 Character.prototype.level = function(player) {
@@ -1675,4 +1734,4 @@ Character.prototype.write = function(name, obj, fn) {
 	}
 };
 
-module.exports = new Character();
+module.exports = Character;
