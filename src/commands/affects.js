@@ -1,13 +1,18 @@
 'use strict'
-var World = require('../world');
 
-module.exports = function(entity, command) {
+module.exports = function(entity, command, World) {
     var str = '';
     
     entity.affects.forEach(affect => {
-        str += '<tr>'
-        + '<td><strong>' + affect.display + '</strong></td>'
-        + '</tr>';
+        if (affect.display) {
+            str += '<tr>'
+                + '<td><strong>' + affect.display + '</strong></td>'
+                + '</tr>';
+        } else {
+            str += '<tr>'
+                + '<td><strong>Unknown</strong></td>'
+                + '</tr>';
+        }
     });
 
     str = '<table class="table table-condensed prac-table">'

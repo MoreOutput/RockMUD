@@ -3,9 +3,7 @@
  * This command will be added to the object prototype outlined in commands.
  */
 'use strict'
-var World = require('../world');
-
-module.exports = function(entity, command) {
+module.exports = function(entity, command, World) {
 	if (entity.position !== 'sleeping') {
 		World.msgPlayer(entity, {msg: 'Nothing happens. Why would it?', styleClass: 'error' });
 	} else {

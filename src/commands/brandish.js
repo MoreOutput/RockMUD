@@ -1,13 +1,11 @@
 /**
- * This file serves as an example of implementing a command on a file basis
- * This command will be added to the object prototype outlined in commands.
+* Cast a spell attached to an item
  */
 'use strict'
-var World = require('../world');
 
-module.exports = function(entity, command) {
-	var scroll = World.character.getItem(entity, command),
-	level = entity.level;
+module.exports = function(entity, command, World) {
+	var scroll = World.character.getItemByName(entity, command.arg);
+	var level = entity.level;
 
 	if (entity.mainStat !== 'int') {
 		level -= 5;

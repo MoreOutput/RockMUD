@@ -2,14 +2,31 @@
 
 var fs = require('fs'),
 util = require('util'),
-World = require('../world'),
-players = World.players,
-time = World.time,
-areas = World.areas,
+World,
+players,
+time,
+areas,
 
-Cmd = function () {};
+Cmd = function (newWorld) {
+	World = newWorld
+	this.world = newWorld;
 
-Cmd.prototype.createCommandObject = function(resFromClient, entity) {
+	players = World.players;
+	time = World.time;
+	areas = World.areas;
+};
+
+
+// TODO: check roomObj for input level matches
+// command + arguments + input
+// give + 20 gold + red dragon
+// cast + cure light wounds + red dragon
+// kill + '' + giant red dragon
+// whirlwind
+// cast + super duper fireball + ultimate red dragon
+// remove + '' + short sword
+// drink + '' + fountain
+Cmd.prototype.createCommandObject = function(resFromClient, entity, roomObj, attachRoom) {
 	var result;
 	var argStr = '';
 	var resultPos = '';
@@ -41,6 +58,9 @@ Cmd.prototype.createCommandObject = function(resFromClient, entity) {
 			cmdObj.arg = cmdObj.msg.replace(cmdObj.input, '').trim();
 		}
 
+		// try to find a matching skill for the arg, if its there replace 
+		// arg with the name
+
 		if (entity) {
 			for (i; i < cmdArr.length; i += 1) {
 				if (i > 0 && !result) {
@@ -51,16 +71,32 @@ Cmd.prototype.createCommandObject = function(resFromClient, entity) {
 							argStr += ' ' + cmdArr[(i)];
 						}
 					}
+
 					resultPos = (i + 1); // adding two to account for starting at index 2
 					result = World.character.getSkill(entity, argStr);
 				}
 			}
 		}
+		
 
 		if (result) {
-			cmdObj.input = cmdArr.slice(resultPos).join(' ');
-			// TODO: build from array
 			cmdObj.arg = result.display.toLowerCase();
+			cmdObj.input = cmdArr.slice(resultPos).join(' ');
+		} else if (!result && argStr) {
+			// TODO see if this check can be factored into character getSkill/2
+			entity.skills.forEach(skill => {
+				if (skill.id.toLowerCase().includes(argStr.replace(/ /g, ''))) {
+					result = skill;
+				}
+			});
+
+			if (result) {
+				cmdObj.arg = result.display.toLowerCase();
+				
+				if (argStr === cmdObj.msg) {
+					cmdObj.input = '';
+				}
+			}
 		}
 
 		if (cmdObj.input && !isNaN(parseInt(cmdObj.input[0]))
@@ -95,6 +131,18 @@ Cmd.prototype.createCommandObject = function(resFromClient, entity) {
 		} else {
 			cmdObj.last = cmdObj.last.replace(cmdObj.number + '.', '');
 		}
+
+		if (cmdObj.arg && entity) {
+			var skillObj = World.character.findSkill(entity, cmdObj.arg);
+
+			if (skillObj) {
+				cmdObj.arg = skillObj.display.toLowerCase();
+			}
+		}
+	}
+
+	if (roomObj && attachRoom) {
+		cmdObj.roomObj = roomObj;
 	}
 
 	return cmdObj;
@@ -297,6 +345,7 @@ Cmd.prototype.give = function(target, command) {
 	canGive,
 	receiver;
 
+
 	if (command.roomObj) {
 		roomObj = command.roomObj;
 	} else {
@@ -307,13 +356,11 @@ Cmd.prototype.give = function(target, command) {
 		if (command.msg) {
 			if (command.msg.indexOf(' ' + World.config.coinage) === -1) {
 				if (canSee) {
-					receiver = World.room.getEntity(roomObj, {
-						arg: command.input,
-						input: command.arg
-					});
+					receiver = World.room.getEntity(roomObj, command);
 
 					if (receiver) {
-						item = World.character.getItem(target, command);
+						item = World.character.getItemByName(target, command.arg);
+
 						if (item) {
 							canGive = World.processEvents('beforeItemRemove', item, roomObj, target);
 
@@ -354,7 +401,7 @@ Cmd.prototype.give = function(target, command) {
 						});
 					}
 				}
-			} else if (!Number.isNaN(parseInt(command.second)) && (command.arg.indexOf(World.config.coinage) !== -1 || command.arg.indexOf('coin') !== -1)) {
+			} else if (!Number.isNaN(parseInt(command.second)) && (command.arg.indexOf('gold') !== -1 || command.arg.indexOf('coin') !== -1)) {
 				if (command.arg !== 'all') {
 					goldToTransfer = parseInt(command.second);
 				} else {
@@ -364,14 +411,12 @@ Cmd.prototype.give = function(target, command) {
 				if (goldToTransfer) {
 					if (goldToTransfer <= target.gold) {
 						if (command.input.indexOf('to') === -1) {
-							command.input = command.input.replace(World.config.coinage, '').replace(/ /g, '');
+							command.input = command.input.replace('gold', '').replace(/ /g, '');
 						} else {
-							command.input = command.input.replace(World.config.coinage + ' to', '').replace(/ /g, '');
+							command.input = command.input.replace('gold to', '').replace(/ /g, '');
 						}
 
-						receiver = World.room.getEntity(roomObj, {
-							arg: command.input
-						});
+						receiver = World.room.getEntity(roomObj, command);
 
 						if (receiver) {
 							target.gold -= goldToTransfer;
@@ -391,13 +436,13 @@ Cmd.prototype.give = function(target, command) {
 						}
 					} else {
 						World.msgPlayer(target,  {
-							msg: 'That\'s more ' + World.config.coinage + ' than you have.',
+							msg: 'That\'s more gold than you have.',
 							styleClass: 'error'
 						});
 					}
 				} else {
 					World.msgPlayer(target,  {
-						msg: 'Not a valid number of ' + World.config.coinage  + '.',
+						msg: 'Not a valid amount of gold.',
 						styleClass: 'error'
 					});
 				}
@@ -488,7 +533,7 @@ Cmd.prototype.follow = function(target, command) {
 	if (target.position === 'standing' && !target.following) {
 		if (canSee) {
 			entityToFollow = World.room.getPlayer(roomObj, command);
-
+			
 			if (!entityToFollow) {
 				entityToFollow = World.room.getMonster(roomObj, command);
 			}
@@ -565,8 +610,9 @@ Cmd.prototype.group = function(target, command) {
 	
 	if (command.arg) {
 		if (target.position === 'standing' || target.position === 'resting') {
+
 			if (target.followers.length) {
-				entityJoiningGroup = World.room.getPlayer(roomObj, command);
+				entityJoiningGroup = World.room.getEntity(roomObj, command);
 
 				if (target.group.indexOf(entityJoiningGroup) === -1) {
 					if (target.followers.indexOf(entityJoiningGroup) !== -1) {
@@ -1169,8 +1215,8 @@ Cmd.prototype.lock = function(target, command, fn) {
 };
 
 Cmd.prototype.recall = function(target, command) {
-	var targetRoom,
-	roomObj;
+	var targetRoom;
+	var roomObj;
 
 	if (command.roomObj) {
 		roomObj = command.roomObj;
@@ -1178,7 +1224,7 @@ Cmd.prototype.recall = function(target, command) {
 		roomObj = World.getRoomObject(target.area, target.roomid);
 	}
 
-	if (!target.fighting && !roomObj.preventRecall && target.cmv) {
+	if (!target.fighting && !roomObj.preventRecall && target.cmv && !target.wait) {
 		if (!command.msg && target.recall.roomid && target.recall.area) {
 			if (roomObj.area !== target.recall.area || roomObj.id !== target.recall.roomid) {
 				targetRoom = World.getRoomObject(target.recall.area, target.recall.roomid);
@@ -1263,29 +1309,36 @@ Cmd.prototype.recall = function(target, command) {
 			});
 		}
 	} else {
-		World.msgPlayer(target, {
-			msg: 'You can\'t recall!',
-			styleClass: 'warning'
-		});
+		if (target.cmv) {
+			World.msgPlayer(target, {
+				msg: 'You can\'t recall!',
+				styleClass: 'warning'
+			});
+		} else {
+			World.msgPlayer(target, {
+				msg: 'You are too tired to recall!',
+				styleClass: 'warning'
+			});
+		}
 	}
 };
 
 // Puts any target object into a defined room after verifying criteria
 Cmd.prototype.move = function(target, command, fn) {
-	var cmd = this,
-	direction = command.arg,
-	dexMod = World.dice.getDexMod(target),
-	exitObj,
-	displayHTML,
-	targetRoom,
-	exitObj,
-	sneakAff,
-	roomObj,
-	canEnter = true, // event result, must be true to move into targetRoom
-	canLeave = true, // event result, must be true to leave roomObj	
-	i = 0,
-	cost = 1 + target.size.value,
-	parseMovementMsg = function(exitObj) {
+	var cmd = this;
+	var direction = command.arg;
+	var dexMod = World.dice.getDexMod(target);
+	var exitObj;
+	var displayHTML;
+	var targetRoom;
+	var exitObj;
+	var sneakAff;
+	var roomObj;
+	var canEnter = true; // event result, must be true to move into targetRoom
+	var canLeave = true; // event result, must be true to leave roomObj	
+	var i = 0;
+	var cost = 1 + target.size.value;
+	var parseMovementMsg = function(exitObj) {
 		if (!exitObj.cmdMsg) {
 			if (exitObj.cmd === 'up') {
 				return 'below';
@@ -1305,7 +1358,7 @@ Cmd.prototype.move = function(target, command, fn) {
 
 	cost -= dexMod;
 
-	if ((!target.fighting && target.position === 'standing') || (target.position === 'fleeing') 
+	if ((!target.fighting && target.position === 'standing') || (target.position === 'fleeing' || target.wait) 
 		&& (target.cmv > cost && target.wait === 0 && target.chp > 0)) {
 
 		if (!command.roomObj) {
@@ -1377,6 +1430,12 @@ Cmd.prototype.move = function(target, command, fn) {
 							World.room.removePlayer(roomObj, target);
 
 							targetRoom.playersInRoom.push(target);
+							
+							setTimeout(() => {
+								if (target.area === targetRoom.area && target.roomid === targetRoom.id) {
+									World.character.save(target);
+								}
+							}, 350);
 						} else {
 							World.room.removeMob(roomObj, target);
 
@@ -1423,6 +1482,7 @@ Cmd.prototype.move = function(target, command, fn) {
 
 								return fn2(true, msg);
 							},
+							noPrompt: true,
 							playerName: target.name
 						});
 
@@ -1462,6 +1522,7 @@ Cmd.prototype.move = function(target, command, fn) {
 
 								return fn2(true, msg);
 							},
+							noPrompt: true,
 							playerName: target.name
 						});
 
@@ -2140,15 +2201,16 @@ Cmd.prototype.mlist = function(player, command) {
 
 // triggering spell skills
 Cmd.prototype.cast = function(player, command, fn) {
-	var cmd = this,
-	mob,
-	skillObj,
-	roomObj,
-	skillProfile,
-	spellTarget;
+	var cmd = this;
+	var mob;
+	var skillObj;
+	var roomObj;
+	var skillProfile;
+	var spellTarget;
 
 	if (command.roomObj) {
 		roomObj = command.roomObj;
+		command.roomObj = null;
 	} else {
 		roomObj = World.getRoomObject(player.area, player.roomid);
 	}
@@ -2157,55 +2219,51 @@ Cmd.prototype.cast = function(player, command, fn) {
 		skillObj = command.skillObj;
 	}
 
-	if (player.position !== 'sleeping' && player.position !== 'resting') {
+	if (player.position !== 'sleeping' && player.position !== 'resting' && player.wait === 0) {
 		if (command.arg || skillObj) {
 			if (!skillObj) {
 				skillObj = World.character.getSkill(player, command.arg);
 			}
 
+			// todo: run a check for skill improvement
+
 			if (skillObj && skillObj.id in World.spells) {
 				if (player.cmana > 0) {
 					if (player.position === 'standing') {
+						// self, me, or a direct name match sets the target of the spell to the caster
+						if (command.last === 'self' || command.last === 'me' || command.input === player.name) {
+							spellTarget = player;
+						}
 
-						spellTarget = World.combat.getBattleTargetByRefId(player.refId);
+						if (!spellTarget) {
+							spellTarget = World.search(roomObj.monsters, command);
+						}
 
-						if (skillObj.type.indexOf('passive') === -1) {
-							// combat skills
-							if (spellTarget) {
-								skillProfile = World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command);
-								World.processEvents('onSpell', player, roomObj, skillObj);
-								World.processEvents('onSpell', player.items, roomObj, skillObj);
-								World.processEvents('onSpell', roomObj, player, skillObj);
-							} else {
-								spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg, number: command.number});
-								if (spellTarget) {
-									skillProfile = World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command);
-								} else {
-									World.msgPlayer(player, {
-										msg: 'You need to specify a target!'
-									});
-								}
-							}
+						if (!spellTarget && !command.input 
+							&& (skillObj.type.indexOf('heal') !== -1 || skillObj.type.indexOf('passive') !== -1)) {
+							spellTarget = player;
+						}
+
+						if (!spellTarget) {
+							spellTarget = World.combat.getBattleTargetByRefId(player.refId);
+						}
+
+						if (!spellTarget) {
+							spellTarget = World.search(roomObj.monsters, command, World);
+						}
+
+						if (!spellTarget) {
+							// skill code needs to handle the case where spellTarget could be null
+							spellTarget = null;
+						}
+						
+						if (spellTarget) {
+							World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command, World);
 						} else {
-							// passive skills
-							if (command.last === 'self' || command.last === 'me' || (command.last === skillObj.display)) {
-								spellTarget = player;
-							} else {
-								spellTarget = World.search(roomObj.monsters, {arg: command.last, input: command.arg});
-							}
-
-							if (spellTarget) {
-								World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command);
-
-								World.processEvents('onSpell', player, roomObj, skillObj);
-								World.processEvents('onSpell', player.items, roomObj, skillObj);
-								World.processEvents('onSpell', roomObj, player, skillObj);
-							} else {
-								World.msgPlayer(player, {
-									msg: 'You do not see anything by that name here.',
-									styleClass: 'error'
-								});
-							}
+							World.msgPlayer(player, {
+								msg: 'Cast ' + command.arg + ' on what?',
+								styleClass: 'error'
+							});
 						}
 					} else {
 						World.msgPlayer(player, {
@@ -2231,9 +2289,15 @@ Cmd.prototype.cast = function(player, command, fn) {
 				msg: 'Cast what?'
 			});
 		}
+	} else if (player.wait === 0) {
+		World.msgPlayer(player, {
+			msg: 'You cannot use magic in this position.',
+			styleClass: 'warning'
+		});
 	} else {
 		World.msgPlayer(player, {
-			msg: 'You cannot use magic while asleep.'
+			msg: 'You can\'t cast that just yet.',
+			styleClass: 'warning'
 		});
 	}
 };
@@ -2252,10 +2316,10 @@ Cmd.prototype.kill = function(player, command) {
 			}
 
 			if (!command.target) {
-				opponent = World.search(roomObj.monsters, command);
+				opponent = World.search(roomObj.monsters, {input: command.arg});
 
 				if (!opponent) {
-					opponent = World.search(roomObj.playersInRoom, command);
+					opponent = World.search(roomObj.playersInRoom, {input: command.arg});
 				}
 			} else {
 				opponent = command.target;
@@ -2263,22 +2327,9 @@ Cmd.prototype.kill = function(player, command) {
 
 			if (opponent && opponent.roomid === player.roomid) {
 				World.msgPlayer(player, {
-					msg: '<strong class="grey">You approach the '
+					msg: '<strong class="grey">You attack the '
 						+ opponent.displayName.toLowerCase() + ' (Level: ' + opponent.level + ')</strong>',
 					noPrompt: true
-				});
-
-				World.msgPlayer(opponent, {
-					msg: '<strong class="red">' + player.displayName 
-						+ ' approaches you</strong>',
-					noPrompt: true
-				});
-
-				World.msgRoom(roomObj, {
-					msg: '<strong class="red">' + player.displayName 
-						+ ' begins to circle ' + opponent.long + '</strong>',
-					noPrompt: true,
-					playerName: player.name
 				});
 
 				World.combat.processFight(player, opponent, roomObj);
@@ -2979,7 +3030,7 @@ Cmd.prototype.practice = function(target, command) {
 							pracSkill();
 						} else {
 							if (skillObj) {
-								if (trainerSkillObj && World.character.meetsSkillPrereq(target, skillObj)) {
+								if (trainerSkillObj && World.character.meetsSkillPrereq(target, skillObj.prerequisites)) {
 									pracSkill();
 								} else {
 									if (trainerSkillObj) {
@@ -3023,7 +3074,7 @@ Cmd.prototype.practice = function(target, command) {
 							if (!skillObj) {
 								practiceDisplay += '<td class="prac-known blue">Not Trainable</td>';
 							} else {
-								if (!World.character.meetsSkillPrereq(target, skillObj)) {
+								if (!World.character.meetsSkillPrereq(target, skillObj.prerequisites)) {
 									practiceDisplay += '<td class="prac-known red">Unmet prerequisites</td>';
 								} else {
 									if (trainer.skills[i].train >= skillObj.train || trainer.maxTrain) {
@@ -3335,7 +3386,7 @@ Cmd.prototype.inventory = function(player, command) {
 		});
 	} else {
 		World.msgPlayer(player, {
-			msg: 'No items in your inventory, can carry ' + World.character.getMaxCarry(player) + ' pounds of items and treasure.'
+			msg: 'No items in your inventory, can carry ' + World.character.getMaxCarry(player) + ' pounds.'
 		});
 	}
 };
@@ -3373,6 +3424,7 @@ Cmd.prototype.quests = function(target, commands) {
 };
 
 Cmd.prototype.score = function(target, command) {
+	var mods = World.dice.getMods(target);
 	var score = '<div class="row score"><div class="col-md-12"><h1>' + 
 		'<span class="score-name">' + target.displayName + '</span> ' + 
 		'<span class="score-title">' + target.title + '</span> ' + 
@@ -3386,14 +3438,14 @@ Cmd.prototype.score = function(target, command) {
 					'<li class="stat-mana list-inline-item"><label>Mana:</label> <strong>' + target.cmana + '</strong>/' + target.mana + '</li>' +
 					'<li class="stat-mv last list-inline-item"><label>Moves:</label> <strong>' + target.cmv + '</strong>/' + target.mv + '</li>' +
 				'</ul>' +
-				'<ul class="col-md-2 score-stats list-unstyled">' +
-					'<li class="stat-str first"><label><strong>STR:</strong></label> ' + target.baseStr + ' <strong>(' + target.str + ')</strong></li>' +
-					'<li class="stat-wis"><label><strong>WIS:</strong></label> ' + target.baseWis + ' <strong>(' + target.wis + ')</strong></li>' +
-					'<li class="stat-int"><label><strong>INT:</strong></label> ' + target.baseInt + ' <strong>(' + target.int + ')</strong></li>' +
-					'<li class="stat-dex"><label><strong>DEX:</strong></label> ' + target.baseDex + ' <strong>(' + target.dex + ')</strong></li>' +
-					'<li class="stat-con last"><label><strong>CON:</strong></label> ' + target.baseCon + ' <strong>(' + target.con + ')</strong></li>' +
+				'<ul class="col-md-3 score-stats list-unstyled">' +
+					'<li class="stat-str first"><label><strong>STR:</strong></label> ' + target.baseStr + ' <strong>(' + target.str + ')(' + (mods.str > 0 ? '+' : '').toString() + mods.str + ')</strong></li>' +
+					'<li class="stat-wis"><label><strong>WIS:</strong></label> ' + target.baseWis + ' <strong>(' + target.wis + ')(' + (mods.wis > 0 ? '+' : '').toString() + mods.wis + ')</strong></li>' +
+					'<li class="stat-int"><label><strong>INT:</strong></label> ' + target.baseInt + ' <strong>(' + target.int + ')(' + (mods.int > 0 ? '+' : '').toString() + mods.int + ')</strong></li>' +
+					'<li class="stat-dex"><label><strong>DEX:</strong></label> ' + target.baseDex + ' <strong>(' + target.dex + ')(' + (mods.dex > 0 ? '+' : '').toString() + mods.dex + ')</strong></li>' +
+					'<li class="stat-con last"><label><strong>CON:</strong></label> ' + target.baseCon + ' <strong>(' + target.con + ')(' + (mods.con > 0 ? '+' : '').toString() + mods.con + ')</strong></li>' +
 				'</ul>' +
-				'<ul class="col-md-2 score-stats list-unstyled">' +
+				'<ul class="col-md-3 score-stats list-unstyled">' +
 					'<li class="stat-armor"><label><strong>Armor:</strong></label> ' + World.dice.getAC(target) + '</li>' +
 					'<li class="stat-hunger"><label><strong>Hunger:</strong></label> ' + target.hunger +'</li>' +
 					'<li class="stat-thirst"><label><strong>Thirst:</strong></label> ' + target.thirst +'</li>' +
@@ -3403,19 +3455,19 @@ Cmd.prototype.score = function(target, command) {
 					'<ul class="score-stats list-unstyled">' +
 						'<li class="stat-hitroll"><label><strong>Hit Bonus: </strong></labels> ' + World.character.getHitroll(target) + '</li>' +
 						'<li class="stat-damroll"><label><strong>Damage Bonus: </strong></label> ' + World.character.getDamroll(target) + '</li>' +
-						'<li class="stat-magicRes"><label><strong>Magic resistance: </strong></label> ' + target.magicRes + '</li>' +
-						'<li class="stat-meleeRes"><label><strong>Melee resistance: </strong></label> ' + target.meleeRes + '</li>' +
+						'<li class="stat-magicRes"><label><strong>Magic Res: </strong></label> ' + target.magicRes + '</li>' +
+						'<li class="stat-meleeRes"><label><strong>Melee Res: </strong></label> ' + target.meleeRes + '</li>' +
 					'</ul>' +
 				'</div>' +
 				'<div class="stat-details col-md-3">' +
 					'<ul class="score-stats list-unstyled">' +
-						'<li class="stat-poisonRes"><label><strong>Poison resistance: </strong></label> ' + target.poisonRes + '</li>' +
+						'<li class="stat-poisonRes"><label><strong>Poison Res: </strong></label> ' + target.poisonRes + '</li>' +
 						'<li class="stat-detection"><label><strong>Detection: </strong></label> ' + target.detection + '</li>' +
 						'<li class="stat-knowlege"><label><strong>Knowledge: </strong></label> ' + target.knowledge + '</li>' +
 					'</ul>' +
 				'</div>' +
 				'<div class="col-md-12 score-affects">' +
-					'<p>You don\'t feel affected by anything.</p>' +
+					(target.affects.length ? '<p>You are under the influence of special affects.</p>' : '<p>You don\'t feel affected by anything.</p>').toString() +
 				'</div>' +
 				'<ul class="col-md-12 list-unstyled">' +
 					'<li class="stat-position">You are currently <span class="green">' + (target.fighting === false ? target.position : target.position + ' and fighting') + '</span>.</li>' +
@@ -3445,7 +3497,14 @@ Cmd.prototype.help = function(target, command) {
 		if (!err) {
 			World.msgPlayer(target, {msg: data, noPrompt: command.noPrompt, styleClass: 'cmd-help' });
 		} else {
-			World.msgPlayer(target, {msg: 'No help file found.', noPrompt: command.noPrompt, styleClass: 'error' });
+			fs.readdir('./help', function(err, helpFileNames) {
+				helpFileNames.forEach(function(name, i) {
+					helpFileNames[i] = name.replace(/[.].*/g, '');
+				});
+
+				World.msgPlayer(target, {msg: 'No help file found. Try one of the following '
+					+ helpFileNames.toString(), noPrompt: command.noPrompt, styleClass: 'error' });
+			});
 		}
 	});
 };
@@ -3478,12 +3537,15 @@ Cmd.prototype.plist = function(player, command) {
 };
 
 Cmd.prototype.cripple = function(player, command) {
+	var target;
 	if (player.role === 'admin' || World.config.allAdmin) {
-		if (player.opponent && player.opponent.chp) {
-			player.opponent.chp = 1;
+		target = World.combat.getBattleTargetByRefId(player.refId);
+		
+		if (target && target.chp) {
+			target.chp = 1;
 
 			World.msgPlayer(player, {
-				msg: 'You have crippled ' + player.opponent.short
+				msg: 'You have crippled ' + target.short
 			});
 		}
 	}
@@ -3500,6 +3562,22 @@ Cmd.prototype.alist = function(target, command) {
 
 	World.msgPlayer(target, {
 		msg: '<h3>Loaded Areas: ' + World.areas.length + '</h3>'
+			+ '<ul>' + str + '</ul>',
+		styleClass: 'warning'
+	});
+};
+
+// list all battles and their total positions
+Cmd.prototype.blist = function(target, command) {
+	var i = 0,
+	str = '';
+
+	for (i; i < World.battles.length; i += 1) {
+		str += '<li>Round: ' + World.battles[i].round  + ', Positions: ' + World.combat.getNumberOfBattlePositions(World.battles[i]) + '</li>';
+	}
+
+	World.msgPlayer(target, {
+		msg: '<h3>Current Battles: ' + World.battles.length + '</h3>'
 			+ '<ul>' + str + '</ul>',
 		styleClass: 'warning'
 	});
@@ -3587,4 +3665,4 @@ Cmd.prototype.peace = function(target, command) {
 	}
 };
 
-module.exports = new Cmd();
+module.exports = Cmd;
