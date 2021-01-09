@@ -1,47 +1,79 @@
 const MOCK_SERVER = require('../mocks/mock_server');
+let mud;
 
 describe('Testing Core: Command Creation', () => {
     let server;
 
     beforeEach((done) => {
-        MOCK_SERVER.setup(() => {
-            mockPlayer = MOCK_SERVER.player;
-            mockPlayerRoom = MOCK_SERVER.room;
-    
-            mockPlayer.skills.push({
-                "id": "cureLight",
-                "display": "Cure Light",
-                "mod": 2,
-                "train": 65,
-                "type": "passive spell",
-                "wait": 2,
-                "learned": true,
-                "prerequisites": {
-                    "level": 1
-                }
-            }, {
-                "id": "heroDancingSword",
-                "display": "Heros Dancing Sword",
-                "mod": 2,
-                "train": 65,
-                "type": "spell",
-                "wait": 2,
-                "learned": true,
-                "prerequisites": {
-                    "level": 1
-                }
-            });
+        mud = new MOCK_SERVER(() => {
+            mud.createNewEntity((dragon) => {
+                mockPlayer = mud.player;
+                dragon.name = 'red dragon';
+                dragon.displayName = 'Red Dragon';
 
-            server = MOCK_SERVER.server;
- 
-            done();
+                mud.room.monsters.push(dragon);
+
+                mockPlayerRoom = mud.room;
+
+                mockPlayer.skills.push({
+                    "id": "cureLight",
+                    "display": "Cure Light",
+                    "mod": 2,
+                    "train": 65,
+                    "type": "passive spell",
+                    "wait": 2,
+                    "learned": true,
+                    "prerequisites": {
+                        "level": 1
+                    }
+                }, {
+                    "id": "heroDancingSword",
+                    "display": "Heros Dancing Sword",
+                    "mod": 2,
+                    "train": 65,
+                    "type": "combat spell",
+                    "wait": 2,
+                    "learned": true,
+                    "prerequisites": {
+                        "level": 1
+                    }
+                });
+
+                server = mud.server;
+    
+                done();
+            });
         });
     });
 
     it('should take a given string and creaate a command object', () => {
         expect(server.world.commands.createCommandObject({
+            msg: 'cast cure lu'
+        }, mockPlayer, mockPlayerRoom)).toEqual({
+            cmd: 'cast',
+            msg: 'cure lu',
+            last: 'lu',
+            number: 1,
+            arg: 'cure light',
+            input: 'lu',
+            second: 'cure'
+        });
+        
+        expect(server.world.commands.createCommandObject({
+            msg: 'cast cure li'
+        }, mockPlayer, mockPlayerRoom)).toEqual({
+            cmd: 'cast',
+            msg: 'cure li',
+            last: 'li',
+            number: 1,
+            arg: 'cure light',
+            input: '',
+            second: 'cure'
+        });
+        
+        expect(server.world.commands.createCommandObject({
             msg: 'cast cure light'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'cast',
             msg: 'cure light',
             last: 'light',
@@ -53,7 +85,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'cast cure light red dragon'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'cast',
             msg: 'cure light red dragon',
             last: 'dragon',
@@ -64,8 +96,20 @@ describe('Testing Core: Command Creation', () => {
         });
 
         expect(server.world.commands.createCommandObject({
+            msg: 'cast cure light 2.red dragon'
+        }, mockPlayer, mockPlayerRoom)).toEqual({
+            cmd: 'cast',
+            msg: 'cure light red dragon',
+            last: 'dragon',
+            number: 2,
+            arg: 'cure light',
+            input: 'red dragon',
+            second: 'cure'
+        });
+
+        expect(server.world.commands.createCommandObject({
             msg: 'skin deer'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'skin',
             msg: 'deer',
             last: 'deer',
@@ -77,7 +121,7 @@ describe('Testing Core: Command Creation', () => {
 
        expect(server.world.commands.createCommandObject({
            msg: 'cast detect hidden'
-       }, mockPlayer)).toEqual({
+       }, mockPlayer, mockPlayerRoom)).toEqual({
            cmd: 'cast',
            msg: 'detect hidden',
            last: 'hidden',
@@ -89,7 +133,7 @@ describe('Testing Core: Command Creation', () => {
 
        expect(server.world.commands.createCommandObject({
             msg: 'cast detect hidden 2.racine'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'cast',
             msg: 'detect hidden racine',
             last: 'racine',
@@ -101,7 +145,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'cast fireball goblin'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'cast',
             msg: 'fireball goblin',
             last: 'goblin',
@@ -113,7 +157,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'cast spark 5.goblin'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'cast',
             msg: 'spark goblin',
             last: 'goblin',
@@ -125,7 +169,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'get 3.potion'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'get',
             msg: 'potion',
             last: 'potion',
@@ -137,7 +181,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'score'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'score',
             msg: '',
             last: 'score',
@@ -149,7 +193,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'cast super duper fireball 4.dragon'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'cast',
             msg: 'super duper fireball dragon',
             last: 'dragon',
@@ -161,7 +205,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'kill red dragon'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'kill',
             msg: 'red dragon',
             last: 'dragon',
@@ -173,7 +217,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'cast cure light red dragon'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'cast',
             msg: 'cure light red dragon',
             last: 'dragon',
@@ -185,7 +229,7 @@ describe('Testing Core: Command Creation', () => {
         
         expect(server.world.commands.createCommandObject({
             msg: 'cast heros dancing sword 20.red dragon'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'cast',
             msg: 'heros dancing sword red dragon',
             last: 'dragon',
@@ -197,7 +241,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'skin deer flank'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'skin',
             msg: 'deer flank',
             last: 'flank',
@@ -209,7 +253,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'cast cure light 100.giant red worm'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'cast',
             msg: 'cure light giant red worm',
             last: 'worm',
@@ -221,7 +265,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'quaff light healing potion'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'quaff',
             msg: 'light healing potion',
             last: 'potion',
@@ -233,7 +277,7 @@ describe('Testing Core: Command Creation', () => {
 
         expect(server.world.commands.createCommandObject({
             msg: 'give 100 gold goblin'
-        }, mockPlayer)).toEqual({
+        }, mockPlayer, mockPlayerRoom)).toEqual({
             cmd: 'give',
             msg: '100 gold goblin',
             last: 'goblin',
@@ -241,6 +285,42 @@ describe('Testing Core: Command Creation', () => {
             arg: '100 gold',
             input: 'goblin',
             second: '100'
+        });
+        
+        expect(server.world.commands.createCommandObject({
+            msg: 'give 10 gold 2.goblin'
+        }, mockPlayer, mockPlayerRoom)).toEqual({
+            cmd: 'give',
+            msg: '10 gold goblin',
+            last: 'goblin',
+            number: 2,
+            arg: '10 gold',
+            input: 'goblin',
+            second: '10'
+        });
+
+        expect(server.world.commands.createCommandObject({
+            msg: 'cast heros gob'
+        }, mockPlayer, mockPlayerRoom)).toEqual({
+            cmd: 'cast',
+            msg: 'heros gob',
+            last: 'gob',
+            number: 1,
+            arg: 'heros dancing sword',
+            input: 'gob',
+            second: 'heros'
+        });
+
+        expect(server.world.commands.createCommandObject({
+            msg: 'cast cure 2.gob'
+        }, mockPlayer, mockPlayerRoom)).toEqual({
+            cmd: 'cast',
+            msg: 'cure gob',
+            last: 'gob',
+            number: 2,
+            arg: 'cure light',
+            input: 'gob',
+            second: 'cure'
         });
     });
 });

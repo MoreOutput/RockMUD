@@ -1,17 +1,19 @@
 const MOCK_SERVER = require('../mocks/mock_server');
+let mud;
 
 describe('Testing Command: REST', () => {
     let mockPlayer;
     let mockPlayerRoom;
     let mockPlayerArea;
+    let server;
 
     beforeEach((done) => {
-        MOCK_SERVER.setup(() => {
-            mockPlayer = MOCK_SERVER.player;
-            mockPlayerRoom = MOCK_SERVER.room;
-            mockPlayerArea = MOCK_SERVER.area;
-    
-            server = MOCK_SERVER.server;
+        mud = new MOCK_SERVER(() => {
+            server = mud.server;
+
+            mockPlayer = mud.player;
+            mockPlayerRoom = mud.room;
+            mockPlayerArea = mud.area;
 
             done();
         });

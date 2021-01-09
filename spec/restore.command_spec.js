@@ -1,4 +1,5 @@
 const MOCK_SERVER = require('../mocks/mock_server');
+let mud;
 
 // Admin only command for healing everyone on the MUD
 describe('Testing Command: RESTORE', () => {
@@ -7,12 +8,12 @@ describe('Testing Command: RESTORE', () => {
     let mockPlayerArea;
 
     beforeEach((done) => {
-        MOCK_SERVER.setup(() => {
-            mockPlayer = MOCK_SERVER.player;
-            mockPlayerRoom = MOCK_SERVER.room;
-            mockPlayerArea = MOCK_SERVER.area;
+        mud = new MOCK_SERVER(() => {
+            mockPlayer = mud.player;
+            mockPlayerRoom = mud.room;
+            mockPlayerArea = mud.area;
     
-            server = MOCK_SERVER.server;
+            server = mud.server;
 
             done();
         });

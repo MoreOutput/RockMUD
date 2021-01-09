@@ -1,5 +1,4 @@
 const MOCK_SERVER = require('../mocks/mock_server');
-const world = require('../src/world');
 
 describe('Testing Behavior: Item Interactions', () => {
     const mockCurrentHealth = 10;
@@ -90,14 +89,12 @@ describe('Testing Behavior: Item Interactions', () => {
     };
 
     beforeEach((done) => {
-        MOCK_SERVER.setup(() => {
-            server = MOCK_SERVER.server;
+        mud = new MOCK_SERVER(() => {
+            server = mud.server;
 
             cmdLoop = spyOn(server.world.ticks, 'cmdLoop').and.callThrough();
 
-            jasmine.clock().install();
-
-            mockPlayer = MOCK_SERVER.getNewPlayerEntity();
+            mockPlayer = mud.getNewPlayerEntity();
             mockPlayer.area = 'midgaard';
             mockPlayer.originatingArea = mockPlayer.area;
             mockPlayer.roomid = '1';
@@ -107,13 +104,6 @@ describe('Testing Behavior: Item Interactions', () => {
             mockPlayer.cmana = 100;
             mockPlayer.hp = mockMaxHealth;
             mockPlayer.chp = mockCurrentHealth;
-            mockPlayer.behaviors = [
-                {
-                    module: 'test',
-                    onSpell: () => {
-                    }
-                }
-            ];
             mockPlayerArea = server.world.getArea(mockPlayer.area);
             mockPlayerRoom = server.world.getRoomObject(mockPlayer.area, mockPlayer.roomid);
             
@@ -126,15 +116,7 @@ describe('Testing Behavior: Item Interactions', () => {
         }, false, false);
     });
 
-    afterEach(() => {
-        jasmine.clock().uninstall();
-    });
-
     it('should pick up every item in the room and them drop them all', () => {
-        setInterval(function() {
-            server.world.ticks.cmdLoop();
-        }, 280);
-
         expect(mockPlayer.items.length).toBe(0);
 
         let cmd = server.world.commands.createCommandObject({
@@ -144,7 +126,7 @@ describe('Testing Behavior: Item Interactions', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
 
         expect(cmdLoop).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledTimes(1);
@@ -159,7 +141,8 @@ describe('Testing Behavior: Item Interactions', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
+
         expect(dropSpy).toHaveBeenCalledTimes(1);
 
         expect(mockPlayer.items.length).toBe(0);
@@ -167,10 +150,6 @@ describe('Testing Behavior: Item Interactions', () => {
     });
 
     it('should pick up the Dagger and fail to equip it due to being a lower level', () => {
-        setInterval(function() {
-            server.world.ticks.cmdLoop();
-        }, 280);
-
         expect(mockPlayer.items.length).toBe(0);
 
         let cmd = server.world.commands.createCommandObject({
@@ -180,7 +159,7 @@ describe('Testing Behavior: Item Interactions', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
 
         expect(cmdLoop).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledTimes(1);
@@ -190,14 +169,14 @@ describe('Testing Behavior: Item Interactions', () => {
         expect(mockPlayer.items[0].name).toBe('Small Dagger');
 
         cmd = server.world.commands.createCommandObject({
-            msg: 'wear dagger'
+            msg: 'wear dagger' 
         });
         let wearSpy = spyOn(server.world.commands, 'wear').and.callThrough();
         let msgPlayerSpy = spyOn(server.world, 'msgPlayer').and.callThrough();
 
         server.world.addCommand(cmd, mockPlayer);
     
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
     
         expect(wearSpy).toHaveBeenCalledTimes(1);
         expect(msgPlayerSpy).toHaveBeenCalledTimes(1);
@@ -208,10 +187,6 @@ describe('Testing Behavior: Item Interactions', () => {
     });
 
     it('should pick up the Staff and then wear it, remove it, drop it, pick it up, wear it again and brandish it to heal', () => {
-        setInterval(function() {
-            server.world.ticks.cmdLoop();
-        }, 280);
-
         expect(mockPlayer.items.length).toBe(0);
 
         let cmd = server.world.commands.createCommandObject({
@@ -221,7 +196,7 @@ describe('Testing Behavior: Item Interactions', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
 
         expect(cmdLoop).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledTimes(1);
@@ -241,7 +216,7 @@ describe('Testing Behavior: Item Interactions', () => {
 
         server.world.addCommand(cmd, mockPlayer);
     
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
     
         expect(wearSpy).toHaveBeenCalledTimes(1);
         expect(wearWeaponSpy).toHaveBeenCalledTimes(1);
@@ -260,7 +235,7 @@ describe('Testing Behavior: Item Interactions', () => {
 
         server.world.addCommand(cmd, mockPlayer);
     
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
     
         expect(removeSpy).toHaveBeenCalledTimes(1);
         expect(server.world.character.getSlot(mockPlayer, 'hands').item).not.toBe(mockStaff.refId);
@@ -274,7 +249,7 @@ describe('Testing Behavior: Item Interactions', () => {
     
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
 
 
         cmd = server.world.commands.createCommandObject({
@@ -283,7 +258,7 @@ describe('Testing Behavior: Item Interactions', () => {
     
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
 
         
         cmd = server.world.commands.createCommandObject({
@@ -292,14 +267,13 @@ describe('Testing Behavior: Item Interactions', () => {
     
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
 
         expect(mockPlayer.items[0].equipped).toBe(true);
         expect(mockPlayer.damroll).toBe(1);
         expect(mockPlayer.hitroll).toBe(1);
 
         const cureSpy = spyOn(server.world.spells, 'cureLight').and.callThrough();
-        const onSpellEventSpy = spyOn(mockPlayer.behaviors[0], 'onSpell').and.callThrough();
 
         cmd = server.world.commands.createCommandObject({
             msg: 'brandish staff me'
@@ -307,11 +281,10 @@ describe('Testing Behavior: Item Interactions', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
 
         expect(mockPlayer.chp).toBeGreaterThan(mockCurrentHealth);
         expect(cureSpy).toHaveBeenCalledTimes(1);
-        expect(onSpellEventSpy).toHaveBeenCalledTimes(1);
 
         cmd = server.world.commands.createCommandObject({
             msg: 'remove staff'
@@ -319,7 +292,7 @@ describe('Testing Behavior: Item Interactions', () => {
         
         server.world.addCommand(cmd, mockPlayer);
     
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
 
         expect(mockPlayer.items.length).toBe(1);
         expect(mockPlayer.items[0].equipped).toBe(false);
@@ -331,17 +304,13 @@ describe('Testing Behavior: Item Interactions', () => {
     
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
 
         expect(cureSpy).toHaveBeenCalledTimes(1);
     });
 
     it('should pick up the helmet and wear it', () => {
         mockPlayerRoom.items.push(helmet);
-
-        setInterval(function() {
-            server.world.ticks.cmdLoop();
-        }, 280);
 
         mockPlayer.ac = 0;
 
@@ -354,7 +323,7 @@ describe('Testing Behavior: Item Interactions', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.cmdLoop(server.world);
 
         expect(cmdLoop).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledTimes(1);

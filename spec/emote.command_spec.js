@@ -1,4 +1,5 @@
 const MOCK_SERVER = require('../mocks/mock_server');
+let mud;
 
 describe('Testing Command: EMOTE', () => {
     let mockPlayer;
@@ -6,11 +7,11 @@ describe('Testing Command: EMOTE', () => {
     let server;
 
     beforeEach((done) => {
-        MOCK_SERVER.setup(() => {
-            mockPlayer = MOCK_SERVER.player;
-            mockPlayerRoom = MOCK_SERVER.room;
+        mud = new MOCK_SERVER(() => {
+            mockPlayer = mud.player;
+            mockPlayerRoom = mud.room;
     
-            server = MOCK_SERVER.server;
+            server = mud.server;
 
             done();
         });

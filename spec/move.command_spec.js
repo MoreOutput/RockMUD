@@ -1,20 +1,21 @@
 const MOCK_SERVER = require('../mocks/mock_server');
+let mud;
 
 describe('Testing Command: MOVE', () => {
     let mockPlayer;
     let server;
 
     beforeEach((done) => {
-        MOCK_SERVER.setup(() => {
-            server = MOCK_SERVER.server;
+        mud = new MOCK_SERVER(() => {
+            server = mud.server;
 
-            mockPlayer = MOCK_SERVER.getNewPlayerEntity();
+            mockPlayer = mud.getNewPlayerEntity();
             mockPlayer.area = 'midgaard';
             mockPlayer.originatingArea = mockPlayer.area;
             mockPlayer.roomid = '1';
 
             mockPlayerRoom = server.world.getRoomObject(mockPlayer.area, mockPlayer.roomid);
-    
+            
             done();
         });
     });

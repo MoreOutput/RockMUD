@@ -1,27 +1,27 @@
 const MOCK_SERVER = require('../mocks/mock_server');
+let mud;
 
 describe('Testing Command: KILL', () => {
     let mockPlayer;
     let mockMob;
     let mockPlayerRoom;
-    let mockPlayerArea;
 
     beforeEach((done) => {
-        MOCK_SERVER.setup(() => {
-            mockPlayer = MOCK_SERVER.player;
-            mockPlayerRoom = MOCK_SERVER.room;
-            mockPlayerArea = MOCK_SERVER.area;
+        mud = new MOCK_SERVER(() => {
+            mockPlayer = mud.player;
+            mockPlayerRoom = mud.room;
+            mockPlayerArea = mud.area;
         
-            mockPlayer = MOCK_SERVER.player;
-            mockPlayerRoom = MOCK_SERVER.room;
-            mockPlayerArea = MOCK_SERVER.area;
+            mockPlayer = mud.player;
+            mockPlayerRoom = mud.room;
+            mockPlayerArea = mud.area;
 
-            mockMob = MOCK_SERVER.getNewEntity();
+            mockMob = mud.getNewEntity();
             mockMob.id = 'test-dragon';
             mockMob.refId = 'test-dragon-ref-id';
             mockMob.isPlayer = false;
             mockMob.name = 'dragon';
-            mockMob.displayName = 'Test Drago2n';
+            mockMob.displayName = 'Test Dragon';
             mockMob.fighting = false;
 
             mockPlayerRoom.monsters.push(mockMob);
@@ -31,9 +31,7 @@ describe('Testing Command: KILL', () => {
     });
 
     it('should initiate combat with the first valid entity in the room', () => {
-        const roomSpy = spyOn(MOCK_SERVER.server.world, 'getRoomObject').and.callThrough();
-        const searchSpy = spyOn(MOCK_SERVER.server.world, 'search').and.callThrough();
-        const processFightSpy = spyOn(MOCK_SERVER.server.world.combat, 'processFight').and.callThrough();
+        const processFightSpy = spyOn(mud.server.world.combat, 'processFight').and.callThrough();
         const cmd = {
             cmd: 'kill',
             msg: 'dragon',
@@ -41,11 +39,10 @@ describe('Testing Command: KILL', () => {
             roomObj: mockPlayerRoom
         };
 
-        expect(MOCK_SERVER.server.world.commands.kill).toBeTruthy();
+        expect(mud.server.world.commands.kill).toBeTruthy();
 
-        MOCK_SERVER.server.world.commands.kill(mockPlayer, cmd);
+        mud.server.world.commands.kill(mockPlayer, cmd);
 
-        expect(searchSpy).toHaveBeenCalledWith(mockPlayerRoom.monsters, cmd);
         expect(processFightSpy).toHaveBeenCalledWith(mockPlayer, mockMob, mockPlayerRoom);
     });
 });

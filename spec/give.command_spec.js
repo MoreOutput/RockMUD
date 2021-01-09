@@ -1,4 +1,5 @@
 const MOCK_SERVER = require('../mocks/mock_server');
+let mud;
 
 describe('Testing Command: GIVE', () => {
     let mockPlayer;
@@ -7,16 +8,15 @@ describe('Testing Command: GIVE', () => {
     let sword;
 
     beforeEach((done) => {
-        server = null;
-        MOCK_SERVER.setup(() => {
-            server = MOCK_SERVER.server;
+        mud = new MOCK_SERVER(() => {
+            server = mud.server;
 
-            mockPlayer = MOCK_SERVER.getNewPlayerEntity();
+            mockPlayer = mud.getNewPlayerEntity();
             mockPlayer.area = 'midgaard';
             mockPlayer.originatingArea = mockPlayer.area;
             mockPlayer.roomid = '1';
           
-            mockPlayer2 = MOCK_SERVER.getNewPlayerEntity();
+            mockPlayer2 = mud.getNewPlayerEntity();
             mockPlayer2.refId = 'player-player2';
             mockPlayer2.name = 'Player2';
             mockPlayer2.area = 'midgaard';
@@ -35,11 +35,12 @@ describe('Testing Command: GIVE', () => {
             })
             
             mockPlayerRoom = server.world.getRoomObject(mockPlayer.area, mockPlayer.roomid);
-            mockPlayerRoom.playersInRoom = [];
+           // mockPlayerRoom.playersInRoom = [];
+           // server.world.players = [];
+           
             mockPlayerRoom.playersInRoom.push(mockPlayer);
             mockPlayerRoom.playersInRoom.push(mockPlayer2);
 
-            server.world.players = [];
             server.world.players.push(mockPlayer);
             server.world.players.push(mockPlayer2);
 

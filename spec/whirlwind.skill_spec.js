@@ -1,9 +1,7 @@
 const MOCK_SERVER = require('../mocks/mock_server');
 let mud;
 
-xdescribe('Testing: AGGIE BEHAVIOR', () => {
-    let combatLoop;
-    let cmdLoop;
+describe('Testing Skill: Whirlwind', () => {
     let mockPlayer;
     let wolf;
     let wolf2;
@@ -11,15 +9,18 @@ xdescribe('Testing: AGGIE BEHAVIOR', () => {
     let mockPlayerRoom;
     let mockPlayerArea;
     let server;
+    const whirlwindSkillObj = {
+        "id": "whirlwind",
+        "display": "Whirlwind",
+        "mod": 0,
+        "train": 100,
+        "type": "area melee",
+        "learned": true
+    };
 
     beforeEach((done) => {
         mud = new MOCK_SERVER(() => {
             server = mud.server;
- 
-            cmdLoop = spyOn(server.world.ticks, 'cmdLoop').and.callThrough();
-            combatLoop = spyOn(server.world.ticks, 'combatLoop').and.callThrough();
-
-            jasmine.clock().install();
 
             mud.createNewEntity((playerModel) => {
                 mud.createNewEntity((wolfModel) => {
@@ -35,6 +36,7 @@ xdescribe('Testing: AGGIE BEHAVIOR', () => {
                         mockPlayer.displayName = 'Bilbo';
                         mockPlayer.combatName = 'Bilbo';
                         mockPlayer.chp = 100;
+                        mockPlayer.skills.push(whirlwindSkillObj);
 
                         wolf = wolfModel;
                         wolf.area = 'midgaard';
@@ -49,7 +51,7 @@ xdescribe('Testing: AGGIE BEHAVIOR', () => {
                         wolf.cmv = 100;
                         wolf.mv = 100;
                         wolf.hp = 100;
-                        wolf.chp = 1;
+                        wolf.chp = 100;
                         wolf.refId = 'b';
 
                         wolf2 = wolf2Model;
@@ -65,7 +67,7 @@ xdescribe('Testing: AGGIE BEHAVIOR', () => {
                         wolf2.cmv = 100;
                         wolf2.mv = 100;
                         wolf2.hp = 100;
-                        wolf2.chp = 1;
+                        wolf2.chp = 100;
                         wolf2.refId = 'a';
 
                         mockPlayerArea = server.world.getArea(mockPlayer.area);
@@ -81,40 +83,19 @@ xdescribe('Testing: AGGIE BEHAVIOR', () => {
                         server.world.players.push(mockPlayer);
 
                         done();
-                    }, [{
-                        module: 'aggie'
-                    }]);
-                }, [{
-                    module: 'aggie'
-                }]);
+                    });
+                });
             });
         }, false, false);
     });
 
-    afterEach(() => {
-        jasmine.clock().uninstall();
-    });
-
-    it('should simulate player walking into a room and being attacked by a wolf', () => {
+    it('should start a battle with every entity in the room', () => {
         mockPlayer.hitroll = 20; // beats the default entity AC of 10 so we always hit
         
         wolfRoom.monsters.push(wolf);
         wolfRoom.monsters.push(wolf2);
 
-        setInterval(function() {
-            server.world.ticks.cmdLoop();
-        }, 280);
-
-        setInterval(function() {
-            server.world.ticks.combatLoop(server.world.battles);
-        }, 1900);
-
-        expect(cmdLoop).not.toHaveBeenCalled();
-        expect(combatLoop).not.toHaveBeenCalled();
-
-        jasmine.clock().tick(280);
-       
-        expect(cmdLoop).toHaveBeenCalledTimes(1);
+        server.world.ticks.gameTime(server.world);
 
         let cmd = server.world.commands.createCommandObject({
             msg: 'move north'
@@ -122,35 +103,21 @@ xdescribe('Testing: AGGIE BEHAVIOR', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280); // 560
+        server.world.ticks.gameTime(server.world);
 
-        jasmine.clock().tick(280); // onVisit issues kill command
+        cmd = server.world.commands.createCommandObject({
+            msg: 'whirlwind'
+        });
+        cmd.skill = whirlwindSkillObj;
 
-        jasmine.clock().tick(1060); // trigger combat loop
-        
-        expect(combatLoop).toHaveBeenCalled();
+        server.world.addCommand(cmd, mockPlayer);
+
+        server.world.ticks.gameTime(server.world);
 
         expect(server.world.battles.length).toBe(1);
-
-        // defeat the wolf
-        while (wolf.fighting) {
-            jasmine.clock().tick(1900); // trigger combat loop
-        }
-
-        expect(wolf.chp).toBe(0);
-        expect(wolfRoom.monsters.length).toBe(1);
-        expect(server.world.battles.length).toBe(1);
-        expect(server.world.battles[0].positions['0']).toBe(null);
+        expect(server.world.battles[0].positions['0'].attacker.name).toBe('Bilbo');
+        expect(server.world.battles[0].positions['0'].defender.name).toBe('wolf');
         expect(server.world.battles[0].positions['1'].attacker.name).toBe('wolf2');
         expect(server.world.battles[0].positions['1'].defender.name).toBe('Bilbo');
-        expect(server.world.battles[0].positions['2']).toBe(undefined);
-
-        while (wolf2.fighting) {
-            jasmine.clock().tick(1900); // trigger combat loop
-        }
-
-        expect(wolf2.chp).toBe(0);
-        expect(wolfRoom.monsters.length).toBe(0);
-        expect(server.world.battles.length).toBe(0);
     });
 });
