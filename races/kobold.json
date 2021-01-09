@@ -1,6 +1,7 @@
 {
 	"name": "Kobold",
-	"dex": 1,
+	"hp": -4,
+	"baseDex": 1,
 	"playable": false,
 	"attackType": "claw",
 	"size": {"value": 1, "display": "tiny"}

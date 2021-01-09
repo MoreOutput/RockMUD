@@ -1,11 +1,9 @@
 {
 	"name": "Halfling",
-	"con": -1,
-	"dex": 2,
+	"baseCon": -1,
+	"baseDex": 2,
 	"hp": -10,
 	"mv": 20,
 	"playable": true,
-	"attackType": "punch",
-	"size": {"value": 2, "display": "very small"},
-	"diceSides": 2
+	"size": {"value": 2, "display": "very small"}
 }

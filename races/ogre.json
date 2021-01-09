@@ -1,15 +1,25 @@
 {
 	"name": "Ogre",
-	"str": 5,
-	"int": -1,
-	"dex": -1,
-	"hp": 20,
+	"baseStr": 4,
+	"baseInt": -3,
+	"baseDex": -1,
+	"hp": 15,
 	"playable": true,
 	"size": {"value": 4, "display": "large"},
-	"damroll": 2,
-	"meleeRes": 1,
+	"damroll": 1,
+	"meleeRes": 2,
 	"magicRes": -3,
-	"attackType": "smash",
-	"diceNum": 1,
-	"diceSides": 8
+	"skills": [{
+		"id": "roar",
+		"display": "Roar",
+		"mod": 0,
+		"train": 50,
+		"type": "passive",
+		"wait": 3,
+		"learned": true,
+		"prerequisites": {
+			"baseStr": 17,
+			"level": 1
+		}
+	}]
 }

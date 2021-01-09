@@ -1,8 +1,7 @@
 
 {
 	"name": "Human",
-	"wis": 1,
+	"baseWis": 1,
 	"playable": true,
-	"trains": 5,
-	"attackType": "punch"
+	"trains": 5
 }

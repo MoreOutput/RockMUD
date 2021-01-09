@@ -1,14 +1,15 @@
 {
 	"name": "Animal",
 	"playable": false,
-	"attackType": "claw",
 	"size": {"value": 2, "display": "small"},
 	"hitroll": -3,
 	"meleeRes": 0,
 	"handsNoun": "claw",
 	"damroll": -2,
-	"ac": -10,
-	"maxHunger": -2,
+	"hp": 2,
+	"baseStr": 1,
+	"baseWis": -1,
+	"baseInt": -4,
 	"fist" : {
 		"name": "Fighting unarmed!",
 		"displayName": "claws",

@@ -1,11 +1,11 @@
 {
 	"name": "Dwarf",
-	"con": 2,
-	"int": -1,
-	"hp": 10,
+	"baseCon": 2,
+	"hp": 8,
+	"mv": -20,
 	"ac": 1,
+	"meleeRes": 2,
 	"playable": true,
-	"attackType": "punch",
 	"size": {"value": 2, "display": "small"},
 	"affects": []
 }
