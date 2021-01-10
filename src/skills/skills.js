@@ -1,7 +1,4 @@
 'use strict';
-
-const { Collector } = require("istanbul");
-
 var World,
 Skill = function(newWorld) {
 	World = newWorld;
