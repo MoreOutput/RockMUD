@@ -28,10 +28,11 @@
   },
   "homepage": "https://github.com/MoreOutput/RockMUD",
   "devDependencies": {
+    "istanbul": "^0.4.5",
     "jasmine": "^3.6.0",
     "request": "^2.88.2"
   },
   "scripts": {
-    "test": "npx jasmine"
+    "test": "npx --max-old-space-size=4096 istanbul cover node_modules\\jasmine\\bin\\jasmine.js"
   }
 }
