@@ -2304,8 +2304,8 @@ Cmd.prototype.cast = function(player, command, fn) {
 
 // We pass in a Skill Profile Object (the output of a skill) when we start combat with a combat skill
 Cmd.prototype.kill = function(player, command) {
-	var roomObj,
-	opponent;
+	var roomObj;
+	var opponent;
 
 	if (command.arg !== player.name && !player.fighting) {
 		if (player.position === 'standing') {

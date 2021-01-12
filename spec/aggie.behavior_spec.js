@@ -1,7 +1,7 @@
 const MOCK_SERVER = require('../mocks/mock_server');
 let mud;
 
-xdescribe('Testing: AGGIE BEHAVIOR', () => {
+describe('Testing: AGGIE BEHAVIOR', () => {
     let combatLoop;
     let cmdLoop;
     let mockPlayer;
@@ -16,11 +16,6 @@ xdescribe('Testing: AGGIE BEHAVIOR', () => {
         mud = new MOCK_SERVER(() => {
             server = mud.server;
  
-            cmdLoop = spyOn(server.world.ticks, 'cmdLoop').and.callThrough();
-            combatLoop = spyOn(server.world.ticks, 'combatLoop').and.callThrough();
-
-            jasmine.clock().install();
-
             mud.createNewEntity((playerModel) => {
                 mud.createNewEntity((wolfModel) => {
                     mud.createNewEntity((wolf2Model) => {
@@ -91,50 +86,28 @@ xdescribe('Testing: AGGIE BEHAVIOR', () => {
         }, false, false);
     });
 
-    afterEach(() => {
-        jasmine.clock().uninstall();
-    });
-
     it('should simulate player walking into a room and being attacked by a wolf', () => {
         mockPlayer.hitroll = 20; // beats the default entity AC of 10 so we always hit
         
         wolfRoom.monsters.push(wolf);
         wolfRoom.monsters.push(wolf2);
 
-        setInterval(function() {
-            server.world.ticks.cmdLoop();
-        }, 280);
-
-        setInterval(function() {
-            server.world.ticks.combatLoop(server.world.battles);
-        }, 1900);
-
-        expect(cmdLoop).not.toHaveBeenCalled();
-        expect(combatLoop).not.toHaveBeenCalled();
-
-        jasmine.clock().tick(280);
+        server.world.ticks.gameTime(server.world);
        
-        expect(cmdLoop).toHaveBeenCalledTimes(1);
-
         let cmd = server.world.commands.createCommandObject({
             msg: 'move north'
         });
 
         server.world.addCommand(cmd, mockPlayer);
-
-        jasmine.clock().tick(280); // 560
-
-        jasmine.clock().tick(280); // onVisit issues kill command
-
-        jasmine.clock().tick(1060); // trigger combat loop
-        
-        expect(combatLoop).toHaveBeenCalled();
+        // process move north
+        server.world.ticks.gameTime(server.world);
+        // process kill command given by the aggie behavior
+        server.world.ticks.gameTime(server.world);
 
         expect(server.world.battles.length).toBe(1);
 
-        // defeat the wolf
         while (wolf.fighting) {
-            jasmine.clock().tick(1900); // trigger combat loop
+            server.world.ticks.gameTime(server.world);
         }
 
         expect(wolf.chp).toBe(0);
@@ -146,7 +119,7 @@ xdescribe('Testing: AGGIE BEHAVIOR', () => {
         expect(server.world.battles[0].positions['2']).toBe(undefined);
 
         while (wolf2.fighting) {
-            jasmine.clock().tick(1900); // trigger combat loop
+            server.world.ticks.gameTime(server.world);
         }
 
         expect(wolf2.chp).toBe(0);
