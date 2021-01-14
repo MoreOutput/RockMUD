@@ -1002,7 +1002,7 @@ Combat.prototype.processSkill = function(attacker, defender, skillProfile, battl
 		// TODO: Move defender.refId to target in skillProfile? Allow for array based skills for flexibility?
 		battle.skills[attacker.refId][defender.refId] = skillProfile;
 	} else {
-		if (!skillProfile.skillObj.type.includes('heal') !== -1 || skillProfile.skillObj.type.includes('passive')) {
+		if (skillProfile.skillObj.type.includes('heal') || skillProfile.skillObj.type.includes('passive')) {
 			World.character.applyMods(attacker, skillProfile.attackerMods);
 			World.character.applyMods(defender, skillProfile.defenderMods);
 

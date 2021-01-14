@@ -2208,7 +2208,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 	var skillProfile;
 	var spellTarget;
 
-	if (command.roomObj) {
+		if (command.roomObj) {
 		roomObj = command.roomObj;
 		command.roomObj = null;
 	} else {
@@ -2219,6 +2219,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 		skillObj = command.skillObj;
 	}
 
+
 	if (player.position !== 'sleeping' && player.position !== 'resting' && player.wait === 0) {
 		if (command.arg || skillObj) {
 			if (!skillObj) {
@@ -2226,7 +2227,6 @@ Cmd.prototype.cast = function(player, command, fn) {
 			}
 
 			// todo: run a check for skill improvement
-
 			if (skillObj && skillObj.id in World.spells) {
 				if (player.cmana > 0) {
 					if (player.position === 'standing') {
@@ -2256,7 +2256,7 @@ Cmd.prototype.cast = function(player, command, fn) {
 							// skill code needs to handle the case where spellTarget could be null
 							spellTarget = null;
 						}
-						
+
 						if (spellTarget) {
 							World.spells[skillObj.id](skillObj, player, spellTarget, roomObj, command, World);
 						} else {

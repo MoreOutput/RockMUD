@@ -1,8 +1,9 @@
+const { cookie } = require('request');
 const MOCK_SERVER = require('../mocks/mock_server');
 let mud;
 
 // Tests the expectations of the overall combat loop 
-xdescribe('Testing: COMBAT LOOP', () => {
+describe('Testing: COMBAT LOOP', () => {
     let combatLoop;
     let cmdLoop;
     let mockPlayer;
@@ -99,7 +100,7 @@ xdescribe('Testing: COMBAT LOOP', () => {
     });
 
     it('should simulate player initiating combat with a deer and casting Spark until each deer is killed.', () => {
-        const endOfCombatSpy = spyOn(server.world.combat, 'processEndOfCombat').and.callThrough();
+        const endOfCombatSpy = spyOn(server.world.combat, 'getDeathMessages').and.callThrough();
         const createCorpseSpy = spyOn(server.world.character, 'createCorpse').and.callThrough();
         const sparkSpell = {
             "id": "spark",
@@ -109,26 +110,18 @@ xdescribe('Testing: COMBAT LOOP', () => {
             "type": "combat spell",
             "learned": true
         };
+
         
         mockPlayer.cmana = 100;
         mockPlayer.hp = 1000;
         mockPlayer.chp = 1000;
         mockPlayer.hitroll = 20; // beats the default entity AC of 10 so we always hit
+
         mockPlayer.skills.push(sparkSpell);
 
         mockPlayerRoom.monsters = [];
         mockPlayerRoom.monsters.push(deer);
         mockPlayerRoom.monsters.push(redDeer);
-
-        setInterval(function() {
-            server.world.ticks.cmdLoop();
-        }, 280);
-
-        setInterval(function() {
-            server.world.ticks.combatLoop(server.world.battles);
-        }, 1900);
-
-        expect(combatLoop).not.toHaveBeenCalled();
 
         let cmd = server.world.commands.createCommandObject({
             msg: 'cast spark 2.deer'
@@ -136,7 +129,7 @@ xdescribe('Testing: COMBAT LOOP', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.gameTime(server.world);
 
         let battleObj = server.world.combat.getBattleByRefId(mockPlayer.refId);
 
@@ -147,19 +140,16 @@ xdescribe('Testing: COMBAT LOOP', () => {
         });
 
         while (redDeer.chp > 0) {
-            if (mockPlayer.wait === 0) {
-                server.world.addCommand(cmd, mockPlayer);
-                jasmine.clock().tick(280);
-            }
-            jasmine.clock().tick(1900); // trigger combat loop
+            mockPlayer.wait = 0;
+            server.world.addCommand(cmd, mockPlayer);
+            server.world.ticks.gameTime(server.world, true);
         }
 
-        expect(endOfCombatSpy).toHaveBeenCalledWith(battleObj, mockPlayer, redDeer)
-
-        expect(combatLoop).toHaveBeenCalled();
+        expect(endOfCombatSpy).toHaveBeenCalledWith(mockPlayer, redDeer);
         expect(createCorpseSpy).toHaveBeenCalledWith(redDeer);
-
         expect(mockPlayerRoom.monsters.length).toBe(1);
+
+        mockPlayer.cmana = 100;
 
         cmd = server.world.commands.createCommandObject({
             msg: 'cast spark deer'
@@ -167,27 +157,19 @@ xdescribe('Testing: COMBAT LOOP', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.gameTime(server.world);
 
         battleObj = server.world.combat.getBattleByRefId(mockPlayer.refId);
 
         expect(battleObj).toBeTruthy();
-
-        cmd = server.world.commands.createCommandObject({
-            msg: 'cast spark'
-        });
-
+        
         while (deer.chp > 0) {
-            if (mockPlayer.wait === 0) {
-                server.world.addCommand(cmd, mockPlayer);
-                jasmine.clock().tick(280);
-            }
-            jasmine.clock().tick(1900); // trigger combat loop
+            mockPlayer.wait = 0;
+            server.world.addCommand(cmd, mockPlayer);
+            server.world.ticks.gameTime(server.world, true);
         }
 
-        expect(endOfCombatSpy).toHaveBeenCalledWith(battleObj, mockPlayer, deer)
-
-        expect(combatLoop).toHaveBeenCalled();
+        expect(endOfCombatSpy).toHaveBeenCalledWith(mockPlayer, deer);
         expect(createCorpseSpy).toHaveBeenCalledWith(deer);
         expect(mockPlayerRoom.monsters.length).toBe(0);
     });
@@ -200,21 +182,6 @@ xdescribe('Testing: COMBAT LOOP', () => {
         mockPlayerRoom.monsters = [];
         mockPlayerRoom.monsters.push(deer);
 
-        setInterval(function() {
-            server.world.ticks.cmdLoop();
-        }, 280);
-
-        setInterval(function() {
-            server.world.ticks.combatLoop(server.world.battles);
-        }, 1900);
-
-        expect(cmdLoop).not.toHaveBeenCalled();
-        expect(combatLoop).not.toHaveBeenCalled();
-
-        jasmine.clock().tick(280);
-       
-        expect(cmdLoop).toHaveBeenCalledTimes(1);
-
         let cmd = server.world.commands.createCommandObject({
             msg: 'kill deer'
         });
@@ -222,32 +189,26 @@ xdescribe('Testing: COMBAT LOOP', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280); // 560
-
-        expect(server.world.cmds.length).toBe(0);
+        server.world.ticks.gameTime(server.world);
+        
         expect(killSpy).toHaveBeenCalled();
         expect(server.world.battles.length).toBe(1);
-        expect(cmdLoop).toHaveBeenCalledTimes(2);
-        
-        jasmine.clock().tick(280); // 840
-        expect(cmdLoop).toHaveBeenCalledTimes(3);
-        expect(combatLoop).not.toHaveBeenCalled();
+
+        server.world.ticks.gameTime(server.world, true);
 
         let roundSpy = spyOn(server.world.combat, 'round').and.callThrough();
         const attackSpy = spyOn(server.world.combat, 'attack').and.callThrough();
 
-        jasmine.clock().tick(1060); // trigger combat loop
+        server.world.ticks.gameTime(server.world, true);
 
         let battleObj = server.world.combat.getBattleByRefId(mockPlayer.refId);
 
-        expect(combatLoop).toHaveBeenCalledTimes(1);
         expect(roundSpy).toHaveBeenCalledTimes(1);
         expect(attackSpy).toHaveBeenCalledTimes(2);
         expect(battleObj.attacked.length).toBe(2);
-        expect(battleObj.round).toBe(1);
         
         attackSpy.calls.reset();
-/*
+
         cmd = server.world.commands.createCommandObject({
             msg: 'flee east'
         });
@@ -255,18 +216,15 @@ xdescribe('Testing: COMBAT LOOP', () => {
 
         server.world.addCommand(cmd, deer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.gameTime(server.world);
 
         expect(fleeSpy).toHaveBeenCalled();
-        expect(server.world.cmds.length).toBe(0);
 
-        jasmine.clock().tick(1620); // trigger combat loop
+        server.world.ticks.gameTime(server.world);
 
-        expect(combatLoop).toHaveBeenCalledTimes(2);
         expect(roundSpy).toHaveBeenCalledTimes(1);
         expect(attackSpy).not.toHaveBeenCalled();
         expect(battleObj.attacked.length).toBe(0);
-        expect(battleObj.round).toBe(1);
         expect(deer.position).toBe('standing');
         expect(deer.fighting).toBe(false);
         expect(deer.area).toBe(mockPlayer.area);
@@ -277,8 +235,8 @@ xdescribe('Testing: COMBAT LOOP', () => {
         expect(mockPlayer.fighting).toBe(false);
 
         attackSpy.calls.reset();
-        
-        jasmine.clock().tick(1900); // trigger combat loop
+
+        server.world.ticks.gameTime(server.world);
         
         cmd = server.world.commands .createCommandObject({
             msg: 'move east'
@@ -286,7 +244,7 @@ xdescribe('Testing: COMBAT LOOP', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
+        server.world.ticks.gameTime(server.world);
 
         cmd = server.world.commands.createCommandObject({
             msg: 'kill deer'
@@ -294,23 +252,17 @@ xdescribe('Testing: COMBAT LOOP', () => {
 
         server.world.addCommand(cmd, mockPlayer);
 
-        jasmine.clock().tick(280);
-        expect(server.world.cmds.length).toBe(0);
+        server.world.ticks.gameTime(server.world);
 
         battleObj = server.world.combat.getBattleByRefId(mockPlayer.refId);
 
-        expect(battleObj.round).toBe(0); // round has not yet occured
-
-        jasmine.clock().tick(1620); // trigger combat loop
+        server.world.ticks.gameTime(server.world);
         
-        expect(server.world.cmds.length).toBe(0);
-        expect(battleObj.round).toBe(1);
         expect(attackSpy).toHaveBeenCalledTimes(2);
         expect(server.world.battles.length).toBe(1);
         expect(mockPlayer.position).toBe('standing');
         expect(mockPlayer.fighting).toBe(true);
         expect(deer.position).toBe('standing');
         expect(deer.fighting).toBe(true);
-*/
     });
 });

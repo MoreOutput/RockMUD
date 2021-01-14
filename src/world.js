@@ -1065,27 +1065,6 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 				}
 			}
 
-			/* 
-			if (mob.area === 'midgaard') {
-				console.table([
-					{
-						name: mob.name,
-						level: mob.level,
-						hp: mob.hp + '/' + mob.chp,
-						mana: mob.mana + '/' + mob.cmana,
-						moves: mob.mv + '/' + mob.cmv,
-						str: mob.str,
-						int: mob.int,
-						wis: mob.wis,
-						dex: mob.dex,
-						con: mob.con,
-						trains: mob.trains,
-						mods: JSON.stringify(world.dice.getMods(mob))
-					}
-				]);
-			}
-			*/
-			
 			if (mob.behaviors) {
 				world.setupBehaviors(mob, area, room, function(err, mob) {
 					return callback(err, mob);

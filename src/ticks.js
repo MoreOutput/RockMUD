@@ -23,7 +23,7 @@ var Ticks = function(newWorld) {
 }
 
 
-Ticks.prototype.gameTime = function(World) {
+Ticks.prototype.gameTime = function(World, runCombatLoop) {
 	var timeMsgs = [{
 		/*
 		{
@@ -79,7 +79,7 @@ Ticks.prototype.gameTime = function(World) {
 		for (i; i < battles.length; i += 1) {
 			if (World.combat.getNumberOfOpenBattlePositions(battles[i]) > 0) {
 				// any battleObj on its initial round is ran immediately 
-				if (canRunExisting || battles[i].round === 0) {
+				if (canRunExisting || battles[i].round === 0 || runCombatLoop) {
 					World.combat.round(battles[i]);
 				}
 				// TODO: round callback for immediate cleanup?
@@ -98,9 +98,9 @@ Ticks.prototype.gameTime = function(World) {
 
 			for (i; i < World.players.length; i += 1) {
 				var player = World.players[i];
+
 				if (!player.fighting && (player.position === 'sleeping' ||
-					player.position === 'resting' ||
-					player.position === 'standing')) {
+					player.position === 'resting' || player.position === 'standing')) {
 					World.character.changeWait(player, -1);
 				}
 			}
