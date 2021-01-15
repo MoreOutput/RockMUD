@@ -83,7 +83,6 @@ Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfi
 		
 		for (j; j < attacker.group.length; j += 1) {
 			nextPosition = this.getNextBattlePosition(battle);
-			console.log('attacker', attacker.name, attacker.group[0].name, nextPosition);
 
 			battle.positions[nextPosition] = {
 				attacker: attacker.group[j],
@@ -99,8 +98,6 @@ Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfi
 
 		for (j; j < defender.group.length; j += 1) {
 			nextPosition = this.getNextBattlePosition(battle);
-
-			console.log('defender', defender.name, defender.group[0].name, nextPosition);
 
 			battle.positions[nextPosition] = {
 				attacker: defender.group[j],

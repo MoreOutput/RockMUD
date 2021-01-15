@@ -2324,7 +2324,7 @@ Cmd.prototype.kill = function(player, command) {
 						+ opponent.displayName.toLowerCase() + ' (Level: ' + opponent.level + ')</strong>',
 					noPrompt: true
 				});
-				console.log('killing', player.name, opponent.name)
+
 				World.combat.processFight(player, opponent, roomObj);
 			} else {
 				World.msgPlayer(player, {

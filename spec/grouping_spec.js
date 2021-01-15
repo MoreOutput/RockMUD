@@ -198,7 +198,8 @@ describe('Testing: GROUPING', () => {
 
     server.world.ticks.gameTime(server.world);
 
-    console.log(server.world.battles[0]);
+    // TODO: sort out why this timing isnt quite right
+    // believe it is a test specific concern.
 
    // expect(server.world.battles[0].positions['0']).toBe(null);
     expect(server.world.battles[0].positions['1'].attacker.name).toBe('wolf2');
