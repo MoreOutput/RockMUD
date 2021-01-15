@@ -1393,15 +1393,10 @@ Cmd.prototype.move = function(target, command, fn) {
 					if (canEnter) {
 						if (target.followers.length) {
 							for (i; i < target.followers.length; i += 1) {
-								(function(index) {
-									setTimeout(function() {
-										cmd.move(target.followers[index], {
-											arg: command.arg,
-											roomObj: roomObj,
-											targetRoom: targetRoom
-										});
-									}, 150);
-								}(i));
+								if (target.followers[i].roomid === target.roomid
+									&& target.followers[i].area === target.area) {
+									World.addCommand(command, target.followers[i]);
+								}
 							}
 						}
 
@@ -1431,11 +1426,9 @@ Cmd.prototype.move = function(target, command, fn) {
 
 							targetRoom.playersInRoom.push(target);
 							
-							setTimeout(() => {
-								if (target.area === targetRoom.area && target.roomid === targetRoom.id) {
-									World.character.save(target);
-								}
-							}, 350);
+							if (target.area === targetRoom.area && target.roomid === targetRoom.id) {
+								World.character.save(target);
+							}
 						} else {
 							World.room.removeMob(roomObj, target);
 
@@ -1525,7 +1518,7 @@ Cmd.prototype.move = function(target, command, fn) {
 							noPrompt: true,
 							playerName: target.name
 						});
-
+						
 						World.processEvents('onMove', target, targetRoom, roomObj, command);
 						World.processEvents('onEnter', targetRoom, target, roomObj, command);
 						World.processEvents('onVisit', targetRoom.monsters, targetRoom, targetRoom, target, command);
@@ -2331,7 +2324,7 @@ Cmd.prototype.kill = function(player, command) {
 						+ opponent.displayName.toLowerCase() + ' (Level: ' + opponent.level + ')</strong>',
 					noPrompt: true
 				});
-
+				console.log('killing', player.name, opponent.name)
 				World.combat.processFight(player, opponent, roomObj);
 			} else {
 				World.msgPlayer(player, {
@@ -3123,7 +3116,7 @@ Cmd.prototype.practice = function(target, command) {
 };
 
 Cmd.prototype.save = function(target, command) {
-	if (target.isPlayer) {
+	if (target.isPlayer && !target.preventSave) {
 		if (target.position === 'standing' && target.wait === 0) {
 			World.character.save(target, function() {
 				target.wait += 4;

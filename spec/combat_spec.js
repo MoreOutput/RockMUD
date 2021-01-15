@@ -1,4 +1,3 @@
-const { cookie } = require('request');
 const MOCK_SERVER = require('../mocks/mock_server');
 let mud;
 
@@ -110,7 +109,6 @@ describe('Testing: COMBAT LOOP', () => {
             "type": "combat spell",
             "learned": true
         };
-
         
         mockPlayer.cmana = 100;
         mockPlayer.hp = 1000;
@@ -139,11 +137,15 @@ describe('Testing: COMBAT LOOP', () => {
             msg: 'cast spark'
         });
 
+        redDeer.chp = 1;
+
         while (redDeer.chp > 0) {
             mockPlayer.wait = 0;
             server.world.addCommand(cmd, mockPlayer);
             server.world.ticks.gameTime(server.world, true);
         }
+
+        server.world.ticks.gameTime(server.world);
 
         expect(endOfCombatSpy).toHaveBeenCalledWith(mockPlayer, redDeer);
         expect(createCorpseSpy).toHaveBeenCalledWith(redDeer);
@@ -163,11 +165,15 @@ describe('Testing: COMBAT LOOP', () => {
 
         expect(battleObj).toBeTruthy();
         
+        deer.chp = 1;
+
         while (deer.chp > 0) {
             mockPlayer.wait = 0;
             server.world.addCommand(cmd, mockPlayer);
             server.world.ticks.gameTime(server.world, true);
         }
+
+        server.world.ticks.gameTime(server.world);
 
         expect(endOfCombatSpy).toHaveBeenCalledWith(mockPlayer, deer);
         expect(createCorpseSpy).toHaveBeenCalledWith(deer);

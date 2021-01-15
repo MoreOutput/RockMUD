@@ -160,6 +160,7 @@
 	"undead": false,
 	"construct": false,
 	"runOnAliveWhenEmpty": false,
+	"preventSave": false,
 	"fist": {
 		"name": "Fighting unarmed!",
 		"displayName": "fists",

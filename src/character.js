@@ -498,7 +498,7 @@ Character.prototype.newCharacter = function(s, command) {
 Character.prototype.save = function(player, fn) {
 	var objToSave;
 
-	if (player.isPlayer && !player.fighting) {
+	if (player.isPlayer && !player.fighting && !player.preventSave) {
 		objToSave =	Object.create(null, {});
 		objToSave.following = '';
 		objToSave.group = [];

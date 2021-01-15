@@ -438,16 +438,13 @@ Room.prototype.removePlayer = function(roomObj, player) {
 };
 
 Room.prototype.removeMob = function(roomObj, mob) {
-	var i = 0,
-	newArr = [];
+	var i = 0;
 
 	for (i; i < roomObj.monsters.length; i += 1) {
-		if (roomObj.monsters[i].refId !== mob.refId) {
-			newArr.push(roomObj.monsters[i]);
+		if (roomObj.monsters[i].refId === mob.refId) {
+			roomObj.monsters.splice(i , 1);
 		}
 	}
-
-	roomObj.monsters = newArr;
 };
 
 module.exports = Room;

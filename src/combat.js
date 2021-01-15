@@ -83,6 +83,7 @@ Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfi
 		
 		for (j; j < attacker.group.length; j += 1) {
 			nextPosition = this.getNextBattlePosition(battle);
+			console.log('attacker', attacker.name, attacker.group[0].name, nextPosition);
 
 			battle.positions[nextPosition] = {
 				attacker: attacker.group[j],
@@ -98,6 +99,8 @@ Combat.prototype.processFight = function(attacker, defender, roomObj, skillProfi
 
 		for (j; j < defender.group.length; j += 1) {
 			nextPosition = this.getNextBattlePosition(battle);
+
+			console.log('defender', defender.name, defender.group[0].name, nextPosition);
 
 			battle.positions[nextPosition] = {
 				attacker: defender.group[j],
@@ -167,17 +170,6 @@ Combat.prototype.processFightMultiple = function(attacker, defenders, roomObj, s
 	}
 
 	attacker.fighting = true;
-
-	for (j; j < attacker.group.length; j += 1) {
-		nextPosition = this.getNextBattlePosition(battle);
-		
-		battle.positions[nextPosition] = {
-			attacker: attacker.group[j],
-			defender: defender
-		};
-
-		attacker.group[j].fighting = true;
-	}
 
 	defenders.forEach((defender, index) => {
 		var skillProfile;
@@ -335,7 +327,7 @@ Combat.prototype.round = function(battle) {
 				var k = 0;
 				
                 for (k; k < defender.group.length; k += 1) {
-					groupMember = combat.getBattleTargetByRefId(battle, defender.group[k].refId);
+					var groupMember = combat.getBattleTargetByRefId(battle, defender.group[k].refId);
 
 					if (!groupMember && !defender.group[k].fighting && defender.group[k].chp) {
 						// group member was not in the battle
@@ -522,7 +514,7 @@ Combat.prototype.round = function(battle) {
 				}  
 				*/
 			} else {
-				console.warn('PROCESSING ROUND WITH REMOVED ENTITIES', battle.round, attacker.name, defender.name, combat.getNumberOfOpenBattlePositions(battle));
+				console.warn('PROCESSING ROUND WITH REMOVED ENTITIES', attacker.roomid, attacker.area, defender.roomid, defender.area);
 				combat.removeBattle(battle);
 			}
         }
@@ -601,6 +593,7 @@ Combat.prototype.getBattleEntityByRefId = function(battle, refId) {
 
 Combat.prototype.publishRound = function(roundOutput, battleObj) {
 	var refId;
+	var combat = this;
 	var numOfPositions = this.getNumberOfBattlePositions(battleObj);
 	var roomObj = battleObj.roomObj;
 	var i = 0;

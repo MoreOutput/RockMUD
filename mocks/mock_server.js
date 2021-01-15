@@ -68,6 +68,7 @@ class MockServer {
             entity.roomid = '';
             entity.recall = {"roomid": "1", "area": "midgaard"};
             entity.name = 'MOCK NAME';
+            entity.preventSave = true;
             entity.socket = {
                 player: entity,
                 id: 'mock-id',
@@ -93,6 +94,7 @@ class MockServer {
         entity.area = '';
         entity.roomid = '';
         entity.title = 'UNIT TEST PLAYER';
+        entity.preventSave = true;
         entity.socket = {
             player: entity,
             id: 'mock-id',
