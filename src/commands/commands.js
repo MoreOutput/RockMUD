@@ -354,7 +354,7 @@ Cmd.prototype.give = function(target, command) {
 
 	if (target.position === 'standing' || target.position === 'resting') {
 		if (command.msg) {
-			if (command.msg.indexOf(' ' + World.config.coinage) === -1) {
+			if (command.msg.indexOf(' gold') === -1) {
 				if (canSee) {
 					receiver = World.room.getEntity(roomObj, command);
 
@@ -452,9 +452,14 @@ Cmd.prototype.give = function(target, command) {
 					styleClass: 'error'
 				});
 			}
+		} else {
+			World.msgPlayer(target, {
+				msg: 'Give what? Example: <strong>give sword dragon</strong> OR <strong>give 100 coins elf</strong>',
+				styleClass: 'error'
+			});
 		}
 	} else {
-	
+
 	}
 };
 
