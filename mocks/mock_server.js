@@ -39,8 +39,8 @@ class MockServer {
                 area.rooms.push(room);
         
                 room.playersInRoom.push(entity);
+                
                 this.server.world.areas.push(area);
-        
                 this.server.world.players.push(entity);
            
                 this.player = entity;

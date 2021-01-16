@@ -91,6 +91,7 @@ describe('Testing: GROUPING', () => {
                     wolfRoom.monsters = [];
 
                     server.world.players = [];
+                    server.world.cmds = [];
                     server.world.players.push(player1);
                     server.world.players.push(player2);
                     
@@ -195,21 +196,17 @@ describe('Testing: GROUPING', () => {
     expect(wolf.fighting).toBe(false);
     expect(wolf2.fighting).toBe(true);
 
-
     server.world.ticks.gameTime(server.world);
 
-    // TODO: sort out why this timing isnt quite right
-    // believe it is a test specific concern.
-
-   // expect(server.world.battles[0].positions['0']).toBe(null);
+    expect(server.world.battles[0].positions['0']).toBe(null);
     expect(server.world.battles[0].positions['1'].attacker.name).toBe('wolf2');
     expect(server.world.battles[0].positions['1'].defender.name).toBe('Player 1');
-   // expect(server.world.battles[0].positions['2']).toBe(null);
-/*
+    expect(server.world.battles[0].positions['2']).toBe(null);
 
     expect(server.world.battles[0].positions['3'].attacker.name).toBe('Player 2');
     expect(server.world.battles[0].positions['3'].defender.name).toBe('wolf2');
     expect(server.world.battles[0].positions['4']).toBe(undefined);
+
     while (wolf2.chp > 0) {
       server.world.ticks.gameTime(server.world, true);
     }
@@ -221,6 +218,5 @@ describe('Testing: GROUPING', () => {
     expect(server.world.battles.length).toBe(0);
     expect(player1.exp).toBeGreaterThan(0);
     expect(player2.exp).toBeGreaterThan(0);
-    */
   });
 });

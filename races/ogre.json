@@ -14,7 +14,7 @@
 		"display": "Roar",
 		"mod": 0,
 		"train": 50,
-		"type": "passive",
+		"type": "passive racial",
 		"wait": 3,
 		"learned": true,
 		"prerequisites": {

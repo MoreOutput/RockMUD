@@ -251,23 +251,6 @@ World = function(socketIO, cfg, callback) {
 		world.dataDriver = null; 
 		// without a driver player data is saved as a flat file to the players folder
 		world.playerDriver = null;
-		/*
-		world.character = require('./character');
-		world.commands = require('./commands/commands');
-		world.skills = require('./skills/skills');
-		world.spells = require('./spells/spells');
-		world.room = require('./rooms');
-		world.combat = require('./combat')
-		world.dice = require('./dice');
-
-		delete require.cache[require.resolve('./character')];
-		delete require.cache[require.resolve('./commands/commands')];
-		delete require.cache[require.resolve('./skills/skills')];
-		delete require.cache[require.resolve('./spells/spells')];
-		delete require.cache[require.resolve('./rooms')];
-		delete require.cache[require.resolve('./combat')];
-		delete require.cache[require.resolve('./dice')];
-		*/
 		world.battleLock = 0;
 		world.aiLock = false;
 

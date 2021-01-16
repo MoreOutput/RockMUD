@@ -428,22 +428,16 @@ Combat.prototype.round = function(battle) {
 										roundOutput[defender.refId].msg += defenderAttackString + combat.getStatusReport(attacker);
 										roundOutput[attacker.refId].msg += attackerDefString + combat.getStatusReport(defender);
 
-										if (attacker.chp) {
-											// all entities attacked, send the message
-											if (i === numOfPositions - 1) {
-												combat.publishRound(roundOutput, battle);
-											}
-										} else {
+										if (attacker.chp <= 0) {
 											// attacker was killed by defender
 											var deathOutput = combat.getDeathMessages(defender, attacker);
-
+										
 											roundOutput[attacker.refId].msg += deathOutput.msgToLoser;
 											roundOutput[defender.refId].msg += deathOutput.msgToWinner;
-
-											// the defender is dead
-											if (i === numOfPositions - 1) {
-												combat.publishRound(roundOutput, battle);
-											}
+										}
+										
+										if (i === numOfPositions - 1 || combat.getNumberOfOpenBattlePositions(battle) === 1) {
+											combat.publishRound(roundOutput, battle);
 										}
 									});
 								} else {
@@ -457,7 +451,6 @@ Combat.prototype.round = function(battle) {
 								}
 							} else {
 								var deathOutput = combat.getDeathMessages(attacker, defender);
-
 								roundOutput[defender.refId].msg += deathOutput.msgToLoser;
 								roundOutput[attacker.refId].msg += deathOutput.msgToWinner;
 
@@ -471,12 +464,10 @@ Combat.prototype.round = function(battle) {
 				} else {
 					if (attacker.chp <= 0) {
 						var deathOutput = combat.getDeathMessages(defender, attacker, attackerSkills[defender.refId]);
-						
 						roundOutput[defender.refId].msg += deathOutput.msgToWinner;
 						roundOutput[attacker.refId].msg += deathOutput.msgToLoser;
 					} else if (defender.chp <= 0) {
 						var deathOutput = combat.getDeathMessages(attacker, defender, attackerSkills[attacker.refId]);
-
 						roundOutput[attacker.refId].msg += deathOutput.msgToWinner;
 						roundOutput[defender.refId].msg += deathOutput.msgToLoser;
 					}
