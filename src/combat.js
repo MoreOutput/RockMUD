@@ -695,6 +695,10 @@ Combat.prototype.publishRound = function(roundOutput, battleObj) {
 				World.character.save(loser);
 			}
 
+			if (winner.exp >= winner.expToLevel) {
+				World.character.level(winner);
+			}
+
 			World.room.addItem(roomObj, corpse);
 		}
 	}
