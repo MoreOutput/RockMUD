@@ -1898,9 +1898,20 @@ World.prototype.setupBehaviors = function(gameEntity, area, room, callback) {
 
 	if (gameEntity.behaviors.length) {
 		for (i; i < len; i += 1) {
-			world.extend(gameEntity.behaviors[i], world.getAI(gameEntity.behaviors[i]), function(err, extendedBehavior) {
-				return callback(false, gameEntity);
-			});
+			(function(index, gameEntity, baseAI) {
+				world.extend(gameEntity.behaviors[index], baseAI, function(err, extendedBehavior) {
+					var prop;
+
+					for (prop in baseAI) {
+	
+						if (typeof baseAI[prop] === 'function') {
+							gameEntity.behaviors[i][prop] = baseAI[prop];
+						}
+					}
+
+					return callback(false, gameEntity);
+				});
+			}(i, gameEntity, world.getAI(gameEntity.behaviors[i])))
 		}
 	} else {
 		return callback(false, gameEntity);
@@ -2170,7 +2181,6 @@ World.prototype.processEvents = function(evtName, gameEntity, roomObj, param, pa
 					if (behavior[evtName]
 						&& !gameEntity['prevent' + this.capitalizeFirstLetter(evtName)]
 						&& !behavior['prevent' + this.capitalizeFirstLetter(evtName)]) {
-
 						allTrue = behavior[evtName](world, behavior, gameEntity, roomObj, param, param2);
 					}
 				}

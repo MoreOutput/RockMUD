@@ -1,16 +1,18 @@
 'use strict';
 
-exports = {
+module.exports = {
     questId: '', // id of the quest
     questCheck: null, // callback for custom logic
     beforeEnter: function(World, behavior, roomObj, player, targetRoom, cmd) {
-        var quest;
+        var quest = World.character.getLog(player, behavior.questId);
 
         if (behavior.questCheck && behavior.questId) {
-            quest = World.character.getLog(player, behavior.questId);
+            return behavior.questCheck(World, quest, player, cmd);
+        } else if (questId) {
+            if (quest) {
+                return true;
+            }
 
-            return behavior.questCheck(quest, player, cmd);
-        } else {
             return false;
         }
     }

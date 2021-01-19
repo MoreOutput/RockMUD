@@ -5,13 +5,10 @@
 */
 'use strict';
 
-const { throws } = require('assert');
-const { isPlayableRace } = require('./world');
-
-var fs = require('fs'),
-crypto = require('crypto'),
-World,
-Character = function (newWorld) {
+var fs = require('fs');
+var crypto = require('crypto');
+var World;
+var Character = function (newWorld) {
 	World = newWorld;
 
 	this.statusReport = [
@@ -1644,11 +1641,11 @@ Character.prototype.changeWait = function(entity, amount) {
 }
 
 Character.prototype.level = function(player) {
-	var mods = World.dice.getMods(player, 0),
-	hpBonus = World.dice.roll(1, 6, mods.con),
-	mvBonus = World.dice.roll(1, 4, mods.dex),
-	manaBonus = World.dice.roll(1, 4, mods.int),
-	newTrains = 4;
+	var mods = World.dice.getMods(player, 0);
+	var hpBonus = World.dice.roll(1, 6, mods.con);
+	var mvBonus = World.dice.roll(1, 4, mods.dex);
+	var manaBonus = 0;
+	var newTrains = 4;
 
 	if (player.mainStat === 'wis') {
 		newTrains += 1;
@@ -1661,7 +1658,15 @@ Character.prototype.level = function(player) {
 	if (player.intMod > 4) {
 		newTrains += 1;
 	}
+	
+	if (player.intMod >= 2) {
+		manaBonus = World.dice.roll(1, player.intMod - 1);
+	}
  
+	if (player.intMod > 2 && player.wisMod > 1) {
+		manaBonus += 1;
+	}
+
 	if (player.mainStat === 'con' || player.mainStat === 'str') {
 		hpBonus += World.dice.roll(1, 4);
 		manaBonus = 0;
@@ -1669,12 +1674,16 @@ Character.prototype.level = function(player) {
 
 	if (player.mainStat === 'wis' || player.mainStat === 'int') {
 		hpBonus -= 5;
-		manaBonus += World.dice.roll(1, 4);
+		manaBonus += 1;
 	}
 
 	if (player.mainStat === 'dex') {
 		hpBonus -= 3;
-		mvBonus += World.dice.roll(1, 6);	
+		mvBonus += World.dice.roll(1, 4);
+	}
+
+	if (hpBonus <= 1) {
+		hpBonus = World.dice.roll(1, 2);
 	}
 
 	player.level += 1;
@@ -1687,7 +1696,7 @@ Character.prototype.level = function(player) {
 	World.msgPlayer(player, {
 		msg: 'You have reached level ' + player.level + '. Your efforts result in ' 
 			+ hpBonus + ' hp, ' + manaBonus + ' mana, ' + mvBonus + ' movement and '
-			+ newTrains + ' new trains.'
+			+ newTrains + ' new training points.'
 	});
 
 	this.save(player);

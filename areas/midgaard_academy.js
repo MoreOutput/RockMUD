@@ -94,9 +94,10 @@ module.exports = {
 			exits: [],
 			behaviors: [{
 				module: 'quest_check_room_enter',
-				questId: towerQuestKey, 
+				questId: towerQuestKey,
+				complete: true,
 				questCheck: function(World, quest, player, cmd) {
-					if (cmd.msg === 'down') {
+					if (cmd && cmd.msg === 'down') {
 						if (quest.data.permission) {
 							return true;
 						} else {

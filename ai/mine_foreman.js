@@ -18,11 +18,11 @@ module.exports = {
 				World.addCommand({
 					cmd: 'say',
 					msg: 'Very good ' + player.displayName  + '. Im sure you\'ll earn this back in no time. You can head in.'
-						+ '<p class="quest-complete yellow">You completed the Quest! You earn 500 experience.</p>',
+						+ '<p class="quest-complete yellow">You completed the Quest! (+500 experience)</p>',
 					roomObj: roomObj
 				}, mob);
 
-				World.character.addExp(player, 500);
+				World.character.addExp(player, 500); // TODO: character could level
 			}
 		} else {
 			World.character.addLog(player, towerQuestKey);
@@ -72,21 +72,13 @@ module.exports = {
 					msg: player.displayName + ', I had heard you arrived! <strong class="warning">Are you seeking access to the Mine</strong>?',
 					roomObj: roomObj
 				}, mob);
-			} else if (!quest.data.permission) {
-				if (World.dice.roll(1, 2) === 1) {
-					World.addCommand({
-						cmd: 'say',
-						msg: 'Can\'t find any gold ' + player.displayName  + '?',
-						roomObj: roomObj
-					}, mob);
-				}
 			}
 		}
 	},
 	onAlive: function(World, behavior, mob, roomObj) {
-		var roll = World.dice.roll(1, 200);
+		var roll = World.dice.roll(2, 50);
 
-		if (roll === 1) {
+		if (roll > 95) {
 			World.addCommand({
 				cmd: 'say',
 				msg: behavior.exclimations[parseInt(Math.random() * ((behavior.exclimations.length)))],
