@@ -365,6 +365,18 @@ Room.prototype.getItem = function(roomObj, command) {
 	return World.search(roomObj.items, command);
 };
 
+
+Room.prototype.getContainer = function(roomObj, command) {
+	var container = World.search(roomObj.items, 'container', command);
+
+	if (!container) {
+		container = World.search(roomObj.items, 'corpse', command);
+	}
+
+	return container;
+};
+
+/*
 Room.prototype.getContainer = function(roomObj, command) {
 	var i = 0;
 
@@ -378,7 +390,7 @@ Room.prototype.getContainer = function(roomObj, command) {
 
 	return false;
 };
-
+*/
 Room.prototype.removeItem = function(roomObj, item) {
 	var i = 0,
 	newArr = [];

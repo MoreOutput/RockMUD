@@ -30,6 +30,7 @@ exports.server = {
 		// show opponent hp in status
 		viewHp: true,
 		// whitelist areas -- aids in testing -- only these areas will be loaded
-		allowedAreas: []
+		allowedAreas: [],
+		hpTo1: false // sets all mobs starting hp to 1 on boot
 	}
 };

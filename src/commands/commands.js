@@ -60,16 +60,13 @@ Cmd.prototype.createCommandObject = function(resFromClient, entity, roomObj, att
 
 		// try to find a matching skill for the arg, if its there replace 
 		// arg with the name
-
 		if (entity) {
 			for (i; i < cmdArr.length; i += 1) {
 				if (i > 0 && !result) {
-					if (!result) {
-						if (!argStr) {
-							argStr += cmdArr[(i)];
-						} else {
-							argStr += ' ' + cmdArr[(i)];
-						}
+					if (!argStr) {
+						argStr += cmdArr[(i)];
+					} else {
+						argStr += ' ' + cmdArr[(i)];
 					}
 
 					resultPos = (i + 1); // adding two to account for starting at index 2
@@ -77,15 +74,15 @@ Cmd.prototype.createCommandObject = function(resFromClient, entity, roomObj, att
 				}
 			}
 		}
-		
 
 		if (result) {
 			cmdObj.arg = result.display.toLowerCase();
 			cmdObj.input = cmdArr.slice(resultPos).join(' ');
 		} else if (!result && argStr) {
+			var skillPattern = new RegExp('^' + argStr.replace(/ /g, ''));
 			// TODO see if this check can be factored into character getSkill/2
 			entity.skills.forEach(skill => {
-				if (skill.id.toLowerCase().includes(argStr.replace(/ /g, ''))) {
+				if (skillPattern.test(skill.id.toLowerCase())) {
 					result = skill;
 				}
 			});
@@ -1674,7 +1671,7 @@ Cmd.prototype.get = function(target, command, fn) {
 				containerInRoom = true;
 			}
 
-			if (!container) {
+			if (!container || container.itemType === 'corpse') {
 				if (command.msg !== 'all') {
 					item = World.room.getItem(roomObj, command);
 			
@@ -2314,6 +2311,8 @@ Cmd.prototype.kill = function(player, command) {
 			}
 
 			if (!command.target) {
+				command.roomObj = null;
+
 				opponent = World.search(roomObj.monsters, {input: command.arg});
 
 				if (!opponent) {

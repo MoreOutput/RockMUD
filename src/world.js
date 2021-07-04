@@ -1048,6 +1048,10 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 				}
 			}
 
+			if (world.config.hpTo1) {
+				mob.chp = 1;
+			}
+
 			if (mob.behaviors) {
 				world.setupBehaviors(mob, area, room, function(err, mob) {
 					return callback(err, mob);
@@ -1835,7 +1839,7 @@ World.prototype.search = function(arr, itemType, returnArr, command) {
 					pattern = new RegExp(command.input);
 
 					if (fnd === false && pattern.test(wordArr[j]) 
-					|| (pattern.test(arr[i].displayName.toLowerCase()) || pattern.test(arr[i].name.toLowerCase()) )  && matchedIndexes.indexOf(i) === -1) {
+					|| (pattern.test(arr[i].displayName.toLowerCase()) || pattern.test(arr[i].name.toLowerCase())) && matchedIndexes.indexOf(i) === -1) {
 						fnd = true;
 
 						matchedIndexes.push(i);

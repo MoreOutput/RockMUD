@@ -136,8 +136,6 @@ Ticks.prototype.gameTime = function(World, runCombatLoop) {
 						for (k; k < roomObj.monsters.length; k += 1) {
 							if ((area.runOnAliveWhenEmpty || players.length)
 								|| (roomObj.monsters[k].originatingArea !== area.id)) {
-								
-
 								if (roomObj.monsters[k].chp >= 1 && (roomObj.monsters[k].runOnAliveWhenEmpty || roomObj.playersInRoom.length)) {
 									World.processEvents('onAlive', roomObj.monsters[k], roomObj);
 								}
@@ -153,7 +151,7 @@ Ticks.prototype.gameTime = function(World, runCombatLoop) {
 						if (players[j].chp >= 1) {
 							World.processEvents('onAlive', players[j], roomObj);
 						}
-
+						// Chance of trigger character save
 						if (players[j].position === 'standing' && !players[j].fighting && World.dice.roll(1, 100) >= 99) {
 							World.character.save(players[j]);
 						}

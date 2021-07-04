@@ -197,7 +197,7 @@ module.exports = {
 						displayName: 'Dark Red Elk',
 						combatName: 'the dark red elk',
 						level: 1,
-						short: ['a dark red elk', 'a large red elk'],
+						short: ['a red elk', 'a large red elk'],
 						long: [
 							'An elk with a thick dark red coat is here'
 						],

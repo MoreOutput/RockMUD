@@ -14,15 +14,16 @@ var Character = function (newWorld) {
 	this.statusReport = [
 		{msg: ' is <span class="red">bleeding all over the place</span> and looks <strong>nearly dead!</strong>', percentage: 0},
 		{msg: ' is <span class="red">bleeding</span> profusely.', percentage: 10},
-		{msg: ' has some <strong>major cuts and brusies.</strong>', percentage: 20},
-		{msg: ' has some large cuts and looks exhausted!', percentage: 30},
+		{msg: ' has some <strong class="yellow">major cuts and brusies.</strong>', percentage: 20},
+		{msg: ' has some <strong>large cuts and looks exhausted!</strong>', percentage: 30},
 		{msg: ' has some minor cuts and brusies.', percentage: 40},
 		{msg: ' is tired and bruised.', percentage: 50},
 		{msg: ' is hurt and showing <span class="grey">signs of fatigue</span>.', percentage: 60},
 		{msg: ' is looking tired and wounded.', percentage: 70},
 		{msg: ' is barely wounded.', percentage: 80},
+		{msg: ' has a few minor scratches.', percentage: 85},
 		{msg: ' is in great shape.', percentage: 90},
-		{msg: ' still seems in perfect health!', percentage: 95},
+		{msg: ' seems in perfect health!', percentage: 95},
 		{msg: ' is in <span class="green">perfect health</span>!', percentage: 100},
 		{msg: ' is in <span class="green">amazing health</span>!', percentage: 200}
 	];

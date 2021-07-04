@@ -41,6 +41,8 @@ window.onload = function() {
 		unfol: 'unfollow',
 		gr: 'group',
 		l: 'look',
+		lo: 'look',
+		loo: 'look',
 		exam: 'look',
 		inv: 'look',
 		sca: 'scan',
