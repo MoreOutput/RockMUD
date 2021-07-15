@@ -342,12 +342,12 @@ Combat.prototype.round = function(battle) {
 				}
 			}
 
-			// TODO -- passive skills (defender of skill isnt combat targer)
+			// TODO -- passive skills (defender of skill isnt combat target)
 			// passive skills (healing, passive) resolve at the head of the attackers first attack
 
 			// same room and have hp
 	        if (combat.inPhysicalVicinity(attacker, defender) && attacker.chp > 0 && defender.chp > 0) {
-				// apply any skills to the casters self
+				// apply any skills to the attackers self
 				if (battle.skills[attacker.refId] && battle.skills[attacker.refId][attacker.refId] && battle.attacked.indexOf(attacker.refId) === -1) {
 					attackerSkills = battle.skills[attacker.refId];
 
@@ -361,12 +361,6 @@ Combat.prototype.round = function(battle) {
 
 					battle.skills[attacker.refId][attacker.refId] = null;
 				}
-
-				attacker.group.forEach(grpMember => {
-					if (battle.skills[attacker.refId] && battle.skills[attacker.refId][grpMember.refId]) {
-						
-					}
-				});
 				
 				if (battle.skills[attacker.refId] && battle.skills[attacker.refId][defender.refId]) {
 					attackerSkills = battle.skills[attacker.refId];
@@ -375,7 +369,7 @@ Combat.prototype.round = function(battle) {
 
 					World.character.applyMods(skillTarget, attackerSkills[defender.refId].defenderMods);
 
-					if (attackerSkills[defender.refId].attackerMods) {
+					if (attackerSkills[defender.refId].attackerMods && battle.attacked.indexOf(attacker.refId) === -1) {
 						World.character.applyMods(attacker, attackerSkills[defender.refId].attackerMods);
 					}
 
@@ -385,25 +379,25 @@ Combat.prototype.round = function(battle) {
 						roundOutput[attacker.refId].msg += '<div>' + attackerSkills[defender.refId].winMsg + '</div>';
 					}
 
+
 					battle.skills[attacker.refId][defender.refId] = null;
 				}
 				
 				// apply defender skills
 				if (battle.skills[defender.refId] && battle.skills[defender.refId][attacker.refId]) {
-					attackerSkills = battle.skills[defender.refId];
-					
+					var defenderSkills = battle.skills[defender.refId];
 					var skillTarget = combat.getBattleEntityByRefId(battle, attacker.refId);
 
-					World.character.applyMods(skillTarget, attackerSkills[attacker.refId].defenderMods);
+					World.character.applyMods(skillTarget, defenderSkills[attacker.refId].defenderMods);
 
-					if (attackerSkills[attacker.refId].attackerMods) {
-						World.character.applyMods(attacker, attackerSkills[attacker.refId].attackerMods);
+					if (defenderSkills[attacker.refId].attackerMods && battle.attacked.indexOf(defender.refId) === -1) {
+						World.character.applyMods(defender, defenderSkills[attacker.refId].attackerMods);
 					}
 
 					if (skillTarget.chp > 0) {
-						roundOutput[defender.refId].msg += '<div>' + attackerSkills[attacker.refId].msgToAttacker + '</div>';
+						roundOutput[defender.refId].msg += '<div>' + defenderSkills[attacker.refId].msgToAttacker + '</div>';
 					} else {
-						roundOutput[defender.refId].msg += '<div>' + attackerSkills[attacker.refId].winMsg + '</div>';
+						roundOutput[defender.refId].msg += '<div>' + defenderSkills[attacker.refId].winMsg + '</div>';
 					}
 
 					battle.skills[defender.refId][attacker.refId] = null;
