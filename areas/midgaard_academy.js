@@ -7,7 +7,7 @@ module.exports = {
 	id: 'midgaard_academy',
 	type: ['mine', 'subterranean'],
 	levels: 'All',
-	description: 'A large, seemingly endless, gold mine whos original founders are now forgotten.',
+	description: 'A large coal mine whos original founders are now forgotten.',
 	reloads: 0,
 	author: 'Rocky',
 	messages: [{
@@ -15,14 +15,14 @@ module.exports = {
 	}],
 	quests: [{
 		id: towerQuestKey,
-		title: 'Going Deep',
+		title: 'The Mine',
 		data: {
 			// the player must give Radhghar 1 gold to enter the mines.
 			permission: false,
 			level: 100
 		},
 		steps: {
-			1: 'The Southern Mine is the worlds main source of both gold and coal.' 
+			1: 'The Southern Mine is the worlds main source of coal.' 
 			+ ' Give Charles a gold coin to gain access to the current level of the mine. <strong>You can sell furs to Tom Kerr for gold</strong>. Example: <strong class="warning">give 1 gold charles</strong>'
 		}
 	}],
@@ -32,7 +32,7 @@ module.exports = {
 			title: 'Just outside of the Mine',
 			area: 'midgaard_academy',
 			content: 'This is the main entrance to the Southern Mine. A hole about fifty yards across is decorated with ropes and pullies powering a series of elevators. '
-				+ 'There are fires and stations bustling with the activity of miners and camp workers.',
+				+ 'There is a small number of fires but no miners in sight.',
 			outdoors: false,
 			light: true,
 			exits: [

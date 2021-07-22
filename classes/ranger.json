@@ -17,18 +17,6 @@
 			"prerequisites": {
 				"level": 1
 			}
-		},
-		{
-			"id": "skin",
-			"display": "Skin",
-			"mod": 1,
-			"train": 100,
-			"type": "skill",
-			"wait": 3,
-			"learned": true,
-			"prerequisites": {
-				"level": 1
-			}
 		}
 	]
 }

@@ -357,7 +357,7 @@ Combat.prototype.round = function(battle) {
 						World.character.applyMods(attacker, attackerSkills[attacker.refId].attackerMods);
 					}
 
-					roundOutput[attacker.refId].msg += '<div>' + attackerSkills[attacker.refId].msgToDefender + '</div>';
+					roundOutput[attacker.refId].msg += '<div class="skill-output">' + attackerSkills[attacker.refId].msgToDefender + '</div>';
 
 					battle.skills[attacker.refId][attacker.refId] = null;
 				}
@@ -374,9 +374,9 @@ Combat.prototype.round = function(battle) {
 					}
 
 					if (skillTarget.chp > 0) {
-						roundOutput[attacker.refId].msg += '<div>' + attackerSkills[defender.refId].msgToAttacker + '</div>';
+						roundOutput[attacker.refId].msg += '<div class="skill-output">' + attackerSkills[defender.refId].msgToAttacker + '</div>';
 					} else {
-						roundOutput[attacker.refId].msg += '<div>' + attackerSkills[defender.refId].winMsg + '</div>';
+						roundOutput[attacker.refId].msg += '<div class="skill-output">' + attackerSkills[defender.refId].winMsg + '</div>';
 					}
 
 
@@ -384,7 +384,7 @@ Combat.prototype.round = function(battle) {
 				}
 				
 				// apply defender skills
-				if (battle.skills[defender.refId] && battle.skills[defender.refId][attacker.refId]) {
+				if (battle.skills[defender.refId] && battle.skills[defender.refId][attacker.refId] && defender.chp > 0) {
 					var defenderSkills = battle.skills[defender.refId];
 					var skillTarget = combat.getBattleEntityByRefId(battle, attacker.refId);
 
@@ -395,15 +395,15 @@ Combat.prototype.round = function(battle) {
 					}
 
 					if (skillTarget.chp > 0) {
-						roundOutput[defender.refId].msg += '<div>' + defenderSkills[attacker.refId].msgToAttacker + '</div>';
+						roundOutput[defender.refId].msg += '<div class="skill-output">' + defenderSkills[attacker.refId].msgToAttacker + '</div>';
 					} else {
-						roundOutput[defender.refId].msg += '<div>' + defenderSkills[attacker.refId].winMsg + '</div>';
+						roundOutput[defender.refId].msg += '<div class="skill-output">' + defenderSkills[attacker.refId].winMsg + '</div>';
 					}
 
 					battle.skills[defender.refId][attacker.refId] = null;
 				}
 
-				if (combat.inPhysicalVicinity(attacker, defender) && attacker.chp > 0 && defender.chp > 0) {
+				if (attacker.chp > 0 && defender.chp > 0) {
 					// can only land attacks once per round
 					if (battle.attacked.indexOf(attacker.refId) === -1) {
 						battle.attacked.push(attacker.refId); // prevents future attacks
@@ -424,13 +424,16 @@ Combat.prototype.round = function(battle) {
 
 										if (attacker.chp <= 0) {
 											// attacker was killed by defender
+
 											var deathOutput = combat.getDeathMessages(defender, attacker);
 										
 											roundOutput[attacker.refId].msg += deathOutput.msgToLoser;
 											roundOutput[defender.refId].msg += deathOutput.msgToWinner;
+											// TODO: sometimes this dead message is dropping!!!
+											console.warn('DEAD ATTACKER', attacker.name, roundOutput[defender.refId].msg, i, numOfPositions);
 										}
 										
-										if (i === numOfPositions - 1 || combat.getNumberOfOpenBattlePositions(battle) === 1) {
+										if (i === numOfPositions - 1) {
 											combat.publishRound(roundOutput, battle);
 										}
 									});
@@ -440,6 +443,7 @@ Combat.prototype.round = function(battle) {
 									roundOutput[attacker.refId].msg += combat.getStatusReport(defender);
 									
 									if (i === numOfPositions - 1) {
+										console.log(2, attacker.name, defender.name);
 										combat.publishRound(roundOutput, battle);
 									}   
 								}
@@ -448,53 +452,39 @@ Combat.prototype.round = function(battle) {
 								roundOutput[defender.refId].msg += deathOutput.msgToLoser;
 								roundOutput[attacker.refId].msg += deathOutput.msgToWinner;
 
+								console.warn('DEAD DEFENDER', defender.name, battle.round);
+
 								// the defender is dead
-								if (i === numOfPositions - 1 || combat.getNumberOfOpenBattlePositions(battle) === 1) {
+								if (i === numOfPositions - 1) {
 									combat.publishRound(roundOutput, battle);
 								}
 							}
 						}); 
 					}
 				} else {
-					if (attacker.chp <= 0) {
+					if (attacker.chp <= 0 && battle.attacked.indexOf(attacker.refId) === -1) {
 						var deathOutput = combat.getDeathMessages(defender, attacker, attackerSkills[defender.refId]);
 						roundOutput[defender.refId].msg += deathOutput.msgToWinner;
 						roundOutput[attacker.refId].msg += deathOutput.msgToLoser;
-					} else if (defender.chp <= 0) {
+
+						console.warn('DEAD ATTACKER 2', attacker.name, defender.name, battle.round);
+					} else if (defender.chp <= 0 && battle.attacked.indexOf(defender.refId) === -1) {
 						var deathOutput = combat.getDeathMessages(attacker, defender, attackerSkills[attacker.refId]);
 						roundOutput[attacker.refId].msg += deathOutput.msgToWinner;
 						roundOutput[defender.refId].msg += deathOutput.msgToLoser;
+
+						console.warn('DEAD DEFENDER 2', defender.name, battle.round);
 					}
 
 					if (i === numOfPositions - 1) {
+						console.log(4);
 						combat.publishRound(roundOutput, battle);
 					}   
 				}
             } else if (defender.chp <= 0) {
-				/*
-				console.warn('defender is dead 1');
-				var deathOutput = combat.getDeathMessages(attacker, defender, attackerSkills[attacker.refId]);
-
-				roundOutput[attacker.refId].msg += deathOutput.msgToWinner;
-				roundOutput[defender.refId].msg += deathOutput.msgToLoser;
-
-				if (i === numOfPositions - 1) {
-					combat.publishRound(roundOutput, battle);
-				}  
-				*/
+				console.warn('PROCESSING ROUND WITH DEAD ENTITIES 1', defender.name);
 			} else if (attacker.chp <= 0) {
-				/*
-				console.warn('attacker is dead', i, numOfPositions, attacker.name, defender.name );
-
-				var deathOutput = combat.getDeathMessages(defender, attacker);
-
-				roundOutput[attacker.refId].msg += deathOutput.msgToLoser;
-				roundOutput[defender.refId].msg += deathOutput.msgToWinner;
-
-				if (i === numOfPositions - 1 || combat.getNumberOfOpenBattlePositions(battle) === 1) {
-					combat.publishRound(roundOutput, battle);
-				}  
-				*/
+				console.warn('PROCESSING ROUND WITH DEAD ENTITIES 2', attacker.name);
 			} else {
 				console.warn('PROCESSING ROUND WITH REMOVED ENTITIES', attacker.roomid, attacker.area, defender.roomid, defender.area);
 				combat.removeBattle(battle);
@@ -579,6 +569,8 @@ Combat.prototype.publishRound = function(roundOutput, battleObj) {
 	var numOfPositions = this.getNumberOfBattlePositions(battleObj);
 	var roomObj = battleObj.roomObj;
 	var i = 0;
+
+	console.log('PUBLISHING ROUND', battleObj.round);
 
 	// Sort the battle positions
 	for (i; i < numOfPositions; i += 1) {

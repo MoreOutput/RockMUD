@@ -8,10 +8,9 @@ module.exports = {
 		'Dont take more than you need from the camp, we don\'t know long it will be before we can resupply.',
 		'Get your asses back into camp before nightfall!',
 		'Foreman Stephenson tells me we\'re close to finding the way into the next level of the mine.',
-		'The mine is just outside of camp to the South.',
-		'If you need to trade in your finds talk to Thomas on the west side of camp.'
+		'The mine is just South.',
+		'Thomas on the west side of camp is still buying furs.'
 	],
-	runOnAliveWhenEmpty: true,
 	onAlive: function(World, behavior, mob, roomObj) {
 		var roll = World.dice.roll(2, 50);
 
@@ -22,7 +21,7 @@ module.exports = {
 					msg: 'looks <span class="grey">skyward</span> in thought.',
 					roomObj: roomObj
 				}, mob);
-			} else if (roll >= 97) {
+			} else if (roll >= 85) {
 				World.addCommand({
 					cmd: 'say',
 					msg: behavior.exclimations[parseInt(Math.random() * ((this.exclimations.length)))],

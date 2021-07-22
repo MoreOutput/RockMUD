@@ -6,7 +6,7 @@
 */
 module.exports = { 
 	stayInArea: true,
-	wanderCheck: 85,
+	wanderCheck: 75,
 	moveDirections: ['down', 'up', 'north', 'east', 'west', 'south'], // default directions
 	onAlive: function(World, behavior, mob, roomObj) {
 		var roll = World.dice.roll(2, 50),

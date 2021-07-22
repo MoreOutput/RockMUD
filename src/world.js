@@ -1016,7 +1016,7 @@ World.prototype.rollMob = function(mob, area, room, callback) {
 				mob.originatingArea = mob.area;
 			}
 
-			mob.hp += 10 + (world.dice.roll((1 * mob.size.value), 10, world.dice.getConMod(mob)) * mob.level);
+			mob.hp += (world.dice.roll((1 * mob.size.value), 5, world.dice.getConMod(mob)) * mob.level);
 			mob.chp = mob.hp;
 
 			if (mob.race === 'animal') {

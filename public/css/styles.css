@@ -244,7 +244,9 @@ text-decoration: underline;
     font-weight: bold;
     color:  #ffcc00;
 }
-
+.skill-output {
+    border: 1px solid lightgray;
+}
 
 @media only screen and (min-width: 1400px) and (min-height: 920px) {
     html, body {

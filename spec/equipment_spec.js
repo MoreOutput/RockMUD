@@ -120,7 +120,7 @@ describe('Testing Behavior: Item Interactions', () => {
         expect(mockPlayer.items.length).toBe(0);
 
         let cmd = server.world.commands.createCommandObject({
-            msg: 'get all'
+            msg: 'get dagger'
         });
         let getSpy = spyOn(server.world.commands, 'get').and.callThrough();
 
@@ -131,12 +131,13 @@ describe('Testing Behavior: Item Interactions', () => {
         expect(cmdLoop).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledTimes(1);
 
-        expect(mockPlayer.items.length).toBe(2);
-        expect(mockPlayerRoom.items.length).toBe(0);
+        expect(mockPlayer.items.length).toBe(1);
+        expect(mockPlayerRoom.items.length).toBe(1);
 
         cmd = server.world.commands.createCommandObject({
             msg: 'drop all'
         });
+
         let dropSpy = spyOn(server.world.commands, 'drop').and.callThrough();
 
         server.world.addCommand(cmd, mockPlayer);

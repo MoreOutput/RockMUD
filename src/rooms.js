@@ -334,10 +334,10 @@ Room.prototype.getWatersources = function(roomObj) {
 	return results;  
 };
 
-Room.prototype.getWatersource = function(roomObj, command) {
+Room.prototype.getWatersource = function(roomObj, searchStr) {
 	var i = 0,
 	waterSource = false,
-	pattern = new RegExp(command.arg),
+	pattern = new RegExp(searchStr),
 	len = roomObj.items.length;
 	
 	for (i; i < len; i += 1) {

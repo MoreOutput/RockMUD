@@ -815,7 +815,7 @@ Cmd.prototype.drink = function(target, command) {
 	}
 
 	if (command.msg) {
-		bottle = World.character.getBottle(target, command);
+		bottle = World.character.getBottle(target, command.arg);
 
 		if (bottle) {
 			bottle.drinks -= World.dice.roll(1, 2);
@@ -886,44 +886,51 @@ Cmd.prototype.fill = function(target, command) {
 	toEmptyWatersource, // the item to be emptied, must also be a watersource
 	toFillWatersource; // the item to be filled
 
-	if (target.position === 'standing') {
+	if (command.arg) {
 		if (command.roomObj) {
 			roomObj = command.roomObj;
 		} else {
 			roomObj = World.getRoomObject(target.area, target.roomid);
 		}
 
-		toFillWatersource = World.character.getBottle(target, command);
+		toFillWatersource = World.character.getBottle(target, command.arg);
 
 		if (toFillWatersource) {
-			toEmptyWatersource = World.room.getWatersource(roomObj, command);
+			toEmptyWatersource = World.room.getWatersource(roomObj, command.input);
 
 			if (!toEmptyWatersource) {
-				// if no room level item was found to fill from try the characters inventory
-				toEmptyWatersource = World.character.getBottle(target, command);
+				toEmptyWatersource = World.character.getBottle(target, command.input);
+
+				if (toEmptyWatersource.refId === toFillWatersource.refId) {
+					toEmptyWatersource = null;
+				}
 			}
 
 			if (toEmptyWatersource) {
 				toFillWatersource.drinks = toFillWatersource.maxDrinks;
 
+				if (!toEmptyWatersource.waterSource) {
+					toEmptyWatersource.drinks = 0;
+				}
+
 				World.msgPlayer(target, {
-					msg: 'You fill ' + toFillWatersource.short + ' to the brim.'
+					msg: 'You use the ' + toEmptyWatersource.displayName.toLowerCase() + ' to fill '+ toFillWatersource.short + '.'
 				});
 			} else {
 				World.msgPlayer(target, {
-					msg: 'Theres nothing by that name around that can be used to fill ' + toFillWatersource.short,
+					msg: 'Theres nothing by that name you can use 	to fill ' + toFillWatersource.short,
 					styleClass: 'error'
 				});
 			}
 		} else {
 			World.msgPlayer(target, {
-				msg: 'It is impossible to fill something you do not have in your inventory...',
+				msg: 'How can you fill something you don\'t have?',
 				styleClass: 'error'
 			});
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'You cannot do that from this position. Try standing up first.'
+			msg: 'Fill what?'
 		});
 	}
 };
@@ -1730,47 +1737,13 @@ Cmd.prototype.get = function(target, command, fn) {
 						}
 					}
 				} else {
-					itemLen = roomObj.items.length;
+					World.msgPlayer(target, {
+						msg: 'You can\'t grab everything at once!',
+						styleClass: 'error'
+					});
 
-					if (itemLen) {
-						for (i; i < itemLen; i += 1) {
-							item = roomObj.items[i];
-
-							if (item.weight <= maxCarry) {
-								World.room.removeItem(roomObj, item);
-
-								World.character.addItem(target, item);
-
-								i -= 1;
-
-								itemLen = roomObj.items.length;
-							}
-						}
-					
-						World.msgRoom(roomObj, {
-							msg: target.displayName + ' grabs everything they can.',
-							playerName: target.name,
-							styleClass: 'warning'
-						});
-
-						World.msgPlayer(target, {
-							msg: 'You grab everything!',
-							styleClass: 'blue'
-						});
-
-						World.processEvents('onGet', roomObj.items, roomObj, null, target);
-						World.processEvents('onGet', target, roomObj, roomObj.items);
-
-						World.character.save(target);
-
-						if (typeof fn === 'function') {
-							return fn(target, roomObj, item);
-						}
-					} else {
-						World.msgPlayer(target, {
-							msg: 'You don\'t see any items here.',
-							styleClass: 'error'
-						});
+					if (typeof fn === 'function') {
+						return fn(target, roomObj, item);
 					}
 				}
 			} else {
@@ -1788,7 +1761,7 @@ Cmd.prototype.get = function(target, command, fn) {
 
 						World.msgPlayer(target, {
 							msg: 'You remove a <strong>' + item.displayName + '</strong> from a '
-								+ container.displayName + '.', 
+								+ container.displayName + '.',
 							styleClass: 'green'
 						});
 
@@ -1821,13 +1794,15 @@ Cmd.prototype.get = function(target, command, fn) {
 						}
 
 						World.msgRoom(roomObj, {
-							msg: target.displayName + ' grabs everything they can.',
+							msg: target.displayName + ' grabs everything they can from a '
+							+ container.displayName + '.',
 							playerName: target.name,
 							styleClass: 'warning'
 						});
 
 						World.msgPlayer(target, {
-							msg: 'You grab everything!',
+							msg: 'You grab everything you can from a '
+							+ container.displayName + '.',
 							styleClass: 'blue'
 						});
 
@@ -1844,7 +1819,7 @@ Cmd.prototype.get = function(target, command, fn) {
 			}
 		} else {
 			World.msgPlayer(target, {
-				msg: 'Get what? Specify a target or try get all.',
+				msg: 'Get what?',
 				styleClass: 'error'
 			});
 
@@ -1854,7 +1829,7 @@ Cmd.prototype.get = function(target, command, fn) {
 		}
 	} else {
 		World.msgPlayer(target, {
-			msg: 'Get something while sleeping?',
+			msg: 'You cannot grab things while you are asleep. You should know that.',
 			styleClass: 'error'
 		});
 	}

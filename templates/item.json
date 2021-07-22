@@ -34,6 +34,8 @@
 	"waterSource": false,
 	"waterSourceDrinkMsg": "",
 	"waterSourceEmptyMsg": "",
+	"waterSourceFillMsg": "",
+	"waterSourceType": "",
 	"light": false,
 	"lightDecay": 0,
 	"flickerMsg": "",

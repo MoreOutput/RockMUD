@@ -1031,13 +1031,13 @@ Character.prototype.removeFromContainer = function(container, item) {
 	container.items = newArr;
 };
 
-Character.prototype.getBottle = function(player, command) {
+Character.prototype.getBottle = function(player, searchStr) {
 	var char = this,
 	containers = char.getBottles(player),
 	i = 0;
 
 	for (i; i < containers.length; i += 1) {
-		if (containers[i].name.indexOf(command.msg) !== -1) {
+		if (containers[i].name.indexOf(searchStr) !== -1) {
 			return containers[i];
 		}
 	}

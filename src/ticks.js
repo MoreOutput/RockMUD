@@ -114,8 +114,6 @@ Ticks.prototype.gameTime = function(World, runCombatLoop) {
 		var k = 0;
 		var area;
 		var players;
-		var monsters;
-		var room;
 		var roomObj;
 
 		if (!World.aiLock) {
